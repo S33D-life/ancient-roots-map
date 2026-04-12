@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Plus, Eye, EyeOff, Users, TreeDeciduous, Trash2, Share2,
   FolderOpen, ChevronDown, ChevronRight, Pencil, MessageSquareQuote,
   StickyNote, Sparkles, BookMarked, Package, Feather, Search,
-  ArrowUpDown, SortAsc, SortDesc
+  ArrowUpDown, SortAsc, SortDesc, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import BookMusingsPanel from "@/components/BookMusingsPanel";
 import BookCsvImportDialog from "@/components/BookCsvImportDialog";
 import LibraryInventoryPortal from "@/components/LibraryInventoryPortal";
 import { toast } from "sonner";
+import { getAllBookOfferings, parseBookOfferingContent, type LibraryBookOffering } from "@/repositories/offering-library";
 
 interface PersonalBookshelfProps {
   userId: string;
