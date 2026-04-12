@@ -738,6 +738,68 @@ Deno.serve(async (req: Request) => {
         });
       }
 
+      /* ────────────────────────────────────────────────────
+       * council — returns Council of Life entry point
+       * enriched with any recent participation or plant data
+       * ──────────────────────────────────────────────────── */
+      case "council": {
+        const { telegram_user_id } = body;
+
+        if (!telegram_user_id) {
+          return jsonResponse({ ok: false, error: "telegram_user_id required" }, 400);
+        }
+
+        const hashedId = await hashTelegramId(telegram_user_id);
+        const appUrl = Deno.env.get("APP_URL") || "https://ancient-roots-map.lovable.app";
+
+        // Check if linked
+        const { data: link } = await supabase
+          .from("connected_accounts")
+          .select("user_id")
+          .eq("provider", "telegram")
+          .eq("provider_user_id", hashedId)
+          .maybeSingle();
+
+        // Check for user's most recent council participation
+        let lastGathering: { gathering_date: string; notes: string | null } | null = null;
+        if (link) {
+          const { data } = await supabase
+            .from("council_participation_rewards")
+            .select("gathering_date, notes")
+            .eq("user_id", link.user_id)
+            .order("gathering_date", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          lastGathering = data;
+        }
+
+        // Check for any recent seasonal marker (acts as "plant of the season")
+        const currentMonth = new Date().getMonth() + 1; // 1-12
+        const { data: seasonalPlant } = await supabase
+          .from("bioregion_seasonal_markers")
+          .select("name, emoji, description, marker_type")
+          .lte("typical_month_start", currentMonth)
+          .gte("typical_month_end", currentMonth)
+          .eq("marker_type", "flowering")
+          .limit(1)
+          .maybeSingle();
+
+        return jsonResponse({
+          ok: true,
+          council_url: `${appUrl}/council`,
+          linked: !!link,
+          last_gathering: lastGathering ? {
+            date: lastGathering.gathering_date,
+            notes: lastGathering.notes,
+          } : null,
+          seasonal_plant: seasonalPlant ? {
+            name: seasonalPlant.name,
+            emoji: seasonalPlant.emoji,
+            description: seasonalPlant.description,
+          } : null,
+        });
+      }
+
       default:
         return jsonResponse({ ok: false, error: `Unknown action: ${action}` }, 400);
     }

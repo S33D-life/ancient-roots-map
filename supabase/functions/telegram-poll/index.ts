@@ -397,7 +397,8 @@ Deno.serve(async () => {
             "🔗 /connect — Weave your Telegram into S33D\n\n" +
             "<b>From the forest</b>\n" +
             "🎶 /radio — Hear what the forest is listening to\n" +
-            "🌿 /continue — Pick up where you left off\n\n" +
+            "🌿 /continue — Pick up where you left off\n" +
+            "🌙 /council — Enter the Council of Life\n\n" +
             "If you have a verification code, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
@@ -497,6 +498,69 @@ Deno.serve(async () => {
             }
           } catch {
             await sendMessage(chatId, "🌿 I couldn't find your path just now. Try /login to enter S33D.", LOVABLE_API_KEY, TELEGRAM_API_KEY);
+          }
+          break;
+        }
+
+        case "council":
+        case "plant": {
+          try {
+            const councilResp = await supabase.functions.invoke("telegram-handoff", {
+              body: { action: "council", telegram_user_id: telegramUserId },
+            });
+
+            const result = councilResp.data;
+            if (!result?.ok) {
+              await sendMessage(
+                chatId,
+                "🌙 The Council of Life awaits.\n\nLink your Telegram first with /connect, then return here.",
+                LOVABLE_API_KEY, TELEGRAM_API_KEY,
+              );
+              break;
+            }
+
+            // Build the council message
+            let msg = "🌙 <b>The Council of Life</b>\n\nThe circle is still open.";
+
+            // Enrich with last gathering if available
+            if (result.last_gathering) {
+              const d = new Date(result.last_gathering.date);
+              const dateStr = d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+              msg += `\n\n📜 You last sat in the circle on ${dateStr}.`;
+            }
+
+            // Enrich with seasonal plant if available
+            if (result.seasonal_plant) {
+              const p = result.seasonal_plant;
+              const emoji = p.emoji || "🌱";
+              msg += `\n\n${emoji} <b>Plant of the season:</b> ${p.name}`;
+              if (p.description) {
+                // Truncate long descriptions
+                const desc = p.description.length > 100 ? p.description.slice(0, 97) + "…" : p.description;
+                msg += `\n<i>${desc}</i>`;
+              }
+            }
+
+            // If /plant was explicitly asked and no plant exists
+            if (command === "plant" && !result.seasonal_plant) {
+              await sendMessage(
+                chatId,
+                "🌱 No plant of the season has been named yet.\n\nSit with what grows around you. The Council is listening.",
+                LOVABLE_API_KEY, TELEGRAM_API_KEY,
+              );
+              break;
+            }
+
+            msg += "\n\nStep into the Council when you are ready:";
+
+            await sendMessage(
+              chatId,
+              msg,
+              LOVABLE_API_KEY, TELEGRAM_API_KEY,
+              { inline_keyboard: [[ { text: "🌙 Enter the Council", url: result.council_url } ]] },
+            );
+          } catch {
+            await sendMessage(chatId, "🌙 I couldn't reach the Council just now. Try again in a moment.", LOVABLE_API_KEY, TELEGRAM_API_KEY);
           }
           break;
         }
