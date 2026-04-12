@@ -157,23 +157,6 @@ export default function EnsoNudge({ size = 52, offsetY = 0, children, onInteract
         {children}
       </motion.div>
 
-      {/* Micro-copy: "Begin here" with staff & footprints — fades in after 3s */}
-      <AnimatePresence>
-        {showMicroCopy && showEnso && !reducedMotion && (
-          <motion.span
-            className="absolute right-full mr-2 whitespace-nowrap text-[8px] font-serif tracking-[0.2em] uppercase select-none pointer-events-none flex items-center gap-1"
-            style={{ color: "hsl(42, 70%, 60%)", top: `calc(50% + ${offsetY}px)`, transform: "translateY(-50%)" }}
-            initial={{ opacity: 0, x: 4 }}
-            animate={{ opacity: 0.8, x: 0 }}
-            exit={{ opacity: 0, x: -4 }}
-            transition={{ duration: 0.8 }}
-          >
-            <span className="text-[9px]">🥾</span>
-            Begin here
-            <span className="text-[9px]">🪄</span>
-          </motion.span>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
