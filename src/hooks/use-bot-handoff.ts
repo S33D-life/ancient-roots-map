@@ -60,7 +60,7 @@ export interface ResolvedHandoff {
 const VALID_INTENTS = new Set([
   "map", "add-tree", "tree", "referrals", "gift", "invite",
   "roadmap", "dashboard", "atlas", "library",
-  "journey", "support",
+  "journey", "support", "council",
 ]);
 
 function sanitizeIntent(raw: string | null): string | null {
@@ -92,6 +92,7 @@ export function intentToPath(intent: string | null, returnTo?: string | null): s
     case "dashboard": return "/dashboard";
     case "atlas":     return "/atlas";
     case "library":   return "/library";
+    case "council":   return "/council";
     case "journey":   return "/map";
     case "support":   return "/support";
     default:          return "/atlas";

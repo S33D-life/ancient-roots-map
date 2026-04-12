@@ -45,7 +45,7 @@ Deno.serve(async (req: Request) => {
        * Only callable internally (service_role).
        * ──────────────────────────────────────────────────── */
       case "create_handoff": {
-        const { telegram_user_id, telegram_username, flow } = body;
+        const { telegram_user_id, telegram_username, flow, intent, extra_payload } = body;
 
         if (!telegram_user_id || !flow) {
           return jsonResponse({ ok: false, error: "telegram_user_id and flow required" }, 400);
@@ -93,16 +93,30 @@ Deno.serve(async (req: Request) => {
           : flow === "login" ? "telegram_login"
           : `telegram_${flow}`;
 
+        // Sanitize extra_payload — only allow known safe keys
+        const safeExtra: Record<string, string> = {};
+        if (extra_payload && typeof extra_payload === "object") {
+          for (const key of ["invite_code", "tree_id", "room"]) {
+            if (typeof extra_payload[key] === "string" && extra_payload[key].length < 200) {
+              safeExtra[key] = extra_payload[key];
+            }
+          }
+        }
+
+        // Resolve intent for handoff routing
+        const resolvedIntent = intent || "dashboard";
+
         const { data: handoff, error: rpcErr } = await supabase.rpc("create_bot_handoff", {
           p_source: "telegram",
           p_bot_name: "openclaw",
-          p_intent: "dashboard",
+          p_intent: resolvedIntent,
           p_external_user_hash: hashedId,
           p_flow_name: flowName,
           p_payload: {
             telegram_user_id,
             telegram_username: telegram_username || null,
             flow,
+            ...safeExtra,
           },
           p_expires_minutes: 30,
         });
@@ -114,7 +128,14 @@ Deno.serve(async (req: Request) => {
 
         const result = handoff as { ok: boolean; token: string; expires_at: string };
         const appUrl = Deno.env.get("APP_URL") || "https://s33d.life";
-        const handoffUrl = `${appUrl}/telegram-handoff?token=${result.token}&flow=${flow}`;
+
+        // Build handoff URL with intent-aware query params
+        const urlParams = new URLSearchParams({ token: result.token, flow });
+        if (safeExtra.invite_code) urlParams.set("invite", safeExtra.invite_code);
+        if (safeExtra.tree_id) urlParams.set("tree", safeExtra.tree_id);
+        if (safeExtra.room) urlParams.set("room", safeExtra.room);
+
+        const handoffUrl = `${appUrl}/telegram-handoff?${urlParams.toString()}`;
 
         return jsonResponse({
           ok: true,
@@ -122,6 +143,7 @@ Deno.serve(async (req: Request) => {
           token: result.token,
           expires_at: result.expires_at,
           flow,
+          intent: resolvedIntent,
         });
       }
 
