@@ -68,7 +68,7 @@ const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
   const navigate = useNavigate();
   const { focusMap } = useMapFocus();
-  const [_isFullscreen, _setIsFullscreen] = useState(false); // reserved for future
+  
   const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [podModalOpen, setPodModalOpen] = useState(false);
