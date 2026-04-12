@@ -100,19 +100,6 @@ const CouncilOfLifePage = () => {
     return <LevelEntrance phases={[{ src: councilHomeBg, alt: "The Canopy" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
-  // Fullscreen Notion embed
-  if (isFullscreen && activeRoom) {
-    const room = councilRooms.find((r) => r.id === activeRoom);
-    return (
-      <div className="fixed inset-0 z-50 bg-background">
-        <Button variant="outline" size="icon" className="absolute top-4 right-4 z-50 bg-background/80 backdrop-blur" onClick={() => setIsFullscreen(false)}>
-          <Minimize2 className="h-4 w-4" />
-        </Button>
-        <iframe src={room?.notionUrl} width="100%" height="100%" frameBorder="0" allowFullScreen title={room?.title} />
-      </div>
-    );
-  }
-
   // Council Chamber view
   if (activeRoom === "chamber" || activeRoom === "chamber-live") {
     return (
@@ -124,30 +111,6 @@ const CouncilOfLifePage = () => {
               ← Back to Council
             </Button>
             <CouncilRoom />
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Notion embed view
-  if (activeRoom) {
-    const room = councilRooms.find((r) => r.id === activeRoom);
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        <main className="pt-28 pb-8 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <Button variant="ghost" size="sm" onClick={() => setActiveRoom(null)} className="text-muted-foreground hover:text-foreground">
-                ← Back to Council
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsFullscreen(true)}>
-                <Maximize2 className="h-4 w-4" /> Full Screen
-              </Button>
-            </div>
-            <iframe src={room?.notionUrl} width="100%" height="800" frameBorder="0" allowFullScreen className="rounded-xl border border-border/40" title={room?.title} />
           </div>
         </main>
         <Footer />
