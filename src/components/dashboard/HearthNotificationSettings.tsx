@@ -221,7 +221,7 @@ const HearthNotificationSettings = ({ userId }: Props) => {
           </p>
           <div className="flex flex-wrap gap-2">
             <a
-              href="https://t.me/s33dlifebot"
+              href="https://t.me/teotag_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-serif min-h-[32px] transition-colors"

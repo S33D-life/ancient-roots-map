@@ -930,7 +930,7 @@ function TelegramSection() {
           </div>
 
           <div className="flex flex-wrap gap-2 pt-1">
-            <a href="https://t.me/s33dlifebot" target="_blank" rel="noopener noreferrer"
+            <a href="https://t.me/teotag_bot" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-serif min-h-[32px] transition-colors"
               style={{ background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)", color: "hsl(var(--primary))" }}>
               <Send className="w-3 h-3" /> Open TEOTAG Bot

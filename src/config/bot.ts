@@ -2,7 +2,7 @@
  * Bot / Telegram configuration for handoff link generation and feature gating.
  */
 
-const FALLBACK_BOT_USERNAME = "s33dlifebot";
+const FALLBACK_BOT_USERNAME = "teotag_bot";
 
 export const BOT_CONFIG = {
   telegramBotUsername: (import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined) || FALLBACK_BOT_USERNAME,

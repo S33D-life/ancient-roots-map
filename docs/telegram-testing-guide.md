@@ -57,7 +57,7 @@ Telegram User ↔ Bot API ↔ Connector Gateway ↔ Edge Functions ↔ Supabase 
 
 | Variable | Purpose |
 |---|---|
-| `VITE_TELEGRAM_BOT_USERNAME` | Override fallback bot username (default: `s33dlifebot`) |
+| `VITE_TELEGRAM_BOT_USERNAME` | Override fallback bot username (default: `teotag_bot`) |
 
 ---
 
@@ -128,7 +128,7 @@ Edge function logs → telegram-poll
 
 ### 5. Deep Links (bot.ts)
 
-- [ ] `BOT_CONFIG.telegramBotLink("start")` → `https://t.me/s33dlifebot?start=start`
+- [ ] `BOT_CONFIG.telegramBotLink("start")` → `https://t.me/teotag_bot?start=start`
 - [ ] `BOT_CONFIG.telegramBotLink("invite_CODE")` → includes encoded invite code
 - [ ] `BOT_CONFIG.telegramBotLink("login")` → used by TelegramLoginButton
 
