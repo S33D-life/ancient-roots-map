@@ -96,6 +96,8 @@ const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"),
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
+const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/CouncilRecordsPage"), "council-records");
+const CouncilSessionPage = lazyImportWithRetry(() => import("./pages/council/CouncilSessionPage"), "council-session");
 const AssetsPage = lazyImportWithRetry(() => import("./pages/AssetsPage"), "assets");
 const VaultPage = lazyImportWithRetry(() => import("./pages/VaultPage"), "vault");
 const RadioPage = lazyImportWithRetry(() => import("./pages/RadioPage"), "radio");
@@ -339,6 +341,8 @@ const App = () => {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
+                <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
+                <Route path="/council/records/:id" element={realm(<CouncilSessionPage />, "canopy")} />
                 <Route path="/assets" element={<AssetsPage />} />
                 <Route path="/vault" element={<VaultPage />} />
                 {/* /heartwood/vault removed — consolidated to /vault */}
