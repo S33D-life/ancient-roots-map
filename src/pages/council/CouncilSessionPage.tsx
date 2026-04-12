@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COUNCIL_CYCLES, getCurrentCouncil, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
 import { hasParticipatedInCouncil, markCouncilParticipation, getCouncilParticipation, COUNCIL_HEARTS_REWARD } from "@/data/council/councilParticipation";
+import EarlyCouncilRecognition from "@/components/council/EarlyCouncilRecognition";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock } from "lucide-react";
