@@ -152,14 +152,17 @@ export async function spendHearts(params: {
 
   try {
     // Insert negative amount into legacy table for balance trigger
-    await supabase.from("heart_transactions").insert({
+    const { error: legacyErr } = await supabase.from("heart_transactions").insert({
       user_id: params.userId,
-      tree_id: params.entityId || "00000000-0000-0000-0000-000000000000",
+      tree_id: params.entityId || null,
       heart_type: params.transactionType,
       amount: -Math.abs(params.amount),
     });
+    if (legacyErr) {
+      console.warn("[heartService.spendHearts] legacy insert failed:", legacyErr.message);
+    }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("heart_ledger")
       .insert({
         user_id: params.userId,
@@ -176,6 +179,12 @@ export async function spendHearts(params: {
       } as any)
       .select()
       .single();
+
+    if (error) {
+      if (error.code === "23505") return null;
+      console.error("[heartService.spendHearts] ledger insert failed:", error.message);
+      return null;
+    }
 
     return (data as unknown as HeartLedgerEntry) || null;
   } finally {
