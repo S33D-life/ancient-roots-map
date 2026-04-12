@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
     const birdsongHeard = Boolean(body?.birdsong_heard);
     const fungiPresent = Boolean(body?.fungi_present);
     const healthNotes = body?.health_notes ? String(body.health_notes) : null;
-    const softMode = Boolean(body?.soft_mode);
+    const softMode = false; // Soft mode disabled — proximity is required
     const hasOffering = Boolean(body?.has_offering);
     const lat = body?.latitude == null ? null : Number(body.latitude);
     const lng = body?.longitude == null ? null : Number(body.longitude);
