@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
 import treeRadioBg from "@/assets/tree-radio-bg.png";
 import TREE_SPECIES from "@/data/treeSpecies";
+import SpeciesOfferingFilter, { filterBySpecies } from "@/components/SpeciesOfferingFilter";
 
 /* ── Species name helpers ────────────────────────────────── */
 
@@ -175,6 +176,7 @@ const EarthRadioRoom = () => {
   const [tunerOpen, setTunerOpen] = useState(false);
   const [trackChanging, setTrackChanging] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [speciesFilter, setSpeciesFilter] = useState("all");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -255,11 +257,20 @@ const EarthRadioRoom = () => {
     if (!loading && allSongs.length > 0 && !activeStation) setActiveStation(allStation);
   }, [loading, allSongs.length]);
 
+  /* ── Species strings for filter (My Songs only) ── */
+  const mySongSpecies = useMemo(() => {
+    if (!currentUserId) return [];
+    return allSongs.filter(s => s.created_by === currentUserId).map(s => s.species);
+  }, [allSongs, currentUserId]);
+
   /* ── Playlist from station ── */
   useEffect(() => {
     if (!activeStation) return;
     let filtered: SongOffering[];
-    if (activeStation.id === "my-songs") filtered = allSongs.filter(s => s.created_by === currentUserId);
+    if (activeStation.id === "my-songs") {
+      filtered = allSongs.filter(s => s.created_by === currentUserId);
+      filtered = filterBySpecies(filtered, speciesFilter);
+    }
     else if (activeStation.type === "all") filtered = allSongs;
     else if (activeStation.type === "species") filtered = allSongs.filter(s => s.species === activeStation.id);
     else filtered = allSongs.filter(s => s.tree_id === activeStation.id);
@@ -268,7 +279,7 @@ const EarthRadioRoom = () => {
     const rest = filtered.slice(Math.ceil(filtered.length * 0.4));
     setPlaylist([...shuffle(recent), ...shuffle(rest)]);
     setCurrentIndex(0);
-  }, [activeStation, allSongs, currentUserId]);
+  }, [activeStation, allSongs, currentUserId, speciesFilter]);
 
   /* ── iTunes preview ── */
   useEffect(() => {
@@ -615,6 +626,18 @@ const EarthRadioRoom = () => {
             </div>
 
             {/* Rotation info */}
+            {/* Species filter for My Songs */}
+            {activeStation?.id === "my-songs" && mySongSpecies.length > 0 && (
+              <div className="mt-4 pt-3" style={{ borderTop: '1px solid hsl(42 30% 25% / 0.15)' }}>
+                <SpeciesOfferingFilter
+                  speciesStrings={mySongSpecies}
+                  value={speciesFilter}
+                  onChange={setSpeciesFilter}
+                  className="w-full bg-transparent border-border/15"
+                />
+              </div>
+            )}
+
             <div className="mt-4 pt-3 flex items-center justify-between text-[10px] font-serif" style={{ borderTop: '1px solid hsl(42 30% 25% / 0.2)', color: 'hsl(40 30% 55% / 0.4)' }}>
               <span className="tracking-wider">{currentIndex + 1} / {playlist.length} in rotation</span>
               <span className="hidden sm:inline">{allSongs.length} offerings · {speciesStations.length} species</span>
