@@ -395,6 +395,9 @@ Deno.serve(async () => {
             "🌱 /new — Begin a new path\n\n" +
             "<b>Link your account</b>\n" +
             "🔗 /connect — Weave your Telegram into S33D\n\n" +
+            "<b>From the forest</b>\n" +
+            "🎶 /radio — Hear what the forest is listening to\n" +
+            "🌿 /continue — Pick up where you left off\n\n" +
             "If you have a verification code, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
@@ -432,6 +435,69 @@ Deno.serve(async () => {
             flow, intent, {},
             LOVABLE_API_KEY, TELEGRAM_API_KEY,
           );
+          break;
+        }
+
+        case "radio": {
+          try {
+            const radioResp = await supabase.functions.invoke("telegram-handoff", {
+              body: { action: "radio", telegram_user_id: telegramUserId },
+            });
+
+            const result = radioResp.data;
+            if (!result?.ok || result?.empty) {
+              await sendMessage(
+                chatId,
+                "🎶 The forest is quiet just now — no songs have been offered yet.\n\nBe the first: visit a tree in S33D and leave a song.",
+                LOVABLE_API_KEY, TELEGRAM_API_KEY,
+              );
+            } else {
+              const s = result.song;
+              const artist = s.artist ? ` — ${s.artist}` : "";
+              const tree = s.tree_name ? `\nOffered to <b>${s.tree_name}</b>` : "";
+              const species = s.species ? ` (${s.species})` : "";
+              const link = s.media_url ? `\n\n🔗 <a href="${s.media_url}">Listen</a>` : "";
+
+              await sendMessage(
+                chatId,
+                `🎶 <b>From the forest:</b>\n\n${s.title}${artist}${tree}${species}${link}`,
+                LOVABLE_API_KEY, TELEGRAM_API_KEY,
+              );
+            }
+          } catch {
+            await sendMessage(chatId, "🎶 I couldn't reach the forest radio just now. Try again in a moment.", LOVABLE_API_KEY, TELEGRAM_API_KEY);
+          }
+          break;
+        }
+
+        case "continue": {
+          try {
+            const contResp = await supabase.functions.invoke("telegram-handoff", {
+              body: { action: "continue", telegram_user_id: telegramUserId },
+            });
+
+            const result = contResp.data;
+            if (!result?.ok) {
+              if (result?.error === "not_linked") {
+                await sendMessage(
+                  chatId,
+                  "🌱 Your Telegram isn't linked to S33D yet.\n\nUse /connect to link an existing account, or /new to begin a new path.",
+                  LOVABLE_API_KEY, TELEGRAM_API_KEY,
+                );
+              } else {
+                await sendMessage(chatId, "🌿 I couldn't find your path just now. Try /login to enter S33D.", LOVABLE_API_KEY, TELEGRAM_API_KEY);
+              }
+            } else {
+              await sendMessage(
+                chatId,
+                `🌿 <b>Your path is still open.</b>\n\nReturn to ${result.label}:`,
+                LOVABLE_API_KEY, TELEGRAM_API_KEY,
+                { inline_keyboard: [[ { text: "🌳 Continue your journey", url: result.destination } ]] },
+              );
+            }
+          } catch {
+            await sendMessage(chatId, "🌿 I couldn't find your path just now. Try /login to enter S33D.", LOVABLE_API_KEY, TELEGRAM_API_KEY);
+          }
           break;
         }
 
