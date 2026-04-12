@@ -22,6 +22,7 @@ import BookCsvImportDialog from "@/components/BookCsvImportDialog";
 import LibraryInventoryPortal from "@/components/LibraryInventoryPortal";
 import { toast } from "sonner";
 import { getAllBookOfferings, parseBookOfferingContent, type LibraryBookOffering } from "@/repositories/offering-library";
+import SpeciesOfferingFilter, { filterBySpecies } from "@/components/SpeciesOfferingFilter";
 
 interface PersonalBookshelfProps {
   userId: string;
@@ -133,6 +134,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
   const [sort, setSort] = useState<SortOption>("recent");
   const [searchQuery, setSearchQuery] = useState("");
+  const [speciesFilter, setSpeciesFilter] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -161,9 +163,19 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const { entries, loading, stats, deleteEntry, updateEntry, refetch } = useBookshelf({ userId, filter });
   const { shelves, createShelf, updateShelf, deleteShelf } = useBookshelves(userId);
 
-  // Search + sort entries
+  // Species list for My Shelf entries (from species_category field)
+  const myShelfSpecies = useMemo(() => {
+    return entries
+      .filter(e => e.species_category)
+      .map(e => e.species_category!);
+  }, [entries]);
+
+  // Search + sort + species filter entries
   const processedEntries = useMemo(() => {
     let result = entries;
+    if (speciesFilter !== "all") {
+      result = result.filter(e => (e.species_category || "Unknown") === speciesFilter);
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(e =>
@@ -382,7 +394,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
       {/* ═══ View Toggle: My Shelf / Forest Books ═══ */}
       <div className="flex items-center gap-1 p-0.5 rounded-lg border border-border/20 bg-card/30 w-fit">
         <button
-          onClick={() => setView("my-shelf")}
+          onClick={() => { setView("my-shelf"); setSpeciesFilter("all"); }}
           className={`px-3 py-1.5 rounded-md text-xs font-serif transition-all ${
             view === "my-shelf"
               ? "bg-primary/15 text-primary border border-primary/30"
@@ -393,7 +405,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           My Shelf
         </button>
         <button
-          onClick={() => setView("forest")}
+          onClick={() => { setView("forest"); setSpeciesFilter("all"); }}
           className={`px-3 py-1.5 rounded-md text-xs font-serif transition-all ${
             view === "forest"
               ? "bg-primary/15 text-primary border border-primary/30"
@@ -425,11 +437,20 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-serif text-muted-foreground/50">
-                {forestBooks.length} book{forestBooks.length !== 1 ? "s" : ""} offered across the forest
-              </p>
+              {/* Species filter for forest books */}
+              <div className="flex items-center gap-2">
+                <SpeciesOfferingFilter
+                  speciesStrings={forestBooks.map(b => b.species)}
+                  value={speciesFilter}
+                  onChange={setSpeciesFilter}
+                  className="w-[180px]"
+                />
+                <p className="text-xs font-serif text-muted-foreground/50 flex-1">
+                  {filterBySpecies(forestBooks, speciesFilter).length} book{filterBySpecies(forestBooks, speciesFilter).length !== 1 ? "s" : ""} offered across the forest
+                </p>
+              </div>
               <div className="space-y-1.5">
-                {forestBooks.map(book => {
+                {filterBySpecies(forestBooks, speciesFilter).map(book => {
                   const { author, quote } = parseBookOfferingContent(book.content);
                   return (
                     <button
@@ -466,6 +487,11 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                   );
                 })}
               </div>
+              {filterBySpecies(forestBooks, speciesFilter).length === 0 && speciesFilter !== "all" && (
+                <p className="text-center py-8 text-xs font-serif text-muted-foreground/40">
+                  No offerings for this species yet
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -518,7 +544,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
 
       {/* ═══ Search + Sort + Filter Bar ═══ */}
       <div className="space-y-3">
-        {/* Search + Sort row */}
+        {/* Search + Sort + Species row */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
@@ -529,6 +555,12 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
               className="pl-9 h-9 text-xs font-serif bg-card/30 border-border/20 focus:border-primary/30"
             />
           </div>
+          <SpeciesOfferingFilter
+            speciesStrings={myShelfSpecies}
+            value={speciesFilter}
+            onChange={setSpeciesFilter}
+            className="w-[150px]"
+          />
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
             <SelectTrigger className="w-[140px] h-9 text-[11px] font-serif border-border/20 bg-card/30">
               <ArrowUpDown className="h-3 w-3 mr-1 text-muted-foreground/50" />
