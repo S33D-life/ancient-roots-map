@@ -310,7 +310,7 @@ export default function TelegramHandoffPage() {
     return (
       <ErrorState
         title="This path has faded"
-        message="The link has expired. Return to TEOTAG in Telegram for a new one."
+        message="The link has expired. Ask TEOTAG in Telegram for a fresh path."
         botLink={botLink}
       />
     );
@@ -320,7 +320,7 @@ export default function TelegramHandoffPage() {
     return (
       <ErrorState
         title="Path not found"
-        message="This link isn't valid. Return to TEOTAG in Telegram and start fresh."
+        message="This link isn't valid. Ask TEOTAG in Telegram for a fresh path."
         botLink={botLink}
       />
     );
@@ -330,7 +330,7 @@ export default function TelegramHandoffPage() {
     return (
       <ErrorState
         title="Already walked"
-        message="This link has already been used. Ask TEOTAG in Telegram for a new path."
+        message="This link has already been used. Ask TEOTAG in Telegram for a new one."
         botLink={botLink}
         showSignIn
         onSignIn={() => navigate(ROUTES.AUTH)}
@@ -388,9 +388,9 @@ export default function TelegramHandoffPage() {
           <div className="text-4xl">🌿</div>
           <h1 className="text-xl font-serif text-foreground">Your thread is woven</h1>
           <p className="text-sm text-muted-foreground font-serif leading-relaxed">
-            Telegram and S33D are now connected. TEOTAG will find you in both places.
+            Telegram and S33D are now woven together. TEOTAG will guide you from both places.
           </p>
-          <p className="text-xs text-muted-foreground/60 font-serif">Entering the forest…</p>
+          <p className="text-xs text-muted-foreground/60 font-serif">TEOTAG is opening the gate…</p>
         </div>
       </div>
     );
@@ -465,10 +465,10 @@ export default function TelegramHandoffPage() {
         <div className="text-center space-y-3">
           <div className="text-4xl">🌳</div>
           <h1 className="text-2xl font-serif text-foreground">
-            You've arrived at S33D
+            TEOTAG brought you here
           </h1>
           <p className="text-sm text-muted-foreground font-serif leading-relaxed">
-            A living map of the world's most ancient trees — tended by people who walk among them.
+            Welcome to S33D — a living map of the world's most ancient trees, tended by people who walk among them.
           </p>
           {telegramUsername && (
             <p className="text-xs text-muted-foreground/60 font-serif">
@@ -598,7 +598,7 @@ function ErrorState({
             <a href={botLink} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="w-full gap-2 font-serif">
                 <ExternalLink className="w-4 h-4" />
-                Return to TEOTAG in Telegram
+                Return to TEOTAG
               </Button>
             </a>
           )}
