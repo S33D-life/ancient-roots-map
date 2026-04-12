@@ -296,6 +296,12 @@ const CouncilOfLifePage = () => {
       </main>
       <Footer />
       <HostAPodModal open={podModalOpen} onOpenChange={setPodModalOpen} />
+      <CuratorEditor
+        open={curatorOpen}
+        onOpenChange={setCuratorOpen}
+        council={getCurrentCouncilWithOverrides()}
+        onSaved={() => setCuratorRefreshKey((k) => k + 1)}
+      />
     </div>
   );
 };
