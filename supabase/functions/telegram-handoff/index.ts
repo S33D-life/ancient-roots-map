@@ -5,8 +5,9 @@
  *   create_handoff    → Bot creates a one-time token for connect or create flows
  *   create_account    → Creates a new S33D account from a verified Telegram handoff
  *   link_after_signin → Links Telegram to an existing authenticated account
- *
- * Called by: telegram-poll (bot commands) and the app (account creation / linking)
+ *   login_via_telegram → Establishes session for already-linked identity
+ *   radio             → Returns a recent song offering from the forest
+ *   continue          → Returns resume-where-you-left-off destination
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -16,6 +17,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
+
 /** Hash a Telegram user ID for safe storage */
 async function hashTelegramId(telegramId: number | bigint): Promise<string> {
   const encoder = new TextEncoder();
@@ -23,6 +26,61 @@ async function hashTelegramId(telegramId: number | bigint): Promise<string> {
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Send a Telegram message via the gateway */
+async function sendTelegramMessage(chatId: number | string, text: string) {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const telegramKey = Deno.env.get("TELEGRAM_API_KEY");
+  if (!lovableKey || !telegramKey) {
+    console.warn("Cannot send Telegram welcome: missing API keys");
+    return;
+  }
+  try {
+    await fetch(`${GATEWAY_URL}/sendMessage`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": telegramKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
+    });
+  } catch (e) {
+    console.warn("Failed to send Telegram welcome:", e);
+  }
+}
+
+/** Send post-link welcome message (once only, deduplicated via provider_metadata) */
+async function sendWelcomeIfNeeded(
+  supabase: ReturnType<typeof createClient>,
+  connectedAccountId: string,
+  telegramUserId: number,
+) {
+  // Check if welcome was already sent
+  const { data: account } = await supabase
+    .from("connected_accounts")
+    .select("id, provider_metadata")
+    .eq("id", connectedAccountId)
+    .single();
+
+  const meta = (account?.provider_metadata as Record<string, unknown>) || {};
+  if (meta.welcome_sent) return;
+
+  // Mark welcome as sent FIRST (prevents duplicates on race)
+  await supabase
+    .from("connected_accounts")
+    .update({ provider_metadata: { ...meta, welcome_sent: true } })
+    .eq("id", connectedAccountId);
+
+  // Send the welcome message
+  await sendTelegramMessage(
+    telegramUserId,
+    "🌿 <b>You're now connected.</b>\n\n" +
+    "I'll meet you here and in the forest.\n\n" +
+    "When you visit a tree, leave an offering, or something grows — the path can remember.\n\n" +
+    "Try /radio to hear what the forest is listening to, or /continue to pick up where you left off.",
+  );
 }
 
 Deno.serve(async (req: Request) => {
@@ -42,7 +100,6 @@ Deno.serve(async (req: Request) => {
       /* ────────────────────────────────────────────────────
        * create_handoff — called by telegram-poll when bot
        * receives /connect, /new, /gardener, /wanderer, /login.
-       * Only callable internally (service_role).
        * ──────────────────────────────────────────────────── */
       case "create_handoff": {
         const { telegram_user_id, telegram_username, flow, intent, extra_payload } = body;
@@ -58,7 +115,6 @@ Deno.serve(async (req: Request) => {
 
         const hashedId = await hashTelegramId(telegram_user_id);
 
-        // Check if this Telegram identity is already linked
         const { data: existingLink } = await supabase
           .from("connected_accounts")
           .select("user_id")
@@ -66,25 +122,21 @@ Deno.serve(async (req: Request) => {
           .eq("provider_user_id", hashedId)
           .maybeSingle();
 
-        // Login flow REQUIRES an existing link
         if (flow === "login") {
           if (!existingLink) {
             return jsonResponse({
-              ok: false,
-              error: "not_linked",
+              ok: false, error: "not_linked",
               message: "Your Telegram is not yet connected to an S33D account. Use /connect first.",
             });
           }
         } else if (flow === "connect" && existingLink) {
           return jsonResponse({
-            ok: false,
-            error: "already_linked",
+            ok: false, error: "already_linked",
             message: "Your Telegram is already connected to an S33D account. Use /login to sign in.",
           });
         } else if (flow.startsWith("create") && existingLink) {
           return jsonResponse({
-            ok: false,
-            error: "already_linked",
+            ok: false, error: "already_linked",
             message: "Your Telegram is already connected to an S33D account. Use /login to sign in.",
           });
         }
@@ -93,7 +145,6 @@ Deno.serve(async (req: Request) => {
           : flow === "login" ? "telegram_login"
           : `telegram_${flow}`;
 
-        // Sanitize extra_payload — only allow known safe keys
         const safeExtra: Record<string, string> = {};
         if (extra_payload && typeof extra_payload === "object") {
           for (const key of ["invite_code", "tree_id", "room"]) {
@@ -103,7 +154,6 @@ Deno.serve(async (req: Request) => {
           }
         }
 
-        // Resolve intent for handoff routing
         const resolvedIntent = intent || "dashboard";
 
         const { data: handoff, error: rpcErr } = await supabase.rpc("create_bot_handoff", {
@@ -128,9 +178,7 @@ Deno.serve(async (req: Request) => {
 
         const result = handoff as { ok: boolean; token: string; expires_at: string };
         const appUrl = Deno.env.get("APP_URL") || "https://ancient-roots-map.lovable.app";
-        console.log("APP_URL resolved to:", appUrl);
 
-        // Build handoff URL with intent-aware query params
         const urlParams = new URLSearchParams({ token: result.token, flow });
         if (safeExtra.invite_code) urlParams.set("invite", safeExtra.invite_code);
         if (safeExtra.tree_id) urlParams.set("tree", safeExtra.tree_id);
@@ -149,11 +197,8 @@ Deno.serve(async (req: Request) => {
       }
 
       /* ────────────────────────────────────────────────────
-       * create_account — called by the app frontend after
-       * the user chooses their first step on the handoff page.
-       *
-       * identity_path is a soft participation hint ("gardener" or "wanderer"),
-       * NOT a permanent role. Users can always do both.
+       * create_account — creates a new S33D account from
+       * a verified Telegram handoff.
        * ──────────────────────────────────────────────────── */
       case "create_account": {
         const { token, identity_path } = body;
@@ -162,12 +207,9 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Token required" }, 400);
         }
 
-        // Accept identity_path as an optional soft hint; default to "wanderer"
         const resolvedPath = identity_path && ["gardener", "wanderer"].includes(identity_path)
-          ? identity_path
-          : "wanderer";
+          ? identity_path : "wanderer";
 
-        // Read the handoff directly to check status atomically
         const { data: handoffRow, error: readErr } = await supabase
           .from("bot_handoffs")
           .select("id, token, status, expires_at, payload, external_user_hash, claimed_by_user_id")
@@ -178,34 +220,25 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "not_found" });
         }
 
-        // Reject already-claimed tokens (prevents duplicate account creation)
         if (handoffRow.status === "claimed") {
           return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
         }
-
         if (handoffRow.status === "invalidated") {
           return jsonResponse({ ok: false, error: "invalidated" });
         }
-
         if (new Date(handoffRow.expires_at) < new Date()) {
           return jsonResponse({ ok: false, error: "expired" });
         }
 
-        // Atomically claim the handoff BEFORE creating the account
-        // This prevents race conditions across tabs/devices
         const { data: claimResult, error: claimErr } = await supabase
           .from("bot_handoffs")
-          .update({
-            status: "claimed",
-            claimed_at: new Date().toISOString(),
-          })
+          .update({ status: "claimed", claimed_at: new Date().toISOString() })
           .eq("token", token)
           .in("status", ["created", "opened"])
           .select("id")
           .maybeSingle();
 
         if (claimErr || !claimResult) {
-          // Another tab/device already claimed it
           return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
         }
 
@@ -220,7 +253,6 @@ Deno.serve(async (req: Request) => {
 
         const hashedId = await hashTelegramId(payload.telegram_user_id);
 
-        // Double-check: is this Telegram already linked?
         const { data: existing } = await supabase
           .from("connected_accounts")
           .select("user_id")
@@ -229,20 +261,17 @@ Deno.serve(async (req: Request) => {
           .maybeSingle();
 
         if (existing) {
-          // Unclaim so user can try connect flow instead
           await supabase
             .from("bot_handoffs")
             .update({ status: "opened" })
             .eq("id", claimResult.id);
 
           return jsonResponse({
-            ok: false,
-            error: "already_linked",
+            ok: false, error: "already_linked",
             message: "This Telegram account is already connected to an S33D account. Please sign in instead.",
           });
         }
 
-        // Create a new user with a placeholder email
         const placeholderEmail = `tg_${hashedId.slice(0, 12)}@telegram.s33d.local`;
         const tempPassword = crypto.randomUUID() + crypto.randomUUID();
 
@@ -253,40 +282,42 @@ Deno.serve(async (req: Request) => {
           user_metadata: {
             source: "telegram",
             telegram_username: payload.telegram_username || null,
-            first_step: resolvedPath, // Soft participation hint, not a permanent role
+            first_step: resolvedPath,
           },
         });
 
         if (createErr) {
           console.error("Failed to create user:", createErr);
-          // If user already exists with this placeholder email, guide to sign in
           if (createErr.message?.includes("already been registered")) {
             return jsonResponse({
-              ok: false,
-              error: "already_linked",
+              ok: false, error: "already_linked",
               message: "An account for this Telegram identity already exists. Please sign in.",
             });
           }
           return jsonResponse({ ok: false, error: "Failed to create account" }, 500);
         }
 
-        // Link Telegram identity immediately
-        await supabase.from("connected_accounts").insert({
+        // Link Telegram identity
+        const { data: insertedAccount } = await supabase.from("connected_accounts").insert({
           user_id: newUser.user.id,
           provider: "telegram",
           provider_user_id: hashedId,
           provider_username: payload.telegram_username || null,
           display_name: payload.telegram_username ? `@${payload.telegram_username}` : "Telegram User",
           verified_at: new Date().toISOString(),
-        });
+          provider_metadata: { welcome_sent: false },
+        }).select("id").single();
 
-        // Update handoff with claimed user
         await supabase
           .from("bot_handoffs")
           .update({ claimed_by_user_id: newUser.user.id })
           .eq("id", claimResult.id);
 
-        // Generate a magic link for session establishment
+        // Send post-link welcome (fire-and-forget)
+        if (insertedAccount) {
+          sendWelcomeIfNeeded(supabase, insertedAccount.id, payload.telegram_user_id).catch(() => {});
+        }
+
         const { data: magicLink, error: magicErr } = await supabase.auth.admin.generateLink({
           type: "magiclink",
           email: placeholderEmail,
@@ -295,17 +326,14 @@ Deno.serve(async (req: Request) => {
         if (magicErr || !magicLink) {
           console.error("Failed to generate magic link:", magicErr);
           return jsonResponse({
-            ok: true,
-            user_id: newUser.user.id,
-            needs_manual_signin: true,
+            ok: true, user_id: newUser.user.id, needs_manual_signin: true,
             identity_path: resolvedPath,
             message: "Account created but session link failed. Please sign in.",
           });
         }
 
         return jsonResponse({
-          ok: true,
-          user_id: newUser.user.id,
+          ok: true, user_id: newUser.user.id,
           access_token: magicLink.properties?.access_token,
           refresh_token: magicLink.properties?.refresh_token,
           identity_path: resolvedPath,
@@ -313,9 +341,7 @@ Deno.serve(async (req: Request) => {
       }
 
       /* ────────────────────────────────────────────────────
-       * link_after_signin — called after an existing user
-       * signs in on the handoff page to link Telegram.
-       * Requires auth header.
+       * link_after_signin — links Telegram to existing account
        * ──────────────────────────────────────────────────── */
       case "link_after_signin": {
         const { token } = body;
@@ -324,7 +350,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Token required" }, 400);
         }
 
-        // Get authenticated user
         const authHeader = req.headers.get("authorization");
         if (!authHeader?.startsWith("Bearer ")) {
           return jsonResponse({ ok: false, error: "Authentication required" }, 401);
@@ -335,7 +360,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Invalid session" }, 401);
         }
 
-        // Read the handoff
         const { data: handoff } = await supabase
           .from("bot_handoffs")
           .select("id, status, expires_at, payload, claimed_by_user_id")
@@ -346,7 +370,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "not_found" });
         }
 
-        // Already claimed — check if by same user (idempotent)
         if (handoff.status === "claimed") {
           if (handoff.claimed_by_user_id === user.id) {
             return jsonResponse({ ok: true, linked: true, already_linked: true });
@@ -357,7 +380,6 @@ Deno.serve(async (req: Request) => {
         if (handoff.status === "invalidated") {
           return jsonResponse({ ok: false, error: "invalidated" });
         }
-
         if (new Date(handoff.expires_at) < new Date()) {
           return jsonResponse({ ok: false, error: "expired" });
         }
@@ -373,7 +395,6 @@ Deno.serve(async (req: Request) => {
 
         const hashedId = await hashTelegramId(payload.telegram_user_id);
 
-        // Check collision: Telegram already linked to different user
         const { data: existingLink } = await supabase
           .from("connected_accounts")
           .select("user_id")
@@ -383,14 +404,12 @@ Deno.serve(async (req: Request) => {
 
         if (existingLink && existingLink.user_id !== user.id) {
           return jsonResponse({
-            ok: false,
-            error: "telegram_linked_elsewhere",
+            ok: false, error: "telegram_linked_elsewhere",
             message: "This Telegram account is already connected to a different S33D account.",
           });
         }
 
         if (existingLink && existingLink.user_id === user.id) {
-          // Already linked to this user — idempotent, claim token
           await supabase
             .from("bot_handoffs")
             .update({ status: "claimed", claimed_by_user_id: user.id, claimed_at: new Date().toISOString() })
@@ -398,7 +417,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: true, linked: true, already_linked: true });
         }
 
-        // Check user doesn't already have a different Telegram linked
         const { data: userTg } = await supabase
           .from("connected_accounts")
           .select("id")
@@ -408,13 +426,11 @@ Deno.serve(async (req: Request) => {
 
         if (userTg) {
           return jsonResponse({
-            ok: false,
-            error: "already_has_telegram",
+            ok: false, error: "already_has_telegram",
             message: "You already have a different Telegram account linked. Unlink it first from your settings.",
           });
         }
 
-        // Atomically claim BEFORE linking (prevents race across tabs)
         const { data: claimResult, error: claimErr } = await supabase
           .from("bot_handoffs")
           .update({
@@ -431,18 +447,17 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
         }
 
-        // Link the Telegram identity
-        const { error: linkErr } = await supabase.from("connected_accounts").insert({
+        const { data: insertedAccount, error: linkErr } = await supabase.from("connected_accounts").insert({
           user_id: user.id,
           provider: "telegram",
           provider_user_id: hashedId,
           provider_username: payload.telegram_username || null,
           display_name: payload.telegram_username ? `@${payload.telegram_username}` : "Telegram User",
           verified_at: new Date().toISOString(),
-        });
+          provider_metadata: { welcome_sent: false },
+        }).select("id").single();
 
         if (linkErr) {
-          // Rollback claim on link failure
           await supabase
             .from("bot_handoffs")
             .update({ status: "opened", claimed_by_user_id: null, claimed_at: null })
@@ -454,18 +469,20 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Failed to link account" }, 500);
         }
 
+        // Send post-link welcome (fire-and-forget)
+        if (insertedAccount) {
+          sendWelcomeIfNeeded(supabase, insertedAccount.id, payload.telegram_user_id).catch(() => {});
+        }
+
         return jsonResponse({
-          ok: true,
-          linked: true,
+          ok: true, linked: true,
           user_email: user.email,
           telegram_username: payload.telegram_username || null,
         });
       }
 
       /* ────────────────────────────────────────────────────
-       * login_via_telegram — establishes a session for an
-       * already-linked Telegram identity. No auth header needed;
-       * the handoff token + linked identity IS the proof.
+       * login_via_telegram — establishes session for linked identity
        * ──────────────────────────────────────────────────── */
       case "login_via_telegram": {
         const { token } = body;
@@ -474,7 +491,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Token required" }, 400);
         }
 
-        // Read the handoff
         const { data: handoffRow, error: readErr } = await supabase
           .from("bot_handoffs")
           .select("id, token, status, expires_at, payload, external_user_hash, flow_name, claimed_by_user_id")
@@ -495,7 +511,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "expired" });
         }
 
-        // Verify this is a login-flow handoff
         if (handoffRow.flow_name !== "telegram_login") {
           return jsonResponse({ ok: false, error: "invalid_flow", message: "This link is not for login." }, 400);
         }
@@ -511,7 +526,6 @@ Deno.serve(async (req: Request) => {
 
         const hashedId = await hashTelegramId(payload.telegram_user_id);
 
-        // Look up the linked S33D account
         const { data: linkedAccount } = await supabase
           .from("connected_accounts")
           .select("user_id")
@@ -521,13 +535,11 @@ Deno.serve(async (req: Request) => {
 
         if (!linkedAccount) {
           return jsonResponse({
-            ok: false,
-            error: "not_linked",
+            ok: false, error: "not_linked",
             message: "This Telegram is not connected to any S33D account.",
           });
         }
 
-        // Atomically claim the handoff
         const { data: claimResult, error: claimErr } = await supabase
           .from("bot_handoffs")
           .update({
@@ -544,11 +556,9 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
         }
 
-        // Get user email for magic link generation
         const { data: { user: linkedUser }, error: userErr } = await supabase.auth.admin.getUserById(linkedAccount.user_id);
 
         if (userErr || !linkedUser?.email) {
-          // Rollback claim
           await supabase
             .from("bot_handoffs")
             .update({ status: "opened", claimed_by_user_id: null, claimed_at: null })
@@ -556,7 +566,6 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "User account not found" }, 500);
         }
 
-        // Generate a magic link for session establishment
         const { data: magicLink, error: magicErr } = await supabase.auth.admin.generateLink({
           type: "magiclink",
           email: linkedUser.email,
@@ -564,7 +573,6 @@ Deno.serve(async (req: Request) => {
 
         if (magicErr || !magicLink) {
           console.error("Failed to generate login magic link:", magicErr);
-          // Rollback claim
           await supabase
             .from("bot_handoffs")
             .update({ status: "opened", claimed_by_user_id: null, claimed_at: null })
@@ -573,10 +581,160 @@ Deno.serve(async (req: Request) => {
         }
 
         return jsonResponse({
-          ok: true,
-          user_id: linkedAccount.user_id,
+          ok: true, user_id: linkedAccount.user_id,
           access_token: magicLink.properties?.access_token,
           refresh_token: magicLink.properties?.refresh_token,
+        });
+      }
+
+      /* ────────────────────────────────────────────────────
+       * radio — returns a recent song offering from the forest
+       * ──────────────────────────────────────────────────── */
+      case "radio": {
+        const { telegram_user_id } = body;
+
+        if (!telegram_user_id) {
+          return jsonResponse({ ok: false, error: "telegram_user_id required" }, 400);
+        }
+
+        const hashedId = await hashTelegramId(telegram_user_id);
+
+        // Check if linked
+        const { data: link } = await supabase
+          .from("connected_accounts")
+          .select("user_id")
+          .eq("provider", "telegram")
+          .eq("provider_user_id", hashedId)
+          .maybeSingle();
+
+        // Try user's own songs first (if linked)
+        let song = null;
+        if (link) {
+          const { data } = await supabase
+            .from("offerings")
+            .select("title, content, media_url, youtube_url, tree_id, trees!inner(name, species)")
+            .eq("type", "song")
+            .eq("created_by", link.user_id)
+            .order("created_at", { ascending: false })
+            .limit(5);
+
+          if (data && data.length > 0) {
+            // Pick a random one from recent 5 for variety
+            song = data[Math.floor(Math.random() * data.length)];
+          }
+        }
+
+        // Fallback: recent song from the whole forest
+        if (!song) {
+          const { data } = await supabase
+            .from("offerings")
+            .select("title, content, media_url, youtube_url, tree_id, trees!inner(name, species)")
+            .eq("type", "song")
+            .order("created_at", { ascending: false })
+            .limit(10);
+
+          if (data && data.length > 0) {
+            song = data[Math.floor(Math.random() * data.length)];
+          }
+        }
+
+        if (!song) {
+          return jsonResponse({ ok: true, empty: true, message: "The forest is quiet just now — no songs have been offered yet." });
+        }
+
+        // Parse artist from content field (format: "Artist — Album")
+        const contentStr = song.content || "";
+        const artist = contentStr.split("—")[0]?.trim() || contentStr.split("-")[0]?.trim() || null;
+        const tree = (song as any).trees;
+
+        // Build media link
+        let mediaLink = song.youtube_url || null;
+        if (!mediaLink && song.media_url) {
+          // Apple Music preview URLs are playable but short
+          mediaLink = song.media_url;
+        }
+
+        return jsonResponse({
+          ok: true,
+          song: {
+            title: song.title,
+            artist,
+            tree_name: tree?.name || null,
+            species: tree?.species || null,
+            media_url: mediaLink,
+          },
+        });
+      }
+
+      /* ────────────────────────────────────────────────────
+       * continue — returns best resume destination for user
+       * ──────────────────────────────────────────────────── */
+      case "continue": {
+        const { telegram_user_id } = body;
+
+        if (!telegram_user_id) {
+          return jsonResponse({ ok: false, error: "telegram_user_id required" }, 400);
+        }
+
+        const hashedId = await hashTelegramId(telegram_user_id);
+
+        const { data: link } = await supabase
+          .from("connected_accounts")
+          .select("user_id")
+          .eq("provider", "telegram")
+          .eq("provider_user_id", hashedId)
+          .maybeSingle();
+
+        if (!link) {
+          return jsonResponse({ ok: false, error: "not_linked" });
+        }
+
+        const appUrl = Deno.env.get("APP_URL") || "https://ancient-roots-map.lovable.app";
+
+        // Signal 1: most recent offering → its tree
+        const { data: recentOffering } = await supabase
+          .from("offerings")
+          .select("tree_id, trees!inner(name)")
+          .eq("created_by", link.user_id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (recentOffering?.tree_id) {
+          const tree = (recentOffering as any).trees;
+          return jsonResponse({
+            ok: true,
+            destination: `${appUrl}/map?tree=${recentOffering.tree_id}`,
+            signal: "last_offering",
+            label: tree?.name || "your last tree",
+          });
+        }
+
+        // Signal 2: most recent handoff destination
+        const { data: lastHandoff } = await supabase
+          .from("bot_handoffs")
+          .select("intent, return_to")
+          .eq("claimed_by_user_id", link.user_id)
+          .eq("status", "claimed")
+          .order("claimed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (lastHandoff?.return_to) {
+          return jsonResponse({
+            ok: true,
+            destination: `${appUrl}${lastHandoff.return_to}`,
+            signal: "last_handoff",
+            label: "where you left off",
+          });
+        }
+
+        // Fallback: hearth/dashboard
+        return jsonResponse({
+          ok: true,
+          destination: `${appUrl}/dashboard`,
+          signal: "default",
+          label: "your hearth",
         });
       }
 
