@@ -214,11 +214,15 @@ async function createAndSendHandoff(
       extra = `\n\n📍 Heading to: ${roomNames[extraPayload.room] || extraPayload.room}`;
     }
 
+    const safariHint = (isLogin || isConnect)
+      ? "\n\n💡 Using Google or passkey? If sign-in doesn't complete here, copy the link and open it in Safari."
+      : "";
+
     await sendMessage(
       chatId,
       `${heading}${extra}\n\nI've prepared a path for you:\n\n` +
       `<a href="${result.handoff_url}">${cta}</a>\n\n` +
-      "⏳ This path stays open for 30 minutes.",
+      "⏳ This path stays open for 30 minutes." + safariHint,
       lovableKey, telegramKey,
       { inline_keyboard: [[ { text: `${emoji} ${cta}`, url: result.handoff_url } ]] },
     );
