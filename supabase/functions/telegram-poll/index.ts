@@ -7,12 +7,79 @@
  * Handles:
  * - Verification code messages (6-digit codes for account linking)
  * - Bot commands (/connect, /new, /gardener, /wanderer, /start, /help)
+ * - Deep-link /start payloads (invite_CODE, login, connect, tree_ID, room_*, etc.)
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const MAX_RUNTIME_MS = 55_000;
 const MIN_REMAINING_MS = 5_000;
+
+/* ── Start param parser ─────────────────────────────────── */
+
+interface ParsedStartParam {
+  /** Which flow to request from telegram-handoff */
+  flow: string;
+  /** App-level intent for post-auth routing */
+  intent: string;
+  /** Optional extra context (tree ID, invite code, room name) */
+  context: Record<string, string>;
+}
+
+/**
+ * Parse a Telegram /start payload into a structured intent.
+ * Returns null for bare /start (treated as help).
+ */
+function parseStartPayload(payload: string | null): ParsedStartParam | null {
+  if (!payload) return null;
+  const trimmed = payload.trim();
+  if (!trimmed) return null;
+
+  // invite_CODE → preserve invite code, onboard or connect
+  if (trimmed.startsWith("invite_")) {
+    const code = trimmed.slice(7);
+    if (code) {
+      return { flow: "create", intent: "invite", context: { invite_code: code } };
+    }
+  }
+
+  // tree_UUID → open specific tree after auth
+  if (trimmed.startsWith("tree_")) {
+    const treeId = trimmed.slice(5);
+    if (treeId) {
+      return { flow: "login", intent: "tree", context: { tree_id: treeId } };
+    }
+  }
+
+  // room_* → open a specific room after auth
+  if (trimmed.startsWith("room_")) {
+    const room = trimmed.slice(5);
+    const validRooms: Record<string, string> = {
+      music: "library",
+      library: "library",
+      council: "dashboard",
+    };
+    if (validRooms[room]) {
+      return { flow: "login", intent: validRooms[room], context: { room } };
+    }
+  }
+
+  // Exact-match keywords
+  switch (trimmed) {
+    case "login":
+      return { flow: "login", intent: "dashboard", context: {} };
+    case "connect":
+      return { flow: "connect", intent: "dashboard", context: {} };
+    case "new_gardener":
+      return { flow: "create_gardener", intent: "add-tree", context: {} };
+    case "new_wanderer":
+      return { flow: "create_wanderer", intent: "atlas", context: {} };
+    default:
+      return null;
+  }
+}
+
+/* ── Helpers ─────────────────────────────────────────────── */
 
 /** Check if a message text is a 6-digit verification code */
 function extractVerificationCode(text: string | null): string | null {
@@ -21,11 +88,12 @@ function extractVerificationCode(text: string | null): string | null {
   return match ? match[1] : null;
 }
 
-/** Extract bot command from message */
-function extractCommand(text: string | null): string | null {
+/** Extract bot command and payload from message */
+function extractCommand(text: string | null): { command: string; payload: string | null } | null {
   if (!text) return null;
-  const match = text.trim().match(/^\/(\w+)(?:\s|$)/);
-  return match ? match[1].toLowerCase() : null;
+  const match = text.trim().match(/^\/(\w+)(?:\s+(.+))?$/);
+  if (!match) return null;
+  return { command: match[1].toLowerCase(), payload: match[2]?.trim() || null };
 }
 
 /** Send a message via the Telegram gateway */
@@ -53,6 +121,112 @@ async function sendMessage(
     body: JSON.stringify(body),
   });
 }
+
+/** Create a handoff and send the user a link */
+async function createAndSendHandoff(
+  supabase: ReturnType<typeof createClient>,
+  chatId: number,
+  telegramUserId: number,
+  telegramUsername: string | null,
+  flow: string,
+  intent: string,
+  extraPayload: Record<string, string>,
+  lovableKey: string,
+  telegramKey: string,
+): Promise<boolean> {
+  try {
+    const handoffResp = await supabase.functions.invoke("telegram-handoff", {
+      body: {
+        action: "create_handoff",
+        telegram_user_id: telegramUserId,
+        telegram_username: telegramUsername,
+        flow,
+        intent,
+        extra_payload: extraPayload,
+      },
+    });
+
+    const result = handoffResp.data;
+    if (!result?.ok) {
+      // Handle known error states
+      if (result?.error === "not_linked") {
+        await sendMessage(
+          chatId,
+          "🌱 Your Telegram isn't linked to an S33D account yet.\n\n" +
+          "Use /connect to link an existing account, or /new to create one.",
+          lovableKey, telegramKey,
+        );
+      } else if (result?.error === "already_linked") {
+        await sendMessage(
+          chatId,
+          "✅ Your Telegram is already connected to S33D!\n\nUse /login to sign in.",
+          lovableKey, telegramKey,
+        );
+      } else {
+        await sendMessage(chatId, "❌ Something went wrong. Please try again in a moment.", lovableKey, telegramKey);
+      }
+      return false;
+    }
+
+    // Build contextual message
+    const isLogin = flow === "login";
+    const isConnect = flow === "connect";
+    const isCreate = flow.startsWith("create");
+
+    let heading: string;
+    let cta: string;
+    let emoji: string;
+
+    if (isLogin) {
+      heading = "🔑 <b>Sign in to S33D</b>";
+      cta = "Sign in to S33D";
+      emoji = "🌳";
+    } else if (isConnect) {
+      heading = "🔗 <b>Connect your S33D account</b>";
+      cta = "Enter S33D";
+      emoji = "🌳";
+    } else if (flow === "create_gardener") {
+      heading = "🌱 <b>Create your Gardener identity</b>";
+      cta = "Begin your journey";
+      emoji = "🌱";
+    } else if (flow === "create_wanderer") {
+      heading = "🧭 <b>Create your Wanderer identity</b>";
+      cta = "Begin your journey";
+      emoji = "🧭";
+    } else {
+      heading = "🌳 <b>Enter S33D</b>";
+      cta = "Enter S33D";
+      emoji = "🌳";
+    }
+
+    // Add context to message
+    let extra = "";
+    if (extraPayload.invite_code) {
+      extra = "\n\n🎋 You've been invited by a fellow wanderer.";
+    } else if (extraPayload.tree_id) {
+      extra = "\n\n🌳 A tree is waiting for you.";
+    } else if (extraPayload.room) {
+      const roomNames: Record<string, string> = { music: "Earth Radio", library: "Heartwood Library", council: "Council of Life" };
+      extra = `\n\n📍 Heading to: ${roomNames[extraPayload.room] || extraPayload.room}`;
+    }
+
+    await sendMessage(
+      chatId,
+      `${heading}${extra}\n\nOpen this link to continue:\n\n` +
+      `<a href="${result.handoff_url}">${cta}</a>\n\n` +
+      "⏳ This link expires in 30 minutes.",
+      lovableKey, telegramKey,
+      { inline_keyboard: [[ { text: `${emoji} ${cta}`, url: result.handoff_url } ]] },
+    );
+    return true;
+  } catch (e) {
+    console.error("Failed to create handoff:", e);
+    await sendMessage(chatId, "❌ Could not create the link right now. Please try again.", lovableKey, telegramKey);
+    return false;
+  }
+}
+
+/* ── Main handler ────────────────────────────────────────── */
 
 Deno.serve(async () => {
   const startTime = Date.now();
@@ -181,10 +355,25 @@ Deno.serve(async () => {
       }
 
       // ── Check for bot commands ──
-      const command = extractCommand(msg.text);
-      if (!command) continue;
+      const parsed = extractCommand(msg.text);
+      if (!parsed) continue;
 
       commandsHandled++;
+      const { command, payload } = parsed;
+
+      // ── /start with a deep-link payload ──
+      if (command === "start" && payload) {
+        const startParam = parseStartPayload(payload);
+        if (startParam) {
+          await createAndSendHandoff(
+            supabase, chatId, telegramUserId, telegramUsername,
+            startParam.flow, startParam.intent, startParam.context,
+            LOVABLE_API_KEY, TELEGRAM_API_KEY,
+          );
+          continue;
+        }
+        // Unknown payload → fall through to help
+      }
 
       switch (command) {
         case "start":
@@ -204,184 +393,35 @@ Deno.serve(async () => {
         }
 
         case "login": {
-          // Login flow — only works if Telegram is already linked
-          try {
-            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
-              body: {
-                action: "create_handoff",
-                telegram_user_id: telegramUserId,
-                telegram_username: telegramUsername,
-                flow: "login",
-              },
-            });
-
-            const result = handoffResp.data;
-            if (result?.ok) {
-              await sendMessage(
-                chatId,
-                "🔑 <b>Sign in to S33D</b>\n\n" +
-                "Open this link to enter the forest:\n\n" +
-                `<a href="${result.handoff_url}">Sign in to S33D</a>\n\n` +
-                "⏳ This link expires in 30 minutes.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-                {
-                  inline_keyboard: [[
-                    { text: "🌳 Sign in to S33D", url: result.handoff_url },
-                  ]],
-                },
-              );
-            } else if (result?.error === "not_linked") {
-              await sendMessage(
-                chatId,
-                "🌱 Your Telegram isn't linked to an S33D account yet.\n\n" +
-                "Use /connect to link an existing account, or /new to create one.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-              );
-            } else {
-              await sendMessage(
-                chatId,
-                "❌ Something went wrong. Please try again in a moment.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-              );
-            }
-          } catch (e) {
-            console.error("Failed to create login handoff:", e);
-            await sendMessage(
-              chatId,
-              "❌ Could not create the link right now. Please try again.",
-              LOVABLE_API_KEY,
-              TELEGRAM_API_KEY,
-            );
-          }
+          await createAndSendHandoff(
+            supabase, chatId, telegramUserId, telegramUsername,
+            "login", "dashboard", {},
+            LOVABLE_API_KEY, TELEGRAM_API_KEY,
+          );
           break;
         }
 
         case "connect": {
-          // Create a handoff for connecting existing account
-          try {
-            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
-              body: {
-                action: "create_handoff",
-                telegram_user_id: telegramUserId,
-                telegram_username: telegramUsername,
-                flow: "connect",
-              },
-            });
-
-            const result = handoffResp.data;
-            if (result?.ok) {
-              await sendMessage(
-                chatId,
-                "🔗 <b>Connect your S33D account</b>\n\n" +
-                "Open this link to sign in and connect your Telegram:\n\n" +
-                `<a href="${result.handoff_url}">Enter S33D</a>\n\n` +
-                "⏳ This link expires in 30 minutes.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-                {
-                  inline_keyboard: [[
-                    { text: "🌳 Enter S33D", url: result.handoff_url },
-                  ]],
-                },
-              );
-            } else if (result?.error === "already_linked") {
-              await sendMessage(
-                chatId,
-                "✅ Your Telegram is already connected to S33D!\n\nUse /login to sign in.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-              );
-            } else {
-              await sendMessage(
-                chatId,
-                "❌ Something went wrong. Please try again in a moment.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-              );
-            }
-          } catch (e) {
-            console.error("Failed to create connect handoff:", e);
-            await sendMessage(
-              chatId,
-              "❌ Could not create the link right now. Please try again.",
-              LOVABLE_API_KEY,
-              TELEGRAM_API_KEY,
-            );
-          }
+          await createAndSendHandoff(
+            supabase, chatId, telegramUserId, telegramUsername,
+            "connect", "dashboard", {},
+            LOVABLE_API_KEY, TELEGRAM_API_KEY,
+          );
           break;
         }
 
         case "gardener":
         case "wanderer":
         case "new": {
-          // /new → neutral "create" flow (user chooses Gardener/Wanderer in-app)
-          // /gardener or /wanderer → pre-selected but still confirmed in-app
           const flow = command === "wanderer" ? "create_wanderer"
                      : command === "gardener" ? "create_gardener"
-                     : "create"; // neutral for /new
-          try {
-            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
-              body: {
-                action: "create_handoff",
-                telegram_user_id: telegramUserId,
-                telegram_username: telegramUsername,
-                flow,
-              },
-            });
-
-            const result = handoffResp.data;
-            if (result?.ok) {
-              const isNeutral = command === "new";
-              const label = command === "wanderer" ? "Wanderer"
-                          : command === "gardener" ? "Gardener"
-                          : "";
-              const emoji = command === "wanderer" ? "🧭" : command === "gardener" ? "🌱" : "🌳";
-              const heading = isNeutral
-                ? "🌳 <b>Create your S33D identity</b>"
-                : `${emoji} <b>Create your ${label} identity</b>`;
-              const cta = isNeutral ? "Choose your path" : "Begin your journey";
-
-              await sendMessage(
-                chatId,
-                `${heading}\n\n` +
-                "Open this link to enter S33D:\n\n" +
-                `<a href="${result.handoff_url}">${cta}</a>\n\n` +
-                "⏳ This link expires in 30 minutes.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-                {
-                  inline_keyboard: [[
-                    { text: `${emoji} ${cta}`, url: result.handoff_url },
-                  ]],
-                },
-              );
-            } else if (result?.error === "already_linked") {
-              await sendMessage(
-                chatId,
-                "🌿 Your Telegram is already connected to an S33D account.\n\nUse /connect to sign in, or open S33D directly.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-              );
-            } else {
-              await sendMessage(
-                chatId,
-                "❌ Something went wrong. Please try again in a moment.",
-                LOVABLE_API_KEY,
-                TELEGRAM_API_KEY,
-              );
-            }
-          } catch (e) {
-            console.error("Failed to create new identity handoff:", e);
-            await sendMessage(
-              chatId,
-              "❌ Could not create the link right now. Please try again.",
-              LOVABLE_API_KEY,
-              TELEGRAM_API_KEY,
-            );
-          }
+                     : "create";
+          const intent = command === "gardener" ? "add-tree" : "atlas";
+          await createAndSendHandoff(
+            supabase, chatId, telegramUserId, telegramUsername,
+            flow, intent, {},
+            LOVABLE_API_KEY, TELEGRAM_API_KEY,
+          );
           break;
         }
 
