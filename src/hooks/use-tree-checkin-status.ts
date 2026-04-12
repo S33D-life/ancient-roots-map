@@ -12,7 +12,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { GateStatus } from "@/hooks/use-tree-proximity-gate";
 
-export type CheckinLight = "red" | "orange" | "green" | "flashing_green";
+export type CheckinLight = "red" | "orange" | "nearby_green" | "green" | "flashing_green";
 
 export interface TreeCheckinStatus {
   light: CheckinLight;
@@ -79,13 +79,22 @@ export function useTreeCheckinStatus({
 
   if (!hasVisited && !isMappedByUser) {
     light = "red";
-  } else if (gateStatus === "unlocked_present" || gateStatus === "unlocked_nearby" || gateStatus === "unlocked_grace" || gateStatus === "no_location") {
-    // Active offering window
+  } else if (gateStatus === "unlocked_present") {
+    // Physically at the tree — full green
+    light = "green";
+  } else if (gateStatus === "unlocked_nearby") {
+    // 100–500m away — offerings open but check-in not available
+    light = "nearby_green";
+  } else if (gateStatus === "unlocked_grace") {
+    // Grace period active — offerings still open remotely
     if (graceMs > 0 && graceMs < 60 * 60 * 1000) {
       light = "flashing_green";
     } else {
-      light = "green";
+      light = "nearby_green";
     }
+  } else if (gateStatus === "no_location") {
+    // Can't determine — show visited but inactive
+    light = "orange";
   } else {
     // Has visited before but no active window
     light = "orange";
