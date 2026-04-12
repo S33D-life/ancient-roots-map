@@ -129,6 +129,7 @@ function sortEntries(entries: BookshelfEntry[], sort: SortOption): BookshelfEntr
 
 const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const navigate = useNavigate();
+  const [view, setView] = useState<"my-shelf" | "forest">("my-shelf");
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
   const [sort, setSort] = useState<SortOption>("recent");
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,6 +143,20 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const [editingShelfId, setEditingShelfId] = useState<string | null>(null);
   const [editingShelfName, setEditingShelfName] = useState("");
   const [assignShelfBookId, setAssignShelfBookId] = useState<string | null>(null);
+
+  // Forest Books state
+  const [forestBooks, setForestBooks] = useState<LibraryBookOffering[]>([]);
+  const [forestLoading, setForestLoading] = useState(false);
+
+  useEffect(() => {
+    if (view !== "forest") return;
+    let cancelled = false;
+    setForestLoading(true);
+    getAllBookOfferings().then(books => {
+      if (!cancelled) { setForestBooks(books); setForestLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [view]);
 
   const { entries, loading, stats, deleteEntry, updateEntry, refetch } = useBookshelf({ userId, filter });
   const { shelves, createShelf, updateShelf, deleteShelf } = useBookshelves(userId);
