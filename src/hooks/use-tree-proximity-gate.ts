@@ -159,7 +159,10 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
     return `${mins}m remaining`;
   }, [graceMs]);
 
-  const isUnlocked = status === "unlocked_present" || status === "unlocked_grace" || status === "no_location";
+  /** Whether offerings/whispers are accessible (near, grace, or nearby) */
+  const isUnlocked = status === "unlocked_present" || status === "unlocked_nearby" || status === "unlocked_grace" || status === "no_location";
+  /** Whether check-in is possible (must be within server check-in radius) */
+  const canCheckin = status === "unlocked_present";
 
   /** Call when a check-in or visit happens elsewhere to immediately unlock */
   const recordVisitNow = useCallback(() => {
