@@ -152,7 +152,7 @@ export default function TelegramHandoffPage() {
         }
 
         toast.success("Welcome back 🌿");
-        navigate(ROUTES.HEARTH, { replace: true });
+        navigate(computeDestination(treeParam, roomParam), { replace: true });
         return;
       }
 
@@ -190,7 +190,7 @@ export default function TelegramHandoffPage() {
           : "Your thread is now woven 🌿"
       );
       setState("success");
-      setTimeout(() => navigate(ROUTES.HEARTH), 2500);
+      setTimeout(() => navigate(computeDestination(treeParam, roomParam)), 2500);
     } catch {
       setError("Connection error. Please try again.");
       setState("error");
@@ -408,7 +408,7 @@ export default function TelegramHandoffPage() {
             Your account is ready. Wander the roots, tend the garden, share what you find — all paths are open.
           </p>
           <Button
-            onClick={() => navigate(ROUTES.HEARTH)}
+            onClick={() => navigate(computeDestination(treeParam, roomParam))}
             className="gap-2 font-serif"
           >
             Enter your hearth
