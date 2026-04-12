@@ -163,9 +163,19 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const { entries, loading, stats, deleteEntry, updateEntry, refetch } = useBookshelf({ userId, filter });
   const { shelves, createShelf, updateShelf, deleteShelf } = useBookshelves(userId);
 
-  // Search + sort entries
+  // Species list for My Shelf entries (from species_category field)
+  const myShelfSpecies = useMemo(() => {
+    return entries
+      .filter(e => e.species_category)
+      .map(e => e.species_category!);
+  }, [entries]);
+
+  // Search + sort + species filter entries
   const processedEntries = useMemo(() => {
     let result = entries;
+    if (speciesFilter !== "all") {
+      result = result.filter(e => (e.species_category || "Unknown") === speciesFilter);
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(e =>
@@ -427,11 +437,20 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-serif text-muted-foreground/50">
-                {forestBooks.length} book{forestBooks.length !== 1 ? "s" : ""} offered across the forest
-              </p>
+              {/* Species filter for forest books */}
+              <div className="flex items-center gap-2">
+                <SpeciesOfferingFilter
+                  speciesStrings={forestBooks.map(b => b.species)}
+                  value={speciesFilter}
+                  onChange={setSpeciesFilter}
+                  className="w-[180px]"
+                />
+                <p className="text-xs font-serif text-muted-foreground/50 flex-1">
+                  {filterBySpecies(forestBooks, speciesFilter).length} book{filterBySpecies(forestBooks, speciesFilter).length !== 1 ? "s" : ""} offered across the forest
+                </p>
+              </div>
               <div className="space-y-1.5">
-                {forestBooks.map(book => {
+                {filterBySpecies(forestBooks, speciesFilter).map(book => {
                   const { author, quote } = parseBookOfferingContent(book.content);
                   return (
                     <button
