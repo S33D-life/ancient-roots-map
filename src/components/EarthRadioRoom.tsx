@@ -174,6 +174,7 @@ const EarthRadioRoom = () => {
   const [activeStation, setActiveStation] = useState<Station | null>(null);
   const [tunerOpen, setTunerOpen] = useState(false);
   const [trackChanging, setTrackChanging] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -183,12 +184,16 @@ const EarthRadioRoom = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data: songData } = await supabase
-        .from("offerings")
-        .select("id, title, content, media_url, tree_id, created_at")
-        .eq("type", "song")
-        .order("created_at", { ascending: false });
+      const [{ data: songData }, { data: { user } }] = await Promise.all([
+        supabase
+          .from("offerings")
+          .select("id, title, content, media_url, tree_id, created_by, created_at")
+          .eq("type", "song")
+          .order("created_at", { ascending: false }),
+        supabase.auth.getUser(),
+      ]);
 
+      if (user) setCurrentUserId(user.id);
       if (!songData?.length) { setAllSongs([]); setLoading(false); return; }
 
       const treeIds = [...new Set(songData.map(s => s.tree_id))];
@@ -203,7 +208,8 @@ const EarthRadioRoom = () => {
         return {
           id: s.id, title: s.title, content: s.content, media_url: s.media_url,
           tree_id: s.tree_id, tree_name: tree?.name || "Unknown Tree",
-          species: tree?.species || "Unknown", created_at: s.created_at,
+          species: tree?.species || "Unknown", created_by: s.created_by,
+          created_at: s.created_at,
         };
       });
       setAllSongs(enriched);
@@ -213,15 +219,17 @@ const EarthRadioRoom = () => {
   }, []);
 
   /* ── Build stations ── */
-  const { speciesStations, treeStations, allStation } = useMemo(() => {
+  const { speciesStations, treeStations, allStation, mySongsStation } = useMemo(() => {
     const speciesMap = new Map<string, SongOffering[]>();
     const treeMap = new Map<string, { name: string; species: string; songs: SongOffering[] }>();
+    let mySongCount = 0;
 
     allSongs.forEach(s => {
       if (!speciesMap.has(s.species)) speciesMap.set(s.species, []);
       speciesMap.get(s.species)!.push(s);
       if (!treeMap.has(s.tree_id)) treeMap.set(s.tree_id, { name: s.tree_name, species: s.species, songs: [] });
       treeMap.get(s.tree_id)!.songs.push(s);
+      if (currentUserId && s.created_by === currentUserId) mySongCount++;
     });
 
     const speciesStations: Station[] = Array.from(speciesMap.entries())
@@ -236,8 +244,11 @@ const EarthRadioRoom = () => {
       .sort((a, b) => b.songCount - a.songCount);
 
     const allStation: Station = { type: "all", id: "all", label: "TETOL Radio", species: "All", songCount: allSongs.length };
-    return { speciesStations, treeStations, allStation };
-  }, [allSongs]);
+    const mySongsStation: Station | null = currentUserId && mySongCount > 0
+      ? { type: "all" as StationType, id: "my-songs", label: "My Songs", species: "All", songCount: mySongCount }
+      : null;
+    return { speciesStations, treeStations, allStation, mySongsStation };
+  }, [allSongs, currentUserId]);
 
   /* ── Default station ── */
   useEffect(() => {
