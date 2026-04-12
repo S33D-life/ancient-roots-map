@@ -539,7 +539,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
 
       {/* ═══ Search + Sort + Filter Bar ═══ */}
       <div className="space-y-3">
-        {/* Search + Sort row */}
+        {/* Search + Sort + Species row */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
@@ -549,6 +549,13 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
               placeholder="Search by title or author…"
               className="pl-9 h-9 text-xs font-serif bg-card/30 border-border/20 focus:border-primary/30"
             />
+          </div>
+          <SpeciesOfferingFilter
+            speciesStrings={myShelfSpecies}
+            value={speciesFilter}
+            onChange={setSpeciesFilter}
+            className="w-[150px]"
+          />
           </div>
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
             <SelectTrigger className="w-[140px] h-9 text-[11px] font-serif border-border/20 bg-card/30">
