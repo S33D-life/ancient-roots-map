@@ -148,22 +148,21 @@ async function createAndSendHandoff(
 
     const result = handoffResp.data;
     if (!result?.ok) {
-      // Handle known error states
       if (result?.error === "not_linked") {
         await sendMessage(
           chatId,
-          "🌱 Your Telegram isn't linked to an S33D account yet.\n\n" +
-          "Use /connect to link an existing account, or /new to create one.",
+          "🌱 Your Telegram isn't linked to S33D yet.\n\n" +
+          "I can help — use /connect to link an existing account, or /new to begin a new path.",
           lovableKey, telegramKey,
         );
       } else if (result?.error === "already_linked") {
         await sendMessage(
           chatId,
-          "✅ Your Telegram is already connected to S33D!\n\nUse /login to sign in.",
+          "✅ You're already connected to S33D.\n\nUse /login and I'll open the gate for you.",
           lovableKey, telegramKey,
         );
       } else {
-        await sendMessage(chatId, "❌ Something went wrong. Please try again in a moment.", lovableKey, telegramKey);
+        await sendMessage(chatId, "🌿 Something went awry. Try again in a moment — I'll be here.", lovableKey, telegramKey);
       }
       return false;
     }
@@ -178,24 +177,24 @@ async function createAndSendHandoff(
     let emoji: string;
 
     if (isLogin) {
-      heading = "🔑 <b>Sign in to S33D</b>";
-      cta = "Sign in to S33D";
+      heading = "🔑 <b>Enter S33D</b>";
+      cta = "Open the gate";
       emoji = "🌳";
     } else if (isConnect) {
-      heading = "🔗 <b>Connect your S33D account</b>";
-      cta = "Enter S33D";
+      heading = "🔗 <b>Link your S33D account</b>";
+      cta = "Connect & enter";
       emoji = "🌳";
     } else if (flow === "create_gardener") {
-      heading = "🌱 <b>Create your Gardener identity</b>";
-      cta = "Begin your journey";
+      heading = "🌱 <b>Begin as a Gardener</b>";
+      cta = "Plant your first seed";
       emoji = "🌱";
     } else if (flow === "create_wanderer") {
-      heading = "🧭 <b>Create your Wanderer identity</b>";
-      cta = "Begin your journey";
+      heading = "🧭 <b>Begin as a Wanderer</b>";
+      cta = "Start walking";
       emoji = "🧭";
     } else {
       heading = "🌳 <b>Enter S33D</b>";
-      cta = "Enter S33D";
+      cta = "Step into the forest";
       emoji = "🌳";
     }
 
@@ -212,16 +211,16 @@ async function createAndSendHandoff(
 
     await sendMessage(
       chatId,
-      `${heading}${extra}\n\nOpen this link to continue:\n\n` +
+      `${heading}${extra}\n\nI've prepared a path for you:\n\n` +
       `<a href="${result.handoff_url}">${cta}</a>\n\n` +
-      "⏳ This link expires in 30 minutes.",
+      "⏳ This path stays open for 30 minutes.",
       lovableKey, telegramKey,
       { inline_keyboard: [[ { text: `${emoji} ${cta}`, url: result.handoff_url } ]] },
     );
     return true;
   } catch (e) {
     console.error("Failed to create handoff:", e);
-    await sendMessage(chatId, "❌ Could not create the link right now. Please try again.", lovableKey, telegramKey);
+    await sendMessage(chatId, "🌿 I couldn't prepare the path right now. Please try again in a moment.", lovableKey, telegramKey);
     return false;
   }
 }
