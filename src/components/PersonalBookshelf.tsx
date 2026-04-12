@@ -556,7 +556,6 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
             onChange={setSpeciesFilter}
             className="w-[150px]"
           />
-          </div>
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
             <SelectTrigger className="w-[140px] h-9 text-[11px] font-serif border-border/20 bg-card/30">
               <ArrowUpDown className="h-3 w-3 mr-1 text-muted-foreground/50" />
