@@ -82,7 +82,6 @@ export default function CouncilSessionPage() {
               🌑 Current Council
             </Button>
           </div>
-          </Button>
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-1">
