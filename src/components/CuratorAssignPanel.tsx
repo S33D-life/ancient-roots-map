@@ -70,38 +70,44 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
   const handleAssign = async () => {
     if (!selectedId) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("staffs")
-      .update({ owner_user_id: selectedId })
-      .eq("id", staffCode);
-    if (error) {
-      toast.error("Failed to assign: " + error.message);
-    } else {
+    try {
+      const { error } = await supabase
+        .from("staffs")
+        .update({ owner_user_id: selectedId })
+        .eq("id", staffCode);
+      if (error) throw error;
       const w = wanderers.find((w) => w.id === selectedId);
       toast.success(`${staffCode} → ${w?.full_name || "wanderer"}`);
       setCurrentOwner(w || null);
       setCurrentOwnerId(selectedId);
       onAssigned?.();
+    } catch (err: any) {
+      console.error("Staff assign error:", err);
+      toast.error("Couldn't assign this staff right now. Please try again.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleUnassign = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("staffs")
-      .update({ owner_user_id: null })
-      .eq("id", staffCode);
-    if (error) {
-      toast.error("Failed to unassign: " + error.message);
-    } else {
+    try {
+      const { error } = await supabase
+        .from("staffs")
+        .update({ owner_user_id: null })
+        .eq("id", staffCode);
+      if (error) throw error;
       toast.success(`${staffCode} unassigned`);
       setCurrentOwner(null);
       setCurrentOwnerId(null);
       setSelectedId("");
       onAssigned?.();
+    } catch (err: any) {
+      console.error("Staff unassign error:", err);
+      toast.error("Couldn't unassign this staff right now. Please try again.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   if (roleLoading || !hasRole) return null;

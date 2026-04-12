@@ -174,38 +174,43 @@ export default function CuratorPage() {
   const handleAssign = async () => {
     if (!assignDialog || !selectedWanderer) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("staffs")
-      .update({ owner_user_id: selectedWanderer })
-      .eq("id", assignDialog.staff.id);
-    if (error) {
-      toast.error("Failed to assign staff: " + error.message);
-    } else {
+    try {
+      const { error } = await supabase
+        .from("staffs")
+        .update({ owner_user_id: selectedWanderer })
+        .eq("id", assignDialog.staff.id);
+      if (error) throw error;
       toast.success(`Staff ${assignDialog.staff.id} assigned!`);
       setStaffRows((prev) =>
         prev.map((s) =>
           s.id === assignDialog.staff.id ? { ...s, owner_user_id: selectedWanderer } : s
         )
       );
+    } catch (err: any) {
+      console.error("Staff assign error:", err);
+      toast.error("Couldn't assign this staff right now. Please try again.");
+    } finally {
+      setSaving(false);
+      setAssignDialog(null);
+      setSelectedWanderer("");
+      setWandererSearch("");
     }
-    setSaving(false);
-    setAssignDialog(null);
-    setSelectedWanderer("");
-    setWandererSearch("");
   };
 
   const handleUnassign = async (staffId: string) => {
-    const { error } = await supabase
-      .from("staffs")
-      .update({ owner_user_id: null })
-      .eq("id", staffId);
-    if (error) {
-      toast.error("Failed to unassign: " + error.message);
-    } else {
+    try {
+      const { error } = await supabase
+        .from("staffs")
+        .update({ owner_user_id: null })
+        .eq("id", staffId);
+      if (error) throw error;
       toast.success("Staff unassigned");
       setStaffRows((prev) =>
         prev.map((s) => (s.id === staffId ? { ...s, owner_user_id: null } : s))
       );
+    } catch (err: any) {
+      console.error("Staff unassign error:", err);
+      toast.error("Couldn't unassign this staff right now. Please try again.");
     }
   };
 
