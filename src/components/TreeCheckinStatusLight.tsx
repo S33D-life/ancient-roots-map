@@ -82,20 +82,22 @@ export default function TreeCheckinStatusLight({
     ? `Here now · ${timeRemaining}`
     : (light === "flashing_green" && timeRemaining)
       ? `Window closing · ${timeRemaining}`
-      : (light === "orange" && timeRemaining)
-        ? `Recently met · ${timeRemaining}`
-        : config.label;
+      : (light === "nearby_green" && timeRemaining)
+        ? `Offerings open · ${timeRemaining}`
+        : (light === "orange" && timeRemaining)
+          ? `Previously met · ${timeRemaining}`
+          : config.label;
 
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className={cn("relative flex items-center justify-center shrink-0", RING_SIZE_MAP[size])}>
         {/* Outer glow ring for green states */}
-        {(light === "green" || light === "flashing_green") && (
+        {(light === "green" || light === "flashing_green" || light === "nearby_green") && (
           <div
             className={cn(
               "absolute inset-0 rounded-full opacity-30",
               config.color,
-              config.animate ? "animate-ping" : "animate-pulse"
+              light === "flashing_green" ? "animate-ping" : light === "green" ? "animate-pulse" : ""
             )}
           />
         )}
@@ -117,7 +119,7 @@ export default function TreeCheckinStatusLight({
           )}>
             {labelText}
           </span>
-          {config.hint && (light === "red" || light === "orange") && (
+          {config.hint && (light === "red" || light === "orange" || light === "nearby_green") && (
             <span className="text-[10px] font-serif text-muted-foreground/60 leading-tight">
               {config.hint}
             </span>
