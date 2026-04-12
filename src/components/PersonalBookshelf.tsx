@@ -784,6 +784,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           </AnimatePresence>
         </div>
       )}
+      </>)}
 
       {/* Add Book Dialog */}
       <AddToShelfDialog open={addOpen} onOpenChange={setAddOpen} userId={userId} />
