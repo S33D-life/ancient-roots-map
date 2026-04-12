@@ -338,14 +338,14 @@ Deno.serve(async () => {
 
           await sendMessage(
             chatId,
-            "✅ <b>Code verified!</b>\n\nReturn to S33D to complete the linking process.",
+            "✅ <b>Code verified!</b>\n\nReturn to S33D — I'll be waiting on the other side.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
           );
         } else {
           await sendMessage(
             chatId,
-            "🌱 That code wasn't recognised. Please check it and try again, or generate a new one from S33D.",
+            "🌱 I didn't recognise that code. Check it and try again, or generate a new one from S33D.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
           );
@@ -379,12 +379,14 @@ Deno.serve(async () => {
         case "help": {
           await sendMessage(
             chatId,
-            "🌳 <b>Welcome to S33D</b>\n\n" +
-            "I can help you enter the living forest.\n\n" +
-            "🔑 /login — Sign in to your S33D account\n" +
-            "🔗 /connect — Link your existing S33D account\n" +
-            "🌳 /new — Create a new S33D identity\n\n" +
-            "If you have a verification code from S33D, just send me the 6-digit number.",
+            "🌳 <b>I'm TEOTAG — your guide into S33D.</b>\n\n" +
+            "S33D is a living map of the world's ancient trees, tended by people who walk among them.\n\n" +
+            "<b>Enter S33D</b>\n" +
+            "🔑 /login — Open the gate\n" +
+            "🌱 /new — Begin a new path\n\n" +
+            "<b>Link your account</b>\n" +
+            "🔗 /connect — Weave your Telegram into S33D\n\n" +
+            "If you have a verification code, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
           );
