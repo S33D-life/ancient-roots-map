@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, ScrollText, Users, Podcast, BarChart3, TreePine, MapPin, Video } from "lucide-react";
+import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -68,7 +68,7 @@ const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
   const navigate = useNavigate();
   const { focusMap } = useMapFocus();
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [_isFullscreen, _setIsFullscreen] = useState(false); // reserved for future
   const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [podModalOpen, setPodModalOpen] = useState(false);
