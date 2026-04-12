@@ -40,10 +40,23 @@ const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCounc
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
         <CardHeader className="p-5 md:p-6 space-y-4">
           <div className="flex items-start justify-between">
-            <div>
-              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary mb-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
                 Next Gathering
               </Badge>
+              {isDraft && (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 border-amber-500/20">
+                  Curator Draft
+                </Badge>
+              )}
+              {onEditCouncil && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onEditCouncil(); }}
+                  className="text-[10px] font-serif text-muted-foreground/40 hover:text-primary/60 transition-colors underline underline-offset-2"
+                >
+                  Edit
+                </button>
+              )}
               <CardTitle className="text-xl md:text-2xl font-serif tracking-wide">
                 Next Council of Life
               </CardTitle>
