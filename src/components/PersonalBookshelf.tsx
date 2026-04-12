@@ -487,6 +487,11 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                   );
                 })}
               </div>
+              {filterBySpecies(forestBooks, speciesFilter).length === 0 && speciesFilter !== "all" && (
+                <p className="text-center py-8 text-xs font-serif text-muted-foreground/40">
+                  No offerings for this species yet
+                </p>
+              )}
             </div>
           )}
         </div>
