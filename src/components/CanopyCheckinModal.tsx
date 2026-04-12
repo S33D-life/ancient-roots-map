@@ -72,7 +72,6 @@ export default function CanopyCheckinModal({
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
   const [accuracyM, setAccuracyM] = useState<number | null>(null);
-  const [softMode, setSoftMode] = useState(false);
   const [hasOffering, setHasOffering] = useState(false);
 
   // Form
@@ -107,7 +106,6 @@ export default function CanopyCheckinModal({
       setHealthNotes("");
       setSubmitted(false);
       setRewardResult(null);
-      setSoftMode(false);
       setHasOffering(false);
       setAccuracyM(null);
       setShowShareOverlay(false);
@@ -138,7 +136,7 @@ export default function CanopyCheckinModal({
     );
   }, [treeLat, treeLng]);
 
-  const canCheckIn = geoStatus === "under_canopy" || softMode;
+  const canCheckIn = geoStatus === "under_canopy";
 
   const handleSubmit = async () => {
     if (!userId) { toast.error("Please sign in to check in."); return; }
@@ -155,7 +153,7 @@ export default function CanopyCheckinModal({
         birdsong_heard: birdsongHeard,
         fungi_present: fungiPresent,
         health_notes: healthNotes.trim() || null,
-        soft_mode: softMode,
+        soft_mode: false,
         has_offering: hasOffering,
         latitude: userLat,
         longitude: userLng,
@@ -466,33 +464,19 @@ export default function CanopyCheckinModal({
                 <MapPin className="w-4 h-4" />
                 You are not currently beneath this canopy.
               </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="soft-mode"
-                  checked={softMode}
-                  onCheckedChange={(v) => setSoftMode(v === true)}
-                />
-                <Label htmlFor="soft-mode" className="text-xs font-serif text-muted-foreground cursor-pointer">
-                  Record a seasonal reflection instead (soft check-in)
-                </Label>
-              </div>
+              <p className="text-[11px] font-serif text-muted-foreground/60">
+                Move closer to this tree to check in.
+              </p>
             </div>
           )}
           {geoStatus === "unavailable" && (
             <div className="space-y-2">
               <p className="text-sm font-serif text-muted-foreground">
-                Location unavailable. You can still record a seasonal reflection.
+                Location needed to check in.
               </p>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="soft-mode-2"
-                  checked={softMode}
-                  onCheckedChange={(v) => setSoftMode(v === true)}
-                />
-                <Label htmlFor="soft-mode-2" className="text-xs font-serif text-muted-foreground cursor-pointer">
-                  Enable soft check-in mode
-                </Label>
-              </div>
+              <p className="text-[11px] font-serif text-muted-foreground/60">
+                Enable location access and try again.
+              </p>
             </div>
           )}
         </div>
