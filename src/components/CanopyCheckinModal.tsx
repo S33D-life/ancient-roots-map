@@ -472,10 +472,10 @@ export default function CanopyCheckinModal({
           {geoStatus === "unavailable" && (
             <div className="space-y-2">
               <p className="text-sm font-serif text-muted-foreground">
-                Location needed to check in.
+                Location access is needed to check in.
               </p>
               <p className="text-[11px] font-serif text-muted-foreground/60">
-                Enable location access and try again.
+                Enable location permissions and try again.
               </p>
             </div>
           )}

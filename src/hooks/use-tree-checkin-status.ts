@@ -79,7 +79,7 @@ export function useTreeCheckinStatus({
 
   if (!hasVisited && !isMappedByUser) {
     light = "red";
-  } else if (gateStatus === "unlocked_present" || gateStatus === "unlocked_grace" || gateStatus === "no_location") {
+  } else if (gateStatus === "unlocked_present" || gateStatus === "unlocked_nearby" || gateStatus === "unlocked_grace" || gateStatus === "no_location") {
     // Active offering window
     if (graceMs > 0 && graceMs < 60 * 60 * 1000) {
       light = "flashing_green";

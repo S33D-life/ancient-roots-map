@@ -6,17 +6,20 @@
  * 2. If user visited this tree within 12 hours → unlocked (grace period).
  * 3. Otherwise → locked.
  *
- * Uses the same proximity radius as tree check-ins (500m).
+ * Uses two proximity thresholds:
+ *   - CHECKIN_RADIUS (100m): gates check-in actions, matches server threshold
+ *   - OFFERING_RADIUS (500m): gates offerings/whispers, wider grace zone
  * Visit timestamps stored per-user-per-tree in localStorage.
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 
 const GRACE_HOURS = 12;
 const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
-const PROXIMITY_M = 500;
+const CHECKIN_RADIUS_M = 100;
+const OFFERING_RADIUS_M = 500;
 const STORE_KEY = "s33d-tree-visits";
 
-export type GateStatus = "checking" | "unlocked_present" | "unlocked_grace" | "locked" | "no_location";
+export type GateStatus = "checking" | "unlocked_present" | "unlocked_nearby" | "unlocked_grace" | "locked" | "no_location";
 
 interface VisitRecord {
   [treeId: string]: number; // timestamp ms
@@ -109,10 +112,14 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
       );
 
       const dist = haversine(pos.coords.latitude, pos.coords.longitude, treeLat, treeLng);
-      if (dist < PROXIMITY_M) {
+      if (dist <= CHECKIN_RADIUS_M) {
         saveVisit(treeId);
         setGraceMs(GRACE_MS);
         setStatus("unlocked_present");
+        return;
+      }
+      if (dist <= OFFERING_RADIUS_M) {
+        setStatus("unlocked_nearby");
         return;
       }
     } catch {
@@ -152,7 +159,10 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
     return `${mins}m remaining`;
   }, [graceMs]);
 
-  const isUnlocked = status === "unlocked_present" || status === "unlocked_grace" || status === "no_location";
+  /** Whether offerings/whispers are accessible (near, grace, or nearby) */
+  const isUnlocked = status === "unlocked_present" || status === "unlocked_nearby" || status === "unlocked_grace" || status === "no_location";
+  /** Whether check-in is possible (must be within server check-in radius) */
+  const canCheckin = status === "unlocked_present";
 
   /** Call when a check-in or visit happens elsewhere to immediately unlock */
   const recordVisitNow = useCallback(() => {
@@ -165,6 +175,7 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
   return {
     status,
     isUnlocked,
+    canCheckin,
     graceLabel,
     graceMs,
     recordVisitNow,

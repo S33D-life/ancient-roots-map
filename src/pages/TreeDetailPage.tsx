@@ -668,7 +668,7 @@ const TreeDetailPage = () => {
             {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
 
             {/* Proximity Gate — shown only when locked */}
-            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && proximityGate.status !== "unlocked_grace" && (
+            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && proximityGate.status !== "unlocked_grace" && proximityGate.status !== "unlocked_nearby" && (
               <Suspense fallback={null}>
                 <ProximityGateMessage
                   status={proximityGate.status}
@@ -909,7 +909,7 @@ const TreeDetailPage = () => {
                   treeName={tree.name}
                   treeSpecies={tree.species || ""}
                   userId={userId}
-                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_grace"}
+                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
                   onCheckIn={() => setCanopyCheckinOpen(true)}
                   onWhisperCollected={() => {

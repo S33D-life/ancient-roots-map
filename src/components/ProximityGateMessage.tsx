@@ -13,7 +13,7 @@ interface Props {
 }
 
 const ProximityGateMessage = ({ status, graceLabel, treeName, className = "" }: Props) => {
-  if (status === "unlocked_present") return null;
+  if (status === "unlocked_present" || status === "unlocked_nearby") return null;
 
   if (status === "unlocked_grace" && graceLabel) {
     return (

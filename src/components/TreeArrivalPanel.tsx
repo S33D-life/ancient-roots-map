@@ -153,14 +153,19 @@ export default function TreeArrivalPanel({
 
   const handleCollectGrowth = async () => {
     hapticTap();
-    const result = await rooting.collect();
-    if (result && result.growth > 0) {
-      hapticSuccess();
-      toast.success(`${result.growth} heart${result.growth !== 1 ? "s" : ""} have grown here`, { icon: "🌿" });
-    } else if (result && result.growth === 0) {
-      toast("Still growing — return later", { icon: "🌱" });
-    } else {
-      toast.error("Could not collect growth");
+    try {
+      const result = await rooting.collect();
+      if (result && result.growth > 0) {
+        hapticSuccess();
+        toast.success(`${result.growth} heart${result.growth !== 1 ? "s" : ""} have grown here`, { icon: "🌿" });
+      } else if (result && result.growth === 0) {
+        toast("Still growing — return later", { icon: "🌱" });
+      } else {
+        toast.error("Could not collect growth — please try again");
+      }
+    } catch (err: any) {
+      console.error("[CollectGrowth] Error:", err);
+      toast.error("Could not collect growth — please try again");
     }
   };
 
