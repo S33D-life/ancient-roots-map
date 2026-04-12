@@ -17,6 +17,8 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
+import CuratorEditor from "@/components/council/CuratorEditor";
+import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides";
 
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
@@ -72,6 +74,8 @@ const CouncilOfLifePage = () => {
   const [podModalOpen, setPodModalOpen] = useState(false);
   const [linkedTrees, setLinkedTrees] = useState<Array<{ id: string; name: string; species: string }>>([]);
   const [linkedRegions, setLinkedRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [curatorOpen, setCuratorOpen] = useState(false);
+  const [curatorRefreshKey, setCuratorRefreshKey] = useState(0);
 
   useEffect(() => {
     supabase
@@ -174,7 +178,11 @@ const CouncilOfLifePage = () => {
           </p>
 
           {/* ── Next Council — primary entry ── */}
-          <NextCouncilCard onJoinCouncil={() => setActiveRoom("chamber")} />
+          <NextCouncilCard
+            onJoinCouncil={() => setActiveRoom("chamber")}
+            refreshKey={curatorRefreshKey}
+            onEditCouncil={() => setCuratorOpen(true)}
+          />
 
           {/* ── Room Grid ── */}
           <div className="grid grid-cols-2 gap-4 md:gap-6 mt-8">
@@ -288,6 +296,12 @@ const CouncilOfLifePage = () => {
       </main>
       <Footer />
       <HostAPodModal open={podModalOpen} onOpenChange={setPodModalOpen} />
+      <CuratorEditor
+        open={curatorOpen}
+        onOpenChange={setCuratorOpen}
+        council={getCurrentCouncilWithOverrides()}
+        onSaved={() => setCuratorRefreshKey((k) => k + 1)}
+      />
     </div>
   );
 };
