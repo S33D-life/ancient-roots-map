@@ -259,7 +259,8 @@ const EarthRadioRoom = () => {
   useEffect(() => {
     if (!activeStation) return;
     let filtered: SongOffering[];
-    if (activeStation.type === "all") filtered = allSongs;
+    if (activeStation.id === "my-songs") filtered = allSongs.filter(s => s.created_by === currentUserId);
+    else if (activeStation.type === "all") filtered = allSongs;
     else if (activeStation.type === "species") filtered = allSongs.filter(s => s.species === activeStation.id);
     else filtered = allSongs.filter(s => s.tree_id === activeStation.id);
 
@@ -267,7 +268,7 @@ const EarthRadioRoom = () => {
     const rest = filtered.slice(Math.ceil(filtered.length * 0.4));
     setPlaylist([...shuffle(recent), ...shuffle(rest)]);
     setCurrentIndex(0);
-  }, [activeStation, allSongs]);
+  }, [activeStation, allSongs, currentUserId]);
 
   /* ── iTunes preview ── */
   useEffect(() => {
