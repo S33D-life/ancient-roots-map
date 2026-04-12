@@ -394,7 +394,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
       {/* ═══ View Toggle: My Shelf / Forest Books ═══ */}
       <div className="flex items-center gap-1 p-0.5 rounded-lg border border-border/20 bg-card/30 w-fit">
         <button
-          onClick={() => setView("my-shelf")}
+          onClick={() => { setView("my-shelf"); setSpeciesFilter("all"); }}
           className={`px-3 py-1.5 rounded-md text-xs font-serif transition-all ${
             view === "my-shelf"
               ? "bg-primary/15 text-primary border border-primary/30"
@@ -405,7 +405,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           My Shelf
         </button>
         <button
-          onClick={() => setView("forest")}
+          onClick={() => { setView("forest"); setSpeciesFilter("all"); }}
           className={`px-3 py-1.5 rounded-md text-xs font-serif transition-all ${
             view === "forest"
               ? "bg-primary/15 text-primary border border-primary/30"
