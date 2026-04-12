@@ -60,7 +60,7 @@ export interface ResolvedHandoff {
 const VALID_INTENTS = new Set([
   "map", "add-tree", "tree", "referrals", "gift", "invite",
   "roadmap", "dashboard", "atlas", "library",
-  "journey", "support",
+  "journey", "support", "council",
 ]);
 
 function sanitizeIntent(raw: string | null): string | null {
