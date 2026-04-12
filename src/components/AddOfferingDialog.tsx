@@ -427,13 +427,28 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       if (taggedUsers.length > 0 && insertedOffering) {
         await supabase.from("offering_tags").insert(taggedUsers.map((t) => ({ offering_id: insertedOffering.id, tagged_user_id: t.id, tagged_by: user.id })));
       }
+      // Also save to bookshelf_entries so the book appears in the library
+      await supabase.from("bookshelf_entries").insert({
+        user_id: user.id,
+        title: data.title,
+        author: data.author,
+        cover_url: data.coverUrl || null,
+        quote: data.quote || null,
+        reflection: data.reflection || null,
+        visibility: visibility === "private" ? "private" : "public",
+        linked_tree_ids: [treeId],
+        offering_id: insertedOffering?.id || null,
+        source: data.isCustom ? "manual" : "google_books",
+      }).then(({ error: shelfErr }) => {
+        if (shelfErr) console.warn("Bookshelf entry skipped:", shelfErr.message);
+      });
       window.dispatchEvent(new CustomEvent("offering-created"));
       let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
-      setCelebrationMsg({ emoji: "📖", message: "Book offering sealed!", subtitle: `"${data.title}" by ${data.author}` });
+      setCelebrationMsg({ emoji: "📖", message: "Your book has been placed", subtitle: `"${data.title}" is now in the Library` });
       setShowCelebration(true);
       resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
