@@ -22,6 +22,7 @@ import BookCsvImportDialog from "@/components/BookCsvImportDialog";
 import LibraryInventoryPortal from "@/components/LibraryInventoryPortal";
 import { toast } from "sonner";
 import { getAllBookOfferings, parseBookOfferingContent, type LibraryBookOffering } from "@/repositories/offering-library";
+import SpeciesOfferingFilter, { filterBySpecies } from "@/components/SpeciesOfferingFilter";
 
 interface PersonalBookshelfProps {
   userId: string;
@@ -133,6 +134,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
   const [sort, setSort] = useState<SortOption>("recent");
   const [searchQuery, setSearchQuery] = useState("");
+  const [speciesFilter, setSpeciesFilter] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
