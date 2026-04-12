@@ -6,8 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video, Sparkles, Leaf } from "lucide-react";
 import {
-  getCurrentCouncil,
-  getNextCouncil,
+  getCurrentCouncilWithOverrides,
+  getNextCouncilWithOverrides,
+  hasCuratorOverride,
+} from "@/data/council/curatorOverrides";
+import {
   formatGatheringDate,
   formatMarkerDate,
   moonEmoji,
@@ -16,14 +19,19 @@ import {
 
 interface NextCouncilCardProps {
   onJoinCouncil: () => void;
+  /** Increment to force re-read after curator save */
+  refreshKey?: number;
+  onEditCouncil?: () => void;
 }
 
-const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
+const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCouncilCardProps) => {
   const [agendaOpen, setAgendaOpen] = useState(false);
   const navigate = useNavigate();
 
-  const current = getCurrentCouncil();
-  const next = getNextCouncil();
+  // Re-read when refreshKey changes (after curator save)
+  const current = getCurrentCouncilWithOverrides();
+  const next = getNextCouncilWithOverrides();
+  const isDraft = hasCuratorOverride(current.id);
 
   return (
     <div className="space-y-4">
