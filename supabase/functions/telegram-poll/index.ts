@@ -148,6 +148,7 @@ async function createAndSendHandoff(
 
     const result = handoffResp.data;
     if (!result?.ok) {
+      console.error("Handoff failed:", JSON.stringify({ flow, intent, error: result?.error, detail: result?.detail }));
       if (result?.error === "not_linked") {
         await sendMessage(
           chatId,
@@ -162,7 +163,11 @@ async function createAndSendHandoff(
           lovableKey, telegramKey,
         );
       } else {
-        await sendMessage(chatId, "🌿 Something went awry. Try again in a moment — I'll be here.", lovableKey, telegramKey);
+        await sendMessage(
+          chatId,
+          "🌿 I couldn't open the path just now. Try again in a moment, or use /login if you're already connected.",
+          lovableKey, telegramKey,
+        );
       }
       return false;
     }
