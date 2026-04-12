@@ -92,6 +92,7 @@ export function intentToPath(intent: string | null, returnTo?: string | null): s
     case "dashboard": return "/dashboard";
     case "atlas":     return "/atlas";
     case "library":   return "/library";
+    case "council":   return "/council";
     case "journey":   return "/map";
     case "support":   return "/support";
     default:          return "/atlas";
