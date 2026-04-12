@@ -40,7 +40,7 @@ function getRecordBadge(session: CouncilSession, currentId: string): string | un
   if (session.id === currentId) {
     return hasParticipatedInCouncil(session.id) ? "Rewarded" : "Live";
   }
-  if (new Date(session.gatheringDate) < today) return "Retroactive soon";
+  if (new Date(session.gatheringDate) < today) return "🌿 Early Circle";
   return "Upcoming";
 }
 
@@ -134,11 +134,20 @@ export default function CouncilRecordsPage() {
 
           <h1 className="text-3xl md:text-4xl font-serif tracking-wider mb-2">Council Records</h1>
           <p className="text-muted-foreground font-serif italic text-sm mb-1">
-            Walk the memory of past circles
+            Each gathering leaves a trace —
           </p>
           <p className="text-muted-foreground/50 text-xs font-serif mb-6 max-w-md">
-            Each moon-marked gathering becomes part of the living archive — a growing record of shared stewardship.
+            a memory held in the living archive.
           </p>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/council-of-life")}
+            className="text-muted-foreground/60 hover:text-foreground text-xs mb-6"
+          >
+            🌑 Return to Current Council
+          </Button>
 
           {/* Participation summary */}
           {summary.totalGathered > 0 && (

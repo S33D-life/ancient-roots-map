@@ -54,8 +54,8 @@ export default function CouncilSessionPage() {
   const handleMarkParticipation = () => {
     markCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
     setParticipated(true);
-    toast.success(`+${COUNCIL_HEARTS_REWARD} S33D Hearts gathered 🌱`, {
-      description: "Your participation has been recorded.",
+    toast.success("Presence received 🌱", {
+      description: `+${COUNCIL_HEARTS_REWARD} S33D Hearts will flow to you`,
     });
   };
 
@@ -64,14 +64,24 @@ export default function CouncilSessionPage() {
       <Header />
       <main className="pt-28 pb-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/council/records")}
-            className="text-muted-foreground hover:text-foreground mb-6"
-          >
-            <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Council Records
-          </Button>
+          <div className="flex items-center gap-3 mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/council/records")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Council Records
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/council-of-life")}
+              className="text-muted-foreground/60 hover:text-foreground text-xs"
+            >
+              🌑 Current Council
+            </Button>
+          </div>
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-1">
@@ -93,26 +103,27 @@ export default function CouncilSessionPage() {
                   <Heart className="h-3 w-3 text-primary" /> Council Participation
                 </h2>
                 {participated ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <div className="flex items-start gap-2.5">
+                    <Sparkles className="h-4 w-4 text-primary mt-0.5" />
                     <div>
-                      <p className="text-sm font-serif text-foreground/80">Participation Recorded</p>
-                      <p className="text-xs text-muted-foreground/60">
-                        +{participation?.heartsAmount ?? COUNCIL_HEARTS_REWARD} S33D Hearts gathered
+                      <p className="text-sm font-serif text-foreground/80">Presence received 🌱</p>
+                      <p className="text-xs text-muted-foreground/60 leading-relaxed mt-0.5">
+                        You are part of this gathering<br />
+                        +{participation?.heartsAmount ?? COUNCIL_HEARTS_REWARD} S33D Hearts will flow to you
                       </p>
                     </div>
                   </div>
                 ) : (
                   <>
                     <p className="text-sm font-serif text-muted-foreground mb-3">
-                      Take part in this gathering and receive S33D Hearts.
+                      Step into this circle and receive S33D Hearts.
                     </p>
                     <Button
                       size="sm"
                       className="text-xs font-serif gap-1.5"
                       onClick={handleMarkParticipation}
                     >
-                      <Heart className="h-3 w-3" /> Mark My Participation
+                      <Heart className="h-3 w-3" /> I'm here for this council
                       <span className="text-primary-foreground/70 ml-1">+{COUNCIL_HEARTS_REWARD} ❤️</span>
                     </Button>
                   </>
