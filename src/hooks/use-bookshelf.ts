@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 
 export interface BookshelfEntry {
   id: string;
