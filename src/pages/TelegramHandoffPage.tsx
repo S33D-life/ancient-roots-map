@@ -33,6 +33,14 @@ type PageState =
   | "success"
   | "error";
 
+/** Compute the best post-auth destination from deep-link params */
+function computeDestination(treeId: string | null, room: string | null): string {
+  if (treeId) return `/map?tree=${treeId}`;
+  if (room === "music" || room === "library") return ROUTES.LIBRARY;
+  if (room === "council") return "/council";
+  return ROUTES.HEARTH;
+}
+
 export default function TelegramHandoffPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
