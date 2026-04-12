@@ -429,7 +429,7 @@ Deno.serve(async () => {
         default: {
           await sendMessage(
             chatId,
-            "🌱 I didn't recognise that command.\n\nTry /help to see what I can do.",
+            "🌿 I didn't recognise that. Try /help and I'll show you the way.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
           );

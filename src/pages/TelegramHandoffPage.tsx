@@ -272,7 +272,7 @@ export default function TelegramHandoffPage() {
 
       localStorage.setItem("s33d_bot_handoff", JSON.stringify({
         source: "telegram",
-        bot: "openclaw",
+        bot: "teotag",
         handoffToken: token,
         intent: resolvedIntent,
         invite: inviteParam || null,

@@ -44,11 +44,9 @@ export default function BotContinuationBanner() {
     ? INTENT_LABELS[handoff.intent] || "Continue your journey"
     : "Continue your journey";
 
-  const sourceLabel = handoff.bot === "openclaw"
-    ? "OpenClaw"
-    : handoff.source === "telegram"
-      ? "Telegram"
-      : "your journey";
+  const sourceLabel = handoff.source === "telegram" || handoff.bot === "openclaw" || handoff.bot === "teotag"
+    ? "TEOTAG"
+    : "your journey";
 
   return (
     <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-500">
