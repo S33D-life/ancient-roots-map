@@ -397,7 +397,8 @@ Deno.serve(async () => {
             "🔗 /connect — Weave your Telegram into S33D\n\n" +
             "<b>From the forest</b>\n" +
             "🎶 /radio — Hear what the forest is listening to\n" +
-            "🌿 /continue — Pick up where you left off\n\n" +
+            "🌿 /continue — Pick up where you left off\n" +
+            "🌙 /council — Enter the Council of Life\n\n" +
             "If you have a verification code, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
