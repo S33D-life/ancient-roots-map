@@ -141,7 +141,7 @@ describe("Bot Handoff Helpers", () => {
 describe("BOT_CONFIG", () => {
   it("has a fallback bot username and generates valid links", async () => {
     const { BOT_CONFIG } = await import("@/config/bot");
-    // Fallback username "s33dlifebot" is always present
+    // Fallback username "teotag_bot" is always present
     expect(BOT_CONFIG.hasTelegramBot).toBe(true);
     expect(BOT_CONFIG.hasTelegramAuth).toBe(true);
     const link = BOT_CONFIG.telegramBotLink("test");
