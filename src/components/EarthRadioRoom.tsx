@@ -678,6 +678,16 @@ const EarthRadioRoom = () => {
                     isPlaying={isPlaying && activeStation?.id === "all"}
                   />
 
+                  {mySongsStation && (
+                    <StationButton
+                      station={mySongsStation}
+                      isActive={activeStation?.id === "my-songs"}
+                      onClick={() => { setActiveStation(mySongsStation); setTunerOpen(false); }}
+                      icon={<Music className="h-3.5 w-3.5" />}
+                      isPlaying={isPlaying && activeStation?.id === "my-songs"}
+                    />
+                  )}
+
                   {speciesStations.length > 0 && (
                     <div>
                       <p className="text-[10px] font-serif uppercase tracking-[0.2em] mb-2 px-1" style={{ color: 'hsl(40 25% 50% / 0.5)' }}>
