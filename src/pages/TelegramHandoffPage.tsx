@@ -458,10 +458,33 @@ export default function TelegramHandoffPage() {
     );
   }
 
+  const inApp = isInAppBrowser();
+  const browserName = externalBrowserName();
+
   // ── Main resolved state ──
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <div className="max-w-sm w-full space-y-8">
+        {/* In-app browser hint */}
+        {inApp && (
+          <div className="flex items-start gap-2.5 p-3 rounded-lg border border-primary/20 bg-primary/5 text-xs text-muted-foreground font-serif leading-relaxed">
+            <Globe className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+            <span>
+              Using Google or passkey sign-in? For the smoothest experience,{" "}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied — paste it in " + browserName);
+                }}
+                className="underline text-primary font-medium"
+              >
+                copy this link
+              </button>
+              {" "}and open it in {browserName}.
+            </span>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="text-4xl">🌳</div>
@@ -553,6 +576,24 @@ export default function TelegramHandoffPage() {
                 </span>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Copy link fallback — always available */}
+        {inApp && (
+          <div className="text-center pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Link copied — open it in " + browserName);
+              }}
+              className="gap-1.5 text-xs text-muted-foreground font-serif"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Copy link to open in {browserName}
+            </Button>
           </div>
         )}
       </div>
