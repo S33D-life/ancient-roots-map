@@ -72,7 +72,6 @@ export default function CanopyCheckinModal({
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
   const [accuracyM, setAccuracyM] = useState<number | null>(null);
-  const [softMode, setSoftMode] = useState(false);
   const [hasOffering, setHasOffering] = useState(false);
 
   // Form
@@ -107,7 +106,6 @@ export default function CanopyCheckinModal({
       setHealthNotes("");
       setSubmitted(false);
       setRewardResult(null);
-      setSoftMode(false);
       setHasOffering(false);
       setAccuracyM(null);
       setShowShareOverlay(false);
@@ -138,7 +136,7 @@ export default function CanopyCheckinModal({
     );
   }, [treeLat, treeLng]);
 
-  const canCheckIn = geoStatus === "under_canopy" || softMode;
+  const canCheckIn = geoStatus === "under_canopy";
 
   const handleSubmit = async () => {
     if (!userId) { toast.error("Please sign in to check in."); return; }
@@ -155,7 +153,7 @@ export default function CanopyCheckinModal({
         birdsong_heard: birdsongHeard,
         fungi_present: fungiPresent,
         health_notes: healthNotes.trim() || null,
-        soft_mode: softMode,
+        soft_mode: false,
         has_offering: hasOffering,
         latitude: userLat,
         longitude: userLng,
