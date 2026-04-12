@@ -89,7 +89,7 @@ export default function TreeDetailPresenceBlock({
             </div>
           </div>
         </div>
-      ) : isNearby ? (
+      ) : canCheckin ? (
         <button
           onClick={onCheckin}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/25 bg-primary/5 hover:bg-primary/10 transition-colors text-left group"
@@ -102,18 +102,32 @@ export default function TreeDetailPresenceBlock({
             <p className="text-sm font-serif text-foreground/90 group-hover:text-primary transition-colors">
               {hasCheckedIn ? "Check in again" : "Begin your meeting with this tree"}
             </p>
-            <p className="text-[11px] font-serif text-muted-foreground mt-0.5">You are nearby — mark your arrival</p>
+            <p className="text-[11px] font-serif text-muted-foreground mt-0.5">You are beneath this canopy — mark your arrival</p>
           </div>
           <TreeDeciduous className="w-4 h-4 text-primary/40 shrink-0" />
         </button>
+      ) : proximityGate.status === "unlocked_nearby" ? (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/15 bg-primary/5">
+          <span className="flex h-2.5 w-2.5 rounded-full shrink-0" style={{ background: "hsl(42, 55%, 55%)" }} />
+          <div className="flex-1 min-w-0">
+            <p className="text-[12px] font-serif text-foreground/70">
+              You are nearby — move closer to check in
+            </p>
+            <p className="text-[10px] font-serif text-muted-foreground/50 mt-0.5">
+              Check-in requires being within 100m of the tree
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border/30 bg-secondary/10">
           <span className="flex h-2.5 w-2.5 rounded-full shrink-0" style={{ background: "hsl(42, 50%, 50%)", opacity: 0.4 }} />
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-serif text-muted-foreground/80">
-              {hasCheckedIn
-                ? `Visited ${checkinStats!.totalVisits} time${checkinStats!.totalVisits !== 1 ? "s" : ""} — this tree remembers you`
-                : "This tree is waiting — find it to begin your meeting"}
+              {proximityGate.status === "no_location"
+                ? "Location access is needed to check in"
+                : hasCheckedIn
+                  ? `Visited ${checkinStats!.totalVisits} time${checkinStats!.totalVisits !== 1 ? "s" : ""} — this tree remembers you`
+                  : "This tree is waiting — find it to begin your meeting"}
             </p>
           </div>
         </div>
