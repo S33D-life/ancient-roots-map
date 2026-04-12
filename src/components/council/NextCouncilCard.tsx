@@ -25,8 +25,21 @@ interface NextCouncilCardProps {
 }
 
 const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCouncilCardProps) => {
-  const [agendaOpen, setAgendaOpen] = useState(false);
+  const [agendaOpen, setAgendaOpen] = useState(() => {
+    try {
+      return !localStorage.getItem("council_agenda_seen");
+    } catch {
+      return false;
+    }
+  });
   const navigate = useNavigate();
+
+  const handleAgendaChange = (open: boolean) => {
+    setAgendaOpen(open);
+    if (open) {
+      try { localStorage.setItem("council_agenda_seen", "true"); } catch {}
+    }
+  };
 
   // Re-read when refreshKey changes (after curator save)
   const current = getCurrentCouncilWithOverrides();
@@ -97,8 +110,15 @@ const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCounc
               <Video className="h-4 w-4" />
               Join Council
             </Button>
+            <Button
+              variant="secondary"
+              className="gap-2 font-serif tracking-wide text-sm"
+              onClick={() => navigate("/time-tree")}
+            >
+              🌳 Reflect in the Time Tree
+            </Button>
 
-            <Collapsible open={agendaOpen} onOpenChange={setAgendaOpen}>
+            <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
               <CollapsibleTrigger asChild>
                 <Button variant="outline" className="gap-2 font-serif tracking-wide w-full sm:w-auto">
                   {agendaOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -109,7 +129,7 @@ const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCounc
           </div>
 
           {/* Expandable agenda */}
-          <Collapsible open={agendaOpen} onOpenChange={setAgendaOpen}>
+          <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
             <CollapsibleContent className="pt-2">
               <div className="space-y-4 border-t border-border/30 pt-4">
                 {/* Opening Invocation */}
