@@ -127,7 +127,8 @@ Deno.serve(async (req: Request) => {
         }
 
         const result = handoff as { ok: boolean; token: string; expires_at: string };
-        const appUrl = Deno.env.get("APP_URL") || "https://s33d.life";
+        const appUrl = Deno.env.get("APP_URL") || "https://ancient-roots-map.lovable.app";
+        console.log("APP_URL resolved to:", appUrl);
 
         // Build handoff URL with intent-aware query params
         const urlParams = new URLSearchParams({ token: result.token, flow });
