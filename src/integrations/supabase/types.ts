@@ -3621,7 +3621,7 @@ export type Database = {
           heart_type: string
           id: string
           seed_id: string | null
-          tree_id: string
+          tree_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -3630,7 +3630,7 @@ export type Database = {
           heart_type: string
           id?: string
           seed_id?: string | null
-          tree_id: string
+          tree_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -3639,7 +3639,7 @@ export type Database = {
           heart_type?: string
           id?: string
           seed_id?: string | null
-          tree_id?: string
+          tree_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -6820,7 +6820,7 @@ export type Database = {
           created_at: string
           id: string
           species_family: string
-          tree_id: string
+          tree_id: string | null
           user_id: string
         }
         Insert: {
@@ -6829,7 +6829,7 @@ export type Database = {
           created_at?: string
           id?: string
           species_family: string
-          tree_id: string
+          tree_id?: string | null
           user_id: string
         }
         Update: {
@@ -6838,7 +6838,7 @@ export type Database = {
           created_at?: string
           id?: string
           species_family?: string
-          tree_id?: string
+          tree_id?: string | null
           user_id?: string
         }
         Relationships: [
