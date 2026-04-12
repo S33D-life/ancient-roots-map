@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Plus, Eye, EyeOff, Users, TreeDeciduous, Trash2, Share2,
   FolderOpen, ChevronDown, ChevronRight, Pencil, MessageSquareQuote,
   StickyNote, Sparkles, BookMarked, Package, Feather, Search,
-  ArrowUpDown, SortAsc, SortDesc
+  ArrowUpDown, SortAsc, SortDesc, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import BookMusingsPanel from "@/components/BookMusingsPanel";
 import BookCsvImportDialog from "@/components/BookCsvImportDialog";
 import LibraryInventoryPortal from "@/components/LibraryInventoryPortal";
 import { toast } from "sonner";
+import { getAllBookOfferings, parseBookOfferingContent, type LibraryBookOffering } from "@/repositories/offering-library";
 
 interface PersonalBookshelfProps {
   userId: string;
@@ -128,6 +129,7 @@ function sortEntries(entries: BookshelfEntry[], sort: SortOption): BookshelfEntr
 
 const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const navigate = useNavigate();
+  const [view, setView] = useState<"my-shelf" | "forest">("my-shelf");
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
   const [sort, setSort] = useState<SortOption>("recent");
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,6 +143,20 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const [editingShelfId, setEditingShelfId] = useState<string | null>(null);
   const [editingShelfName, setEditingShelfName] = useState("");
   const [assignShelfBookId, setAssignShelfBookId] = useState<string | null>(null);
+
+  // Forest Books state
+  const [forestBooks, setForestBooks] = useState<LibraryBookOffering[]>([]);
+  const [forestLoading, setForestLoading] = useState(false);
+
+  useEffect(() => {
+    if (view !== "forest") return;
+    let cancelled = false;
+    setForestLoading(true);
+    getAllBookOfferings().then(books => {
+      if (!cancelled) { setForestBooks(books); setForestLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [view]);
 
   const { entries, loading, stats, deleteEntry, updateEntry, refetch } = useBookshelf({ userId, filter });
   const { shelves, createShelf, updateShelf, deleteShelf } = useBookshelves(userId);
@@ -363,7 +379,101 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
         onCreateShelves={handleCreateMultipleShelves}
       />
 
-      {/* ═══ Stats Bar — breathable, clear hierarchy ═══ */}
+      {/* ═══ View Toggle: My Shelf / Forest Books ═══ */}
+      <div className="flex items-center gap-1 p-0.5 rounded-lg border border-border/20 bg-card/30 w-fit">
+        <button
+          onClick={() => setView("my-shelf")}
+          className={`px-3 py-1.5 rounded-md text-xs font-serif transition-all ${
+            view === "my-shelf"
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <BookMarked className="h-3 w-3 inline mr-1.5" />
+          My Shelf
+        </button>
+        <button
+          onClick={() => setView("forest")}
+          className={`px-3 py-1.5 rounded-md text-xs font-serif transition-all ${
+            view === "forest"
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Globe className="h-3 w-3 inline mr-1.5" />
+          Forest Books
+        </button>
+      </div>
+
+      {/* ═══ Forest Books View ═══ */}
+      {view === "forest" && (
+        <div className="space-y-4">
+          {forestLoading ? (
+            <div className="text-center py-16">
+              <BookOpen className="h-8 w-8 text-muted-foreground/30 mx-auto animate-pulse" />
+              <p className="text-xs text-muted-foreground/50 font-serif mt-3">Loading forest books…</p>
+            </div>
+          ) : forestBooks.length === 0 ? (
+            <div className="text-center py-16 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <BookOpen className="h-7 w-7 text-primary/40" />
+              </div>
+              <p className="text-sm font-serif text-muted-foreground/60">No books have been placed in the forest yet</p>
+              <p className="text-xs text-muted-foreground/40 font-serif">
+                Offer a book to a tree and it will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs font-serif text-muted-foreground/50">
+                {forestBooks.length} book{forestBooks.length !== 1 ? "s" : ""} offered across the forest
+              </p>
+              <div className="space-y-1.5">
+                {forestBooks.map(book => {
+                  const { author, quote } = parseBookOfferingContent(book.content);
+                  return (
+                    <button
+                      key={book.id}
+                      type="button"
+                      onClick={() => navigate(`/tree/${book.tree_id}`)}
+                      className="w-full flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-primary/5 transition-colors text-left group border border-border/10"
+                      style={{ background: "hsl(var(--card) / 0.3)" }}
+                    >
+                      {book.media_url ? (
+                        <img src={book.media_url} alt={book.title || ""} className="w-10 h-14 rounded object-cover shrink-0 border border-border/30" loading="lazy" />
+                      ) : (
+                        <div className="w-10 h-14 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                          <BookOpen className="h-4 w-4 text-primary/40" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-serif font-medium text-foreground/90 truncate group-hover:text-primary transition-colors">
+                          {book.title || "Untitled"}
+                        </p>
+                        <p className="text-xs text-muted-foreground/70 truncate">{author}</p>
+                        {quote && (
+                          <p className="text-[11px] text-muted-foreground/40 italic truncate mt-0.5">"{quote}"</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] text-muted-foreground/40 font-serif flex items-center gap-0.5">
+                            <TreeDeciduous className="h-2.5 w-2.5" /> {book.tree_name}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground/30">·</span>
+                          <span className="text-[10px] text-muted-foreground/30 font-serif">{book.species}</span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ My Shelf View ═══ */}
+      {view === "my-shelf" && (<>
+
       <div
         className="rounded-xl border border-border/20 p-4"
         style={{ background: "hsl(var(--card) / 0.3)" }}
@@ -674,6 +784,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           </AnimatePresence>
         </div>
       )}
+      </>)}
 
       {/* Add Book Dialog */}
       <AddToShelfDialog open={addOpen} onOpenChange={setAddOpen} userId={userId} />
