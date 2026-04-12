@@ -4,10 +4,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import { COUNCIL_CYCLES, type CouncilSession, getCurrentCouncil, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
+import { hasParticipatedInCouncil, getParticipationSummary } from "@/data/council/councilParticipation";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Leaf, FolderTree, Lightbulb } from "lucide-react";
+import { ArrowLeft, Leaf, FolderTree, Lightbulb, Heart } from "lucide-react";
 import { useState } from "react";
 
 type Filter = "all" | "new" | "full";
@@ -32,6 +33,23 @@ function groupCycles() {
   return { current, upcoming, past: past.reverse() };
 }
 
+function getRecordBadge(session: CouncilSession, currentId: string): string | undefined {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (session.id === currentId) {
+    return hasParticipatedInCouncil(session.id) ? "Rewarded" : "Live";
+  }
+  if (new Date(session.gatheringDate) < today) return "Retroactive soon";
+  return "Upcoming";
+}
+
+function badgeVariant(badge: string): "default" | "secondary" | "outline" {
+  if (badge === "Live") return "default";
+  if (badge === "Rewarded") return "default";
+  return "secondary";
+}
+
 function RecordCard({ session, badge }: { session: CouncilSession; badge?: string }) {
   const navigate = useNavigate();
   return (
@@ -46,9 +64,10 @@ function RecordCard({ session, badge }: { session: CouncilSession; badge?: strin
           </span>
           {badge && (
             <Badge
-              variant={badge === "Current" ? "default" : "secondary"}
-              className="text-[10px] px-1.5 py-0.5"
+              variant={badgeVariant(badge)}
+              className={`text-[10px] px-1.5 py-0.5 ${badge === "Rewarded" ? "bg-primary/20 text-primary border-primary/30" : ""}`}
             >
+              {badge === "Rewarded" && <Heart className="h-2.5 w-2.5 mr-0.5 inline" />}
               {badge}
             </Badge>
           )}
@@ -93,6 +112,7 @@ export default function CouncilRecordsPage() {
   const [filter, setFilter] = useState<Filter>("all");
 
   const { current, upcoming, past } = groupCycles();
+  const summary = getParticipationSummary();
 
   const matchesFilter = (s: CouncilSession) =>
     filter === "all" || s.moonPhase === filter;
@@ -116,9 +136,20 @@ export default function CouncilRecordsPage() {
           <p className="text-muted-foreground font-serif italic text-sm mb-1">
             Walk the memory of past circles
           </p>
-          <p className="text-muted-foreground/50 text-xs font-serif mb-8 max-w-md">
+          <p className="text-muted-foreground/50 text-xs font-serif mb-6 max-w-md">
             Each moon-marked gathering becomes part of the living archive — a growing record of shared stewardship.
           </p>
+
+          {/* Participation summary */}
+          {summary.totalGathered > 0 && (
+            <div className="flex items-center gap-4 mb-6 text-xs font-serif text-muted-foreground/70 border border-border/20 rounded-lg px-4 py-2.5 bg-card/30">
+              <span>Councils gathered: <strong className="text-foreground/80">{summary.totalGathered}</strong></span>
+              <span className="flex items-center gap-1">
+                <Heart className="h-3 w-3 text-primary/60" />
+                Hearts received: <strong className="text-foreground/80">{summary.totalHearts}</strong>
+              </span>
+            </div>
+          )}
 
           {/* Moon filter */}
           <div className="flex gap-2 mb-8">
@@ -143,7 +174,7 @@ export default function CouncilRecordsPage() {
               <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3">
                 Current
               </h2>
-              <RecordCard session={current} badge="Current" />
+              <RecordCard session={current} badge={getRecordBadge(current, current.id)} />
             </section>
           )}
 
@@ -155,7 +186,7 @@ export default function CouncilRecordsPage() {
               </h2>
               <div className="space-y-3">
                 {upcoming.filter(matchesFilter).map((s) => (
-                  <RecordCard key={s.id} session={s} badge="Next" />
+                  <RecordCard key={s.id} session={s} badge={getRecordBadge(s, current.id)} />
                 ))}
               </div>
             </section>
@@ -169,7 +200,7 @@ export default function CouncilRecordsPage() {
               </h2>
               <div className="space-y-3">
                 {past.filter(matchesFilter).map((s) => (
-                  <RecordCard key={s.id} session={s} />
+                  <RecordCard key={s.id} session={s} badge={getRecordBadge(s, current.id)} />
                 ))}
               </div>
             </section>

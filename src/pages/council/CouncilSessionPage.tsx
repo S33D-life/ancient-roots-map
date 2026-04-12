@@ -1,17 +1,34 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { COUNCIL_CYCLES, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
+import { COUNCIL_CYCLES, getCurrentCouncil, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
+import { hasParticipatedInCouncil, markCouncilParticipation, getCouncilParticipation, COUNCIL_HEARTS_REWARD } from "@/data/council/councilParticipation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb } from "lucide-react";
+import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock } from "lucide-react";
+import { toast } from "sonner";
+
+type SessionTiming = "current" | "future" | "past";
+
+function getSessionTiming(sessionId: string): SessionTiming {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const current = getCurrentCouncil();
+  if (sessionId === current.id) return "current";
+  const session = COUNCIL_CYCLES.find((c) => c.id === sessionId);
+  if (!session) return "past";
+  return new Date(session.gatheringDate) >= today ? "future" : "past";
+}
 
 export default function CouncilSessionPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const session = COUNCIL_CYCLES.find((c) => c.id === id);
+  const [participated, setParticipated] = useState(() =>
+    id ? hasParticipatedInCouncil(id) : false,
+  );
 
   useDocumentTitle(session ? session.title : "Council Session");
 
@@ -29,6 +46,17 @@ export default function CouncilSessionPage() {
       </div>
     );
   }
+
+  const timing = getSessionTiming(session.id);
+  const participation = getCouncilParticipation(session.id);
+
+  const handleMarkParticipation = () => {
+    markCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
+    setParticipated(true);
+    toast.success(`+${COUNCIL_HEARTS_REWARD} S33D Hearts gathered 🌱`, {
+      description: "Your participation has been recorded.",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -55,6 +83,71 @@ export default function CouncilSessionPage() {
           <p className="text-xs text-muted-foreground/50 mb-6">
             {moonLabel(session.moonPhase)} · {formatMarkerDate(session.markerDate)} · Curated by {session.curator}
           </p>
+
+          {/* ── Participation Reward Section ── */}
+          {timing === "current" && (
+            <Card className={`mb-4 backdrop-blur-sm ${participated ? "bg-primary/5 border-primary/30" : "bg-card/60 border-primary/20"}`}>
+              <CardContent className="p-5">
+                <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2 flex items-center gap-1.5">
+                  <Heart className="h-3 w-3 text-primary" /> Council Participation
+                </h2>
+                {participated ? (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="text-sm font-serif text-foreground/80">Participation Recorded</p>
+                      <p className="text-xs text-muted-foreground/60">
+                        +{participation?.heartsAmount ?? COUNCIL_HEARTS_REWARD} S33D Hearts gathered
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-serif text-muted-foreground mb-3">
+                      Take part in this gathering and receive S33D Hearts.
+                    </p>
+                    <Button
+                      size="sm"
+                      className="text-xs font-serif gap-1.5"
+                      onClick={handleMarkParticipation}
+                    >
+                      <Heart className="h-3 w-3" /> Mark My Participation
+                      <span className="text-primary-foreground/70 ml-1">+{COUNCIL_HEARTS_REWARD} ❤️</span>
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {timing === "future" && (
+            <Card className="bg-card/40 backdrop-blur-sm border-border/20 mb-4">
+              <CardContent className="p-5">
+                <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2 flex items-center gap-1.5">
+                  <Clock className="h-3 w-3 text-muted-foreground/50" /> Council Participation
+                </h2>
+                <p className="text-xs font-serif text-muted-foreground/60">
+                  Rewards open when this gathering becomes active.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {timing === "past" && (
+            <Card className="bg-card/40 backdrop-blur-sm border-border/20 mb-4">
+              <CardContent className="p-5">
+                <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2 flex items-center gap-1.5">
+                  <Heart className="h-3 w-3 text-muted-foreground/40" /> Retroactive Claims
+                </h2>
+                <p className="text-xs font-serif text-muted-foreground/60 mb-1">
+                  Past council claims will open when the council ledgers are woven into the archive.
+                </p>
+                <span className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">
+                  Coming Soon
+                </span>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Invocation */}
           <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-4">
