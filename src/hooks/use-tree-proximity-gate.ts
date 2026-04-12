@@ -112,10 +112,14 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
       );
 
       const dist = haversine(pos.coords.latitude, pos.coords.longitude, treeLat, treeLng);
-      if (dist < PROXIMITY_M) {
+      if (dist <= CHECKIN_RADIUS_M) {
         saveVisit(treeId);
         setGraceMs(GRACE_MS);
         setStatus("unlocked_present");
+        return;
+      }
+      if (dist <= OFFERING_RADIUS_M) {
+        setStatus("unlocked_nearby");
         return;
       }
     } catch {
