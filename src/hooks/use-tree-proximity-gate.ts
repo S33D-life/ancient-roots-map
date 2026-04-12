@@ -6,17 +6,20 @@
  * 2. If user visited this tree within 12 hours → unlocked (grace period).
  * 3. Otherwise → locked.
  *
- * Uses the same proximity radius as tree check-ins (500m).
+ * Uses two proximity thresholds:
+ *   - CHECKIN_RADIUS (100m): gates check-in actions, matches server threshold
+ *   - OFFERING_RADIUS (500m): gates offerings/whispers, wider grace zone
  * Visit timestamps stored per-user-per-tree in localStorage.
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 
 const GRACE_HOURS = 12;
 const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
-const PROXIMITY_M = 500;
+const CHECKIN_RADIUS_M = 100;
+const OFFERING_RADIUS_M = 500;
 const STORE_KEY = "s33d-tree-visits";
 
-export type GateStatus = "checking" | "unlocked_present" | "unlocked_grace" | "locked" | "no_location";
+export type GateStatus = "checking" | "unlocked_present" | "unlocked_nearby" | "unlocked_grace" | "locked" | "no_location";
 
 interface VisitRecord {
   [treeId: string]: number; // timestamp ms
