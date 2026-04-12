@@ -139,10 +139,13 @@ describe("Bot Handoff Helpers", () => {
 });
 
 describe("BOT_CONFIG", () => {
-  it("returns null link when env not set", async () => {
+  it("has a fallback bot username and generates valid links", async () => {
     const { BOT_CONFIG } = await import("@/config/bot");
-    expect(BOT_CONFIG.hasTelegramBot).toBe(false);
-    expect(BOT_CONFIG.hasTelegramAuth).toBe(false);
-    expect(BOT_CONFIG.telegramBotLink("test")).toBeNull();
+    // Fallback username "s33dlifebot" is always present
+    expect(BOT_CONFIG.hasTelegramBot).toBe(true);
+    expect(BOT_CONFIG.hasTelegramAuth).toBe(true);
+    const link = BOT_CONFIG.telegramBotLink("test");
+    expect(link).toContain("t.me/");
+    expect(link).toContain("start=test");
   });
 });
