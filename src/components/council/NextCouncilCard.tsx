@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video } from "lucide-react";
+import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video, Sparkles } from "lucide-react";
 
 /** Hardcoded for now — structured for future DB mapping */
 const CURRENT_COUNCIL = {
@@ -44,6 +45,7 @@ interface NextCouncilCardProps {
 
 const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
   const [agendaOpen, setAgendaOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
@@ -135,13 +137,25 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
                 </div>
 
                 {/* Time Tree */}
-                <div>
+                <div className="space-y-2">
                   <h4 className="font-serif text-xs tracking-[0.12em] uppercase text-muted-foreground/60 mb-1.5">
-                    🌳 Time Tree
+                    🌳 The Time Tree
                   </h4>
                   <p className="text-sm font-serif text-foreground/80 leading-relaxed">
                     "{CURRENT_COUNCIL.agenda.timeTreeQuestion}"
                   </p>
+                  <p className="text-xs font-serif text-muted-foreground/50 italic">
+                    Offer your reflection in the Time Tree
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 font-serif tracking-wide text-xs"
+                    onClick={() => navigate("/time-tree")}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Offer to the Time Tree
+                  </Button>
                 </div>
 
                 {/* Focus Areas */}

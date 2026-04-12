@@ -28,29 +28,28 @@ import CouncilRoom from "@/components/CouncilRoom";
 */
 const councilRooms = [
   {
-    id: "join",
+    id: "chamber",
     title: "Join Council",
-    description: "Become a member of the Council of Life",
-    icon: Users,
-    externalUrl: "https://t.me/s33dlife",
+    description: "Step into this moon's gathering",
+    icon: Video,
   },
   {
-    id: "chamber",
+    id: "chamber-live",
     title: "Council Chamber",
-    description: "Enter the live gathering room",
-    icon: Video,
+    description: "Enter the live council room",
+    icon: Users,
   },
   {
     id: "records",
     title: "Council Records",
-    description: "Browse the archives of past councils",
+    description: "Walk the archives of past circles",
     icon: ScrollText,
     notionUrl: "https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228",
   },
   {
     id: "markets",
     title: "Cycle Markets",
-    description: "Participatory ecological forecasting",
+    description: "Shape the rhythm of future gatherings",
     icon: BarChart3,
     internalUrl: "/library/rhythms",
   },
@@ -111,7 +110,7 @@ const CouncilOfLifePage = () => {
   }
 
   // Council Chamber view
-  if (activeRoom === "chamber") {
+  if (activeRoom === "chamber" || activeRoom === "chamber-live") {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header />
@@ -263,24 +262,24 @@ const CouncilOfLifePage = () => {
               Continue the cycle
             </h3>
             <p className="text-[10px] text-muted-foreground/40 font-serif">
-              Council → Contribution → Harvest → Exchange → New Encounters
+              Council → Reflection → Harvest → Exchange → New Encounters
             </p>
             <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => navigate("/time-tree")} className="loop-card font-serif">
+                <span className="text-primary">🌳 Time Tree</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Offer to the Time Tree</p>
+              </button>
               <button onClick={() => navigate(ROUTES.VALUE_TREE)} className="loop-card font-serif">
                 <span className="text-primary">❤️ Value Tree</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">See how Hearts flow</p>
-              </button>
-              <button onClick={() => navigate(ROUTES.SUPPORT)} className="loop-card font-serif">
-                <span className="text-primary">🌱 Support S33D</span>
-                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Contribute beyond governance</p>
               </button>
               <button onClick={() => navigate(ROUTES.MAP)} className="loop-card font-serif">
                 <span className="text-primary">🗺️ Atlas</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Map an Ancient Friend</p>
               </button>
               <button onClick={() => navigate(ROUTES.LIBRARY)} className="loop-card font-serif">
-                <span className="text-primary">📚 Library</span>
-                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Browse offerings & stories</p>
+                <span className="text-primary">📚 Heartwood</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Dream Tree & offerings</p>
               </button>
             </div>
           </div>
