@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
 
         const { data: handoff, error: rpcErr } = await supabase.rpc("create_bot_handoff", {
           p_source: "telegram",
-          p_bot_name: "openclaw",
+          p_bot_name: "teotag",
           p_intent: resolvedIntent,
           p_external_user_hash: hashedId,
           p_flow_name: flowName,
