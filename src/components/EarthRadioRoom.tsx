@@ -44,6 +44,7 @@ interface SongOffering {
   tree_id: string;
   tree_name: string;
   species: string;
+  created_by: string | null;
   created_at: string;
 }
 
