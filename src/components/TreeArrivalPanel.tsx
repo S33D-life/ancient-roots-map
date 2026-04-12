@@ -136,13 +136,18 @@ export default function TreeArrivalPanel({
 
   const handlePlant = async (amount: number) => {
     hapticTap();
-    const result = await rooting.plant({ amount, speciesKey: treeSpecies || undefined });
-    if (result) {
-      hapticSuccess();
-      toast.success("Your hearts are now growing here", { icon: "🌱" });
-      setPlantModalOpen(false);
-    } else {
-      toast.error("Could not plant hearts");
+    try {
+      const result = await rooting.plant({ amount, speciesKey: treeSpecies || undefined });
+      if (result) {
+        hapticSuccess();
+        toast.success("Your hearts are now growing here", { icon: "🌱" });
+        setPlantModalOpen(false);
+      } else {
+        toast.error("Couldn't plant hearts right now. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("[PlantHearts] Error:", err);
+      toast.error("Couldn't plant hearts right now. Please try again.");
     }
   };
 
