@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COUNCIL_CYCLES, getCurrentCouncil, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
 import { hasParticipatedInCouncil, markCouncilParticipation, getCouncilParticipation, COUNCIL_HEARTS_REWARD } from "@/data/council/councilParticipation";
+import EarlyCouncilRecognition from "@/components/council/EarlyCouncilRecognition";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock } from "lucide-react";
@@ -134,19 +135,7 @@ export default function CouncilSessionPage() {
           )}
 
           {timing === "past" && (
-            <Card className="bg-card/40 backdrop-blur-sm border-border/20 mb-4">
-              <CardContent className="p-5">
-                <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-                  <Heart className="h-3 w-3 text-muted-foreground/40" /> Retroactive Claims
-                </h2>
-                <p className="text-xs font-serif text-muted-foreground/60 mb-1">
-                  Past council claims will open when the council ledgers are woven into the archive.
-                </p>
-                <span className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">
-                  Coming Soon
-                </span>
-              </CardContent>
-            </Card>
+            <EarlyCouncilRecognition sessionId={session.id} />
           )}
 
           {/* Invocation */}
