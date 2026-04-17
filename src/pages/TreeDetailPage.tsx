@@ -97,6 +97,7 @@ const ContributionFeed = lazy(() => import("@/components/contributions/Contribut
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
+const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
@@ -617,7 +618,23 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ Primary Check-In Prompt + Presence Signal ══════ */}
+        {/* ══════ Mobile Above-the-Fold Action Bar ══════ */}
+        {tree && (
+          <Suspense fallback={null}>
+            <TreeMobileActionBar
+              treeId={tree.id}
+              treeName={tree.name}
+              userId={userId}
+              proximityGate={proximityGate}
+              meetingStatus={meetingStatus}
+              relationship={relationship}
+              onCheckin={() => setCanopyCheckinOpen(true)}
+              onMakeOffering={openOfferingGateway}
+            />
+          </Suspense>
+        )}
+
+        {/* ══════ Primary Check-In Prompt + Presence Signal (desktop + secondary on mobile) ══════ */}
         {userId && tree && (
           <Suspense fallback={null}>
             <TreeDetailPresenceBlock
