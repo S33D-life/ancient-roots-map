@@ -97,6 +97,7 @@ const ContributionFeed = lazy(() => import("@/components/contributions/Contribut
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
+const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
@@ -617,21 +618,39 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ Primary Check-In Prompt + Presence Signal ══════ */}
-        {userId && tree && (
+        {/* ══════ Mobile Above-the-Fold Action Bar ══════ */}
+        {tree && (
           <Suspense fallback={null}>
-            <TreeDetailPresenceBlock
-              tree={tree}
+            <TreeMobileActionBar
+              treeId={tree.id}
+              treeName={tree.name}
+              userId={userId}
               proximityGate={proximityGate}
               meetingStatus={meetingStatus}
-              checkinStats={checkinStats}
+              relationship={relationship}
               onCheckin={() => setCanopyCheckinOpen(true)}
-              treePresence={treeDetailPresence}
-              availableWhispers={availableWhispers}
-              hasHearts={false}
-              onGoToEncounters={() => setSectionTab("encounters")}
+              onMakeOffering={openOfferingGateway}
             />
           </Suspense>
+        )}
+
+        {/* ══════ Presence Signal + Encounter nudge — desktop only on tree page; mobile uses TreeMobileActionBar ══════ */}
+        {userId && tree && (
+          <div className="hidden md:block">
+            <Suspense fallback={null}>
+              <TreeDetailPresenceBlock
+                tree={tree}
+                proximityGate={proximityGate}
+                meetingStatus={meetingStatus}
+                checkinStats={checkinStats}
+                onCheckin={() => setCanopyCheckinOpen(true)}
+                treePresence={treeDetailPresence}
+                availableWhispers={availableWhispers}
+                hasHearts={false}
+                onGoToEncounters={() => setSectionTab("encounters")}
+              />
+            </Suspense>
+          </div>
         )}
 
         {/* Aliveness signal — visible to all visitors, above tabs */}
