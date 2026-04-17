@@ -261,8 +261,8 @@ const TreePageHero = ({
             </div>
           )}
 
-          {/* Primary CTA — one clear action */}
-          <div className="flex items-center justify-center gap-3">
+          {/* Primary CTA — desktop only; mobile uses TreeMobileActionBar below */}
+          <div className="hidden md:flex items-center justify-center gap-3">
             <Button
               onClick={onMakeOffering}
               className={`font-serif tracking-wider gap-2 ${presenceLocked ? "opacity-50 cursor-not-allowed" : "glow-subtle"}`}
@@ -283,8 +283,8 @@ const TreePageHero = ({
             </div>
           )}
 
-          {/* Compact secondary row */}
-          <div className="flex items-center justify-center gap-1.5 mt-3">
+          {/* Compact secondary row — desktop only */}
+          <div className="hidden md:flex items-center justify-center gap-1.5 mt-3">
             <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onAddWish}>
               <Heart className="h-3 w-3" /> Wish
             </Button>
