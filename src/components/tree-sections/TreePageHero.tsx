@@ -108,8 +108,7 @@ const TreePageHero = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="relative -mx-4 md:-mx-8 mb-10 overflow-hidden rounded-b-2xl"
-      style={{ maxHeight: "min(50vh, 400px)" }}
+      className="relative -mx-4 md:-mx-8 mb-6 md:mb-10 overflow-hidden rounded-b-2xl max-h-[36vh] md:max-h-[min(50vh,400px)]"
     >
       {/* Background with parallax */}
       <div
@@ -176,7 +175,7 @@ const TreePageHero = ({
       </div>
 
       {/* Content */}
-      <div className="relative z-10 px-5 md:px-10 pt-6 pb-6 md:pt-16 md:pb-10">
+      <div className="relative z-10 px-5 md:px-10 pt-4 pb-4 md:pt-16 md:pb-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
