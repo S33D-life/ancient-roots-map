@@ -634,21 +634,23 @@ const TreeDetailPage = () => {
           </Suspense>
         )}
 
-        {/* ══════ Primary Check-In Prompt + Presence Signal (desktop + secondary on mobile) ══════ */}
+        {/* ══════ Presence Signal + Encounter nudge — desktop only on tree page; mobile uses TreeMobileActionBar ══════ */}
         {userId && tree && (
-          <Suspense fallback={null}>
-            <TreeDetailPresenceBlock
-              tree={tree}
-              proximityGate={proximityGate}
-              meetingStatus={meetingStatus}
-              checkinStats={checkinStats}
-              onCheckin={() => setCanopyCheckinOpen(true)}
-              treePresence={treeDetailPresence}
-              availableWhispers={availableWhispers}
-              hasHearts={false}
-              onGoToEncounters={() => setSectionTab("encounters")}
-            />
-          </Suspense>
+          <div className="hidden md:block">
+            <Suspense fallback={null}>
+              <TreeDetailPresenceBlock
+                tree={tree}
+                proximityGate={proximityGate}
+                meetingStatus={meetingStatus}
+                checkinStats={checkinStats}
+                onCheckin={() => setCanopyCheckinOpen(true)}
+                treePresence={treeDetailPresence}
+                availableWhispers={availableWhispers}
+                hasHearts={false}
+                onGoToEncounters={() => setSectionTab("encounters")}
+              />
+            </Suspense>
+          </div>
         )}
 
         {/* Aliveness signal — visible to all visitors, above tabs */}
