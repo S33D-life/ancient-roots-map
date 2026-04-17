@@ -19,7 +19,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo, lazy, Suspense } from "react";
 import { useIsNewUser } from "@/hooks/use-is-new-user";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import OrbConstellation from "@/components/OrbConstellation";
@@ -79,6 +79,9 @@ const DOUBLE_TAP_MS = 350;
 
 const FireflyFAB = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Hide on tree detail pages so the orb never overlaps the primary check-in / collect actions.
+  const hideOnRoute = /^\/tree\/[^/]+/.test(location.pathname);
   const { activeLens, lensConfig } = useSeasonalLens();
   const { updateAvailable, applyUpdate, dismissUpdate } = useAppUpdate();
   const [constellationOpen, setConstellationOpen] = useState(false);
@@ -302,7 +305,7 @@ const FireflyFAB = () => {
   const signalHue = dominantType ? SIGNAL_TYPE_HUE[dominantType] : null;
   const hasSignals = unreadCount > 0;
 
-  if (hidden) return null;
+  if (hidden || hideOnRoute) return null;
 
   return (
     <>
