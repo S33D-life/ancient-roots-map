@@ -81,10 +81,25 @@ export const SealedByLabel = ({ staff }: { staff: string | null }) => {
 
 // Build a flat photo list across offerings, with back-references for the lightbox.
 type FlatPhoto = { url: string; offering: Offering; indexInOffering: number };
-const flattenPhotos = (offerings: Offering[]): FlatPhoto[] =>
+export const flattenOfferingPhotos = (offerings: Offering[]): FlatPhoto[] =>
   offerings.flatMap((o) =>
     getOfferingPhotos(o).map((url, i) => ({ url, offering: o, indexInOffering: i })),
   );
+
+/**
+ * Resolve the flat lightbox index for a given offering id + photo index.
+ * Returns -1 if not found.
+ */
+export const findFlatPhotoIndex = (
+  offerings: Offering[],
+  offeringId: string,
+  photoIndex = 0,
+): number => {
+  const flat = flattenOfferingPhotos(offerings);
+  return flat.findIndex(
+    (p) => p.offering.id === offeringId && p.indexInOffering === photoIndex,
+  );
+};
 
 export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; onImageClick: (index: number) => void }) => {
   const flat = flattenPhotos(offerings);
