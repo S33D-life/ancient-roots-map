@@ -6965,9 +6965,12 @@ export type Database = {
       }
       species_index: {
         Row: {
+          canonical_common_name: string | null
           canonical_name: string | null
           common_name: string
           created_at: string
+          description_language: string | null
+          description_short: string | null
           family: string | null
           gbif_taxon_id: number | null
           genus: string | null
@@ -6977,15 +6980,19 @@ export type Database = {
           normalized_name: string | null
           rank: string
           scientific_name: string | null
+          slug: string | null
           species_key: string
           synonym_names: Json | null
           synonyms: string[] | null
           updated_at: string
         }
         Insert: {
+          canonical_common_name?: string | null
           canonical_name?: string | null
           common_name: string
           created_at?: string
+          description_language?: string | null
+          description_short?: string | null
           family?: string | null
           gbif_taxon_id?: number | null
           genus?: string | null
@@ -6995,15 +7002,19 @@ export type Database = {
           normalized_name?: string | null
           rank?: string
           scientific_name?: string | null
+          slug?: string | null
           species_key: string
           synonym_names?: Json | null
           synonyms?: string[] | null
           updated_at?: string
         }
         Update: {
+          canonical_common_name?: string | null
           canonical_name?: string | null
           common_name?: string
           created_at?: string
+          description_language?: string | null
+          description_short?: string | null
           family?: string | null
           gbif_taxon_id?: number | null
           genus?: string | null
@@ -7013,6 +7024,7 @@ export type Database = {
           normalized_name?: string | null
           rank?: string
           scientific_name?: string | null
+          slug?: string | null
           species_key?: string
           synonym_names?: Json | null
           synonyms?: string[] | null
@@ -8947,6 +8959,127 @@ export type Database = {
           },
         ]
       }
+      tree_species_lore: {
+        Row: {
+          body: string
+          category: string
+          confidence: string
+          country_code: string | null
+          created_at: string
+          created_by: string | null
+          geography: string | null
+          id: string
+          language_code: string | null
+          source: string | null
+          species_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          category: string
+          confidence?: string
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          geography?: string | null
+          id?: string
+          language_code?: string | null
+          source?: string | null
+          species_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          confidence?: string
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          geography?: string | null
+          id?: string
+          language_code?: string | null
+          source?: string | null
+          species_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_species_lore_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species_index"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_species_names: {
+        Row: {
+          confidence: string
+          country_code: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_primary: boolean
+          language_code: string | null
+          language_name: string | null
+          name: string
+          name_normalized: string | null
+          region: string | null
+          script: string | null
+          source: string | null
+          species_id: string
+          transliteration: string | null
+          updated_at: string
+        }
+        Insert: {
+          confidence?: string
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_primary?: boolean
+          language_code?: string | null
+          language_name?: string | null
+          name: string
+          name_normalized?: string | null
+          region?: string | null
+          script?: string | null
+          source?: string | null
+          species_id: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confidence?: string
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_primary?: boolean
+          language_code?: string | null
+          language_name?: string | null
+          name?: string
+          name_normalized?: string | null
+          region?: string | null
+          script?: string | null
+          source?: string | null
+          species_id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_species_names_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species_index"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_value_roots: {
         Row: {
           amount: number
@@ -10669,8 +10802,23 @@ export type Database = {
           title: string
         }[]
       }
+      search_species_multilingual: {
+        Args: { max_results?: number; query: string }
+        Returns: {
+          canonical_common_name: string
+          family: string
+          match_kind: string
+          matched_language: string
+          matched_name: string
+          scientific_name: string
+          slug: string
+          species_id: string
+          species_key: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      species_make_slug: { Args: { input: string }; Returns: string }
       update_agent_trust_score: {
         Args: { p_agent_id: string }
         Returns: undefined
