@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Check, Loader2, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { notify } from "@/lib/notify";
+import PostCheckinReflection from "@/components/PostCheckinReflection";
 import type { CheckinLight } from "@/hooks/use-tree-checkin-status";
 
 const LocationRefinementFlow = lazy(() => import("@/components/LocationRefinementFlow"));
@@ -35,6 +37,7 @@ export default function QuickCheckinButton({
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [showRefinement, setShowRefinement] = useState(false);
+  const [showReflection, setShowReflection] = useState(false);
   const [lastCheckinId, setLastCheckinId] = useState<string | null>(null);
   const [lastAccuracy, setLastAccuracy] = useState<number | null>(null);
   const { toast } = useToast();
@@ -95,6 +98,31 @@ export default function QuickCheckinButton({
       if (data) setLastCheckinId(data.id);
       toast({ title: "🌳 Checked in!", description: `You're at ${treeName}` });
       onComplete?.();
+
+      // Notify tree creator (fire-and-forget)
+      supabase
+        .from("trees")
+        .select("created_by")
+        .eq("id", treeId)
+        .maybeSingle()
+        .then(({ data: t }) => {
+          if (t?.created_by) {
+            notify(
+              {
+                user_id: t.created_by,
+                title: "Your tree was visited",
+                body: `Someone arrived beneath ${treeName}`,
+                category: "tree_visit",
+                deep_link: `/tree/${treeId}`,
+                metadata: { tree_id: treeId },
+              },
+              userId,
+            );
+          }
+        });
+
+      // Show reflection prompt (soft, optional)
+      setTimeout(() => setShowReflection(true), 600);
 
       // Show refinement prompt if GPS was good and tree has coordinates
       if (accuracy && accuracy <= 30 && treeLat != null && treeLng != null) {
