@@ -44,6 +44,7 @@ const OfferingPhotoTray = ({
   max = 3,
   disabled = false,
   uploadingIds,
+  uploadProgress,
 }: Props) => {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
