@@ -96,6 +96,13 @@ export function mapResearchTreeToTreeRow(rt: ResearchTreeRow): TreeRow & { __res
     merged_into_tree_id: null,
     location_confidence: "approximate",
     refinement_count: 0,
+    // Cultivated variety / lineage — not applicable for research trees
+    variety_name: null,
+    is_orchard: false,
+    propagation_type: null,
+    parent_tree_id: null,
+    parent_description: null,
+    planted_year: null,
   };
 
   const researchOrigin: ResearchOrigin = {

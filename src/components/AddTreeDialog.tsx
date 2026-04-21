@@ -26,6 +26,7 @@ import {
 } from "@/services/speciesVision";
 import SeedNudge from "@/components/SeedNudge";
 import TreeAgeInput, { type TreeAgeValue, EMPTY_AGE } from "@/components/encounter/TreeAgeInput";
+import OrchardModePanel, { type OrchardValue, EMPTY_ORCHARD, buildOrchardPayload } from "@/components/encounter/OrchardModePanel";
 
 /**
  * Resolve the structured age form into the columns persisted on `trees`.
@@ -86,6 +87,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const speciesSuggestions = useMemo(() => searchSpecies(species), [species]);
   const [description, setDescription] = useState("");
   const [age, setAge] = useState<TreeAgeValue>(EMPTY_AGE);
+  const [orchard, setOrchard] = useState<OrchardValue>(EMPTY_ORCHARD);
   const [what3words, setWhat3words] = useState(initialW3w || "");
   const [lat, setLat] = useState<number | null>(initLat);
   const [lng, setLng] = useState<number | null>(initLng);
@@ -139,6 +141,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setSpecies("");
       setDescription("");
       setAge(EMPTY_AGE);
+      setOrchard(EMPTY_ORCHARD);
       setWhat3words(initialW3w || "");
       setLat(initLat);
       setLng(initLng);
@@ -634,6 +637,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           latitude: lat,
           longitude: lng,
           ...buildAgePayload(age),
+          ...buildOrchardPayload(orchard),
           species_ai_predictions: normalizedAiPredictions.length > 0 ? normalizedAiPredictions : null,
           species_ai_selected: selectedSpeciesPrediction
             ? {
@@ -683,6 +687,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         latitude: lat,
         longitude: lng,
         ...buildAgePayload(age),
+        ...buildOrchardPayload(orchard),
         created_by: user.id,
         photo_status: droppedPhotoFile ? 'pending' : 'none',
         ...(photoDate ? { created_at: photoDate } : {}),
@@ -1321,6 +1326,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 </div>
 
                 <TreeAgeInput value={age} onChange={setAge} />
+
+                <OrchardModePanel value={orchard} onChange={setOrchard} />
 
                 <div className="space-y-1.5">
                   <Label htmlFor="description" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
