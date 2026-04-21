@@ -248,6 +248,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       if (photoSlots.length > 0) {
         setUploading(true);
         setUploadingPhotoIds(new Set(photoSlots.map((p) => p.id)));
+        setUploadBatch({ total: photoSlots.length, done: 0, failed: false });
         try {
           // Upload all photos in parallel; clear each from the "uploading" set as it finishes
           uploadedPhotos = await Promise.all(
@@ -258,11 +259,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 next.delete(p.id);
                 return next;
               });
+              setUploadBatch((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
               return url;
             }),
           );
           finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
         } catch (uploadErr: any) {
+          setUploadBatch((prev) => (prev ? { ...prev, failed: true } : prev));
           toast({ title: "Upload failed", description: uploadErr.message || "One or more photos failed to upload — try again", variant: "destructive" });
           submittingRef.current = false;
           setLoading(false);
@@ -273,6 +276,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         } finally {
           setUploading(false);
           setUploadingPhotoIds(new Set());
+          // Keep batch visible briefly so the user sees the "all ready" state, then clear
+          setTimeout(() => setUploadBatch(null), 1500);
         }
       }
 
