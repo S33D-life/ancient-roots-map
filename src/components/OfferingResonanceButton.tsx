@@ -83,8 +83,8 @@ const OfferingResonanceButton = ({ offeringId, userId, initialCount = 0, compact
               notify(
                 {
                   user_id: data.created_by,
-                  title: "Your offering was felt",
-                  body: data.title ? `Someone resonated with “${data.title}”` : "Someone resonated with one of your offerings",
+                  title: data.title ? `“${data.title}” was felt` : "Your offering was felt",
+                  body: "Someone let it move them.",
                   category: "resonance",
                   deep_link: data.tree_id ? `/tree/${data.tree_id}` : null,
                   metadata: { offering_id: offeringId },

@@ -88,10 +88,10 @@ const NotificationsBadge = () => {
 
         <ScrollArea className="max-h-80">
           {notifications.length === 0 ? (
-            <div className="py-8 text-center">
+            <div className="py-10 text-center px-6">
               <span className="text-2xl block mb-2">🌿</span>
-              <p className="text-xs text-muted-foreground font-serif px-6">
-                The grove is still. Plant a seed, leave a whisper, and signs will arrive.
+              <p className="text-xs text-muted-foreground font-serif italic leading-relaxed">
+                The grove is quiet.<br />Plant a seed, leave a whisper —<br />signs will arrive.
               </p>
             </div>
           ) : (

@@ -54,21 +54,21 @@ const HeartbeatNotification = () => {
                      flex items-center gap-2 px-4 py-2 rounded-full
                      bg-card/90 border border-primary/20 backdrop-blur-md shadow-xl pointer-events-none"
         >
-          {/* Pulsing heart */}
+          {/* Soft breathing heart */}
           <motion.span
             animate={isPulsing ? {
-              scale: [1, 1.35, 1],
+              scale: [1, 1.18, 1],
               filter: [
                 "drop-shadow(0 0 0px hsl(var(--primary) / 0))",
-                "drop-shadow(0 0 10px hsl(var(--primary) / 0.5))",
-                "drop-shadow(0 0 2px hsl(var(--primary) / 0.1))",
+                "drop-shadow(0 0 6px hsl(var(--primary) / 0.35))",
+                "drop-shadow(0 0 1px hsl(var(--primary) / 0.05))",
               ],
             } : {}}
             transition={isPulsing ? {
-              duration: 0.5,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 1.1,
+              ease: [0.4, 0, 0.6, 1],
               repeat: Infinity,
-              repeatDelay: 0.4,
+              repeatDelay: 0.3,
             } : {}}
             className="inline-flex"
           >
@@ -78,21 +78,21 @@ const HeartbeatNotification = () => {
           {/* Animated total */}
           <motion.span
             key={batchTotal}
-            initial={{ scale: 1.2 }}
+            initial={{ scale: 1.15 }}
             animate={{ scale: 1 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-sm font-serif text-primary font-medium tabular-nums"
           >
             +{batchTotal}
           </motion.span>
 
-          {/* Ripple */}
+          {/* Gentle ripple */}
           {isPulsing && (
             <motion.span
-              initial={{ scale: 0.8, opacity: 0.4 }}
-              animate={{ scale: 2.5, opacity: 0 }}
-              transition={{ duration: 1, ease: "easeOut", repeat: Infinity, repeatDelay: 0.6 }}
-              className="absolute inset-0 rounded-full border border-primary/20 pointer-events-none"
+              initial={{ scale: 0.9, opacity: 0.3 }}
+              animate={{ scale: 1.8, opacity: 0 }}
+              transition={{ duration: 1.4, ease: "easeOut", repeat: Infinity, repeatDelay: 0.4 }}
+              className="absolute inset-0 rounded-full border border-primary/15 pointer-events-none"
             />
           )}
         </motion.div>

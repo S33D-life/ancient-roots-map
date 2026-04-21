@@ -23,6 +23,7 @@ const PROMPTS = [
   "What did you notice that you might forget?",
   "If this tree spoke, what did it say?",
   "What small thing wants to be remembered?",
+  "What was here that wasn't here before?",
 ];
 
 const PostCheckinReflection = ({ open, checkinId, treeName, onClose, onSaved }: Props) => {
@@ -57,13 +58,14 @@ const PostCheckinReflection = ({ open, checkinId, treeName, onClose, onSaved }: 
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="fixed inset-x-3 bottom-3 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-sm z-[60]"
+          exit={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed inset-x-3 md:inset-x-auto md:right-6 md:bottom-6 md:max-w-sm z-[60]"
           style={{
-            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            // Sit above mobile BottomNav (~56px + safe-area)
+            bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
           }}
         >
           <div
@@ -100,7 +102,7 @@ const PostCheckinReflection = ({ open, checkinId, treeName, onClose, onSaved }: 
               onChange={(e) => setText(e.target.value.slice(0, 280))}
               placeholder="A small thing, in your own voice…"
               rows={2}
-              className="font-serif text-sm resize-none border-border/40 bg-background/60 mb-3"
+              className="font-serif text-sm resize-none border-border/40 bg-background/60 mb-3 focus-visible:ring-primary/30"
               autoFocus
             />
 
