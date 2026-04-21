@@ -134,6 +134,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const submittingRef = useRef(false);
   const { toast } = useToast();
+  const { online } = useConnectivity();
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
   const [tagQuery, setTagQuery] = useState("");
