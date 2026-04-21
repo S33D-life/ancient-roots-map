@@ -4,12 +4,12 @@
  * Expands into a full balance panel on tap.
  */
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, ArrowRight, X, Shield, Sprout, Sun, Moon } from "lucide-react";
+import { Heart, X, Sun, Moon, ScrollText } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
-import HeartLedgerPanel from "./HeartLedgerPanel";
-import HeartClaimsPanel from "./HeartClaimsPanel";
+import HeartJarOverview from "./HeartJarOverview";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
@@ -19,9 +19,8 @@ interface Props {
 
 const HeartJar = ({ userId, className = "" }: Props) => {
   const { balance, isLoading } = useHeartEconomy(userId);
-  const { seedsRemaining } = useSeedEconomy(userId);
+  const { seedsRemaining } = useSeedEconomy(userId); // shown as small dot on the trigger pill
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"overview" | "ledger" | "claims">("overview");
   const prevBalance = useRef(balance.s33d);
   const [pulse, setPulse] = useState(false);
 
@@ -186,49 +185,19 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                 </div>
               </div>
 
-              {/* Quick summary strip */}
-              <div className="px-5 py-3 flex gap-2">
-                <QuickStat icon={<Heart className="w-3.5 h-3.5 text-primary" />} label="Hearts" value={balance.s33d} />
-                <QuickStat icon={<Shield className="w-3.5 h-3.5 text-muted-foreground" />} label="Influence" value={balance.influence} />
-                <QuickStat icon={<Sprout className="w-3.5 h-3.5 text-primary" />} label="Seeds today" value={seedsRemaining} suffix="/3" />
-              </div>
+              {/* Content — Phase 1: single overview, no tabs */}
+              <div className="px-5 pt-2 pb-8">
+                <HeartJarOverview userId={userId!} hearts={balance.s33d} />
 
-              {/* Tab bar */}
-              <div className="px-5 flex gap-1 mb-3">
-                {(["overview", "ledger", "claims"] as const).map(t => (
-                  <button
-                    key={t}
-                    onClick={() => setTab(t)}
-                    className={`flex-1 py-2 text-xs font-serif rounded-lg transition-all ${
-                      tab === t
-                        ? "bg-primary/10 text-primary border border-primary/30"
-                        : "text-muted-foreground hover:bg-secondary/20 border border-transparent"
-                    }`}
-                  >
-                    {t === "overview" ? "Balance" : t === "ledger" ? "Ledger" : "Claimable"}
-                  </button>
-                ))}
-              </div>
-
-              {/* Content */}
-              <div className="px-5 pb-8">
-                <AnimatePresence mode="wait">
-                  {tab === "overview" && (
-                    <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <JarOverview balance={balance} seedsRemaining={seedsRemaining} />
-                    </motion.div>
-                  )}
-                  {tab === "ledger" && (
-                    <motion.div key="ledger" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <HeartLedgerPanel userId={userId!} />
-                    </motion.div>
-                  )}
-                  {tab === "claims" && (
-                    <motion.div key="claims" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <HeartClaimsPanel userId={userId!} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* Quiet secondary link — full ledger lives in /vault */}
+                <Link
+                  to="/vault?tab=ledger"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-serif text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ScrollText className="w-3 h-3" />
+                  View full ledger
+                </Link>
               </div>
             </motion.div>
           </>
@@ -237,157 +206,5 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     </>
   );
 };
-
-/* ── Quick stat chip ── */
-const QuickStat = ({ icon, label, value, suffix = "" }: { icon: React.ReactNode; label: string; value: number; suffix?: string }) => (
-  <div
-    className="flex-1 flex items-center gap-1.5 px-2.5 py-2 rounded-xl"
-    style={{
-      background: "hsl(var(--secondary) / 0.15)",
-      border: "1px solid hsl(var(--border) / 0.15)",
-    }}
-  >
-    {icon}
-    <div className="min-w-0">
-      <p className="text-sm font-serif font-bold tabular-nums text-foreground">
-        {value.toLocaleString()}{suffix}
-      </p>
-      <p className="text-[8px] font-serif text-muted-foreground uppercase tracking-wider truncate">{label}</p>
-    </div>
-  </div>
-);
-
-/* ── Overview tab ── */
-import type { HeartBalance } from "@/lib/heart-economy-types";
-import { Link } from "react-router-dom";
-
-const JarOverview = ({ balance, seedsRemaining }: { balance: HeartBalance; seedsRemaining: number }) => (
-  <div className="space-y-4">
-    {/* Big jar visualization */}
-    <div className="flex flex-col items-center py-4">
-      <div
-        className="relative w-24 h-32 rounded-b-2xl rounded-t-lg overflow-hidden"
-        style={{
-          border: "2px solid hsl(var(--primary) / 0.3)",
-          background: "hsl(var(--card) / 0.8)",
-        }}
-      >
-        <motion.div
-          className="absolute bottom-0 left-0 right-0"
-          initial={{ height: 0 }}
-          animate={{ height: `${Math.min(95, Math.max(5, (balance.s33d / Math.max(balance.s33d, 100)) * 95))}%` }}
-          transition={{ type: "spring", damping: 20, stiffness: 100 }}
-          style={{
-            background: "linear-gradient(to top, hsl(var(--primary) / 0.7), hsl(var(--primary) / 0.3))",
-            boxShadow: "inset 0 -4px 12px hsl(var(--primary) / 0.3)",
-          }}
-        />
-        {[0, 1, 2, 3, 4].map(i => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 rounded-full"
-            style={{
-              opacity: 0.4 + i * 0.1,
-              left: `${15 + i * 15}%`,
-              background: "hsl(var(--primary))",
-            }}
-            animate={{
-              y: [0, -8, 0],
-              opacity: [0.3, 0.8, 0.3],
-              bottom: [`${10 + i * 12}%`, `${18 + i * 12}%`, `${10 + i * 12}%`],
-            }}
-            transition={{
-              duration: 2.5 + i * 0.3,
-              repeat: Infinity,
-              delay: i * 0.4,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-      <p className="text-3xl font-serif font-bold tabular-nums text-primary mt-3">
-        {balance.s33d.toLocaleString()}
-      </p>
-      <p className="text-[10px] font-serif text-muted-foreground uppercase tracking-[0.15em]">
-        S33D Hearts
-      </p>
-    </div>
-
-    {/* Balance grid */}
-    <div className="grid grid-cols-2 gap-2">
-      <BalanceCard label="Species Hearts" value={balance.species} icon="🌿" />
-      <BalanceCard label="Influence" value={balance.influence} icon="🛡️" />
-      <BalanceCard label="Seeds Today" value={seedsRemaining} icon="🌱" suffix="/3" />
-      {balance.locked > 0 && (
-        <BalanceCard label="Locked (Staking)" value={balance.locked} icon="🔒" />
-      )}
-      {balance.claimable > 0 && (
-        <BalanceCard label="Claimable" value={balance.claimable} icon="✨" />
-      )}
-    </div>
-
-    {/* Action links */}
-    <div className="space-y-1.5 pt-2">
-      <Link
-        to="/vault"
-        className="flex items-center justify-between px-3 py-3 rounded-xl transition-all group"
-        style={{
-          background: "hsl(var(--primary) / 0.08)",
-          border: "1px solid hsl(var(--primary) / 0.25)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <Heart className="w-4 h-4 text-primary" />
-          <span className="text-sm font-serif font-medium text-foreground">Enter Heartwood Vault</span>
-        </div>
-        <ArrowRight className="w-4 h-4 text-primary/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-      </Link>
-      <Link
-        to="/how-hearts-work"
-        className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group"
-        style={{
-          border: "1px solid hsl(var(--border) / 0.3)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary/60" />
-          <span className="text-xs font-serif text-foreground">How to Earn Hearts</span>
-        </div>
-        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-      </Link>
-      <Link
-        to="/value-tree?tab=economy"
-        className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group"
-        style={{
-          border: "1px solid hsl(var(--border) / 0.3)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <Heart className="w-4 h-4 text-primary/60" />
-          <span className="text-xs font-serif text-foreground">Living Economy</span>
-        </div>
-        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-      </Link>
-    </div>
-  </div>
-);
-
-const BalanceCard = ({ label, value, icon, suffix = "" }: { label: string; value: number; icon: string; suffix?: string }) => (
-  <div
-    className="flex items-center gap-2 p-3 rounded-xl"
-    style={{
-      border: "1px solid hsl(var(--border) / 0.2)",
-      background: "hsl(var(--secondary) / 0.05)",
-    }}
-  >
-    <span className="text-base">{icon}</span>
-    <div className="min-w-0">
-      <p className="text-sm font-serif font-bold tabular-nums text-foreground">
-        {value.toLocaleString()}{suffix}
-      </p>
-      <p className="text-[9px] font-serif text-muted-foreground truncate">{label}</p>
-    </div>
-  </div>
-);
 
 export default HeartJar;
