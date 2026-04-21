@@ -141,6 +141,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setSpecies("");
       setDescription("");
       setAge(EMPTY_AGE);
+      setOrchard(EMPTY_ORCHARD);
       setWhat3words(initialW3w || "");
       setLat(initLat);
       setLng(initLng);
