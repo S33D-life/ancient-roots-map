@@ -137,42 +137,58 @@ export default function QuickCheckinButton({
     }
   }, [userId, treeId, treeName, treeLat, treeLng, toast, onComplete]);
 
+  const reflectionSheet = (
+    <PostCheckinReflection
+      open={showReflection}
+      checkinId={lastCheckinId}
+      treeName={treeName}
+      onClose={() => setShowReflection(false)}
+      onSaved={() => onComplete?.()}
+    />
+  );
+
   // Show refinement prompt after check-in
   if (showRefinement && treeLat != null && treeLng != null && userId) {
     return (
-      <Suspense fallback={null}>
-        <LocationRefinementFlow
-          treeId={treeId}
-          treeName={treeName}
-          treeLat={treeLat}
-          treeLng={treeLng}
-          userId={userId}
-          sourceType="checkin_passive"
-          checkinId={lastCheckinId || undefined}
-          onComplete={() => {
-            setShowRefinement(false);
-            setDone(false);
-          }}
-          onDismiss={() => {
-            setShowRefinement(false);
-            setDone(false);
-          }}
-        />
-      </Suspense>
+      <>
+        <Suspense fallback={null}>
+          <LocationRefinementFlow
+            treeId={treeId}
+            treeName={treeName}
+            treeLat={treeLat}
+            treeLng={treeLng}
+            userId={userId}
+            sourceType="checkin_passive"
+            checkinId={lastCheckinId || undefined}
+            onComplete={() => {
+              setShowRefinement(false);
+              setDone(false);
+            }}
+            onDismiss={() => {
+              setShowRefinement(false);
+              setDone(false);
+            }}
+          />
+        </Suspense>
+        {reflectionSheet}
+      </>
     );
   }
 
   if (done) {
     return (
-      <Button
-        variant="outline"
-        size={variant === "inline" ? "sm" : "default"}
-        className="gap-2 font-serif text-xs tracking-wider border-[hsl(142,60%,45%)]/30 text-[hsl(142,60%,45%)]"
-        disabled
-      >
-        <Check className="w-3.5 h-3.5" />
-        Checked In
-      </Button>
+      <>
+        <Button
+          variant="outline"
+          size={variant === "inline" ? "sm" : "default"}
+          className="gap-2 font-serif text-xs tracking-wider border-[hsl(142,60%,45%)]/30 text-[hsl(142,60%,45%)]"
+          disabled
+        >
+          <Check className="w-3.5 h-3.5" />
+          Checked In
+        </Button>
+        {reflectionSheet}
+      </>
     );
   }
 
@@ -180,23 +196,26 @@ export default function QuickCheckinButton({
   const label = isFirstVisit ? "Check In — First Visit" : "Check In";
 
   return (
-    <Button
-      variant={isFirstVisit ? "default" : "outline"}
-      size={variant === "inline" ? "sm" : "default"}
-      className={`gap-2 font-serif text-xs tracking-wider ${
-        isFirstVisit
-          ? "bg-primary hover:bg-primary/90"
-          : "border-primary/30 hover:bg-primary/10"
-      }`}
-      onClick={handleCheckin}
-      disabled={submitting || !userId}
-    >
-      {submitting ? (
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-      ) : (
-        <MapPin className="w-3.5 h-3.5" />
-      )}
-      {submitting ? "Checking in..." : label}
-    </Button>
+    <>
+      <Button
+        variant={isFirstVisit ? "default" : "outline"}
+        size={variant === "inline" ? "sm" : "default"}
+        className={`gap-2 font-serif text-xs tracking-wider ${
+          isFirstVisit
+            ? "bg-primary hover:bg-primary/90"
+            : "border-primary/30 hover:bg-primary/10"
+        }`}
+        onClick={handleCheckin}
+        disabled={submitting || !userId}
+      >
+        {submitting ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <MapPin className="w-3.5 h-3.5" />
+        )}
+        {submitting ? "Checking in..." : label}
+      </Button>
+      {reflectionSheet}
+    </>
   );
 }
