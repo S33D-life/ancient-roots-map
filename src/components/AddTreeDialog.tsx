@@ -25,6 +25,39 @@ import {
   type SpeciesVisionResult,
 } from "@/services/speciesVision";
 import SeedNudge from "@/components/SeedNudge";
+import TreeAgeInput, { type TreeAgeValue, EMPTY_AGE } from "@/components/encounter/TreeAgeInput";
+
+/**
+ * Resolve the structured age form into the columns persisted on `trees`.
+ * - Known mode: age_exact wins; min/max mirror it; confidence forced to verified.
+ * - Estimate mode: min/max + confidence stored; estimated_age derived from midpoint.
+ * - estimated_age remains the canonical "best single number" used by all readers.
+ */
+const buildAgePayload = (a: TreeAgeValue) => {
+  if (a.mode === "known" && a.ageExact != null) {
+    return {
+      estimated_age: a.ageExact,
+      age_min: a.ageExact,
+      age_max: a.ageExact,
+      age_exact: a.ageExact,
+      age_confidence: "verified" as const,
+      age_source: a.ageSource?.trim() || null,
+    };
+  }
+  const hasRange = a.ageMin != null || a.ageMax != null;
+  const midpoint =
+    a.ageMin != null && a.ageMax != null
+      ? Math.round((a.ageMin + a.ageMax) / 2)
+      : (a.ageMin ?? a.ageMax ?? null);
+  return {
+    estimated_age: midpoint,
+    age_min: a.ageMin,
+    age_max: a.ageMax,
+    age_exact: null,
+    age_confidence: hasRange ? a.ageConfidence : null,
+    age_source: null,
+  };
+};
 
 interface AddTreeDialogProps {
   open: boolean;
