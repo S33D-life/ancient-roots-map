@@ -12,10 +12,33 @@ import { getOfferingPhotos } from "@/utils/offeringPhotos";
 
 /* ---------- Shared Helpers ---------- */
 
-export const shareOffering = async (offering: Offering, treeName?: string) => {
+/**
+ * Build a deep-link URL to a specific offering (and optional photo within it).
+ * Adds `?offering=<id>` and `&photo=<idx>` to the current page URL.
+ * `photoIndex` is 0-based; omitted (or 0) for single-photo / first-photo links.
+ */
+export const buildOfferingDeepLink = (offering: Offering, photoIndex?: number): string => {
+  if (typeof window === "undefined") return "";
+  const url = new URL(window.location.href);
+  url.searchParams.set("offering", offering.id);
+  if (typeof photoIndex === "number" && photoIndex > 0) {
+    url.searchParams.set("photo", String(photoIndex));
+  } else {
+    url.searchParams.delete("photo");
+  }
+  return url.toString();
+};
+
+export const shareOffering = async (
+  offering: Offering,
+  treeName?: string,
+  photoIndex?: number,
+) => {
   const typeLabel = offering.type === "poem" ? "poem" : offering.type === "song" ? "song" : offering.type === "story" ? "musing" : offering.type === "nft" ? "NFT" : "memory";
-  const text = `"${offering.title}" — a ${typeLabel} offering${treeName ? ` for ${treeName}` : ""} on the Ancient Friends Map`;
-  const url = window.location.href;
+  const photoSuffix =
+    typeof photoIndex === "number" && photoIndex > 0 ? ` (photo ${photoIndex + 1})` : "";
+  const text = `"${offering.title}"${photoSuffix} — a ${typeLabel} offering${treeName ? ` for ${treeName}` : ""} on the Ancient Friends Map`;
+  const url = buildOfferingDeepLink(offering, photoIndex);
   try {
     if (navigator.share) {
       await navigator.share({ title: offering.title, text, url });
@@ -58,13 +81,28 @@ export const SealedByLabel = ({ staff }: { staff: string | null }) => {
 
 // Build a flat photo list across offerings, with back-references for the lightbox.
 type FlatPhoto = { url: string; offering: Offering; indexInOffering: number };
-const flattenPhotos = (offerings: Offering[]): FlatPhoto[] =>
+export const flattenOfferingPhotos = (offerings: Offering[]): FlatPhoto[] =>
   offerings.flatMap((o) =>
     getOfferingPhotos(o).map((url, i) => ({ url, offering: o, indexInOffering: i })),
   );
 
+/**
+ * Resolve the flat lightbox index for a given offering id + photo index.
+ * Returns -1 if not found.
+ */
+export const findFlatPhotoIndex = (
+  offerings: Offering[],
+  offeringId: string,
+  photoIndex = 0,
+): number => {
+  const flat = flattenOfferingPhotos(offerings);
+  return flat.findIndex(
+    (p) => p.offering.id === offeringId && p.indexInOffering === photoIndex,
+  );
+};
+
 export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; onImageClick: (index: number) => void }) => {
-  const flat = flattenPhotos(offerings);
+  const flat = flattenOfferingPhotos(offerings);
   const offeringsWithPhotos = offerings.filter((o) => getOfferingPhotos(o).length > 0);
 
   return (
@@ -80,7 +118,7 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="group relative rounded-lg overflow-hidden border border-border/50 cursor-pointer aspect-square"
             onClick={() => {
-              const idx = flat.findIndex((p) => p.offering.id === offering.id);
+              const idx = flattenOfferingPhotos(offerings).findIndex((p) => p.offering.id === offering.id);
               if (idx >= 0) onImageClick(idx);
             }}
           >
@@ -118,15 +156,32 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
  * Steps through every photo across all offerings (multi-photo aware).
  */
 
-export const Lightbox = ({ offerings, index, onClose, onChange }: { offerings: Offering[]; index: number; onClose: () => void; onChange: (i: number) => void }) => {
-  const flat = flattenPhotos(offerings);
+export const Lightbox = ({ offerings, index, onClose, onChange, treeName }: { offerings: Offering[]; index: number; onClose: () => void; onChange: (i: number) => void; treeName?: string }) => {
+  const flat = flattenOfferingPhotos(offerings);
   const current = flat[index];
   if (!current) return null;
   const photosForCurrent = getOfferingPhotos(current.offering);
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-background/95 backdrop-blur-sm" onClick={onClose}>
-      <button className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10" onClick={onClose}><X className="h-6 w-6" /></button>
+      <button
+        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10"
+        onClick={onClose}
+        aria-label="Close lightbox"
+      >
+        <X className="h-6 w-6" />
+      </button>
+      <button
+        className="absolute top-4 right-16 text-muted-foreground hover:text-primary z-10 transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          shareOffering(current.offering, treeName, current.indexInOffering);
+        }}
+        aria-label="Share this photo"
+        title="Share this photo"
+      >
+        <Share2 className="h-5 w-5" />
+      </button>
       {flat.length > 1 && (
         <>
           <button className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10" onClick={(e) => { e.stopPropagation(); onChange((index - 1 + flat.length) % flat.length); }}>
