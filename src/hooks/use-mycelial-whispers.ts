@@ -85,7 +85,20 @@ export async function sendMycelialWhisper(params: {
     _is_active: params.isActive ?? true,
     _expires_at: params.expiresAt ?? null,
   });
-  return { data: data as { ok: boolean; whisper_id?: string; cost?: number; error?: string; balance?: number } | null, error };
+  return {
+    data: data as {
+      ok: boolean;
+      whisper_id?: string;
+      cost?: number;
+      error?: string;
+      balance?: number;
+      /** Final stored state — server may demote to false if sender is not at the tree. */
+      is_active?: boolean;
+      /** True when caller asked for active but lacked a check-in within 12h. */
+      presence_required?: boolean;
+    } | null,
+    error,
+  };
 }
 
 /** Open a group whisper at a tree. Validates channel + awards hearts server-side. */
