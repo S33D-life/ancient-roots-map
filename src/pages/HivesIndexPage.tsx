@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Loader2, Search, MapPin, TreePine, Music, Heart, Users, ArrowRight, X, Sparkles, Filter } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import SpeciesSearch from "@/components/treeasurus/SpeciesSearch";
 
 interface HiveStats {
   treeCount: number;
@@ -241,6 +242,14 @@ const HivesIndexPage = () => {
             message="Hives group trees by botanical family. Each hive is a living community — the more trees mapped, the stronger the hive grows. Explore one to see its species, offerings, and regional presence."
             delay={2500}
           />
+
+          {/* Treeasurus — multilingual species search */}
+          <div className="mt-4 mb-2">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3" /> Treeasurus · find a species in any language
+            </p>
+            <SpeciesSearch />
+          </div>
 
           {/* Live animated global stats */}
           {!loading && (
