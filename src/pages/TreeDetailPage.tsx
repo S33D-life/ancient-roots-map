@@ -1355,8 +1355,9 @@ const TreeDetailPage = () => {
         <Lightbox
           offerings={photoOfferings}
           index={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
-          onChange={setLightboxIndex}
+          onClose={closeLightbox}
+          onChange={openLightboxAt}
+          treeName={tree?.name}
         />
       )}
 
