@@ -95,6 +95,7 @@ const SendWhisperModal = lazy(() => import("@/components/SendWhisperModal"));
 const AddContributionPanel = lazy(() => import("@/components/contributions/AddContributionPanel"));
 const ContributionFeed = lazy(() => import("@/components/contributions/ContributionFeed"));
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
+const MycelialWhispersBeneath = lazy(() => import("@/components/MycelialWhispersBeneath"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
 const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
@@ -1158,6 +1159,14 @@ const TreeDetailPage = () => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }
                 }}
+              />
+            )}
+
+            {userId && tree && (
+              <MycelialWhispersBeneath
+                userId={userId}
+                treeId={tree.id}
+                treeSpecies={tree.species || ""}
               />
             )}
 

@@ -5,12 +5,13 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useWaitingWhispers, useCollectedWhispers, useSentWhispers, type TreeWhisper } from "@/hooks/use-whispers";
+import { useWaitingMycelialWhispers, useSentMycelialWhispers } from "@/hooks/use-mycelial-whispers";
 import Header from "@/components/Header";
 import PageShell from "@/components/PageShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MessageCircle, TreeDeciduous, Send, Inbox, Archive } from "lucide-react";
+import { Loader2, MessageCircle, TreeDeciduous, Send, Inbox, Archive, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const DELIVERY_LABELS: Record<string, string> = {
@@ -103,6 +104,8 @@ export default function WhispersPage() {
   const { whispers: waiting, loading: waitingLoading } = useWaitingWhispers(userId);
   const { whispers: collected, loading: collectedLoading } = useCollectedWhispers(userId);
   const { whispers: sent, loading: sentLoading } = useSentWhispers(userId);
+  const { rows: mycelialWaiting, loading: mycelialWaitingLoading } = useWaitingMycelialWhispers(userId);
+  const { whispers: mycelialSent, loading: mycelialSentLoading } = useSentMycelialWhispers(userId);
 
   return (
     <div className="min-h-screen bg-background">

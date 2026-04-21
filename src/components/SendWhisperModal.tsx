@@ -6,6 +6,15 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhisper } from "@/hooks/use-whispers";
+import {
+  sendMycelialWhisper,
+  useUserWhisperGroups,
+  createWhisperGroup,
+  CHANNEL_COST,
+  type WhisperChannelType,
+  type WhisperAudienceType,
+} from "@/hooks/use-mycelial-whispers";
+import { useHeartBalance } from "@/hooks/use-heart-balance";
 import { emitMycelialThread } from "@/lib/mycelial-network";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -18,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, TreeDeciduous, Users, Globe, User, Share2, Copy, Check, Wind } from "lucide-react";
+import { Loader2, Send, TreeDeciduous, Users, Globe, User, Share2, Copy, Check, Wind, Heart, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -51,6 +60,13 @@ export default function SendWhisperModal({
   const [searchResults, setSearchResults] = useState<Array<{ id: string; full_name: string }>>([]);
   const [message, setMessage] = useState("");
   const [deliveryScope, setDeliveryScope] = useState<"ANY_TREE" | "SPECIFIC_TREE" | "SPECIES_MATCH">("ANY_TREE");
+  // Mycelial channel + audience
+  const [channelType, setChannelType] = useState<WhisperChannelType>("mycelium");
+  const [audienceType, setAudienceType] = useState<WhisperAudienceType>("individual");
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupType, setNewGroupType] = useState<"family" | "council" | "custom">("family");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [inviteEnabled, setInviteEnabled] = useState(false);
@@ -59,6 +75,10 @@ export default function SendWhisperModal({
   const [copied, setCopied] = useState(false);
   const { allowance } = useInvitationAllowance(userId);
   const canInvite = (allowance?.invitesRemaining ?? 0) > 0;
+  const { groups, loading: groupsLoading, refetch: refetchGroups } = useUserWhisperGroups(userId);
+  const heartBalance = useHeartBalance(userId);
+  const heartCost = audienceType === "group" ? CHANNEL_COST[channelType] : 0;
+  const insufficientHearts = audienceType === "group" && heartBalance.totalHearts < heartCost;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -73,6 +93,11 @@ export default function SendWhisperModal({
       setRecipientName("");
       setMessage("");
       setDeliveryScope("ANY_TREE");
+      setChannelType("mycelium");
+      setAudienceType("individual");
+      setGroupId(null);
+      setCreatingGroup(false);
+      setNewGroupName("");
       setSent(false);
       setInviteEnabled(false);
       setInviteCode(null);
@@ -128,28 +153,67 @@ export default function SendWhisperModal({
       toast.error("Select a recipient.");
       return;
     }
+    if (audienceType === "group" && !groupId) {
+      toast.error("Choose a group to whisper into.");
+      return;
+    }
+    if (insufficientHearts) {
+      toast.error("Offer a few hearts to send this into the network.");
+      return;
+    }
 
     setSending(true);
     const speciesKey = treeSpecies?.toLowerCase().replace(/\s+/g, "_");
+    let createdWhisperId: string | null = null;
+    let sendError: any = null;
 
-    const { error, data: whisperData } = await sendWhisper({
-      senderUserId: userId,
-      recipientScope,
-      recipientUserId: recipientScope === "PRIVATE" ? recipientUserId! : undefined,
-      treeAnchorId: treeId,
-      messageContent: message.trim(),
-      deliveryScope,
-      deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
-      deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
-    });
-
-    if (error) {
-      toast.error("Failed to send whisper.");
-      console.error(error);
-    } else {
-      if (whisperData && typeof whisperData === "object" && whisperData !== null && "id" in (whisperData as Record<string, unknown>)) {
-        setSentWhisperId((whisperData as any).id);
+    if (audienceType === "group") {
+      // Mycelial / channel-based group whisper through RPC
+      const channelId =
+        channelType === "tree" ? treeId :
+        channelType === "species" ? speciesKey :
+        null;
+      const { data, error } = await sendMycelialWhisper({
+        channelType,
+        channelId,
+        audienceType: "group",
+        groupId,
+        treeAnchorId: treeId,
+        messageContent: message.trim(),
+        isActive: true,
+      });
+      if (error || !data?.ok) {
+        if (data?.error === "insufficient_hearts") {
+          toast.error("Offer a few hearts to send this into the network.");
+        } else {
+          toast.error("Failed to send whisper.");
+        }
+        sendError = error || data?.error;
+      } else {
+        createdWhisperId = data.whisper_id || null;
       }
+    } else {
+      // Existing individual flow (preserved)
+      const { error, data: whisperData } = await sendWhisper({
+        senderUserId: userId,
+        recipientScope,
+        recipientUserId: recipientScope === "PRIVATE" ? recipientUserId! : undefined,
+        treeAnchorId: treeId,
+        messageContent: message.trim(),
+        deliveryScope,
+        deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
+        deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
+      });
+      if (error) {
+        toast.error("Failed to send whisper.");
+        sendError = error;
+      } else if (whisperData && typeof whisperData === "object" && "id" in (whisperData as any)) {
+        createdWhisperId = (whisperData as any).id;
+      }
+    }
+
+    if (!sendError) {
+      if (createdWhisperId) setSentWhisperId(createdWhisperId);
       let senderLocation: { lat: number; lng: number } | null = null;
       if (typeof navigator !== "undefined" && "geolocation" in navigator) {
         try {
@@ -160,9 +224,7 @@ export default function SendWhisperModal({
               { enableHighAccuracy: false, timeout: 2200, maximumAge: 120000 },
             );
           });
-        } catch {
-          senderLocation = null;
-        }
+        } catch { senderLocation = null; }
       }
       emitMycelialThread({
         source: "whisper",
@@ -171,9 +233,7 @@ export default function SendWhisperModal({
         from: senderLocation,
       });
       setSent(true);
-      if (inviteEnabled) {
-        toast.success("Whisper sent — now share the invitation!");
-      }
+      if (inviteEnabled) toast.success("Whisper sent — now share the invitation!");
       window.dispatchEvent(new CustomEvent("whisper-sent", { detail: { treeId } }));
     }
     setSending(false);
@@ -407,30 +467,152 @@ export default function SendWhisperModal({
             </p>
           </div>
 
-          {/* Step 3: Delivery Rule */}
+          {/* Step 3: Channel — where should this whisper travel? */}
           <div className="space-y-3">
-            <Label className="font-serif text-sm">Where can it be collected?</Label>
-            <div className="flex flex-wrap gap-2">
+            <Label className="font-serif text-sm">Where should this whisper travel?</Label>
+            <div className="grid grid-cols-1 gap-2">
               {([
-                { value: "ANY_TREE" as const, label: "Any Ancient Friend", desc: "Collected at the next check-in" },
-                { value: "SPECIFIC_TREE" as const, label: `Only at ${treeName}`, desc: "Must visit this tree" },
-                { value: "SPECIES_MATCH" as const, label: `Any ${treeSpecies}`, desc: `Must visit a ${treeSpecies}` },
+                { value: "tree" as const, icon: "🌳", label: "This tree", desc: `Open only at ${treeName}` },
+                { value: "species" as const, icon: "🌿", label: `This species (${treeSpecies || "any"})`, desc: `Open at any matching ${treeSpecies || "species"}` },
+                { value: "mycelium" as const, icon: "🍄", label: "The forest", desc: "Open at any Ancient Friend" },
               ]).map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => setDeliveryScope(opt.value)}
-                  className={`flex flex-col items-start px-3 py-2 rounded-lg text-xs font-serif border transition-all ${
-                    deliveryScope === opt.value
+                  onClick={() => {
+                    setChannelType(opt.value);
+                    // keep legacy delivery_scope in sync for individual flows
+                    setDeliveryScope(
+                      opt.value === "tree" ? "SPECIFIC_TREE"
+                      : opt.value === "species" ? "SPECIES_MATCH"
+                      : "ANY_TREE"
+                    );
+                  }}
+                  className={`flex items-start gap-2 px-3 py-2 rounded-lg text-xs font-serif border transition-all text-left ${
+                    channelType === opt.value
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border/40 text-muted-foreground hover:border-primary/30"
                   }`}
                 >
-                  <span className="font-medium">{opt.label}</span>
-                  <span className="text-[10px] opacity-60">{opt.desc}</span>
+                  <span className="text-base leading-none mt-0.5">{opt.icon}</span>
+                  <div>
+                    <div className="font-medium">{opt.label}</div>
+                    <div className="text-[10px] opacity-60">{opt.desc}</div>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Step 4: Audience — individual or group */}
+          {userId && (
+            <div className="space-y-3">
+              <Label className="font-serif text-sm">Send to</Label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setAudienceType("individual")}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-serif border transition-all ${
+                    audienceType === "individual"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" /> Individual
+                  <span className="text-[10px] opacity-60 ml-1">free</span>
+                </button>
+                <button
+                  onClick={() => setAudienceType("group")}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-serif border transition-all ${
+                    audienceType === "group"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" /> Group
+                  <span className="text-[10px] opacity-60 ml-1 inline-flex items-center gap-0.5">
+                    <Heart className="w-2.5 h-2.5" />{CHANNEL_COST[channelType]}
+                  </span>
+                </button>
+              </div>
+
+              {audienceType === "group" && (
+                <div className="space-y-2 pl-1">
+                  {groupsLoading ? (
+                    <p className="text-[11px] font-serif text-muted-foreground">Loading circles…</p>
+                  ) : groups.length > 0 ? (
+                    <Select value={groupId || ""} onValueChange={(v) => setGroupId(v || null)}>
+                      <SelectTrigger className="font-serif text-xs">
+                        <SelectValue placeholder="Choose a circle…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groups.map(g => (
+                          <SelectItem key={g.id} value={g.id} className="font-serif text-xs">
+                            {g.group_type === "family" ? "👨‍👩‍👧 " : g.group_type === "council" ? "🌀 " : "🌿 "}{g.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="text-[11px] font-serif text-muted-foreground italic">
+                      No circles yet. Create one to whisper to a group.
+                    </p>
+                  )}
+
+                  {!creatingGroup ? (
+                    <button
+                      onClick={() => setCreatingGroup(true)}
+                      className="text-[11px] font-serif text-primary hover:underline"
+                    >
+                      + Create a new circle
+                    </button>
+                  ) : (
+                    <div className="space-y-2 rounded-lg border border-border/40 p-2.5">
+                      <Input
+                        placeholder="Circle name"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        className="font-serif text-xs"
+                      />
+                      <div className="flex gap-1.5">
+                        {(["family", "council", "custom"] as const).map(t => (
+                          <button
+                            key={t}
+                            onClick={() => setNewGroupType(t)}
+                            className={`text-[10px] font-serif px-2 py-1 rounded border ${
+                              newGroupType === t ? "border-primary bg-primary/10 text-primary" : "border-border/40 text-muted-foreground"
+                            }`}
+                          >{t}</button>
+                        ))}
+                      </div>
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="font-serif text-xs h-7"
+                          onClick={async () => {
+                            if (!newGroupName.trim()) return;
+                            const { data, error } = await createWhisperGroup(newGroupName.trim(), newGroupType);
+                            if (error) { toast.error("Couldn't create circle."); return; }
+                            await refetchGroups();
+                            if (data?.id) setGroupId(data.id);
+                            setCreatingGroup(false);
+                            setNewGroupName("");
+                            toast.success("Circle created.");
+                          }}
+                        >Create</Button>
+                        <Button size="sm" variant="ghost" className="font-serif text-xs h-7" onClick={() => setCreatingGroup(false)}>Cancel</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {insufficientHearts && (
+                    <p className="text-[11px] font-serif text-destructive">
+                      Offer a few hearts to send this into the network. ({heartBalance.totalHearts} / {heartCost})
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Invite toggle */}
           {userId && (
@@ -465,11 +647,18 @@ export default function SendWhisperModal({
         <DialogFooter>
           <Button
             onClick={handleSend}
-            disabled={sending || !userId || !message.trim() || (recipientScope === "PRIVATE" && !recipientUserId)}
+            disabled={
+              sending || !userId || !message.trim() ||
+              (recipientScope === "PRIVATE" && !recipientUserId) ||
+              (audienceType === "group" && !groupId) ||
+              insufficientHearts
+            }
             className="font-serif tracking-wider gap-2 w-full sm:w-auto"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Send Whisper
+            {audienceType === "group"
+              ? <>Send Whisper <span className="inline-flex items-center gap-0.5 opacity-80"><Heart className="w-3 h-3" />{heartCost}</span></>
+              : "Send Whisper"}
           </Button>
         </DialogFooter>
       </DialogContent>
