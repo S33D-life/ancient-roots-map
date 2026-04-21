@@ -246,6 +246,12 @@ export default function WhispersPage() {
             </section>
           )}
 
+          {userId && (
+            <div className="mb-8">
+              <WhisperGroupManager userId={userId} />
+            </div>
+          )}
+
           {!userId ? (
             <Card className="border-border/40">
               <CardContent className="p-8 text-center">
