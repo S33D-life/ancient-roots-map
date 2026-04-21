@@ -240,6 +240,53 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     return data.publicUrl;
   };
 
+  /**
+   * Re-upload a single failed photo slot. Used by the per-tile "Retry" button
+   * in the photo tray. On success the slot is moved out of `failedPhotoIds`
+   * and into `uploadedUrlsById`; on failure it stays in the failed set.
+   */
+  const retryPhotoUpload = async (slotId: string) => {
+    const slot = photoSlots.find((p) => p.id === slotId);
+    if (!slot) return;
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData.user;
+    if (!user) {
+      toast({ title: "Not authenticated", description: "Please sign in to upload", variant: "destructive" });
+      return;
+    }
+    // Mark uploading
+    setUploadingPhotoIds((prev) => new Set(prev).add(slotId));
+    try {
+      const url = await uploadFile(slot.file, user.id);
+      setUploadedUrlsById((prev) => ({ ...prev, [slotId]: url }));
+      setFailedPhotoIds((prev) => {
+        if (!prev.has(slotId)) return prev;
+        const next = new Set(prev);
+        next.delete(slotId);
+        return next;
+      });
+      // Update batch counters so the global indicator reflects recovery.
+      setUploadBatch((prev) => {
+        if (!prev) return prev;
+        const stillFailed = Array.from(failedPhotoIds).some((id) => id !== slotId);
+        return { ...prev, done: Math.min(prev.total, prev.done + 1), failed: stillFailed };
+      });
+    } catch (err: any) {
+      toast({
+        title: "Retry failed",
+        description: err?.message || "Could not upload photo — check your connection and try again",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPhotoIds((prev) => {
+        if (!prev.has(slotId)) return prev;
+        const next = new Set(prev);
+        next.delete(slotId);
+        return next;
+      });
+    }
+  };
+
   const resetForm = () => {
     setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
   };
