@@ -218,15 +218,28 @@ const TreeDetailPage = () => {
   /**
    * Deep-link sync: open the lightbox to a specific offering/photo when the
    * URL carries `?offering=<id>&photo=<idx>`. Must be declared before any
-   * early returns to keep hook order consistent.
+   * early returns to keep hook order consistent. Fails gracefully on
+   * malformed params and missing offerings.
    */
   useEffect(() => {
     const offeringId = searchParams.get("offering");
     if (!offeringId || photoOfferings.length === 0) return;
-    const photoIdx = Math.max(0, parseInt(searchParams.get("photo") || "0", 10) || 0);
-    const flatIdx = findFlatPhotoIndex(photoOfferings, offeringId, photoIdx);
-    if (flatIdx >= 0 && lightboxIndex !== flatIdx) {
-      setLightboxIndex(flatIdx);
+    const rawPhoto = searchParams.get("photo");
+    const parsedPhoto = rawPhoto ? parseInt(rawPhoto, 10) : 0;
+    const photoIdx = Number.isFinite(parsedPhoto) && parsedPhoto >= 0 ? parsedPhoto : 0;
+    try {
+      const flatIdx = findFlatPhotoIndex(photoOfferings, offeringId, photoIdx);
+      if (flatIdx >= 0 && lightboxIndex !== flatIdx) {
+        setLightboxIndex(flatIdx);
+      } else if (flatIdx < 0) {
+        console.info(`[tree-detail:${id}] lightbox:deep-link:not-found`, {
+          offeringId,
+          photoIdx,
+          available: photoOfferings.length,
+        });
+      }
+    } catch (err) {
+      console.warn(`[tree-detail:${id}] lightbox:deep-link:error`, err);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, photoOfferings.length]);
@@ -341,63 +354,114 @@ const TreeDetailPage = () => {
   useEffect(() => {
     if (!id) return;
 
+    // Lightweight structured logger so future tree-page fetch failures are
+    // easy to attribute to a specific query without flooding the console.
+    const log = (event: string, data?: Record<string, unknown>) =>
+      console.info(`[tree-detail:${id}] ${event}`, data ?? {});
+
     const fetchTree = async () => {
+      log("tree:fetch:start");
       const { data, error } = await supabase
         .from("trees")
         .select("*")
         .eq("id", id)
         .maybeSingle();
-      if (error) console.error("Error fetching tree:", error);
-      else setTree(data);
+      if (error) {
+        console.error(`[tree-detail:${id}] tree:fetch:error`, error);
+        return;
+      }
+      if (!data) {
+        log("tree:fetch:not-found");
+        setTree(null);
+        return;
+      }
+      log("tree:fetch:ok", { species: data.species });
+      setTree(data);
     };
 
     const fetchMeetings = async () => {
+      log("meetings:fetch:start");
       const { data, error } = await supabase
         .from("meetings")
         .select("*")
         .eq("tree_id", id)
         .order("created_at", { ascending: false });
-      if (!error && data) setAllMeetings(data as Meeting[]);
+      if (error) {
+        console.error(`[tree-detail:${id}] meetings:fetch:error`, error);
+        setAllMeetings([]);
+        return;
+      }
+      setAllMeetings((data ?? []) as Meeting[]);
+      log("meetings:fetch:ok", { count: data?.length ?? 0 });
     };
 
     const fetchBirdsongCount = async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from("birdsong_offerings")
         .select("id", { count: "exact", head: true })
         .eq("tree_id", id);
+      if (error) {
+        console.error(`[tree-detail:${id}] birdsong:count:error`, error);
+        setBirdsongCount(0);
+        return;
+      }
       setBirdsongCount(count || 0);
     };
 
     const fetchEcoBelonging = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("bio_region_trees")
         .select("bio_region_id")
         .eq("tree_id", id);
-      if (data && data.length > 0) {
-        const { data: regions } = await supabase
-          .from("bio_regions")
-          .select("id, name, type")
-          .in("id", data.map(d => d.bio_region_id));
-        if (regions) setEcoBelonging(regions as Array<{ id: string; name: string; type: string }>);
+      if (error) {
+        console.error(`[tree-detail:${id}] eco-belonging:fetch:error`, error);
+        setEcoBelonging([]);
+        return;
       }
+      if (!data || data.length === 0) {
+        setEcoBelonging([]);
+        return;
+      }
+      const { data: regions, error: regionsErr } = await supabase
+        .from("bio_regions")
+        .select("id, name, type")
+        .in("id", data.map((d) => d.bio_region_id));
+      if (regionsErr) {
+        console.error(`[tree-detail:${id}] eco-belonging:regions:error`, regionsErr);
+        setEcoBelonging([]);
+        return;
+      }
+      setEcoBelonging((regions ?? []) as Array<{ id: string; name: string; type: string }>);
     };
 
     // Record digital encounter (fire-and-forget, lightweight)
     const recordPageView = async () => {
-      const sessionId = sessionStorage.getItem("s33d_session") || (() => {
-        const sid = crypto.randomUUID();
-        sessionStorage.setItem("s33d_session", sid);
-        return sid;
-      })();
-      await supabase.from("tree_page_views" as any).insert({
-        tree_id: id,
-        user_id: userId || null,
-        session_id: sessionId,
-      } as any);
+      try {
+        const sessionId = sessionStorage.getItem("s33d_session") || (() => {
+          const sid = crypto.randomUUID();
+          sessionStorage.setItem("s33d_session", sid);
+          return sid;
+        })();
+        await supabase.from("tree_page_views" as any).insert({
+          tree_id: id,
+          user_id: userId || null,
+          session_id: sessionId,
+        } as any);
+      } catch (err) {
+        // Page-view tracking must never break the page.
+        console.warn(`[tree-detail:${id}] page-view:insert:error`, err);
+      }
     };
     recordPageView();
 
-    Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount(), fetchEcoBelonging()]).then(() => setLoading(false));
+    Promise.all([
+      fetchTree(),
+      fetchMeetings(),
+      fetchBirdsongCount(),
+      fetchEcoBelonging(),
+    ])
+      .catch((err) => console.error(`[tree-detail:${id}] parallel-fetch:error`, err))
+      .finally(() => setLoading(false));
 
     // Realtime subscription for photo processing updates
     const channel = supabase
@@ -406,8 +470,8 @@ const TreeDetailPage = () => {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'trees', filter: `id=eq.${id}` },
         (payload) => {
-          const updated = payload.new as any;
-          if (updated.photo_status) {
+          const updated = payload?.new as any;
+          if (updated?.photo_status) {
             setTree((prev) => prev ? { ...prev, ...updated } : prev);
           }
         },
