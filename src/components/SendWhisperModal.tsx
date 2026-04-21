@@ -93,6 +93,11 @@ export default function SendWhisperModal({
       setRecipientName("");
       setMessage("");
       setDeliveryScope("ANY_TREE");
+      setChannelType("mycelium");
+      setAudienceType("individual");
+      setGroupId(null);
+      setCreatingGroup(false);
+      setNewGroupName("");
       setSent(false);
       setInviteEnabled(false);
       setInviteCode(null);
