@@ -9169,6 +9169,7 @@ export type Database = {
           image_similarity_hash: string | null
           is_anchor_node: boolean | null
           is_churchyard_tree: boolean | null
+          is_orchard: boolean
           latitude: number | null
           lineage: string | null
           linked_churchyard_id: string | null
@@ -9179,13 +9180,19 @@ export type Database = {
           metadata: Json | null
           name: string
           nation: string | null
+          parent_description: string | null
+          parent_tree_id: string | null
           photo_error: string | null
           photo_original_url: string | null
           photo_processed_url: string | null
           photo_status: string
           photo_thumb_url: string | null
+          planted_year: number | null
           project_name: string | null
           project_url: string | null
+          propagation_type:
+            | Database["public"]["Enums"]["propagation_type"]
+            | null
           radio_theme: string | null
           refinement_count: number | null
           seasonal_tone: string | null
@@ -9196,6 +9203,7 @@ export type Database = {
           species_key: string | null
           state: string | null
           updated_at: string
+          variety_name: string | null
           what3words: string | null
           wish_tags: string[] | null
         }
@@ -9219,6 +9227,7 @@ export type Database = {
           image_similarity_hash?: string | null
           is_anchor_node?: boolean | null
           is_churchyard_tree?: boolean | null
+          is_orchard?: boolean
           latitude?: number | null
           lineage?: string | null
           linked_churchyard_id?: string | null
@@ -9229,13 +9238,19 @@ export type Database = {
           metadata?: Json | null
           name: string
           nation?: string | null
+          parent_description?: string | null
+          parent_tree_id?: string | null
           photo_error?: string | null
           photo_original_url?: string | null
           photo_processed_url?: string | null
           photo_status?: string
           photo_thumb_url?: string | null
+          planted_year?: number | null
           project_name?: string | null
           project_url?: string | null
+          propagation_type?:
+            | Database["public"]["Enums"]["propagation_type"]
+            | null
           radio_theme?: string | null
           refinement_count?: number | null
           seasonal_tone?: string | null
@@ -9246,6 +9261,7 @@ export type Database = {
           species_key?: string | null
           state?: string | null
           updated_at?: string
+          variety_name?: string | null
           what3words?: string | null
           wish_tags?: string[] | null
         }
@@ -9269,6 +9285,7 @@ export type Database = {
           image_similarity_hash?: string | null
           is_anchor_node?: boolean | null
           is_churchyard_tree?: boolean | null
+          is_orchard?: boolean
           latitude?: number | null
           lineage?: string | null
           linked_churchyard_id?: string | null
@@ -9279,13 +9296,19 @@ export type Database = {
           metadata?: Json | null
           name?: string
           nation?: string | null
+          parent_description?: string | null
+          parent_tree_id?: string | null
           photo_error?: string | null
           photo_original_url?: string | null
           photo_processed_url?: string | null
           photo_status?: string
           photo_thumb_url?: string | null
+          planted_year?: number | null
           project_name?: string | null
           project_url?: string | null
+          propagation_type?:
+            | Database["public"]["Enums"]["propagation_type"]
+            | null
           radio_theme?: string | null
           refinement_count?: number | null
           seasonal_tone?: string | null
@@ -9296,6 +9319,7 @@ export type Database = {
           species_key?: string | null
           state?: string | null
           updated_at?: string
+          variety_name?: string | null
           what3words?: string | null
           wish_tags?: string[] | null
         }
@@ -9317,6 +9341,20 @@ export type Database = {
           {
             foreignKeyName: "trees_merged_into_tree_id_fkey"
             columns: ["merged_into_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trees_parent_tree_id_fkey"
+            columns: ["parent_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trees_parent_tree_id_fkey"
+            columns: ["parent_tree_id"]
             isOneToOne: false
             referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
@@ -10602,6 +10640,7 @@ export type Database = {
         | "nft"
         | "voice"
         | "book"
+      propagation_type: "seed" | "graft" | "cutting" | "unknown"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -10743,6 +10782,7 @@ export const Constants = {
       market_status: ["draft", "open", "closed", "resolved", "cancelled"],
       market_type: ["binary", "date_range", "numeric", "protocol_parameter"],
       offering_type: ["photo", "poem", "song", "story", "nft", "voice", "book"],
+      propagation_type: ["seed", "graft", "cutting", "unknown"],
     },
   },
 } as const
