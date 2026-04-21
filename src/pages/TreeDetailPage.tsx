@@ -1248,7 +1248,7 @@ const TreeDetailPage = () => {
                         {getOfferingsByType(type).length === 0 ? (
                           <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
                         ) : type === "photo" ? (
-                          <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
+                          <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={openLightboxAt} />
                         ) : type === "book" ? (
                           <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
                         ) : (
