@@ -273,7 +273,7 @@ const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }:
   );
 };
 
-const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/40 transition-colors">
     <CardContent className="p-5">
       <div className="flex items-center gap-2 mb-2">
@@ -294,12 +294,12 @@ const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offering
           View on marketplace →
         </a>
       )}
-      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
     </CardContent>
   </Card>
 );
 
-const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => {
+const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
   const photos = getOfferingPhotos(offering);
   const [idx, setIdx] = useState(0);
   const total = photos.length;
@@ -358,13 +358,13 @@ const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offeri
           <p className="text-sm text-foreground/70 font-serif mt-2 whitespace-pre-wrap">{offering.content}</p>
         )}
         <QuoteSection offering={offering} />
-        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
       </CardContent>
     </Card>
   );
 };
 
-const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
       <div className="flex items-center gap-2 mb-2">
@@ -380,7 +380,7 @@ const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offe
         </audio>
       )}
       <QuoteSection offering={offering} />
-      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
     </CardContent>
   </Card>
 );
