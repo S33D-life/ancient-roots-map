@@ -13,6 +13,7 @@ import GlobalSearch from "./GlobalSearch";
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";
 import ThemeToggle from "./ThemeToggle";
+import NotificationsBadge from "./NotificationsBadge";
 
 const TetolMenu = lazy(() => import("./TetolMenu"));
 const TeotagGuide = lazy(() => import("./TeotagGuide"));
@@ -250,7 +251,8 @@ const Header = () => {
               {/* Theme toggle */}
               <ThemeToggle />
 
-              {/* Notifications now centralized in Orb bell arm */}
+              {/* What the forest sent you — notifications spine */}
+              {user && <NotificationsBadge />}
 
               {/* Heart Jar — primary value indicator */}
               {user && <HeartJar userId={user.id} />}

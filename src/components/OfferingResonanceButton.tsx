@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { notify } from "@/lib/notify";
 import {
   Tooltip,
   TooltipContent,
@@ -70,6 +71,28 @@ const OfferingResonanceButton = ({ offeringId, userId, initialCount = 0, compact
         setCount((c) => c + 1);
         setPulsing(true);
         setTimeout(() => setPulsing(false), 700);
+
+        // Notify the offering creator (skips self via notify())
+        supabase
+          .from("offerings")
+          .select("created_by, title, tree_id")
+          .eq("id", offeringId)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data?.created_by) {
+              notify(
+                {
+                  user_id: data.created_by,
+                  title: "Your offering was felt",
+                  body: data.title ? `Someone resonated with “${data.title}”` : "Someone resonated with one of your offerings",
+                  category: "resonance",
+                  deep_link: data.tree_id ? `/tree/${data.tree_id}` : null,
+                  metadata: { offering_id: offeringId },
+                },
+                userId,
+              );
+            }
+          });
       }
     }
 
