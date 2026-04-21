@@ -12,8 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MessageCircle, TreeDeciduous, Send, Inbox, Archive, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
-import MycelialWhisperOpenModal from "@/components/MycelialWhisperOpenModal";
+import { Link, useNavigate } from "react-router-dom";
 
 const CHANNEL_META: Record<string, { icon: string; label: string; tone: string }> = {
   tree: { icon: "🌳", label: "This tree", tone: "border-primary/30 text-primary" },
