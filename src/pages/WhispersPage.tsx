@@ -110,9 +110,9 @@ export default function WhispersPage() {
   const { whispers: waiting, loading: waitingLoading } = useWaitingWhispers(userId);
   const { whispers: collected, loading: collectedLoading } = useCollectedWhispers(userId);
   const { whispers: sent, loading: sentLoading } = useSentWhispers(userId);
-  const { rows: mycelialWaiting, loading: mycelialWaitingLoading, refetch: refetchMycelialWaiting } = useWaitingMycelialWhispers(userId);
+  const { rows: mycelialWaiting, loading: mycelialWaitingLoading } = useWaitingMycelialWhispers(userId);
   const { whispers: mycelialSent, loading: mycelialSentLoading } = useSentMycelialWhispers(userId);
-  const [openWhisperId, setOpenWhisperId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
