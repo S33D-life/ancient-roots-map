@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { TreeDeciduous, MapPin, Globe, Calendar, Leaf, Shield } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import type { SpeciesResolution } from "@/services/speciesResolver";
+import SpeciesNameLink from "@/components/treeasurus/SpeciesNameLink";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -41,7 +42,11 @@ const TreeStructuredDataCard = ({ tree, ecoBelonging, speciesResolution }: Props
         <div className={ROW}>
           <span className={LABEL}><TreeDeciduous className="w-3 h-3" /> Species</span>
           <span className={`${VALUE} flex flex-col items-end`}>
-            <span>{speciesResolution?.displayName || tree.species}</span>
+            <SpeciesNameLink
+              speciesKey={(tree as any).species_key}
+              fallbackLabel={speciesResolution?.displayName || tree.species}
+              showAlternates
+            />
             {speciesResolution?.scientificName && speciesResolution.scientificName !== (speciesResolution?.displayName || tree.species) && (
               <span className="text-[10px] italic text-muted-foreground/50">{speciesResolution.scientificName}</span>
             )}

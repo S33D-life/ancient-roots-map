@@ -93,11 +93,11 @@ export default function SpeciesPage() {
       <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-8">
         {/* Back */}
         <Link
-          to={hive ? `/hive/${species.family?.toLowerCase()}` : "/hives"}
+          to={hive ? `/hive/${hive.slug}` : "/hives"}
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-serif tracking-wider"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          {hive ? `${hive.name} hive` : "Hives"}
+          {hive ? hive.displayName : "Hives"}
         </Link>
 
         {/* Header */}
