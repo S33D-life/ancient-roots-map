@@ -17,6 +17,20 @@ export default function GardenDetailPage() {
   const { data: garden, isLoading } = useGardenBySlug(slug);
   const { data: trees = [] } = useGardenTrees(garden?.id);
 
+  useEffect(() => {
+    if (garden) {
+      document.title = `${garden.name} · Garden · S33D`;
+      const desc = garden.description?.slice(0, 155) || `${garden.name} — a living garden on the S33D atlas.`;
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", desc);
+    }
+  }, [garden]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
