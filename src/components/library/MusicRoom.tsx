@@ -600,6 +600,26 @@ function SongDetail({
               )}
             </div>
 
+            {/* Witness — resonance gesture */}
+            <div
+              className="flex flex-col items-center gap-2 py-4 rounded-2xl border border-primary/20"
+              style={{ background: "hsl(var(--primary) / 0.04)" }}
+            >
+              <p className="text-[10px] font-serif tracking-[0.18em] uppercase text-primary/70">
+                Did this move you?
+              </p>
+              <div className="scale-150">
+                <OfferingResonanceButton
+                  offeringId={song.id}
+                  userId={userId}
+                  initialCount={0}
+                />
+              </div>
+              <p className="text-[10px] font-serif italic text-muted-foreground/60">
+                {userId ? "Tap the heart to witness" : "Sign in to witness"}
+              </p>
+            </div>
+
             {/* Actions */}
             <div className="flex flex-col gap-2 pt-2">
               <button
