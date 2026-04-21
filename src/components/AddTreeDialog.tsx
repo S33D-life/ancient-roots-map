@@ -27,6 +27,8 @@ import {
 import SeedNudge from "@/components/SeedNudge";
 import TreeAgeInput, { type TreeAgeValue, EMPTY_AGE } from "@/components/encounter/TreeAgeInput";
 import OrchardModePanel, { type OrchardValue, EMPTY_ORCHARD, buildOrchardPayload } from "@/components/encounter/OrchardModePanel";
+import GardenPicker from "@/components/encounter/GardenPicker";
+import { useCanCreateGarden } from "@/hooks/use-can-create-garden";
 import { hapticTap } from "@/lib/haptics";
 
 /**
@@ -89,6 +91,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [description, setDescription] = useState("");
   const [age, setAge] = useState<TreeAgeValue>(EMPTY_AGE);
   const [orchard, setOrchard] = useState<OrchardValue>(EMPTY_ORCHARD);
+  const [gardenId, setGardenId] = useState<string | null>(null);
+  const { data: canCreateGarden = false } = useCanCreateGarden();
   const [what3words, setWhat3words] = useState(initialW3w || "");
   const [lat, setLat] = useState<number | null>(initLat);
   const [lng, setLng] = useState<number | null>(initLng);
