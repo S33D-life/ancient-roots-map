@@ -845,9 +845,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   onRemove={removePhoto}
                   onReorder={(next) => setPhotoSlots(next)}
                   uploadingIds={uploadingPhotoIds}
+                  failedIds={failedPhotoIds}
+                  successIds={new Set(Object.keys(uploadedUrlsById))}
+                  onRetry={retryPhotoUpload}
                   uploadProgress={uploadBatch ?? undefined}
                   offline={!online}
-                  disabled={loading}
+                  disabled={loading && failedPhotoIds.size === 0}
                 />
               </div>
               {/* Title appears after first photo */}
