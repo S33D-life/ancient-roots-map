@@ -176,8 +176,8 @@ const OfferingPhotoTray = ({
               : `${photos.length} of ${max} ${photos.length === 1 ? "photo" : "photos"}`}
           </p>
           {offline && photos.length > 0 ? (
-            <span className="text-[10px] font-serif text-amber-600/80 dark:text-amber-400/80 tracking-wider flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500/80" />
+            <span className="text-[10px] font-serif text-muted-foreground/80 tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-pulse" />
               will upload when online
             </span>
           ) : canReorder ? (
