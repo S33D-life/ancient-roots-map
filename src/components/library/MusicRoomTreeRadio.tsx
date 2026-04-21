@@ -34,6 +34,8 @@ interface SongRow {
   tree_name: string;
   tree_species: string;
   offered_by: string | null;
+  // Music Room may pass extra fields (content, thumbnail_url, etc.) — allow them through.
+  [key: string]: unknown;
 }
 
 interface ItunesPreview {
