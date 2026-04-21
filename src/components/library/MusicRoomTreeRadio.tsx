@@ -83,12 +83,17 @@ async function fetchItunesPreview(query: string): Promise<ItunesPreview | null> 
   return null;
 }
 
-const MusicRoomTreeRadio = ({ scopedSongs, anchorTree, scopeLabel, onOpenSong }: Props) => {
+function MusicRoomTreeRadio<T extends RadioSong>({
+  scopedSongs,
+  anchorTree,
+  scopeLabel,
+  onOpenSong,
+}: Props<T>) {
   /** Broadcast playlist: anchor-tree songs first when in forest mode, else as-given. */
   const playlist = useMemo(() => {
     if (!anchorTree || scopeLabel !== "forest") return scopedSongs;
-    const here: SongRow[] = [];
-    const elsewhere: SongRow[] = [];
+    const here: T[] = [];
+    const elsewhere: T[] = [];
     for (const s of scopedSongs) (s.tree_id === anchorTree.id ? here : elsewhere).push(s);
     return [...here, ...elsewhere];
   }, [scopedSongs, anchorTree, scopeLabel]);
