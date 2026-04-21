@@ -4702,6 +4702,7 @@ export type Database = {
           media_url: string | null
           meeting_id: string | null
           nft_link: string | null
+          photos: string[]
           quote_author: string | null
           quote_source: string | null
           quote_text: string | null
@@ -4732,6 +4733,7 @@ export type Database = {
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
+          photos?: string[]
           quote_author?: string | null
           quote_source?: string | null
           quote_text?: string | null
@@ -4762,6 +4764,7 @@ export type Database = {
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
+          photos?: string[]
           quote_author?: string | null
           quote_source?: string | null
           quote_text?: string | null
