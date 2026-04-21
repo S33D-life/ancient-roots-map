@@ -10623,7 +10623,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "curator" | "keeper"
+      app_role: "curator" | "keeper" | "garden_steward"
       grove_scale:
         | "hyper_local"
         | "local"
@@ -10771,7 +10771,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["curator", "keeper"],
+      app_role: ["curator", "keeper", "garden_steward"],
       grove_scale: [
         "hyper_local",
         "local",
