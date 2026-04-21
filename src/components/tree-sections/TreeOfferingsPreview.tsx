@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Offering } from "@/hooks/use-offerings";
+import { getOfferingPhotos, getOfferingCover } from "@/utils/offeringPhotos";
 
 interface Props {
   offerings: Offering[];
@@ -122,15 +123,24 @@ const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay =
                         </div>
                       </button>
                     )}
-                    {/* Photo thumbnail */}
-                    {off.media_url && off.type === "photo" && (
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
-                        <img src={off.media_url} alt={off.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                      </div>
-                    )}
+                    {/* Photo thumbnail (cover + +N badge for multi-photo offerings) */}
+                    {(() => {
+                      const cover = getOfferingCover(off);
+                      const extra = getOfferingPhotos(off).length - 1;
+                      return cover && off.type === "photo" ? (
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                          <img src={cover} alt={off.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          {extra > 0 && (
+                            <span className="absolute bottom-0.5 right-0.5 px-1 min-w-[14px] h-3.5 rounded-full bg-primary/80 text-primary-foreground text-[8px] font-serif text-center leading-[14px]">
+                              +{extra}
+                            </span>
+                          )}
+                        </div>
+                      ) : null;
+                    })()}
                     {/* Icon for non-photo, non-YouTube types */}
-                    {!(off.type === "song" && (off as any).youtube_video_id) && !(off.media_url && off.type === "photo") && (
+                    {!(off.type === "song" && (off as any).youtube_video_id) && !(getOfferingCover(off) && off.type === "photo") && (
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                         style={{ background: "hsl(var(--primary) / 0.08)" }}
