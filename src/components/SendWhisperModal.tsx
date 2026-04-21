@@ -146,10 +146,14 @@ export default function SendWhisperModal({
   // Auto-close only if invite is NOT enabled (otherwise show share step)
   useEffect(() => {
     if (!sent || inviteEnabled) return;
-    toast.success("Whisper sent.");
-    const timer = setTimeout(() => onOpenChange(false), 900);
+    if (presence.atTree) {
+      toast.success("Whisper sent.");
+    } else {
+      toast.success("Whisper rests in the soil — it will stir when you visit this tree.");
+    }
+    const timer = setTimeout(() => onOpenChange(false), 1100);
     return () => clearTimeout(timer);
-  }, [sent, onOpenChange, inviteEnabled]);
+  }, [sent, onOpenChange, inviteEnabled, presence.atTree]);
 
   // Search wanderers for private whispers
   useEffect(() => {
