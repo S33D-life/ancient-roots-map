@@ -37,6 +37,7 @@ import {
   getShareUrl,
 } from "@/utils/shareUtils";
 import { useInvitationAllowance } from "@/hooks/use-invitation-allowance";
+import { useTreePresenceWindow } from "@/hooks/use-tree-presence-window";
 
 interface Props {
   open: boolean;
