@@ -333,6 +333,46 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
           );
           finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
         } catch (uploadErr: any) {
+          // Mid-flight failure — if we lost connection, fall back to the
+          // offline queue so the user doesn't lose their offering.
+          if (activeType === "photo" && !isOnline()) {
+            try {
+              const dataUrls = await Promise.all(photoSlots.map((p) => fileToDataUrl(p.file)));
+              const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
+              const quoteText = quote.text.trim() || null;
+              await queueMultiPhotoOffering({
+                payload: {
+                  tree_id: treeId,
+                  type: activeType,
+                  title: resolvedTitle,
+                  content: content.trim() || null,
+                  created_by: user.id,
+                  sealed_by_staff: sealedByStaff.trim() || null,
+                  meeting_id: meetingId || null,
+                  visibility: activeType === "photo" ? "public" : visibility,
+                  tree_role: treeRole,
+                  impact_weight: impactWeight,
+                  quote_text: quoteText,
+                  quote_author: quoteText ? quote.author.trim() || null : null,
+                  quote_source: quoteText ? quote.source.trim() || null : null,
+                },
+                photoDataUrls: dataUrls,
+                label: `${cfg.singular}${treeName ? ` to ${treeName}` : ""}`,
+              });
+              setUploadBatch(null);
+              setCelebrationMsg({
+                emoji: "📦",
+                message: `${cfg.singular} saved offline`,
+                subtitle: "Photos will upload when you're back online",
+              });
+              setShowCelebration(true);
+              setTimeout(() => { setShowCelebration(false); onOpenChange(false); }, 2400);
+              resetForm();
+              return;
+            } catch {
+              /* fall through to error toast */
+            }
+          }
           setUploadBatch((prev) => (prev ? { ...prev, failed: true } : prev));
           toast({ title: "Upload failed", description: uploadErr.message || "One or more photos failed to upload — try again", variant: "destructive" });
           submittingRef.current = false;
