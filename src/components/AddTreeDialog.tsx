@@ -324,6 +324,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           Math.abs(clampedLat - c.lat) > 1e-7 || Math.abs(clampedLng - c.lng) > 1e-7;
         if (drifted) {
           snapping = true;
+          // Subtle haptic confirms the gentle correction back into the allowed radius.
+          hapticTap();
           // Gentler easing for the snap-back so it feels like settling, not bouncing.
           map.easeTo({
             center: [clampedLng, clampedLat],
