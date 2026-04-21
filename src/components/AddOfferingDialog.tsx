@@ -117,6 +117,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [uploading, setUploading] = useState(false);
   const [photoSlots, setPhotoSlots] = useState<PhotoSlot[]>([]);
   const [uploadingPhotoIds, setUploadingPhotoIds] = useState<Set<string>>(new Set());
+  const [uploadBatch, setUploadBatch] = useState<{ total: number; done: number; failed: boolean } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [sealedByStaff, setSealedByStaff] = useState(() => localStorage.getItem("linked_staff_code") || "");
   const [advancedOpen, setAdvancedOpen] = useState(false);
