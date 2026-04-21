@@ -674,25 +674,78 @@ export default function SendWhisperModal({
               <span className="font-medium text-foreground/80">Sent from afar.</span> You're not at this tree, so the whisper will rest dormant in the soil — it stirs awake when you next visit (within a 12-hour grace).
             </div>
           )}
+
+          {/* Cost summary — shows the exact heart cost for group/audience sends */}
+          {userId && audienceType === "group" && (
+            <div
+              className={`rounded-lg border px-3 py-2.5 text-[11px] font-serif leading-relaxed ${
+                insufficientHearts
+                  ? "border-destructive/40 bg-destructive/5 text-destructive"
+                  : "border-border/40 bg-secondary/10 text-muted-foreground"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-1.5">
+                  <Heart className={`w-3.5 h-3.5 ${insufficientHearts ? "text-destructive" : "text-primary"}`} />
+                  <span className="font-medium text-foreground/90">
+                    Cost to send: {heartCost} {heartCost === 1 ? "heart" : "hearts"}
+                  </span>
+                </span>
+                <span className="opacity-80">
+                  Balance: {heartBalance.totalHearts}
+                </span>
+              </div>
+              <p className="mt-1 text-[10px] opacity-80">
+                {channelType === "tree" && "Tree channel · 3 hearts to whisper into a single tree's soil."}
+                {channelType === "species" && "Species channel · 5 hearts to ripple through one species family."}
+                {channelType === "mycelium" && "Mycelium channel · 7 hearts to travel the wider forest network."}
+              </p>
+              {insufficientHearts && (
+                <p className="mt-1 text-[10px] font-medium">
+                  You're {heartCost - heartBalance.totalHearts} short. Earn hearts by visiting trees, offering, or curating.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
-        <DialogFooter>
-          <Button
-            onClick={handleSend}
-            disabled={
-              sending || !userId || !message.trim() ||
-              (recipientScope === "PRIVATE" && !recipientUserId) ||
-              (audienceType === "group" && !groupId) ||
-              insufficientHearts
-            }
-            className="font-serif tracking-wider gap-2 w-full sm:w-auto"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {audienceType === "group"
-              ? <>Send Whisper <span className="inline-flex items-center gap-0.5 opacity-80"><Heart className="w-3 h-3" />{heartCost}</span></>
-              : "Send Whisper"}
-          </Button>
-        </DialogFooter>
+        {(() => {
+          const missingMessage = !message.trim();
+          const missingRecipient = recipientScope === "PRIVATE" && !recipientUserId;
+          const missingGroup = audienceType === "group" && !groupId;
+          const isDisabled =
+            sending || !userId || missingMessage ||
+            missingRecipient || missingGroup || insufficientHearts;
+
+          let disabledReason: string | null = null;
+          if (!userId) disabledReason = "Sign in to send a whisper.";
+          else if (missingMessage) disabledReason = "Write a message first.";
+          else if (missingRecipient) disabledReason = "Choose a wanderer to whisper to.";
+          else if (missingGroup) disabledReason = "Choose a circle to whisper into.";
+          else if (insufficientHearts) {
+            disabledReason = `Needs ${heartCost} hearts — you have ${heartBalance.totalHearts} (short by ${heartCost - heartBalance.totalHearts}).`;
+          }
+
+          return (
+            <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch sm:space-x-0">
+              <Button
+                onClick={handleSend}
+                disabled={isDisabled}
+                className="font-serif tracking-wider gap-2 w-full sm:w-auto sm:self-end"
+              >
+                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {audienceType === "group"
+                  ? <>Send Whisper <span className="inline-flex items-center gap-0.5 opacity-80"><Heart className="w-3 h-3" />{heartCost}</span></>
+                  : "Send Whisper"}
+              </Button>
+              {isDisabled && disabledReason && !sending && (
+                <p className="text-[11px] font-serif text-muted-foreground text-center sm:text-right">
+                  {disabledReason}
+                </p>
+              )}
+            </DialogFooter>
+          );
+        })()}
       </DialogContent>
     </Dialog>
   );
