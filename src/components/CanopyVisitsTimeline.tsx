@@ -1,17 +1,30 @@
 /**
  * CanopyVisitsTimeline — displays check-in history for a tree.
  * Timeline view with seasonal comparison and visit stats.
+ *
+ * Visibility pass: each entry now reveals the wanderer who met the tree
+ * (avatar + name → /wanderer/:id). A small "Others who met this tree" row
+ * shows up to 6 unique recent visitors above the timeline.
  */
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   TreeDeciduous, ChevronDown, MapPin, Leaf, Flame, Loader2,
 } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 import type { TreeCheckin } from "@/hooks/use-tree-checkins";
 import type { CheckinStats } from "@/hooks/use-tree-checkins";
+
+interface VisitorProfile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
 
 const SEASON_ICONS: Record<string, string> = {
   bud: "🌱", leaf: "🍃", blossom: "🌸", fruit: "🍎", bare: "🪵", other: "🌿",
