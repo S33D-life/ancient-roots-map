@@ -1,25 +1,31 @@
 /**
- * MusicRoom — Browse-first view for music offerings across the forest.
+ * MusicRoom — A living room inside the HeARTwood Library.
  *
- * A living grid of album artwork pulled from existing song offerings.
- * Foundation for a future universal offering browser.
+ * Composition:
+ *   ┌─────────────────────────────────┐
+ *   │  Tree Radio (the hearth)        │  ← focal listening centre
+ *   ├─────────────────────────────────┤
+ *   │  Shared scope dial · search     │  ← one tuning system
+ *   ├─────────────────────────────────┤
+ *   │  Music Library (records grid)   │  ← surrounding shelves
+ *   └─────────────────────────────────┘
  *
- * Scope dial (Tree · Species · Forest):
- *   - Tree   → only the entry tree
- *   - Species → all offerings on trees of the same species
- *   - Forest → every song offering
+ * Scope dial (Tree · Species · Forest) governs BOTH Tree Radio and the
+ * Library grid — one shared tuning interface.
  *
- * Entered with `?tree=:id` to anchor scope to a specific tree.
- * Cards open an in-room detail panel; "Go to tree" is the secondary action.
+ * Entered with `?tree=:id` to anchor scope to a specific tree, in which
+ * case Tree Radio broadcasts from that tree first and the library
+ * widens outward.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink } from "lucide-react";
+import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink, Library } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import MusicRoomTreeRadio from "@/components/library/MusicRoomTreeRadio";
 
 type Scope = "tree" | "species" | "forest";
 
@@ -274,19 +280,19 @@ const MusicRoom = () => {
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-8">
       {/* ── Header ── */}
-      <header className="space-y-3 text-center">
+      <header className="space-y-2 text-center">
         <div className="flex items-center justify-center gap-2 text-primary/80">
           <Music className="w-4 h-4" />
           <p className="font-serif text-[11px] tracking-[0.25em] uppercase">A Living Music Room</p>
           <Music className="w-4 h-4" />
         </div>
-        <p className="font-serif italic text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-          Songs offered to trees by wanderers. Wander the grove by tree, by kin, or across the whole forest.
+        <p className="font-serif italic text-xs sm:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+          Tune into a tree, then wander the wider forest of songs offered by other hands.
         </p>
         {contextTree && (
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/80">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/80 pt-1">
             <span className="font-serif">Anchored at</span>
             <Link
               to={`/tree/${contextTree.id}`}
@@ -305,136 +311,154 @@ const MusicRoom = () => {
         )}
       </header>
 
-      {/* ── Scope dial ── */}
-      <div className="flex justify-center">
-        <div
-          className="inline-flex items-center gap-1 rounded-full border border-border/40 p-1"
-          style={{ background: "hsl(var(--card) / 0.5)" }}
-          role="tablist"
-          aria-label="Scope"
-        >
-          {([
-            { key: "tree", label: "Tree", icon: TreeDeciduous, disabled: !contextTree },
-            { key: "species", label: "Species", icon: Radio, disabled: !contextTree },
-            { key: "forest", label: "Forest", icon: Globe2, disabled: false },
-          ] as const).map((opt) => {
-            const Icon = opt.icon;
-            const active = scope === opt.key;
-            return (
+      {/* ── Tree Radio — the hearth ── */}
+      <MusicRoomTreeRadio
+        scopedSongs={ordered}
+        anchorTree={contextTree}
+        scopeLabel={scope}
+        onOpenSong={(s) => setActiveSong(s)}
+      />
+
+      {/* ── Shared tuning interface (Tree Radio + Library both respond) ── */}
+      <div className="space-y-3">
+        <div className="flex justify-center">
+          <div
+            className="inline-flex items-center gap-1 rounded-full border border-border/40 p-1"
+            style={{ background: "hsl(var(--card) / 0.5)" }}
+            role="tablist"
+            aria-label="Tune by Tree, Species, or Forest"
+          >
+            {([
+              { key: "tree", label: "Tree", icon: TreeDeciduous, disabled: !contextTree },
+              { key: "species", label: "Species", icon: Radio, disabled: !contextTree },
+              { key: "forest", label: "Forest", icon: Globe2, disabled: false },
+            ] as const).map((opt) => {
+              const Icon = opt.icon;
+              const active = scope === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  role="tab"
+                  aria-selected={active}
+                  disabled={opt.disabled}
+                  onClick={() => !opt.disabled && setScope(opt.key)}
+                  className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{
+                    color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="music-scope-pill"
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "hsl(var(--primary) / 0.85)" }}
+                      transition={{ type: "spring", stiffness: 280, damping: 28 }}
+                    />
+                  )}
+                  <span className="relative flex items-center gap-1.5">
+                    <Icon className="w-3 h-3" />
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {!contextTree && (
+          <p className="text-center text-[11px] font-serif italic text-muted-foreground/60">
+            Enter from a tree to filter by Tree or Species.
+          </p>
+        )}
+
+        {/* Search */}
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-sm flex items-center">
+            <Search className="absolute left-3 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search the library…"
+              className="w-full pl-9 pr-9 py-2 rounded-full text-xs font-serif placeholder:italic placeholder:text-muted-foreground/50 outline-none border border-border/40 focus:border-primary/40 transition-colors"
+              style={{ background: "hsl(var(--card) / 0.5)", color: "hsl(var(--foreground))" }}
+              aria-label="Search the music library"
+            />
+            {search && (
               <button
-                key={opt.key}
-                role="tab"
-                aria-selected={active}
-                disabled={opt.disabled}
-                onClick={() => !opt.disabled && setScope(opt.key)}
-                className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                style={{
-                  color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
-                }}
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 p-0.5 rounded-full text-muted-foreground/60 hover:text-foreground transition-colors"
+                aria-label="Clear search"
               >
-                {active && (
-                  <motion.span
-                    layoutId="music-scope-pill"
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: "hsl(var(--primary) / 0.85)" }}
-                    transition={{ type: "spring", stiffness: 280, damping: 28 }}
-                  />
-                )}
-                <span className="relative flex items-center gap-1.5">
-                  <Icon className="w-3 h-3" />
-                  {opt.label}
-                </span>
+                <X className="w-3.5 h-3.5" />
               </button>
-            );
-          })}
+            )}
+          </div>
         </div>
       </div>
 
-      {!contextTree && (
-        <p className="text-center text-[11px] font-serif italic text-muted-foreground/60 -mt-3">
-          Enter from a tree to filter by Tree or Species.
-        </p>
-      )}
-
-      {/* ── Search ── */}
-      <div className="flex justify-center">
-        <div
-          className="relative w-full max-w-sm flex items-center"
-        >
-          <Search className="absolute left-3 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search title, artist, tree, wanderer…"
-            className="w-full pl-9 pr-9 py-2 rounded-full text-xs font-serif placeholder:italic placeholder:text-muted-foreground/50 outline-none border border-border/40 focus:border-primary/40 transition-colors"
-            style={{ background: "hsl(var(--card) / 0.5)", color: "hsl(var(--foreground))" }}
-            aria-label="Search music room"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="absolute right-2.5 p-0.5 rounded-full text-muted-foreground/60 hover:text-foreground transition-colors"
-              aria-label="Clear search"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+      {/* ── Music Library — the surrounding shelves ── */}
+      <section className="space-y-4 pt-2">
+        <div className="flex items-end justify-between gap-3 px-1">
+          <div className="flex items-center gap-2">
+            <Library className="w-3.5 h-3.5 text-muted-foreground/70" />
+            <h3 className="font-serif text-[11px] tracking-[0.22em] uppercase text-muted-foreground/80">
+              Records in the grove
+            </h3>
+          </div>
+          {!loading && (
+            <p className="text-[10px] font-serif italic text-muted-foreground/50">
+              {ordered.length} {ordered.length === 1 ? "record" : "records"}
+              {search && " found"}
+            </p>
           )}
         </div>
-      </div>
 
-      {search && !loading && (
-        <p className="text-center text-[11px] font-serif italic text-muted-foreground/60 -mt-3">
-          {ordered.length === 0
-            ? "Nothing here by that name."
-            : `${ordered.length} record${ordered.length === 1 ? "" : "s"} found`}
-        </p>
-      )}
-
-      {/* ── Grid ── */}
-      {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-square rounded-2xl animate-pulse"
-              style={{ background: "hsl(var(--muted) / 0.3)" }}
-            />
-          ))}
-        </div>
-      ) : ordered.length === 0 ? (
-        <div className="text-center py-16 space-y-3">
-          <Music className="w-8 h-8 text-muted-foreground/40 mx-auto" />
-          <p className="font-serif italic text-sm text-muted-foreground">
-            {search
-              ? "No song matches your search."
-              : scope === "tree"
-              ? "No songs have been offered here yet."
-              : scope === "species"
-              ? "No kin of this species has been sung to yet."
-              : "The forest is quiet. Be the first to offer a song."}
-          </p>
-        </div>
-      ) : (
-        <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 md:gap-6"
-          initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-        >
-          {ordered.map((s) => {
-            const isHere = !!(contextTree && s.tree_id === contextTree.id && scope === "forest");
-            return (
-              <SongCard
-                key={s.id}
-                song={s}
-                emphasised={isHere}
-                onOpen={() => setActiveSong(s)}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-square rounded-2xl animate-pulse"
+                style={{ background: "hsl(var(--muted) / 0.3)" }}
               />
-            );
-          })}
-        </motion.div>
-      )}
+            ))}
+          </div>
+        ) : ordered.length === 0 ? (
+          <div className="text-center py-12 space-y-3">
+            <Music className="w-8 h-8 text-muted-foreground/40 mx-auto" />
+            <p className="font-serif italic text-sm text-muted-foreground">
+              {search
+                ? "No record matches your search."
+                : scope === "tree"
+                ? "No songs have been offered here yet — be the first to leave one."
+                : scope === "species"
+                ? "No kin of this species has been sung to yet."
+                : "The forest is quiet. Be the first to offer a song."}
+            </p>
+          </div>
+        ) : (
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 md:gap-6"
+            initial="hidden"
+            animate="visible"
+            variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
+          >
+            {ordered.map((s) => {
+              const isHere = !!(contextTree && s.tree_id === contextTree.id && scope === "forest");
+              return (
+                <SongCard
+                  key={s.id}
+                  song={s}
+                  emphasised={isHere}
+                  onOpen={() => setActiveSong(s)}
+                />
+              );
+            })}
+          </motion.div>
+        )}
+      </section>
+
 
       {/* ── Detail panel ── */}
       <SongDetail
