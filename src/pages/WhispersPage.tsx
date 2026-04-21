@@ -29,6 +29,9 @@ const DELIVERY_LABELS: Record<string, string> = {
 
 function WhisperCard({ whisper, variant }: { whisper: TreeWhisper; variant: "waiting" | "collected" | "sent" }) {
   const [treeName, setTreeName] = useState<string>("");
+  const [collectedTreeName, setCollectedTreeName] = useState<string>("");
+  const [recipientName, setRecipientName] = useState<string>("");
+  const [collectionCount, setCollectionCount] = useState<number | null>(null);
 
   useEffect(() => {
     supabase
@@ -39,12 +42,56 @@ function WhisperCard({ whisper, variant }: { whisper: TreeWhisper; variant: "wai
       .then(({ data }) => setTreeName(data?.name || "Unknown"));
   }, [whisper.tree_anchor_id]);
 
+  // For "sent" variant: resolve recipient name + collection telemetry
+  useEffect(() => {
+    if (variant !== "sent") return;
+
+    if (whisper.recipient_scope === "PRIVATE" && whisper.recipient_user_id) {
+      supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", whisper.recipient_user_id)
+        .maybeSingle()
+        .then(({ data }) => setRecipientName((data as any)?.full_name || "a wanderer"));
+    }
+
+    if (whisper.collected_tree_id) {
+      supabase
+        .from("trees")
+        .select("name")
+        .eq("id", whisper.collected_tree_id)
+        .maybeSingle()
+        .then(({ data }) => setCollectedTreeName(data?.name || ""));
+    }
+
+    if (whisper.recipient_scope === "PUBLIC") {
+      supabase
+        .from("tree_whisper_collections" as any)
+        .select("id", { count: "exact", head: true })
+        .eq("whisper_id", whisper.id)
+        .then(({ count }) => setCollectionCount(typeof count === "number" ? count : 0));
+    }
+  }, [variant, whisper.id, whisper.recipient_scope, whisper.recipient_user_id, whisper.collected_tree_id]);
+
+  // Derive sender-facing status
+  const sentStatus: "collected" | "waiting" =
+    variant === "sent" && (whisper.status === "collected" || (collectionCount ?? 0) > 0)
+      ? "collected"
+      : "waiting";
+
+  const ageDays = Math.floor(
+    (Date.now() - new Date(whisper.created_at).getTime()) / (1000 * 60 * 60 * 24),
+  );
+  const isStalled = variant === "sent" && sentStatus === "waiting" && ageDays >= 7;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 transition-colors">
+      <Card className={`border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 transition-colors ${
+        isStalled ? "border-amber-500/30" : ""
+      }`}>
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -84,7 +131,7 @@ function WhisperCard({ whisper, variant }: { whisper: TreeWhisper; variant: "wai
               <p className="text-sm font-serif text-foreground/90 leading-relaxed italic">
                 "{whisper.message_content}"
               </p>
-              {whisper.collected_at && (
+              {variant === "collected" && whisper.collected_at && (
                 <p className="text-[10px] text-muted-foreground/50 mt-2 font-serif">
                   Collected {new Date(whisper.collected_at).toLocaleDateString()}
                 </p>
@@ -92,9 +139,70 @@ function WhisperCard({ whisper, variant }: { whisper: TreeWhisper; variant: "wai
             </div>
           )}
 
-          <div className="text-[10px] text-muted-foreground/40 font-serif">
-            {new Date(whisper.created_at).toLocaleDateString()}
-          </div>
+          {/* Sender-facing status panel */}
+          {variant === "sent" && (
+            <div
+              className="rounded-lg px-3 py-2 text-[10px] font-serif flex flex-wrap items-center gap-x-3 gap-y-1"
+              style={{
+                background:
+                  sentStatus === "collected"
+                    ? "hsl(var(--primary) / 0.08)"
+                    : isStalled
+                    ? "hsl(38 92% 50% / 0.08)"
+                    : "hsl(var(--muted) / 0.4)",
+              }}
+            >
+              {sentStatus === "collected" ? (
+                <>
+                  <span className="text-primary">✓ Collected</span>
+                  {whisper.recipient_scope === "PRIVATE" ? (
+                    <>
+                      <span className="text-muted-foreground/70">
+                        by {recipientName || "the recipient"}
+                      </span>
+                      {whisper.collected_at && (
+                        <span className="text-muted-foreground/50">
+                          {new Date(whisper.collected_at).toLocaleDateString()}
+                        </span>
+                      )}
+                      {collectedTreeName && (
+                        <span className="text-muted-foreground/60">
+                          at {collectedTreeName}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground/70">
+                      {collectionCount ?? 0}{" "}
+                      {collectionCount === 1 ? "wanderer" : "wanderers"} received
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className={isStalled ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground/80"}>
+                    {isStalled ? "⏳ Stalled" : "⋯ Waiting"}
+                  </span>
+                  <span className="text-muted-foreground/60">
+                    {whisper.recipient_scope === "PRIVATE"
+                      ? `${recipientName || "Recipient"} hasn't visited yet`
+                      : whisper.recipient_scope === "PUBLIC"
+                      ? `${collectionCount ?? 0} have collected`
+                      : "Awaiting collection"}
+                  </span>
+                  <span className="text-muted-foreground/50">
+                    {ageDays === 0 ? "today" : `${ageDays}d ago`}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+
+          {variant !== "sent" && (
+            <div className="text-[10px] text-muted-foreground/40 font-serif">
+              {new Date(whisper.created_at).toLocaleDateString()}
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
