@@ -773,9 +773,22 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const currentStepIndex = STEPS.findIndex(s => s.key === step);
   const currentStepConfig = STEPS[currentStepIndex];
 
-  const distanceFromGps = (originLat !== null && originLng !== null && lat !== null && lng !== null)
-    ? Math.round(getDistance(originLat, originLng, lat, lng) * 3.28084)
+  // Locale-aware distance: meters for metric devices, feet otherwise.
+  const usesMetric = useMemo(() => {
+    try {
+      const lang = (navigator.language || "en-US").toLowerCase();
+      // US, Liberia, Myanmar — feet/inches. Everywhere else metric.
+      return !/^(en-us|en-lr|my)/.test(lang);
+    } catch {
+      return true;
+    }
+  }, []);
+  const distanceFromGpsMeters = (originLat !== null && originLng !== null && lat !== null && lng !== null)
+    ? Math.round(getDistance(originLat, originLng, lat, lng))
     : 0;
+  const distanceFromGps = usesMetric
+    ? `${distanceFromGpsMeters} m`
+    : `${Math.round(distanceFromGpsMeters * 3.28084)} ft`;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) setAdjustMode(false); onOpenChange(v); }}>
@@ -1230,8 +1243,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   >
                     <div className="staff-readout__bubble">
                       <span className="staff-readout__label">Selected point</span>
-                      {originLat !== null && originLng !== null && (
-                        <span className="staff-readout__distance">{distanceFromGps} ft from you</span>
+                      {originLat !== null && originLng !== null && distanceFromGpsMeters > 0 && (
+                        <span className="staff-readout__distance">{distanceFromGps} from you</span>
                       )}
                     </div>
                   </div>
@@ -1290,15 +1303,15 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       className="flex-1 font-serif h-11 text-sm"
                       onClick={() => { setAdjustMode(false); setLat(originLat); setLng(originLng); }}
                     >
-                      Skip
+                      Use my GPS point
                     </Button>
                     <Button
                       className="flex-1 gap-2 font-serif h-11 text-sm"
                       onClick={() => {
-                        // Settle animation: mark pin as confirmed, then proceed
+                        // Settle animation, then advance — single quiet moment, no extra toast.
                         const pin = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
                         if (pin) pin.dataset.state = 'confirmed';
-                        toast({ title: "🌳 You've met here", description: "This is where you stand together" });
+                        hapticTap();
                         setTimeout(() => confirmAdjustment(), 280);
                       }}
                       style={{
