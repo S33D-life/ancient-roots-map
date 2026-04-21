@@ -613,6 +613,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   photos={photoSlots}
                   onAdd={addPhoto}
                   onRemove={removePhoto}
+                  onReorder={(next) => setPhotoSlots(next)}
                   uploadingIds={uploadingPhotoIds}
                   disabled={loading}
                 />
