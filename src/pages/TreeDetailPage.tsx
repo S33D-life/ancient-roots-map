@@ -621,6 +621,9 @@ const TreeDetailPage = () => {
           }}
         />
 
+        {/* Witness CTA — surfaces resonance gesture impossible-to-miss */}
+        <TreeWitnessStrip offerings={offerings} userId={userId} />
+
         {/* Inviter arrival context */}
         {arrivalRef && (
           <Suspense fallback={null}>
