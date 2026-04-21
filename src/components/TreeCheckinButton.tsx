@@ -127,10 +127,10 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
             notify(
               {
                 user_id: t.created_by,
-                title: "Your tree was visited",
+                title: `Someone arrived beneath ${treeName}`,
                 body: note.trim()
-                  ? `Someone arrived beneath ${treeName} and left a reflection`
-                  : `Someone arrived beneath ${treeName}`,
+                  ? "A wanderer paused here and left a reflection."
+                  : "A wanderer paused here. The tree was felt.",
                 category: "tree_visit",
                 deep_link: `/tree/${treeId}`,
                 metadata: { tree_id: treeId, has_reflection: !!note.trim() },

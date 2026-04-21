@@ -110,8 +110,8 @@ export default function QuickCheckinButton({
             notify(
               {
                 user_id: t.created_by,
-                title: "Your tree was visited",
-                body: `Someone arrived beneath ${treeName}`,
+                title: `Someone arrived beneath ${treeName}`,
+                body: "A wanderer paused here. The tree was felt.",
                 category: "tree_visit",
                 deep_link: `/tree/${treeId}`,
                 metadata: { tree_id: treeId },
