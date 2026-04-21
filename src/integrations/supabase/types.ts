@@ -9150,6 +9150,11 @@ export type Database = {
       }
       trees: {
         Row: {
+          age_confidence: string | null
+          age_exact: number | null
+          age_max: number | null
+          age_min: number | null
+          age_source: string | null
           archetype: string | null
           bioregion: string | null
           created_at: string
@@ -9195,6 +9200,11 @@ export type Database = {
           wish_tags: string[] | null
         }
         Insert: {
+          age_confidence?: string | null
+          age_exact?: number | null
+          age_max?: number | null
+          age_min?: number | null
+          age_source?: string | null
           archetype?: string | null
           bioregion?: string | null
           created_at?: string
@@ -9240,6 +9250,11 @@ export type Database = {
           wish_tags?: string[] | null
         }
         Update: {
+          age_confidence?: string | null
+          age_exact?: number | null
+          age_max?: number | null
+          age_min?: number | null
+          age_source?: string | null
           archetype?: string | null
           bioregion?: string | null
           created_at?: string
