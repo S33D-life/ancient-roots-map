@@ -5,7 +5,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,8 @@ export interface OfferingCardProps {
   showTreeLink?: boolean;
   /** Called when user deletes their offering */
   onDelete?: (offeringId: string) => void;
+  /** Called when user wants to edit their own offering */
+  onEdit?: (offeringId: string) => void;
 }
 
 /* ── Helper ── */
@@ -105,43 +107,58 @@ const CardFooter = ({
   treeSpecies,
   treeNation,
   userId,
+  onEdit,
 }: {
   offering: Offering;
   treeId?: string;
   treeSpecies?: string | null;
   treeNation?: string | null;
   userId?: string | null;
-}) => (
-  <div className="flex items-center justify-between mt-4">
-    <DateLabel date={offering.created_at} />
-    <div className="flex items-center gap-3">
-      <OfferingResonanceButton
-        offeringId={offering.id}
-        userId={userId ?? null}
-        initialCount={(offering as any).resonance_count || 0}
-      />
-      {treeId && (
-        <InfluenceUpvoteButton
+  onEdit?: (offeringId: string) => void;
+}) => {
+  const isAuthor = !!userId && offering.created_by === userId;
+  return (
+    <div className="flex items-center justify-between mt-4">
+      <DateLabel date={offering.created_at} />
+      <div className="flex items-center gap-3">
+        <OfferingResonanceButton
           offeringId={offering.id}
-          treeId={treeId}
-          treeSpecies={treeSpecies}
-          treeNation={treeNation}
           userId={userId ?? null}
-          influenceScore={offering.influence_score || 0}
+          initialCount={(offering as any).resonance_count || 0}
         />
-      )}
-      <button
-        onClick={() => shareOffering(offering)}
-        className="text-muted-foreground/60 hover:text-primary transition-colors"
-        title="Share"
-      >
-        <Share2 className="w-3.5 h-3.5" />
-      </button>
-      <SealedByLabel staff={offering.sealed_by_staff} />
-      <SkystampSeal skyStampId={offering.sky_stamp_id} />
+        {treeId && (
+          <InfluenceUpvoteButton
+            offeringId={offering.id}
+            treeId={treeId}
+            treeSpecies={treeSpecies}
+            treeNation={treeNation}
+            userId={userId ?? null}
+            influenceScore={offering.influence_score || 0}
+          />
+        )}
+        <button
+          onClick={() => shareOffering(offering)}
+          className="text-muted-foreground/60 hover:text-primary transition-colors"
+          title="Share"
+        >
+          <Share2 className="w-3.5 h-3.5" />
+        </button>
+        {isAuthor && onEdit && (
+          <button
+            onClick={() => onEdit(offering.id)}
+            className="text-muted-foreground/60 hover:text-primary transition-colors"
+            title="Edit your offering"
+            aria-label="Edit offering"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        )}
+        <SealedByLabel staff={offering.sealed_by_staff} />
+        <SkystampSeal skyStampId={offering.sky_stamp_id} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const QuoteSection = ({ offering }: { offering: Offering }) => {
   if (!offering.quote_text) return null;
@@ -158,7 +175,7 @@ const QuoteSection = ({ offering }: { offering: Offering }) => {
    FULL CARD VARIANTS
    ══════════════════════════════════════════ */
 
-const LiteraryFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => {
+const LiteraryFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
   const isPoemStyle = offering.type === "poem";
   return (
     <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
@@ -184,13 +201,15 @@ const LiteraryFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Off
           </div>
         )}
         <QuoteSection offering={offering} />
-        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
       </CardContent>
     </Card>
   );
 };
 
-const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
+  const isAuthor = !!userId && offering.created_by === userId;
+  return (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
       <div className="flex items-start gap-4">
@@ -234,6 +253,16 @@ const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offerin
             <button onClick={() => shareOffering(offering)} className="text-muted-foreground/60 hover:text-primary transition-colors" title="Share">
               <Share2 className="w-3.5 h-3.5" />
             </button>
+            {isAuthor && onEdit && (
+              <button
+                onClick={() => onEdit(offering.id)}
+                className="text-muted-foreground/60 hover:text-primary transition-colors"
+                title="Edit your offering"
+                aria-label="Edit offering"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
             <SealedByLabel staff={offering.sealed_by_staff} />
             <SkystampSeal skyStampId={offering.sky_stamp_id} />
           </div>
@@ -241,9 +270,10 @@ const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offerin
       </div>
     </CardContent>
   </Card>
-);
+  );
+};
 
-const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/40 transition-colors">
     <CardContent className="p-5">
       <div className="flex items-center gap-2 mb-2">
@@ -264,12 +294,12 @@ const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offering
           View on marketplace →
         </a>
       )}
-      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
     </CardContent>
   </Card>
 );
 
-const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => {
+const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
   const photos = getOfferingPhotos(offering);
   const [idx, setIdx] = useState(0);
   const total = photos.length;
@@ -328,13 +358,13 @@ const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offeri
           <p className="text-sm text-foreground/70 font-serif mt-2 whitespace-pre-wrap">{offering.content}</p>
         )}
         <QuoteSection offering={offering} />
-        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
       </CardContent>
     </Card>
   );
 };
 
-const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
       <div className="flex items-center gap-2 mb-2">
@@ -350,7 +380,7 @@ const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offe
         </audio>
       )}
       <QuoteSection offering={offering} />
-      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
     </CardContent>
   </Card>
 );
@@ -368,6 +398,7 @@ const CompactRow = ({
   treeName,
   showTreeLink,
   onDelete,
+  onEdit,
 }: OfferingCardProps) => {
   const isAuthor = userId && offering.created_by === userId;
   return (
@@ -426,6 +457,18 @@ const CompactRow = ({
           {offering.visibility && offering.visibility !== "public" && visibilityIcons[offering.visibility]}
           {offering.type}
         </Badge>
+        {isAuthor && onEdit && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-primary shrink-0"
+            onClick={() => onEdit(offering.id)}
+            aria-label="Edit offering"
+            title="Edit your offering"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )}
         {isAuthor && onDelete && (
           <Button
             variant="ghost"

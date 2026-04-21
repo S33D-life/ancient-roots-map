@@ -4715,6 +4715,7 @@ export type Database = {
           tree_id: string
           tree_role: string
           type: Database["public"]["Enums"]["offering_type"]
+          updated_at: string
           visibility: string
           youtube_embed_url: string | null
           youtube_url: string | null
@@ -4746,6 +4747,7 @@ export type Database = {
           tree_id: string
           tree_role?: string
           type: Database["public"]["Enums"]["offering_type"]
+          updated_at?: string
           visibility?: string
           youtube_embed_url?: string | null
           youtube_url?: string | null
@@ -4777,6 +4779,7 @@ export type Database = {
           tree_id?: string
           tree_role?: string
           type?: Database["public"]["Enums"]["offering_type"]
+          updated_at?: string
           visibility?: string
           youtube_embed_url?: string | null
           youtube_url?: string | null
