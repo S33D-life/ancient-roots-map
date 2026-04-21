@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 import OfferingCard from "@/components/OfferingCard";
+import EditOfferingDialog from "@/components/EditOfferingDialog";
 import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
@@ -40,6 +41,8 @@ interface OfferingListProps {
   sortable?: boolean;
   /** Called after a successful delete so parent can refresh */
   onDelete?: () => void;
+  /** Called after a successful edit so parent can refresh */
+  onEdit?: () => void;
 }
 
 const OfferingList = ({
@@ -51,9 +54,11 @@ const OfferingList = ({
   variant = "compact",
   sortable = false,
   onDelete,
+  onEdit,
 }: OfferingListProps) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Offering | null>(null);
+  const [editTarget, setEditTarget] = useState<Offering | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
@@ -163,6 +168,10 @@ const OfferingList = ({
                   onDelete={(id) => {
                     const target = offerings.find((o) => o.id === id);
                     if (target) setDeleteTarget(target);
+                  }}
+                  onEdit={(id) => {
+                    const target = offerings.find((o) => o.id === id);
+                    if (target) setEditTarget(target);
                   }}
                 />
               </motion.div>
