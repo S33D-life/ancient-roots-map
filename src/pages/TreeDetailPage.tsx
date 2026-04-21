@@ -500,7 +500,6 @@ const TreeDetailPage = () => {
   // photoOfferings + deep-link sync are declared above (before early returns)
   // to keep hook order stable across loading/error states.
 
-  }, [searchParams, photoOfferings.length]);
 
   /** Open the lightbox AND mirror state to URL so the moment is shareable. */
   const openLightboxAt = (flatIdx: number) => {
