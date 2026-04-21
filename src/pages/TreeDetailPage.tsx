@@ -214,6 +214,23 @@ const TreeDetailPage = () => {
     () => getOfferingsByType("photo").filter((o) => o.media_url),
     [getOfferingsByType]
   );
+
+  /**
+   * Deep-link sync: open the lightbox to a specific offering/photo when the
+   * URL carries `?offering=<id>&photo=<idx>`. Must be declared before any
+   * early returns to keep hook order consistent.
+   */
+  useEffect(() => {
+    const offeringId = searchParams.get("offering");
+    if (!offeringId || photoOfferings.length === 0) return;
+    const photoIdx = Math.max(0, parseInt(searchParams.get("photo") || "0", 10) || 0);
+    const flatIdx = findFlatPhotoIndex(photoOfferings, offeringId, photoIdx);
+    if (flatIdx >= 0 && lightboxIndex !== flatIdx) {
+      setLightboxIndex(flatIdx);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, photoOfferings.length]);
+
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
