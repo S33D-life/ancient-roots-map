@@ -107,43 +107,58 @@ const CardFooter = ({
   treeSpecies,
   treeNation,
   userId,
+  onEdit,
 }: {
   offering: Offering;
   treeId?: string;
   treeSpecies?: string | null;
   treeNation?: string | null;
   userId?: string | null;
-}) => (
-  <div className="flex items-center justify-between mt-4">
-    <DateLabel date={offering.created_at} />
-    <div className="flex items-center gap-3">
-      <OfferingResonanceButton
-        offeringId={offering.id}
-        userId={userId ?? null}
-        initialCount={(offering as any).resonance_count || 0}
-      />
-      {treeId && (
-        <InfluenceUpvoteButton
+  onEdit?: (offeringId: string) => void;
+}) => {
+  const isAuthor = !!userId && offering.created_by === userId;
+  return (
+    <div className="flex items-center justify-between mt-4">
+      <DateLabel date={offering.created_at} />
+      <div className="flex items-center gap-3">
+        <OfferingResonanceButton
           offeringId={offering.id}
-          treeId={treeId}
-          treeSpecies={treeSpecies}
-          treeNation={treeNation}
           userId={userId ?? null}
-          influenceScore={offering.influence_score || 0}
+          initialCount={(offering as any).resonance_count || 0}
         />
-      )}
-      <button
-        onClick={() => shareOffering(offering)}
-        className="text-muted-foreground/60 hover:text-primary transition-colors"
-        title="Share"
-      >
-        <Share2 className="w-3.5 h-3.5" />
-      </button>
-      <SealedByLabel staff={offering.sealed_by_staff} />
-      <SkystampSeal skyStampId={offering.sky_stamp_id} />
+        {treeId && (
+          <InfluenceUpvoteButton
+            offeringId={offering.id}
+            treeId={treeId}
+            treeSpecies={treeSpecies}
+            treeNation={treeNation}
+            userId={userId ?? null}
+            influenceScore={offering.influence_score || 0}
+          />
+        )}
+        <button
+          onClick={() => shareOffering(offering)}
+          className="text-muted-foreground/60 hover:text-primary transition-colors"
+          title="Share"
+        >
+          <Share2 className="w-3.5 h-3.5" />
+        </button>
+        {isAuthor && onEdit && (
+          <button
+            onClick={() => onEdit(offering.id)}
+            className="text-muted-foreground/60 hover:text-primary transition-colors"
+            title="Edit your offering"
+            aria-label="Edit offering"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        )}
+        <SealedByLabel staff={offering.sealed_by_staff} />
+        <SkystampSeal skyStampId={offering.sky_stamp_id} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const QuoteSection = ({ offering }: { offering: Offering }) => {
   if (!offering.quote_text) return null;
