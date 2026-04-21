@@ -6,6 +6,15 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhisper } from "@/hooks/use-whispers";
+import {
+  sendMycelialWhisper,
+  useUserWhisperGroups,
+  createWhisperGroup,
+  CHANNEL_COST,
+  type WhisperChannelType,
+  type WhisperAudienceType,
+} from "@/hooks/use-mycelial-whispers";
+import { useHeartBalance } from "@/hooks/use-heart-balance";
 import { emitMycelialThread } from "@/lib/mycelial-network";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -18,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, TreeDeciduous, Users, Globe, User, Share2, Copy, Check, Wind } from "lucide-react";
+import { Loader2, Send, TreeDeciduous, Users, Globe, User, Share2, Copy, Check, Wind, Heart, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import {
