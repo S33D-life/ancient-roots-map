@@ -51,6 +51,8 @@ export async function sendWhisper(params: {
   deliveryScope: "ANY_TREE" | "SPECIFIC_TREE" | "SPECIES_MATCH";
   deliveryTreeId?: string;
   deliverySpeciesKey?: string;
+  /** When false, whisper is created dormant (sender not at the tree). Default true. */
+  isActive?: boolean;
 }) {
   const { data, error } = await supabase
     .from("tree_whispers" as any)
@@ -65,6 +67,7 @@ export async function sendWhisper(params: {
       delivery_scope: params.deliveryScope,
       delivery_tree_id: params.deliveryTreeId || null,
       delivery_species_key: params.deliverySpeciesKey || null,
+      is_active: params.isActive ?? true,
     })
     .select()
     .single();

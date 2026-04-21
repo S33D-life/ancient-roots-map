@@ -37,6 +37,7 @@ import {
   getShareUrl,
 } from "@/utils/shareUtils";
 import { useInvitationAllowance } from "@/hooks/use-invitation-allowance";
+import { useTreePresenceWindow } from "@/hooks/use-tree-presence-window";
 
 interface Props {
   open: boolean;
@@ -79,6 +80,26 @@ export default function SendWhisperModal({
   const heartBalance = useHeartBalance(userId);
   const heartCost = audienceType === "group" ? CHANNEL_COST[channelType] : 0;
   const insufficientHearts = audienceType === "group" && heartBalance.totalHearts < heartCost;
+
+  // Fetch tree coordinates so presence can be evaluated by geo as a fallback.
+  const [treeCoords, setTreeCoords] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
+  useEffect(() => {
+    if (!treeId) return;
+    supabase
+      .from("trees")
+      .select("latitude, longitude")
+      .eq("id", treeId)
+      .maybeSingle()
+      .then(({ data }) => setTreeCoords({ lat: (data as any)?.latitude ?? null, lng: (data as any)?.longitude ?? null }));
+  }, [treeId]);
+
+  const presence = useTreePresenceWindow({
+    userId,
+    treeId,
+    treeLat: treeCoords.lat,
+    treeLng: treeCoords.lng,
+    enabled: open,
+  });
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -125,10 +146,14 @@ export default function SendWhisperModal({
   // Auto-close only if invite is NOT enabled (otherwise show share step)
   useEffect(() => {
     if (!sent || inviteEnabled) return;
-    toast.success("Whisper sent.");
-    const timer = setTimeout(() => onOpenChange(false), 900);
+    if (presence.atTree) {
+      toast.success("Whisper sent.");
+    } else {
+      toast.success("Whisper rests in the soil — it will stir when you visit this tree.");
+    }
+    const timer = setTimeout(() => onOpenChange(false), 1100);
     return () => clearTimeout(timer);
-  }, [sent, onOpenChange, inviteEnabled]);
+  }, [sent, onOpenChange, inviteEnabled, presence.atTree]);
 
   // Search wanderers for private whispers
   useEffect(() => {
@@ -180,7 +205,7 @@ export default function SendWhisperModal({
         groupId,
         treeAnchorId: treeId,
         messageContent: message.trim(),
-        isActive: true,
+        isActive: presence.atTree,
       });
       if (error || !data?.ok) {
         if (data?.error === "insufficient_hearts") {
@@ -203,6 +228,7 @@ export default function SendWhisperModal({
         deliveryScope,
         deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
         deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
+        isActive: presence.atTree,
       });
       if (error) {
         toast.error("Failed to send whisper.");
@@ -640,6 +666,12 @@ export default function SendWhisperModal({
           {!userId && (
             <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-serif text-muted-foreground">
               You can compose freely. Sign in is required to send.
+            </div>
+          )}
+
+          {userId && !presence.loading && !presence.atTree && (
+            <div className="rounded-md border border-muted-foreground/20 bg-muted/40 px-3 py-2 text-[11px] font-serif text-muted-foreground leading-relaxed">
+              <span className="font-medium text-foreground/80">Sent from afar.</span> You're not at this tree, so the whisper will rest dormant in the soil — it stirs awake when you next visit (within a 12-hour grace).
             </div>
           )}
         </div>
