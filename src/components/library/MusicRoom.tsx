@@ -17,7 +17,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import ResponsiveDialog from "@/components/ui/responsive-dialog";
 
 type Scope = "tree" | "species" | "forest";
 
