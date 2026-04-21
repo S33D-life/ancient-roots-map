@@ -209,6 +209,11 @@ const TreeDetailPage = () => {
   const stewardshipOfferings = useMemo(() => getByRole("stewardship"), [getByRole]);
   const anchoredOfferings = useMemo(() => getByRole("anchored"), [getByRole]);
   const [showAnchored, setShowAnchored] = useState(false);
+  // Derived: photo offerings (memoized so deep-link effect deps stay stable)
+  const photoOfferings = useMemo(
+    () => getOfferingsByType("photo").filter((o) => o.media_url),
+    [getOfferingsByType]
+  );
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
