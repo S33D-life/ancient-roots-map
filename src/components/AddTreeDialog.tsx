@@ -1347,34 +1347,58 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   )}
                 </div>
 
-                {/* About this tree — age, variety, garden */}
-                <div className="space-y-3 pt-1">
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50 font-serif">
-                    About this tree
-                  </p>
-                  <TreeAgeInput value={age} onChange={setAge} />
-                  <OrchardModePanel value={orchard} onChange={setOrchard} />
-                  <GardenPicker
-                    value={gardenId}
-                    onChange={setGardenId}
-                    treeLat={lat}
-                    treeLng={lng}
-                    canCreateGarden={canCreateGarden}
-                  />
-                </div>
+                {/* About this tree — one calm section, three soft layers */}
+                <section className="pt-1">
+                  {/* Layer 1 — Core: Age */}
+                  <div className="pb-3">
+                    <TreeAgeInput value={age} onChange={setAge} />
+                  </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="description" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
-                    placeholder="What did you notice? How did you feel standing beside it?"
-                    maxLength={2000}
-                    rows={4}
-                    className="font-serif text-sm"
-                  />
-                </div>
+                  {/* Hairline divider + optional-context label */}
+                  <div className="flex items-center gap-2 py-2">
+                    <Separator className="flex-1 bg-border/40" />
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/45 font-serif whitespace-nowrap">
+                      Optional context
+                    </span>
+                    <Separator className="flex-1 bg-border/40" />
+                  </div>
+
+                  {/* Layer 2 — Optional: how it was grown / where it belongs */}
+                  <div className="space-y-2">
+                    <OrchardModePanel value={orchard} onChange={setOrchard} />
+                    <GardenPicker
+                      value={gardenId}
+                      onChange={setGardenId}
+                      treeLat={lat}
+                      treeLng={lng}
+                      canCreateGarden={canCreateGarden}
+                    />
+                  </div>
+
+                  {/* Hairline divider before reflection */}
+                  <div className="py-3">
+                    <Separator className="bg-border/40" />
+                  </div>
+
+                  {/* Layer 3 — Final soft layer: reflection */}
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="description"
+                      className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif"
+                    >
+                      A few words, if they come
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
+                      placeholder="What did you notice? How did you feel standing beside it?"
+                      maxLength={2000}
+                      rows={4}
+                      className="font-serif text-sm"
+                    />
+                  </div>
+                </section>
 
                 <p className="text-[10px] text-center font-serif" style={{ color: 'hsla(42, 40%, 55%, 0.4)' }}>
                   Take your time. This tree has waited centuries.
