@@ -243,19 +243,35 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       }
 
       let finalMediaUrl = mediaUrl.trim() || null;
-      if (selectedFile) {
+      let uploadedPhotos: string[] = [];
+      if (photoSlots.length > 0) {
         setUploading(true);
+        setUploadingPhotoIds(new Set(photoSlots.map((p) => p.id)));
         try {
-          finalMediaUrl = await uploadFile(selectedFile, user.id);
+          // Upload all photos in parallel; clear each from the "uploading" set as it finishes
+          uploadedPhotos = await Promise.all(
+            photoSlots.map(async (p) => {
+              const url = await uploadFile(p.file, user.id);
+              setUploadingPhotoIds((prev) => {
+                const next = new Set(prev);
+                next.delete(p.id);
+                return next;
+              });
+              return url;
+            }),
+          );
+          finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
         } catch (uploadErr: any) {
-          toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+          toast({ title: "Upload failed", description: uploadErr.message || "One or more photos failed to upload — try again", variant: "destructive" });
           submittingRef.current = false;
           setLoading(false);
           setUploading(false);
+          setUploadingPhotoIds(new Set());
           clearTimeout(timeout);
           return;
         } finally {
           setUploading(false);
+          setUploadingPhotoIds(new Set());
         }
       }
 
@@ -270,6 +286,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         title: resolvedTitle,
         content: content.trim() || null,
         media_url: finalMediaUrl,
+        photos: uploadedPhotos,
         nft_link: activeType === "nft" ? nftLink.trim() || null : null,
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
