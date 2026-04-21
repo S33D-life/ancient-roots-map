@@ -7,7 +7,7 @@
  */
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, ImagePlus, X, Loader2, Star } from "lucide-react";
+import { Camera, ImagePlus, X, Loader2, Star, RotateCw, AlertCircle } from "lucide-react";
 
 export interface PhotoSlot {
   id: string;
@@ -25,6 +25,12 @@ interface Props {
   disabled?: boolean;
   /** When true, shows per-slot processing state */
   uploadingIds?: Set<string>;
+  /** Photo slot ids whose upload failed and can be retried. */
+  failedIds?: Set<string>;
+  /** Photo slot ids whose upload succeeded (used to dim the retry affordance once recovered). */
+  successIds?: Set<string>;
+  /** Called when the user taps the retry button on a failed slot. */
+  onRetry?: (id: string) => void;
   /** When provided, shows an overall upload progress bar above the tray. */
   uploadProgress?: {
     /** Total photos being uploaded in this batch. */
@@ -47,6 +53,9 @@ const OfferingPhotoTray = ({
   max = 3,
   disabled = false,
   uploadingIds,
+  failedIds,
+  successIds,
+  onRetry,
   uploadProgress,
   offline = false,
 }: Props) => {
