@@ -54,12 +54,6 @@ export default function GardenDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>{garden.name} · Garden · S33D</title>
-        <meta name="description" content={garden.description?.slice(0, 155) || `${garden.name} — a living garden on the S33D atlas.`} />
-        <link rel="canonical" href={`https://www.s33d.life/garden/${garden.slug}`} />
-      </Helmet>
-
       <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6">
         {/* Back */}
         <Link to="/map" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-serif tracking-wider">
