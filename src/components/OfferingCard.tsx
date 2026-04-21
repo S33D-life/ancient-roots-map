@@ -175,7 +175,7 @@ const QuoteSection = ({ offering }: { offering: Offering }) => {
    FULL CARD VARIANTS
    ══════════════════════════════════════════ */
 
-const LiteraryFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => {
+const LiteraryFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
   const isPoemStyle = offering.type === "poem";
   return (
     <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
@@ -201,13 +201,15 @@ const LiteraryFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Off
           </div>
         )}
         <QuoteSection offering={offering} />
-        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
       </CardContent>
     </Card>
   );
 };
 
-const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
+  const isAuthor = !!userId && offering.created_by === userId;
+  return (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
       <div className="flex items-start gap-4">
@@ -251,6 +253,16 @@ const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offerin
             <button onClick={() => shareOffering(offering)} className="text-muted-foreground/60 hover:text-primary transition-colors" title="Share">
               <Share2 className="w-3.5 h-3.5" />
             </button>
+            {isAuthor && onEdit && (
+              <button
+                onClick={() => onEdit(offering.id)}
+                className="text-muted-foreground/60 hover:text-primary transition-colors"
+                title="Edit your offering"
+                aria-label="Edit offering"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
             <SealedByLabel staff={offering.sealed_by_staff} />
             <SkystampSeal skyStampId={offering.sky_stamp_id} />
           </div>
@@ -258,7 +270,8 @@ const SongFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offerin
       </div>
     </CardContent>
   </Card>
-);
+  );
+};
 
 const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/40 transition-colors">
