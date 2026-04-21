@@ -1143,20 +1143,54 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
               <div className="space-y-3 -mx-5 -my-4">
                 {/* Header bar over map */}
                 <div className="px-5 pt-4 pb-2">
-                  <p className="text-xs text-muted-foreground font-serif leading-relaxed">
-                    <strong style={{ color: 'hsl(42, 75%, 60%)' }}>Tap the map</strong> to place the tree, or drag the pin to fine-tune — up to <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) from your GPS fix.
+                  <h3 className="text-sm font-serif" style={{ color: 'hsl(42, 75%, 55%)' }}>
+                    Place your staff at the tree
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mt-1">
+                    Move the map to align the staff with the trunk — within <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) of your GPS fix.
                   </p>
                 </div>
 
-                {/* Map container — fills available space */}
+                {/* Map + center-fixed staff pin */}
                 <div
-                  ref={mapContainerRef}
-                  className="w-full border-y overflow-hidden"
+                  className="relative w-full border-y overflow-hidden"
                   style={{
-                    height: 'clamp(200px, 40dvh, 340px)',
+                    height: 'clamp(220px, 42dvh, 360px)',
                     borderColor: 'hsla(42, 40%, 30%, 0.2)',
                   }}
-                />
+                >
+                  <div ref={mapContainerRef} className="absolute inset-0" />
+
+                  {/* STAFF PIN — center-fixed visual overlay (non-interactive) */}
+                  <div
+                    data-staff-pin
+                    data-state="idle"
+                    aria-hidden="true"
+                    className="staff-pin pointer-events-none absolute left-1/2 top-1/2 z-[5]"
+                    style={{ transform: 'translate(-50%, -100%)' }}
+                  >
+                    {/* Halo on the ground */}
+                    <div className="staff-pin__halo" />
+                    {/* Vertical staff */}
+                    <div className="staff-pin__staff" />
+                    {/* Carved head / orb at the top */}
+                    <div className="staff-pin__head" />
+                    {/* Foot anchored at the exact ground point */}
+                    <div className="staff-pin__foot" />
+                  </div>
+
+                  {/* Legend */}
+                  <div className="absolute bottom-2 left-2 flex flex-col gap-1 text-[10px] font-serif text-white/90 bg-black/40 backdrop-blur-sm rounded-md px-2 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'hsl(205, 90%, 55%)', boxShadow: '0 0 0 2px hsla(205, 90%, 55%, 0.3)' }} />
+                      <span>You</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block w-2 h-2.5 rounded-sm" style={{ background: 'linear-gradient(180deg, hsl(34, 55%, 45%), hsl(28, 50%, 28%))' }} />
+                      <span>Staff (the tree)</span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Location info bar */}
                 <div className="px-5 space-y-3 pb-4">
@@ -1172,7 +1206,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       </div>
                       {originLat !== null && originLng !== null && (
                         <span className="text-muted-foreground/60 font-serif text-[10px]">
-                          {distanceFromGps} ft from GPS
+                          {distanceFromGps} ft from you
                         </span>
                       )}
                     </motion.div>
@@ -1188,14 +1222,20 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     </Button>
                     <Button
                       className="flex-1 gap-2 font-serif h-11 text-sm"
-                      onClick={confirmAdjustment}
+                      onClick={() => {
+                        // Settle animation: mark pin as confirmed, then proceed
+                        const pin = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
+                        if (pin) pin.dataset.state = 'confirmed';
+                        toast({ title: "🌳 Position anchored", description: "Your staff is planted beside the tree" });
+                        setTimeout(() => confirmAdjustment(), 280);
+                      }}
                       style={{
                         background: 'linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))',
                         color: 'hsl(120, 50%, 70%)',
                         border: '1px solid hsla(120, 40%, 35%, 0.4)',
                       }}
                     >
-                      <Check className="h-4 w-4" /> Confirm Location
+                      <Check className="h-4 w-4" /> Anchor here
                     </Button>
                   </div>
                 </div>
