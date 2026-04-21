@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Lazy room components — each loads independently
 const StaffRoomGallery = lazy(() => import("@/components/StaffRoomGallery"));
-const EarthRadioRoom = lazy(() => import("@/components/EarthRadioRoom"));
+const MusicRoom = lazy(() => import("@/components/library/MusicRoom"));
 const Greenhouse = lazy(() => import("@/components/Greenhouse"));
 const WishingTreeUnified = lazy(() => import("@/components/WishingTreeUnified"));
 const SeedCellarRoom = lazy(() => import("@/components/library/SeedCellarRoom"));
@@ -197,7 +197,7 @@ const HeartwoodRoomPage = () => {
     >
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
-        {resolvedRoom === "music-room" && <EarthRadioRoom />}
+        {resolvedRoom === "music-room" && <MusicRoom />}
         {resolvedRoom === "greenhouse" && <Greenhouse />}
         {resolvedRoom === "wishlist" && <WishingTreeUnified />}
         {resolvedRoom === "seed-cellar" && <SeedCellarRoom />}

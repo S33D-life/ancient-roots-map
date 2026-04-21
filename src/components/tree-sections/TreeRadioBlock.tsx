@@ -4,8 +4,9 @@
  * Now supports YouTube song offerings with inline embed playback.
  */
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Radio, Play, Pause, Volume2, VolumeX, Music, Youtube } from "lucide-react";
+import { Radio, Play, Pause, Volume2, VolumeX, Music, Youtube, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
