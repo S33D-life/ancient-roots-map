@@ -103,6 +103,8 @@ export function mapResearchTreeToTreeRow(rt: ResearchTreeRow): TreeRow & { __res
     parent_tree_id: null,
     parent_description: null,
     planted_year: null,
+    // Garden / orchard linkage — research trees are wild, not in a garden
+    garden_id: null,
   };
 
   const researchOrigin: ResearchOrigin = {

@@ -2880,6 +2880,57 @@ export type Database = {
           },
         ]
       }
+      gardens: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_public: boolean
+          latitude: number
+          longitude: number
+          name: string
+          notes: string | null
+          open_days: string | null
+          slug: string
+          tree_count: number
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          notes?: string | null
+          open_days?: string | null
+          slug: string
+          tree_count?: number
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          notes?: string | null
+          open_days?: string | null
+          slug?: string
+          tree_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gift_seeds: {
         Row: {
           activated_at: string | null
@@ -9166,6 +9217,7 @@ export type Database = {
           discovery_list: string | null
           elemental_signature: string[] | null
           estimated_age: number | null
+          garden_id: string | null
           girth_cm: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
@@ -9224,6 +9276,7 @@ export type Database = {
           discovery_list?: string | null
           elemental_signature?: string[] | null
           estimated_age?: number | null
+          garden_id?: string | null
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
@@ -9282,6 +9335,7 @@ export type Database = {
           discovery_list?: string | null
           elemental_signature?: string[] | null
           estimated_age?: number | null
+          garden_id?: string | null
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
@@ -9327,6 +9381,13 @@ export type Database = {
           wish_tags?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trees_garden_id_fkey"
+            columns: ["garden_id"]
+            isOneToOne: false
+            referencedRelation: "gardens"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trees_linked_churchyard_id_fkey"
             columns: ["linked_churchyard_id"]
@@ -10623,7 +10684,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "curator" | "keeper"
+      app_role: "curator" | "keeper" | "garden_steward"
       grove_scale:
         | "hyper_local"
         | "local"
@@ -10771,7 +10832,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["curator", "keeper"],
+      app_role: ["curator", "keeper", "garden_steward"],
       grove_scale: [
         "hyper_local",
         "local",
