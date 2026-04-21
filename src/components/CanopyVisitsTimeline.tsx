@@ -338,7 +338,8 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
