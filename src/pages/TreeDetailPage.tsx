@@ -45,7 +45,7 @@ import { useTreeProximityGate } from "@/hooks/use-tree-proximity-gate";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
-import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering } from "@/components/tree-detail/TreeDetailSubComponents";
+import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering, findFlatPhotoIndex, flattenOfferingPhotos } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
 const InviterContext = lazy(() => import("@/components/InviterContext"));
