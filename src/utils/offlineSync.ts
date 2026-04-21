@@ -21,10 +21,14 @@ export interface PendingAction {
   table: string;
   /** The row payload (minus server-generated fields) */
   payload: Record<string, unknown>;
-  /** Base64 photo data for offline storage (if applicable) */
+  /** Base64 photo data for offline storage (legacy single-photo) */
   photoDataUrl?: string;
-  /** Storage bucket + path for the photo */
+  /** Storage bucket + path for the legacy single photo */
   photoStoragePath?: string;
+  /** Multiple base64 photos (newer multi-photo offerings, max 3) */
+  photoDataUrls?: string[];
+  /** Storage paths for each photo in `photoDataUrls` (parallel array) */
+  photoStoragePaths?: string[];
   /** Number of sync attempts so far */
   attempts: number;
   /** Last error message */
