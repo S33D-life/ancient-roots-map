@@ -1295,19 +1295,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   )}
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="age" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Estimated Age (years)</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    min="0"
-                    max="10000"
-                    value={estimatedAge}
-                    onChange={(e) => setEstimatedAge(e.target.value)}
-                    placeholder="How many rings might it hold?"
-                    className="font-serif h-9 text-sm"
-                  />
-                </div>
+                <TreeAgeInput value={age} onChange={setAge} />
 
                 <div className="space-y-1.5">
                   <Label htmlFor="description" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
