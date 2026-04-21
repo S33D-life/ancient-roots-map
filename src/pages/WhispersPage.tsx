@@ -333,6 +333,14 @@ export default function WhispersPage() {
           )}
         </div>
       </PageShell>
+
+      {openWhisperId && (
+        <MycelialWhisperOpenModal
+          whisperId={openWhisperId}
+          open={!!openWhisperId}
+          onClose={() => { setOpenWhisperId(null); refetchMycelialWaiting(); }}
+        />
+      )}
     </div>
   );
 }
