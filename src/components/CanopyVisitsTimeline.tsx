@@ -1,17 +1,30 @@
 /**
  * CanopyVisitsTimeline — displays check-in history for a tree.
  * Timeline view with seasonal comparison and visit stats.
+ *
+ * Visibility pass: each entry now reveals the wanderer who met the tree
+ * (avatar + name → /wanderer/:id). A small "Others who met this tree" row
+ * shows up to 6 unique recent visitors above the timeline.
  */
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   TreeDeciduous, ChevronDown, MapPin, Leaf, Flame, Loader2,
 } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 import type { TreeCheckin } from "@/hooks/use-tree-checkins";
 import type { CheckinStats } from "@/hooks/use-tree-checkins";
+
+interface VisitorProfile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
 
 const SEASON_ICONS: Record<string, string> = {
   bud: "🌱", leaf: "🍃", blossom: "🌸", fruit: "🍎", bare: "🪵", other: "🌿",
@@ -35,6 +48,47 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
   const [expanded, setExpanded] = useState(false);
   const [witnessingId, setWitnessingId] = useState<string | null>(null);
   const displayCheckins = expanded ? checkins : checkins.slice(0, 3);
+
+  // Fetch visitor profiles for all check-ins (deduped by user_id)
+  const visitorIds = useMemo(() => {
+    const ids = new Set<string>();
+    checkins.forEach((c) => { if (c.user_id) ids.add(c.user_id); });
+    return Array.from(ids);
+  }, [checkins]);
+
+  const [visitorMap, setVisitorMap] = useState<Record<string, VisitorProfile>>({});
+  useEffect(() => {
+    if (visitorIds.length === 0) { setVisitorMap({}); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .in("id", visitorIds);
+      if (cancelled) return;
+      const map: Record<string, VisitorProfile> = {};
+      (data || []).forEach((p) => { map[p.id] = p as VisitorProfile; });
+      setVisitorMap(map);
+    })();
+    return () => { cancelled = true; };
+  }, [visitorIds]);
+
+  // Unique visitors (most-recent-first) for the "Others who met this tree" row
+  const uniqueVisitors = useMemo(() => {
+    const seen = new Set<string>();
+    const list: VisitorProfile[] = [];
+    for (const c of checkins) {
+      if (!c.user_id || seen.has(c.user_id)) continue;
+      const p = visitorMap[c.user_id];
+      if (p) { seen.add(c.user_id); list.push(p); }
+      if (list.length >= 6) break;
+    }
+    return list;
+  }, [checkins, visitorMap]);
+
+  const visitorInitials = (name: string | null | undefined) =>
+    (name || "Wanderer")
+      .split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
   const handleWitness = async (checkinId: string) => {
     if (!userId) {
@@ -169,23 +223,77 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
             )}
           </div>
         )}
+      {/* Others who met this tree */}
+      {uniqueVisitors.length > 0 && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[10px] font-serif uppercase tracking-wider text-muted-foreground/70">
+            Others who met this tree
+          </span>
+          <div className="flex -space-x-2">
+            {uniqueVisitors.map((v) => (
+              <Link
+                key={v.id}
+                to={ROUTES.WANDERER(v.id)}
+                title={v.full_name || "Wanderer"}
+                className="rounded-full ring-2 ring-background hover:ring-primary/40 transition-all"
+              >
+                <Avatar className="h-7 w-7 border border-primary/15">
+                  <AvatarImage src={v.avatar_url || undefined} alt={v.full_name || "Wanderer"} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-serif">
+                    {visitorInitials(v.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Timeline */}
       {displayCheckins.length > 0 && (
         <div className="space-y-2 mb-4">
-          {displayCheckins.map((c) => (
+          {displayCheckins.map((c) => {
+            const visitor = c.user_id ? visitorMap[c.user_id] : null;
+            const visitorName = visitor?.full_name || "A wanderer";
+            return (
             <div
               key={c.id}
               className="flex items-start gap-3 p-3 rounded-lg border border-border/30 bg-card/30"
             >
-              <div className="text-xl shrink-0 mt-0.5">
-                {SEASON_ICONS[c.season_stage] || "🌿"}
-              </div>
+              {visitor ? (
+                <Link to={ROUTES.WANDERER(visitor.id)} className="shrink-0 mt-0.5">
+                  <Avatar className="h-9 w-9 border border-primary/15 hover:border-primary/40 transition-colors">
+                    <AvatarImage src={visitor.avatar_url || undefined} alt={visitorName} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-[11px] font-serif">
+                      {visitorInitials(visitorName)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <div className="text-xl shrink-0 mt-0.5" aria-hidden>
+                  {SEASON_ICONS[c.season_stage] || "🌿"}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <span className="text-xs font-serif text-foreground">
+                  {visitor ? (
+                    <Link
+                      to={ROUTES.WANDERER(visitor.id)}
+                      className="text-xs font-serif text-foreground hover:text-primary transition-colors truncate max-w-[160px]"
+                    >
+                      {visitorName}
+                    </Link>
+                  ) : (
+                    <span className="text-xs font-serif text-foreground">{visitorName}</span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground/70 font-serif">·</span>
+                  <span className="text-[11px] font-serif text-muted-foreground">
                     {new Date(c.checked_in_at).toLocaleDateString(undefined, {
                       day: "numeric", month: "short", year: "numeric",
                     })}
+                  </span>
+                  <span className="text-base leading-none" aria-hidden>
+                    {SEASON_ICONS[c.season_stage] || "🌿"}
                   </span>
                   {c.weather && (
                     <span className="text-xs">{WEATHER_ICONS[c.weather] || c.weather}</span>
@@ -230,7 +338,8 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
