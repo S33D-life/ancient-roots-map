@@ -152,6 +152,70 @@ export async function addGroupMember(groupId: string, userId: string) {
   return { error };
 }
 
+/** Remove a member from a group (owner only). */
+export async function removeGroupMember(groupId: string, userId: string) {
+  const { error } = await supabase
+    .from("whisper_group_members" as any)
+    .delete()
+    .eq("group_id", groupId)
+    .eq("user_id", userId);
+  return { error };
+}
+
+/** Delete a whole group (owner only — cascades members + recipients link). */
+export async function deleteWhisperGroup(groupId: string) {
+  const { error } = await supabase
+    .from("whisper_groups" as any)
+    .delete()
+    .eq("id", groupId);
+  return { error };
+}
+
+export interface WhisperGroupMember {
+  user_id: string;
+  joined_at: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
+/** Fetch members of a group with their profile bits. */
+export function useGroupMembers(groupId: string | null) {
+  const [members, setMembers] = useState<WhisperGroupMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = useCallback(async () => {
+    if (!groupId) { setMembers([]); setLoading(false); return; }
+    setLoading(true);
+    const { data: rows } = await supabase
+      .from("whisper_group_members" as any)
+      .select("user_id, joined_at")
+      .eq("group_id", groupId)
+      .order("joined_at", { ascending: true });
+
+    const ids = (rows as any[] || []).map(r => r.user_id);
+    if (!ids.length) { setMembers([]); setLoading(false); return; }
+
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, full_name, avatar_url")
+      .in("user_id", ids);
+
+    const pMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    setMembers(
+      (rows as any[]).map(r => ({
+        user_id: r.user_id,
+        joined_at: r.joined_at,
+        full_name: pMap.get(r.user_id)?.full_name ?? null,
+        avatar_url: pMap.get(r.user_id)?.avatar_url ?? null,
+      }))
+    );
+    setLoading(false);
+  }, [groupId]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+  return { members, loading, refetch: fetch };
+}
+
 /** Group whispers waiting for the user (not yet opened). */
 export function useWaitingMycelialWhispers(userId: string | null) {
   const [rows, setRows] = useState<Array<MycelialWhisperRecipient & { whisper: MycelialWhisper }>>([]);
