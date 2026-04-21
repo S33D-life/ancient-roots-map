@@ -1511,42 +1511,73 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           }
 
           /* ── Staff pin (center-fixed for "locate yourself") ── */
-          .staff-pin { width: 28px; height: 64px; transition: transform 220ms cubic-bezier(.2,.8,.2,1); will-change: transform; }
+          /* Filter-based dark outline ensures the pin reads on bright satellite imagery */
+          .staff-pin {
+            width: 28px; height: 64px;
+            transition: transform 220ms cubic-bezier(.2,.8,.2,1);
+            will-change: transform;
+            filter: drop-shadow(0 0 1px hsla(0,0%,0%,0.95)) drop-shadow(0 2px 4px hsla(0,0%,0%,0.55));
+          }
           .staff-pin__staff {
             position: absolute; left: 50%; bottom: 6px;
             width: 4px; height: 46px;
             transform: translateX(-50%);
-            background: linear-gradient(180deg, hsl(34, 55%, 50%) 0%, hsl(28, 50%, 30%) 60%, hsl(22, 45%, 20%) 100%);
+            background: linear-gradient(180deg, hsl(34, 60%, 55%) 0%, hsl(28, 55%, 32%) 60%, hsl(22, 50%, 18%) 100%);
             border-radius: 2px;
-            box-shadow: inset -1px 0 0 hsla(0,0%,0%,0.25), 0 1px 2px hsla(0,0%,0%,0.45);
+            box-shadow: inset -1px 0 0 hsla(0,0%,0%,0.35), inset 1px 0 0 hsla(45,80%,75%,0.25);
           }
           .staff-pin__head {
             position: absolute; left: 50%; top: 0;
             width: 14px; height: 14px;
             transform: translateX(-50%);
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, hsl(45, 90%, 70%), hsl(38, 70%, 45%) 60%, hsl(30, 55%, 28%));
-            box-shadow: 0 0 10px hsla(42, 90%, 60%, 0.55), 0 0 0 1.5px hsla(28, 50%, 18%, 0.6);
+            background: radial-gradient(circle at 35% 30%, hsl(45, 95%, 75%), hsl(38, 75%, 48%) 60%, hsl(30, 60%, 28%));
+            box-shadow:
+              0 0 12px hsla(42, 95%, 65%, 0.7),
+              0 0 0 1.5px hsla(28, 60%, 14%, 0.85),
+              inset 0 -1px 2px hsla(28, 55%, 18%, 0.5);
           }
           .staff-pin__foot {
             position: absolute; left: 50%; bottom: 4px;
-            width: 8px; height: 4px;
+            width: 10px; height: 4px;
             transform: translateX(-50%);
             border-radius: 50%;
-            background: hsla(0, 0%, 0%, 0.55);
+            background: hsla(0, 0%, 0%, 0.65);
             filter: blur(0.5px);
           }
           .staff-pin__halo {
             position: absolute; left: 50%; bottom: -6px;
-            width: 36px; height: 14px;
+            width: 38px; height: 14px;
             transform: translateX(-50%);
             border-radius: 50%;
-            background: radial-gradient(ellipse at center, hsla(42, 90%, 60%, 0.45), hsla(42, 90%, 60%, 0) 70%);
-            transition: opacity 220ms ease, transform 220ms ease;
+            background: radial-gradient(ellipse at center, hsla(42, 95%, 65%, 0.55), hsla(42, 95%, 65%, 0) 70%);
+            transition: opacity 220ms ease, transform 220ms ease, background 220ms ease;
+          }
+          .staff-pin__hint {
+            position: absolute; left: 50%; bottom: -28px;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 10px; font-family: ui-serif, Georgia, serif;
+            color: hsl(0, 0%, 100%);
+            background: hsla(0, 60%, 35%, 0.85);
+            border: 1px solid hsla(0, 70%, 60%, 0.6);
+            padding: 2px 8px;
+            border-radius: 9999px;
+            opacity: 0;
+            transition: opacity 180ms ease;
           }
           .staff-pin[data-state="active"] { transform: translate(-50%, -100%) translateY(-3px); }
-          .staff-pin[data-state="active"] .staff-pin__head { box-shadow: 0 0 14px hsla(42, 95%, 65%, 0.85), 0 0 0 1.5px hsla(28, 50%, 18%, 0.6); }
-          .staff-pin[data-state="active"] .staff-pin__halo { opacity: 0.7; transform: translateX(-50%) scale(1.15); }
+          .staff-pin[data-state="active"] .staff-pin__head { box-shadow: 0 0 16px hsla(42, 100%, 70%, 0.95), 0 0 0 1.5px hsla(28, 60%, 14%, 0.85), inset 0 -1px 2px hsla(28, 55%, 18%, 0.5); }
+          .staff-pin[data-state="active"] .staff-pin__halo { opacity: 0.85; transform: translateX(-50%) scale(1.2); }
+          .staff-pin[data-state="beyond"] {
+            transform: translate(-50%, -100%) translateY(-3px);
+            animation: staffWobble 600ms ease-in-out infinite;
+          }
+          .staff-pin[data-state="beyond"] .staff-pin__halo {
+            background: radial-gradient(ellipse at center, hsla(0, 80%, 55%, 0.55), hsla(0, 80%, 55%, 0) 70%);
+            opacity: 0.9;
+          }
+          .staff-pin[data-state="beyond"] .staff-pin__hint { opacity: 1; }
           .staff-pin[data-state="confirmed"] { animation: staffSettle 280ms cubic-bezier(.2,.8,.2,1) forwards; }
           .staff-pin[data-state="confirmed"] .staff-pin__halo { animation: staffHaloPulse 280ms ease-out forwards; }
           @keyframes staffSettle {
@@ -1556,8 +1587,40 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           }
           @keyframes staffHaloPulse {
             0% { opacity: 0.4; transform: translateX(-50%) scale(0.9); }
-            60% { opacity: 0.9; transform: translateX(-50%) scale(1.5); }
+            60% { opacity: 0.95; transform: translateX(-50%) scale(1.6); }
             100% { opacity: 0.5; transform: translateX(-50%) scale(1.2); }
+          }
+          @keyframes staffWobble {
+            0%, 100% { transform: translate(-50%, -100%) translateY(-3px) rotate(-1.5deg); }
+            50% { transform: translate(-50%, -100%) translateY(-3px) rotate(1.5deg); }
+          }
+
+          /* ── Selected-point readout bubble ── */
+          .staff-readout {
+            transform: translate(-50%, calc(-100% - 70px));
+            display: flex; justify-content: center;
+          }
+          .staff-readout__bubble {
+            display: inline-flex; flex-direction: column; align-items: center;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            background: hsla(0, 0%, 0%, 0.62);
+            backdrop-filter: blur(6px);
+            border: 1px solid hsla(42, 80%, 60%, 0.35);
+            box-shadow: 0 4px 12px hsla(0, 0%, 0%, 0.35);
+          }
+          .staff-readout__label {
+            font-family: ui-serif, Georgia, serif;
+            font-size: 10px;
+            color: hsl(42, 90%, 75%);
+            line-height: 1.1;
+            letter-spacing: 0.02em;
+          }
+          .staff-readout__distance {
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            font-size: 9px;
+            color: hsla(0, 0%, 100%, 0.85);
+            line-height: 1.2;
           }
         `}</style>
 
