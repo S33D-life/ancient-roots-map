@@ -12,10 +12,33 @@ import { getOfferingPhotos } from "@/utils/offeringPhotos";
 
 /* ---------- Shared Helpers ---------- */
 
-export const shareOffering = async (offering: Offering, treeName?: string) => {
+/**
+ * Build a deep-link URL to a specific offering (and optional photo within it).
+ * Adds `?offering=<id>` and `&photo=<idx>` to the current page URL.
+ * `photoIndex` is 0-based; omitted (or 0) for single-photo / first-photo links.
+ */
+export const buildOfferingDeepLink = (offering: Offering, photoIndex?: number): string => {
+  if (typeof window === "undefined") return "";
+  const url = new URL(window.location.href);
+  url.searchParams.set("offering", offering.id);
+  if (typeof photoIndex === "number" && photoIndex > 0) {
+    url.searchParams.set("photo", String(photoIndex));
+  } else {
+    url.searchParams.delete("photo");
+  }
+  return url.toString();
+};
+
+export const shareOffering = async (
+  offering: Offering,
+  treeName?: string,
+  photoIndex?: number,
+) => {
   const typeLabel = offering.type === "poem" ? "poem" : offering.type === "song" ? "song" : offering.type === "story" ? "musing" : offering.type === "nft" ? "NFT" : "memory";
-  const text = `"${offering.title}" — a ${typeLabel} offering${treeName ? ` for ${treeName}` : ""} on the Ancient Friends Map`;
-  const url = window.location.href;
+  const photoSuffix =
+    typeof photoIndex === "number" && photoIndex > 0 ? ` (photo ${photoIndex + 1})` : "";
+  const text = `"${offering.title}"${photoSuffix} — a ${typeLabel} offering${treeName ? ` for ${treeName}` : ""} on the Ancient Friends Map`;
+  const url = buildOfferingDeepLink(offering, photoIndex);
   try {
     if (navigator.share) {
       await navigator.share({ title: offering.title, text, url });
