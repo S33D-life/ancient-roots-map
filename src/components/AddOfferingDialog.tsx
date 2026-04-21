@@ -200,6 +200,19 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       if (target) URL.revokeObjectURL(target.previewUrl);
       return prev.filter((p) => p.id !== id);
     });
+    // Drop any retry / upload state tied to this slot.
+    setFailedPhotoIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setUploadedUrlsById((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -214,6 +227,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const clearAllPhotos = () => {
     photoSlots.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     setPhotoSlots([]);
+    setFailedPhotoIds(new Set());
+    setUploadedUrlsById({});
   };
 
   const uploadFile = async (file: File, userId: string): Promise<string> => {
