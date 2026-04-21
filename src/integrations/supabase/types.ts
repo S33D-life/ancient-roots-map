@@ -9179,6 +9179,9 @@ export type Database = {
       }
       tree_whispers: {
         Row: {
+          audience_type: string
+          channel_id: string | null
+          channel_type: string
           circle_id: string | null
           collected_at: string | null
           collected_tree_id: string | null
@@ -9187,7 +9190,11 @@ export type Database = {
           delivery_species_key: string | null
           delivery_tree_id: string | null
           expires_at: string | null
+          group_id: string | null
+          hearts_cost: number
           id: string
+          is_active: boolean
+          is_mycelial: boolean | null
           media_url: string | null
           message_content: string
           recipient_scope: string
@@ -9198,6 +9205,9 @@ export type Database = {
           tree_anchor_id: string
         }
         Insert: {
+          audience_type?: string
+          channel_id?: string | null
+          channel_type?: string
           circle_id?: string | null
           collected_at?: string | null
           collected_tree_id?: string | null
@@ -9206,7 +9216,11 @@ export type Database = {
           delivery_species_key?: string | null
           delivery_tree_id?: string | null
           expires_at?: string | null
+          group_id?: string | null
+          hearts_cost?: number
           id?: string
+          is_active?: boolean
+          is_mycelial?: boolean | null
           media_url?: string | null
           message_content: string
           recipient_scope?: string
@@ -9217,6 +9231,9 @@ export type Database = {
           tree_anchor_id: string
         }
         Update: {
+          audience_type?: string
+          channel_id?: string | null
+          channel_type?: string
           circle_id?: string | null
           collected_at?: string | null
           collected_tree_id?: string | null
@@ -9225,7 +9242,11 @@ export type Database = {
           delivery_species_key?: string | null
           delivery_tree_id?: string | null
           expires_at?: string | null
+          group_id?: string | null
+          hearts_cost?: number
           id?: string
+          is_active?: boolean
+          is_mycelial?: boolean | null
           media_url?: string | null
           message_content?: string
           recipient_scope?: string
@@ -10155,6 +10176,114 @@ export type Database = {
         }
         Relationships: []
       }
+      whisper_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whisper_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "whisper_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whisper_group_recipients: {
+        Row: {
+          created_at: string
+          hearts_earned: number
+          id: string
+          opened_at: string | null
+          opened_tree_id: string | null
+          recipient_user_id: string
+          whisper_id: string
+        }
+        Insert: {
+          created_at?: string
+          hearts_earned?: number
+          id?: string
+          opened_at?: string | null
+          opened_tree_id?: string | null
+          recipient_user_id: string
+          whisper_id: string
+        }
+        Update: {
+          created_at?: string
+          hearts_earned?: number
+          id?: string
+          opened_at?: string | null
+          opened_tree_id?: string | null
+          recipient_user_id?: string
+          whisper_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whisper_group_recipients_opened_tree_id_fkey"
+            columns: ["opened_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whisper_group_recipients_opened_tree_id_fkey"
+            columns: ["opened_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whisper_group_recipients_whisper_id_fkey"
+            columns: ["whisper_id"]
+            isOneToOne: false
+            referencedRelation: "tree_whispers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whisper_groups: {
+        Row: {
+          created_at: string
+          group_type: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          group_type?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          group_type?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       witness_sessions: {
         Row: {
           companion_channel: string | null
@@ -10497,6 +10626,20 @@ export type Database = {
         }
         Returns: string
       }
+      charge_whisper_send: {
+        Args: {
+          _audience_type: string
+          _channel_id: string
+          _channel_type: string
+          _expires_at?: string
+          _group_id: string
+          _is_active?: boolean
+          _message_content: string
+          _recipient_user_id?: string
+          _tree_anchor_id: string
+        }
+        Returns: Json
+      }
       claim_bot_handoff: { Args: { p_token: string }; Returns: Json }
       claim_gift_seed: {
         Args: { p_invite_code: string; p_user_id: string }
@@ -10717,6 +10860,14 @@ export type Database = {
       increment_proposal_support: {
         Args: { p_id: string; p_weight: number }
         Returns: undefined
+      }
+      is_whisper_group_member: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
+      open_group_whisper: {
+        Args: { _current_tree_id: string; _whisper_id: string }
+        Returns: Json
       }
       owns_agent: { Args: { _agent_id: string }; Returns: boolean }
       plant_hearts_at_tree: {
