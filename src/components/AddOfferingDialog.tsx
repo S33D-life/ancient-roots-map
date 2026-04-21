@@ -128,6 +128,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [uploading, setUploading] = useState(false);
   const [photoSlots, setPhotoSlots] = useState<PhotoSlot[]>([]);
   const [uploadingPhotoIds, setUploadingPhotoIds] = useState<Set<string>>(new Set());
+  /** Slot ids whose upload failed and are awaiting retry. */
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Set<string>>(new Set());
+  /** Map of slot id → uploaded public URL (preserves order via lookup). */
+  const [uploadedUrlsById, setUploadedUrlsById] = useState<Record<string, string>>({});
   const [uploadBatch, setUploadBatch] = useState<{ total: number; done: number; failed: boolean } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [sealedByStaff, setSealedByStaff] = useState(() => localStorage.getItem("linked_staff_code") || "");
@@ -196,6 +200,19 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       if (target) URL.revokeObjectURL(target.previewUrl);
       return prev.filter((p) => p.id !== id);
     });
+    // Drop any retry / upload state tied to this slot.
+    setFailedPhotoIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setUploadedUrlsById((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -210,6 +227,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const clearAllPhotos = () => {
     photoSlots.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     setPhotoSlots([]);
+    setFailedPhotoIds(new Set());
+    setUploadedUrlsById({});
   };
 
   const uploadFile = async (file: File, userId: string): Promise<string> => {
@@ -219,6 +238,53 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     if (error) throw error;
     const { data } = supabase.storage.from("offerings").getPublicUrl(fileName);
     return data.publicUrl;
+  };
+
+  /**
+   * Re-upload a single failed photo slot. Used by the per-tile "Retry" button
+   * in the photo tray. On success the slot is moved out of `failedPhotoIds`
+   * and into `uploadedUrlsById`; on failure it stays in the failed set.
+   */
+  const retryPhotoUpload = async (slotId: string) => {
+    const slot = photoSlots.find((p) => p.id === slotId);
+    if (!slot) return;
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData.user;
+    if (!user) {
+      toast({ title: "Not authenticated", description: "Please sign in to upload", variant: "destructive" });
+      return;
+    }
+    // Mark uploading
+    setUploadingPhotoIds((prev) => new Set(prev).add(slotId));
+    try {
+      const url = await uploadFile(slot.file, user.id);
+      setUploadedUrlsById((prev) => ({ ...prev, [slotId]: url }));
+      setFailedPhotoIds((prev) => {
+        if (!prev.has(slotId)) return prev;
+        const next = new Set(prev);
+        next.delete(slotId);
+        return next;
+      });
+      // Update batch counters so the global indicator reflects recovery.
+      setUploadBatch((prev) => {
+        if (!prev) return prev;
+        const stillFailed = Array.from(failedPhotoIds).some((id) => id !== slotId);
+        return { ...prev, done: Math.min(prev.total, prev.done + 1), failed: stillFailed };
+      });
+    } catch (err: any) {
+      toast({
+        title: "Retry failed",
+        description: err?.message || "Could not upload photo — check your connection and try again",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPhotoIds((prev) => {
+        if (!prev.has(slotId)) return prev;
+        const next = new Set(prev);
+        next.delete(slotId);
+        return next;
+      });
+    }
   };
 
   const resetForm = () => {
@@ -314,13 +380,21 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       let finalMediaUrl = mediaUrl.trim() || null;
       let uploadedPhotos: string[] = [];
       if (photoSlots.length > 0) {
+        // Identify which slots still need upload (skip the ones already uploaded
+        // via a previous attempt + retries).
+        const pending = photoSlots.filter((p) => !uploadedUrlsById[p.id]);
+        const alreadyDone = photoSlots.length - pending.length;
+
         setUploading(true);
-        setUploadingPhotoIds(new Set(photoSlots.map((p) => p.id)));
-        setUploadBatch({ total: photoSlots.length, done: 0, failed: false });
-        try {
-          // Upload all photos in parallel; clear each from the "uploading" set as it finishes
-          uploadedPhotos = await Promise.all(
-            photoSlots.map(async (p) => {
+        setUploadingPhotoIds(new Set(pending.map((p) => p.id)));
+        setUploadBatch({ total: photoSlots.length, done: alreadyDone, failed: false });
+        // Clear any prior failed flags for the slots we're about to retry as a batch
+        setFailedPhotoIds(new Set());
+
+        // Use allSettled so a single failure doesn't kill the rest of the batch.
+        const results = await Promise.allSettled(
+          pending.map(async (p) => {
+            try {
               const url = await uploadFile(p.file, user.id);
               setUploadingPhotoIds((prev) => {
                 const next = new Set(prev);
@@ -328,14 +402,35 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 return next;
               });
               setUploadBatch((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
-              return url;
-            }),
-          );
-          finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
-        } catch (uploadErr: any) {
-          // Mid-flight failure — if we lost connection, fall back to the
-          // offline queue so the user doesn't lose their offering.
-          if (activeType === "photo" && !isOnline()) {
+              setUploadedUrlsById((prev) => ({ ...prev, [p.id]: url }));
+              return { id: p.id, url };
+            } catch (err) {
+              setUploadingPhotoIds((prev) => {
+                const next = new Set(prev);
+                next.delete(p.id);
+                return next;
+              });
+              throw { id: p.id, err };
+            }
+          }),
+        );
+
+        // Collect newly-failed slot ids
+        const newlyFailed = new Set<string>();
+        results.forEach((r) => {
+          if (r.status === "rejected") {
+            const id = (r.reason as any)?.id as string | undefined;
+            if (id) newlyFailed.add(id);
+          }
+        });
+
+        if (newlyFailed.size > 0) {
+          setFailedPhotoIds(newlyFailed);
+          setUploadBatch((prev) => (prev ? { ...prev, failed: true } : prev));
+
+          // Full-batch failure while offline → fall back to the offline queue
+          // (existing behavior).
+          if (newlyFailed.size === pending.length && activeType === "photo" && !isOnline()) {
             try {
               const dataUrls = await Promise.all(photoSlots.map((p) => fileToDataUrl(p.file)));
               const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
@@ -370,23 +465,44 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               resetForm();
               return;
             } catch {
-              /* fall through to error toast */
+              /* fall through to in-dialog retry */
             }
           }
-          setUploadBatch((prev) => (prev ? { ...prev, failed: true } : prev));
-          toast({ title: "Upload failed", description: uploadErr.message || "One or more photos failed to upload — try again", variant: "destructive" });
+
+          // Partial failure (or online full failure) — keep dialog open so the
+          // user can tap Retry on each failed tile, then submit again.
+          toast({
+            title: newlyFailed.size === 1 ? "1 photo didn't upload" : `${newlyFailed.size} photos didn't upload`,
+            description: "Tap Retry on the dimmed photos to try again.",
+            variant: "destructive",
+          });
           submittingRef.current = false;
           setLoading(false);
           setUploading(false);
-          setUploadingPhotoIds(new Set());
           clearTimeout(timeout);
           return;
-        } finally {
-          setUploading(false);
-          setUploadingPhotoIds(new Set());
-          // Keep batch visible briefly so the user sees the "all ready" state, then clear
-          setTimeout(() => setUploadBatch(null), 1500);
         }
+
+        // All uploads (incl. previously-retried ones) succeeded — assemble in
+        // original slot order so the cover photo stays first.
+        uploadedPhotos = photoSlots
+          .map((p) => uploadedUrlsById[p.id] || results.find(
+            (r) => r.status === "fulfilled" && (r.value as { id: string }).id === p.id,
+          ))
+          .map((entry) => {
+            if (typeof entry === "string") return entry;
+            if (entry && (entry as PromiseFulfilledResult<{ url: string }>).status === "fulfilled") {
+              return (entry as PromiseFulfilledResult<{ url: string }>).value.url;
+            }
+            return "";
+          })
+          .filter(Boolean);
+
+        finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
+        setUploading(false);
+        setUploadingPhotoIds(new Set());
+        // Keep batch visible briefly so the user sees the "all ready" state, then clear
+        setTimeout(() => setUploadBatch(null), 1500);
       }
 
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
@@ -729,9 +845,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   onRemove={removePhoto}
                   onReorder={(next) => setPhotoSlots(next)}
                   uploadingIds={uploadingPhotoIds}
+                  failedIds={failedPhotoIds}
+                  successIds={new Set(Object.keys(uploadedUrlsById))}
+                  onRetry={retryPhotoUpload}
                   uploadProgress={uploadBatch ?? undefined}
                   offline={!online}
-                  disabled={loading}
+                  disabled={loading && failedPhotoIds.size === 0}
                 />
               </div>
               {/* Title appears after first photo */}
