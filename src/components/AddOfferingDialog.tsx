@@ -128,6 +128,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [uploading, setUploading] = useState(false);
   const [photoSlots, setPhotoSlots] = useState<PhotoSlot[]>([]);
   const [uploadingPhotoIds, setUploadingPhotoIds] = useState<Set<string>>(new Set());
+  /** Slot ids whose upload failed and are awaiting retry. */
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Set<string>>(new Set());
+  /** Map of slot id → uploaded public URL (preserves order via lookup). */
+  const [uploadedUrlsById, setUploadedUrlsById] = useState<Record<string, string>>({});
   const [uploadBatch, setUploadBatch] = useState<{ total: number; done: number; failed: boolean } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [sealedByStaff, setSealedByStaff] = useState(() => localStorage.getItem("linked_staff_code") || "");
