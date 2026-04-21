@@ -1,25 +1,31 @@
 /**
- * MusicRoom — Browse-first view for music offerings across the forest.
+ * MusicRoom — A living room inside the HeARTwood Library.
  *
- * A living grid of album artwork pulled from existing song offerings.
- * Foundation for a future universal offering browser.
+ * Composition:
+ *   ┌─────────────────────────────────┐
+ *   │  Tree Radio (the hearth)        │  ← focal listening centre
+ *   ├─────────────────────────────────┤
+ *   │  Shared scope dial · search     │  ← one tuning system
+ *   ├─────────────────────────────────┤
+ *   │  Music Library (records grid)   │  ← surrounding shelves
+ *   └─────────────────────────────────┘
  *
- * Scope dial (Tree · Species · Forest):
- *   - Tree   → only the entry tree
- *   - Species → all offerings on trees of the same species
- *   - Forest → every song offering
+ * Scope dial (Tree · Species · Forest) governs BOTH Tree Radio and the
+ * Library grid — one shared tuning interface.
  *
- * Entered with `?tree=:id` to anchor scope to a specific tree.
- * Cards open an in-room detail panel; "Go to tree" is the secondary action.
+ * Entered with `?tree=:id` to anchor scope to a specific tree, in which
+ * case Tree Radio broadcasts from that tree first and the library
+ * widens outward.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink } from "lucide-react";
+import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink, Library } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import MusicRoomTreeRadio from "@/components/library/MusicRoomTreeRadio";
 
 type Scope = "tree" | "species" | "forest";
 
