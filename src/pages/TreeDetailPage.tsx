@@ -475,6 +475,46 @@ const TreeDetailPage = () => {
 
   const photoOfferings = getOfferingsByType("photo").filter((o) => o.media_url);
 
+  /**
+   * Deep-link sync: open the lightbox to a specific offering/photo when the
+   * URL carries `?offering=<id>&photo=<idx>`. Runs whenever the param or the
+   * underlying photo set changes (e.g. after offerings finish loading).
+   */
+  useEffect(() => {
+    const offeringId = searchParams.get("offering");
+    if (!offeringId || photoOfferings.length === 0) return;
+    const photoIdx = Math.max(0, parseInt(searchParams.get("photo") || "0", 10) || 0);
+    const flatIdx = findFlatPhotoIndex(photoOfferings, offeringId, photoIdx);
+    if (flatIdx >= 0 && lightboxIndex !== flatIdx) {
+      setLightboxIndex(flatIdx);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, photoOfferings.length]);
+
+  /** Open the lightbox AND mirror state to URL so the moment is shareable. */
+  const openLightboxAt = (flatIdx: number) => {
+    setLightboxIndex(flatIdx);
+    const flat = flattenOfferingPhotos(photoOfferings);
+    const target = flat[flatIdx];
+    if (!target) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("offering", target.offering.id);
+    if (target.indexInOffering > 0) next.set("photo", String(target.indexInOffering));
+    else next.delete("photo");
+    setSearchParams(next, { replace: true });
+  };
+
+  /** Strip lightbox-specific params from the URL when closing. */
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+    const next = new URLSearchParams(searchParams);
+    if (next.has("offering") || next.has("photo")) {
+      next.delete("offering");
+      next.delete("photo");
+      setSearchParams(next, { replace: true });
+    }
+  };
+
   /** Sort offerings by selected mode */
   const sortOfferings = (items: Offering[]) => {
     const now = Date.now();
