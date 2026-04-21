@@ -1192,10 +1192,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 {/* Header bar over map */}
                 <div className="px-5 pt-4 pb-2">
                   <h3 className="text-sm font-serif" style={{ color: 'hsl(42, 75%, 55%)' }}>
-                    Place your staff at the tree
+                    Meet the tree
                   </h3>
                   <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mt-1">
-                    Move the map to align the staff with the trunk — within <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) of your GPS fix.
+                    Move the map until the staff rests beside the trunk. The point at its foot is where you stand together — within <strong style={{ color: 'hsl(42, 75%, 60%)' }}>~44m</strong> of you.
                   </p>
                 </div>
 
@@ -1208,6 +1208,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   }}
                 >
                   <div ref={mapContainerRef} className="absolute inset-0" />
+
+                  {/* Selected-point readout — floats above the staff head */}
+                  <div
+                    className="staff-readout pointer-events-none absolute left-1/2 top-1/2 z-[6]"
+                    aria-live="polite"
+                  >
+                    <div className="staff-readout__bubble">
+                      <span className="staff-readout__label">Selected point</span>
+                      {originLat !== null && originLng !== null && (
+                        <span className="staff-readout__distance">{distanceFromGps} ft from you</span>
+                      )}
+                    </div>
+                  </div>
 
                   {/* STAFF PIN — center-fixed visual overlay (non-interactive) */}
                   <div
@@ -1225,22 +1238,24 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     <div className="staff-pin__head" />
                     {/* Foot anchored at the exact ground point */}
                     <div className="staff-pin__foot" />
+                    {/* Beyond-range hint (only visible when state="beyond") */}
+                    <div className="staff-pin__hint">Beyond your range — release to settle</div>
                   </div>
 
                   {/* Legend */}
-                  <div className="absolute bottom-2 left-2 flex flex-col gap-1 text-[10px] font-serif text-white/90 bg-black/40 backdrop-blur-sm rounded-md px-2 py-1.5">
+                  <div className="absolute bottom-2 left-2 flex flex-col gap-1 text-[10px] font-serif text-white bg-black/55 backdrop-blur-sm rounded-md px-2 py-1.5 shadow">
                     <div className="flex items-center gap-1.5">
-                      <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'hsl(205, 90%, 55%)', boxShadow: '0 0 0 2px hsla(205, 90%, 55%, 0.3)' }} />
+                      <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'hsl(205, 90%, 55%)', boxShadow: '0 0 0 2px hsla(205, 90%, 55%, 0.35)' }} />
                       <span>You</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="inline-block w-2 h-2.5 rounded-sm" style={{ background: 'linear-gradient(180deg, hsl(34, 55%, 45%), hsl(28, 50%, 28%))' }} />
-                      <span>Staff (the tree)</span>
+                      <span>Where you meet the tree</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Location info bar */}
+                {/* Coords + actions */}
                 <div className="px-5 space-y-3 pb-4">
                   {lat !== null && lng !== null && (
                     <motion.div
@@ -1248,15 +1263,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="flex items-center gap-2 text-muted-foreground/70">
                         <MapPin className="h-3 w-3" style={{ color: 'hsl(42, 80%, 55%)' }} />
-                        <span className="font-mono text-[11px]">{lat.toFixed(6)}, {lng.toFixed(6)}</span>
+                        <span className="font-mono text-[10px]">{lat.toFixed(6)}, {lng.toFixed(6)}</span>
                       </div>
-                      {originLat !== null && originLng !== null && (
-                        <span className="text-muted-foreground/60 font-serif text-[10px]">
-                          {distanceFromGps} ft from you
-                        </span>
-                      )}
                     </motion.div>
                   )}
 
@@ -1274,7 +1284,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                         // Settle animation: mark pin as confirmed, then proceed
                         const pin = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
                         if (pin) pin.dataset.state = 'confirmed';
-                        toast({ title: "🌳 Position anchored", description: "Your staff is planted beside the tree" });
+                        toast({ title: "🌳 You've met here", description: "This is where you stand together" });
                         setTimeout(() => confirmAdjustment(), 280);
                       }}
                       style={{
@@ -1283,7 +1293,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                         border: '1px solid hsla(120, 40%, 35%, 0.4)',
                       }}
                     >
-                      <Check className="h-4 w-4" /> Anchor here
+                      <Check className="h-4 w-4" /> Meet here
                     </Button>
                   </div>
                 </div>
