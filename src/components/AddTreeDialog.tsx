@@ -305,37 +305,52 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       // The map moves underneath; the screen center == the saved point.
       const staffEl = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
 
-      const setStaffActive = (active: boolean) => {
+      const setStaffState = (state: 'idle' | 'active' | 'beyond' | 'confirmed') => {
         if (!staffEl) return;
-        staffEl.dataset.state = active ? 'active' : 'idle';
+        staffEl.dataset.state = state;
       };
 
-      // Update lat/lng from current map center, clamped to MAX_ADJUST_METERS.
-      // If the user pans outside the radius, snap the map back to the clamped point.
+      // Soft snap-back when the wanderer pans beyond the allowed radius.
       let snapping = false;
-      const syncFromCenter = () => {
+      const commitFromCenter = () => {
         if (snapping) return;
         const c = map.getCenter();
         const [clampedLat, clampedLng] = clampPosition(c.lat, c.lng);
-        if (Math.abs(clampedLat - c.lat) > 1e-7 || Math.abs(clampedLng - c.lng) > 1e-7) {
+        const drifted =
+          Math.abs(clampedLat - c.lat) > 1e-7 || Math.abs(clampedLng - c.lng) > 1e-7;
+        if (drifted) {
           snapping = true;
-          map.easeTo({ center: [clampedLng, clampedLat], duration: 200 });
-          setTimeout(() => { snapping = false; }, 220);
+          // Gentler easing for the snap-back so it feels like settling, not bouncing.
+          map.easeTo({
+            center: [clampedLng, clampedLat],
+            duration: 320,
+            easing: (t: number) => 1 - Math.pow(1 - t, 3),
+          });
+          window.setTimeout(() => {
+            snapping = false;
+            setStaffState('idle');
+          }, 340);
+        } else {
+          setStaffState('idle');
         }
+        // Only commit the CLAMPED, settled value to the form state.
         setLat(clampedLat);
         setLng(clampedLng);
       };
 
-      map.on('movestart', () => setStaffActive(true));
+      map.on('movestart', () => setStaffState('active'));
       map.on('move', () => {
+        if (snapping) return;
+        // Live-preview only: show "beyond" hint when out of range, but
+        // do NOT push unclamped values into the saved form state.
         const c = map.getCenter();
-        // Live-update the displayed coords while panning (no snap mid-pan)
-        setLat(c.lat);
-        setLng(c.lng);
+        if (originLat !== null && originLng !== null) {
+          const dist = getDistance(originLat, originLng, c.lat, c.lng);
+          setStaffState(dist > MAX_ADJUST_METERS ? 'beyond' : 'active');
+        }
       });
       map.on('moveend', () => {
-        setStaffActive(false);
-        syncFromCenter();
+        commitFromCenter();
       });
 
       map.on("load", () => {
