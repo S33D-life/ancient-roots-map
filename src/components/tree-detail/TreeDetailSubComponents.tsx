@@ -102,7 +102,7 @@ export const findFlatPhotoIndex = (
 };
 
 export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; onImageClick: (index: number) => void }) => {
-  const flat = flattenPhotos(offerings);
+  const flat = flattenOfferingPhotos(offerings);
   const offeringsWithPhotos = offerings.filter((o) => getOfferingPhotos(o).length > 0);
 
   return (
