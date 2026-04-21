@@ -621,6 +621,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   onRemove={removePhoto}
                   onReorder={(next) => setPhotoSlots(next)}
                   uploadingIds={uploadingPhotoIds}
+                  uploadProgress={uploadBatch ?? undefined}
                   disabled={loading}
                 />
               </div>
