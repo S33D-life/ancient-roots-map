@@ -31,15 +31,15 @@ export interface NotifyInput {
 export async function notify(input: NotifyInput, actorUserId?: string | null) {
   if (actorUserId && actorUserId === input.user_id) return;
   try {
-    await supabase.from("notifications").insert({
+    await supabase.from("notifications").insert([{
       user_id: input.user_id,
       title: input.title,
       body: input.body ?? null,
       category: input.category,
       priority: input.priority ?? "normal",
       deep_link: input.deep_link ?? null,
-      metadata: input.metadata ?? {},
-    });
+      metadata: (input.metadata ?? {}) as never,
+    }]);
   } catch {
     // best-effort
   }
