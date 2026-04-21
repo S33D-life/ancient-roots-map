@@ -149,7 +149,10 @@ const HeartJarOverview = ({ userId, hearts }: Props) => {
           </span>
         </div>
         {today > 0 && (
-          <p className="text-xs font-serif text-emerald-600 dark:text-emerald-400 mt-1">
+          <p
+            className="text-xs font-serif mt-1"
+            style={{ color: "hsl(140 45% 45%)" }}
+          >
             +{today} today
           </p>
         )}
