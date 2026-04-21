@@ -773,9 +773,22 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const currentStepIndex = STEPS.findIndex(s => s.key === step);
   const currentStepConfig = STEPS[currentStepIndex];
 
-  const distanceFromGps = (originLat !== null && originLng !== null && lat !== null && lng !== null)
-    ? Math.round(getDistance(originLat, originLng, lat, lng) * 3.28084)
+  // Locale-aware distance: meters for metric devices, feet otherwise.
+  const usesMetric = useMemo(() => {
+    try {
+      const lang = (navigator.language || "en-US").toLowerCase();
+      // US, Liberia, Myanmar — feet/inches. Everywhere else metric.
+      return !/^(en-us|en-lr|my)/.test(lang);
+    } catch {
+      return true;
+    }
+  }, []);
+  const distanceFromGpsMeters = (originLat !== null && originLng !== null && lat !== null && lng !== null)
+    ? Math.round(getDistance(originLat, originLng, lat, lng))
     : 0;
+  const distanceFromGps = usesMetric
+    ? `${distanceFromGpsMeters} m`
+    : `${Math.round(distanceFromGpsMeters * 3.28084)} ft`;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) setAdjustMode(false); onOpenChange(v); }}>
@@ -1230,8 +1243,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   >
                     <div className="staff-readout__bubble">
                       <span className="staff-readout__label">Selected point</span>
-                      {originLat !== null && originLng !== null && (
-                        <span className="staff-readout__distance">{distanceFromGps} ft from you</span>
+                      {originLat !== null && originLng !== null && distanceFromGpsMeters > 0 && (
+                        <span className="staff-readout__distance">{distanceFromGps} from you</span>
                       )}
                     </div>
                   </div>
@@ -1290,15 +1303,15 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       className="flex-1 font-serif h-11 text-sm"
                       onClick={() => { setAdjustMode(false); setLat(originLat); setLng(originLng); }}
                     >
-                      Skip
+                      Use my GPS point
                     </Button>
                     <Button
                       className="flex-1 gap-2 font-serif h-11 text-sm"
                       onClick={() => {
-                        // Settle animation: mark pin as confirmed, then proceed
+                        // Settle animation, then advance — single quiet moment, no extra toast.
                         const pin = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
                         if (pin) pin.dataset.state = 'confirmed';
-                        toast({ title: "🌳 You've met here", description: "This is where you stand together" });
+                        hapticTap();
                         setTimeout(() => confirmAdjustment(), 280);
                       }}
                       style={{
@@ -1334,16 +1347,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   )}
                 </div>
 
-                <TreeAgeInput value={age} onChange={setAge} />
-
-                <OrchardModePanel value={orchard} onChange={setOrchard} />
-                <GardenPicker
-                  value={gardenId}
-                  onChange={setGardenId}
-                  treeLat={lat}
-                  treeLng={lng}
-                  canCreateGarden={canCreateGarden}
-                />
+                {/* About this tree — age, variety, garden */}
+                <div className="space-y-3 pt-1">
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50 font-serif">
+                    About this tree
+                  </p>
+                  <TreeAgeInput value={age} onChange={setAge} />
+                  <OrchardModePanel value={orchard} onChange={setOrchard} />
+                  <GardenPicker
+                    value={gardenId}
+                    onChange={setGardenId}
+                    treeLat={lat}
+                    treeLng={lng}
+                    canCreateGarden={canCreateGarden}
+                  />
+                </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="description" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
@@ -1443,10 +1461,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     { emoji: "🎵", label: "Song", type: "song" },
                     { emoji: "💭", label: "Story", type: "story" },
                   ].map((o) => (
-                    <a
+                    <button
                       key={o.type}
-                      href={savedTreeId ? `/tree/${encodeURIComponent(savedTreeId)}?add=${o.type}` : '#'}
-                      className="flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:scale-105"
+                      type="button"
+                      disabled={!savedTreeId}
+                      onClick={() => {
+                        if (!savedTreeId) return;
+                        hapticTap();
+                        // Close the dialog cleanly, then navigate — avoids a hard
+                        // page reload and lets the celebration finish.
+                        onOpenChange(false);
+                        setTimeout(() => {
+                          navigate(`/tree/${encodeURIComponent(savedTreeId)}?add=${o.type}`);
+                        }, 120);
+                      }}
+                      className="flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         background: 'hsla(0, 0%, 100%, 0.03)',
                         border: '1px solid hsla(42, 50%, 40%, 0.15)',
@@ -1454,7 +1483,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     >
                       <span className="text-xl">{o.emoji}</span>
                       <span className="text-[10px] font-serif text-muted-foreground">{o.label}</span>
-                    </a>
+                    </button>
                   ))}
                 </div>
 

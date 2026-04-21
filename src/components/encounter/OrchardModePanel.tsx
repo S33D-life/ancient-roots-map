@@ -76,7 +76,7 @@ const OrchardModePanel = ({ value, onChange }: Props) => {
         <div className="flex items-center gap-2 min-w-0">
           <Sprout className="h-3.5 w-3.5 shrink-0" style={{ color: "hsl(120, 45%, 55%)" }} />
           <span className="text-[11px] font-serif" style={{ color: "hsl(120, 45%, 60%)" }}>
-            Garden, orchard, or cultivated variety?
+            Cultivar or variety details?
           </span>
         </div>
         <ChevronDown
@@ -134,10 +134,10 @@ const OrchardModePanel = ({ value, onChange }: Props) => {
                     className="text-xs font-serif cursor-pointer"
                     style={{ color: "hsl(120, 45%, 65%)" }}
                   >
-                    Part of an orchard or garden
+                    Cultivated tree (orchard / nursery)
                   </Label>
                   <p className="text-[10px] text-muted-foreground/50 font-serif mt-0.5">
-                    Unlocks lineage tracking
+                    Unlocks lineage tracking — propagation, parent, year
                   </p>
                 </div>
                 <Switch

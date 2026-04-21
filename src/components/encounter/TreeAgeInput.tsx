@@ -73,6 +73,14 @@ const TreeAgeInput = ({ value, onChange }: Props) => {
     }
   }, [value]);
 
+  // Keep local input strings in sync when value changes from outside
+  // (e.g. mode toggle restoring a stashed estimate, or preset application).
+  useEffect(() => {
+    setMinStr(value.ageMin?.toString() ?? "");
+    setMaxStr(value.ageMax?.toString() ?? "");
+    setExactStr(value.ageExact?.toString() ?? "");
+  }, [value.ageMin, value.ageMax, value.ageExact, value.mode]);
+
   const setMode = (mode: "estimate" | "known") => {
     if (mode === "known") {
       onChange({
