@@ -118,7 +118,7 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="group relative rounded-lg overflow-hidden border border-border/50 cursor-pointer aspect-square"
             onClick={() => {
-              const idx = flat.findIndex((p) => p.offering.id === offering.id);
+              const idx = flattenOfferingPhotos(offerings).findIndex((p) => p.offering.id === offering.id);
               if (idx >= 0) onImageClick(idx);
             }}
           >
