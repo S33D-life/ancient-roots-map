@@ -618,7 +618,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           what3words: what3words.trim() || '',
           latitude: lat,
           longitude: lng,
-          estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
+          ...buildAgePayload(age),
           species_ai_predictions: normalizedAiPredictions.length > 0 ? normalizedAiPredictions : null,
           species_ai_selected: selectedSpeciesPrediction
             ? {
@@ -667,7 +667,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         what3words: what3words.trim() || '',
         latitude: lat,
         longitude: lng,
-        estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
+        ...buildAgePayload(age),
         created_by: user.id,
         photo_status: droppedPhotoFile ? 'pending' : 'none',
         ...(photoDate ? { created_at: photoDate } : {}),
