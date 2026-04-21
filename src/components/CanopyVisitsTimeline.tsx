@@ -223,23 +223,77 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
             )}
           </div>
         )}
+      {/* Others who met this tree */}
+      {uniqueVisitors.length > 0 && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[10px] font-serif uppercase tracking-wider text-muted-foreground/70">
+            Others who met this tree
+          </span>
+          <div className="flex -space-x-2">
+            {uniqueVisitors.map((v) => (
+              <Link
+                key={v.id}
+                to={ROUTES.WANDERER(v.id)}
+                title={v.full_name || "Wanderer"}
+                className="rounded-full ring-2 ring-background hover:ring-primary/40 transition-all"
+              >
+                <Avatar className="h-7 w-7 border border-primary/15">
+                  <AvatarImage src={v.avatar_url || undefined} alt={v.full_name || "Wanderer"} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-serif">
+                    {visitorInitials(v.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Timeline */}
       {displayCheckins.length > 0 && (
         <div className="space-y-2 mb-4">
-          {displayCheckins.map((c) => (
+          {displayCheckins.map((c) => {
+            const visitor = c.user_id ? visitorMap[c.user_id] : null;
+            const visitorName = visitor?.full_name || "A wanderer";
+            return (
             <div
               key={c.id}
               className="flex items-start gap-3 p-3 rounded-lg border border-border/30 bg-card/30"
             >
-              <div className="text-xl shrink-0 mt-0.5">
-                {SEASON_ICONS[c.season_stage] || "🌿"}
-              </div>
+              {visitor ? (
+                <Link to={ROUTES.WANDERER(visitor.id)} className="shrink-0 mt-0.5">
+                  <Avatar className="h-9 w-9 border border-primary/15 hover:border-primary/40 transition-colors">
+                    <AvatarImage src={visitor.avatar_url || undefined} alt={visitorName} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-[11px] font-serif">
+                      {visitorInitials(visitorName)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <div className="text-xl shrink-0 mt-0.5" aria-hidden>
+                  {SEASON_ICONS[c.season_stage] || "🌿"}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <span className="text-xs font-serif text-foreground">
+                  {visitor ? (
+                    <Link
+                      to={ROUTES.WANDERER(visitor.id)}
+                      className="text-xs font-serif text-foreground hover:text-primary transition-colors truncate max-w-[160px]"
+                    >
+                      {visitorName}
+                    </Link>
+                  ) : (
+                    <span className="text-xs font-serif text-foreground">{visitorName}</span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground/70 font-serif">·</span>
+                  <span className="text-[11px] font-serif text-muted-foreground">
                     {new Date(c.checked_in_at).toLocaleDateString(undefined, {
                       day: "numeric", month: "short", year: "numeric",
                     })}
+                  </span>
+                  <span className="text-base leading-none" aria-hidden>
+                    {SEASON_ICONS[c.season_stage] || "🌿"}
                   </span>
                   {c.weather && (
                     <span className="text-xs">{WEATHER_ICONS[c.weather] || c.weather}</span>
