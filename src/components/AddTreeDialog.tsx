@@ -637,6 +637,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           latitude: lat,
           longitude: lng,
           ...buildAgePayload(age),
+          ...buildOrchardPayload(orchard),
           species_ai_predictions: normalizedAiPredictions.length > 0 ? normalizedAiPredictions : null,
           species_ai_selected: selectedSpeciesPrediction
             ? {
