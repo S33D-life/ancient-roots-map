@@ -390,6 +390,11 @@ export default function WhispersPage() {
                 <TabsTrigger value="sent" className="font-serif text-xs gap-1.5">
                   <Send className="w-3.5 h-3.5" />
                   Sent
+                  {sent.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-[9px] h-4 px-1.5">
+                      {sent.length}
+                    </Badge>
+                  )}
                 </TabsTrigger>
               </TabsList>
 
