@@ -329,6 +329,7 @@ const App = () => {
                 <Route path="/atlas" element={realm(<WorldAtlasPage />, "roots")} />
                 <Route path="/tree/research/:id" element={realm(<ResearchTreeDetailPage />, "roots")} />
                 <Route path="/tree/:id" element={realm(<TreeDetailPage />, "roots")} />
+                <Route path="/garden/:slug" element={realm(<GardenDetailPage />, "roots")} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={realm(<GrovesPage />, "roots")} />
                 <Route path="/pulse" element={realm(<PulseExplorerPage />, "roots")} />
