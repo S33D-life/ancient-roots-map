@@ -27,6 +27,9 @@ import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
 import OfferingPhotoTray, { type PhotoSlot } from "@/components/offering/OfferingPhotoTray";
 import { MAX_OFFERING_PHOTOS } from "@/utils/offeringPhotos";
+import { isOnline } from "@/utils/offlineSync";
+import { queueMultiPhotoOffering } from "@/utils/offlineActions";
+import { useConnectivity } from "@/hooks/use-connectivity";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
