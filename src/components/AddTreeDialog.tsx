@@ -251,62 +251,58 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         doubleClickZoom: false,
       });
 
-      const markerEl = document.createElement('div');
-      markerEl.className = 'encounter-map-pin';
-      markerEl.style.cssText = `
-        width: 32px; height: 32px; border-radius: 50%;
-        background: radial-gradient(circle at 40% 35%, hsl(42, 95%, 65%), hsl(42, 90%, 45%));
-        border: 2.5px solid white;
-        cursor: grab;
-        box-shadow: 0 0 0 0 hsla(42, 90%, 55%, 0.4), 0 2px 8px hsla(0, 0%, 0%, 0.3);
-        animation: pinPulse 2s ease-in-out infinite;
-        transition: transform 0.15s ease, left 0s, top 0s;
-      `;
-      const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
-        .setLngLat([lng, lat])
-        .addTo(map);
+      // GPS origin dot — separate from the staff pin, shows where the wanderer stands
+      let originMarker: any = null;
+      if (originLat !== null && originLng !== null) {
+        const originEl = document.createElement('div');
+        originEl.setAttribute('aria-hidden', 'true');
+        originEl.style.cssText = `
+          width: 14px; height: 14px; border-radius: 50%;
+          background: hsl(205, 90%, 55%);
+          border: 2px solid white;
+          box-shadow: 0 0 0 4px hsla(205, 90%, 55%, 0.25), 0 1px 4px hsla(0, 0%, 0%, 0.3);
+          pointer-events: none;
+        `;
+        originMarker = new maplibregl.Marker({ element: originEl, anchor: 'center' })
+          .setLngLat([originLng, originLat])
+          .addTo(map);
+      }
 
-      marker.on("dragstart", () => {
-        markerEl.style.transform = 'scale(1.2)';
-        markerEl.style.cursor = 'grabbing';
-      });
+      // Staff pin is a CENTER-FIXED DOM overlay (rendered in JSX), not a map marker.
+      // The map moves underneath; the screen center == the saved point.
+      const staffEl = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
 
-      marker.on("dragend", () => {
-        markerEl.style.transform = 'scale(1)';
-        markerEl.style.cursor = 'grab';
-        const pos = marker.getLngLat();
-        const [clampedLat, clampedLng] = clampPosition(pos.lat, pos.lng);
-        if (clampedLat !== pos.lat || clampedLng !== pos.lng) marker.setLngLat([clampedLng, clampedLat]);
+      const setStaffActive = (active: boolean) => {
+        if (!staffEl) return;
+        staffEl.dataset.state = active ? 'active' : 'idle';
+      };
+
+      // Update lat/lng from current map center, clamped to MAX_ADJUST_METERS.
+      // If the user pans outside the radius, snap the map back to the clamped point.
+      let snapping = false;
+      const syncFromCenter = () => {
+        if (snapping) return;
+        const c = map.getCenter();
+        const [clampedLat, clampedLng] = clampPosition(c.lat, c.lng);
+        if (Math.abs(clampedLat - c.lat) > 1e-7 || Math.abs(clampedLng - c.lng) > 1e-7) {
+          snapping = true;
+          map.easeTo({ center: [clampedLng, clampedLat], duration: 200 });
+          setTimeout(() => { snapping = false; }, 220);
+        }
         setLat(clampedLat);
         setLng(clampedLng);
+      };
+
+      map.on('movestart', () => setStaffActive(true));
+      map.on('move', () => {
+        const c = map.getCenter();
+        // Live-update the displayed coords while panning (no snap mid-pan)
+        setLat(c.lat);
+        setLng(c.lng);
       });
-
-      // Tap-to-place: click anywhere on the map to move the marker
-      let lastClickTime = 0;
-      map.on("click", (e: any) => {
-        const now = Date.now();
-        // Ignore rapid successive clicks (debounce accidental taps)
-        if (now - lastClickTime < 300) return;
-        lastClickTime = now;
-
-        const clickLat = e.lngLat.lat;
-        const clickLng = e.lngLat.lng;
-
-        if (originLat !== null && originLng !== null) {
-          const dist = getDistance(originLat, originLng, clickLat, clickLng);
-          if (dist > MAX_ADJUST_METERS) {
-            // Out of range — gentle feedback
-            toast({
-              title: "Outside your range",
-              description: `That point is ${Math.round(dist)}m away. Max allowed is ${Math.round(MAX_ADJUST_METERS)}m from your GPS fix.`,
-            });
-            return;
-          }
-        }
-
-        marker.setLngLat([clickLng, clickLat]);
-        setLat(clickLat);
-        setLng(clickLng);
+      map.on('moveend', () => {
+        setStaffActive(false);
+        syncFromCenter();
       });
 
       map.on("load", () => {
@@ -321,13 +317,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         if (gpsAccuracy && gpsAccuracy > 5) {
           const accuracyCircle = createCircleGeoJSON(lng, lat, Math.min(gpsAccuracy, MAX_ADJUST_METERS * 2));
           map.addSource("gps-accuracy", { type: "geojson", data: accuracyCircle });
-          map.addLayer({ id: "gps-accuracy-fill", type: "fill", source: "gps-accuracy", paint: { "fill-color": "hsl(200, 80%, 60%)", "fill-opacity": 0.06 } });
-          map.addLayer({ id: "gps-accuracy-border", type: "line", source: "gps-accuracy", paint: { "line-color": "hsl(200, 80%, 60%)", "line-width": 1, "line-opacity": 0.3 } });
+          map.addLayer({ id: "gps-accuracy-fill", type: "fill", source: "gps-accuracy", paint: { "fill-color": "hsl(205, 80%, 60%)", "fill-opacity": 0.08 } });
+          map.addLayer({ id: "gps-accuracy-border", type: "line", source: "gps-accuracy", paint: { "line-color": "hsl(205, 80%, 60%)", "line-width": 1, "line-opacity": 0.35 } });
         }
       });
 
       mapRef.current = map;
-      markerRef.current = marker;
+      markerRef.current = originMarker;
     });
 
     return () => { cancelled = true; mapRef.current?.remove(); mapRef.current = null; markerRef.current = null; };
