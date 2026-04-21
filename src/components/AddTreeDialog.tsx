@@ -251,62 +251,58 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         doubleClickZoom: false,
       });
 
-      const markerEl = document.createElement('div');
-      markerEl.className = 'encounter-map-pin';
-      markerEl.style.cssText = `
-        width: 32px; height: 32px; border-radius: 50%;
-        background: radial-gradient(circle at 40% 35%, hsl(42, 95%, 65%), hsl(42, 90%, 45%));
-        border: 2.5px solid white;
-        cursor: grab;
-        box-shadow: 0 0 0 0 hsla(42, 90%, 55%, 0.4), 0 2px 8px hsla(0, 0%, 0%, 0.3);
-        animation: pinPulse 2s ease-in-out infinite;
-        transition: transform 0.15s ease, left 0s, top 0s;
-      `;
-      const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
-        .setLngLat([lng, lat])
-        .addTo(map);
+      // GPS origin dot — separate from the staff pin, shows where the wanderer stands
+      let originMarker: any = null;
+      if (originLat !== null && originLng !== null) {
+        const originEl = document.createElement('div');
+        originEl.setAttribute('aria-hidden', 'true');
+        originEl.style.cssText = `
+          width: 14px; height: 14px; border-radius: 50%;
+          background: hsl(205, 90%, 55%);
+          border: 2px solid white;
+          box-shadow: 0 0 0 4px hsla(205, 90%, 55%, 0.25), 0 1px 4px hsla(0, 0%, 0%, 0.3);
+          pointer-events: none;
+        `;
+        originMarker = new maplibregl.Marker({ element: originEl, anchor: 'center' })
+          .setLngLat([originLng, originLat])
+          .addTo(map);
+      }
 
-      marker.on("dragstart", () => {
-        markerEl.style.transform = 'scale(1.2)';
-        markerEl.style.cursor = 'grabbing';
-      });
+      // Staff pin is a CENTER-FIXED DOM overlay (rendered in JSX), not a map marker.
+      // The map moves underneath; the screen center == the saved point.
+      const staffEl = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
 
-      marker.on("dragend", () => {
-        markerEl.style.transform = 'scale(1)';
-        markerEl.style.cursor = 'grab';
-        const pos = marker.getLngLat();
-        const [clampedLat, clampedLng] = clampPosition(pos.lat, pos.lng);
-        if (clampedLat !== pos.lat || clampedLng !== pos.lng) marker.setLngLat([clampedLng, clampedLat]);
+      const setStaffActive = (active: boolean) => {
+        if (!staffEl) return;
+        staffEl.dataset.state = active ? 'active' : 'idle';
+      };
+
+      // Update lat/lng from current map center, clamped to MAX_ADJUST_METERS.
+      // If the user pans outside the radius, snap the map back to the clamped point.
+      let snapping = false;
+      const syncFromCenter = () => {
+        if (snapping) return;
+        const c = map.getCenter();
+        const [clampedLat, clampedLng] = clampPosition(c.lat, c.lng);
+        if (Math.abs(clampedLat - c.lat) > 1e-7 || Math.abs(clampedLng - c.lng) > 1e-7) {
+          snapping = true;
+          map.easeTo({ center: [clampedLng, clampedLat], duration: 200 });
+          setTimeout(() => { snapping = false; }, 220);
+        }
         setLat(clampedLat);
         setLng(clampedLng);
+      };
+
+      map.on('movestart', () => setStaffActive(true));
+      map.on('move', () => {
+        const c = map.getCenter();
+        // Live-update the displayed coords while panning (no snap mid-pan)
+        setLat(c.lat);
+        setLng(c.lng);
       });
-
-      // Tap-to-place: click anywhere on the map to move the marker
-      let lastClickTime = 0;
-      map.on("click", (e: any) => {
-        const now = Date.now();
-        // Ignore rapid successive clicks (debounce accidental taps)
-        if (now - lastClickTime < 300) return;
-        lastClickTime = now;
-
-        const clickLat = e.lngLat.lat;
-        const clickLng = e.lngLat.lng;
-
-        if (originLat !== null && originLng !== null) {
-          const dist = getDistance(originLat, originLng, clickLat, clickLng);
-          if (dist > MAX_ADJUST_METERS) {
-            // Out of range — gentle feedback
-            toast({
-              title: "Outside your range",
-              description: `That point is ${Math.round(dist)}m away. Max allowed is ${Math.round(MAX_ADJUST_METERS)}m from your GPS fix.`,
-            });
-            return;
-          }
-        }
-
-        marker.setLngLat([clickLng, clickLat]);
-        setLat(clickLat);
-        setLng(clickLng);
+      map.on('moveend', () => {
+        setStaffActive(false);
+        syncFromCenter();
       });
 
       map.on("load", () => {
@@ -321,13 +317,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         if (gpsAccuracy && gpsAccuracy > 5) {
           const accuracyCircle = createCircleGeoJSON(lng, lat, Math.min(gpsAccuracy, MAX_ADJUST_METERS * 2));
           map.addSource("gps-accuracy", { type: "geojson", data: accuracyCircle });
-          map.addLayer({ id: "gps-accuracy-fill", type: "fill", source: "gps-accuracy", paint: { "fill-color": "hsl(200, 80%, 60%)", "fill-opacity": 0.06 } });
-          map.addLayer({ id: "gps-accuracy-border", type: "line", source: "gps-accuracy", paint: { "line-color": "hsl(200, 80%, 60%)", "line-width": 1, "line-opacity": 0.3 } });
+          map.addLayer({ id: "gps-accuracy-fill", type: "fill", source: "gps-accuracy", paint: { "fill-color": "hsl(205, 80%, 60%)", "fill-opacity": 0.08 } });
+          map.addLayer({ id: "gps-accuracy-border", type: "line", source: "gps-accuracy", paint: { "line-color": "hsl(205, 80%, 60%)", "line-width": 1, "line-opacity": 0.35 } });
         }
       });
 
       mapRef.current = map;
-      markerRef.current = marker;
+      markerRef.current = originMarker;
     });
 
     return () => { cancelled = true; mapRef.current?.remove(); mapRef.current = null; markerRef.current = null; };
@@ -1147,20 +1143,54 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
               <div className="space-y-3 -mx-5 -my-4">
                 {/* Header bar over map */}
                 <div className="px-5 pt-4 pb-2">
-                  <p className="text-xs text-muted-foreground font-serif leading-relaxed">
-                    <strong style={{ color: 'hsl(42, 75%, 60%)' }}>Tap the map</strong> to place the tree, or drag the pin to fine-tune — up to <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) from your GPS fix.
+                  <h3 className="text-sm font-serif" style={{ color: 'hsl(42, 75%, 55%)' }}>
+                    Place your staff at the tree
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mt-1">
+                    Move the map to align the staff with the trunk — within <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) of your GPS fix.
                   </p>
                 </div>
 
-                {/* Map container — fills available space */}
+                {/* Map + center-fixed staff pin */}
                 <div
-                  ref={mapContainerRef}
-                  className="w-full border-y overflow-hidden"
+                  className="relative w-full border-y overflow-hidden"
                   style={{
-                    height: 'clamp(200px, 40dvh, 340px)',
+                    height: 'clamp(220px, 42dvh, 360px)',
                     borderColor: 'hsla(42, 40%, 30%, 0.2)',
                   }}
-                />
+                >
+                  <div ref={mapContainerRef} className="absolute inset-0" />
+
+                  {/* STAFF PIN — center-fixed visual overlay (non-interactive) */}
+                  <div
+                    data-staff-pin
+                    data-state="idle"
+                    aria-hidden="true"
+                    className="staff-pin pointer-events-none absolute left-1/2 top-1/2 z-[5]"
+                    style={{ transform: 'translate(-50%, -100%)' }}
+                  >
+                    {/* Halo on the ground */}
+                    <div className="staff-pin__halo" />
+                    {/* Vertical staff */}
+                    <div className="staff-pin__staff" />
+                    {/* Carved head / orb at the top */}
+                    <div className="staff-pin__head" />
+                    {/* Foot anchored at the exact ground point */}
+                    <div className="staff-pin__foot" />
+                  </div>
+
+                  {/* Legend */}
+                  <div className="absolute bottom-2 left-2 flex flex-col gap-1 text-[10px] font-serif text-white/90 bg-black/40 backdrop-blur-sm rounded-md px-2 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'hsl(205, 90%, 55%)', boxShadow: '0 0 0 2px hsla(205, 90%, 55%, 0.3)' }} />
+                      <span>You</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block w-2 h-2.5 rounded-sm" style={{ background: 'linear-gradient(180deg, hsl(34, 55%, 45%), hsl(28, 50%, 28%))' }} />
+                      <span>Staff (the tree)</span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Location info bar */}
                 <div className="px-5 space-y-3 pb-4">
@@ -1176,7 +1206,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       </div>
                       {originLat !== null && originLng !== null && (
                         <span className="text-muted-foreground/60 font-serif text-[10px]">
-                          {distanceFromGps} ft from GPS
+                          {distanceFromGps} ft from you
                         </span>
                       )}
                     </motion.div>
@@ -1192,14 +1222,20 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     </Button>
                     <Button
                       className="flex-1 gap-2 font-serif h-11 text-sm"
-                      onClick={confirmAdjustment}
+                      onClick={() => {
+                        // Settle animation: mark pin as confirmed, then proceed
+                        const pin = mapContainerRef.current?.parentElement?.querySelector<HTMLDivElement>('[data-staff-pin]');
+                        if (pin) pin.dataset.state = 'confirmed';
+                        toast({ title: "🌳 Position anchored", description: "Your staff is planted beside the tree" });
+                        setTimeout(() => confirmAdjustment(), 280);
+                      }}
                       style={{
                         background: 'linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))',
                         color: 'hsl(120, 50%, 70%)',
                         border: '1px solid hsla(120, 40%, 35%, 0.4)',
                       }}
                     >
-                      <Check className="h-4 w-4" /> Confirm Location
+                      <Check className="h-4 w-4" /> Anchor here
                     </Button>
                   </div>
                 </div>
@@ -1426,6 +1462,56 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           @keyframes pinPulse {
             0%, 100% { box-shadow: 0 0 0 0 hsla(42, 90%, 55%, 0.4), 0 2px 8px hsla(0, 0%, 0%, 0.3); }
             50% { box-shadow: 0 0 0 8px hsla(42, 90%, 55%, 0), 0 2px 8px hsla(0, 0%, 0%, 0.3); }
+          }
+
+          /* ── Staff pin (center-fixed for "locate yourself") ── */
+          .staff-pin { width: 28px; height: 64px; transition: transform 220ms cubic-bezier(.2,.8,.2,1); will-change: transform; }
+          .staff-pin__staff {
+            position: absolute; left: 50%; bottom: 6px;
+            width: 4px; height: 46px;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, hsl(34, 55%, 50%) 0%, hsl(28, 50%, 30%) 60%, hsl(22, 45%, 20%) 100%);
+            border-radius: 2px;
+            box-shadow: inset -1px 0 0 hsla(0,0%,0%,0.25), 0 1px 2px hsla(0,0%,0%,0.45);
+          }
+          .staff-pin__head {
+            position: absolute; left: 50%; top: 0;
+            width: 14px; height: 14px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, hsl(45, 90%, 70%), hsl(38, 70%, 45%) 60%, hsl(30, 55%, 28%));
+            box-shadow: 0 0 10px hsla(42, 90%, 60%, 0.55), 0 0 0 1.5px hsla(28, 50%, 18%, 0.6);
+          }
+          .staff-pin__foot {
+            position: absolute; left: 50%; bottom: 4px;
+            width: 8px; height: 4px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: hsla(0, 0%, 0%, 0.55);
+            filter: blur(0.5px);
+          }
+          .staff-pin__halo {
+            position: absolute; left: 50%; bottom: -6px;
+            width: 36px; height: 14px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, hsla(42, 90%, 60%, 0.45), hsla(42, 90%, 60%, 0) 70%);
+            transition: opacity 220ms ease, transform 220ms ease;
+          }
+          .staff-pin[data-state="active"] { transform: translate(-50%, -100%) translateY(-3px); }
+          .staff-pin[data-state="active"] .staff-pin__head { box-shadow: 0 0 14px hsla(42, 95%, 65%, 0.85), 0 0 0 1.5px hsla(28, 50%, 18%, 0.6); }
+          .staff-pin[data-state="active"] .staff-pin__halo { opacity: 0.7; transform: translateX(-50%) scale(1.15); }
+          .staff-pin[data-state="confirmed"] { animation: staffSettle 280ms cubic-bezier(.2,.8,.2,1) forwards; }
+          .staff-pin[data-state="confirmed"] .staff-pin__halo { animation: staffHaloPulse 280ms ease-out forwards; }
+          @keyframes staffSettle {
+            0% { transform: translate(-50%, -100%) translateY(-4px); }
+            60% { transform: translate(-50%, -100%) translateY(2px); }
+            100% { transform: translate(-50%, -100%) translateY(0); }
+          }
+          @keyframes staffHaloPulse {
+            0% { opacity: 0.4; transform: translateX(-50%) scale(0.9); }
+            60% { opacity: 0.9; transform: translateX(-50%) scale(1.5); }
+            100% { opacity: 0.5; transform: translateX(-50%) scale(1.2); }
           }
         `}</style>
 
