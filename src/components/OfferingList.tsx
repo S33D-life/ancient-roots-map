@@ -213,6 +213,18 @@ const OfferingList = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {editTarget && (
+        <EditOfferingDialog
+          open={!!editTarget}
+          onOpenChange={(o) => !o && setEditTarget(null)}
+          offering={editTarget}
+          onSaved={() => {
+            setEditTarget(null);
+            onEdit?.();
+          }}
+        />
+      )}
     </>
   );
 };
