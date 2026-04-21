@@ -224,6 +224,26 @@ const TreePageHero = ({
             {tree.estimated_age && (
               <span className="bg-secondary/50 px-3 py-1 rounded-full">~{tree.estimated_age} years</span>
             )}
+            {(tree as any).variety_name && (
+              <span className="bg-secondary/50 px-3 py-1 rounded-full">
+                <span className="text-muted-foreground/60">Variety:</span> {(tree as any).variety_name}
+              </span>
+            )}
+            {(tree as any).propagation_type && (tree as any).propagation_type !== "unknown" && (
+              <span className="bg-secondary/40 px-3 py-1 rounded-full text-[11px]">
+                <span className="text-muted-foreground/60">Grown from:</span> {(tree as any).propagation_type}
+              </span>
+            )}
+            {(tree as any).planted_year && (
+              <span className="bg-secondary/40 px-3 py-1 rounded-full text-[11px]">
+                <span className="text-muted-foreground/60">Planted:</span> {(tree as any).planted_year}
+              </span>
+            )}
+            {(tree as any).is_orchard && (
+              <span className="px-2.5 py-0.5 rounded-full text-[10px]" style={{ background: "hsla(120, 35%, 25%, 0.3)", color: "hsl(120, 45%, 60%)" }}>
+                🌿 Cultivated
+              </span>
+            )}
             {location && (
               <span className="bg-secondary/50 px-3 py-1 rounded-full inline-flex items-center gap-1">
                 <MapPin className="w-3 h-3" /> {location}
