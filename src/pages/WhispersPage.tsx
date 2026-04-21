@@ -445,7 +445,31 @@ export default function WhispersPage() {
                     </p>
                   </div>
                 ) : (
-                  sent.map(w => <WhisperCard key={w.id} whisper={w} variant="collected" />)
+                  <>
+                    {/* Stalled summary */}
+                    {(() => {
+                      const stalled = sent.filter(w => {
+                        const ageDays = Math.floor(
+                          (Date.now() - new Date(w.created_at).getTime()) / (1000 * 60 * 60 * 24),
+                        );
+                        return w.status !== "collected" && ageDays >= 7;
+                      }).length;
+                      if (stalled === 0) return null;
+                      return (
+                        <div
+                          className="rounded-lg border px-3 py-2 text-[11px] font-serif"
+                          style={{
+                            background: "hsl(38 92% 50% / 0.06)",
+                            borderColor: "hsl(38 92% 50% / 0.25)",
+                            color: "hsl(38 92% 30%)",
+                          }}
+                        >
+                          ⏳ {stalled} {stalled === 1 ? "whisper has" : "whispers have"} been waiting more than a week.
+                        </div>
+                      );
+                    })()}
+                    {sent.map(w => <WhisperCard key={w.id} whisper={w} variant="sent" />)}
+                  </>
                 )}
               </TabsContent>
             </Tabs>
