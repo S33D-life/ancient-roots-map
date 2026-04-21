@@ -34,6 +34,9 @@ interface Props {
     /** True if any upload in the batch failed. */
     failed?: boolean;
   };
+  /** When true, shows an "offline — will upload later" hint instead of the
+   *  reorder/captured tagline. */
+  offline?: boolean;
 }
 
 const OfferingPhotoTray = ({
@@ -45,6 +48,7 @@ const OfferingPhotoTray = ({
   disabled = false,
   uploadingIds,
   uploadProgress,
+  offline = false,
 }: Props) => {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
