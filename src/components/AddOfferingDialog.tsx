@@ -150,12 +150,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     else if (ANCHORED_KEYWORDS.test(text)) setTreeRole("anchored");
   }, [title, content]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const processFile = async (file: File) => {
+  const addPhoto = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file type", description: "Please select an image file", variant: "destructive" });
       return;
@@ -164,37 +159,49 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       toast({ title: "File too large", description: "Please select an image under 50MB", variant: "destructive" });
       return;
     }
+    if (photoSlots.length >= MAX_OFFERING_PHOTOS) {
+      toast({ title: "Limit reached", description: `Up to ${MAX_OFFERING_PHOTOS} photos per offering` });
+      return;
+    }
     try {
       const processed = await resizeImage(file);
-      setSelectedFile(processed);
-      setPreviewUrl(URL.createObjectURL(processed));
+      const slot: PhotoSlot = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        file: processed,
+        previewUrl: URL.createObjectURL(processed),
+      };
+      setPhotoSlots((prev) => [...prev, slot].slice(0, MAX_OFFERING_PHOTOS));
       setMediaUrl("");
-      if (processed !== file) {
-        toast({ title: "Image optimized", description: `Resized from ${(file.size / 1024 / 1024).toFixed(1)}MB to ${(processed.size / 1024 / 1024).toFixed(1)}MB` });
-      }
     } catch {
       toast({ title: "Processing failed", description: "Could not process the image", variant: "destructive" });
     }
   };
 
+  const removePhoto = (id: string) => {
+    setPhotoSlots((prev) => {
+      const target = prev.find((p) => p.id === id);
+      if (target) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) processFile(file);
+    const files = e.dataTransfer.files;
+    if (!files) return;
+    const remaining = MAX_OFFERING_PHOTOS - photoSlots.length;
+    Array.from(files).slice(0, remaining).forEach(addPhoto);
   };
 
-  const clearSelectedFile = () => {
-    setSelectedFile(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  const clearAllPhotos = () => {
+    photoSlots.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    setPhotoSlots([]);
   };
 
   const uploadFile = async (file: File, userId: string): Promise<string> => {
     const ext = file.name.split(".").pop() || "jpg";
-    const fileName = `${userId}/${treeId}/${Date.now()}.${ext}`;
+    const fileName = `${userId}/${treeId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("offerings").upload(fileName, file, { cacheControl: "3600", upsert: false });
     if (error) throw error;
     const { data } = supabase.storage.from("offerings").getPublicUrl(fileName);
@@ -202,7 +209,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   };
 
   const resetForm = () => {
-    setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearSelectedFile();
+    setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
