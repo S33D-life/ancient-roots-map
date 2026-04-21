@@ -696,6 +696,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         longitude: lng,
         ...buildAgePayload(age),
         ...buildOrchardPayload(orchard),
+        garden_id: gardenId,
         created_by: user.id,
         photo_status: droppedPhotoFile ? 'pending' : 'none',
         ...(photoDate ? { created_at: photoDate } : {}),
