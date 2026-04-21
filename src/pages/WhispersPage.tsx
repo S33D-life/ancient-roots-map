@@ -13,6 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MessageCircle, TreeDeciduous, Send, Inbox, Archive, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import MycelialWhisperOpenModal from "@/components/MycelialWhisperOpenModal";
+
+const CHANNEL_META: Record<string, { icon: string; label: string; tone: string }> = {
+  tree: { icon: "🌳", label: "This tree", tone: "border-primary/30 text-primary" },
+  species: { icon: "🌿", label: "Species", tone: "border-emerald-500/30 text-emerald-700 dark:text-emerald-300" },
+  mycelium: { icon: "🍄", label: "The forest", tone: "border-amber-500/30 text-amber-700 dark:text-amber-300" },
+};
 
 const DELIVERY_LABELS: Record<string, string> = {
   ANY_TREE: "🌳 Any Ancient Friend",
