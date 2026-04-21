@@ -1456,10 +1456,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     { emoji: "🎵", label: "Song", type: "song" },
                     { emoji: "💭", label: "Story", type: "story" },
                   ].map((o) => (
-                    <a
+                    <button
                       key={o.type}
-                      href={savedTreeId ? `/tree/${encodeURIComponent(savedTreeId)}?add=${o.type}` : '#'}
-                      className="flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:scale-105"
+                      type="button"
+                      disabled={!savedTreeId}
+                      onClick={() => {
+                        if (!savedTreeId) return;
+                        hapticTap();
+                        // Close the dialog cleanly, then navigate — avoids a hard
+                        // page reload and lets the celebration finish.
+                        onOpenChange(false);
+                        setTimeout(() => {
+                          navigate(`/tree/${encodeURIComponent(savedTreeId)}?add=${o.type}`);
+                        }, 120);
+                      }}
+                      className="flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         background: 'hsla(0, 0%, 100%, 0.03)',
                         border: '1px solid hsla(42, 50%, 40%, 0.15)',
@@ -1467,7 +1478,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     >
                       <span className="text-xl">{o.emoji}</span>
                       <span className="text-[10px] font-serif text-muted-foreground">{o.label}</span>
-                    </a>
+                    </button>
                   ))}
                 </div>
 
