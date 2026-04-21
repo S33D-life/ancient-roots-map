@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWeather, weatherSummary } from "@/hooks/use-weather";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import { useUIFlow } from "@/contexts/UIFlowContext";
+import { notify } from "@/lib/notify";
 
 interface TreeCheckinButtonProps {
   treeId: string;
@@ -114,6 +115,30 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
       setDone(true);
       toast({ title: "Checked in! 🌳", description: `You're at ${treeName}` });
       onCheckinComplete?.();
+
+      // Notify tree creator (fire-and-forget)
+      supabase
+        .from("trees")
+        .select("created_by")
+        .eq("id", treeId)
+        .maybeSingle()
+        .then(({ data: t }) => {
+          if (t?.created_by) {
+            notify(
+              {
+                user_id: t.created_by,
+                title: "Your tree was visited",
+                body: note.trim()
+                  ? `Someone arrived beneath ${treeName} and left a reflection`
+                  : `Someone arrived beneath ${treeName}`,
+                category: "tree_visit",
+                deep_link: `/tree/${treeId}`,
+                metadata: { tree_id: treeId, has_reflection: !!note.trim() },
+              },
+              userId,
+            );
+          }
+        });
 
       setTimeout(() => handleClose(), 1500);
     } catch (err: any) {
