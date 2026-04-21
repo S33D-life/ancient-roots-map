@@ -195,12 +195,12 @@ export function useGroupMembers(groupId: string | null) {
     const ids = (rows as any[] || []).map(r => r.user_id);
     if (!ids.length) { setMembers([]); setLoading(false); return; }
 
-    const { data: profiles } = await supabase
+    const { data: profiles } = await (supabase as any)
       .from("profiles")
       .select("user_id, full_name, avatar_url")
       .in("user_id", ids);
 
-    const pMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+    const pMap = new Map(((profiles as any[]) || []).map((p: any) => [p.user_id, p]));
     setMembers(
       (rows as any[]).map(r => ({
         user_id: r.user_id,
