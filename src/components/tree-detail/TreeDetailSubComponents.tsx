@@ -156,15 +156,32 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
  * Steps through every photo across all offerings (multi-photo aware).
  */
 
-export const Lightbox = ({ offerings, index, onClose, onChange }: { offerings: Offering[]; index: number; onClose: () => void; onChange: (i: number) => void }) => {
-  const flat = flattenPhotos(offerings);
+export const Lightbox = ({ offerings, index, onClose, onChange, treeName }: { offerings: Offering[]; index: number; onClose: () => void; onChange: (i: number) => void; treeName?: string }) => {
+  const flat = flattenOfferingPhotos(offerings);
   const current = flat[index];
   if (!current) return null;
   const photosForCurrent = getOfferingPhotos(current.offering);
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-background/95 backdrop-blur-sm" onClick={onClose}>
-      <button className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10" onClick={onClose}><X className="h-6 w-6" /></button>
+      <button
+        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10"
+        onClick={onClose}
+        aria-label="Close lightbox"
+      >
+        <X className="h-6 w-6" />
+      </button>
+      <button
+        className="absolute top-4 right-16 text-muted-foreground hover:text-primary z-10 transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          shareOffering(current.offering, treeName, current.indexInOffering);
+        }}
+        aria-label="Share this photo"
+        title="Share this photo"
+      >
+        <Share2 className="h-5 w-5" />
+      </button>
       {flat.length > 1 && (
         <>
           <button className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10" onClick={(e) => { e.stopPropagation(); onChange((index - 1 + flat.length) % flat.length); }}>
