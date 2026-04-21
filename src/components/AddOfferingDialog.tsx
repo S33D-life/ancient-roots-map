@@ -255,6 +255,62 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         return;
       }
 
+      // ── Offline branch: queue the whole offering (record + photo blobs) in
+      // IndexedDB. The sync engine will upload photos and create the row when
+      // connectivity returns. Currently scoped to photo offerings.
+      if (!isOnline() && activeType === "photo" && photoSlots.length > 0) {
+        try {
+          const dataUrls = await Promise.all(photoSlots.map((p) => fileToDataUrl(p.file)));
+          const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
+          const quoteText = quote.text.trim() || null;
+          const quoteAuthor = quoteText ? (quote.author.trim() || null) : null;
+          const quoteSource = quoteText ? (quote.source.trim() || null) : null;
+          await queueMultiPhotoOffering({
+            payload: {
+              tree_id: treeId,
+              type: activeType,
+              title: resolvedTitle,
+              content: content.trim() || null,
+              created_by: user.id,
+              sealed_by_staff: sealedByStaff.trim() || null,
+              meeting_id: meetingId || null,
+              visibility: activeType === "photo" ? "public" : visibility,
+              tree_role: treeRole,
+              impact_weight: impactWeight,
+              quote_text: quoteText,
+              quote_author: quoteAuthor,
+              quote_source: quoteSource,
+              // photos + media_url are filled in by the sync engine after upload
+            },
+            photoDataUrls: dataUrls,
+            label: `${cfg.singular}${treeName ? ` to ${treeName}` : ""}`,
+          });
+          const treePart = treeName ? ` to ${treeName}` : "";
+          setCelebrationMsg({
+            emoji: "📦",
+            message: `${cfg.singular} saved offline${treePart}`,
+            subtitle: `${dataUrls.length} ${dataUrls.length === 1 ? "photo" : "photos"} will upload when you're back online`,
+          });
+          setShowCelebration(true);
+          setTimeout(() => {
+            setShowCelebration(false);
+            onOpenChange(false);
+          }, 2400);
+          resetForm();
+          return;
+        } catch (queueErr: any) {
+          toast({
+            title: "Couldn't save offline",
+            description: queueErr?.message || "Please try again",
+            variant: "destructive",
+          });
+          submittingRef.current = false;
+          setLoading(false);
+          clearTimeout(timeout);
+          return;
+        }
+      }
+
       let finalMediaUrl = mediaUrl.trim() || null;
       let uploadedPhotos: string[] = [];
       if (photoSlots.length > 0) {
