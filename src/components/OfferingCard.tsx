@@ -398,6 +398,7 @@ const CompactRow = ({
   treeName,
   showTreeLink,
   onDelete,
+  onEdit,
 }: OfferingCardProps) => {
   const isAuthor = userId && offering.created_by === userId;
   return (
