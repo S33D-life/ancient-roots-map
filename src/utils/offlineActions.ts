@@ -59,6 +59,54 @@ export async function createOfferingOfflineAware(input: OfflineOfferingInput): P
   return { queued: true };
 }
 
+interface OfflineMultiPhotoOfferingInput {
+  /** Full row payload (anything that goes into the `offerings` insert) */
+  payload: Record<string, unknown> & { tree_id: string; created_by: string; type: string; title?: string };
+  /** 1–3 photos as base64 data URLs (already resized client-side) */
+  photoDataUrls: string[];
+  /** Optional human label for the sync banner */
+  label?: string;
+}
+
+/**
+ * Queue a multi-photo offering for offline sync. The whole record is
+ * persisted in IndexedDB and uploaded automatically when connectivity
+ * returns (see syncEngine.ts). The first photo becomes the cover.
+ *
+ * Always returns `{ queued: true }` — callers should check `isOnline()`
+ * before calling this; if you want online-or-queue behaviour use
+ * `createOfferingOfflineAware`.
+ */
+export async function queueMultiPhotoOffering(
+  input: OfflineMultiPhotoOfferingInput,
+): Promise<{ queued: true; id: string }> {
+  const id = offlineId();
+  const userPrefix = input.payload.created_by;
+  const treePrefix = input.payload.tree_id;
+  const photoStoragePaths = input.photoDataUrls.map(
+    (_, i) => `${userPrefix}/${treePrefix}/${id}-${i}.jpg`,
+  );
+
+  const action: PendingAction = {
+    id,
+    type: "offering",
+    status: "pending",
+    table: "offerings",
+    payload: input.payload,
+    photoDataUrls: input.photoDataUrls,
+    photoStoragePaths,
+    attempts: 0,
+    queuedAt: new Date().toISOString(),
+    label:
+      input.label ||
+      `Offering: ${input.payload.type}${input.payload.title ? ` — ${input.payload.title}` : ""}`,
+  };
+  await queueAction(action);
+  emitChange();
+  toast("📦 Offering saved locally — photos will upload when online", { duration: 4000 });
+  return { queued: true, id };
+}
+
 interface OfflineCheckinInput {
   tree_id: string;
   user_id: string;
