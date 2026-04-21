@@ -81,6 +81,26 @@ export default function SendWhisperModal({
   const heartCost = audienceType === "group" ? CHANNEL_COST[channelType] : 0;
   const insufficientHearts = audienceType === "group" && heartBalance.totalHearts < heartCost;
 
+  // Fetch tree coordinates so presence can be evaluated by geo as a fallback.
+  const [treeCoords, setTreeCoords] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
+  useEffect(() => {
+    if (!treeId) return;
+    supabase
+      .from("trees")
+      .select("latitude, longitude")
+      .eq("id", treeId)
+      .maybeSingle()
+      .then(({ data }) => setTreeCoords({ lat: (data as any)?.latitude ?? null, lng: (data as any)?.longitude ?? null }));
+  }, [treeId]);
+
+  const presence = useTreePresenceWindow({
+    userId,
+    treeId,
+    treeLat: treeCoords.lat,
+    treeLng: treeCoords.lng,
+    enabled: open,
+  });
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
