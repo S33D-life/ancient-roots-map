@@ -4,10 +4,11 @@
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Share2, ChevronLeft, ChevronRight, X, BookOpen } from "lucide-react";
+import { Camera, Share2, ChevronLeft, ChevronRight, X, BookOpen, Layers } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Offering } from "@/hooks/use-offerings";
+import { getOfferingPhotos, getOfferingCover } from "@/utils/offeringPhotos";
 
 /* ---------- Shared Helpers ---------- */
 
@@ -49,69 +50,104 @@ export const SealedByLabel = ({ staff }: { staff: string | null }) => {
   );
 };
 
-/* ---------- Photo Grid ---------- */
+/* ---------- Photo Grid ----------
+ * Each offering becomes ONE tile showing its cover photo.
+ * Multi-photo offerings get a small "+N" stack indicator.
+ * Tapping opens the lightbox at that offering's first photo.
+ */
+
+// Build a flat photo list across offerings, with back-references for the lightbox.
+type FlatPhoto = { url: string; offering: Offering; indexInOffering: number };
+const flattenPhotos = (offerings: Offering[]): FlatPhoto[] =>
+  offerings.flatMap((o) =>
+    getOfferingPhotos(o).map((url, i) => ({ url, offering: o, indexInOffering: i })),
+  );
 
 export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; onImageClick: (index: number) => void }) => {
-  const photoIndex = offerings.filter((o) => o.media_url);
+  const flat = flattenPhotos(offerings);
+  const offeringsWithPhotos = offerings.filter((o) => getOfferingPhotos(o).length > 0);
+
   return (
     <motion.div className="grid grid-cols-2 md:grid-cols-3 gap-3" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.08 } } }}>
-      {offerings.map((offering) => (
-        <motion.div
-          key={offering.id}
-          variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="group relative rounded-lg overflow-hidden border border-border/50 cursor-pointer aspect-square"
-          onClick={() => { const idx = photoIndex.findIndex((p) => p.id === offering.id); if (idx >= 0) onImageClick(idx); }}
-        >
-          {offering.media_url ? (
-            <img src={offering.media_url} alt={offering.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-secondary/30"><Camera className="h-8 w-8 text-muted-foreground/30" /></div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-            <p className="text-sm font-serif text-foreground truncate">{offering.title}</p>
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-muted-foreground">{new Date(offering.created_at).toLocaleDateString()}</p>
-              <div className="flex items-center gap-2">
-                <button onClick={(e) => { e.stopPropagation(); shareOffering(offering); }} className="text-muted-foreground hover:text-primary transition-colors" title="Share">
-                  <Share2 className="w-3.5 h-3.5" />
-                </button>
-                <SealedByLabel staff={offering.sealed_by_staff} />
+      {offeringsWithPhotos.map((offering) => {
+        const photos = getOfferingPhotos(offering);
+        const cover = photos[0];
+        const extra = photos.length - 1;
+        return (
+          <motion.div
+            key={offering.id}
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="group relative rounded-lg overflow-hidden border border-border/50 cursor-pointer aspect-square"
+            onClick={() => {
+              const idx = flat.findIndex((p) => p.offering.id === offering.id);
+              if (idx >= 0) onImageClick(idx);
+            }}
+          >
+            {cover ? (
+              <img src={cover} alt={offering.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-secondary/30"><Camera className="h-8 w-8 text-muted-foreground/30" /></div>
+            )}
+            {extra > 0 && (
+              <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-background/80 backdrop-blur-sm border border-border/40 text-[10px] font-serif text-foreground/80">
+                <Layers className="w-2.5 h-2.5" />+{extra}
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <p className="text-sm font-serif text-foreground truncate">{offering.title}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-muted-foreground">{new Date(offering.created_at).toLocaleDateString()}</p>
+                <div className="flex items-center gap-2">
+                  <button onClick={(e) => { e.stopPropagation(); shareOffering(offering); }} className="text-muted-foreground hover:text-primary transition-colors" title="Share">
+                    <Share2 className="w-3.5 h-3.5" />
+                  </button>
+                  <SealedByLabel staff={offering.sealed_by_staff} />
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        );
+      })}
     </motion.div>
   );
 };
 
-/* ---------- Lightbox ---------- */
+/* ---------- Lightbox ----------
+ * Steps through every photo across all offerings (multi-photo aware).
+ */
 
 export const Lightbox = ({ offerings, index, onClose, onChange }: { offerings: Offering[]; index: number; onClose: () => void; onChange: (i: number) => void }) => {
-  const current = offerings[index];
+  const flat = flattenPhotos(offerings);
+  const current = flat[index];
   if (!current) return null;
+  const photosForCurrent = getOfferingPhotos(current.offering);
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-background/95 backdrop-blur-sm" onClick={onClose}>
       <button className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10" onClick={onClose}><X className="h-6 w-6" /></button>
-      {offerings.length > 1 && (
+      {flat.length > 1 && (
         <>
-          <button className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10" onClick={(e) => { e.stopPropagation(); onChange((index - 1 + offerings.length) % offerings.length); }}>
+          <button className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10" onClick={(e) => { e.stopPropagation(); onChange((index - 1 + flat.length) % flat.length); }}>
             <ChevronLeft className="h-8 w-8" />
           </button>
-          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10" onClick={(e) => { e.stopPropagation(); onChange((index + 1) % offerings.length); }}>
+          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10" onClick={(e) => { e.stopPropagation(); onChange((index + 1) % flat.length); }}>
             <ChevronRight className="h-8 w-8" />
           </button>
         </>
       )}
       <div className="max-w-4xl max-h-[85vh] px-4" onClick={(e) => e.stopPropagation()}>
-        <img src={current.media_url!} alt={current.title} className="max-w-full max-h-[75vh] object-contain rounded-lg mx-auto" />
+        <img src={current.url} alt={current.offering.title} className="max-w-full max-h-[75vh] object-contain rounded-lg mx-auto" />
         <div className="text-center mt-4">
-          <p className="font-serif text-lg text-primary">{current.title}</p>
-          {current.content && <p className="text-sm text-muted-foreground font-serif mt-1">{current.content}</p>}
-          <p className="text-[10px] text-muted-foreground/50 mt-2 tracking-widest">{index + 1} / {offerings.length}</p>
+          <p className="font-serif text-lg text-primary">{current.offering.title}</p>
+          {current.offering.content && <p className="text-sm text-muted-foreground font-serif mt-1">{current.offering.content}</p>}
+          {photosForCurrent.length > 1 && (
+            <p className="text-[10px] text-primary/60 font-serif mt-2 tracking-widest">
+              Photo {current.indexInOffering + 1} of {photosForCurrent.length} in this moment
+            </p>
+          )}
+          <p className="text-[10px] text-muted-foreground/50 mt-2 tracking-widest">{index + 1} / {flat.length}</p>
         </div>
       </div>
     </div>
