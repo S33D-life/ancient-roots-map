@@ -4,8 +4,9 @@
  * Now supports YouTube song offerings with inline embed playback.
  */
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Radio, Play, Pause, Volume2, VolumeX, Music, Youtube } from "lucide-react";
+import { Radio, Play, Pause, Volume2, VolumeX, Music, Youtube, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -238,6 +239,15 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      <div className="flex justify-end">
+        <Link
+          to={`/library/music-room?tree=${treeId}`}
+          className="inline-flex items-center gap-1 text-[11px] font-serif tracking-wide text-muted-foreground/70 hover:text-primary transition-colors"
+        >
+          Wander the Music Room <ArrowRight className="w-3 h-3" />
+        </Link>
       </div>
     </section>
   );
