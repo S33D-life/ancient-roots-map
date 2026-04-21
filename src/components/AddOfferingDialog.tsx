@@ -380,13 +380,21 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       let finalMediaUrl = mediaUrl.trim() || null;
       let uploadedPhotos: string[] = [];
       if (photoSlots.length > 0) {
+        // Identify which slots still need upload (skip the ones already uploaded
+        // via a previous attempt + retries).
+        const pending = photoSlots.filter((p) => !uploadedUrlsById[p.id]);
+        const alreadyDone = photoSlots.length - pending.length;
+
         setUploading(true);
-        setUploadingPhotoIds(new Set(photoSlots.map((p) => p.id)));
-        setUploadBatch({ total: photoSlots.length, done: 0, failed: false });
-        try {
-          // Upload all photos in parallel; clear each from the "uploading" set as it finishes
-          uploadedPhotos = await Promise.all(
-            photoSlots.map(async (p) => {
+        setUploadingPhotoIds(new Set(pending.map((p) => p.id)));
+        setUploadBatch({ total: photoSlots.length, done: alreadyDone, failed: false });
+        // Clear any prior failed flags for the slots we're about to retry as a batch
+        setFailedPhotoIds(new Set());
+
+        // Use allSettled so a single failure doesn't kill the rest of the batch.
+        const results = await Promise.allSettled(
+          pending.map(async (p) => {
+            try {
               const url = await uploadFile(p.file, user.id);
               setUploadingPhotoIds((prev) => {
                 const next = new Set(prev);
@@ -394,14 +402,35 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 return next;
               });
               setUploadBatch((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
-              return url;
-            }),
-          );
-          finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
-        } catch (uploadErr: any) {
-          // Mid-flight failure — if we lost connection, fall back to the
-          // offline queue so the user doesn't lose their offering.
-          if (activeType === "photo" && !isOnline()) {
+              setUploadedUrlsById((prev) => ({ ...prev, [p.id]: url }));
+              return { id: p.id, url };
+            } catch (err) {
+              setUploadingPhotoIds((prev) => {
+                const next = new Set(prev);
+                next.delete(p.id);
+                return next;
+              });
+              throw { id: p.id, err };
+            }
+          }),
+        );
+
+        // Collect newly-failed slot ids
+        const newlyFailed = new Set<string>();
+        results.forEach((r) => {
+          if (r.status === "rejected") {
+            const id = (r.reason as any)?.id as string | undefined;
+            if (id) newlyFailed.add(id);
+          }
+        });
+
+        if (newlyFailed.size > 0) {
+          setFailedPhotoIds(newlyFailed);
+          setUploadBatch((prev) => (prev ? { ...prev, failed: true } : prev));
+
+          // Full-batch failure while offline → fall back to the offline queue
+          // (existing behavior).
+          if (newlyFailed.size === pending.length && activeType === "photo" && !isOnline()) {
             try {
               const dataUrls = await Promise.all(photoSlots.map((p) => fileToDataUrl(p.file)));
               const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
@@ -436,23 +465,44 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               resetForm();
               return;
             } catch {
-              /* fall through to error toast */
+              /* fall through to in-dialog retry */
             }
           }
-          setUploadBatch((prev) => (prev ? { ...prev, failed: true } : prev));
-          toast({ title: "Upload failed", description: uploadErr.message || "One or more photos failed to upload — try again", variant: "destructive" });
+
+          // Partial failure (or online full failure) — keep dialog open so the
+          // user can tap Retry on each failed tile, then submit again.
+          toast({
+            title: newlyFailed.size === 1 ? "1 photo didn't upload" : `${newlyFailed.size} photos didn't upload`,
+            description: "Tap Retry on the dimmed photos to try again.",
+            variant: "destructive",
+          });
           submittingRef.current = false;
           setLoading(false);
           setUploading(false);
-          setUploadingPhotoIds(new Set());
           clearTimeout(timeout);
           return;
-        } finally {
-          setUploading(false);
-          setUploadingPhotoIds(new Set());
-          // Keep batch visible briefly so the user sees the "all ready" state, then clear
-          setTimeout(() => setUploadBatch(null), 1500);
         }
+
+        // All uploads (incl. previously-retried ones) succeeded — assemble in
+        // original slot order so the cover photo stays first.
+        uploadedPhotos = photoSlots
+          .map((p) => uploadedUrlsById[p.id] || results.find(
+            (r) => r.status === "fulfilled" && (r.value as { id: string }).id === p.id,
+          ))
+          .map((entry) => {
+            if (typeof entry === "string") return entry;
+            if (entry && (entry as PromiseFulfilledResult<{ url: string }>).status === "fulfilled") {
+              return (entry as PromiseFulfilledResult<{ url: string }>).value.url;
+            }
+            return "";
+          })
+          .filter(Boolean);
+
+        finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
+        setUploading(false);
+        setUploadingPhotoIds(new Set());
+        // Keep batch visible briefly so the user sees the "all ready" state, then clear
+        setTimeout(() => setUploadBatch(null), 1500);
       }
 
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
