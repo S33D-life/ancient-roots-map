@@ -76,7 +76,7 @@ const OrchardModePanel = ({ value, onChange }: Props) => {
         <div className="flex items-center gap-2 min-w-0">
           <Sprout className="h-3.5 w-3.5 shrink-0" style={{ color: "hsl(120, 45%, 55%)" }} />
           <span className="text-[11px] font-serif" style={{ color: "hsl(120, 45%, 60%)" }}>
-            Cultivar or variety details?
+            How was it grown? <span className="text-muted-foreground/50">— cultivar / orchard</span>
           </span>
         </div>
         <ChevronDown
