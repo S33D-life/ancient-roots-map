@@ -26,6 +26,7 @@ import {
 } from "@/services/speciesVision";
 import SeedNudge from "@/components/SeedNudge";
 import TreeAgeInput, { type TreeAgeValue, EMPTY_AGE } from "@/components/encounter/TreeAgeInput";
+import OrchardModePanel, { type OrchardValue, EMPTY_ORCHARD, buildOrchardPayload } from "@/components/encounter/OrchardModePanel";
 
 /**
  * Resolve the structured age form into the columns persisted on `trees`.
