@@ -110,6 +110,14 @@ const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =
     img.src = url;
   });
 
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
 const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, type: initialType, meetingId, onChangeType }: AddOfferingDialogProps) => {
   const [activeType, setActiveType] = useState<OfferingType>(initialType);
   const [title, setTitle] = useState("");
