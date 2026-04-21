@@ -10,13 +10,14 @@
  *   - Forest → every song offering
  *
  * Entered with `?tree=:id` to anchor scope to a specific tree.
- * Cards open the tree page (existing offering surface).
+ * Cards open an in-room detail panel; "Go to tree" is the secondary action.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Music, Radio, TreeDeciduous, Globe2 } from "lucide-react";
+import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 
 type Scope = "tree" | "species" | "forest";
 
@@ -26,6 +27,7 @@ interface SongRow {
   content: string | null;          // typically "Artist — Album"
   thumbnail_url: string | null;
   youtube_video_id: string | null;
+  youtube_embed_url: string | null;
   tree_id: string;
   created_by: string | null;
   created_at: string;
@@ -42,28 +44,121 @@ interface SongRow {
 
 function parseArtist(content: string | null): string {
   if (!content) return "Unknown artist";
-  // Common format: "Artist — Album" or "Artist - Album"
   const dash = content.split(/\s+[—–-]\s+/)[0];
   return (dash || content).trim();
 }
 
 function resolveArtwork(s: { thumbnail_url: string | null; youtube_video_id: string | null }): string | null {
-  if (s.thumbnail_url) {
-    // Upgrade iTunes thumbs from 100x100 to 600x600 when possible
-    return s.thumbnail_url.replace("100x100", "600x600");
-  }
-  if (s.youtube_video_id) {
-    return `https://i.ytimg.com/vi/${s.youtube_video_id}/hqdefault.jpg`;
-  }
+  if (s.thumbnail_url) return s.thumbnail_url.replace("100x100", "600x600");
+  if (s.youtube_video_id) return `https://i.ytimg.com/vi/${s.youtube_video_id}/hqdefault.jpg`;
   return null;
 }
 
-/** Tiny deterministic scale variation for organic feel. */
-function scaleFor(id: string): number {
+/** Tiny deterministic hash for organic per-card variation. */
+function hashId(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
-  const n = Math.abs(h) % 100;
-  return 0.94 + (n / 100) * 0.12; // 0.94 — 1.06
+  return Math.abs(h);
+}
+
+function scaleFor(id: string): number {
+  return 0.94 + ((hashId(id) % 100) / 100) * 0.12; // 0.94 — 1.06
+}
+
+/* ── Botanical placeholder ─────────────────────────────── */
+
+/**
+ * BotanicalRecord — a record-like placeholder for songs without artwork.
+ * Uses deterministic colour/leaf variation so each song has its own face.
+ */
+function BotanicalRecord({ song }: { song: SongRow }) {
+  const h = hashId(song.id);
+  // Warm, earthy palette anchored by the project's primary
+  const palettes = [
+    { a: 28, b: 38 },   // amber
+    { a: 142, b: 110 }, // moss
+    { a: 200, b: 220 }, // dusk
+    { a: 14, b: 28 },   // ember
+    { a: 280, b: 260 }, // wild plum
+    { a: 165, b: 145 }, // pine
+  ];
+  const p = palettes[h % palettes.length];
+  const leafCount = 3 + (h % 3); // 3-5 leaves
+  const initial = (song.artist?.[0] || song.title?.[0] || "♪").toUpperCase();
+  const ringRotate = (h % 360);
+
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{
+        background: `radial-gradient(circle at 30% 25%, hsl(${p.a} 30% 22% / 0.95), hsl(${p.b} 25% 10%) 75%)`,
+      }}
+      aria-hidden
+    >
+      {/* Vinyl rings */}
+      <div
+        className="absolute inset-[14%] rounded-full"
+        style={{
+          background: `repeating-radial-gradient(circle at center,
+            hsl(${p.a} 25% 14%) 0px,
+            hsl(${p.a} 30% 18%) 1px,
+            hsl(${p.a} 22% 12%) 4px,
+            hsl(${p.a} 28% 16%) 5px)`,
+          boxShadow: `inset 0 0 24px hsl(${p.b} 30% 4% / 0.6), 0 0 1px hsl(${p.a} 30% 30% / 0.4)`,
+          transform: `rotate(${ringRotate}deg)`,
+        }}
+      />
+      {/* Centre label */}
+      <div
+        className="absolute inset-[36%] rounded-full flex items-center justify-center"
+        style={{
+          background: `radial-gradient(circle, hsl(${p.a} 40% 30%), hsl(${p.b} 35% 18%))`,
+          boxShadow: `inset 0 0 8px hsl(${p.b} 40% 8% / 0.6), 0 0 0 2px hsl(${p.a} 30% 14%)`,
+        }}
+      >
+        <span
+          className="font-serif text-lg select-none"
+          style={{ color: `hsl(${p.a} 40% 80% / 0.85)` }}
+        >
+          {initial}
+        </span>
+      </div>
+      {/* Centre hole */}
+      <div
+        className="absolute inset-[47.5%] rounded-full"
+        style={{ background: `hsl(${p.b} 30% 6%)`, boxShadow: `inset 0 0 4px hsl(${p.b} 30% 2%)` }}
+      />
+      {/* Botanical leaves drifting around the disc */}
+      {Array.from({ length: leafCount }).map((_, i) => {
+        const angle = (360 / leafCount) * i + (h % 60);
+        const dist = 38 + ((h >> i) % 8); // % from center
+        const leafRot = angle + 90;
+        return (
+          <span
+            key={i}
+            className="absolute text-base select-none"
+            style={{
+              left: `${50 + Math.cos((angle * Math.PI) / 180) * dist}%`,
+              top: `${50 + Math.sin((angle * Math.PI) / 180) * dist}%`,
+              transform: `translate(-50%, -50%) rotate(${leafRot}deg)`,
+              color: `hsl(${p.a + 20} 35% 55% / 0.45)`,
+              filter: "blur(0.2px)",
+            }}
+          >
+            🍃
+          </span>
+        );
+      })}
+      {/* Soft top sheen */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(160deg, hsl(0 0% 100% / 0.06), transparent 45%, transparent 80%, hsl(0 0% 0% / 0.18))",
+        }}
+      />
+    </div>
+  );
 }
 
 /* ── Component ──────────────────────────────────────────── */
@@ -77,6 +172,8 @@ const MusicRoom = () => {
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [contextTree, setContextTree] = useState<{ id: string; name: string; species: string } | null>(null);
+  const [search, setSearch] = useState("");
+  const [activeSong, setActiveSong] = useState<SongRow | null>(null);
 
   /* ── Load all song offerings + tree + profile data ── */
   useEffect(() => {
@@ -85,7 +182,7 @@ const MusicRoom = () => {
       setLoading(true);
       const { data: offData } = await supabase
         .from("offerings")
-        .select("id, title, content, thumbnail_url, youtube_video_id, tree_id, created_by, created_at")
+        .select("id, title, content, thumbnail_url, youtube_video_id, youtube_embed_url, tree_id, created_by, created_at")
         .eq("type", "song")
         .order("created_at", { ascending: false });
 
@@ -135,11 +232,8 @@ const MusicRoom = () => {
   }, [treeParam]);
 
   /* ── Apply scope filter ── */
-  const visible = useMemo(() => {
-    if (!treeParam || !contextTree) {
-      // No anchor tree: forest is all that makes sense
-      return songs;
-    }
+  const scoped = useMemo(() => {
+    if (!treeParam || !contextTree) return songs;
     if (scope === "tree") return songs.filter((s) => s.tree_id === contextTree.id);
     if (scope === "species")
       return songs.filter(
@@ -148,18 +242,25 @@ const MusicRoom = () => {
     return songs;
   }, [scope, songs, contextTree, treeParam]);
 
+  /* ── Apply search ── */
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return scoped;
+    return scoped.filter((s) =>
+      [s.title, s.artist, s.tree_name, s.offered_by]
+        .filter(Boolean)
+        .some((field) => (field as string).toLowerCase().includes(q))
+    );
+  }, [scoped, search]);
+
   /* ── Forest view: prioritise context tree's offerings first ── */
   const ordered = useMemo(() => {
-    if (!contextTree || scope !== "forest") return visible;
+    if (!contextTree || scope !== "forest") return filtered;
     const here: SongRow[] = [];
     const elsewhere: SongRow[] = [];
-    for (const s of visible) (s.tree_id === contextTree.id ? here : elsewhere).push(s);
+    for (const s of filtered) (s.tree_id === contextTree.id ? here : elsewhere).push(s);
     return [...here, ...elsewhere];
-  }, [visible, contextTree, scope]);
-
-  const setScopeAndUrl = (next: Scope) => {
-    setScope(next);
-  };
+  }, [filtered, contextTree, scope]);
 
   const clearTreeContext = () => {
     const next = new URLSearchParams(params);
@@ -170,7 +271,7 @@ const MusicRoom = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7">
       {/* ── Header ── */}
       <header className="space-y-3 text-center">
         <div className="flex items-center justify-center gap-2 text-primary/80">
@@ -222,7 +323,7 @@ const MusicRoom = () => {
                 role="tab"
                 aria-selected={active}
                 disabled={opt.disabled}
-                onClick={() => !opt.disabled && setScopeAndUrl(opt.key)}
+                onClick={() => !opt.disabled && setScope(opt.key)}
                 className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 style={{
                   color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
@@ -247,8 +348,43 @@ const MusicRoom = () => {
       </div>
 
       {!contextTree && (
-        <p className="text-center text-[11px] font-serif italic text-muted-foreground/60 -mt-4">
+        <p className="text-center text-[11px] font-serif italic text-muted-foreground/60 -mt-3">
           Enter from a tree to filter by Tree or Species.
+        </p>
+      )}
+
+      {/* ── Search ── */}
+      <div className="flex justify-center">
+        <div
+          className="relative w-full max-w-sm flex items-center"
+        >
+          <Search className="absolute left-3 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search title, artist, tree, wanderer…"
+            className="w-full pl-9 pr-9 py-2 rounded-full text-xs font-serif placeholder:italic placeholder:text-muted-foreground/50 outline-none border border-border/40 focus:border-primary/40 transition-colors"
+            style={{ background: "hsl(var(--card) / 0.5)", color: "hsl(var(--foreground))" }}
+            aria-label="Search music room"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 p-0.5 rounded-full text-muted-foreground/60 hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {search && !loading && (
+        <p className="text-center text-[11px] font-serif italic text-muted-foreground/60 -mt-3">
+          {ordered.length === 0
+            ? "Nothing here by that name."
+            : `${ordered.length} record${ordered.length === 1 ? "" : "s"} found`}
         </p>
       )}
 
@@ -267,7 +403,9 @@ const MusicRoom = () => {
         <div className="text-center py-16 space-y-3">
           <Music className="w-8 h-8 text-muted-foreground/40 mx-auto" />
           <p className="font-serif italic text-sm text-muted-foreground">
-            {scope === "tree"
+            {search
+              ? "No song matches your search."
+              : scope === "tree"
               ? "No songs have been offered here yet."
               : scope === "species"
               ? "No kin of this species has been sung to yet."
@@ -282,18 +420,28 @@ const MusicRoom = () => {
           variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
         >
           {ordered.map((s) => {
-            const isHere = contextTree && s.tree_id === contextTree.id && scope === "forest";
+            const isHere = !!(contextTree && s.tree_id === contextTree.id && scope === "forest");
             return (
               <SongCard
                 key={s.id}
                 song={s}
-                emphasised={!!isHere}
-                onOpen={() => navigate(`/tree/${s.tree_id}`)}
+                emphasised={isHere}
+                onOpen={() => setActiveSong(s)}
               />
             );
           })}
         </motion.div>
       )}
+
+      {/* ── Detail panel ── */}
+      <SongDetail
+        song={activeSong}
+        onClose={() => setActiveSong(null)}
+        onGoToTree={(id) => {
+          setActiveSong(null);
+          navigate(`/tree/${id}`);
+        }}
+      />
     </div>
   );
 };
@@ -320,7 +468,6 @@ function SongCard({
       className="group relative text-left flex flex-col gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
       style={{ transform: `scale(${scale})` }}
     >
-      {/* Artwork */}
       <div
         className="relative aspect-square rounded-2xl overflow-hidden transition-shadow duration-500"
         style={{
@@ -338,12 +485,9 @@ function SongCard({
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Music className="w-10 h-10 text-muted-foreground/30" />
-          </div>
+          <BotanicalRecord song={song} />
         )}
 
-        {/* Soft glow on hover */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           style={{
@@ -352,7 +496,6 @@ function SongCard({
           }}
         />
 
-        {/* Subtle bottom gradient for legibility on hover caption */}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {emphasised && (
@@ -369,7 +512,6 @@ function SongCard({
         )}
       </div>
 
-      {/* Caption */}
       <div className="px-1 space-y-0.5">
         <p className="font-serif text-sm text-foreground/90 truncate leading-snug">{song.title}</p>
         <p className="text-xs text-muted-foreground/80 truncate font-serif italic">{song.artist}</p>
@@ -379,6 +521,106 @@ function SongCard({
         </p>
       </div>
     </motion.button>
+  );
+}
+
+/* ── Detail panel ──────────────────────────────────────── */
+
+function SongDetail({
+  song,
+  onClose,
+  onGoToTree,
+}: {
+  song: SongRow | null;
+  onClose: () => void;
+  onGoToTree: (treeId: string) => void;
+}) {
+  const open = !!song;
+  return (
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={(o) => !o && onClose()}
+      title={null}
+      contentClassName="max-w-md p-0 overflow-hidden border-border/40"
+    >
+      {song && (
+        <div className="flex flex-col">
+          {/* Artwork */}
+          <div
+            className="relative w-full aspect-square"
+            style={{
+              background: "linear-gradient(155deg, hsl(var(--muted) / 0.4), hsl(var(--card) / 0.6))",
+            }}
+          >
+            {song.artwork ? (
+              <img src={song.artwork} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            ) : (
+              <BotanicalRecord song={song} />
+            )}
+            {/* fade into the card body */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(180deg, transparent, hsl(var(--background) / 0.95))",
+              }}
+            />
+          </div>
+
+          {/* Body */}
+          <div className="px-6 pb-6 -mt-6 relative space-y-4">
+            <div className="space-y-1">
+              <p className="font-serif text-[10px] tracking-[0.2em] uppercase text-primary/80">A song offered</p>
+              <h2 className="font-serif text-lg leading-tight text-foreground">{song.title}</h2>
+              <p className="text-sm text-muted-foreground italic font-serif">{song.artist}</p>
+            </div>
+
+            <div className="space-y-2 text-xs font-serif text-muted-foreground/90 border-t border-border/30 pt-4">
+              {song.offered_by && (
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground/60">Offered by</span>
+                  <span className="text-foreground/85 truncate">{song.offered_by}</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground/60">At</span>
+                <span className="text-foreground/85 truncate">{song.tree_name}</span>
+              </div>
+              {song.tree_species && (
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground/60">Species</span>
+                  <span className="text-foreground/70 italic truncate">{song.tree_species}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                onClick={() => onGoToTree(song.tree_id)}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full py-2.5 text-xs font-serif tracking-wide transition-colors"
+                style={{
+                  background: "hsl(var(--primary) / 0.9)",
+                  color: "hsl(var(--primary-foreground))",
+                }}
+              >
+                Go to tree <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              {song.youtube_video_id && (
+                <a
+                  href={`https://www.youtube.com/watch?v=${song.youtube_video_id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-full py-2 text-[11px] font-serif tracking-wide text-muted-foreground hover:text-foreground border border-border/40 transition-colors"
+                >
+                  Listen on YouTube <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </ResponsiveDialog>
   );
 }
 
