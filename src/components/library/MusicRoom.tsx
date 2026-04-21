@@ -532,10 +532,12 @@ function SongCard({
 
 function SongDetail({
   song,
+  userId,
   onClose,
   onGoToTree,
 }: {
   song: SongRow | null;
+  userId: string | null;
   onClose: () => void;
   onGoToTree: (treeId: string) => void;
 }) {
