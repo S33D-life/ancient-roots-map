@@ -34,6 +34,9 @@ interface Props {
     /** True if any upload in the batch failed. */
     failed?: boolean;
   };
+  /** When true, shows an "offline — will upload later" hint instead of the
+   *  reorder/captured tagline. */
+  offline?: boolean;
 }
 
 const OfferingPhotoTray = ({
@@ -45,6 +48,7 @@ const OfferingPhotoTray = ({
   disabled = false,
   uploadingIds,
   uploadProgress,
+  offline = false,
 }: Props) => {
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -171,12 +175,16 @@ const OfferingPhotoTray = ({
               ? "Capture this moment"
               : `${photos.length} of ${max} ${photos.length === 1 ? "photo" : "photos"}`}
           </p>
-          {canReorder && (
+          {offline && photos.length > 0 ? (
+            <span className="text-[10px] font-serif text-muted-foreground/80 tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-pulse" />
+              will upload when online
+            </span>
+          ) : canReorder ? (
             <p className="text-[10px] font-serif text-muted-foreground/50 tracking-wider">
               drag to reorder · first is cover
             </p>
-          )}
-          {isComplete && !canReorder && (
+          ) : isComplete ? (
             <motion.span
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -184,7 +192,7 @@ const OfferingPhotoTray = ({
             >
               ✦ moment captured
             </motion.span>
-          )}
+          ) : null}
         </div>
 
         {/* Overall upload progress */}

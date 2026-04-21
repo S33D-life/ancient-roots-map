@@ -43,6 +43,30 @@ async function uploadOfflinePhoto(action: PendingAction): Promise<string | null>
   return null;
 }
 
+/** Upload multiple base64 photos in parallel; returns the URLs in original order. */
+async function uploadOfflinePhotos(action: PendingAction): Promise<string[]> {
+  const urls = action.photoDataUrls || [];
+  const paths = action.photoStoragePaths || [];
+  if (urls.length === 0 || urls.length !== paths.length) return [];
+  try {
+    const uploaded = await Promise.all(
+      urls.map(async (dataUrl, i) => {
+        const blob = await fetch(dataUrl).then((r) => r.blob());
+        const { data, error } = await supabase.storage
+          .from("offerings")
+          .upload(paths[i], blob, { contentType: "image/jpeg", upsert: true });
+        if (error || !data) throw error || new Error("Upload returned no data");
+        const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(data.path);
+        return urlData.publicUrl;
+      }),
+    );
+    return uploaded;
+  } catch (err) {
+    console.warn("[SyncEngine] Multi-photo upload failed:", err);
+    throw err;
+  }
+}
+
 /** Process a single queued action */
 async function processAction(action: PendingAction): Promise<boolean> {
   // Mark syncing
@@ -53,12 +77,16 @@ async function processAction(action: PendingAction): Promise<boolean> {
   emitChange();
 
   try {
-    // Upload photo if present
-    let photoUrl: string | null = null;
-    if (action.photoDataUrl) {
-      photoUrl = await uploadOfflinePhoto(action);
+    // Upload multi-photo array first (preferred); fall back to legacy single photo.
+    if (action.photoDataUrls && action.photoDataUrls.length > 0) {
+      const urls = await uploadOfflinePhotos(action);
+      if (urls.length > 0 && action.payload) {
+        action.payload.photos = urls;
+        action.payload.media_url = urls[0];
+      }
+    } else if (action.photoDataUrl) {
+      const photoUrl = await uploadOfflinePhoto(action);
       if (photoUrl && action.payload) {
-        // Inject the uploaded URL into the payload
         action.payload.media_url = photoUrl;
         action.payload.photo_url = photoUrl;
       }
