@@ -457,6 +457,18 @@ const CompactRow = ({
           {offering.visibility && offering.visibility !== "public" && visibilityIcons[offering.visibility]}
           {offering.type}
         </Badge>
+        {isAuthor && onEdit && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-primary shrink-0"
+            onClick={() => onEdit(offering.id)}
+            aria-label="Edit offering"
+            title="Edit your offering"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )}
         {isAuthor && onDelete && (
           <Button
             variant="ghost"
