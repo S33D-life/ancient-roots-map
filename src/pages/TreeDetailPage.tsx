@@ -218,15 +218,28 @@ const TreeDetailPage = () => {
   /**
    * Deep-link sync: open the lightbox to a specific offering/photo when the
    * URL carries `?offering=<id>&photo=<idx>`. Must be declared before any
-   * early returns to keep hook order consistent.
+   * early returns to keep hook order consistent. Fails gracefully on
+   * malformed params and missing offerings.
    */
   useEffect(() => {
     const offeringId = searchParams.get("offering");
     if (!offeringId || photoOfferings.length === 0) return;
-    const photoIdx = Math.max(0, parseInt(searchParams.get("photo") || "0", 10) || 0);
-    const flatIdx = findFlatPhotoIndex(photoOfferings, offeringId, photoIdx);
-    if (flatIdx >= 0 && lightboxIndex !== flatIdx) {
-      setLightboxIndex(flatIdx);
+    const rawPhoto = searchParams.get("photo");
+    const parsedPhoto = rawPhoto ? parseInt(rawPhoto, 10) : 0;
+    const photoIdx = Number.isFinite(parsedPhoto) && parsedPhoto >= 0 ? parsedPhoto : 0;
+    try {
+      const flatIdx = findFlatPhotoIndex(photoOfferings, offeringId, photoIdx);
+      if (flatIdx >= 0 && lightboxIndex !== flatIdx) {
+        setLightboxIndex(flatIdx);
+      } else if (flatIdx < 0) {
+        console.info(`[tree-detail:${id}] lightbox:deep-link:not-found`, {
+          offeringId,
+          photoIdx,
+          available: photoOfferings.length,
+        });
+      }
+    } catch (err) {
+      console.warn(`[tree-detail:${id}] lightbox:deep-link:error`, err);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, photoOfferings.length]);
