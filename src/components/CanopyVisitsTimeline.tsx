@@ -49,6 +49,47 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
   const [witnessingId, setWitnessingId] = useState<string | null>(null);
   const displayCheckins = expanded ? checkins : checkins.slice(0, 3);
 
+  // Fetch visitor profiles for all check-ins (deduped by user_id)
+  const visitorIds = useMemo(() => {
+    const ids = new Set<string>();
+    checkins.forEach((c) => { if (c.user_id) ids.add(c.user_id); });
+    return Array.from(ids);
+  }, [checkins]);
+
+  const [visitorMap, setVisitorMap] = useState<Record<string, VisitorProfile>>({});
+  useEffect(() => {
+    if (visitorIds.length === 0) { setVisitorMap({}); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .in("id", visitorIds);
+      if (cancelled) return;
+      const map: Record<string, VisitorProfile> = {};
+      (data || []).forEach((p) => { map[p.id] = p as VisitorProfile; });
+      setVisitorMap(map);
+    })();
+    return () => { cancelled = true; };
+  }, [visitorIds]);
+
+  // Unique visitors (most-recent-first) for the "Others who met this tree" row
+  const uniqueVisitors = useMemo(() => {
+    const seen = new Set<string>();
+    const list: VisitorProfile[] = [];
+    for (const c of checkins) {
+      if (!c.user_id || seen.has(c.user_id)) continue;
+      const p = visitorMap[c.user_id];
+      if (p) { seen.add(c.user_id); list.push(p); }
+      if (list.length >= 6) break;
+    }
+    return list;
+  }, [checkins, visitorMap]);
+
+  const visitorInitials = (name: string | null | undefined) =>
+    (name || "Wanderer")
+      .split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+
   const handleWitness = async (checkinId: string) => {
     if (!userId) {
       toast.error("Please sign in to witness a check-in.");
