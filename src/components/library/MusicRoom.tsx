@@ -18,6 +18,8 @@ import { motion } from "framer-motion";
 import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ResponsiveDialog from "@/components/ui/responsive-dialog";
+import OfferingResonanceButton from "@/components/OfferingResonanceButton";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 type Scope = "tree" | "species" | "forest";
 
@@ -167,6 +169,7 @@ const MusicRoom = () => {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const treeParam = params.get("tree");
+  const { userId } = useCurrentUser();
 
   const [scope, setScope] = useState<Scope>(treeParam ? "tree" : "forest");
   const [songs, setSongs] = useState<SongRow[]>([]);
@@ -436,6 +439,7 @@ const MusicRoom = () => {
       {/* ── Detail panel ── */}
       <SongDetail
         song={activeSong}
+        userId={userId}
         onClose={() => setActiveSong(null)}
         onGoToTree={(id) => {
           setActiveSong(null);
@@ -528,10 +532,12 @@ function SongCard({
 
 function SongDetail({
   song,
+  userId,
   onClose,
   onGoToTree,
 }: {
   song: SongRow | null;
+  userId: string | null;
   onClose: () => void;
   onGoToTree: (treeId: string) => void;
 }) {
@@ -592,6 +598,26 @@ function SongDetail({
                   <span className="text-foreground/70 italic truncate">{song.tree_species}</span>
                 </div>
               )}
+            </div>
+
+            {/* Witness — resonance gesture */}
+            <div
+              className="flex flex-col items-center gap-2 py-4 rounded-2xl border border-primary/20"
+              style={{ background: "hsl(var(--primary) / 0.04)" }}
+            >
+              <p className="text-[10px] font-serif tracking-[0.18em] uppercase text-primary/70">
+                Did this move you?
+              </p>
+              <div className="scale-150">
+                <OfferingResonanceButton
+                  offeringId={song.id}
+                  userId={userId}
+                  initialCount={0}
+                />
+              </div>
+              <p className="text-[10px] font-serif italic text-muted-foreground/60">
+                {userId ? "Tap the heart to witness" : "Sign in to witness"}
+              </p>
             </div>
 
             {/* Actions */}

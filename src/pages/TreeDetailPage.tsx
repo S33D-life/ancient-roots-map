@@ -47,6 +47,7 @@ import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering, findFlatPhotoIndex, flattenOfferingPhotos } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
+import TreeWitnessStrip from "@/components/tree-detail/TreeWitnessStrip";
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
 const InviterContext = lazy(() => import("@/components/InviterContext"));
 const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
@@ -619,6 +620,9 @@ const TreeDetailPage = () => {
             if (freshTree) setTree(freshTree);
           }}
         />
+
+        {/* Witness CTA — surfaces resonance gesture impossible-to-miss */}
+        <TreeWitnessStrip offerings={offerings} userId={userId} />
 
         {/* Inviter arrival context */}
         {arrivalRef && (
