@@ -153,28 +153,67 @@ export default function SendWhisperModal({
       toast.error("Select a recipient.");
       return;
     }
+    if (audienceType === "group" && !groupId) {
+      toast.error("Choose a group to whisper into.");
+      return;
+    }
+    if (insufficientHearts) {
+      toast.error("Offer a few hearts to send this into the network.");
+      return;
+    }
 
     setSending(true);
     const speciesKey = treeSpecies?.toLowerCase().replace(/\s+/g, "_");
+    let createdWhisperId: string | null = null;
+    let sendError: any = null;
 
-    const { error, data: whisperData } = await sendWhisper({
-      senderUserId: userId,
-      recipientScope,
-      recipientUserId: recipientScope === "PRIVATE" ? recipientUserId! : undefined,
-      treeAnchorId: treeId,
-      messageContent: message.trim(),
-      deliveryScope,
-      deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
-      deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
-    });
-
-    if (error) {
-      toast.error("Failed to send whisper.");
-      console.error(error);
-    } else {
-      if (whisperData && typeof whisperData === "object" && whisperData !== null && "id" in (whisperData as Record<string, unknown>)) {
-        setSentWhisperId((whisperData as any).id);
+    if (audienceType === "group") {
+      // Mycelial / channel-based group whisper through RPC
+      const channelId =
+        channelType === "tree" ? treeId :
+        channelType === "species" ? speciesKey :
+        null;
+      const { data, error } = await sendMycelialWhisper({
+        channelType,
+        channelId,
+        audienceType: "group",
+        groupId,
+        treeAnchorId: treeId,
+        messageContent: message.trim(),
+        isActive: true,
+      });
+      if (error || !data?.ok) {
+        if (data?.error === "insufficient_hearts") {
+          toast.error("Offer a few hearts to send this into the network.");
+        } else {
+          toast.error("Failed to send whisper.");
+        }
+        sendError = error || data?.error;
+      } else {
+        createdWhisperId = data.whisper_id || null;
       }
+    } else {
+      // Existing individual flow (preserved)
+      const { error, data: whisperData } = await sendWhisper({
+        senderUserId: userId,
+        recipientScope,
+        recipientUserId: recipientScope === "PRIVATE" ? recipientUserId! : undefined,
+        treeAnchorId: treeId,
+        messageContent: message.trim(),
+        deliveryScope,
+        deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
+        deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
+      });
+      if (error) {
+        toast.error("Failed to send whisper.");
+        sendError = error;
+      } else if (whisperData && typeof whisperData === "object" && "id" in (whisperData as any)) {
+        createdWhisperId = (whisperData as any).id;
+      }
+    }
+
+    if (!sendError) {
+      if (createdWhisperId) setSentWhisperId(createdWhisperId);
       let senderLocation: { lat: number; lng: number } | null = null;
       if (typeof navigator !== "undefined" && "geolocation" in navigator) {
         try {
@@ -185,9 +224,7 @@ export default function SendWhisperModal({
               { enableHighAccuracy: false, timeout: 2200, maximumAge: 120000 },
             );
           });
-        } catch {
-          senderLocation = null;
-        }
+        } catch { senderLocation = null; }
       }
       emitMycelialThread({
         source: "whisper",
@@ -196,9 +233,7 @@ export default function SendWhisperModal({
         from: senderLocation,
       });
       setSent(true);
-      if (inviteEnabled) {
-        toast.success("Whisper sent — now share the invitation!");
-      }
+      if (inviteEnabled) toast.success("Whisper sent — now share the invitation!");
       window.dispatchEvent(new CustomEvent("whisper-sent", { detail: { treeId } }));
     }
     setSending(false);
