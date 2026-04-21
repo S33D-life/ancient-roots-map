@@ -25,6 +25,15 @@ interface Props {
   disabled?: boolean;
   /** When true, shows per-slot processing state */
   uploadingIds?: Set<string>;
+  /** When provided, shows an overall upload progress bar above the tray. */
+  uploadProgress?: {
+    /** Total photos being uploaded in this batch. */
+    total: number;
+    /** Photos finished uploading so far. */
+    done: number;
+    /** True if any upload in the batch failed. */
+    failed?: boolean;
+  };
 }
 
 const OfferingPhotoTray = ({
