@@ -24,7 +24,11 @@ import {
   Music,
 } from "lucide-react";
 
-interface SongRow {
+/**
+ * Minimal song shape Tree Radio needs. Music Room passes a richer object —
+ * any extra fields are simply preserved when handed back via onOpenSong.
+ */
+export interface RadioSong {
   id: string;
   title: string;
   artist: string;
@@ -34,8 +38,6 @@ interface SongRow {
   tree_name: string;
   tree_species: string;
   offered_by: string | null;
-  // Music Room may pass extra fields (content, thumbnail_url, etc.) — allow them through.
-  [key: string]: unknown;
 }
 
 interface ItunesPreview {
@@ -45,15 +47,15 @@ interface ItunesPreview {
   trackName: string;
 }
 
-interface Props {
+interface Props<T extends RadioSong> {
   /** Songs already filtered by the Music Room's shared scope dial */
-  scopedSongs: SongRow[];
+  scopedSongs: T[];
   /** Tree we're anchored to (if entered via ?tree=:id) */
   anchorTree: { id: string; name: string; species: string } | null;
   /** Current scope (for the small status label) */
   scopeLabel: "tree" | "species" | "forest";
   /** Open the song in the room's detail panel */
-  onOpenSong: (song: SongRow) => void;
+  onOpenSong: (song: T) => void;
 }
 
 function extractSearchTerm(title: string): string {
