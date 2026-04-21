@@ -173,7 +173,7 @@ export default function WhispersPage() {
                         key={whisper.id}
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        onClick={() => setOpenWhisperId(whisper.id)}
+                        onClick={() => navigate(whisper.channel_type === "tree" && whisper.channel_id ? `/tree/${whisper.channel_id}` : `/tree/${whisper.tree_anchor_id}`)}
                         className="w-full text-left"
                       >
                         <Card className="border-border/40 bg-card/60 hover:border-primary/30 transition-colors">
