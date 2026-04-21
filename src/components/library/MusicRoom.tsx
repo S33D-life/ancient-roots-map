@@ -439,6 +439,7 @@ const MusicRoom = () => {
       {/* ── Detail panel ── */}
       <SongDetail
         song={activeSong}
+        userId={userId}
         onClose={() => setActiveSong(null)}
         onGoToTree={(id) => {
           setActiveSong(null);
