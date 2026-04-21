@@ -146,6 +146,106 @@ export default function WhispersPage() {
             </p>
           </div>
 
+          {/* 🍄 Mycelial Whispers */}
+          {userId && (mycelialWaiting.length > 0 || mycelialSent.length > 0 || mycelialWaitingLoading) && (
+            <section className="mb-8 space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden>🍄</span>
+                <h2 className="text-lg font-serif text-primary tracking-wide">Mycelial Whispers</h2>
+                <Sparkles className="w-3.5 h-3.5 text-primary/50" />
+              </div>
+              <p className="text-[11px] font-serif text-muted-foreground -mt-2">
+                Whispers carried through the network — open them at a tree to receive their hearts.
+              </p>
+
+              {mycelialWaitingLoading ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary/60" />
+                </div>
+              ) : mycelialWaiting.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider font-serif text-muted-foreground/70">
+                    Waiting in the roots
+                  </p>
+                  {mycelialWaiting.map(({ whisper }) => {
+                    const meta = CHANNEL_META[whisper.channel_type] ?? CHANNEL_META.mycelium;
+                    return (
+                      <motion.button
+                        key={whisper.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        onClick={() => setOpenWhisperId(whisper.id)}
+                        className="w-full text-left"
+                      >
+                        <Card className="border-border/40 bg-card/60 hover:border-primary/30 transition-colors">
+                          <CardContent className="p-4 flex items-center gap-3">
+                            <div className="text-2xl" aria-hidden>{meta.icon}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-serif text-foreground/90 italic truncate">
+                                A whisper waits for you beneath the roots…
+                              </p>
+                              <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
+                                {whisper.channel_type === "tree"
+                                  ? "Open at the anchor tree"
+                                  : whisper.channel_type === "species"
+                                  ? "Open at any tree of its species"
+                                  : "Open at any Ancient Friend"}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className={`text-[9px] font-serif ${meta.tone}`}>
+                              {meta.label}
+                            </Badge>
+                          </CardContent>
+                        </Card>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {mycelialSent.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider font-serif text-muted-foreground/70">
+                    Sent into the network
+                  </p>
+                  {mycelialSent.map(w => {
+                    const meta = CHANNEL_META[w.channel_type] ?? CHANNEL_META.mycelium;
+                    return (
+                      <motion.div
+                        key={w.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <Card className="border-border/40 bg-card/60">
+                          <CardContent className="p-4 space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-base" aria-hidden>{meta.icon}</span>
+                                <Badge variant="outline" className={`text-[9px] font-serif ${meta.tone}`}>
+                                  {meta.label}
+                                </Badge>
+                              </div>
+                              <span className="text-[10px] text-muted-foreground/60 font-serif">
+                                {new Date(w.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm font-serif text-foreground/85 italic leading-relaxed border-l-2 border-primary/20 pl-3">
+                              "{w.message_content}"
+                            </p>
+                            <div className="flex items-center justify-between text-[10px] font-serif text-muted-foreground">
+                              <span>{w.opened_count} of {w.total_count} opened</span>
+                              <span className="text-primary/70">−{w.hearts_cost} ♥ sent</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          )}
+
           {!userId ? (
             <Card className="border-border/40">
               <CardContent className="p-8 text-center">
