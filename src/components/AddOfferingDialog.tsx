@@ -25,6 +25,8 @@ import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
+import OfferingPhotoTray, { type PhotoSlot } from "@/components/offering/OfferingPhotoTray";
+import { MAX_OFFERING_PHOTOS } from "@/utils/offeringPhotos";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -113,13 +115,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [nftLink, setNftLink] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [photoSlots, setPhotoSlots] = useState<PhotoSlot[]>([]);
+  const [uploadingPhotoIds, setUploadingPhotoIds] = useState<Set<string>>(new Set());
   const [dragActive, setDragActive] = useState(false);
   const [sealedByStaff, setSealedByStaff] = useState(() => localStorage.getItem("linked_staff_code") || "");
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const submittingRef = useRef(false);
   const { toast } = useToast();
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
