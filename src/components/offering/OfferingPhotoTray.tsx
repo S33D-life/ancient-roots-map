@@ -344,16 +344,24 @@ const OfferingPhotoTray = ({
                       setPreview(p.previewUrl);
                     }}
                     className={`w-20 h-20 rounded-lg overflow-hidden border transition-all relative group ${
-                      isCover ? "border-primary/50" : "border-border/40 hover:border-primary/40"
+                      isFailed
+                        ? "border-destructive/70 ring-1 ring-destructive/40"
+                        : isSuccess
+                        ? "border-primary/40"
+                        : isCover
+                        ? "border-primary/50"
+                        : "border-border/40 hover:border-primary/40"
                     } ${canReorder ? "cursor-grab active:cursor-grabbing" : ""}`}
                   >
                     <img
                       src={p.previewUrl}
                       alt={`Photo ${idx + 1}${isCover ? " (cover)" : ""}`}
-                      className="w-full h-full object-cover pointer-events-none select-none"
+                      className={`w-full h-full object-cover pointer-events-none select-none ${
+                        isFailed ? "opacity-60 grayscale" : ""
+                      }`}
                       draggable={false}
                     />
-                    {isCover && photos.length > 1 && (
+                    {isCover && photos.length > 1 && !isFailed && (
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary/80 to-transparent px-1 py-0.5 flex items-center justify-center gap-0.5">
                         <Star className="w-2.5 h-2.5 text-primary-foreground fill-primary-foreground" />
                         <span className="text-[8px] font-serif text-primary-foreground tracking-wider uppercase">
@@ -364,6 +372,35 @@ const OfferingPhotoTray = ({
                     {isUploading && (
                       <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
                         <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                      </div>
+                    )}
+                    {isFailed && onRetry && (
+                      <div
+                        className="absolute inset-0 bg-destructive/15 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1"
+                        role="group"
+                        aria-label={`Photo ${idx + 1} failed to upload`}
+                      >
+                        <AlertCircle className="w-3.5 h-3.5 text-destructive" aria-hidden="true" />
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRetry(p.id);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onRetry(p.id);
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-background/95 border border-destructive/40 text-[9px] font-serif tracking-wider uppercase text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors cursor-pointer"
+                          aria-label={`Retry uploading photo ${idx + 1}`}
+                        >
+                          <RotateCw className="w-2.5 h-2.5" />
+                          Retry
+                        </span>
                       </div>
                     )}
                   </button>
