@@ -169,6 +169,7 @@ const MusicRoom = () => {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const treeParam = params.get("tree");
+  const { userId } = useCurrentUser();
 
   const [scope, setScope] = useState<Scope>(treeParam ? "tree" : "forest");
   const [songs, setSongs] = useState<SongRow[]>([]);
