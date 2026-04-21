@@ -5,7 +5,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,8 @@ export interface OfferingCardProps {
   showTreeLink?: boolean;
   /** Called when user deletes their offering */
   onDelete?: (offeringId: string) => void;
+  /** Called when user wants to edit their own offering */
+  onEdit?: (offeringId: string) => void;
 }
 
 /* ── Helper ── */
