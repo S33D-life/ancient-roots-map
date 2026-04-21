@@ -10,7 +10,7 @@ import { ArrowLeft, MapPin, TreeDeciduous, Calendar, Lock, Globe2 } from "lucide
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGardenBySlug, useGardenTrees } from "@/hooks/use-gardens";
-import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 
 export default function GardenDetailPage() {
   const { slug } = useParams<{ slug: string }>();
