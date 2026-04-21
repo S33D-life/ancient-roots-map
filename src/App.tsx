@@ -9,6 +9,7 @@ const realm = (element: ReactNode, direction: RealmDirection) => (
   <RealmTransition direction={direction}>{element}</RealmTransition>
 );
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
+import TreeDetailErrorBoundary from "@/components/tree-detail/TreeDetailErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 import { MapFilterProvider } from "@/contexts/MapFilterContext";
 import { UIFlowProvider } from "@/contexts/UIFlowContext";
@@ -329,7 +330,15 @@ const App = () => {
                 <Route path="/add-tree" element={realm(<AddTreePage />, "roots")} />
                 <Route path="/atlas" element={realm(<WorldAtlasPage />, "roots")} />
                 <Route path="/tree/research/:id" element={realm(<ResearchTreeDetailPage />, "roots")} />
-                <Route path="/tree/:id" element={realm(<TreeDetailPage />, "roots")} />
+                <Route
+                  path="/tree/:id"
+                  element={realm(
+                    <TreeDetailErrorBoundary>
+                      <TreeDetailPage />
+                    </TreeDetailErrorBoundary>,
+                    "roots",
+                  )}
+                />
                 <Route path="/garden/:slug" element={realm(<GardenDetailPage />, "roots")} />
                 <Route path="/species/:slug" element={realm(<SpeciesPage />, "roots")} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
