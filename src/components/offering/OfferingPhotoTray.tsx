@@ -175,12 +175,16 @@ const OfferingPhotoTray = ({
               ? "Capture this moment"
               : `${photos.length} of ${max} ${photos.length === 1 ? "photo" : "photos"}`}
           </p>
-          {canReorder && (
+          {offline && photos.length > 0 ? (
+            <span className="text-[10px] font-serif text-amber-600/80 dark:text-amber-400/80 tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500/80" />
+              will upload when online
+            </span>
+          ) : canReorder ? (
             <p className="text-[10px] font-serif text-muted-foreground/50 tracking-wider">
               drag to reorder · first is cover
             </p>
-          )}
-          {isComplete && !canReorder && (
+          ) : isComplete ? (
             <motion.span
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -188,7 +192,7 @@ const OfferingPhotoTray = ({
             >
               ✦ moment captured
             </motion.span>
-          )}
+          ) : null}
         </div>
 
         {/* Overall upload progress */}
