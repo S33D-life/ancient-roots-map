@@ -52,7 +52,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [showSpeciesSuggestions, setShowSpeciesSuggestions] = useState(false);
   const speciesSuggestions = useMemo(() => searchSpecies(species), [species]);
   const [description, setDescription] = useState("");
-  const [estimatedAge, setEstimatedAge] = useState("");
+  const [age, setAge] = useState<TreeAgeValue>(EMPTY_AGE);
   const [what3words, setWhat3words] = useState(initialW3w || "");
   const [lat, setLat] = useState<number | null>(initLat);
   const [lng, setLng] = useState<number | null>(initLng);
@@ -105,7 +105,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setName("");
       setSpecies("");
       setDescription("");
-      setEstimatedAge("");
+      setAge(EMPTY_AGE);
       setWhat3words(initialW3w || "");
       setLat(initLat);
       setLng(initLng);
