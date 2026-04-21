@@ -670,8 +670,8 @@ export default function SendWhisperModal({
           )}
 
           {userId && !presence.loading && !presence.atTree && (
-            <div className="rounded-md border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-[11px] font-serif text-amber-800 dark:text-amber-200 leading-relaxed">
-              <span className="font-medium">Sent from afar.</span> You're not at this tree, so the whisper will rest dormant in the soil — it stirs awake when you next visit (within a 12-hour grace).
+            <div className="rounded-md border border-muted-foreground/20 bg-muted/40 px-3 py-2 text-[11px] font-serif text-muted-foreground leading-relaxed">
+              <span className="font-medium text-foreground/80">Sent from afar.</span> You're not at this tree, so the whisper will rest dormant in the soil — it stirs awake when you next visit (within a 12-hour grace).
             </div>
           )}
         </div>
