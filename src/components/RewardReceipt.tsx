@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, X, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -14,9 +15,9 @@ interface RewardReceiptProps {
 }
 
 /**
- * RewardReceipt — simplified to show a single Heart total.
- * Species Hearts and Influence are tracked internally but
- * presented only as subtle secondary info, not separate rows.
+ * RewardReceipt — mobile-first bottom sheet so the reward is
+ * instantly visible above the fold after submission.
+ * On ≥sm screens it floats as a centered card.
  */
 const RewardReceipt = ({
   visible, onClose, s33dHearts = 0, speciesHearts = 0,
@@ -25,64 +26,93 @@ const RewardReceipt = ({
   const hive = speciesFamily ? getHiveInfo(speciesFamily) : null;
   const totalHearts = s33dHearts + speciesHearts;
 
+  // Lock background scroll while the sheet is open
+  useEffect(() => {
+    if (!visible || totalHearts === 0) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [visible, totalHearts]);
+
   if (!visible || totalHearts === 0) return null;
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
+
           <motion.div
-            className="relative w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl overflow-hidden"
-            initial={{ y: 40, scale: 0.95 }}
-            animate={{ y: 0, scale: 1 }}
-            exit={{ y: 40, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="relative w-full sm:max-w-sm bg-card border border-border shadow-2xl overflow-hidden
+                       rounded-t-2xl sm:rounded-2xl
+                       max-h-[85dvh] sm:max-h-[80vh]
+                       flex flex-col"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 32 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 120 || info.velocity.y > 600) onClose();
+            }}
           >
+            {/* Drag handle (mobile) */}
+            <div className="sm:hidden flex justify-center pt-2 pb-1 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+
             {/* Header glow */}
             <div
-              className="h-1"
+              className="h-1 shrink-0"
               style={{
                 background: `linear-gradient(90deg, transparent, hsl(42 80% 50%), transparent)`,
               }}
             />
 
-            <div className="p-6 text-center">
+            {/* Scrollable inner content — hero stays pinned to top */}
+            <div className="relative px-6 pt-5 pb-6 text-center overflow-y-auto">
               <button
                 onClick={onClose}
-                className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close"
+                className="absolute top-2 right-2 p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
 
+              {/* HERO — always visible above the fold */}
               <motion.div
-                className="flex items-center justify-center gap-2 mb-3"
+                className="flex items-center justify-center gap-2 mb-2"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 400 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 400 }}
               >
-                <Heart className="w-8 h-8 text-primary fill-primary/20" />
+                <Heart className="w-7 h-7 text-primary fill-primary/20" />
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.25 }}
               >
                 <span className="text-4xl font-serif font-bold text-primary tabular-nums">+{totalHearts}</span>
                 <p className="text-sm text-muted-foreground font-serif mt-1">S33D Hearts earned</p>
               </motion.div>
 
               <motion.p
-                className="text-xs text-muted-foreground/60 font-serif mt-3"
+                className="text-xs text-muted-foreground/60 font-serif mt-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
                 {actionLabel}
               </motion.p>
@@ -92,8 +122,8 @@ const RewardReceipt = ({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-4 flex items-center justify-center gap-3 text-[10px] font-serif text-muted-foreground/50"
+                  transition={{ delay: 0.5 }}
+                  className="mt-3 flex items-center justify-center gap-3 text-[10px] font-serif text-muted-foreground/50"
                 >
                   <span>❤️ {s33dHearts} S33D</span>
                   <span>·</span>
@@ -111,7 +141,7 @@ const RewardReceipt = ({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
+                transition={{ delay: 0.6 }}
                 className="mt-4 space-y-2"
               >
                 {/* Hive link */}
