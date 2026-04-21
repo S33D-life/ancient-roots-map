@@ -187,6 +187,61 @@ const OfferingPhotoTray = ({
           )}
         </div>
 
+        {/* Overall upload progress */}
+        <AnimatePresence>
+          {uploadProgress && uploadProgress.total > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+              role="status"
+              aria-live="polite"
+            >
+              {(() => {
+                const { total, done, failed } = uploadProgress;
+                const pct = Math.min(100, Math.round((done / total) * 100));
+                const allDone = done >= total && !failed;
+                return (
+                  <div className="space-y-1 pt-0.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-serif tracking-wider uppercase text-muted-foreground/70 flex items-center gap-1.5">
+                        {failed ? (
+                          <span className="text-destructive">Upload failed</span>
+                        ) : allDone ? (
+                          <span className="text-primary/80">✦ All photos ready</span>
+                        ) : (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin text-primary/70" />
+                            Uploading {done} of {total}
+                          </>
+                        )}
+                      </span>
+                      <span className="text-[10px] font-serif tabular-nums text-muted-foreground/60">
+                        {pct}%
+                      </span>
+                    </div>
+                    <div className="h-1 rounded-full bg-muted/40 overflow-hidden">
+                      <motion.div
+                        className={`h-full rounded-full ${
+                          failed
+                            ? "bg-destructive/70"
+                            : allDone
+                            ? "bg-primary/70"
+                            : "bg-primary/50"
+                        }`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div
           className={`flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 transition-all ${
             isComplete ? "ring-1 ring-primary/20 rounded-xl p-1.5" : ""
