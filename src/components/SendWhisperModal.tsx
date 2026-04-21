@@ -647,11 +647,18 @@ export default function SendWhisperModal({
         <DialogFooter>
           <Button
             onClick={handleSend}
-            disabled={sending || !userId || !message.trim() || (recipientScope === "PRIVATE" && !recipientUserId)}
+            disabled={
+              sending || !userId || !message.trim() ||
+              (recipientScope === "PRIVATE" && !recipientUserId) ||
+              (audienceType === "group" && !groupId) ||
+              insufficientHearts
+            }
             className="font-serif tracking-wider gap-2 w-full sm:w-auto"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Send Whisper
+            {audienceType === "group"
+              ? <>Send Whisper <span className="inline-flex items-center gap-0.5 opacity-80"><Heart className="w-3 h-3" />{heartCost}</span></>
+              : "Send Whisper"}
           </Button>
         </DialogFooter>
       </DialogContent>
