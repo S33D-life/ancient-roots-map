@@ -759,7 +759,7 @@ const TreeDetailPage = () => {
 
             {/* Photo Gallery */}
             {photoOfferings.length > 0 && (
-              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
+              <PhotoGrid offerings={photoOfferings} onImageClick={openLightboxAt} />
             )}
 
             {/* Aliveness signal already shown above tabs */}
