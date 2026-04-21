@@ -600,45 +600,26 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         <form onSubmit={handleSubmit} className="space-y-4 mt-1">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
-          {/* PHOTO: image first, then title */}
+          {/* PHOTO: tray of up to 3 photos, then title + caption */}
           {activeType === "photo" && (
             <>
-              {previewUrl ? (
-                <div className="relative rounded-xl overflow-hidden border border-border/30">
-                  <img src={previewUrl} alt="Preview" className="w-full max-h-52 object-cover" />
-                  <button type="button" onClick={clearSelectedFile} className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 hover:bg-background transition-colors">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
-                    dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/30 hover:border-primary/20"
-                  }`}
-                  style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
-                  onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-                  onDragLeave={() => setDragActive(false)}
-                  onDrop={handleDrop}
-                >
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-                    <ImagePlus className="h-6 w-6 text-primary/40" />
-                  </div>
-                  <p className="text-sm text-muted-foreground/60 font-serif mb-3">Choose a memory to place here</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
-                      <ImagePlus className="h-3 w-3" /> Gallery
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
-                      <Camera className="h-3 w-3" /> Camera
-                    </Button>
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                  <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
-                </div>
-              )}
-              {/* Title appears after photo selected, or always for experienced users */}
+              <div
+                onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
+              >
+                <OfferingPhotoTray
+                  photos={photoSlots}
+                  onAdd={addPhoto}
+                  onRemove={removePhoto}
+                  uploadingIds={uploadingPhotoIds}
+                  disabled={loading}
+                />
+              </div>
+              {/* Title appears after first photo */}
               <AnimatePresence>
-                {(previewUrl || title.length > 0) && (
+                {(photoSlots.length > 0 || title.length > 0) && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <Input
                       id="title"
@@ -653,7 +634,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               </AnimatePresence>
               {/* Caption — softer, optional feel */}
               <AnimatePresence>
-                {(previewUrl || content.length > 0) && (
+                {(photoSlots.length > 0 || content.length > 0) && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <Textarea
                       id="content"
