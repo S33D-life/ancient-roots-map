@@ -60,6 +60,13 @@ export default function SendWhisperModal({
   const [searchResults, setSearchResults] = useState<Array<{ id: string; full_name: string }>>([]);
   const [message, setMessage] = useState("");
   const [deliveryScope, setDeliveryScope] = useState<"ANY_TREE" | "SPECIFIC_TREE" | "SPECIES_MATCH">("ANY_TREE");
+  // Mycelial channel + audience
+  const [channelType, setChannelType] = useState<WhisperChannelType>("mycelium");
+  const [audienceType, setAudienceType] = useState<WhisperAudienceType>("individual");
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupType, setNewGroupType] = useState<"family" | "council" | "custom">("family");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [inviteEnabled, setInviteEnabled] = useState(false);
@@ -68,6 +75,10 @@ export default function SendWhisperModal({
   const [copied, setCopied] = useState(false);
   const { allowance } = useInvitationAllowance(userId);
   const canInvite = (allowance?.invitesRemaining ?? 0) > 0;
+  const { groups, loading: groupsLoading, refetch: refetchGroups } = useUserWhisperGroups(userId);
+  const heartBalance = useHeartBalance(userId);
+  const heartCost = audienceType === "group" ? CHANNEL_COST[channelType] : 0;
+  const insufficientHearts = audienceType === "group" && heartBalance.totalHearts < heartCost;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
