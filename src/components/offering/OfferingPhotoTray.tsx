@@ -298,6 +298,8 @@ const OfferingPhotoTray = ({
           <AnimatePresence initial={false}>
             {photos.map((p, idx) => {
               const isUploading = uploadingIds?.has(p.id);
+              const isFailed = !isUploading && !!failedIds?.has(p.id);
+              const isSuccess = !isUploading && !isFailed && !!successIds?.has(p.id);
               const isCover = idx === 0;
               const isDragging = draggingId === p.id;
               const isOver = overId === p.id && draggingId && draggingId !== p.id;
