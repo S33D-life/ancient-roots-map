@@ -1337,6 +1337,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 <TreeAgeInput value={age} onChange={setAge} />
 
                 <OrchardModePanel value={orchard} onChange={setOrchard} />
+                <GardenPicker
+                  value={gardenId}
+                  onChange={setGardenId}
+                  treeLat={lat}
+                  treeLng={lng}
+                  canCreateGarden={canCreateGarden}
+                />
 
                 <div className="space-y-1.5">
                   <Label htmlFor="description" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
