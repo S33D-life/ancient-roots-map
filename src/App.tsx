@@ -154,6 +154,7 @@ const SpainAtlasPage = lazyImportWithRetry(() => import("./pages/SpainAtlasPage"
 const MexicoAtlasPage = lazyImportWithRetry(() => import("./pages/MexicoAtlasPage"), "mexico-atlas");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
+const GardenDetailPage = lazyImportWithRetry(() => import("./pages/GardenDetailPage"), "garden-detail");
 const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
 const HarvestDetailPage = lazyImportWithRetry(() => import("./pages/HarvestDetailPage"), "harvest-detail");
 const HowHeartsWorkPage = lazyImportWithRetry(() => import("./pages/HowHeartsWorkPage"), "how-hearts");
