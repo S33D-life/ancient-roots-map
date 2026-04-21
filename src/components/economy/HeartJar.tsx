@@ -19,7 +19,7 @@ interface Props {
 
 const HeartJar = ({ userId, className = "" }: Props) => {
   const { balance, isLoading } = useHeartEconomy(userId);
-  const { seedsRemaining } = useSeedEconomy(userId);
+  const { seedsRemaining } = useSeedEconomy(userId); // shown as small dot on the trigger pill
   const [open, setOpen] = useState(false);
   const prevBalance = useRef(balance.s33d);
   const [pulse, setPulse] = useState(false);
