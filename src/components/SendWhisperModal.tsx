@@ -467,30 +467,152 @@ export default function SendWhisperModal({
             </p>
           </div>
 
-          {/* Step 3: Delivery Rule */}
+          {/* Step 3: Channel — where should this whisper travel? */}
           <div className="space-y-3">
-            <Label className="font-serif text-sm">Where can it be collected?</Label>
-            <div className="flex flex-wrap gap-2">
+            <Label className="font-serif text-sm">Where should this whisper travel?</Label>
+            <div className="grid grid-cols-1 gap-2">
               {([
-                { value: "ANY_TREE" as const, label: "Any Ancient Friend", desc: "Collected at the next check-in" },
-                { value: "SPECIFIC_TREE" as const, label: `Only at ${treeName}`, desc: "Must visit this tree" },
-                { value: "SPECIES_MATCH" as const, label: `Any ${treeSpecies}`, desc: `Must visit a ${treeSpecies}` },
+                { value: "tree" as const, icon: "🌳", label: "This tree", desc: `Open only at ${treeName}` },
+                { value: "species" as const, icon: "🌿", label: `This species (${treeSpecies || "any"})`, desc: `Open at any matching ${treeSpecies || "species"}` },
+                { value: "mycelium" as const, icon: "🍄", label: "The forest", desc: "Open at any Ancient Friend" },
               ]).map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => setDeliveryScope(opt.value)}
-                  className={`flex flex-col items-start px-3 py-2 rounded-lg text-xs font-serif border transition-all ${
-                    deliveryScope === opt.value
+                  onClick={() => {
+                    setChannelType(opt.value);
+                    // keep legacy delivery_scope in sync for individual flows
+                    setDeliveryScope(
+                      opt.value === "tree" ? "SPECIFIC_TREE"
+                      : opt.value === "species" ? "SPECIES_MATCH"
+                      : "ANY_TREE"
+                    );
+                  }}
+                  className={`flex items-start gap-2 px-3 py-2 rounded-lg text-xs font-serif border transition-all text-left ${
+                    channelType === opt.value
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border/40 text-muted-foreground hover:border-primary/30"
                   }`}
                 >
-                  <span className="font-medium">{opt.label}</span>
-                  <span className="text-[10px] opacity-60">{opt.desc}</span>
+                  <span className="text-base leading-none mt-0.5">{opt.icon}</span>
+                  <div>
+                    <div className="font-medium">{opt.label}</div>
+                    <div className="text-[10px] opacity-60">{opt.desc}</div>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Step 4: Audience — individual or group */}
+          {userId && (
+            <div className="space-y-3">
+              <Label className="font-serif text-sm">Send to</Label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setAudienceType("individual")}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-serif border transition-all ${
+                    audienceType === "individual"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" /> Individual
+                  <span className="text-[10px] opacity-60 ml-1">free</span>
+                </button>
+                <button
+                  onClick={() => setAudienceType("group")}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-serif border transition-all ${
+                    audienceType === "group"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/40 text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" /> Group
+                  <span className="text-[10px] opacity-60 ml-1 inline-flex items-center gap-0.5">
+                    <Heart className="w-2.5 h-2.5" />{CHANNEL_COST[channelType]}
+                  </span>
+                </button>
+              </div>
+
+              {audienceType === "group" && (
+                <div className="space-y-2 pl-1">
+                  {groupsLoading ? (
+                    <p className="text-[11px] font-serif text-muted-foreground">Loading circles…</p>
+                  ) : groups.length > 0 ? (
+                    <Select value={groupId || ""} onValueChange={(v) => setGroupId(v || null)}>
+                      <SelectTrigger className="font-serif text-xs">
+                        <SelectValue placeholder="Choose a circle…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groups.map(g => (
+                          <SelectItem key={g.id} value={g.id} className="font-serif text-xs">
+                            {g.group_type === "family" ? "👨‍👩‍👧 " : g.group_type === "council" ? "🌀 " : "🌿 "}{g.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="text-[11px] font-serif text-muted-foreground italic">
+                      No circles yet. Create one to whisper to a group.
+                    </p>
+                  )}
+
+                  {!creatingGroup ? (
+                    <button
+                      onClick={() => setCreatingGroup(true)}
+                      className="text-[11px] font-serif text-primary hover:underline"
+                    >
+                      + Create a new circle
+                    </button>
+                  ) : (
+                    <div className="space-y-2 rounded-lg border border-border/40 p-2.5">
+                      <Input
+                        placeholder="Circle name"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        className="font-serif text-xs"
+                      />
+                      <div className="flex gap-1.5">
+                        {(["family", "council", "custom"] as const).map(t => (
+                          <button
+                            key={t}
+                            onClick={() => setNewGroupType(t)}
+                            className={`text-[10px] font-serif px-2 py-1 rounded border ${
+                              newGroupType === t ? "border-primary bg-primary/10 text-primary" : "border-border/40 text-muted-foreground"
+                            }`}
+                          >{t}</button>
+                        ))}
+                      </div>
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="font-serif text-xs h-7"
+                          onClick={async () => {
+                            if (!newGroupName.trim()) return;
+                            const { data, error } = await createWhisperGroup(newGroupName.trim(), newGroupType);
+                            if (error) { toast.error("Couldn't create circle."); return; }
+                            await refetchGroups();
+                            if (data?.id) setGroupId(data.id);
+                            setCreatingGroup(false);
+                            setNewGroupName("");
+                            toast.success("Circle created.");
+                          }}
+                        >Create</Button>
+                        <Button size="sm" variant="ghost" className="font-serif text-xs h-7" onClick={() => setCreatingGroup(false)}>Cancel</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {insufficientHearts && (
+                    <p className="text-[11px] font-serif text-destructive">
+                      Offer a few hearts to send this into the network. ({heartBalance.totalHearts} / {heartCost})
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Invite toggle */}
           {userId && (
