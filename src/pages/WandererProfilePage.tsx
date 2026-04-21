@@ -128,7 +128,8 @@ const WandererProfilePage = () => {
   const companion = !isOwnProfile && id ? isCompanion(id) : false;
   const pendingCompanion = !isOwnProfile && id ? pendingFor(id) : undefined;
 
-  const initials = useMemo(() => initialsOf(data?.full_name), [data?.full_name]);
+  const profile = data as any;
+  const initials = useMemo(() => initialsOf(profile?.full_name), [profile?.full_name]);
 
   // Visibility — respect the wanderer's choices
   const visible: VisibleFields = useMemo(
@@ -173,11 +174,11 @@ const WandererProfilePage = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-14 w-14">
-                      <AvatarImage src={data.avatar_url || undefined} alt={data.full_name || "Wanderer"} />
+                      <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || "Wanderer"} />
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-serif text-xl text-foreground">{data.full_name || "Wanderer"}</p>
+                      <p className="font-serif text-xl text-foreground">{profile.full_name || "Wanderer"}</p>
                       <Badge variant="outline" className="text-[10px] mt-1">Public Profile</Badge>
                     </div>
                   </div>
