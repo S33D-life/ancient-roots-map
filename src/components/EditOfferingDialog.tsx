@@ -4,16 +4,16 @@
  * Editable fields (creator-only):
  *   - title
  *   - content / caption
- *   - photos (add / remove, max 3) — for any type
+ *   - photos (add/remove existing + new, max 3)
  *   - quote block (text / author / source)
  *   - visibility
- *   - youtube_url (for song offerings)
- *   - nft_link (for nft offerings)
+ *   - youtube_url (song only)
+ *   - nft_link (nft only)
  *
  * Preserves original `created_at`; the DB trigger maintains `updated_at`.
  * Type cannot be changed in this first phase.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,6 @@ import OfferingPhotoTray, { type PhotoSlot } from "@/components/offering/Offerin
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
 import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
 import { MAX_OFFERING_PHOTOS, getOfferingPhotos } from "@/utils/offeringPhotos";
-import { extractYouTubeVideoId, buildYouTubeEmbedUrl, getYouTubeThumbnail } from "@/utils/youtubeUtils";
 import type { Database } from "@/integrations/supabase/types";
 
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
@@ -51,14 +50,23 @@ const TYPE_LABEL: Record<string, string> = {
 
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
 
+/** Extract a YouTube video id from common URL shapes. */
+const extractYouTubeId = (url: string): string | null => {
+  const m = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+  );
+  return m?.[1] || null;
+};
+
 const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
-  // ── Form state (initialised from `offering` whenever it opens) ──
+  // ── Form state ──
   const [title, setTitle] = useState(offering.title);
   const [content, setContent] = useState(offering.content || "");
-  const [photos, setPhotos] = useState<PhotoSlot[]>([]);
+  const [existingUrls, setExistingUrls] = useState<string[]>([]);
+  const [newPhotos, setNewPhotos] = useState<PhotoSlot[]>([]);
   const [quote, setQuote] = useState<QuoteData>({
     text: offering.quote_text || "",
     author: offering.quote_author || "",
@@ -70,11 +78,13 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
   const [youtubeUrl, setYoutubeUrl] = useState(offering.youtube_url || "");
   const [nftLink, setNftLink] = useState(offering.nft_link || "");
 
-  // Reset whenever a new offering / fresh open
+  // Reset on open / offering change
   useEffect(() => {
     if (!open) return;
     setTitle(offering.title);
     setContent(offering.content || "");
+    setExistingUrls(getOfferingPhotos(offering));
+    setNewPhotos([]);
     setQuote({
       text: offering.quote_text || "",
       author: offering.quote_author || "",
@@ -83,71 +93,70 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
     setVisibility((offering.visibility as OfferingVisibility) || "public");
     setYoutubeUrl(offering.youtube_url || "");
     setNftLink(offering.nft_link || "");
-    // Map existing photos into PhotoSlot shape (already-uploaded URLs)
-    const existing = getOfferingPhotos(offering).map<PhotoSlot>((url) => ({
-      id: `existing-${url}`,
-      file: null,
-      previewUrl: url,
-      uploadedUrl: url,
-      status: "ready",
-    }));
-    setPhotos(existing);
   }, [open, offering]);
 
-  const supportsPhotos = true; // any offering type may carry photos
   const isSong = offering.type === "song";
   const isNft = offering.type === "nft";
+  const totalPhotos = existingUrls.length + newPhotos.length;
+  const canAddMorePhotos = totalPhotos < MAX_OFFERING_PHOTOS;
 
   // ── Photo handlers ──
-  const handleAddPhotos = (files: FileList | null) => {
-    if (!files) return;
-    const remaining = MAX_OFFERING_PHOTOS - photos.length;
-    if (remaining <= 0) return;
-    const next: PhotoSlot[] = [];
-    Array.from(files).slice(0, remaining).forEach((file) => {
-      if (file.size > MAX_UPLOAD_SIZE) {
-        toast({
-          title: "Image too large",
-          description: `${file.name} is over ${MAX_UPLOAD_SIZE / 1024 / 1024}MB.`,
-          variant: "destructive",
-        });
-        return;
-      }
-      next.push({
-        id: `new-${Date.now()}-${Math.random()}`,
+  const handleAddPhoto = (file: File) => {
+    if (!canAddMorePhotos) return;
+    if (file.size > MAX_UPLOAD_SIZE) {
+      toast({
+        title: "Image too large",
+        description: `${file.name} is over ${MAX_UPLOAD_SIZE / 1024 / 1024}MB.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setNewPhotos((p) => [
+      ...p,
+      {
+        id: `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         file,
         previewUrl: URL.createObjectURL(file),
-        uploadedUrl: null,
-        status: "ready",
-      });
-    });
-    setPhotos((p) => [...p, ...next]);
+      },
+    ]);
   };
 
   const handleRemovePhoto = (id: string) => {
-    setPhotos((p) => p.filter((slot) => slot.id !== id));
+    if (id.startsWith("existing-")) {
+      const url = id.replace(/^existing-/, "");
+      setExistingUrls((urls) => urls.filter((u) => u !== url));
+    } else {
+      setNewPhotos((p) => p.filter((slot) => slot.id !== id));
+    }
   };
 
-  // Upload any new photos and return final ordered URL array
-  const uploadPendingPhotos = async (): Promise<string[]> => {
-    const finalUrls: string[] = [];
-    for (const slot of photos) {
-      if (slot.uploadedUrl) {
-        finalUrls.push(slot.uploadedUrl);
-        continue;
-      }
-      if (!slot.file) continue;
+  // Combined view for the tray (existing as readonly slots + new file slots)
+  const traySlots: PhotoSlot[] = useMemo(() => {
+    const existing: PhotoSlot[] = existingUrls.map((url) => ({
+      id: `existing-${url}`,
+      // Tray expects File; pass an empty placeholder — only previewUrl is used for display
+      file: new File([], "existing.jpg", { type: "image/jpeg" }),
+      previewUrl: url,
+    }));
+    return [...existing, ...newPhotos];
+  }, [existingUrls, newPhotos]);
 
+  // Upload any new photos, return final ordered URL array (existing first, then new)
+  const uploadNewPhotos = async (): Promise<string[]> => {
+    const uploaded: string[] = [];
+    for (const slot of newPhotos) {
       const ext = slot.file.name.split(".").pop() || "jpg";
-      const path = `offerings/${offering.tree_id}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
+      const path = `offerings/${offering.tree_id}/${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 9)}.${ext}`;
       const { error } = await supabase.storage
         .from("offerings")
         .upload(path, slot.file, { cacheControl: "3600", upsert: false });
       if (error) throw new Error(`Upload failed: ${error.message}`);
       const { data: pub } = supabase.storage.from("offerings").getPublicUrl(path);
-      finalUrls.push(pub.publicUrl);
+      uploaded.push(pub.publicUrl);
     }
-    return finalUrls;
+    return [...existingUrls, ...uploaded];
   };
 
   // ── Save ──
@@ -158,7 +167,7 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
     }
     setSaving(true);
     try {
-      const photoUrls = await uploadPendingPhotos();
+      const photoUrls = await uploadNewPhotos();
 
       const update: Record<string, any> = {
         title: title.trim(),
@@ -168,22 +177,24 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
         quote_source: quote.source.trim() || null,
         visibility,
         photos: photoUrls,
-        // Keep media_url in sync for legacy single-photo readers
-        media_url: photoUrls[0] || (offering.type === "voice" || offering.type === "song" ? offering.media_url : null),
       };
+
+      // Keep media_url in sync for legacy single-photo readers (don't touch
+      // for voice/song where media_url holds audio).
+      if (offering.type !== "voice" && offering.type !== "song") {
+        update.media_url = photoUrls[0] || null;
+      }
 
       // Song-specific: youtube embedding
       if (isSong) {
         const trimmed = youtubeUrl.trim();
         if (trimmed) {
-          const vid = extractYouTubeVideoId(trimmed);
+          const vid = extractYouTubeId(trimmed);
+          update.youtube_url = trimmed;
+          update.youtube_video_id = vid;
+          update.youtube_embed_url = vid ? `https://www.youtube.com/embed/${vid}` : null;
           if (vid) {
-            update.youtube_url = trimmed;
-            update.youtube_video_id = vid;
-            update.youtube_embed_url = buildYouTubeEmbedUrl(vid);
-            update.thumbnail_url = getYouTubeThumbnail(vid);
-          } else {
-            update.youtube_url = trimmed;
+            update.thumbnail_url = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
           }
         } else {
           update.youtube_url = null;
@@ -224,12 +235,15 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
       open={open}
       onOpenChange={onOpenChange}
       title="Tend your offering"
-      description={`Refine the ${TYPE_LABEL[offering.type] || "offering"} you placed at this tree.`}
+      subtitle={`Refine the ${TYPE_LABEL[offering.type] || "offering"} you placed at this tree.`}
     >
       <div className="space-y-4 pb-4">
         {/* Title */}
         <div className="space-y-1.5">
-          <Label htmlFor="edit-title" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
+          <Label
+            htmlFor="edit-title"
+            className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif"
+          >
             Title
           </Label>
           <Input
@@ -243,7 +257,10 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
 
         {/* Content / caption */}
         <div className="space-y-1.5">
-          <Label htmlFor="edit-content" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
+          <Label
+            htmlFor="edit-content"
+            className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif"
+          >
             {offering.type === "poem" ? "Poem" : offering.type === "photo" ? "Caption" : "Words"}
           </Label>
           <Textarea
@@ -257,26 +274,30 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
         </div>
 
         {/* Photos (any type) */}
-        {supportsPhotos && (
-          <div className="space-y-1.5">
-            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
-              Photos <span className="text-muted-foreground/50 normal-case tracking-normal">({photos.length}/{MAX_OFFERING_PHOTOS})</span>
-            </Label>
-            <OfferingPhotoTray
-              photos={photos}
-              maxPhotos={MAX_OFFERING_PHOTOS}
-              onAdd={handleAddPhotos}
-              onRemove={handleRemovePhoto}
-              uploadingCount={0}
-            />
-          </div>
-        )}
+        <div className="space-y-1.5">
+          <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
+            Photos{" "}
+            <span className="text-muted-foreground/50 normal-case tracking-normal">
+              ({totalPhotos}/{MAX_OFFERING_PHOTOS})
+            </span>
+          </Label>
+          <OfferingPhotoTray
+            photos={traySlots}
+            max={MAX_OFFERING_PHOTOS}
+            onAdd={handleAddPhoto}
+            onRemove={handleRemovePhoto}
+          />
+        </div>
 
         {/* Song-specific */}
         {isSong && (
           <div className="space-y-1.5">
-            <Label htmlFor="edit-youtube" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
-              YouTube link <span className="text-muted-foreground/40 normal-case tracking-normal">(optional)</span>
+            <Label
+              htmlFor="edit-youtube"
+              className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif"
+            >
+              YouTube link{" "}
+              <span className="text-muted-foreground/40 normal-case tracking-normal">(optional)</span>
             </Label>
             <Input
               id="edit-youtube"
@@ -291,7 +312,10 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
         {/* NFT-specific */}
         {isNft && (
           <div className="space-y-1.5">
-            <Label htmlFor="edit-nft" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
+            <Label
+              htmlFor="edit-nft"
+              className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif"
+            >
               Marketplace link
             </Label>
             <Input
