@@ -4,12 +4,12 @@
  * Expands into a full balance panel on tap.
  */
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, ArrowRight, X, Shield, Sprout, Sun, Moon } from "lucide-react";
+import { Heart, X, Sun, Moon, ScrollText } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
-import HeartLedgerPanel from "./HeartLedgerPanel";
-import HeartClaimsPanel from "./HeartClaimsPanel";
+import HeartJarOverview from "./HeartJarOverview";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
