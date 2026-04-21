@@ -201,7 +201,7 @@ export default function SendWhisperModal({
         groupId,
         treeAnchorId: treeId,
         messageContent: message.trim(),
-        isActive: true,
+        isActive: presence.atTree,
       });
       if (error || !data?.ok) {
         if (data?.error === "insufficient_hearts") {
@@ -224,6 +224,7 @@ export default function SendWhisperModal({
         deliveryScope,
         deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
         deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
+        isActive: presence.atTree,
       });
       if (error) {
         toast.error("Failed to send whisper.");
