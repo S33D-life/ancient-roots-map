@@ -5,7 +5,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2 } from "lucide-react";
+import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import OfferingQuoteBlock from "@/components/OfferingQuoteBlock";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import SkystampSeal from "@/components/SkystampSeal";
+import { getOfferingPhotos, getOfferingCover } from "@/utils/offeringPhotos";
 import type { Database } from "@/integrations/supabase/types";
 
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
@@ -268,29 +269,70 @@ const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offering
   </Card>
 );
 
-const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
-  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/20 transition-all">
-    {offering.media_url && (
-      <div className="relative overflow-hidden">
-        <img
-          src={offering.media_url}
-          alt={offering.title}
-          className="w-full max-h-64 object-cover group-hover:scale-[1.02] transition-transform duration-700"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent" />
-      </div>
-    )}
-    <CardContent className="p-5">
-      <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
-      {offering.content && (
-        <p className="text-sm text-foreground/70 font-serif mt-2 whitespace-pre-wrap">{offering.content}</p>
+const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => {
+  const photos = getOfferingPhotos(offering);
+  const [idx, setIdx] = useState(0);
+  const total = photos.length;
+  const current = photos[idx] || null;
+  const next = () => setIdx((i) => (i + 1) % total);
+  const prev = () => setIdx((i) => (i - 1 + total) % total);
+  return (
+    <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/20 transition-all">
+      {current && (
+        <div className="relative overflow-hidden">
+          <img
+            src={current}
+            alt={offering.title}
+            className="w-full max-h-64 object-cover group-hover:scale-[1.02] transition-transform duration-700"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prev}
+                aria-label="Previous photo"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center hover:bg-background transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={next}
+                aria-label="Next photo"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center hover:bg-background transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {photos.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      i === idx ? "bg-primary scale-125" : "bg-background/60"
+                    }`}
+                  />
+                ))}
+              </div>
+              <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-background/70 backdrop-blur text-[10px] font-serif text-foreground/80">
+                {idx + 1} / {total}
+              </div>
+            </>
+          )}
+        </div>
       )}
-      <QuoteSection offering={offering} />
-      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
-    </CardContent>
-  </Card>
-);
+      <CardContent className="p-5">
+        <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
+        {offering.content && (
+          <p className="text-sm text-foreground/70 font-serif mt-2 whitespace-pre-wrap">{offering.content}</p>
+        )}
+        <QuoteSection offering={offering} />
+        <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+      </CardContent>
+    </Card>
+  );
+};
 
 const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
@@ -333,9 +375,20 @@ const CompactRow = ({
       offering.tree_role === "stewardship" ? "bg-card/60 border-l-2 border-l-primary/40" : "bg-card/40"
     }`}>
       <CardContent className="p-3 flex items-center gap-3">
-        {offering.media_url && offering.type === "photo" && (
-          <img src={offering.media_url} alt={offering.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
-        )}
+        {(() => {
+          const cover = getOfferingCover(offering);
+          const extra = getOfferingPhotos(offering).length - 1;
+          return cover && offering.type === "photo" ? (
+            <div className="relative shrink-0">
+              <img src={cover} alt={offering.title} className="w-12 h-12 rounded object-cover" loading="lazy" />
+              {extra > 0 && (
+                <span className="absolute -bottom-1 -right-1 px-1 py-0 min-w-[16px] h-4 rounded-full bg-primary/80 text-primary-foreground text-[9px] font-serif text-center leading-4">
+                  +{extra}
+                </span>
+              )}
+            </div>
+          ) : null;
+        })()}
         <span className="text-primary/70 shrink-0">{typeIcons[offering.type]}</span>
         <div className="flex-1 min-w-0">
           <p className="font-serif text-sm text-foreground truncate">{offering.title}</p>

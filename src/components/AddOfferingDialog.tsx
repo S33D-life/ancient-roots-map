@@ -25,6 +25,8 @@ import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
+import OfferingPhotoTray, { type PhotoSlot } from "@/components/offering/OfferingPhotoTray";
+import { MAX_OFFERING_PHOTOS } from "@/utils/offeringPhotos";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -113,13 +115,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [nftLink, setNftLink] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [photoSlots, setPhotoSlots] = useState<PhotoSlot[]>([]);
+  const [uploadingPhotoIds, setUploadingPhotoIds] = useState<Set<string>>(new Set());
   const [dragActive, setDragActive] = useState(false);
   const [sealedByStaff, setSealedByStaff] = useState(() => localStorage.getItem("linked_staff_code") || "");
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const submittingRef = useRef(false);
   const { toast } = useToast();
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
@@ -150,12 +150,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     else if (ANCHORED_KEYWORDS.test(text)) setTreeRole("anchored");
   }, [title, content]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const processFile = async (file: File) => {
+  const addPhoto = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file type", description: "Please select an image file", variant: "destructive" });
       return;
@@ -164,37 +159,49 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       toast({ title: "File too large", description: "Please select an image under 50MB", variant: "destructive" });
       return;
     }
+    if (photoSlots.length >= MAX_OFFERING_PHOTOS) {
+      toast({ title: "Limit reached", description: `Up to ${MAX_OFFERING_PHOTOS} photos per offering` });
+      return;
+    }
     try {
       const processed = await resizeImage(file);
-      setSelectedFile(processed);
-      setPreviewUrl(URL.createObjectURL(processed));
+      const slot: PhotoSlot = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        file: processed,
+        previewUrl: URL.createObjectURL(processed),
+      };
+      setPhotoSlots((prev) => [...prev, slot].slice(0, MAX_OFFERING_PHOTOS));
       setMediaUrl("");
-      if (processed !== file) {
-        toast({ title: "Image optimized", description: `Resized from ${(file.size / 1024 / 1024).toFixed(1)}MB to ${(processed.size / 1024 / 1024).toFixed(1)}MB` });
-      }
     } catch {
       toast({ title: "Processing failed", description: "Could not process the image", variant: "destructive" });
     }
   };
 
+  const removePhoto = (id: string) => {
+    setPhotoSlots((prev) => {
+      const target = prev.find((p) => p.id === id);
+      if (target) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) processFile(file);
+    const files = e.dataTransfer.files;
+    if (!files) return;
+    const remaining = MAX_OFFERING_PHOTOS - photoSlots.length;
+    Array.from(files).slice(0, remaining).forEach(addPhoto);
   };
 
-  const clearSelectedFile = () => {
-    setSelectedFile(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  const clearAllPhotos = () => {
+    photoSlots.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    setPhotoSlots([]);
   };
 
   const uploadFile = async (file: File, userId: string): Promise<string> => {
     const ext = file.name.split(".").pop() || "jpg";
-    const fileName = `${userId}/${treeId}/${Date.now()}.${ext}`;
+    const fileName = `${userId}/${treeId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("offerings").upload(fileName, file, { cacheControl: "3600", upsert: false });
     if (error) throw error;
     const { data } = supabase.storage.from("offerings").getPublicUrl(fileName);
@@ -202,7 +209,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   };
 
   const resetForm = () => {
-    setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearSelectedFile();
+    setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,19 +243,35 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       }
 
       let finalMediaUrl = mediaUrl.trim() || null;
-      if (selectedFile) {
+      let uploadedPhotos: string[] = [];
+      if (photoSlots.length > 0) {
         setUploading(true);
+        setUploadingPhotoIds(new Set(photoSlots.map((p) => p.id)));
         try {
-          finalMediaUrl = await uploadFile(selectedFile, user.id);
+          // Upload all photos in parallel; clear each from the "uploading" set as it finishes
+          uploadedPhotos = await Promise.all(
+            photoSlots.map(async (p) => {
+              const url = await uploadFile(p.file, user.id);
+              setUploadingPhotoIds((prev) => {
+                const next = new Set(prev);
+                next.delete(p.id);
+                return next;
+              });
+              return url;
+            }),
+          );
+          finalMediaUrl = uploadedPhotos[0] || finalMediaUrl;
         } catch (uploadErr: any) {
-          toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+          toast({ title: "Upload failed", description: uploadErr.message || "One or more photos failed to upload — try again", variant: "destructive" });
           submittingRef.current = false;
           setLoading(false);
           setUploading(false);
+          setUploadingPhotoIds(new Set());
           clearTimeout(timeout);
           return;
         } finally {
           setUploading(false);
+          setUploadingPhotoIds(new Set());
         }
       }
 
@@ -263,6 +286,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         title: resolvedTitle,
         content: content.trim() || null,
         media_url: finalMediaUrl,
+        photos: uploadedPhotos,
         nft_link: activeType === "nft" ? nftLink.trim() || null : null,
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
@@ -576,45 +600,26 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         <form onSubmit={handleSubmit} className="space-y-4 mt-1">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
-          {/* PHOTO: image first, then title */}
+          {/* PHOTO: tray of up to 3 photos, then title + caption */}
           {activeType === "photo" && (
             <>
-              {previewUrl ? (
-                <div className="relative rounded-xl overflow-hidden border border-border/30">
-                  <img src={previewUrl} alt="Preview" className="w-full max-h-52 object-cover" />
-                  <button type="button" onClick={clearSelectedFile} className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 hover:bg-background transition-colors">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
-                    dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/30 hover:border-primary/20"
-                  }`}
-                  style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
-                  onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-                  onDragLeave={() => setDragActive(false)}
-                  onDrop={handleDrop}
-                >
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-                    <ImagePlus className="h-6 w-6 text-primary/40" />
-                  </div>
-                  <p className="text-sm text-muted-foreground/60 font-serif mb-3">Choose a memory to place here</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
-                      <ImagePlus className="h-3 w-3" /> Gallery
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
-                      <Camera className="h-3 w-3" /> Camera
-                    </Button>
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                  <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
-                </div>
-              )}
-              {/* Title appears after photo selected, or always for experienced users */}
+              <div
+                onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
+              >
+                <OfferingPhotoTray
+                  photos={photoSlots}
+                  onAdd={addPhoto}
+                  onRemove={removePhoto}
+                  uploadingIds={uploadingPhotoIds}
+                  disabled={loading}
+                />
+              </div>
+              {/* Title appears after first photo */}
               <AnimatePresence>
-                {(previewUrl || title.length > 0) && (
+                {(photoSlots.length > 0 || title.length > 0) && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <Input
                       id="title"
@@ -629,7 +634,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               </AnimatePresence>
               {/* Caption — softer, optional feel */}
               <AnimatePresence>
-                {(previewUrl || content.length > 0) && (
+                {(photoSlots.length > 0 || content.length > 0) && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <Textarea
                       id="content"
