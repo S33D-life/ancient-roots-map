@@ -185,13 +185,11 @@ function MusicRoomTreeRadio<T extends RadioSong>({
   };
 
   const stationLabel =
-    scopeLabel === "tree" && anchorTree
-      ? anchorTree.name
-      : scopeLabel === "species" && anchorTree
-        ? `${anchorTree.species} kin`
-        : anchorTree
-          ? "The wider forest"
-          : "The whole forest";
+    scopeLabel === "tree"
+      ? (selectedTreeName ?? anchorTree?.name ?? "Choose a tree")
+      : scopeLabel === "species"
+        ? `${selectedSpecies ?? anchorTree?.species ?? "—"} kin · across the forest`
+        : "The whole forest";
 
   /* ── Empty state ── */
   if (playlist.length === 0) {
