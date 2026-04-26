@@ -81,6 +81,7 @@
         "npm:@types/react@^18.3.23",
         "npm:@types/three@0.160",
         "npm:@vitejs/plugin-react-swc@^3.11.0",
+        "npm:astronomy-engine@^2.1.19",
         "npm:autoprefixer@^10.4.21",
         "npm:class-variance-authority@~0.7.1",
         "npm:clsx@^2.1.1",
