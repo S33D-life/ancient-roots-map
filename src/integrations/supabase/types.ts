@@ -9714,6 +9714,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_council_participation: {
+        Row: {
+          created_at: string
+          hearts_awarded: number
+          id: string
+          ledger_entry_id: string | null
+          session_key: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hearts_awarded?: number
+          id?: string
+          ledger_entry_id?: string | null
+          session_key: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hearts_awarded?: number
+          id?: string
+          ledger_entry_id?: string | null
+          session_key?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_heart_balances: {
         Row: {
           influence_tokens: number
@@ -10693,6 +10723,10 @@ export type Database = {
         Returns: Json
       }
       claim_bot_handoff: { Args: { p_token: string }; Returns: Json }
+      claim_council_participation: {
+        Args: { p_hearts?: number; p_session_key: string }
+        Returns: Json
+      }
       claim_gift_seed: {
         Args: { p_invite_code: string; p_user_id: string }
         Returns: Json

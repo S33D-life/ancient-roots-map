@@ -1,14 +1,21 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COUNCIL_CYCLES, getCurrentCouncil, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
-import { hasParticipatedInCouncil, markCouncilParticipation, getCouncilParticipation, COUNCIL_HEARTS_REWARD } from "@/data/council/councilParticipation";
+import {
+  hasParticipatedInCouncil,
+  claimCouncilParticipation,
+  getCouncilParticipation,
+  resyncLocalParticipation,
+  COUNCIL_HEARTS_REWARD,
+  type ParticipationSyncState,
+} from "@/data/council/councilParticipation";
 import EarlyCouncilRecognition from "@/components/council/EarlyCouncilRecognition";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock, Loader2, CloudOff, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 type SessionTiming = "current" | "future" | "past";
@@ -30,8 +37,26 @@ export default function CouncilSessionPage() {
   const [participated, setParticipated] = useState(() =>
     id ? hasParticipatedInCouncil(id) : false,
   );
+  const initial = id ? getCouncilParticipation(id) : null;
+  const [syncState, setSyncState] = useState<ParticipationSyncState>(
+    initial?.syncState ?? "synced",
+  );
+  const [claiming, setClaiming] = useState(false);
 
   useDocumentTitle(session ? session.title : "Council Session");
+
+  // Background re-sync of any local_only records on mount.
+  useEffect(() => {
+    if (initial?.syncState === "local_only") {
+      void resyncLocalParticipation().then((recovered) => {
+        if (recovered > 0 && id) {
+          const fresh = getCouncilParticipation(id);
+          if (fresh) setSyncState(fresh.syncState);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!session) {
     return (
@@ -51,12 +76,45 @@ export default function CouncilSessionPage() {
   const timing = getSessionTiming(session.id);
   const participation = getCouncilParticipation(session.id);
 
-  const handleMarkParticipation = () => {
-    markCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
-    setParticipated(true);
-    toast.success("Presence received 🌱", {
-      description: `+${COUNCIL_HEARTS_REWARD} S33D Hearts will flow to you`,
-    });
+  const handleMarkParticipation = async () => {
+    if (claiming) return;
+    setClaiming(true);
+    setSyncState("syncing");
+    setParticipated(true); // optimistic — show the success card immediately
+    try {
+      const result = await claimCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
+      setSyncState(result.syncState);
+      if (result.ok) {
+        toast.success("Presence received 🌱", {
+          description: `+${result.participation.heartsAmount} S33D Hearts safely synced`,
+        });
+      } else if (result.code === "unauthenticated") {
+        toast.error("Sign in to keep your Hearts", {
+          description: "Your presence is held locally — sign in to sync it.",
+        });
+      } else {
+        toast.warning("Saved locally — will retry", {
+          description: "We'll sync your Hearts to the server when connection returns.",
+        });
+      }
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const handleRetrySync = async () => {
+    if (claiming) return;
+    setClaiming(true);
+    setSyncState("syncing");
+    try {
+      const result = await claimCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
+      setSyncState(result.syncState);
+      if (result.ok) {
+        toast.success("Synced ✓", { description: "Your Hearts are safe across devices." });
+      }
+    } finally {
+      setClaiming(false);
+    }
   };
 
   return (
@@ -105,12 +163,38 @@ export default function CouncilSessionPage() {
                 {participated ? (
                   <div className="flex items-start gap-2.5">
                     <Sparkles className="h-4 w-4 text-primary mt-0.5" />
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-serif text-foreground/80">Presence received 🌱</p>
                       <p className="text-xs text-muted-foreground/60 leading-relaxed mt-0.5">
                         You are part of this gathering<br />
                         +{participation?.heartsAmount ?? COUNCIL_HEARTS_REWARD} S33D Hearts will flow to you
                       </p>
+                      {/* Sync state indicator — tells the user whether their Hearts are safe */}
+                      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-serif">
+                        {syncState === "synced" && (
+                          <span className="inline-flex items-center gap-1 text-primary/80">
+                            <CheckCircle2 className="h-3 w-3" /> Synced — safe across devices
+                          </span>
+                        )}
+                        {syncState === "syncing" && (
+                          <span className="inline-flex items-center gap-1 text-muted-foreground/70">
+                            <Loader2 className="h-3 w-3 animate-spin" /> Syncing your presence…
+                          </span>
+                        )}
+                        {syncState === "local_only" && (
+                          <button
+                            type="button"
+                            onClick={handleRetrySync}
+                            disabled={claiming}
+                            className="inline-flex items-center gap-1 text-amber-400/90 hover:text-amber-300 underline-offset-2 hover:underline"
+                          >
+                            <CloudOff className="h-3 w-3" /> Saved locally
+                            <span className="inline-flex items-center gap-0.5 ml-1 text-muted-foreground/60">
+                              <RefreshCw className="h-2.5 w-2.5" /> Retry
+                            </span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -122,8 +206,14 @@ export default function CouncilSessionPage() {
                       size="sm"
                       className="text-xs font-serif gap-1.5"
                       onClick={handleMarkParticipation}
+                      disabled={claiming}
                     >
-                      <Heart className="h-3 w-3" /> I'm here for this council
+                      {claiming ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Heart className="h-3 w-3" />
+                      )}
+                      {claiming ? "Receiving…" : "I'm here for this council"}
                       <span className="text-primary-foreground/70 ml-1">+{COUNCIL_HEARTS_REWARD} ❤️</span>
                     </Button>
                   </>

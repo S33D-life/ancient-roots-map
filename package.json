@@ -19,7 +19,9 @@
     "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs",
     "open:country": "node scripts/open-country.mjs",
     "seed:country": "node scripts/seed-country.mjs",
-    "seed:hong-kong": "node scripts/seed-hong-kong.mjs"
+    "seed:hong-kong": "node scripts/seed-hong-kong.mjs",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.3",
@@ -97,6 +99,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
