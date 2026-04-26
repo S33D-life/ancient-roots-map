@@ -138,12 +138,11 @@ export interface SpendCheck {
 }
 
 // ── Action-to-transaction-type map ─────────────────────────
-export const ACTION_TO_TXN_TYPE: Record<string, HeartTransactionType> = {
-  checkin: "earn_checkin",
-  mapping: "earn_tree_mapping",
-  offering: "earn_offering",
-  curation: "earn_curation",
-  plant_hearts: "spend_plant_hearts",
-  root_growth: "earn_root_growth",
-  support_gratitude: "earn_support_gratitude",
-};
+//
+// Re-exported from the economy-vocabulary registry so adding a new
+// action requires touching the registry rather than scattering inline
+// strings. Cast keeps existing call-sites typed against
+// HeartTransactionType.
+import { ACTION_TO_LEDGER_TXN_TYPE } from "@/lib/economy-vocabulary";
+export const ACTION_TO_TXN_TYPE: Record<string, HeartTransactionType> =
+  ACTION_TO_LEDGER_TXN_TYPE as unknown as Record<string, HeartTransactionType>;
