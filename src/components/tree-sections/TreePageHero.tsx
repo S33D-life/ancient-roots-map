@@ -122,6 +122,12 @@ const TreePageHero = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       className="relative -mx-4 md:-mx-8 mb-6 md:mb-10 overflow-hidden rounded-b-2xl max-h-[36vh] md:max-h-[min(50vh,400px)]"
+      style={{
+        boxShadow: isGoldFrame
+          ? `inset 0 0 0 4px ${accessVisual.border}, 0 0 22px ${accessVisual.glow}`
+          : `inset 0 0 0 3px ${accessVisual.border}, 0 0 14px ${accessVisual.glow}`,
+      }}
+      data-accessibility-tier={accessibilityTier}
     >
       {/* Background with parallax */}
       <div
