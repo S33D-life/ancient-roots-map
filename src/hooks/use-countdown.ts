@@ -35,17 +35,19 @@ function compute(target: Date | string | number | null | undefined): Countdown {
 }
 
 export function useCountdown(target: Date | string | number | null | undefined): Countdown {
-  const [state, setState] = useState<Countdown>(() => compute(target));
+  const targetMs =
+    target == null ? null : typeof target === "object" ? target.getTime() : new Date(target).getTime();
+  const [state, setState] = useState<Countdown>(() => compute(targetMs));
 
   useEffect(() => {
-    setState(compute(target));
-    if (!target) return;
+    setState(compute(targetMs));
+    if (targetMs == null) return;
 
     let interval: ReturnType<typeof setInterval> | null = null;
 
     const start = () => {
       if (interval !== null) return;
-      interval = setInterval(() => setState(compute(target)), 1000);
+      interval = setInterval(() => setState(compute(targetMs)), 1000);
     };
     const stop = () => {
       if (interval === null) return;
@@ -56,7 +58,7 @@ export function useCountdown(target: Date | string | number | null | undefined):
     const onVisibility = () => {
       if (document.hidden) stop();
       else {
-        setState(compute(target));
+        setState(compute(targetMs));
         start();
       }
     };
@@ -68,7 +70,7 @@ export function useCountdown(target: Date | string | number | null | undefined):
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [typeof target === "object" && target ? (target as Date).getTime() : target]);
+  }, [targetMs]);
 
   return state;
 }
