@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
         contributionId = inserted?.id || "00000000-0000-0000-0000-000000000000";
       }
 
-      // Grant gratitude hearts via heart_ledger ONLY (idempotent via unique key)
+      // Grant gratitude hearts via heart_ledger (idempotent via unique key).
       const { error: ledgerErr } = await supabase.from("heart_ledger").insert({
         user_id: userId,
         amount: hearts,
@@ -136,13 +136,27 @@ Deno.serve(async (req) => {
         },
       });
 
-      if (ledgerErr) {
-        // If idempotency_key unique violation, that's expected on replays
-        if (ledgerErr.code === "23505") {
-          console.log("[webhook] Ledger entry already exists (idempotent), skipping");
+      // HOTFIX (heart ledger discovery, Task 2): heart_ledger writes do NOT
+      // fire update_heart_balance_on_insert. Without this mirror, paid-user
+      // gratitude hearts are invisible in the UI balance. 'support_gratitude'
+      // is on the daily-cap and duplicate-guard skip lists. We only mirror
+      // when the ledger insert actually wrote (or was already idempotent).
+      if (!ledgerErr || ledgerErr.code === "23505") {
+        if (ledgerErr?.code === "23505") {
+          console.log("[webhook] Ledger entry already exists (idempotent), skipping mirror");
         } else {
-          console.error("[webhook] Ledger insert error:", ledgerErr);
+          const { error: mirrorErr } = await supabase.from("heart_transactions").insert({
+            user_id: userId,
+            tree_id: null,
+            heart_type: "support_gratitude",
+            amount: hearts,
+          });
+          if (mirrorErr) {
+            console.error("[webhook] heart_transactions mirror error:", mirrorErr);
+          }
         }
+      } else {
+        console.error("[webhook] Ledger insert error:", ledgerErr);
       }
 
       console.log(`[webhook] Confirmed contribution ${sessionId}, granted ${hearts} hearts to ${userId}`);
