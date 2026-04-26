@@ -42,7 +42,6 @@ type Scope = "tree" | "species" | "forest";
 type LibraryScope = "personal" | "family" | "tribe" | "collective";
 
 interface TreeOption { id: string; name: string; species: string }
-interface SpeciesOption { key: string; count: number }
 
 interface SongRow {
   id: string;
