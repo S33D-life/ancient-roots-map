@@ -27,7 +27,7 @@ export interface TicketsBreakdown {
 
 export interface NextDraw {
   id: string;
-  draw_type: "new_moon" | "full_moon" | "equinox_spring" | "equinox_autumn" | "solstice_summer" | "solstice_winter";
+  draw_type: "lunar_new" | "lunar_full" | "solar_equinox_spring" | "solar_equinox_autumn" | "solar_solstice_summer" | "solar_solstice_winter";
   scheduled_at: string;
   prize_amount: number;
   prize_count: number;
@@ -197,26 +197,28 @@ export function useLotteryConfig() {
 
 // ── Display helpers ────────────────────────────────────────
 
+// Vocabulary note: DB uses 'lunar_new'/'lunar_full'/'solar_*' (see lottery_draws CHECK
+// constraint and lottery-scheduler edge function). Helpers below match that vocabulary.
 export function drawEmoji(type: NextDraw["draw_type"] | undefined | null): string {
   switch (type) {
-    case "new_moon": return "🌑";
-    case "full_moon": return "🌕";
-    case "equinox_spring": return "🌸";
-    case "equinox_autumn": return "🍂";
-    case "solstice_summer": return "☀️";
-    case "solstice_winter": return "❄️";
+    case "lunar_new": return "🌑";
+    case "lunar_full": return "🌕";
+    case "solar_equinox_spring": return "🌸";
+    case "solar_equinox_autumn": return "🍂";
+    case "solar_solstice_summer": return "☀️";
+    case "solar_solstice_winter": return "❄️";
     default: return "🌙";
   }
 }
 
 export function drawLabel(type: NextDraw["draw_type"] | undefined | null): string {
   switch (type) {
-    case "new_moon": return "New Moon";
-    case "full_moon": return "Full Moon";
-    case "equinox_spring": return "Spring Equinox";
-    case "equinox_autumn": return "Autumn Equinox";
-    case "solstice_summer": return "Summer Solstice";
-    case "solstice_winter": return "Winter Solstice";
+    case "lunar_new": return "New Moon";
+    case "lunar_full": return "Full Moon";
+    case "solar_equinox_spring": return "Spring Equinox";
+    case "solar_equinox_autumn": return "Autumn Equinox";
+    case "solar_solstice_summer": return "Summer Solstice";
+    case "solar_solstice_winter": return "Winter Solstice";
     default: return "Next Moon";
   }
 }
