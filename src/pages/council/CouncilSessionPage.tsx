@@ -1,14 +1,21 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COUNCIL_CYCLES, getCurrentCouncil, moonEmoji, moonLabel, formatGatheringDate, formatMarkerDate } from "@/data/council/councilCycles";
-import { hasParticipatedInCouncil, markCouncilParticipation, getCouncilParticipation, COUNCIL_HEARTS_REWARD } from "@/data/council/councilParticipation";
+import {
+  hasParticipatedInCouncil,
+  claimCouncilParticipation,
+  getCouncilParticipation,
+  resyncLocalParticipation,
+  COUNCIL_HEARTS_REWARD,
+  type ParticipationSyncState,
+} from "@/data/council/councilParticipation";
 import EarlyCouncilRecognition from "@/components/council/EarlyCouncilRecognition";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock, Loader2, CloudOff, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 type SessionTiming = "current" | "future" | "past";
@@ -30,8 +37,26 @@ export default function CouncilSessionPage() {
   const [participated, setParticipated] = useState(() =>
     id ? hasParticipatedInCouncil(id) : false,
   );
+  const initial = id ? getCouncilParticipation(id) : null;
+  const [syncState, setSyncState] = useState<ParticipationSyncState>(
+    initial?.syncState ?? "synced",
+  );
+  const [claiming, setClaiming] = useState(false);
 
   useDocumentTitle(session ? session.title : "Council Session");
+
+  // Background re-sync of any local_only records on mount.
+  useEffect(() => {
+    if (initial?.syncState === "local_only") {
+      void resyncLocalParticipation().then((recovered) => {
+        if (recovered > 0 && id) {
+          const fresh = getCouncilParticipation(id);
+          if (fresh) setSyncState(fresh.syncState);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!session) {
     return (
@@ -51,12 +76,45 @@ export default function CouncilSessionPage() {
   const timing = getSessionTiming(session.id);
   const participation = getCouncilParticipation(session.id);
 
-  const handleMarkParticipation = () => {
-    markCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
-    setParticipated(true);
-    toast.success("Presence received 🌱", {
-      description: `+${COUNCIL_HEARTS_REWARD} S33D Hearts will flow to you`,
-    });
+  const handleMarkParticipation = async () => {
+    if (claiming) return;
+    setClaiming(true);
+    setSyncState("syncing");
+    setParticipated(true); // optimistic — show the success card immediately
+    try {
+      const result = await claimCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
+      setSyncState(result.syncState);
+      if (result.ok) {
+        toast.success("Presence received 🌱", {
+          description: `+${result.participation.heartsAmount} S33D Hearts safely synced`,
+        });
+      } else if (result.code === "unauthenticated") {
+        toast.error("Sign in to keep your Hearts", {
+          description: "Your presence is held locally — sign in to sync it.",
+        });
+      } else {
+        toast.warning("Saved locally — will retry", {
+          description: "We'll sync your Hearts to the server when connection returns.",
+        });
+      }
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const handleRetrySync = async () => {
+    if (claiming) return;
+    setClaiming(true);
+    setSyncState("syncing");
+    try {
+      const result = await claimCouncilParticipation(session.id, COUNCIL_HEARTS_REWARD);
+      setSyncState(result.syncState);
+      if (result.ok) {
+        toast.success("Synced ✓", { description: "Your Hearts are safe across devices." });
+      }
+    } finally {
+      setClaiming(false);
+    }
   };
 
   return (
