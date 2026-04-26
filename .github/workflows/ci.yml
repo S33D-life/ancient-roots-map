@@ -37,6 +37,9 @@ jobs:
       - name: Duplicate artifact guard
         run: npm run check:duplicates
 
+      - name: Asset budget guard
+        run: npm run guard:assets
+
       - name: Lint
         run: npm run lint
 
