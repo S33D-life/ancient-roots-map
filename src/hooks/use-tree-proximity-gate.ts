@@ -137,6 +137,15 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
     checkProximity();
   }, [checkProximity]);
 
+  // Soft re-poll distance every 30s so the CTA updates from "340m away" → "approaching" → "ready"
+  // as the wanderer walks closer, without requiring a manual refresh.
+  useEffect(() => {
+    if (!treeId || !treeLat || !treeLng) return;
+    if (status === "checking" || status === "no_location") return;
+    const interval = setInterval(() => { checkProximity(); }, 30_000);
+    return () => clearInterval(interval);
+  }, [status, treeId, treeLat, treeLng, checkProximity]);
+
   // Update grace countdown every minute
   useEffect(() => {
     if (status !== "unlocked_grace") return;
@@ -180,6 +189,8 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
     canCheckin,
     graceLabel,
     graceMs,
+    /** Last measured distance from user to tree in meters. Null if unknown / no geo permission. */
+    distanceMeters,
     recordVisitNow,
     recheckProximity: checkProximity,
   };
