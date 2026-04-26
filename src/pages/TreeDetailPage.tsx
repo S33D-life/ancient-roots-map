@@ -278,6 +278,45 @@ const TreeDetailPage = () => {
     graceMs: proximityGate.graceMs,
   });
 
+  // ── Accessibility frame: where this tree sits on the public/private spectrum
+  const accessibility = useTreeAccessibility({
+    treeId: id,
+    tier: (tree as any)?.accessibility_tier ?? "public",
+    userId,
+  });
+  const { toast: accessibilityToast } = useToast();
+
+  // Brief haptic when the page opens on a closed (red) tree.
+  // Communicates "this is closed to you" physically, not just visually.
+  useEffect(() => {
+    if (!tree || accessibility.loading) return;
+    if (accessibility.tier === "private") {
+      try {
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          navigator.vibrate(40);
+        }
+      } catch { /* haptics optional */ }
+    }
+  }, [tree, accessibility.tier, accessibility.loading]);
+
+  /**
+   * Attempt to open the check-in flow. Trees on private land (red frame
+   * with no access grant) are gently blocked with a warm message + haptic.
+   */
+  const tryOpenCheckin = () => {
+    if (!canCheckIn(accessibility.tier)) {
+      try { navigator.vibrate?.(40); } catch { /* */ }
+      accessibilityToast({
+        title: "This tree rests on private land",
+        description:
+          "Ask the landowner for permission, or request access through the tree's keeper.",
+      });
+      return;
+    }
+    setCanopyCheckinOpen(true);
+  };
+
+
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
     tree: tree ? {
