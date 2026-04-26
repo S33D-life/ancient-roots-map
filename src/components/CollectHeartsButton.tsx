@@ -17,6 +17,8 @@ interface CollectHeartsButtonProps {
   treeName: string;
   userId: string | null;
   isEligible: boolean;
+  /** Live distance to tree in meters — drives progressive states (idle / approaching / ready). */
+  distanceMeters?: number | null;
   variant?: "full" | "compact" | "inline";
   className?: string;
 }
@@ -26,10 +28,16 @@ export default function CollectHeartsButton({
   treeName,
   userId,
   isEligible,
+  distanceMeters = null,
   variant = "full",
   className = "",
 }: CollectHeartsButtonProps) {
-  const { state, pool, collectedAmount, collect } = useHeartCollection(treeId, userId, isEligible);
+  const { state, pool, collectedAmount, collect, proximityTier } = useHeartCollection(
+    treeId,
+    userId,
+    isEligible,
+    distanceMeters,
+  );
 
   const handleCollect = useCallback(async () => {
     // Haptic feedback on mobile
@@ -61,7 +69,20 @@ export default function CollectHeartsButton({
     return <CompactVariant state={state} hearts={hearts} collectedAmount={collectedAmount} onCollect={handleCollect} isCollectable={isCollectable} className={className} treeId={treeId} />;
   }
 
-  return <FullVariant state={state} hearts={hearts} collectedAmount={collectedAmount} onCollect={handleCollect} isCollectable={isCollectable} guidance={guidance} className={className} treeId={treeId} />;
+  return (
+    <FullVariant
+      state={state}
+      hearts={hearts}
+      collectedAmount={collectedAmount}
+      onCollect={handleCollect}
+      isCollectable={isCollectable}
+      guidance={guidance}
+      className={className}
+      treeId={treeId}
+      proximityTier={proximityTier}
+      distanceMeters={distanceMeters}
+    />
+  );
 }
 
 /* ── Grace timer ── */
