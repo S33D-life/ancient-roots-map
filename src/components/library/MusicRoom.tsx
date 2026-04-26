@@ -1002,7 +1002,7 @@ function SpeciesPickerDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Tune into a species"
-      description="Hear songs offered to this species across the forest."
+      
       contentClassName="max-w-md p-0 overflow-hidden border-border/40"
     >
       <Command className="bg-transparent">
