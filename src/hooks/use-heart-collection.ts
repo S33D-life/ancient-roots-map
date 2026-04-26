@@ -23,6 +23,8 @@ export function useHeartCollection(
   userId: string | null,
   /** True when proximity gate says user is near or checked in */
   isEligible: boolean,
+  /** Optional live distance from user → tree (meters). Used for progressive UI states. */
+  distanceMeters?: number | null,
 ) {
   const [pool, setPool] = useState<HeartPoolInfo | null>(null);
   const [state, setState] = useState<HeartCollectionState>("loading");
