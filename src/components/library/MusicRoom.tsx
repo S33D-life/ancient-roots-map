@@ -412,13 +412,15 @@ const MusicRoom = () => {
 
       {/* ── Tree Radio — the hearth ── */}
       <MusicRoomTreeRadio
-        scopedSongs={ordered}
+        scopedSongs={scoped}
         anchorTree={contextTree}
         scopeLabel={scope}
+        selectedTreeName={selectedTree?.name ?? null}
+        selectedSpecies={selectedSpecies}
         onOpenSong={(s) => setActiveSong(s)}
       />
 
-      {/* ── Shared tuning interface (Tree Radio + Library both respond) ── */}
+      {/* ── Radio tuning tabs (each tab = its own station frequency) ── */}
       <div className="space-y-3">
         <div className="flex justify-center">
           <div
@@ -428,9 +430,9 @@ const MusicRoom = () => {
             aria-label="Tune by Tree, Species, or Forest"
           >
             {([
-              { key: "tree", label: "Tree", icon: TreeDeciduous, disabled: !contextTree },
-              { key: "species", label: "Species", icon: Radio, disabled: !contextTree },
-              { key: "forest", label: "Forest", icon: Globe2, disabled: false },
+              { key: "tree", label: "Tree", icon: TreeDeciduous },
+              { key: "species", label: "Species", icon: Leaf },
+              { key: "forest", label: "Forest", icon: Globe2 },
             ] as const).map((opt) => {
               const Icon = opt.icon;
               const active = scope === opt.key;
@@ -439,9 +441,8 @@ const MusicRoom = () => {
                   key={opt.key}
                   role="tab"
                   aria-selected={active}
-                  disabled={opt.disabled}
-                  onClick={() => !opt.disabled && setScope(opt.key)}
-                  className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  onClick={() => handleScopeTab(opt.key)}
+                  className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors"
                   style={{
                     color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
                   }}
@@ -464,11 +465,108 @@ const MusicRoom = () => {
           </div>
         </div>
 
-        {!contextTree && (
-          <p className="text-center text-[11px] font-serif italic text-muted-foreground/60">
-            Enter from a tree to filter by Tree or Species.
-          </p>
-        )}
+        {/* Active tuning hint — open picker to change selection */}
+        <div className="flex justify-center">
+          {scope === "tree" && (
+            <button
+              type="button"
+              onClick={() => setTreePickerOpen(true)}
+              className="text-[11px] font-serif italic text-muted-foreground/80 hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              {selectedTree
+                ? <>Tuned to <span className="text-primary/90 not-italic">{selectedTree.name}</span> · change tree</>
+                : "Choose a tree to tune into"}
+            </button>
+          )}
+          {scope === "species" && (
+            <button
+              type="button"
+              onClick={() => setSpeciesPickerOpen(true)}
+              className="text-[11px] font-serif italic text-muted-foreground/80 hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              {selectedSpecies
+                ? <>Tuned to <span className="text-primary/90 not-italic">{selectedSpecies}</span> kin · change species</>
+                : "Choose a species to tune into"}
+            </button>
+          )}
+          {scope === "forest" && (
+            <p className="text-[11px] font-serif italic text-muted-foreground/60">
+              All offerings, across the whole forest.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Library tuning row (scope · species · tree · search) ── */}
+      <div className="space-y-3 pt-4 border-t border-border/20">
+        {/* Scope pills — Personal · Family · Tribe · Collective */}
+        <div className="flex justify-center">
+          <div
+            className="inline-flex items-center gap-1 rounded-full border border-border/40 p-1 max-w-full overflow-x-auto"
+            style={{ background: "hsl(var(--card) / 0.4)" }}
+            role="tablist"
+            aria-label="Tune the library by scope"
+          >
+            {([
+              { key: "personal", label: "Personal", icon: Heart },
+              { key: "family", label: "Family", icon: Users },
+              { key: "tribe", label: "Tribe", icon: TreeDeciduous },
+              { key: "collective", label: "Collective", icon: Globe },
+            ] as const).map((opt) => {
+              const Icon = opt.icon;
+              const active = libraryScope === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setLibraryScope(opt.key)}
+                  className="relative px-3 py-1.5 rounded-full text-[11px] font-serif tracking-wide whitespace-nowrap transition-colors"
+                  style={{
+                    color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="library-scope-pill"
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "hsl(var(--primary) / 0.75)" }}
+                      transition={{ type: "spring", stiffness: 280, damping: 28 }}
+                    />
+                  )}
+                  <span className="relative flex items-center gap-1.5">
+                    <Icon className="w-3 h-3" />
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Species + Tree filter row */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <SpeciesOfferingFilter
+            speciesStrings={availableSpeciesStrings}
+            value={librarySpecies}
+            onChange={setLibrarySpecies}
+            className="w-44"
+          />
+          <button
+            type="button"
+            onClick={() => setLibraryTreePickerOpen(true)}
+            className="h-9 px-3 rounded-md text-[11px] font-serif border border-border/20 bg-card/30 text-muted-foreground hover:text-foreground hover:bg-card/50 transition-colors flex items-center gap-1.5"
+          >
+            <TreeDeciduous className="h-3 w-3 text-muted-foreground/50" />
+            {libraryTree ? <span className="truncate max-w-[140px]">{libraryTree.name}</span> : <span>All trees</span>}
+            {libraryTree && (
+              <X
+                className="h-3 w-3 ml-1 text-muted-foreground/50 hover:text-foreground"
+                onClick={(e) => { e.stopPropagation(); setLibraryTreeId(null); }}
+              />
+            )}
+          </button>
+        </div>
 
         {/* Search */}
         <div className="flex justify-center">
