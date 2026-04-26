@@ -15,7 +15,15 @@ interface WindfallEvent {
   tree_name?: string;
 }
 
-const VaultLotteryTracker = ({ userId }: Props) => {
+/**
+ * VaultWindfalls — displays the user's received windfalls and the count of
+ * pending windfalls across the forest.
+ *
+ * NOTE: previously named "VaultLotteryTracker" / labeled "Lottery". The name
+ * "Lottery" is reserved for the upcoming lunar lottery system. This panel
+ * shows windfall transactions only.
+ */
+const VaultWindfalls = ({ userId }: Props) => {
   const [windfalls, setWindfalls] = useState<WindfallEvent[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -62,7 +70,10 @@ const VaultLotteryTracker = ({ userId }: Props) => {
       <div className="p-5">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles className="w-4 h-4 text-accent" />
-          <h3 className="text-sm font-serif tracking-wide text-foreground">Windfall Lottery <span className="text-[9px] text-muted-foreground font-normal ml-1">Current</span></h3>
+          <h3 className="text-sm font-serif tracking-wide text-foreground">
+            Windfalls{" "}
+            <span className="text-[9px] text-muted-foreground font-normal ml-1">Current</span>
+          </h3>
         </div>
 
         {/* Status beacon */}
@@ -124,4 +135,4 @@ const VaultLotteryTracker = ({ userId }: Props) => {
   );
 };
 
-export default VaultLotteryTracker;
+export default VaultWindfalls;

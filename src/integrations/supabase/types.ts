@@ -3313,36 +3313,6 @@ export type Database = {
         }
         Relationships: []
       }
-      habitat_pool_ledger: {
-        Row: {
-          allocation_pct: number
-          created_at: string
-          hearts_contributed: number
-          id: string
-          notes: string | null
-          source_id: string | null
-          source_type: string
-        }
-        Insert: {
-          allocation_pct?: number
-          created_at?: string
-          hearts_contributed?: number
-          id?: string
-          notes?: string | null
-          source_id?: string | null
-          source_type?: string
-        }
-        Update: {
-          allocation_pct?: number
-          created_at?: string
-          hearts_contributed?: number
-          id?: string
-          notes?: string | null
-          source_id?: string | null
-          source_type?: string
-        }
-        Relationships: []
-      }
       harvest_listings: {
         Row: {
           availability_type: string
@@ -10964,23 +10934,7 @@ export type Database = {
           p_tree_id: string
           p_user_id: string
         }
-        Returns: {
-          amount: number
-          asset_type: string
-          created_at: string
-          id: string
-          last_accrual_at: string
-          last_visit_at: string | null
-          species_key: string | null
-          tree_id: string
-          user_id: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "tree_value_roots"
-          isOneToOne: false
-          isSetofReturn: true
-        }
+        Returns: Json
       }
       recompute_seed_life_validation_totals: {
         Args: { _target_id: string; _target_type: string }

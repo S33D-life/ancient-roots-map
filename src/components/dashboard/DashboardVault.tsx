@@ -20,7 +20,7 @@ import VaultHeartBalance from "./vault/VaultHeartBalance";
 import VaultSproutingSeeds from "./vault/VaultSproutingSeeds";
 import VaultHeartLedger from "./vault/VaultHeartLedger";
 import VaultTreeReservoirs from "./vault/VaultTreeReservoirs";
-import VaultLotteryTracker from "./vault/VaultLotteryTracker";
+import VaultWindfalls from "./vault/VaultWindfalls";
 import VaultParticles from "./vault/VaultParticles";
 import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
@@ -252,7 +252,7 @@ const DashboardVault = ({ userId }: Props) => {
           accent="120 40% 45%"
         >
           <VaultTreeReservoirs />
-          <VaultLotteryTracker userId={userId} />
+          <VaultWindfalls userId={userId} />
         </VaultSection>
 
         {/* Journey — Scrolls + Activity */}
