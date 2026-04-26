@@ -46,7 +46,12 @@ export default function TreeMobileActionBar({
   onMakeOffering,
 }: Props) {
   // Hearts
-  const { state, pool, collect } = useHeartCollection(treeId, userId, proximityGate.isUnlocked);
+  const { state, pool, collect } = useHeartCollection(
+    treeId,
+    userId,
+    proximityGate.isUnlocked,
+    proximityGate.distanceMeters ?? null,
+  );
   const heartsAvailable = pool?.totalHearts ?? 0;
   const heartsCollectable = canCollect(state) && heartsAvailable > 0;
 
