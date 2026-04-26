@@ -57,7 +57,7 @@ import Map from "../Map";
 
 describe("Map component — renderer delegation", () => {
   it("renders LeafletFallbackMap (not MapLibre)", async () => {
-    render(
+    renderWithProviders(
       <MemoryRouter initialEntries={["/map"]}>
         <Map />
       </MemoryRouter>
@@ -71,7 +71,7 @@ describe("Map component — renderer delegation", () => {
     const journeyEnd = vi.fn();
     const fullscreenToggle = vi.fn();
 
-    render(
+    renderWithProviders(
       <MemoryRouter initialEntries={["/map"]}>
         <Map
           initialLat={51.5}
@@ -104,7 +104,7 @@ describe("Map component — renderer delegation", () => {
   });
 
   it("does NOT render MapLibreRecoveryMap", async () => {
-    render(
+    renderWithProviders(
       <MemoryRouter initialEntries={["/map"]}>
         <Map />
       </MemoryRouter>
