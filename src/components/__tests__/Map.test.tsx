@@ -1,6 +1,19 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement } from "react";
+
+/**
+ * Wrap the rendered tree in a fresh QueryClientProvider per test
+ * so `useQuery` calls inside Map don't blow up.
+ */
+function renderWithProviders(ui: ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
 
 // Mock LeafletFallbackMap to verify Map delegates to it with all props
 vi.mock("../LeafletFallbackMap", () => ({
