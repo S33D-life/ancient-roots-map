@@ -115,7 +115,7 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
         return;
       }
 
-      const result = data as AssignResult | null;
+      const result = data as unknown as AssignResult | null;
       if (!result) {
         setLastError("Empty response from server.");
         toast.error("Couldn't assign: empty response from server.");
@@ -170,7 +170,7 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
         toast.error(`Couldn't unassign: ${error.message}`);
         return;
       }
-      const result = data as AssignResult | null;
+      const result = data as unknown as AssignResult | null;
       if (!result || !result.success) {
         const msg = result?.message || "Unknown error.";
         console.error("[curator-assign] Unassign rejected:", result);
