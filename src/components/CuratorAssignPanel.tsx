@@ -4,7 +4,7 @@ import { useHasRole } from "@/hooks/use-role";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Shield, UserPlus, Search, X, Check } from "lucide-react";
+import { Loader2, Shield, UserPlus, Search, X, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface WandererOption {
@@ -18,8 +18,22 @@ interface CuratorAssignPanelProps {
   onAssigned?: () => void;
 }
 
+interface AssignResult {
+  success: boolean;
+  code: string;
+  message: string;
+  staff_code?: string;
+  owner_user_id?: string | null;
+  owner_name?: string | null;
+  previous_owner_id?: string | null;
+  sqlstate?: string;
+}
+
 export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAssignPanelProps) {
   const { hasRole, loading: roleLoading } = useHasRole("curator");
+  const { hasRole: isKeeper } = useHasRole("keeper");
+  const canModerate = hasRole || isKeeper;
+
   const [expanded, setExpanded] = useState(false);
   const [wanderers, setWanderers] = useState<WandererOption[]>([]);
   const [currentOwner, setCurrentOwner] = useState<WandererOption | null>(null);
@@ -28,13 +42,14 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
   const [selectedId, setSelectedId] = useState("");
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
 
-  // Load staff owner + wanderers when expanded
-  const loadData = useCallback(async () => {
-    if (loaded) return;
+  // Load staff owner + wanderers
+  const loadData = useCallback(async (force = false) => {
+    if (loaded && !force) return;
     const [staffRes, profileRes] = await Promise.all([
       supabase.from("staffs").select("owner_user_id").eq("id", staffCode).maybeSingle(),
-      supabase.rpc("search_discoverable_profiles", { search_query: "", result_limit: 100 }),
+      supabase.rpc("search_discoverable_profiles", { search_query: "", result_limit: 200 }),
     ]);
     const ownerId = staffRes.data?.owner_user_id || null;
     setCurrentOwnerId(ownerId);
@@ -42,16 +57,29 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
     const profiles = (profileRes.data as WandererOption[]) || [];
     setWanderers(profiles);
     if (ownerId) {
-      setCurrentOwner(profiles.find((p) => p.id === ownerId) || null);
+      // Try profile list first; if missing, fetch directly so we can always show the assignee
+      const fromList = profiles.find((p) => p.id === ownerId) || null;
+      if (fromList) {
+        setCurrentOwner(fromList);
+      } else {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("id, full_name, avatar_url")
+          .eq("id", ownerId)
+          .maybeSingle();
+        setCurrentOwner((prof as WandererOption) || null);
+      }
+    } else {
+      setCurrentOwner(null);
     }
     setLoaded(true);
   }, [staffCode, loaded]);
 
   useEffect(() => {
-    if (expanded && hasRole) loadData();
-  }, [expanded, hasRole, loadData]);
+    if (expanded && canModerate) loadData();
+  }, [expanded, canModerate, loadData]);
 
-  // Reset when staffCode changes
+  // Reset on staff change
   useEffect(() => {
     setLoaded(false);
     setExpanded(false);
@@ -59,6 +87,7 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
     setCurrentOwnerId(null);
     setSearchQ("");
     setSelectedId("");
+    setLastError(null);
   }, [staffCode]);
 
   const filtered = useMemo(() => {
@@ -70,20 +99,59 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
   const handleAssign = async () => {
     if (!selectedId) return;
     setSaving(true);
+    setLastError(null);
     try {
-      const { error } = await supabase
-        .from("staffs")
-        .update({ owner_user_id: selectedId })
-        .eq("id", staffCode);
-      if (error) throw error;
+      const { data, error } = await supabase.rpc("assign_staff_steward", {
+        p_staff_code: staffCode,
+        p_new_owner_id: selectedId,
+      });
+
+      if (error) {
+        // Network/transport error
+        console.error("[curator-assign] RPC transport error:", error);
+        const msg = error.message || "Network error reaching the assignment service.";
+        setLastError(msg);
+        toast.error(`Couldn't assign: ${msg}`);
+        return;
+      }
+
+      const result = data as AssignResult | null;
+      if (!result) {
+        setLastError("Empty response from server.");
+        toast.error("Couldn't assign: empty response from server.");
+        return;
+      }
+
+      if (!result.success) {
+        console.error("[curator-assign] Assignment rejected:", result);
+        setLastError(result.message);
+        toast.error(result.message, {
+          description: result.code === "forbidden"
+            ? "Ask a senior curator to grant you the curator role."
+            : result.code === "profile_not_found"
+              ? "The wanderer's profile may have been removed. Refresh and try again."
+              : result.code === "staff_not_found"
+                ? `Staff code "${staffCode}" wasn't found in the database.`
+                : undefined,
+        });
+        return;
+      }
+
+      // Success
       const w = wanderers.find((w) => w.id === selectedId);
-      toast.success(`${staffCode} → ${w?.full_name || "wanderer"}`);
-      setCurrentOwner(w || null);
+      const ownerName = result.owner_name || w?.full_name || "wanderer";
+      toast.success(`${staffCode} → ${ownerName}`, {
+        description: result.code === "unchanged" ? "Already the steward." : undefined,
+      });
+      setCurrentOwner(w || { id: selectedId, full_name: result.owner_name || null, avatar_url: null });
       setCurrentOwnerId(selectedId);
+      setLastError(null);
       onAssigned?.();
-    } catch (err: any) {
-      console.error("Staff assign error:", err);
-      toast.error("Couldn't assign this staff right now. Please try again.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[curator-assign] Unexpected error:", err);
+      setLastError(msg);
+      toast.error(`Couldn't assign: ${msg}`);
     } finally {
       setSaving(false);
     }
@@ -91,26 +159,41 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
 
   const handleUnassign = async () => {
     setSaving(true);
+    setLastError(null);
     try {
-      const { error } = await supabase
-        .from("staffs")
-        .update({ owner_user_id: null })
-        .eq("id", staffCode);
-      if (error) throw error;
+      const { data, error } = await supabase.rpc("unassign_staff_steward", {
+        p_staff_code: staffCode,
+      });
+      if (error) {
+        console.error("[curator-assign] Unassign transport error:", error);
+        setLastError(error.message);
+        toast.error(`Couldn't unassign: ${error.message}`);
+        return;
+      }
+      const result = data as AssignResult | null;
+      if (!result || !result.success) {
+        const msg = result?.message || "Unknown error.";
+        console.error("[curator-assign] Unassign rejected:", result);
+        setLastError(msg);
+        toast.error(msg);
+        return;
+      }
       toast.success(`${staffCode} unassigned`);
       setCurrentOwner(null);
       setCurrentOwnerId(null);
       setSelectedId("");
       onAssigned?.();
-    } catch (err: any) {
-      console.error("Staff unassign error:", err);
-      toast.error("Couldn't unassign this staff right now. Please try again.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[curator-assign] Unassign unexpected error:", err);
+      setLastError(msg);
+      toast.error(`Couldn't unassign: ${msg}`);
     } finally {
       setSaving(false);
     }
   };
 
-  if (roleLoading || !hasRole) return null;
+  if (roleLoading || !canModerate) return null;
 
   if (!expanded) {
     return (
@@ -121,7 +204,7 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
         onClick={() => setExpanded(true)}
       >
         <Shield className="w-3.5 h-3.5" />
-        Curator: Assign Steward
+        {currentOwnerId ? "Curator: Reassign Steward" : "Curator: Assign Steward"}
       </Button>
     );
   }
@@ -148,7 +231,7 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
           <button
             onClick={handleUnassign}
             disabled={saving}
-            className="text-muted-foreground hover:text-destructive transition-colors ml-auto"
+            className="text-muted-foreground hover:text-destructive transition-colors ml-auto disabled:opacity-50"
             title="Unassign"
           >
             <X className="w-3 h-3" />
@@ -202,6 +285,14 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
           ))
         )}
       </div>
+
+      {/* Inline error so curator sees the actual reason without dismissing the toast */}
+      {lastError && (
+        <div className="flex items-start gap-1.5 rounded-md border border-destructive/30 bg-destructive/5 px-2 py-1.5 text-[10px] text-destructive font-serif">
+          <AlertCircle className="w-3 h-3 mt-px shrink-0" />
+          <span className="leading-tight">{lastError}</span>
+        </div>
+      )}
 
       {/* Assign button */}
       <Button
