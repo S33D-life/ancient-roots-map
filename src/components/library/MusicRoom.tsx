@@ -916,4 +916,129 @@ function SongDetail({
   );
 }
 
+/* ── Picker dialogs ─────────────────────────────────────── */
+
+function TreePickerDialog({
+  open,
+  onOpenChange,
+  trees,
+  selectedId,
+  title,
+  description,
+  onSelect,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  trees: TreeOption[];
+  selectedId: string | null;
+  title: string;
+  description: string;
+  onSelect: (t: TreeOption) => void;
+}) {
+  return (
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      contentClassName="max-w-md p-0 overflow-hidden border-border/40"
+    >
+      <Command className="bg-transparent">
+        <CommandInput placeholder="Search trees…" className="font-serif text-sm" />
+        <CommandList className="max-h-[60vh]">
+          <CommandEmpty>
+            <span className="font-serif italic text-xs text-muted-foreground">
+              No tree matches that search.
+            </span>
+          </CommandEmpty>
+          <CommandGroup>
+            {trees.map((t) => (
+              <CommandItem
+                key={t.id}
+                value={`${t.name} ${t.species}`}
+                onSelect={() => onSelect(t)}
+                className="font-serif"
+              >
+                <TreeDeciduous className="w-3.5 h-3.5 mr-2 text-muted-foreground/60" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground/90 truncate">{t.name}</p>
+                  {t.species && (
+                    <p className="text-[10px] italic text-muted-foreground/70 truncate">{t.species}</p>
+                  )}
+                </div>
+                {selectedId === t.id && (
+                  <span className="text-[10px] uppercase tracking-wider text-primary/80">tuned</span>
+                )}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsiveDialog>
+  );
+}
+
+function SpeciesPickerDialog({
+  open,
+  onOpenChange,
+  speciesStrings,
+  selected,
+  onSelect,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  speciesStrings: string[];
+  selected: string | null;
+  onSelect: (sp: string) => void;
+}) {
+  const counts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const s of speciesStrings) {
+      const k = s || "Unknown";
+      m.set(k, (m.get(k) || 0) + 1);
+    }
+    return Array.from(m.entries()).sort((a, b) => b[1] - a[1]);
+  }, [speciesStrings]);
+
+  return (
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Tune into a species"
+      description="Hear songs offered to this species across the forest."
+      contentClassName="max-w-md p-0 overflow-hidden border-border/40"
+    >
+      <Command className="bg-transparent">
+        <CommandInput placeholder="Search species…" className="font-serif text-sm" />
+        <CommandList className="max-h-[60vh]">
+          <CommandEmpty>
+            <span className="font-serif italic text-xs text-muted-foreground">
+              No species matches that search.
+            </span>
+          </CommandEmpty>
+          <CommandGroup>
+            {counts.map(([sp, count]) => (
+              <CommandItem
+                key={sp}
+                value={sp}
+                onSelect={() => onSelect(sp)}
+                className="font-serif"
+              >
+                <Leaf className="w-3.5 h-3.5 mr-2 text-muted-foreground/60" />
+                <span className="flex-1 truncate text-sm text-foreground/90">{sp}</span>
+                <span className="text-[10px] italic text-muted-foreground/60 ml-2">
+                  {count} {count === 1 ? "song" : "songs"}
+                </span>
+                {selected === sp && (
+                  <span className="text-[10px] uppercase tracking-wider text-primary/80 ml-2">tuned</span>
+                )}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsiveDialog>
+  );
+}
+
 export default MusicRoom;
