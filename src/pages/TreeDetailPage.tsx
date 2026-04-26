@@ -789,7 +789,7 @@ const TreeDetailPage = () => {
               proximityGate={proximityGate}
               meetingStatus={meetingStatus}
               relationship={relationship}
-              onCheckin={() => setCanopyCheckinOpen(true)}
+              onCheckin={tryOpenCheckin}
               onMakeOffering={openOfferingGateway}
             />
           </Suspense>
@@ -804,7 +804,7 @@ const TreeDetailPage = () => {
                 proximityGate={proximityGate}
                 meetingStatus={meetingStatus}
                 checkinStats={checkinStats}
-                onCheckin={() => setCanopyCheckinOpen(true)}
+                onCheckin={tryOpenCheckin}
                 treePresence={treeDetailPresence}
                 availableWhispers={availableWhispers}
                 hasHearts={false}
@@ -1092,7 +1092,7 @@ const TreeDetailPage = () => {
                   userId={userId}
                   isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  onCheckIn={() => setCanopyCheckinOpen(true)}
+                  onCheckIn={tryOpenCheckin}
                   onWhisperCollected={() => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }}
@@ -1154,7 +1154,7 @@ const TreeDetailPage = () => {
               checkins={checkins}
               stats={checkinStats}
               loading={checkinsLoading}
-              onCheckin={() => setCanopyCheckinOpen(true)}
+              onCheckin={tryOpenCheckin}
               userId={userId}
               onRefresh={refetchCheckins}
             />
