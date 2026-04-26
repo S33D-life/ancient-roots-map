@@ -20,14 +20,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink, Library } from "lucide-react";
+import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink, Library, Leaf, Users, Heart, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import MusicRoomTreeRadio from "@/components/library/MusicRoomTreeRadio";
+import SpeciesOfferingFilter, { filterBySpecies } from "@/components/SpeciesOfferingFilter";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type Scope = "tree" | "species" | "forest";
+
+/** Library "who" scope — maps to visibility + creator. */
+type LibraryScope = "personal" | "family" | "tribe" | "collective";
+
+interface TreeOption { id: string; name: string; species: string }
+interface SpeciesOption { key: string; count: number }
 
 interface SongRow {
   id: string;
