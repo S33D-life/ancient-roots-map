@@ -244,8 +244,10 @@ export default defineConfig(async ({ mode }) => {
           if (id.includes('node_modules/@tanstack')) return 'vendor-query';
           // Map libraries — heavy, only needed on /map
           if (id.includes('node_modules/leaflet') || id.includes('node_modules/maplibre-gl')) return 'vendor-map';
-          // Charts — only needed on dashboard/hive pages
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) return 'vendor-charts';
+          // Charts (recharts/d3) intentionally NOT manually chunked.
+          // Manual chunking promoted them into the home modulepreload list (~110 KB gz)
+          // even though they're only used by 3 admin pages. Letting Vite's per-route
+          // splitting handle them keeps recharts inside the lazy admin chunks.
           // Blockchain — rarely used
           if (id.includes('node_modules/ethers')) return 'vendor-ethers';
           // Radix UI primitives
