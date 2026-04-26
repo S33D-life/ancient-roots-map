@@ -139,7 +139,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
             </span>
           )}
         </div>
-      </button>
+      </motion.button>
 
       {/* Panel overlay */}
       <AnimatePresence>
