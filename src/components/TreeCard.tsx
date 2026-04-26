@@ -248,7 +248,8 @@ const TreeCard = ({
   /* ── Gallery variant (full card) ── */
   return (
     <>
-    <Card className="border-border/40 hover:border-primary/25 transition-all duration-400 relative group">
+    <AccessibilityFrame tier={accessTier} size="card" rounded="rounded-xl">
+    <Card className="border-transparent hover:border-primary/25 transition-all duration-400 relative group bg-card overflow-hidden">
       {/* Hero image */}
       {heroPhotoUrl && (
         <div className="relative w-full h-36 overflow-hidden rounded-t-lg">
@@ -420,6 +421,7 @@ const TreeCard = ({
         </div>
       </CardContent>
     </Card>
+    </AccessibilityFrame>
     <SendWhisperModal
       open={whisperOpen}
       onOpenChange={setWhisperOpen}
