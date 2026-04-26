@@ -132,6 +132,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [locationConfirmed, setLocationConfirmed] = useState(false);
   const [speciesCertainty, setSpeciesCertainty] = useState<SpeciesCertainty>("exact");
   const [speciesHiveFamily, setSpeciesHiveFamily] = useState<string | undefined>();
+  const [accessibilityTier, setAccessibilityTier] = useState<AccessibilityTier>("public");
+  const [accessNotes, setAccessNotes] = useState("");
+  const [accessibilityConfirmed, setAccessibilityConfirmed] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const dragCounter = useRef(0);
@@ -168,6 +171,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setGpsAccuracy(null);
       setSpeciesCertainty("exact");
       setSpeciesHiveFamily(undefined);
+      setAccessibilityTier("public");
+      setAccessNotes("");
+      setAccessibilityConfirmed(false);
     }
   }, [open]);
 
