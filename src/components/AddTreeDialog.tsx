@@ -1413,6 +1413,71 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   </div>
                 </section>
 
+                {/* ── Accessibility step: how can wanderers reach this tree? ── */}
+                <section className="pt-1">
+                  <div className="flex items-center gap-2 py-2">
+                    <Separator className="flex-1 bg-border/40" />
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/45 font-serif whitespace-nowrap">
+                      How can wanderers reach this tree?
+                    </span>
+                    <Separator className="flex-1 bg-border/40" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {ACCESSIBILITY_TIER_OPTIONS.map((opt) => {
+                      const selected = accessibilityTier === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setAccessibilityTier(opt.value);
+                            setAccessibilityConfirmed(true);
+                            hapticTap();
+                          }}
+                          className={`text-left rounded-lg p-2.5 transition-all border ${
+                            selected
+                              ? "border-primary/60 bg-primary/5"
+                              : "border-border/30 bg-card/40 hover:border-border/60"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-base leading-none">{opt.emoji}</span>
+                            <span className="font-serif text-[12px] leading-tight">{opt.label}</span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground/70 font-serif mt-1 leading-snug">
+                            {opt.hint}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-1.5 mt-3">
+                    <Label
+                      htmlFor="access-notes"
+                      className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif"
+                    >
+                      Anything wanderers should know? (optional)
+                    </Label>
+                    <Textarea
+                      id="access-notes"
+                      value={accessNotes}
+                      onChange={(e) => setAccessNotes(e.target.value.slice(0, 500))}
+                      placeholder="Opening hours, who to ask, entry fee…"
+                      maxLength={500}
+                      rows={2}
+                      className="font-serif text-sm"
+                    />
+                  </div>
+
+                  {!accessibilityConfirmed && (
+                    <p className="text-[10px] text-center font-serif text-muted-foreground/60 mt-2">
+                      Defaulting to <span className="text-foreground/80">🟢 Open path</span> — tap a tile to confirm or change.
+                    </p>
+                  )}
+                </section>
+
                 <p className="text-[10px] text-center font-serif" style={{ color: 'hsla(42, 40%, 55%, 0.4)' }}>
                   Take your time. This tree has waited centuries.
                 </p>
