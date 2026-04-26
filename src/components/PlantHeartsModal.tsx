@@ -4,10 +4,13 @@
  * Shows existing root context when planting more.
  */
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, X, Loader2 } from "lucide-react";
+import { Sprout, X, Loader2, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
+import { useLotteryStats, drawEmoji, drawLabel } from "@/hooks/use-lottery";
+import { useCountdown } from "@/hooks/use-countdown";
 
 const QUICK_AMOUNTS = [1, 3, 11, 33];
 
@@ -33,7 +36,18 @@ export default function PlantHeartsModal({
   const [amount, setAmount] = useState(3);
   const { balance } = useHeartEconomy(userId);
   const available = balance.s33d - balance.locked;
-  const hasExisting = existingAmount && existingAmount > 0;
+  const hasExisting = !!existingAmount && existingAmount > 0;
+
+  // Twin-moons yield hint — surfaces the 3.3% staking yield at the moment of decision.
+  const { data: lotteryStats } = useLotteryStats();
+  const yieldBps = lotteryStats?.nextDraw?.yield_bps ?? 330;
+  const yieldPct = (yieldBps / 100).toFixed(1);
+  const projected = hasExisting
+    ? Math.floor(((existingAmount as number) * yieldBps) / 10000)
+    : 0;
+  const countdown = useCountdown(lotteryStats?.nextDraw?.scheduled_at ?? null);
+  const emoji = drawEmoji(lotteryStats?.nextDraw?.draw_type);
+  const label = drawLabel(lotteryStats?.nextDraw?.draw_type);
 
   const handlePlant = async () => {
     if (amount < 1 || amount > available) return;
@@ -95,6 +109,30 @@ export default function PlantHeartsModal({
                 </>
               )}
             </p>
+
+            {/* Twin Moons yield hint — surfaces staking yield at the moment of decision. */}
+            <Link
+              to="/lottery"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card/40 border border-border/30 hover:border-primary/30 transition-colors"
+            >
+              <Moon className="w-3.5 h-3.5 text-accent shrink-0" />
+              <span className="text-[10px] font-serif text-muted-foreground/80 leading-snug">
+                {hasExisting && projected > 0 && !countdown.isPast ? (
+                  <>
+                    <span className="text-foreground/80 tabular-nums">~{projected}</span> hearts at{" "}
+                    {emoji} {label} ·{" "}
+                    <span className="tabular-nums">
+                      in {countdown.days}d {String(countdown.hours).padStart(2, "0")}h
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Stake to earn{" "}
+                    <span className="text-foreground/80">{yieldPct}%</span> at every moon
+                  </>
+                )}
+              </span>
+            </Link>
 
             {/* Quick select */}
             <div className="flex gap-2">

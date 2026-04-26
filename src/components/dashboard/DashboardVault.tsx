@@ -21,6 +21,7 @@ import VaultSproutingSeeds from "./vault/VaultSproutingSeeds";
 import VaultHeartLedger from "./vault/VaultHeartLedger";
 import VaultTreeReservoirs from "./vault/VaultTreeReservoirs";
 import VaultWindfalls from "./vault/VaultWindfalls";
+import LotteryCountdownCard from "./vault/LotteryCountdownCard";
 import VaultParticles from "./vault/VaultParticles";
 import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
@@ -240,19 +241,22 @@ const DashboardVault = ({ userId }: Props) => {
           <VaultValueTree userId={userId} totalHearts={totalHearts} />
         </VaultSection>
 
-        {/* Trees — Reservoirs + Lottery */}
+        {/* Trees — Reservoirs + Windfalls + Lottery */}
         <VaultSection
           id="trees"
           icon={<TreeDeciduous className="w-4 h-4" />}
           title="Trees"
-          subtitle="Reservoirs and lottery"
+          subtitle="Reservoirs, windfalls, and the twin moons"
           badge={treeCount}
           isOpen={openSection === "trees"}
           onToggle={handleToggle}
           accent="120 40% 45%"
         >
           <VaultTreeReservoirs />
-          <VaultWindfalls userId={userId} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <VaultWindfalls userId={userId} />
+            <LotteryCountdownCard />
+          </div>
         </VaultSection>
 
         {/* Journey — Scrolls + Activity */}

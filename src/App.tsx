@@ -101,6 +101,7 @@ const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/Cou
 const CouncilSessionPage = lazyImportWithRetry(() => import("./pages/council/CouncilSessionPage"), "council-session");
 const AssetsPage = lazyImportWithRetry(() => import("./pages/AssetsPage"), "assets");
 const VaultPage = lazyImportWithRetry(() => import("./pages/VaultPage"), "vault");
+const LotteryPage = lazyImportWithRetry(() => import("./pages/LotteryPage"), "lottery");
 const RadioPage = lazyImportWithRetry(() => import("./pages/RadioPage"), "radio");
 const VisitsPage = lazyImportWithRetry(() => import("./pages/VisitsPage"), "visits");
 const ReferralsPage = lazyImportWithRetry(() => import("./pages/ReferralsPage"), "referrals");
@@ -358,6 +359,7 @@ const App = () => {
                 <Route path="/council/records/:id" element={realm(<CouncilSessionPage />, "canopy")} />
                 <Route path="/assets" element={<AssetsPage />} />
                 <Route path="/vault" element={<VaultPage />} />
+                <Route path="/lottery" element={<LotteryPage />} />
                 {/* /heartwood/vault removed — consolidated to /vault */}
                 <Route path="/radio" element={<RadioPage />} />
                 <Route path="/visits" element={<VisitsPage />} />
