@@ -669,6 +669,49 @@ const MusicRoom = () => {
           navigate(`/tree/${id}`);
         }}
       />
+
+      {/* ── Tree picker (Radio · Tree tab) ── */}
+      <TreePickerDialog
+        open={treePickerOpen}
+        onOpenChange={setTreePickerOpen}
+        trees={availableTrees}
+        selectedId={selectedTreeId}
+        title="Tune into a tree"
+        description="Each tree carries its own offerings."
+        onSelect={(t) => {
+          setSelectedTreeId(t.id);
+          setSelectedSpecies(t.species || null);
+          setScope("tree");
+          setTreePickerOpen(false);
+        }}
+      />
+
+      {/* ── Species picker (Radio · Species tab) ── */}
+      <SpeciesPickerDialog
+        open={speciesPickerOpen}
+        onOpenChange={setSpeciesPickerOpen}
+        speciesStrings={availableSpeciesStrings}
+        selected={selectedSpecies}
+        onSelect={(sp) => {
+          setSelectedSpecies(sp);
+          setScope("species");
+          setSpeciesPickerOpen(false);
+        }}
+      />
+
+      {/* ── Library tree picker ── */}
+      <TreePickerDialog
+        open={libraryTreePickerOpen}
+        onOpenChange={setLibraryTreePickerOpen}
+        trees={availableTrees}
+        selectedId={libraryTreeId}
+        title="Filter library by tree"
+        description="See only the records offered at a specific tree."
+        onSelect={(t) => {
+          setLibraryTreeId(t.id);
+          setLibraryTreePickerOpen(false);
+        }}
+      />
     </div>
   );
 };
