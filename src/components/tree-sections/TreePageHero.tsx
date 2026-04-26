@@ -21,6 +21,11 @@ import PhenologyBadge from "@/components/PhenologyBadge";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import type { SpeciesResolution } from "@/services/speciesResolver";
 import type { Database } from "@/integrations/supabase/types";
+import {
+  ACCESSIBILITY_VISUALS,
+  type EffectiveAccessibilityTier,
+} from "@/lib/treeAccessibility";
+import AccessibilityStrip from "@/components/AccessibilityStrip";
 
 const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
 const TreeCheckinStatusLight = lazy(() => import("@/components/TreeCheckinStatusLight"));
@@ -49,6 +54,10 @@ interface TreePageHeroProps {
   checkinLight?: CheckinLight;
   /** Pre-resolved species data from parent */
   speciesResolution?: SpeciesResolution | null;
+  /** Effective accessibility tier (after grant resolution). */
+  accessibilityTier?: EffectiveAccessibilityTier;
+  /** Optional notes (opening hours, who to ask…) */
+  accessibilityNotes?: string | null;
 }
 
 const TreePageHero = ({
@@ -69,6 +78,8 @@ const TreePageHero = ({
   graceLabel,
   checkinLight,
   speciesResolution,
+  accessibilityTier = "public",
+  accessibilityNotes,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -100,6 +111,8 @@ const TreePageHero = ({
 
   const hive = speciesResolution?.hive ?? getHiveForSpecies(tree.species);
   const location = [tree.state, tree.nation].filter(Boolean).join(", ");
+  const accessVisual = ACCESSIBILITY_VISUALS[accessibilityTier];
+  const isGoldFrame = accessibilityTier === "granted";
 
   return (
     <>
@@ -109,6 +122,12 @@ const TreePageHero = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       className="relative -mx-4 md:-mx-8 mb-6 md:mb-10 overflow-hidden rounded-b-2xl max-h-[36vh] md:max-h-[min(50vh,400px)]"
+      style={{
+        boxShadow: isGoldFrame
+          ? `inset 0 0 0 4px ${accessVisual.border}, 0 0 22px ${accessVisual.glow}`
+          : `inset 0 0 0 3px ${accessVisual.border}, 0 0 14px ${accessVisual.glow}`,
+      }}
+      data-accessibility-tier={accessibilityTier}
     >
       {/* Background with parallax */}
       <div
@@ -190,6 +209,15 @@ const TreePageHero = ({
             >
               {tree.name}
             </h1>
+          </div>
+
+          {/* Accessibility strip — how can wanderers reach this tree? */}
+          <div className="flex justify-center mb-3">
+            <AccessibilityStrip
+              tier={accessibilityTier}
+              notes={accessibilityNotes}
+              className="max-w-md"
+            />
           </div>
 
           {/* Subtitle / Archetype */}

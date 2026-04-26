@@ -47,6 +47,9 @@ export interface TreeCardData {
   created_at?: string;
   created_by?: string | null;
   project_name?: string | null;
+  /** How wanderers can reach this tree. Defaults to public if absent. */
+  accessibility_tier?: "public" | "visible" | "garden" | "private" | null;
+  access_notes?: string | null;
   /** Present only for research/seed trees */
   research?: ResearchMeta;
 }

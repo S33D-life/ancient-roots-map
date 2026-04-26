@@ -120,6 +120,9 @@ import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { useTreeEditPermission } from "@/hooks/use-tree-edit-permission";
 import TabErrorBoundary from "@/components/TabErrorBoundary";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
+import { useTreeAccessibility } from "@/hooks/use-tree-accessibility";
+import { canCheckIn, ACCESSIBILITY_VISUALS } from "@/lib/treeAccessibility";
+import { useToast } from "@/hooks/use-toast";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -274,6 +277,45 @@ const TreeDetailPage = () => {
     gateStatus: proximityGate.status,
     graceMs: proximityGate.graceMs,
   });
+
+  // ── Accessibility frame: where this tree sits on the public/private spectrum
+  const accessibility = useTreeAccessibility({
+    treeId: id,
+    tier: (tree as any)?.accessibility_tier ?? "public",
+    userId,
+  });
+  const { toast: accessibilityToast } = useToast();
+
+  // Brief haptic when the page opens on a closed (red) tree.
+  // Communicates "this is closed to you" physically, not just visually.
+  useEffect(() => {
+    if (!tree || accessibility.loading) return;
+    if (accessibility.tier === "private") {
+      try {
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          navigator.vibrate(40);
+        }
+      } catch { /* haptics optional */ }
+    }
+  }, [tree, accessibility.tier, accessibility.loading]);
+
+  /**
+   * Attempt to open the check-in flow. Trees on private land (red frame
+   * with no access grant) are gently blocked with a warm message + haptic.
+   */
+  const tryOpenCheckin = () => {
+    if (!canCheckIn(accessibility.tier)) {
+      try { navigator.vibrate?.(40); } catch { /* */ }
+      accessibilityToast({
+        title: "This tree rests on private land",
+        description:
+          "Ask the landowner for permission, or request access through the tree's keeper.",
+      });
+      return;
+    }
+    setCanopyCheckinOpen(true);
+  };
+
 
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
@@ -683,6 +725,8 @@ const TreeDetailPage = () => {
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
           speciesResolution={speciesResolution}
+          accessibilityTier={accessibility.tier}
+          accessibilityNotes={(tree as any)?.access_notes ?? null}
           presenceLocked={!proximityGate.isUnlocked && proximityGate.status !== "checking"}
           graceLabel={proximityGate.graceLabel}
           checkinLight={checkinStatus.light}
@@ -745,7 +789,7 @@ const TreeDetailPage = () => {
               proximityGate={proximityGate}
               meetingStatus={meetingStatus}
               relationship={relationship}
-              onCheckin={() => setCanopyCheckinOpen(true)}
+              onCheckin={tryOpenCheckin}
               onMakeOffering={openOfferingGateway}
             />
           </Suspense>
@@ -760,7 +804,7 @@ const TreeDetailPage = () => {
                 proximityGate={proximityGate}
                 meetingStatus={meetingStatus}
                 checkinStats={checkinStats}
-                onCheckin={() => setCanopyCheckinOpen(true)}
+                onCheckin={tryOpenCheckin}
                 treePresence={treeDetailPresence}
                 availableWhispers={availableWhispers}
                 hasHearts={false}
@@ -1048,7 +1092,7 @@ const TreeDetailPage = () => {
                   userId={userId}
                   isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  onCheckIn={() => setCanopyCheckinOpen(true)}
+                  onCheckIn={tryOpenCheckin}
                   onWhisperCollected={() => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }}
@@ -1110,7 +1154,7 @@ const TreeDetailPage = () => {
               checkins={checkins}
               stats={checkinStats}
               loading={checkinsLoading}
-              onCheckin={() => setCanopyCheckinOpen(true)}
+              onCheckin={tryOpenCheckin}
               userId={userId}
               onRefresh={refetchCheckins}
             />

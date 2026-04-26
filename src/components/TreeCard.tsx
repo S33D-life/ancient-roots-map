@@ -12,6 +12,8 @@ import TreeWhisperButton from "@/components/TreeWhisperButton";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import QuickSeedButton from "@/components/QuickSeedButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import AccessibilityFrame from "@/components/AccessibilityFrame";
+import { useTreeAccessibility } from "@/hooks/use-tree-accessibility";
 
 export type TreeCardVariant = "gallery" | "compact";
 
@@ -102,6 +104,11 @@ const TreeCard = ({
   const hive = resolution?.hive ?? null;
   const speciesDisplayName = resolution?.displayName || tree.species;
   const scientificName = resolution?.scientificName;
+  const { tier: accessTier } = useTreeAccessibility({
+    treeId: tree.id,
+    tier: tree.accessibility_tier ?? "public",
+    userId: currentUserId,
+  });
 
   const isClustered = cluster?.isClustered ?? false;
   const encounterCount = cluster?.encounters?.length ?? 0;
@@ -154,8 +161,9 @@ const TreeCard = ({
   if (variant === "compact") {
     return (
       <>
+      <AccessibilityFrame tier={accessTier} size="card" rounded="rounded-lg">
       <Card
-        className="border-border/40 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+        className="border-transparent hover:border-primary/30 transition-all duration-300 cursor-pointer group bg-card"
         onClick={handleClick}
       >
         <div className="flex gap-3 p-3 relative">
@@ -224,6 +232,7 @@ const TreeCard = ({
           </div>
         </div>
       </Card>
+      </AccessibilityFrame>
       <SendWhisperModal
         open={whisperOpen}
         onOpenChange={setWhisperOpen}
@@ -239,7 +248,8 @@ const TreeCard = ({
   /* ── Gallery variant (full card) ── */
   return (
     <>
-    <Card className="border-border/40 hover:border-primary/25 transition-all duration-400 relative group">
+    <AccessibilityFrame tier={accessTier} size="card" rounded="rounded-xl">
+    <Card className="border-transparent hover:border-primary/25 transition-all duration-400 relative group bg-card overflow-hidden">
       {/* Hero image */}
       {heroPhotoUrl && (
         <div className="relative w-full h-36 overflow-hidden rounded-t-lg">
@@ -411,6 +421,7 @@ const TreeCard = ({
         </div>
       </CardContent>
     </Card>
+    </AccessibilityFrame>
     <SendWhisperModal
       open={whisperOpen}
       onOpenChange={setWhisperOpen}
