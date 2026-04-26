@@ -69,6 +69,7 @@ interface UseTreeProximityGateOptions {
 export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTreeProximityGateOptions) {
   const [status, setStatus] = useState<GateStatus>("checking");
   const [graceMs, setGraceMs] = useState(0);
+  const [distanceMeters, setDistanceMeters] = useState<number | null>(null);
 
   const checkProximity = useCallback(async () => {
     if (!treeId) { setStatus("locked"); return; }
@@ -112,6 +113,7 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
       );
 
       const dist = haversine(pos.coords.latitude, pos.coords.longitude, treeLat, treeLng);
+      setDistanceMeters(dist);
       if (dist <= CHECKIN_RADIUS_M) {
         saveVisit(treeId);
         setGraceMs(GRACE_MS);
