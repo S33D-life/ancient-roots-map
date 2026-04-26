@@ -924,7 +924,6 @@ function TreePickerDialog({
   trees,
   selectedId,
   title,
-  description,
   onSelect,
 }: {
   open: boolean;
@@ -932,7 +931,6 @@ function TreePickerDialog({
   trees: TreeOption[];
   selectedId: string | null;
   title: string;
-  description: string;
   onSelect: (t: TreeOption) => void;
 }) {
   return (
@@ -940,7 +938,6 @@ function TreePickerDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={title}
-      description={description}
       contentClassName="max-w-md p-0 overflow-hidden border-border/40"
     >
       <Command className="bg-transparent">
