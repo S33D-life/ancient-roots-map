@@ -211,6 +211,15 @@ const TreePageHero = ({
             </h1>
           </div>
 
+          {/* Accessibility strip — how can wanderers reach this tree? */}
+          <div className="flex justify-center mb-3">
+            <AccessibilityStrip
+              tier={accessibilityTier}
+              notes={accessibilityNotes}
+              className="max-w-md"
+            />
+          </div>
+
           {/* Subtitle / Archetype */}
           {(tree as any).archetype && (
             <p className="text-sm md:text-base font-serif text-primary/70 tracking-widest uppercase mb-4">
