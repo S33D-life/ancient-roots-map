@@ -78,6 +78,27 @@ export async function getHeartLedger(
 }
 
 // ── Earn ───────────────────────────────────────────────────
+/**
+ * HOTFIX (heart ledger discovery report, Task 4):
+ * earnHearts now ALWAYS dual-writes — heart_ledger (rich)
+ * AND heart_transactions (legacy, drives user_heart_balances).
+ *
+ * Without the heart_transactions mirror, the balance trigger
+ * never fires and credits are invisible in the UI. Pass
+ * `skipLegacyMirror: true` only for ledger-only state changes
+ * (e.g. status='pending' purchase intents that aren't real credit).
+ *
+ * Note: heart_ledger uses 'earn_*' transaction_type vocabulary;
+ * heart_transactions uses bare strings. We strip the 'earn_'
+ * prefix when mirroring so existing readers and the daily-cap /
+ * lottery-ticket filters keep working.
+ */
+function legacyHeartTypeFor(txnType: HeartTransactionType): string {
+  if (txnType.startsWith("earn_")) return txnType.slice(5);
+  if (txnType.startsWith("spend_")) return txnType; // keep spend_ prefix
+  return txnType;
+}
+
 export async function earnHearts(params: {
   userId: string;
   amount: number;
@@ -87,6 +108,8 @@ export async function earnHearts(params: {
   entityId?: string;
   source?: string;
   metadata?: Record<string, unknown>;
+  /** Opt-out of the heart_transactions mirror (e.g. pending purchases). */
+  skipLegacyMirror?: boolean;
 }): Promise<HeartLedgerEntry | null> {
   const key = idempotencyKey(params.userId, params.transactionType, params.entityId);
   if (_inflight.has(key)) return null;
@@ -112,11 +135,30 @@ export async function earnHearts(params: {
       .single();
 
     if (error) {
-      // Idempotency conflict → already processed
+      // Idempotency conflict → already processed (skip mirror too).
       if (error.code === "23505") return null;
       console.warn("[heartService.earnHearts]", error.message);
       return null;
     }
+
+    // Mirror to heart_transactions so update_heart_balance_on_insert fires.
+    // Currency must be S33D (heart_transactions only tracks S33D); other currencies
+    // (SPECIES / INFLUENCE) flow through their own dedicated tables/triggers.
+    const isS33D = (params.currencyType || "S33D") === "S33D";
+    if (!params.skipLegacyMirror && isS33D) {
+      const treeId = params.entityType === "tree" ? params.entityId ?? null : null;
+      const { error: mirrorErr } = await supabase.from("heart_transactions").insert({
+        user_id: params.userId,
+        tree_id: treeId,
+        heart_type: legacyHeartTypeFor(params.transactionType),
+        amount: Math.abs(params.amount),
+      });
+      if (mirrorErr) {
+        // Non-fatal: ledger entry already recorded. Surface for diagnostics.
+        console.warn("[heartService.earnHearts] legacy mirror failed:", mirrorErr.message);
+      }
+    }
+
     return data as unknown as HeartLedgerEntry;
   } finally {
     _inflight.delete(key);
