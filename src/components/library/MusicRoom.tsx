@@ -20,14 +20,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink, Library } from "lucide-react";
+import { Music, Radio, TreeDeciduous, Globe2, Search, X, ArrowRight, ExternalLink, Library, Leaf, Users, Heart, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import MusicRoomTreeRadio from "@/components/library/MusicRoomTreeRadio";
+import SpeciesOfferingFilter from "@/components/SpeciesOfferingFilter";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type Scope = "tree" | "species" | "forest";
+
+/** Library "who" scope — maps to visibility + creator. */
+type LibraryScope = "personal" | "family" | "tribe" | "collective";
+
+interface TreeOption { id: string; name: string; species: string }
 
 interface SongRow {
   id: string;
@@ -177,7 +191,21 @@ const MusicRoom = () => {
   const treeParam = params.get("tree");
   const { userId } = useCurrentUser();
 
+  // Radio scope (tuning the hearth-fire)
   const [scope, setScope] = useState<Scope>(treeParam ? "tree" : "forest");
+  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(treeParam);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+
+  // Picker dialogs (radio tabs)
+  const [treePickerOpen, setTreePickerOpen] = useState(false);
+  const [speciesPickerOpen, setSpeciesPickerOpen] = useState(false);
+
+  // Library filters (independent surrounding shelves)
+  const [libraryScope, setLibraryScope] = useState<LibraryScope>("collective");
+  const [librarySpecies, setLibrarySpecies] = useState<string>("all");
+  const [libraryTreeId, setLibraryTreeId] = useState<string | null>(null);
+  const [libraryTreePickerOpen, setLibraryTreePickerOpen] = useState(false);
+
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [contextTree, setContextTree] = useState<{ id: string; name: string; species: string } | null>(null);
@@ -191,7 +219,7 @@ const MusicRoom = () => {
       setLoading(true);
       const { data: offData } = await supabase
         .from("offerings")
-        .select("id, title, content, thumbnail_url, youtube_video_id, youtube_embed_url, tree_id, created_by, created_at")
+        .select("id, title, content, thumbnail_url, youtube_video_id, youtube_embed_url, tree_id, created_by, created_at, visibility")
         .eq("type", "song")
         .order("created_at", { ascending: false });
 
@@ -231,7 +259,11 @@ const MusicRoom = () => {
 
       if (treeParam) {
         const t = treeMap.get(treeParam);
-        if (t) setContextTree({ id: t.id, name: t.name, species: t.species });
+        if (t) {
+          setContextTree({ id: t.id, name: t.name, species: t.species });
+          setSelectedTreeId(t.id);
+          setSelectedSpecies(t.species || null);
+        }
       }
       setLoading(false);
     };
@@ -240,43 +272,110 @@ const MusicRoom = () => {
     return () => { cancelled = true; };
   }, [treeParam]);
 
-  /* ── Apply scope filter ── */
-  const scoped = useMemo(() => {
-    if (!treeParam || !contextTree) return songs;
-    if (scope === "tree") return songs.filter((s) => s.tree_id === contextTree.id);
-    if (scope === "species")
-      return songs.filter(
-        (s) => s.tree_species && s.tree_species.toLowerCase() === contextTree.species.toLowerCase()
-      );
-    return songs;
-  }, [scope, songs, contextTree, treeParam]);
+  /* ── Available trees + species (derived from loaded songs) ── */
+  const availableTrees: TreeOption[] = useMemo(() => {
+    const seen = new Map<string, TreeOption>();
+    for (const s of songs) {
+      if (!seen.has(s.tree_id)) {
+        seen.set(s.tree_id, { id: s.tree_id, name: s.tree_name, species: s.tree_species });
+      }
+    }
+    return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [songs]);
 
-  /* ── Apply search ── */
-  const filtered = useMemo(() => {
+  const availableSpeciesStrings = useMemo(
+    () => songs.map((s) => s.tree_species).filter(Boolean) as string[],
+    [songs],
+  );
+
+  /* ── Resolve currently-selected tree / species (for radio + labels) ── */
+  const selectedTree = useMemo(
+    () => availableTrees.find((t) => t.id === selectedTreeId) || null,
+    [availableTrees, selectedTreeId],
+  );
+
+  /* ── Apply RADIO scope filter (powers Tree Radio playlist) ── */
+  const scoped = useMemo(() => {
+    if (scope === "tree" && selectedTreeId) {
+      return songs.filter((s) => s.tree_id === selectedTreeId);
+    }
+    if (scope === "species" && selectedSpecies) {
+      const sp = selectedSpecies.toLowerCase();
+      return songs.filter((s) => s.tree_species && s.tree_species.toLowerCase() === sp);
+    }
+    return songs;
+  }, [scope, songs, selectedTreeId, selectedSpecies]);
+
+  /* ── LIBRARY filter pipeline (scope + species + tree + search) ── */
+  const libraryFiltered = useMemo(() => {
+    let list = songs;
+
+    // Scope ("who" filter) — Personal / Family / Tribe / Collective
+    if (libraryScope === "personal") {
+      list = userId ? list.filter((s) => s.created_by === userId) : [];
+    } else if (libraryScope === "family") {
+      list = list.filter((s: any) => s.visibility === "circle" || s.visibility === "private");
+    } else if (libraryScope === "tribe") {
+      list = list.filter((s: any) => s.visibility === "tribe");
+    } // collective = no filter
+
+    // Species
+    if (librarySpecies !== "all") {
+      list = list.filter((s) => (s.tree_species || "Unknown") === librarySpecies);
+    }
+
+    // Specific tree
+    if (libraryTreeId) {
+      list = list.filter((s) => s.tree_id === libraryTreeId);
+    }
+
+    // Free-text search
     const q = search.trim().toLowerCase();
-    if (!q) return scoped;
-    return scoped.filter((s) =>
-      [s.title, s.artist, s.tree_name, s.offered_by]
-        .filter(Boolean)
-        .some((field) => (field as string).toLowerCase().includes(q))
-    );
-  }, [scoped, search]);
+    if (q) {
+      list = list.filter((s) =>
+        [s.title, s.artist, s.tree_name, s.offered_by]
+          .filter(Boolean)
+          .some((field) => (field as string).toLowerCase().includes(q)),
+      );
+    }
+    return list;
+  }, [songs, libraryScope, librarySpecies, libraryTreeId, search, userId]);
 
   /* ── Forest view: prioritise context tree's offerings first ── */
   const ordered = useMemo(() => {
-    if (!contextTree || scope !== "forest") return filtered;
+    if (!contextTree) return libraryFiltered;
     const here: SongRow[] = [];
     const elsewhere: SongRow[] = [];
-    for (const s of filtered) (s.tree_id === contextTree.id ? here : elsewhere).push(s);
+    for (const s of libraryFiltered) (s.tree_id === contextTree.id ? here : elsewhere).push(s);
     return [...here, ...elsewhere];
-  }, [filtered, contextTree, scope]);
+  }, [libraryFiltered, contextTree]);
+
+  const libraryTree = useMemo(
+    () => availableTrees.find((t) => t.id === libraryTreeId) || null,
+    [availableTrees, libraryTreeId],
+  );
 
   const clearTreeContext = () => {
     const next = new URLSearchParams(params);
     next.delete("tree");
     setParams(next, { replace: true });
     setContextTree(null);
+    setSelectedTreeId(null);
+    setSelectedSpecies(null);
     setScope("forest");
+  };
+
+  /* ── Tab handlers (open picker on tab activation) ── */
+  const handleScopeTab = (next: Scope) => {
+    if (next === "tree") {
+      setScope("tree");
+      if (!selectedTreeId) setTreePickerOpen(true);
+    } else if (next === "species") {
+      setScope("species");
+      if (!selectedSpecies) setSpeciesPickerOpen(true);
+    } else {
+      setScope("forest");
+    }
   };
 
   return (
@@ -313,13 +412,15 @@ const MusicRoom = () => {
 
       {/* ── Tree Radio — the hearth ── */}
       <MusicRoomTreeRadio
-        scopedSongs={ordered}
+        scopedSongs={scoped}
         anchorTree={contextTree}
         scopeLabel={scope}
+        selectedTreeName={selectedTree?.name ?? null}
+        selectedSpecies={selectedSpecies}
         onOpenSong={(s) => setActiveSong(s)}
       />
 
-      {/* ── Shared tuning interface (Tree Radio + Library both respond) ── */}
+      {/* ── Radio tuning tabs (each tab = its own station frequency) ── */}
       <div className="space-y-3">
         <div className="flex justify-center">
           <div
@@ -329,9 +430,9 @@ const MusicRoom = () => {
             aria-label="Tune by Tree, Species, or Forest"
           >
             {([
-              { key: "tree", label: "Tree", icon: TreeDeciduous, disabled: !contextTree },
-              { key: "species", label: "Species", icon: Radio, disabled: !contextTree },
-              { key: "forest", label: "Forest", icon: Globe2, disabled: false },
+              { key: "tree", label: "Tree", icon: TreeDeciduous },
+              { key: "species", label: "Species", icon: Leaf },
+              { key: "forest", label: "Forest", icon: Globe2 },
             ] as const).map((opt) => {
               const Icon = opt.icon;
               const active = scope === opt.key;
@@ -340,9 +441,8 @@ const MusicRoom = () => {
                   key={opt.key}
                   role="tab"
                   aria-selected={active}
-                  disabled={opt.disabled}
-                  onClick={() => !opt.disabled && setScope(opt.key)}
-                  className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  onClick={() => handleScopeTab(opt.key)}
+                  className="relative px-4 py-1.5 rounded-full text-xs font-serif tracking-wide transition-colors"
                   style={{
                     color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
                   }}
@@ -365,11 +465,108 @@ const MusicRoom = () => {
           </div>
         </div>
 
-        {!contextTree && (
-          <p className="text-center text-[11px] font-serif italic text-muted-foreground/60">
-            Enter from a tree to filter by Tree or Species.
-          </p>
-        )}
+        {/* Active tuning hint — open picker to change selection */}
+        <div className="flex justify-center">
+          {scope === "tree" && (
+            <button
+              type="button"
+              onClick={() => setTreePickerOpen(true)}
+              className="text-[11px] font-serif italic text-muted-foreground/80 hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              {selectedTree
+                ? <>Tuned to <span className="text-primary/90 not-italic">{selectedTree.name}</span> · change tree</>
+                : "Choose a tree to tune into"}
+            </button>
+          )}
+          {scope === "species" && (
+            <button
+              type="button"
+              onClick={() => setSpeciesPickerOpen(true)}
+              className="text-[11px] font-serif italic text-muted-foreground/80 hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              {selectedSpecies
+                ? <>Tuned to <span className="text-primary/90 not-italic">{selectedSpecies}</span> kin · change species</>
+                : "Choose a species to tune into"}
+            </button>
+          )}
+          {scope === "forest" && (
+            <p className="text-[11px] font-serif italic text-muted-foreground/60">
+              All offerings, across the whole forest.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Library tuning row (scope · species · tree · search) ── */}
+      <div className="space-y-3 pt-4 border-t border-border/20">
+        {/* Scope pills — Personal · Family · Tribe · Collective */}
+        <div className="flex justify-center">
+          <div
+            className="inline-flex items-center gap-1 rounded-full border border-border/40 p-1 max-w-full overflow-x-auto"
+            style={{ background: "hsl(var(--card) / 0.4)" }}
+            role="tablist"
+            aria-label="Tune the library by scope"
+          >
+            {([
+              { key: "personal", label: "Personal", icon: Heart },
+              { key: "family", label: "Family", icon: Users },
+              { key: "tribe", label: "Tribe", icon: TreeDeciduous },
+              { key: "collective", label: "Collective", icon: Globe },
+            ] as const).map((opt) => {
+              const Icon = opt.icon;
+              const active = libraryScope === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setLibraryScope(opt.key)}
+                  className="relative px-3 py-1.5 rounded-full text-[11px] font-serif tracking-wide whitespace-nowrap transition-colors"
+                  style={{
+                    color: active ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="library-scope-pill"
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "hsl(var(--primary) / 0.75)" }}
+                      transition={{ type: "spring", stiffness: 280, damping: 28 }}
+                    />
+                  )}
+                  <span className="relative flex items-center gap-1.5">
+                    <Icon className="w-3 h-3" />
+                    {opt.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Species + Tree filter row */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <SpeciesOfferingFilter
+            speciesStrings={availableSpeciesStrings}
+            value={librarySpecies}
+            onChange={setLibrarySpecies}
+            className="w-44"
+          />
+          <button
+            type="button"
+            onClick={() => setLibraryTreePickerOpen(true)}
+            className="h-9 px-3 rounded-md text-[11px] font-serif border border-border/20 bg-card/30 text-muted-foreground hover:text-foreground hover:bg-card/50 transition-colors flex items-center gap-1.5"
+          >
+            <TreeDeciduous className="h-3 w-3 text-muted-foreground/50" />
+            {libraryTree ? <span className="truncate max-w-[140px]">{libraryTree.name}</span> : <span>All trees</span>}
+            {libraryTree && (
+              <X
+                className="h-3 w-3 ml-1 text-muted-foreground/50 hover:text-foreground"
+                onClick={(e) => { e.stopPropagation(); setLibraryTreeId(null); }}
+              />
+            )}
+          </button>
+        </div>
 
         {/* Search */}
         <div className="flex justify-center">
@@ -430,9 +627,11 @@ const MusicRoom = () => {
             <p className="font-serif italic text-sm text-muted-foreground">
               {search
                 ? "No record matches your search."
-                : scope === "tree"
-                ? "No songs have been offered here yet — be the first to leave one."
-                : scope === "species"
+                : libraryScope === "personal"
+                ? "You haven't offered any songs yet — leave the first."
+                : libraryTreeId
+                ? "No songs have been offered at this tree yet."
+                : librarySpecies !== "all"
                 ? "No kin of this species has been sung to yet."
                 : "The forest is quiet. Be the first to offer a song."}
             </p>
@@ -445,7 +644,7 @@ const MusicRoom = () => {
             variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
           >
             {ordered.map((s) => {
-              const isHere = !!(contextTree && s.tree_id === contextTree.id && scope === "forest");
+              const isHere = !!(contextTree && s.tree_id === contextTree.id);
               return (
                 <SongCard
                   key={s.id}
@@ -468,6 +667,49 @@ const MusicRoom = () => {
         onGoToTree={(id) => {
           setActiveSong(null);
           navigate(`/tree/${id}`);
+        }}
+      />
+
+      {/* ── Tree picker (Radio · Tree tab) ── */}
+      <TreePickerDialog
+        open={treePickerOpen}
+        onOpenChange={setTreePickerOpen}
+        trees={availableTrees}
+        selectedId={selectedTreeId}
+        title="Tune into a tree"
+
+        onSelect={(t) => {
+          setSelectedTreeId(t.id);
+          setSelectedSpecies(t.species || null);
+          setScope("tree");
+          setTreePickerOpen(false);
+        }}
+      />
+
+      {/* ── Species picker (Radio · Species tab) ── */}
+      <SpeciesPickerDialog
+        open={speciesPickerOpen}
+        onOpenChange={setSpeciesPickerOpen}
+        speciesStrings={availableSpeciesStrings}
+        selected={selectedSpecies}
+        onSelect={(sp) => {
+          setSelectedSpecies(sp);
+          setScope("species");
+          setSpeciesPickerOpen(false);
+        }}
+      />
+
+      {/* ── Library tree picker ── */}
+      <TreePickerDialog
+        open={libraryTreePickerOpen}
+        onOpenChange={setLibraryTreePickerOpen}
+        trees={availableTrees}
+        selectedId={libraryTreeId}
+        title="Filter library by tree"
+
+        onSelect={(t) => {
+          setLibraryTreeId(t.id);
+          setLibraryTreePickerOpen(false);
         }}
       />
     </div>
@@ -670,6 +912,128 @@ function SongDetail({
           </div>
         </div>
       )}
+    </ResponsiveDialog>
+  );
+}
+
+/* ── Picker dialogs ─────────────────────────────────────── */
+
+function TreePickerDialog({
+  open,
+  onOpenChange,
+  trees,
+  selectedId,
+  title,
+  onSelect,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  trees: TreeOption[];
+  selectedId: string | null;
+  title: string;
+  onSelect: (t: TreeOption) => void;
+}) {
+  return (
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      contentClassName="max-w-md p-0 overflow-hidden border-border/40"
+    >
+      <Command className="bg-transparent">
+        <CommandInput placeholder="Search trees…" className="font-serif text-sm" />
+        <CommandList className="max-h-[60vh]">
+          <CommandEmpty>
+            <span className="font-serif italic text-xs text-muted-foreground">
+              No tree matches that search.
+            </span>
+          </CommandEmpty>
+          <CommandGroup>
+            {trees.map((t) => (
+              <CommandItem
+                key={t.id}
+                value={`${t.name} ${t.species}`}
+                onSelect={() => onSelect(t)}
+                className="font-serif"
+              >
+                <TreeDeciduous className="w-3.5 h-3.5 mr-2 text-muted-foreground/60" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground/90 truncate">{t.name}</p>
+                  {t.species && (
+                    <p className="text-[10px] italic text-muted-foreground/70 truncate">{t.species}</p>
+                  )}
+                </div>
+                {selectedId === t.id && (
+                  <span className="text-[10px] uppercase tracking-wider text-primary/80">tuned</span>
+                )}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsiveDialog>
+  );
+}
+
+function SpeciesPickerDialog({
+  open,
+  onOpenChange,
+  speciesStrings,
+  selected,
+  onSelect,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  speciesStrings: string[];
+  selected: string | null;
+  onSelect: (sp: string) => void;
+}) {
+  const counts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const s of speciesStrings) {
+      const k = s || "Unknown";
+      m.set(k, (m.get(k) || 0) + 1);
+    }
+    return Array.from(m.entries()).sort((a, b) => b[1] - a[1]);
+  }, [speciesStrings]);
+
+  return (
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Tune into a species"
+      
+      contentClassName="max-w-md p-0 overflow-hidden border-border/40"
+    >
+      <Command className="bg-transparent">
+        <CommandInput placeholder="Search species…" className="font-serif text-sm" />
+        <CommandList className="max-h-[60vh]">
+          <CommandEmpty>
+            <span className="font-serif italic text-xs text-muted-foreground">
+              No species matches that search.
+            </span>
+          </CommandEmpty>
+          <CommandGroup>
+            {counts.map(([sp, count]) => (
+              <CommandItem
+                key={sp}
+                value={sp}
+                onSelect={() => onSelect(sp)}
+                className="font-serif"
+              >
+                <Leaf className="w-3.5 h-3.5 mr-2 text-muted-foreground/60" />
+                <span className="flex-1 truncate text-sm text-foreground/90">{sp}</span>
+                <span className="text-[10px] italic text-muted-foreground/60 ml-2">
+                  {count} {count === 1 ? "song" : "songs"}
+                </span>
+                {selected === sp && (
+                  <span className="text-[10px] uppercase tracking-wider text-primary/80 ml-2">tuned</span>
+                )}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
     </ResponsiveDialog>
   );
 }

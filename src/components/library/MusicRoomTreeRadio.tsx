@@ -54,6 +54,10 @@ interface Props<T extends RadioSong> {
   anchorTree: { id: string; name: string; species: string } | null;
   /** Current scope (for the small status label) */
   scopeLabel: "tree" | "species" | "forest";
+  /** Currently-tuned tree name (for direct selection in Tree mode) */
+  selectedTreeName?: string | null;
+  /** Currently-tuned species (for direct selection in Species mode) */
+  selectedSpecies?: string | null;
   /** Open the song in the room's detail panel */
   onOpenSong: (song: T) => void;
 }
@@ -87,6 +91,8 @@ function MusicRoomTreeRadio<T extends RadioSong>({
   scopedSongs,
   anchorTree,
   scopeLabel,
+  selectedTreeName,
+  selectedSpecies,
   onOpenSong,
 }: Props<T>) {
   /** Broadcast playlist: anchor-tree songs first when in forest mode, else as-given. */
@@ -179,13 +185,11 @@ function MusicRoomTreeRadio<T extends RadioSong>({
   };
 
   const stationLabel =
-    scopeLabel === "tree" && anchorTree
-      ? anchorTree.name
-      : scopeLabel === "species" && anchorTree
-        ? `${anchorTree.species} kin`
-        : anchorTree
-          ? "The wider forest"
-          : "The whole forest";
+    scopeLabel === "tree"
+      ? (selectedTreeName ?? anchorTree?.name ?? "Choose a tree")
+      : scopeLabel === "species"
+        ? `${selectedSpecies ?? anchorTree?.species ?? "—"} kin · across the forest`
+        : "The whole forest";
 
   /* ── Empty state ── */
   if (playlist.length === 0) {
