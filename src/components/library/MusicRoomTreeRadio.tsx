@@ -54,6 +54,10 @@ interface Props<T extends RadioSong> {
   anchorTree: { id: string; name: string; species: string } | null;
   /** Current scope (for the small status label) */
   scopeLabel: "tree" | "species" | "forest";
+  /** Currently-tuned tree name (for direct selection in Tree mode) */
+  selectedTreeName?: string | null;
+  /** Currently-tuned species (for direct selection in Species mode) */
+  selectedSpecies?: string | null;
   /** Open the song in the room's detail panel */
   onOpenSong: (song: T) => void;
 }

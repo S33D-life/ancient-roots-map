@@ -677,7 +677,7 @@ const MusicRoom = () => {
         trees={availableTrees}
         selectedId={selectedTreeId}
         title="Tune into a tree"
-        description="Each tree carries its own offerings."
+
         onSelect={(t) => {
           setSelectedTreeId(t.id);
           setSelectedSpecies(t.species || null);
@@ -706,7 +706,7 @@ const MusicRoom = () => {
         trees={availableTrees}
         selectedId={libraryTreeId}
         title="Filter library by tree"
-        description="See only the records offered at a specific tree."
+
         onSelect={(t) => {
           setLibraryTreeId(t.id);
           setLibraryTreePickerOpen(false);
