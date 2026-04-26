@@ -644,7 +644,7 @@ const MusicRoom = () => {
             variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
           >
             {ordered.map((s) => {
-              const isHere = !!(contextTree && s.tree_id === contextTree.id && scope === "forest");
+              const isHere = !!(contextTree && s.tree_id === contextTree.id);
               return (
                 <SongCard
                   key={s.id}
