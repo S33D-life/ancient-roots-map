@@ -191,7 +191,21 @@ const MusicRoom = () => {
   const treeParam = params.get("tree");
   const { userId } = useCurrentUser();
 
+  // Radio scope (tuning the hearth-fire)
   const [scope, setScope] = useState<Scope>(treeParam ? "tree" : "forest");
+  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(treeParam);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+
+  // Picker dialogs (radio tabs)
+  const [treePickerOpen, setTreePickerOpen] = useState(false);
+  const [speciesPickerOpen, setSpeciesPickerOpen] = useState(false);
+
+  // Library filters (independent surrounding shelves)
+  const [libraryScope, setLibraryScope] = useState<LibraryScope>("collective");
+  const [librarySpecies, setLibrarySpecies] = useState<string>("all");
+  const [libraryTreeId, setLibraryTreeId] = useState<string | null>(null);
+  const [libraryTreePickerOpen, setLibraryTreePickerOpen] = useState(false);
+
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [contextTree, setContextTree] = useState<{ id: string; name: string; species: string } | null>(null);
@@ -205,7 +219,7 @@ const MusicRoom = () => {
       setLoading(true);
       const { data: offData } = await supabase
         .from("offerings")
-        .select("id, title, content, thumbnail_url, youtube_video_id, youtube_embed_url, tree_id, created_by, created_at")
+        .select("id, title, content, thumbnail_url, youtube_video_id, youtube_embed_url, tree_id, created_by, created_at, visibility")
         .eq("type", "song")
         .order("created_at", { ascending: false });
 
@@ -245,7 +259,11 @@ const MusicRoom = () => {
 
       if (treeParam) {
         const t = treeMap.get(treeParam);
-        if (t) setContextTree({ id: t.id, name: t.name, species: t.species });
+        if (t) {
+          setContextTree({ id: t.id, name: t.name, species: t.species });
+          setSelectedTreeId(t.id);
+          setSelectedSpecies(t.species || null);
+        }
       }
       setLoading(false);
     };
@@ -254,43 +272,110 @@ const MusicRoom = () => {
     return () => { cancelled = true; };
   }, [treeParam]);
 
-  /* ── Apply scope filter ── */
-  const scoped = useMemo(() => {
-    if (!treeParam || !contextTree) return songs;
-    if (scope === "tree") return songs.filter((s) => s.tree_id === contextTree.id);
-    if (scope === "species")
-      return songs.filter(
-        (s) => s.tree_species && s.tree_species.toLowerCase() === contextTree.species.toLowerCase()
-      );
-    return songs;
-  }, [scope, songs, contextTree, treeParam]);
+  /* ── Available trees + species (derived from loaded songs) ── */
+  const availableTrees: TreeOption[] = useMemo(() => {
+    const seen = new Map<string, TreeOption>();
+    for (const s of songs) {
+      if (!seen.has(s.tree_id)) {
+        seen.set(s.tree_id, { id: s.tree_id, name: s.tree_name, species: s.tree_species });
+      }
+    }
+    return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [songs]);
 
-  /* ── Apply search ── */
-  const filtered = useMemo(() => {
+  const availableSpeciesStrings = useMemo(
+    () => songs.map((s) => s.tree_species).filter(Boolean) as string[],
+    [songs],
+  );
+
+  /* ── Resolve currently-selected tree / species (for radio + labels) ── */
+  const selectedTree = useMemo(
+    () => availableTrees.find((t) => t.id === selectedTreeId) || null,
+    [availableTrees, selectedTreeId],
+  );
+
+  /* ── Apply RADIO scope filter (powers Tree Radio playlist) ── */
+  const scoped = useMemo(() => {
+    if (scope === "tree" && selectedTreeId) {
+      return songs.filter((s) => s.tree_id === selectedTreeId);
+    }
+    if (scope === "species" && selectedSpecies) {
+      const sp = selectedSpecies.toLowerCase();
+      return songs.filter((s) => s.tree_species && s.tree_species.toLowerCase() === sp);
+    }
+    return songs;
+  }, [scope, songs, selectedTreeId, selectedSpecies]);
+
+  /* ── LIBRARY filter pipeline (scope + species + tree + search) ── */
+  const libraryFiltered = useMemo(() => {
+    let list = songs;
+
+    // Scope ("who" filter) — Personal / Family / Tribe / Collective
+    if (libraryScope === "personal") {
+      list = userId ? list.filter((s) => s.created_by === userId) : [];
+    } else if (libraryScope === "family") {
+      list = list.filter((s: any) => s.visibility === "circle" || s.visibility === "private");
+    } else if (libraryScope === "tribe") {
+      list = list.filter((s: any) => s.visibility === "tribe");
+    } // collective = no filter
+
+    // Species
+    if (librarySpecies !== "all") {
+      list = list.filter((s) => (s.tree_species || "Unknown") === librarySpecies);
+    }
+
+    // Specific tree
+    if (libraryTreeId) {
+      list = list.filter((s) => s.tree_id === libraryTreeId);
+    }
+
+    // Free-text search
     const q = search.trim().toLowerCase();
-    if (!q) return scoped;
-    return scoped.filter((s) =>
-      [s.title, s.artist, s.tree_name, s.offered_by]
-        .filter(Boolean)
-        .some((field) => (field as string).toLowerCase().includes(q))
-    );
-  }, [scoped, search]);
+    if (q) {
+      list = list.filter((s) =>
+        [s.title, s.artist, s.tree_name, s.offered_by]
+          .filter(Boolean)
+          .some((field) => (field as string).toLowerCase().includes(q)),
+      );
+    }
+    return list;
+  }, [songs, libraryScope, librarySpecies, libraryTreeId, search, userId]);
 
   /* ── Forest view: prioritise context tree's offerings first ── */
   const ordered = useMemo(() => {
-    if (!contextTree || scope !== "forest") return filtered;
+    if (!contextTree) return libraryFiltered;
     const here: SongRow[] = [];
     const elsewhere: SongRow[] = [];
-    for (const s of filtered) (s.tree_id === contextTree.id ? here : elsewhere).push(s);
+    for (const s of libraryFiltered) (s.tree_id === contextTree.id ? here : elsewhere).push(s);
     return [...here, ...elsewhere];
-  }, [filtered, contextTree, scope]);
+  }, [libraryFiltered, contextTree]);
+
+  const libraryTree = useMemo(
+    () => availableTrees.find((t) => t.id === libraryTreeId) || null,
+    [availableTrees, libraryTreeId],
+  );
 
   const clearTreeContext = () => {
     const next = new URLSearchParams(params);
     next.delete("tree");
     setParams(next, { replace: true });
     setContextTree(null);
+    setSelectedTreeId(null);
+    setSelectedSpecies(null);
     setScope("forest");
+  };
+
+  /* ── Tab handlers (open picker on tab activation) ── */
+  const handleScopeTab = (next: Scope) => {
+    if (next === "tree") {
+      setScope("tree");
+      if (!selectedTreeId) setTreePickerOpen(true);
+    } else if (next === "species") {
+      setScope("species");
+      if (!selectedSpecies) setSpeciesPickerOpen(true);
+    } else {
+      setScope("forest");
+    }
   };
 
   return (
