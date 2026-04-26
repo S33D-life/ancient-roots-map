@@ -28,9 +28,9 @@ const LotteryNextDrawHero = ({ draw }: Props) => {
   const phase = draw.draw_type;
   // Subtle glow color per phase
   const glow =
-    phase === "full_moon"
+    phase === "lunar_full"
       ? "hsl(48 60% 70%)"
-      : phase === "new_moon"
+      : phase === "lunar_new"
       ? "hsl(240 30% 35%)"
       : "hsl(200 40% 60%)";
 
