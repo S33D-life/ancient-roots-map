@@ -36,7 +36,18 @@ export default function PlantHeartsModal({
   const [amount, setAmount] = useState(3);
   const { balance } = useHeartEconomy(userId);
   const available = balance.s33d - balance.locked;
-  const hasExisting = existingAmount && existingAmount > 0;
+  const hasExisting = !!existingAmount && existingAmount > 0;
+
+  // Twin-moons yield hint — surfaces the 3.3% staking yield at the moment of decision.
+  const { data: lotteryStats } = useLotteryStats();
+  const yieldBps = lotteryStats?.nextDraw?.yield_bps ?? 330;
+  const yieldPct = (yieldBps / 100).toFixed(1);
+  const projected = hasExisting
+    ? Math.floor(((existingAmount as number) * yieldBps) / 10000)
+    : 0;
+  const countdown = useCountdown(lotteryStats?.nextDraw?.scheduled_at ?? null);
+  const emoji = drawEmoji(lotteryStats?.nextDraw?.draw_type);
+  const label = drawLabel(lotteryStats?.nextDraw?.draw_type);
 
   const handlePlant = async () => {
     if (amount < 1 || amount > available) return;
