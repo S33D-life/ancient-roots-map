@@ -3964,6 +3964,157 @@ export type Database = {
         }
         Relationships: []
       }
+      lottery_config: {
+        Row: {
+          id: number
+          lunar_prize_amount: number
+          lunar_prize_count: number
+          lunar_yield_bps: number
+          solar_prize_amount: number
+          solar_prize_count: number
+          solar_yield_bps: number
+          ticket_window_days: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          lunar_prize_amount?: number
+          lunar_prize_count?: number
+          lunar_yield_bps?: number
+          solar_prize_amount?: number
+          solar_prize_count?: number
+          solar_yield_bps?: number
+          ticket_window_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          lunar_prize_amount?: number
+          lunar_prize_count?: number
+          lunar_yield_bps?: number
+          solar_prize_amount?: number
+          solar_prize_count?: number
+          solar_yield_bps?: number
+          ticket_window_days?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      lottery_draws: {
+        Row: {
+          created_at: string
+          draw_type: string
+          entries_total: number
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          prize_pool_total: number
+          random_seed: string | null
+          scheduled_at: string
+          status: string
+          yield_paid_total: number
+        }
+        Insert: {
+          created_at?: string
+          draw_type: string
+          entries_total?: number
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          prize_pool_total?: number
+          random_seed?: string | null
+          scheduled_at: string
+          status?: string
+          yield_paid_total?: number
+        }
+        Update: {
+          created_at?: string
+          draw_type?: string
+          entries_total?: number
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          prize_pool_total?: number
+          random_seed?: string | null
+          scheduled_at?: string
+          status?: string
+          yield_paid_total?: number
+        }
+        Relationships: []
+      }
+      lottery_entries: {
+        Row: {
+          created_at: string
+          draw_id: string
+          id: string
+          ticket_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          draw_id: string
+          id?: string
+          ticket_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          draw_id?: string
+          id?: string
+          ticket_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lottery_entries_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "lottery_draws"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lottery_winners: {
+        Row: {
+          created_at: string
+          draw_id: string
+          id: string
+          ledger_entry_id: string | null
+          prize_amount: number
+          prize_rank: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          draw_id: string
+          id?: string
+          ledger_entry_id?: string | null
+          prize_amount: number
+          prize_rank: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          draw_id?: string
+          id?: string
+          ledger_entry_id?: string | null
+          prize_amount?: number
+          prize_rank?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lottery_winners_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "lottery_draws"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_funds_ledger: {
         Row: {
           amount: number
@@ -7091,6 +7242,44 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      staking_yield_payouts: {
+        Row: {
+          created_at: string
+          draw_id: string
+          id: string
+          ledger_entry_id: string | null
+          staked_amount: number
+          user_id: string
+          yield_amount: number
+        }
+        Insert: {
+          created_at?: string
+          draw_id: string
+          id?: string
+          ledger_entry_id?: string | null
+          staked_amount: number
+          user_id: string
+          yield_amount: number
+        }
+        Update: {
+          created_at?: string
+          draw_id?: string
+          id?: string
+          ledger_entry_id?: string | null
+          staked_amount?: number
+          user_id?: string
+          yield_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staking_yield_payouts_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "lottery_draws"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stewardship_actions: {
         Row: {
@@ -10729,6 +10918,7 @@ export type Database = {
         }
         Returns: Json
       }
+      execute_lottery_draw: { Args: { p_draw_id: string }; Returns: Json }
       get_bio_region_trees: {
         Args: { p_bio_region_id: string }
         Returns: {
@@ -10750,6 +10940,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_my_lottery_stats: { Args: { p_user_id?: string }; Returns: Json }
       get_offering_counts: {
         Args: never
         Returns: {
@@ -10957,6 +11148,10 @@ export type Database = {
       retract_influence_vote: {
         Args: { p_user_id: string; p_vote_id: string }
         Returns: undefined
+      }
+      schedule_lottery_draw: {
+        Args: { p_draw_type: string; p_scheduled_at: string }
+        Returns: string
       }
       search_books: {
         Args: { query: string; result_limit?: number }
