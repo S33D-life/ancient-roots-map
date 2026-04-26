@@ -725,6 +725,8 @@ const TreeDetailPage = () => {
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
           speciesResolution={speciesResolution}
+          accessibilityTier={accessibility.tier}
+          accessibilityNotes={(tree as any)?.access_notes ?? null}
           presenceLocked={!proximityGate.isUnlocked && proximityGate.status !== "checking"}
           graceLabel={proximityGate.graceLabel}
           checkinLight={checkinStatus.light}
