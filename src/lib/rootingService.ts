@@ -6,6 +6,7 @@
  * Planting uses an atomic DB function to prevent race conditions.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { earnHearts } from "@/lib/heartService";
 
 // ── Types ──────────────────────────────────────────────────
 export interface TreeRoot {
@@ -101,7 +102,7 @@ export async function plantHearts(params: {
       return null;
     }
 
-    const envelope = (Array.isArray(data) ? data[0] : data) as
+    const envelope = (Array.isArray(data) ? data[0] : data) as unknown as
       | { ok: boolean; error: string | null; root: TreeRoot | null }
       | null;
 
@@ -145,7 +146,7 @@ export async function plantHeartsDetailed(params: {
 
   if (error) return { ok: false, error: "rpc_error" };
 
-  const envelope = (Array.isArray(data) ? data[0] : data) as {
+  const envelope = (Array.isArray(data) ? data[0] : data) as unknown as {
     ok: boolean;
     error: string | null;
     root: TreeRoot | null;
