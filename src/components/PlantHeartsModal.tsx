@@ -110,6 +110,30 @@ export default function PlantHeartsModal({
               )}
             </p>
 
+            {/* Twin Moons yield hint — surfaces staking yield at the moment of decision. */}
+            <Link
+              to="/lottery"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card/40 border border-border/30 hover:border-primary/30 transition-colors"
+            >
+              <Moon className="w-3.5 h-3.5 text-accent shrink-0" />
+              <span className="text-[10px] font-serif text-muted-foreground/80 leading-snug">
+                {hasExisting && projected > 0 && !countdown.isPast ? (
+                  <>
+                    <span className="text-foreground/80 tabular-nums">~{projected}</span> hearts at{" "}
+                    {emoji} {label} ·{" "}
+                    <span className="tabular-nums">
+                      in {countdown.days}d {String(countdown.hours).padStart(2, "0")}h
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Stake to earn{" "}
+                    <span className="text-foreground/80">{yieldPct}%</span> at every moon
+                  </>
+                )}
+              </span>
+            </Link>
+
             {/* Quick select */}
             <div className="flex gap-2">
               {QUICK_AMOUNTS.filter((a) => a <= available).map((a) => (
