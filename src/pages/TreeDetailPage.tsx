@@ -803,13 +803,14 @@ const TreeDetailPage = () => {
           <TabsContent value="overview" className="space-y-8">
             {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
 
-            {/* Proximity Gate — shown only when locked */}
-            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && proximityGate.status !== "unlocked_grace" && proximityGate.status !== "unlocked_nearby" && (
+            {/* Proximity Gate — warm, distance-aware guidance whenever the user isn't fully present */}
+            {proximityGate.status !== "checking" && proximityGate.status !== "unlocked_present" && (
               <Suspense fallback={null}>
                 <ProximityGateMessage
                   status={proximityGate.status}
                   graceLabel={proximityGate.graceLabel}
                   treeName={tree?.name}
+                  distanceMeters={proximityGate.distanceMeters}
                 />
               </Suspense>
             )}

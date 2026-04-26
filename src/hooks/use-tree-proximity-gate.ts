@@ -69,6 +69,7 @@ interface UseTreeProximityGateOptions {
 export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTreeProximityGateOptions) {
   const [status, setStatus] = useState<GateStatus>("checking");
   const [graceMs, setGraceMs] = useState(0);
+  const [distanceMeters, setDistanceMeters] = useState<number | null>(null);
 
   const checkProximity = useCallback(async () => {
     if (!treeId) { setStatus("locked"); return; }
@@ -112,6 +113,7 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
       );
 
       const dist = haversine(pos.coords.latitude, pos.coords.longitude, treeLat, treeLng);
+      setDistanceMeters(dist);
       if (dist <= CHECKIN_RADIUS_M) {
         saveVisit(treeId);
         setGraceMs(GRACE_MS);
@@ -134,6 +136,15 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
   useEffect(() => {
     checkProximity();
   }, [checkProximity]);
+
+  // Soft re-poll distance every 30s so the CTA updates from "340m away" → "approaching" → "ready"
+  // as the wanderer walks closer, without requiring a manual refresh.
+  useEffect(() => {
+    if (!treeId || !treeLat || !treeLng) return;
+    if (status === "checking" || status === "no_location") return;
+    const interval = setInterval(() => { checkProximity(); }, 30_000);
+    return () => clearInterval(interval);
+  }, [status, treeId, treeLat, treeLng, checkProximity]);
 
   // Update grace countdown every minute
   useEffect(() => {
@@ -178,6 +189,8 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
     canCheckin,
     graceLabel,
     graceMs,
+    /** Last measured distance from user to tree in meters. Null if unknown / no geo permission. */
+    distanceMeters,
     recordVisitNow,
     recheckProximity: checkProximity,
   };

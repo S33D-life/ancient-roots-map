@@ -23,6 +23,8 @@ export function useHeartCollection(
   userId: string | null,
   /** True when proximity gate says user is near or checked in */
   isEligible: boolean,
+  /** Optional live distance from user → tree (meters). Used for progressive UI states. */
+  distanceMeters?: number | null,
 ) {
   const [pool, setPool] = useState<HeartPoolInfo | null>(null);
   const [state, setState] = useState<HeartCollectionState>("loading");
@@ -106,12 +108,32 @@ export function useHeartCollection(
     }
   }, [collectedAmount]);
 
+  /**
+   * Progressive proximity tier — derived from distanceMeters when available.
+   *  - "ready"        : within 100m (collectable)
+   *  - "approaching"  : within 200m (jar warming up)
+   *  - "far"          : >200m (idle/dim)
+   *  - "unknown"      : no distance signal
+   */
+  const proximityTier: "ready" | "approaching" | "far" | "unknown" =
+    typeof distanceMeters === "number"
+      ? distanceMeters <= 100
+        ? "ready"
+        : distanceMeters <= 200
+        ? "approaching"
+        : "far"
+      : isEligible
+      ? "ready"
+      : "unknown";
+
   return {
     state,
     pool,
     collectedAmount,
     collect,
     refetchPool: fetchPool,
+    proximityTier,
+    distanceMeters: distanceMeters ?? null,
   };
 }
 
