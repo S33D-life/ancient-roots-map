@@ -21,6 +21,11 @@ import PhenologyBadge from "@/components/PhenologyBadge";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import type { SpeciesResolution } from "@/services/speciesResolver";
 import type { Database } from "@/integrations/supabase/types";
+import {
+  ACCESSIBILITY_VISUALS,
+  type EffectiveAccessibilityTier,
+} from "@/lib/treeAccessibility";
+import AccessibilityStrip from "@/components/AccessibilityStrip";
 
 const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
 const TreeCheckinStatusLight = lazy(() => import("@/components/TreeCheckinStatusLight"));
@@ -49,6 +54,10 @@ interface TreePageHeroProps {
   checkinLight?: CheckinLight;
   /** Pre-resolved species data from parent */
   speciesResolution?: SpeciesResolution | null;
+  /** Effective accessibility tier (after grant resolution). */
+  accessibilityTier?: EffectiveAccessibilityTier;
+  /** Optional notes (opening hours, who to ask…) */
+  accessibilityNotes?: string | null;
 }
 
 const TreePageHero = ({
