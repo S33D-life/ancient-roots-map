@@ -10607,6 +10607,10 @@ export type Database = {
         }[]
       }
       aggregate_phenology: { Args: never; Returns: undefined }
+      assign_staff_steward: {
+        Args: { p_new_owner_id: string; p_staff_code: string }
+        Returns: Json
+      }
       award_bug_hearts: {
         Args: { p_amount: number; p_bug_id: string; p_curator_id: string }
         Returns: undefined
@@ -10970,6 +10974,7 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       species_make_slug: { Args: { input: string }; Returns: string }
+      unassign_staff_steward: { Args: { p_staff_code: string }; Returns: Json }
       update_agent_trust_score: {
         Args: { p_agent_id: string }
         Returns: undefined
