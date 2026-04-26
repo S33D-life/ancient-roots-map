@@ -143,46 +143,41 @@ export interface CosmicEvent {
   description: string;
 }
 
-/** Get approximate solar events for a given year */
+/** Get accurate solar events for a given year (UTC, computed via astronomy-engine). */
 export function getSolarEvents(year: number): CosmicEvent[] {
+  const solar = solarEventsForYear(year);
+  const byType = (t: typeof solar[number]["type"]) =>
+    solar.find((e) => e.type === t)!.date;
+
   return [
-    { id: `veq-${year}`, name: "Vernal Equinox", emoji: "🌿", date: new Date(year, 2, 20), type: "equinox", description: "Day and night equal. Spring begins in the Northern Hemisphere." },
-    { id: `sso-${year}`, name: "Summer Solstice", emoji: "☀️", date: new Date(year, 5, 21), type: "solstice", description: "Longest day. Midsummer. Peak light in Northern Hemisphere." },
-    { id: `aeq-${year}`, name: "Autumnal Equinox", emoji: "🍂", date: new Date(year, 8, 22), type: "equinox", description: "Day and night equal. Autumn begins in the Northern Hemisphere." },
-    { id: `wso-${year}`, name: "Winter Solstice", emoji: "❄️", date: new Date(year, 11, 21), type: "solstice", description: "Shortest day. Midwinter. The turning of the light." },
-    // Cross-quarter days
-    { id: `imb-${year}`, name: "Imbolc", emoji: "🕯️", date: new Date(year, 1, 1), type: "seasonal", description: "Midpoint between winter solstice and spring equinox. First stirrings." },
-    { id: `bel-${year}`, name: "Beltane", emoji: "🔥", date: new Date(year, 4, 1), type: "seasonal", description: "Midpoint between spring equinox and summer solstice. Full bloom." },
-    { id: `lug-${year}`, name: "Lughnasadh", emoji: "🌾", date: new Date(year, 7, 1), type: "seasonal", description: "Midpoint between summer solstice and autumn equinox. First harvest." },
-    { id: `sam-${year}`, name: "Samhain", emoji: "🎃", date: new Date(year, 10, 1), type: "seasonal", description: "Midpoint between autumn equinox and winter solstice. Thin veil." },
+    { id: `veq-${year}`, name: "Vernal Equinox",   emoji: "🌿", date: byType("equinox_spring"),  type: "equinox",  description: "Day and night equal. Spring begins in the Northern Hemisphere." },
+    { id: `sso-${year}`, name: "Summer Solstice",  emoji: "☀️", date: byType("solstice_summer"), type: "solstice", description: "Longest day. Midsummer. Peak light in Northern Hemisphere." },
+    { id: `aeq-${year}`, name: "Autumnal Equinox", emoji: "🍂", date: byType("equinox_autumn"),  type: "equinox",  description: "Day and night equal. Autumn begins in the Northern Hemisphere." },
+    { id: `wso-${year}`, name: "Winter Solstice",  emoji: "❄️", date: byType("solstice_winter"), type: "solstice", description: "Shortest day. Midwinter. The turning of the light." },
+    // Cross-quarter days remain calendar-anchored — not astronomical
+    { id: `imb-${year}`, name: "Imbolc",     emoji: "🕯️", date: new Date(Date.UTC(year, 1, 1)),  type: "seasonal", description: "Midpoint between winter solstice and spring equinox. First stirrings." },
+    { id: `bel-${year}`, name: "Beltane",    emoji: "🔥", date: new Date(Date.UTC(year, 4, 1)),  type: "seasonal", description: "Midpoint between spring equinox and summer solstice. Full bloom." },
+    { id: `lug-${year}`, name: "Lughnasadh", emoji: "🌾", date: new Date(Date.UTC(year, 7, 1)),  type: "seasonal", description: "Midpoint between summer solstice and autumn equinox. First harvest." },
+    { id: `sam-${year}`, name: "Samhain",    emoji: "🎃", date: new Date(Date.UTC(year, 10, 1)), type: "seasonal", description: "Midpoint between autumn equinox and winter solstice. Thin veil." },
   ];
 }
 
-/** Get upcoming new/full moons for next N cycles */
+/** Get the next N upcoming new/full moons (accurate, computed via astronomy-engine). */
 export function getUpcomingLunarEvents(count: number = 6): CosmicEvent[] {
-  const events: CosmicEvent[] = [];
-  const now = new Date();
-  const nowMs = now.getTime();
-  const diff = nowMs - KNOWN_NEW_MOON;
-  const daysSinceRef = diff / (1000 * 60 * 60 * 24);
-  const currentCycle = Math.floor(daysSinceRef / LUNAR_CYCLE);
-
-  for (let i = 0; i < count; i++) {
-    const cycleNum = currentCycle + i;
-    const newMoonMs = KNOWN_NEW_MOON + cycleNum * LUNAR_CYCLE * 86400000;
-    const fullMoonMs = newMoonMs + (LUNAR_CYCLE / 2) * 86400000;
-    const newDate = new Date(newMoonMs);
-    const fullDate = new Date(fullMoonMs);
-
-    if (newDate > now) {
-      events.push({ id: `nm-${cycleNum}`, name: "New Moon", emoji: "🌑", date: newDate, type: "lunar", description: "New Moon — seeds of intention. Time Tree: Inside of Time." });
-    }
-    if (fullDate > now) {
-      events.push({ id: `fm-${cycleNum}`, name: "Full Moon", emoji: "🌕", date: fullDate, type: "lunar", description: "Full Moon — illumination. Time Tree: Outside of Time." });
-    }
-  }
-
-  return events.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, count);
+  const events = upcomingLunarEvents(count, new Date());
+  return events.map((e, i) => {
+    const isNew = e.phase === "new_moon";
+    return {
+      id: `${isNew ? "nm" : "fm"}-${e.date.getTime()}`,
+      name: isNew ? "New Moon" : "Full Moon",
+      emoji: isNew ? "🌑" : "🌕",
+      date: e.date,
+      type: "lunar" as const,
+      description: isNew
+        ? "New Moon — seeds of intention. Time Tree: Inside of Time."
+        : "Full Moon — illumination. Time Tree: Outside of Time.",
+    };
+  });
 }
 
 // ── Main Hook ──
