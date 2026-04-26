@@ -28,6 +28,7 @@ interface Props {
     status: string;
     isUnlocked: boolean;
     canCheckin?: boolean;
+    distanceMeters?: number | null;
   };
   meetingStatus: string;
   relationship: RelationshipProgress | null;
