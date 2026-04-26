@@ -21,6 +21,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   const { balance, isLoading } = useHeartEconomy(userId);
   const { seedsRemaining } = useSeedEconomy(userId); // shown as small dot on the trigger pill
   const [open, setOpen] = useState(false);
+  const [tapPulse, setTapPulse] = useState(false);
   const prevBalance = useRef(balance.s33d);
   const [pulse, setPulse] = useState(false);
 
@@ -33,6 +34,23 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     }
     prevBalance.current = balance.s33d;
   }, [balance.s33d]);
+
+  /**
+   * Tap handler — let the jar animate in place BEFORE the overlay covers it.
+   * Sequence: tap → jar pulse/burst (~280ms) → sheet slides up.
+   * Fixes the bug where the modal overlay rendered over the jar so users
+   * never saw their action register.
+   */
+  const handleTap = () => {
+    if (open) return;
+    if (navigator.vibrate) navigator.vibrate(20);
+    setTapPulse(true);
+    window.setTimeout(() => {
+      setOpen(true);
+      // Let the pulse continue underneath the overlay for a moment, then reset.
+      window.setTimeout(() => setTapPulse(false), 400);
+    }, 280);
+  };
 
   if (!userId) return null;
 
@@ -51,13 +69,16 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   return (
     <>
       {/* Compact jar button */}
-      <button
-        onClick={() => setOpen(true)}
+      <motion.button
+        onClick={handleTap}
+        animate={tapPulse ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+        transition={{ duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }}
         className={`relative group flex items-center gap-1.5 px-2 py-1 md:px-2.5 md:py-1.5 rounded-full border transition-all ${className}`}
         style={{
-          borderColor: "hsl(var(--primary) / 0.2)",
+          borderColor: tapPulse ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary) / 0.2)",
           background: "hsl(var(--card) / 0.6)",
           backdropFilter: "blur(8px)",
+          boxShadow: tapPulse ? "0 0 24px hsl(var(--primary) / 0.45)" : undefined,
         }}
         aria-label="Open Heart Jar — your living balances"
       >
