@@ -26,7 +26,7 @@ import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import MusicRoomTreeRadio from "@/components/library/MusicRoomTreeRadio";
-import SpeciesOfferingFilter, { filterBySpecies } from "@/components/SpeciesOfferingFilter";
+import SpeciesOfferingFilter from "@/components/SpeciesOfferingFilter";
 import {
   Command,
   CommandEmpty,
