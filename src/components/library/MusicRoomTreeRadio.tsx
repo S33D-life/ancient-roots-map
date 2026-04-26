@@ -91,6 +91,8 @@ function MusicRoomTreeRadio<T extends RadioSong>({
   scopedSongs,
   anchorTree,
   scopeLabel,
+  selectedTreeName,
+  selectedSpecies,
   onOpenSong,
 }: Props<T>) {
   /** Broadcast playlist: anchor-tree songs first when in forest mode, else as-given. */
