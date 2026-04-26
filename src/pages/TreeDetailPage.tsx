@@ -120,6 +120,9 @@ import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { useTreeEditPermission } from "@/hooks/use-tree-edit-permission";
 import TabErrorBoundary from "@/components/TabErrorBoundary";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
+import { useTreeAccessibility } from "@/hooks/use-tree-accessibility";
+import { canCheckIn, ACCESSIBILITY_VISUALS } from "@/lib/treeAccessibility";
+import { useToast } from "@/hooks/use-toast";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
