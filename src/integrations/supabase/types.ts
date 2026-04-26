@@ -7782,6 +7782,48 @@ export type Database = {
         }
         Relationships: []
       }
+      tree_access_grants: {
+        Row: {
+          granted_at: string
+          granted_by: string
+          id: string
+          notes: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by: string
+          id?: string
+          notes?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          notes?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_access_grants_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_access_grants_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_change_log: {
         Row: {
           change_set: Json
@@ -9358,6 +9400,8 @@ export type Database = {
       }
       trees: {
         Row: {
+          access_notes: string | null
+          accessibility_tier: Database["public"]["Enums"]["tree_accessibility_tier"]
           age_confidence: string | null
           age_exact: number | null
           age_max: number | null
@@ -9417,6 +9461,8 @@ export type Database = {
           wish_tags: string[] | null
         }
         Insert: {
+          access_notes?: string | null
+          accessibility_tier?: Database["public"]["Enums"]["tree_accessibility_tier"]
           age_confidence?: string | null
           age_exact?: number | null
           age_max?: number | null
@@ -9476,6 +9522,8 @@ export type Database = {
           wish_tags?: string[] | null
         }
         Update: {
+          access_notes?: string | null
+          accessibility_tier?: Database["public"]["Enums"]["tree_accessibility_tier"]
           age_confidence?: string | null
           age_exact?: number | null
           age_max?: number | null
@@ -11009,6 +11057,7 @@ export type Database = {
         | "voice"
         | "book"
       propagation_type: "seed" | "graft" | "cutting" | "unknown"
+      tree_accessibility_tier: "public" | "visible" | "garden" | "private"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -11151,6 +11200,7 @@ export const Constants = {
       market_type: ["binary", "date_range", "numeric", "protocol_parameter"],
       offering_type: ["photo", "poem", "song", "story", "nft", "voice", "book"],
       propagation_type: ["seed", "graft", "cutting", "unknown"],
+      tree_accessibility_tier: ["public", "visible", "garden", "private"],
     },
   },
 } as const
