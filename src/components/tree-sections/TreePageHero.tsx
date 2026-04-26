@@ -78,6 +78,8 @@ const TreePageHero = ({
   graceLabel,
   checkinLight,
   speciesResolution,
+  accessibilityTier = "public",
+  accessibilityNotes,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -109,6 +111,8 @@ const TreePageHero = ({
 
   const hive = speciesResolution?.hive ?? getHiveForSpecies(tree.species);
   const location = [tree.state, tree.nation].filter(Boolean).join(", ");
+  const accessVisual = ACCESSIBILITY_VISUALS[accessibilityTier];
+  const isGoldFrame = accessibilityTier === "granted";
 
   return (
     <>
