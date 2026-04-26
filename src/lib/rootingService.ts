@@ -6,7 +6,6 @@
  * Planting uses an atomic DB function to prevent race conditions.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { spendHearts, earnHearts } from "@/lib/heartService";
 
 // ── Types ──────────────────────────────────────────────────
 export interface TreeRoot {
@@ -87,19 +86,9 @@ export async function plantHearts(params: {
   _inflightPlant.add(key);
 
   try {
-    // 1. Deduct from balance via existing spend system
-    const spent = await spendHearts({
-      userId: params.userId,
-      amount: params.amount,
-      transactionType: "spend_plant_hearts",
-      entityType: "tree_root",
-      entityId: params.treeId,
-      metadata: { action: "plant_hearts", species_key: params.speciesKey },
-    });
-
-    if (!spent) return null;
-
-    // 2. Atomic upsert via DB function — safely increments existing roots
+    // Atomic: balance check + debit + stake — all in one RPC.
+    // Returns structured envelope: { ok, error, root } where error ∈
+    // 'unauthenticated' | 'invalid_amount' | 'tree_not_found' | 'insufficient_hearts'
     const { data, error } = await supabase.rpc("plant_hearts_at_tree", {
       p_user_id: params.userId,
       p_tree_id: params.treeId,
@@ -108,25 +97,72 @@ export async function plantHearts(params: {
     });
 
     if (error) {
-      console.warn("[rootingService.plantHearts] RPC failed, attempting refund", error.message);
-      // Refund: credit back the spent hearts
-      await earnHearts({
-        userId: params.userId,
-        amount: params.amount,
-        transactionType: "refund",
-        entityType: "tree_root",
-        entityId: params.treeId,
-        source: "rooting_refund",
-        metadata: { reason: "plant_rpc_failed" },
-      });
+      console.warn("[rootingService.plantHearts] RPC error", error.message);
       return null;
     }
 
-    const root = Array.isArray(data) ? data[0] : data;
-    return (root as unknown as TreeRoot) || null;
+    const envelope = (Array.isArray(data) ? data[0] : data) as
+      | { ok: boolean; error: string | null; root: TreeRoot | null }
+      | null;
+
+    if (!envelope || !envelope.ok) {
+      console.warn(
+        "[rootingService.plantHearts] refused:",
+        envelope?.error || "unknown"
+      );
+      return null;
+    }
+
+    return envelope.root;
   } finally {
     _inflightPlant.delete(key);
   }
+}
+
+/** Structured error code returned by plant_hearts_at_tree RPC. */
+export type PlantHeartsError =
+  | "unauthenticated"
+  | "invalid_amount"
+  | "tree_not_found"
+  | "insufficient_hearts";
+
+/** Detailed variant of plantHearts that surfaces the structured error code. */
+export async function plantHeartsDetailed(params: {
+  userId: string;
+  treeId: string;
+  amount: number;
+  speciesKey?: string;
+}): Promise<
+  | { ok: true; root: TreeRoot }
+  | { ok: false; error: PlantHeartsError | "rpc_error"; balance?: number; required?: number }
+> {
+  const { data, error } = await supabase.rpc("plant_hearts_at_tree", {
+    p_user_id: params.userId,
+    p_tree_id: params.treeId,
+    p_amount: params.amount,
+    p_species_key: params.speciesKey || null,
+  });
+
+  if (error) return { ok: false, error: "rpc_error" };
+
+  const envelope = (Array.isArray(data) ? data[0] : data) as {
+    ok: boolean;
+    error: string | null;
+    root: TreeRoot | null;
+    balance?: number;
+    required?: number;
+  } | null;
+
+  if (!envelope || !envelope.ok) {
+    return {
+      ok: false,
+      error: (envelope?.error as PlantHeartsError) || "rpc_error",
+      balance: envelope?.balance,
+      required: envelope?.required,
+    };
+  }
+
+  return { ok: true, root: envelope.root as TreeRoot };
 }
 
 // ── Collect growth ─────────────────────────────────────────
