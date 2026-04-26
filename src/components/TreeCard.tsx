@@ -12,6 +12,8 @@ import TreeWhisperButton from "@/components/TreeWhisperButton";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import QuickSeedButton from "@/components/QuickSeedButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import AccessibilityFrame from "@/components/AccessibilityFrame";
+import { useTreeAccessibility } from "@/hooks/use-tree-accessibility";
 
 export type TreeCardVariant = "gallery" | "compact";
 
