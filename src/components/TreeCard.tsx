@@ -161,8 +161,9 @@ const TreeCard = ({
   if (variant === "compact") {
     return (
       <>
+      <AccessibilityFrame tier={accessTier} size="card" rounded="rounded-lg">
       <Card
-        className="border-border/40 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+        className="border-transparent hover:border-primary/30 transition-all duration-300 cursor-pointer group bg-card"
         onClick={handleClick}
       >
         <div className="flex gap-3 p-3 relative">
@@ -231,6 +232,7 @@ const TreeCard = ({
           </div>
         </div>
       </Card>
+      </AccessibilityFrame>
       <SendWhisperModal
         open={whisperOpen}
         onOpenChange={setWhisperOpen}
