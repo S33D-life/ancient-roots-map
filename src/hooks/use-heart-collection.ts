@@ -108,12 +108,32 @@ export function useHeartCollection(
     }
   }, [collectedAmount]);
 
+  /**
+   * Progressive proximity tier — derived from distanceMeters when available.
+   *  - "ready"        : within 100m (collectable)
+   *  - "approaching"  : within 200m (jar warming up)
+   *  - "far"          : >200m (idle/dim)
+   *  - "unknown"      : no distance signal
+   */
+  const proximityTier: "ready" | "approaching" | "far" | "unknown" =
+    typeof distanceMeters === "number"
+      ? distanceMeters <= 100
+        ? "ready"
+        : distanceMeters <= 200
+        ? "approaching"
+        : "far"
+      : isEligible
+      ? "ready"
+      : "unknown";
+
   return {
     state,
     pool,
     collectedAmount,
     collect,
     refetchPool: fetchPool,
+    proximityTier,
+    distanceMeters: distanceMeters ?? null,
   };
 }
 
