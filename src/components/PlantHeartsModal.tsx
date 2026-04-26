@@ -4,10 +4,13 @@
  * Shows existing root context when planting more.
  */
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, X, Loader2 } from "lucide-react";
+import { Sprout, X, Loader2, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
+import { useLotteryStats, drawEmoji, drawLabel } from "@/hooks/use-lottery";
+import { useCountdown } from "@/hooks/use-countdown";
 
 const QUICK_AMOUNTS = [1, 3, 11, 33];
 
