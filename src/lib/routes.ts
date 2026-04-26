@@ -32,6 +32,8 @@ export const ROUTES = {
   HEARTH: "/dashboard",
   /** Vault */
   VAULT: "/vault",
+  /** Twin Moons — lunar lottery & staking yield */
+  LOTTERY: "/lottery",
   /** Value Tree */
   VALUE_TREE: "/value-tree",
   /** Value Tree — Earn branch */
