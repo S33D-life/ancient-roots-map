@@ -31,6 +31,10 @@ import OrchardModePanel, { type OrchardValue, EMPTY_ORCHARD, buildOrchardPayload
 import GardenPicker from "@/components/encounter/GardenPicker";
 import { useCanCreateGarden } from "@/hooks/use-can-create-garden";
 import { hapticTap } from "@/lib/haptics";
+import {
+  ACCESSIBILITY_TIER_OPTIONS,
+  type AccessibilityTier,
+} from "@/lib/treeAccessibility";
 
 /**
  * Resolve the structured age form into the columns persisted on `trees`.
