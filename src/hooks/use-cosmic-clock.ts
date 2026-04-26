@@ -2,9 +2,14 @@
  * useCosmicClock — Unified rhythm layer
  *
  * Provides: lunar phase, season, daily reset countdown, cosmic events.
- * All calculations are algorithmic (no API needed).
+ * Uses `astronomy-engine` for accurate equinox / solstice / moon moments.
  */
 import { useState, useEffect, useMemo } from "react";
+import {
+  upcomingLunarEvents,
+  solarEventsForYear,
+  currentMoonState,
+} from "@/lib/astronomy";
 
 // ── Lunar Phase Calculation (Trig method, accurate ±1 day) ──
 
@@ -43,30 +48,29 @@ const PHASE_DATA: Record<LunarPhase, { name: string; emoji: string }> = {
 };
 
 export function getLunarInfo(date: Date = new Date()): LunarInfo {
-  const diff = date.getTime() - KNOWN_NEW_MOON;
-  const days = diff / (1000 * 60 * 60 * 24);
-  const dayOfCycle = ((days % LUNAR_CYCLE) + LUNAR_CYCLE) % LUNAR_CYCLE;
+  // Use astronomy-engine for accurate illumination + phase angle
+  const { illumination, phaseAngle } = currentMoonState(date);
 
-  // Illumination approximation
-  const illumination = (1 - Math.cos((2 * Math.PI * dayOfCycle) / LUNAR_CYCLE)) / 2;
+  // Map phase angle (0..360) to dayOfCycle (0..LUNAR_CYCLE)
+  const dayOfCycle = (phaseAngle / 360) * LUNAR_CYCLE;
 
-  // Phase buckets (8 phases, each ~3.69 days)
-  const eighth = LUNAR_CYCLE / 8;
+  // Phase buckets (8 phases) from angle
   let phase: LunarPhase;
-  if (dayOfCycle < eighth)          phase = "new_moon";
-  else if (dayOfCycle < 2 * eighth) phase = "waxing_crescent";
-  else if (dayOfCycle < 3 * eighth) phase = "first_quarter";
-  else if (dayOfCycle < 4 * eighth) phase = "waxing_gibbous";
-  else if (dayOfCycle < 5 * eighth) phase = "full_moon";
-  else if (dayOfCycle < 6 * eighth) phase = "waning_gibbous";
-  else if (dayOfCycle < 7 * eighth) phase = "last_quarter";
-  else                              phase = "waning_crescent";
+  if (phaseAngle < 22.5)        phase = "new_moon";
+  else if (phaseAngle < 67.5)   phase = "waxing_crescent";
+  else if (phaseAngle < 112.5)  phase = "first_quarter";
+  else if (phaseAngle < 157.5)  phase = "waxing_gibbous";
+  else if (phaseAngle < 202.5)  phase = "full_moon";
+  else if (phaseAngle < 247.5)  phase = "waning_gibbous";
+  else if (phaseAngle < 292.5)  phase = "last_quarter";
+  else if (phaseAngle < 337.5)  phase = "waning_crescent";
+  else                          phase = "new_moon";
 
-  const daysToNew = (LUNAR_CYCLE - dayOfCycle) % LUNAR_CYCLE;
-  const halfCycle = LUNAR_CYCLE / 2;
-  const daysToFull = dayOfCycle < halfCycle
-    ? halfCycle - dayOfCycle
-    : LUNAR_CYCLE - dayOfCycle + halfCycle;
+  // Days until next new/full from upcoming events (accurate)
+  const next = upcomingLunarEvents(2, date);
+  const ms = (d: Date) => (d.getTime() - date.getTime()) / 86400000;
+  const nextNew = next.find((e) => e.phase === "new_moon");
+  const nextFull = next.find((e) => e.phase === "full_moon");
 
   const pd = PHASE_DATA[phase];
   return {
@@ -75,8 +79,8 @@ export function getLunarInfo(date: Date = new Date()): LunarInfo {
     emoji: pd.emoji,
     illumination: Math.round(illumination * 100) / 100,
     dayOfCycle: Math.round(dayOfCycle * 10) / 10,
-    daysToNew: Math.round(daysToNew * 10) / 10,
-    daysToFull: Math.round(daysToFull * 10) / 10,
+    daysToNew: nextNew ? Math.round(ms(nextNew.date) * 10) / 10 : 0,
+    daysToFull: nextFull ? Math.round(ms(nextFull.date) * 10) / 10 : 0,
   };
 }
 
