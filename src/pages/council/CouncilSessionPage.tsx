@@ -163,12 +163,38 @@ export default function CouncilSessionPage() {
                 {participated ? (
                   <div className="flex items-start gap-2.5">
                     <Sparkles className="h-4 w-4 text-primary mt-0.5" />
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-serif text-foreground/80">Presence received 🌱</p>
                       <p className="text-xs text-muted-foreground/60 leading-relaxed mt-0.5">
                         You are part of this gathering<br />
                         +{participation?.heartsAmount ?? COUNCIL_HEARTS_REWARD} S33D Hearts will flow to you
                       </p>
+                      {/* Sync state indicator — tells the user whether their Hearts are safe */}
+                      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-serif">
+                        {syncState === "synced" && (
+                          <span className="inline-flex items-center gap-1 text-primary/80">
+                            <CheckCircle2 className="h-3 w-3" /> Synced — safe across devices
+                          </span>
+                        )}
+                        {syncState === "syncing" && (
+                          <span className="inline-flex items-center gap-1 text-muted-foreground/70">
+                            <Loader2 className="h-3 w-3 animate-spin" /> Syncing your presence…
+                          </span>
+                        )}
+                        {syncState === "local_only" && (
+                          <button
+                            type="button"
+                            onClick={handleRetrySync}
+                            disabled={claiming}
+                            className="inline-flex items-center gap-1 text-amber-400/90 hover:text-amber-300 underline-offset-2 hover:underline"
+                          >
+                            <CloudOff className="h-3 w-3" /> Saved locally
+                            <span className="inline-flex items-center gap-0.5 ml-1 text-muted-foreground/60">
+                              <RefreshCw className="h-2.5 w-2.5" /> Retry
+                            </span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -180,8 +206,14 @@ export default function CouncilSessionPage() {
                       size="sm"
                       className="text-xs font-serif gap-1.5"
                       onClick={handleMarkParticipation}
+                      disabled={claiming}
                     >
-                      <Heart className="h-3 w-3" /> I'm here for this council
+                      {claiming ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Heart className="h-3 w-3" />
+                      )}
+                      {claiming ? "Receiving…" : "I'm here for this council"}
                       <span className="text-primary-foreground/70 ml-1">+{COUNCIL_HEARTS_REWARD} ❤️</span>
                     </Button>
                   </>
