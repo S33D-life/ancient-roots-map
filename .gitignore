@@ -33,3 +33,8 @@ dist-ssr
 # Vite temp files
 vite.config.ts.timestamp-*.mjs
 .vite/
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
