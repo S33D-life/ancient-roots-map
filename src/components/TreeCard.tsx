@@ -104,6 +104,11 @@ const TreeCard = ({
   const hive = resolution?.hive ?? null;
   const speciesDisplayName = resolution?.displayName || tree.species;
   const scientificName = resolution?.scientificName;
+  const { tier: accessTier } = useTreeAccessibility({
+    treeId: tree.id,
+    tier: tree.accessibility_tier ?? "public",
+    userId: currentUserId,
+  });
 
   const isClustered = cluster?.isClustered ?? false;
   const encounterCount = cluster?.encounters?.length ?? 0;
