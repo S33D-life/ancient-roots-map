@@ -709,6 +709,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         ...buildOrchardPayload(orchard),
         garden_id: gardenId,
         created_by: user.id,
+        accessibility_tier: accessibilityTier,
+        access_notes: accessNotes.trim() || null,
         photo_status: droppedPhotoFile ? 'pending' : 'none',
         ...(photoDate ? { created_at: photoDate } : {}),
       } as any).select('id').single();
