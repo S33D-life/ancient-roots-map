@@ -627,9 +627,11 @@ const MusicRoom = () => {
             <p className="font-serif italic text-sm text-muted-foreground">
               {search
                 ? "No record matches your search."
-                : scope === "tree"
-                ? "No songs have been offered here yet — be the first to leave one."
-                : scope === "species"
+                : libraryScope === "personal"
+                ? "You haven't offered any songs yet — leave the first."
+                : libraryTreeId
+                ? "No songs have been offered at this tree yet."
+                : librarySpecies !== "all"
                 ? "No kin of this species has been sung to yet."
                 : "The forest is quiet. Be the first to offer a song."}
             </p>
