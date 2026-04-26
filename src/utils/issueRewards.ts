@@ -108,15 +108,12 @@ async function _issueRewardsInner(params: IssueParams): Promise<RewardResult | n
   }
 
   // ── Layer 1: S33D Hearts (global currency) ──
+  // HOTFIX (heart ledger discovery, Task 4): earnHearts now dual-writes
+  // to heart_ledger AND heart_transactions, so we no longer insert into
+  // heart_transactions here — doing both would double-credit the user.
+  // We await the call so cap/dedup errors surface to the caller.
   if (s33dAmt > 0) {
-    await supabase.from("heart_transactions").insert({
-      user_id: userId,
-      tree_id: treeId,
-      heart_type: actionType,
-      amount: s33dAmt,
-    });
-    // Dual-write to rich ledger
-    earnHearts({
+    await earnHearts({
       userId,
       amount: s33dAmt,
       transactionType: ACTION_TO_TXN_TYPE[actionType] || "earn_checkin",
@@ -124,7 +121,7 @@ async function _issueRewardsInner(params: IssueParams): Promise<RewardResult | n
       entityType: "tree",
       entityId: treeId,
       source: actionType,
-    }).catch(() => {}); // non-blocking
+    });
   }
 
   // ── Layer 2: Species Hearts (fractal per-hive) ──
