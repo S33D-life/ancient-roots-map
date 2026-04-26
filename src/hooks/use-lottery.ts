@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import type { LotteryDrawType } from "@/lib/economy-vocabulary";
 
 export interface TicketsBreakdown {
   collections: number;
@@ -27,7 +28,7 @@ export interface TicketsBreakdown {
 
 export interface NextDraw {
   id: string;
-  draw_type: "lunar_new" | "lunar_full" | "solar_equinox_spring" | "solar_equinox_autumn" | "solar_solstice_summer" | "solar_solstice_winter";
+  draw_type: LotteryDrawType;
   scheduled_at: string;
   prize_amount: number;
   prize_count: number;
@@ -196,29 +197,8 @@ export function useLotteryConfig() {
 }
 
 // ── Display helpers ────────────────────────────────────────
-
-// Vocabulary note: DB uses 'lunar_new'/'lunar_full'/'solar_*' (see lottery_draws CHECK
-// constraint and lottery-scheduler edge function). Helpers below match that vocabulary.
-export function drawEmoji(type: NextDraw["draw_type"] | undefined | null): string {
-  switch (type) {
-    case "lunar_new": return "🌑";
-    case "lunar_full": return "🌕";
-    case "solar_equinox_spring": return "🌸";
-    case "solar_equinox_autumn": return "🍂";
-    case "solar_solstice_summer": return "☀️";
-    case "solar_solstice_winter": return "❄️";
-    default: return "🌙";
-  }
-}
-
-export function drawLabel(type: NextDraw["draw_type"] | undefined | null): string {
-  switch (type) {
-    case "lunar_new": return "New Moon";
-    case "lunar_full": return "Full Moon";
-    case "solar_equinox_spring": return "Spring Equinox";
-    case "solar_equinox_autumn": return "Autumn Equinox";
-    case "solar_solstice_summer": return "Summer Solstice";
-    case "solar_solstice_winter": return "Winter Solstice";
-    default: return "Next Moon";
-  }
-}
+//
+// All emoji/label mapping is centralised in src/lib/economy-vocabulary.ts
+// to prevent the 'lunar_full' vs 'full_moon' drift class of bug. These
+// re-exports preserve the existing import surface for components.
+export { drawEmoji, drawLabel } from "@/lib/economy-vocabulary";

@@ -1,12 +1,30 @@
 /**
  * Heart Economy Service — single abstraction for all heart operations.
  *
- * Writes to BOTH the legacy heart_transactions table (backward compat)
- * AND the new heart_ledger (rich, blockchain-ready).
+ * ╔══════════════════════════════════════════════════════════════════════╗
+ * ║  DUAL-WRITE CONTRACT — LOAD-BEARING. READ BEFORE EDITING.            ║
+ * ╠══════════════════════════════════════════════════════════════════════╣
+ * ║  This service writes to BOTH heart_ledger AND heart_transactions.    ║
+ * ║  The legacy heart_transactions mirror is the row that fires the      ║
+ * ║  update_heart_balance_on_insert trigger and updates                  ║
+ * ║  user_heart_balances. WITHOUT IT, credits are silently invisible     ║
+ * ║  in the UI even though the rich ledger row exists.                   ║
+ * ║                                                                      ║
+ * ║  Do NOT pass `skipLegacyMirror: true` unless you are intentionally   ║
+ * ║  writing a non-balance-affecting record (e.g. status='pending'       ║
+ * ║  purchase intents that are confirmed later by a webhook).            ║
+ * ║                                                                      ║
+ * ║  See src/lib/economy-vocabulary.ts for the canonical                 ║
+ * ║  transaction_type ↔ heart_type translation. Do not invent inline     ║
+ * ║  strings — every drift bug we have ever shipped started that way.    ║
+ * ║                                                                      ║
+ * ║  Locked in by src/tests/HeartLedgerDualWrite.test.ts.                ║
+ * ╚══════════════════════════════════════════════════════════════════════╝
  *
  * All balance reads use the materialized user_heart_balances table.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { ledgerToLegacy } from "@/lib/economy-vocabulary";
 import type {
   HeartBalance,
   HeartLedgerEntry,
@@ -93,11 +111,9 @@ export async function getHeartLedger(
  * prefix when mirroring so existing readers and the daily-cap /
  * lottery-ticket filters keep working.
  */
-function legacyHeartTypeFor(txnType: HeartTransactionType): string {
-  if (txnType.startsWith("earn_")) return txnType.slice(5);
-  if (txnType.startsWith("spend_")) return txnType; // keep spend_ prefix
-  return txnType;
-}
+// Translation lives in src/lib/economy-vocabulary.ts (`ledgerToLegacy`).
+// Kept as a thin alias so call-sites read fluently.
+const legacyHeartTypeFor = (txnType: HeartTransactionType) => ledgerToLegacy(txnType);
 
 export async function earnHearts(params: {
   userId: string;

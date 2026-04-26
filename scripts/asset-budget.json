@@ -1,0 +1,5 @@
+{
+  "comment": "Files allowed to exceed the 500 KB asset budget. Add intentionally; do not auto-grow this list. Each entry must justify itself in a PR description.",
+  "maxBytes": 512000,
+  "allowList": []
+}
