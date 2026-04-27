@@ -668,6 +668,14 @@ export default function QuestCaveRoom() {
       />
       <QuestHeartFlowCard {...heartFlow} />
 
+      {/* 6b — Spark & Bug Bounty (contribution layer) */}
+      <SectionHeading
+        glyph={<Sparkles />}
+        title="Spark & Bug Bounty"
+        whisper="Small flashes that help the living app grow stronger."
+      />
+      <SparkBugBountyPanel />
+
       {/* 7 — Blooming Map */}
       <SectionHeading
         glyph={<MapIcon />}
