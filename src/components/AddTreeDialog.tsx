@@ -761,7 +761,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setTransitionDir("forward");
       setStep("offering");
     } catch (err: any) {
-      toast({ title: "Error adding tree", description: err.message, variant: "destructive" });
+      toast({ title: "Could not add this tree", description: err?.message || "Please try again in a moment.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
