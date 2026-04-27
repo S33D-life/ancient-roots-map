@@ -29,7 +29,14 @@ import DreamTreesPanel from "./quest-cave/DreamTreesPanel";
 import PathArchetypesPanel from "./quest-cave/PathArchetypesPanel";
 import BloomingMapCard from "./quest-cave/BloomingMapCard";
 import QuestHeartFlowCard from "./quest-cave/QuestHeartFlowCard";
-import { currentSeason, type SeasonKey } from "./quest-cave/seasonalQuestsConfig";
+import SectionHeading from "./quest-cave/SectionHeading";
+import {
+  currentSeason,
+  SEASONAL_QUESTS,
+  type SeasonKey,
+  type SeasonalQuestSeed,
+} from "./quest-cave/seasonalQuestsConfig";
+import type { RewardStatus } from "./quest-cave/rewardTypes";
 
 // ─────────────────────────────────────────────────────────────────
 // Quest model
@@ -494,20 +501,55 @@ export default function QuestCaveRoom() {
     return set;
   }, [activity.visits, season]);
 
-  // Heart Flow shape — derived, not awarded yet.
+  // Heart Flow shape — derived from quest reward metadata, not from
+  // a flat per-quest constant. Visual only in v0.2; nothing is awarded.
   const heartFlow = useMemo(() => {
-    const base = balance.totalHearts;
-    const completedQuests = quests.filter(q => q.status === "complete").length;
-    const bonus = completedQuests * 5;
+    const seasonQuests: SeasonalQuestSeed[] = SEASONAL_QUESTS[season] ?? [];
+
+    // Bonus prepared = sum of bonusHearts for completed seasonal quests.
+    const completedSeasonal = seasonQuests.filter((sq) => {
+      if (!sq.derivedFrom) return false;
+      const cur = activity[sq.derivedFrom] ?? 0;
+      return cur >= sq.goal;
+    });
+
+    const bonusPrepared = completedSeasonal.reduce(
+      (sum, sq) => sum + (sq.rewardFlow?.bonusHearts ?? 0),
+      0,
+    );
+    const speciesFlow = completedSeasonal.reduce(
+      (sum, sq) => sum + (sq.rewardFlow?.speciesHearts?.amount ?? 0),
+      0,
+    );
+    const hearthFlow = completedSeasonal.reduce(
+      (sum, sq) =>
+        sum + (sq.rewardFlow?.hearthHearts ?? 0) + (sq.rewardFlow?.circleHearts ?? 0),
+      0,
+    );
+    const valueTreeContribution = Math.round(
+      (bonusPrepared + speciesFlow + hearthFlow) * 0.33,
+    );
+
+    // Safe status vocabulary — never "Claimable" without a backing ledger.
+    const requiresVerification = completedSeasonal.some(
+      (sq) =>
+        sq.rewardFlow?.verificationLevel === "Ancient" ||
+        sq.rewardFlow?.verificationLevel === "Council Verified",
+    );
+    let rewardStatus: RewardStatus = "Locked";
+    if (bonusPrepared > 0 && requiresVerification) rewardStatus = "Requires Verification";
+    else if (bonusPrepared > 0) rewardStatus = "Claiming Coming Soon";
+    else if (quests.some((q) => q.status === "complete")) rewardStatus = "Earned";
+
     return {
-      baseHearts: base,
-      bonusAvailable: bonus,
-      speciesFlow: Math.round(bonus * 0.34),
-      hearthFlow: Math.round(bonus * 0.33),
-      valueTreeContribution: Math.round(bonus * 0.33),
-      rewardStatus: (bonus > 0 ? "Claimable" : "Locked") as "Locked" | "Claimable" | "Earned",
+      baseHearts: balance.totalHearts,
+      bonusPrepared,
+      speciesFlow,
+      hearthFlow,
+      valueTreeContribution,
+      rewardStatus,
     };
-  }, [balance.totalHearts, quests]);
+  }, [season, activity, balance.totalHearts, quests]);
 
   return (
     <div className="space-y-6">
@@ -536,7 +578,12 @@ export default function QuestCaveRoom() {
         recent={recent}
       />
 
-      {/* Seasonal layer — Spring is the first active step */}
+      {/* 2 — Seasonal invitation */}
+      <SectionHeading
+        glyph={<Leaf />}
+        title="Seasonal Invitation"
+        whisper="Follow the seasons. Meet the trees as they change."
+      />
       <SeasonalQuestsPanel
         season={season}
         activity={{
@@ -548,16 +595,30 @@ export default function QuestCaveRoom() {
           globalOfferings: activity.globalOfferings,
         }}
       />
-
-      {/* Featured Four Seasons quest */}
       <FourSeasonsCard currentSeason={season} touchedSeasons={touchedSeasons} />
 
-      {/* Dream Trees — UI-only seed list */}
+      {/* 3 — Dream Trees */}
+      <SectionHeading
+        glyph={<Sparkles />}
+        title="Dream Trees"
+        whisper="Where dream trees become living paths."
+      />
       <DreamTreesPanel />
 
-      {/* Choose Your Path Today */}
+      {/* 4 — Paths */}
+      <SectionHeading
+        glyph={<Compass />}
+        title="Choose Your Path"
+        whisper="Reasons for journeying — not rigid roles."
+      />
       <PathArchetypesPanel />
 
+      {/* 5 — Active quest tabs */}
+      <SectionHeading
+        glyph={<Trophy />}
+        title="Living Quests"
+        whisper="Your active paths across the forest."
+      />
       <Tabs defaultValue="path" className="w-full">
         <TabsList className="bg-muted/40 w-full justify-start overflow-x-auto">
           <TabsTrigger value="path" className="text-xs font-serif gap-1.5">
@@ -598,10 +659,20 @@ export default function QuestCaveRoom() {
         ))}
       </Tabs>
 
-      {/* Heart-flow / Value Tree shape */}
+      {/* 6 — Heart Flow / Value Tree */}
+      <SectionHeading
+        glyph={<Heart />}
+        title="Heart Flow"
+        whisper="How the cave routes care into the Value Tree."
+      />
       <QuestHeartFlowCard {...heartFlow} />
 
-      {/* Connection to the collective Blooming Map */}
+      {/* 7 — Blooming Map */}
+      <SectionHeading
+        glyph={<MapIcon />}
+        title="Blooming Map"
+        whisper="What is awakening — alone and together."
+      />
       <BloomingMapCard
         individualTrees={activity.trees}
         individualOfferings={activity.offerings}
