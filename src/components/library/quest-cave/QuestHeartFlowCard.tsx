@@ -13,6 +13,7 @@ import { Heart, ArrowRight, Lock, ShieldCheck, Hourglass, Sparkles } from "lucid
 import { ROUTES } from "@/lib/routes";
 import {
   HEART_FLOW_MICROCOPY,
+  HEART_FLOW_NOTE,
   rewardButtonLabel,
   isRewardButtonDisabled,
   type RewardStatus,
@@ -74,30 +75,35 @@ export default function QuestHeartFlowCard({
 
         <div className="grid grid-cols-2 gap-2 text-[11px] font-serif">
           <div className="rounded-lg border border-border/40 bg-card/50 p-2 flex justify-between">
-            <span className="text-muted-foreground">Base hearts</span>
+            <span className="text-muted-foreground">Current Hearts</span>
             <span className="tabular-nums text-foreground">{baseHearts}</span>
           </div>
           <div className="rounded-lg border border-border/40 bg-card/50 p-2 flex justify-between">
-            <span className="text-muted-foreground">Bonus prepared</span>
+            <span className="text-muted-foreground">Prepared Bonus Hearts</span>
             <span className="tabular-nums text-foreground">{bonusPrepared}</span>
           </div>
           <div className="rounded-lg border border-border/40 bg-card/50 p-2 flex justify-between">
-            <span className="text-muted-foreground">→ Species hives</span>
+            <span className="text-muted-foreground">Species Flow Prepared</span>
             <span className="tabular-nums text-foreground">{speciesFlow}</span>
           </div>
           <div className="rounded-lg border border-border/40 bg-card/50 p-2 flex justify-between">
-            <span className="text-muted-foreground">→ Hearth / circle</span>
+            <span className="text-muted-foreground">Hearth / Circle Flow Prepared</span>
             <span className="tabular-nums text-foreground">{hearthFlow}</span>
           </div>
           <div className="col-span-2 rounded-lg border border-primary/30 bg-primary/5 p-2 flex justify-between">
-            <span className="text-muted-foreground">→ S33D Value Tree branch</span>
+            <span className="text-muted-foreground">Value Tree Contribution Prepared</span>
             <span className="tabular-nums text-primary">+{valueTreeContribution}</span>
           </div>
         </div>
 
-        <p className="text-[10px] font-serif text-muted-foreground/70 italic leading-relaxed">
-          {HEART_FLOW_MICROCOPY}
-        </p>
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-serif text-muted-foreground/70 italic leading-relaxed">
+            {HEART_FLOW_NOTE}
+          </p>
+          <p className="text-[10px] font-serif text-muted-foreground/60 italic leading-relaxed">
+            {HEART_FLOW_MICROCOPY}
+          </p>
+        </div>
 
         {/* "View Heart Flow" is always safe — it just navigates. */}
         <div className="grid grid-cols-2 gap-2">
