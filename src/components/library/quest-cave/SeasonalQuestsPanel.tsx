@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { SEASON_META, SEASONAL_QUESTS, type SeasonKey, type SeasonalQuestSeed } from "./seasonalQuestsConfig";
+import QuestRewardRow from "./QuestRewardRow";
 
 interface DerivedActivity {
   trees: number;
