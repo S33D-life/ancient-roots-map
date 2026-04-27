@@ -419,10 +419,10 @@ export default function QuestCaveRoom() {
           ? supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId)
           : Promise.resolve({ count: 0 }),
         userId
-          ? supabase.from("whispers").select("*", { count: "exact", head: true }).eq("created_by", userId)
+          ? supabase.from("tree_whispers" as any).select("*", { count: "exact", head: true }).eq("sender_user_id", userId)
           : Promise.resolve({ count: 0 }),
         userId
-          ? supabase.from("tree_visits").select("*", { count: "exact", head: true }).eq("user_id", userId)
+          ? supabase.from("tree_checkins").select("*", { count: "exact", head: true }).eq("user_id", userId)
           : Promise.resolve({ count: 0 }),
         supabase.from("trees").select("*", { count: "exact", head: true }),
         supabase.from("offerings").select("*", { count: "exact", head: true }),
