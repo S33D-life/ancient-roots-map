@@ -122,7 +122,7 @@ const OfferingList = ({
     setDeleting(false);
     setDeleteTarget(null);
     if (error) {
-      toast({ title: "Could not delete", description: error.message, variant: "destructive" });
+      toast({ title: "Could not remove this offering", description: error.message || "Please try again in a moment.", variant: "destructive" });
     } else {
       toast({ title: "Offering removed" });
       onDelete?.();
