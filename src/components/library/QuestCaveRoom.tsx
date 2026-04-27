@@ -501,20 +501,55 @@ export default function QuestCaveRoom() {
     return set;
   }, [activity.visits, season]);
 
-  // Heart Flow shape — derived, not awarded yet.
+  // Heart Flow shape — derived from quest reward metadata, not from
+  // a flat per-quest constant. Visual only in v0.2; nothing is awarded.
   const heartFlow = useMemo(() => {
-    const base = balance.totalHearts;
-    const completedQuests = quests.filter(q => q.status === "complete").length;
-    const bonus = completedQuests * 5;
+    const seasonQuests: SeasonalQuestSeed[] = SEASONAL_QUESTS[season] ?? [];
+
+    // Bonus prepared = sum of bonusHearts for completed seasonal quests.
+    const completedSeasonal = seasonQuests.filter((sq) => {
+      if (!sq.derivedFrom) return false;
+      const cur = activity[sq.derivedFrom] ?? 0;
+      return cur >= sq.goal;
+    });
+
+    const bonusPrepared = completedSeasonal.reduce(
+      (sum, sq) => sum + (sq.rewardFlow?.bonusHearts ?? 0),
+      0,
+    );
+    const speciesFlow = completedSeasonal.reduce(
+      (sum, sq) => sum + (sq.rewardFlow?.speciesHearts?.amount ?? 0),
+      0,
+    );
+    const hearthFlow = completedSeasonal.reduce(
+      (sum, sq) =>
+        sum + (sq.rewardFlow?.hearthHearts ?? 0) + (sq.rewardFlow?.circleHearts ?? 0),
+      0,
+    );
+    const valueTreeContribution = Math.round(
+      (bonusPrepared + speciesFlow + hearthFlow) * 0.33,
+    );
+
+    // Safe status vocabulary — never "Claimable" without a backing ledger.
+    const requiresVerification = completedSeasonal.some(
+      (sq) =>
+        sq.rewardFlow?.verificationLevel === "Ancient" ||
+        sq.rewardFlow?.verificationLevel === "Council Verified",
+    );
+    let rewardStatus: RewardStatus = "Locked";
+    if (bonusPrepared > 0 && requiresVerification) rewardStatus = "Requires Verification";
+    else if (bonusPrepared > 0) rewardStatus = "Claiming Coming Soon";
+    else if (quests.some((q) => q.status === "complete")) rewardStatus = "Earned";
+
     return {
-      baseHearts: base,
-      bonusAvailable: bonus,
-      speciesFlow: Math.round(bonus * 0.34),
-      hearthFlow: Math.round(bonus * 0.33),
-      valueTreeContribution: Math.round(bonus * 0.33),
-      rewardStatus: (bonus > 0 ? "Claimable" : "Locked") as "Locked" | "Claimable" | "Earned",
+      baseHearts: balance.totalHearts,
+      bonusPrepared,
+      speciesFlow,
+      hearthFlow,
+      valueTreeContribution,
+      rewardStatus,
     };
-  }, [balance.totalHearts, quests]);
+  }, [season, activity, balance.totalHearts, quests]);
 
   return (
     <div className="space-y-6">
