@@ -23,6 +23,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import SeasonalQuestsPanel from "./quest-cave/SeasonalQuestsPanel";
+import FourSeasonsCard from "./quest-cave/FourSeasonsCard";
+import DreamTreesPanel from "./quest-cave/DreamTreesPanel";
+import PathArchetypesPanel from "./quest-cave/PathArchetypesPanel";
+import BloomingMapCard from "./quest-cave/BloomingMapCard";
+import QuestHeartFlowCard from "./quest-cave/QuestHeartFlowCard";
+import { currentSeason, type SeasonKey } from "./quest-cave/seasonalQuestsConfig";
 
 // ─────────────────────────────────────────────────────────────────
 // Quest model
@@ -477,6 +484,31 @@ export default function QuestCaveRoom() {
     return candidates.sort((a, b) => (b.progress / b.goal) - (a.progress / a.goal))[0];
   }, [quests]);
 
+  // Seasonal layer
+  const season: SeasonKey = useMemo(() => currentSeason(), []);
+  // v0.2: derive touched-seasons from a single visits count.
+  // Any visit ⇒ current season touched. Future: read per-visit timestamps.
+  const touchedSeasons = useMemo(() => {
+    const set = new Set<SeasonKey>();
+    if (activity.visits > 0) set.add(season);
+    return set;
+  }, [activity.visits, season]);
+
+  // Heart Flow shape — derived, not awarded yet.
+  const heartFlow = useMemo(() => {
+    const base = balance.totalHearts;
+    const completedQuests = quests.filter(q => q.status === "complete").length;
+    const bonus = completedQuests * 5;
+    return {
+      baseHearts: base,
+      bonusAvailable: bonus,
+      speciesFlow: Math.round(bonus * 0.34),
+      hearthFlow: Math.round(bonus * 0.33),
+      valueTreeContribution: Math.round(bonus * 0.33),
+      rewardStatus: (bonus > 0 ? "Claimable" : "Locked") as "Locked" | "Claimable" | "Earned",
+    };
+  }, [balance.totalHearts, quests]);
+
   return (
     <div className="space-y-6">
       {/* Threshold image / ambience */}
@@ -503,6 +535,28 @@ export default function QuestCaveRoom() {
         nextMilestone={nextMilestone}
         recent={recent}
       />
+
+      {/* Seasonal layer — Spring is the first active step */}
+      <SeasonalQuestsPanel
+        season={season}
+        activity={{
+          trees: activity.trees,
+          offerings: activity.offerings,
+          whispers: activity.whispers,
+          visits: activity.visits,
+          globalTrees: activity.globalTrees,
+          globalOfferings: activity.globalOfferings,
+        }}
+      />
+
+      {/* Featured Four Seasons quest */}
+      <FourSeasonsCard currentSeason={season} touchedSeasons={touchedSeasons} />
+
+      {/* Dream Trees — UI-only seed list */}
+      <DreamTreesPanel />
+
+      {/* Choose Your Path Today */}
+      <PathArchetypesPanel />
 
       <Tabs defaultValue="path" className="w-full">
         <TabsList className="bg-muted/40 w-full justify-start overflow-x-auto">
@@ -543,6 +597,17 @@ export default function QuestCaveRoom() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Heart-flow / Value Tree shape */}
+      <QuestHeartFlowCard {...heartFlow} />
+
+      {/* Connection to the collective Blooming Map */}
+      <BloomingMapCard
+        individualTrees={activity.trees}
+        individualOfferings={activity.offerings}
+        collectiveTrees={activity.globalTrees}
+        collectiveOfferings={activity.globalOfferings}
+      />
 
       {/* Bridge back to Heartwood */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
