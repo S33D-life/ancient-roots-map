@@ -76,7 +76,7 @@ export function useTreeRooting(
         amount: params.amount,
         speciesKey: params.speciesKey,
       });
-      if (!result.ok) {
+      if (result.ok === false) {
         throw new PlantHeartsRefused(result.error, result.balance, result.required);
       }
       return result.root;
