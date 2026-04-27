@@ -2,7 +2,7 @@
  * Path archetypes — Creator, Pilgrim, Collector, Curator.
  * Reasons for journeying, not rigid roles. A wanderer may walk many.
  */
-export type PathArchetype = "creator" | "pilgrim" | "collector" | "curator";
+export type PathArchetype = "creator" | "pilgrim" | "collector" | "curator" | "spark";
 
 export interface PathArchetypeMeta {
   key: PathArchetype;
@@ -12,7 +12,7 @@ export interface PathArchetypeMeta {
   /** Safe route — uses only known existing routes or prepared placeholders */
   ctaTo: string;
   /** Lucide icon name resolved at render time */
-  icon: "Feather" | "Footprints" | "BookHeart" | "Sprout";
+  icon: "Feather" | "Footprints" | "BookHeart" | "Sprout" | "Flame";
   accent: string;
 }
 
@@ -52,5 +52,14 @@ export const PATH_ARCHETYPES: PathArchetypeMeta[] = [
     ctaTo: "/hives",
     icon: "Sprout",
     accent: "hsl(140, 40%, 45%)",
+  },
+  {
+    key: "spark",
+    title: "Spark Path",
+    hint: "For ideas, bug reports, tests, fixes, prompts, and small flashes that help S33D grow.",
+    ctaLabel: "Open Bug Garden",
+    ctaTo: "/bug-garden",
+    icon: "Flame",
+    accent: "hsl(28, 85%, 55%)",
   },
 ];
