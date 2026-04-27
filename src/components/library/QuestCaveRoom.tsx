@@ -484,6 +484,31 @@ export default function QuestCaveRoom() {
     return candidates.sort((a, b) => (b.progress / b.goal) - (a.progress / a.goal))[0];
   }, [quests]);
 
+  // Seasonal layer
+  const season: SeasonKey = useMemo(() => currentSeason(), []);
+  // v0.2: derive touched-seasons from a single visits count.
+  // Any visit ⇒ current season touched. Future: read per-visit timestamps.
+  const touchedSeasons = useMemo(() => {
+    const set = new Set<SeasonKey>();
+    if (activity.visits > 0) set.add(season);
+    return set;
+  }, [activity.visits, season]);
+
+  // Heart Flow shape — derived, not awarded yet.
+  const heartFlow = useMemo(() => {
+    const base = balance.totalHearts;
+    const completedQuests = quests.filter(q => q.status === "complete").length;
+    const bonus = completedQuests * 5;
+    return {
+      baseHearts: base,
+      bonusAvailable: bonus,
+      speciesFlow: Math.round(bonus * 0.34),
+      hearthFlow: Math.round(bonus * 0.33),
+      valueTreeContribution: Math.round(bonus * 0.33),
+      rewardStatus: (bonus > 0 ? "Claimable" : "Locked") as "Locked" | "Claimable" | "Earned",
+    };
+  }, [balance.totalHearts, quests]);
+
   return (
     <div className="space-y-6">
       {/* Threshold image / ambience */}
