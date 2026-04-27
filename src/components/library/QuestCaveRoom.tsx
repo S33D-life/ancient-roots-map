@@ -598,6 +598,17 @@ export default function QuestCaveRoom() {
         ))}
       </Tabs>
 
+      {/* Heart-flow / Value Tree shape */}
+      <QuestHeartFlowCard {...heartFlow} />
+
+      {/* Connection to the collective Blooming Map */}
+      <BloomingMapCard
+        individualTrees={activity.trees}
+        individualOfferings={activity.offerings}
+        collectiveTrees={activity.globalTrees}
+        collectiveOfferings={activity.globalOfferings}
+      />
+
       {/* Bridge back to Heartwood */}
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
         <p className="text-xs font-serif text-foreground/80">
