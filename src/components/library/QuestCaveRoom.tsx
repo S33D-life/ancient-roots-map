@@ -29,7 +29,14 @@ import DreamTreesPanel from "./quest-cave/DreamTreesPanel";
 import PathArchetypesPanel from "./quest-cave/PathArchetypesPanel";
 import BloomingMapCard from "./quest-cave/BloomingMapCard";
 import QuestHeartFlowCard from "./quest-cave/QuestHeartFlowCard";
-import { currentSeason, type SeasonKey } from "./quest-cave/seasonalQuestsConfig";
+import SectionHeading from "./quest-cave/SectionHeading";
+import {
+  currentSeason,
+  SEASONAL_QUESTS,
+  type SeasonKey,
+  type SeasonalQuestSeed,
+} from "./quest-cave/seasonalQuestsConfig";
+import type { RewardStatus } from "./quest-cave/rewardTypes";
 
 // ─────────────────────────────────────────────────────────────────
 // Quest model
