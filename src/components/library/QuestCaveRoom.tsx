@@ -511,6 +511,28 @@ export default function QuestCaveRoom() {
         recent={recent}
       />
 
+      {/* Seasonal layer — Spring is the first active step */}
+      <SeasonalQuestsPanel
+        season={season}
+        activity={{
+          trees: activity.trees,
+          offerings: activity.offerings,
+          whispers: activity.whispers,
+          visits: activity.visits,
+          globalTrees: activity.globalTrees,
+          globalOfferings: activity.globalOfferings,
+        }}
+      />
+
+      {/* Featured Four Seasons quest */}
+      <FourSeasonsCard currentSeason={season} touchedSeasons={touchedSeasons} />
+
+      {/* Dream Trees — UI-only seed list */}
+      <DreamTreesPanel />
+
+      {/* Choose Your Path Today */}
+      <PathArchetypesPanel />
+
       <Tabs defaultValue="path" className="w-full">
         <TabsList className="bg-muted/40 w-full justify-start overflow-x-auto">
           <TabsTrigger value="path" className="text-xs font-serif gap-1.5">
