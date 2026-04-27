@@ -1548,7 +1548,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                           if (error) throw error;
                           toast({ title: "Name saved ✨", description: `Now known as "${name.trim()}"` });
                         } catch (err: any) {
-                          toast({ title: "Could not save name", description: err.message, variant: "destructive" });
+                          toast({ title: "Could not save name", description: err?.message || "Please try again.", variant: "destructive" });
                         }
                       }}
                     >
