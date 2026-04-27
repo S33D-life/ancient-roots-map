@@ -23,6 +23,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import SeasonalQuestsPanel from "./quest-cave/SeasonalQuestsPanel";
+import FourSeasonsCard from "./quest-cave/FourSeasonsCard";
+import DreamTreesPanel from "./quest-cave/DreamTreesPanel";
+import PathArchetypesPanel from "./quest-cave/PathArchetypesPanel";
+import BloomingMapCard from "./quest-cave/BloomingMapCard";
+import QuestHeartFlowCard from "./quest-cave/QuestHeartFlowCard";
+import { currentSeason, type SeasonKey } from "./quest-cave/seasonalQuestsConfig";
 
 // ─────────────────────────────────────────────────────────────────
 // Quest model
