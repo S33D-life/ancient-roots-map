@@ -30,6 +30,7 @@ import PathArchetypesPanel from "./quest-cave/PathArchetypesPanel";
 import BloomingMapCard from "./quest-cave/BloomingMapCard";
 import QuestHeartFlowCard from "./quest-cave/QuestHeartFlowCard";
 import SectionHeading from "./quest-cave/SectionHeading";
+import SparkBugBountyPanel from "./quest-cave/SparkBugBountyPanel";
 import {
   currentSeason,
   SEASONAL_QUESTS,
@@ -666,6 +667,14 @@ export default function QuestCaveRoom() {
         whisper="How the cave routes care into the Value Tree."
       />
       <QuestHeartFlowCard {...heartFlow} />
+
+      {/* 6b — Spark & Bug Bounty (contribution layer) */}
+      <SectionHeading
+        glyph={<Sparkles />}
+        title="Spark & Bug Bounty"
+        whisper="Small flashes that help the living app grow stronger."
+      />
+      <SparkBugBountyPanel />
 
       {/* 7 — Blooming Map */}
       <SectionHeading

@@ -42,7 +42,14 @@ export type ValueTreeBranch =
   | "Collector Path / Seed Cellar"
   | "Collective Spring Bloom"
   | "Species Hive Canopy"
-  | "Great Quest / Spring Encounters";
+  | "Great Quest / Spring Encounters"
+  /** Spark / Bug Bounty branches — Builder & Trust lineage */
+  | "Spark Path / Builder Branch"
+  | "Bug Garden / Curator Branch"
+  | "Quality / Pilgrim / Builder"
+  | "Creator / Curator"
+  | "Trust / Curator"
+  | "Builder / Agentic Garden";
 
 export interface QuestRewardFlow {
   baseHeartsLabel?: string;

@@ -5,11 +5,11 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Feather, Footprints, BookHeart, Sprout } from "lucide-react";
+import { ArrowRight, Feather, Footprints, BookHeart, Sprout, Flame } from "lucide-react";
 import { PATH_ARCHETYPES, type PathArchetypeMeta } from "./pathArchetypes";
 
 const ICON_MAP: Record<PathArchetypeMeta["icon"], typeof Feather> = {
-  Feather, Footprints, BookHeart, Sprout,
+  Feather, Footprints, BookHeart, Sprout, Flame,
 };
 
 export default function PathArchetypesPanel() {
