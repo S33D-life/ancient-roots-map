@@ -6,11 +6,29 @@ import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getTreeRoot,
-  plantHearts,
+  plantHeartsDetailed,
   collectGrowth,
   calculateGrowth,
   type TreeRoot,
+  type PlantHeartsError,
 } from "@/lib/rootingService";
+
+/**
+ * Thrown by the `plant` mutation when the RPC refuses.
+ * Carries the structured error code so the UI can render warm,
+ * specific copy ("you need X more hearts to plant Y") rather than
+ * a generic "couldn't plant" toast.
+ */
+export class PlantHeartsRefused extends Error {
+  constructor(
+    public code: PlantHeartsError | "rpc_error",
+    public balance?: number,
+    public required?: number,
+  ) {
+    super(code);
+    this.name = "PlantHeartsRefused";
+  }
+}
 import { isWithinGracePeriod } from "@/utils/heartPoolState";
 
 export function useTreeRooting(
@@ -52,12 +70,16 @@ export function useTreeRooting(
       if (root && calculateGrowth(root) > 0) {
         await collectGrowth(userId!, treeId!).catch(() => {});
       }
-      return plantHearts({
+      const result = await plantHeartsDetailed({
         userId: userId!,
         treeId: treeId!,
         amount: params.amount,
         speciesKey: params.speciesKey,
       });
+      if (!result.ok) {
+        throw new PlantHeartsRefused(result.error, result.balance, result.required);
+      }
+      return result.root;
     },
     onSuccess: () => {
       invalidate();
