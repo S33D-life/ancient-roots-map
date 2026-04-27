@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2, Bot, Download } from "lucide-react";
+import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2, Bot, Download, Mountain } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 
 const links = [
@@ -10,13 +10,14 @@ const links = [
   { to: ROUTES.COUNCIL, icon: Leaf, label: "Council", sub: "Join the gathering" },
   { to: "/vault?from=hearth", icon: Archive, label: "Vault", sub: "Your treasury" },
   { to: ROUTES.STAFF_ROOM, icon: Wand2, label: "Staff Room", sub: "Founding circle" },
+  { to: "/library/quest-cave", icon: Mountain, label: "Quest Cave", sub: "Living paths" },
   { to: ROUTES.AGENT_GARDEN, icon: Bot, label: "Agent Garden", sub: "AI contributors" },
   { to: ROUTES.SUPPORT, icon: Heart, label: "Support", sub: "Nurture S33D" },
   { to: "/living-archive", icon: Download, label: "My Data", sub: "Sovereign export" },
 ];
 
 const HearthCrossLinks = () => (
-  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-9 gap-2">
+  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-10 gap-2">
     {links.map((l) => (
       <Link
         key={l.to}
