@@ -578,7 +578,12 @@ export default function QuestCaveRoom() {
         recent={recent}
       />
 
-      {/* Seasonal layer — Spring is the first active step */}
+      {/* 2 — Seasonal invitation */}
+      <SectionHeading
+        glyph={<Leaf />}
+        title="Seasonal Invitation"
+        whisper="Follow the seasons. Meet the trees as they change."
+      />
       <SeasonalQuestsPanel
         season={season}
         activity={{
@@ -590,16 +595,30 @@ export default function QuestCaveRoom() {
           globalOfferings: activity.globalOfferings,
         }}
       />
-
-      {/* Featured Four Seasons quest */}
       <FourSeasonsCard currentSeason={season} touchedSeasons={touchedSeasons} />
 
-      {/* Dream Trees — UI-only seed list */}
+      {/* 3 — Dream Trees */}
+      <SectionHeading
+        glyph={<Sparkles />}
+        title="Dream Trees"
+        whisper="Where dream trees become living paths."
+      />
       <DreamTreesPanel />
 
-      {/* Choose Your Path Today */}
+      {/* 4 — Paths */}
+      <SectionHeading
+        glyph={<Compass />}
+        title="Choose Your Path"
+        whisper="Reasons for journeying — not rigid roles."
+      />
       <PathArchetypesPanel />
 
+      {/* 5 — Active quest tabs */}
+      <SectionHeading
+        glyph={<Trophy />}
+        title="Living Quests"
+        whisper="Your active paths across the forest."
+      />
       <Tabs defaultValue="path" className="w-full">
         <TabsList className="bg-muted/40 w-full justify-start overflow-x-auto">
           <TabsTrigger value="path" className="text-xs font-serif gap-1.5">
@@ -640,10 +659,20 @@ export default function QuestCaveRoom() {
         ))}
       </Tabs>
 
-      {/* Heart-flow / Value Tree shape */}
+      {/* 6 — Heart Flow / Value Tree */}
+      <SectionHeading
+        glyph={<Heart />}
+        title="Heart Flow"
+        whisper="How the cave routes care into the Value Tree."
+      />
       <QuestHeartFlowCard {...heartFlow} />
 
-      {/* Connection to the collective Blooming Map */}
+      {/* 7 — Blooming Map */}
+      <SectionHeading
+        glyph={<MapIcon />}
+        title="Blooming Map"
+        whisper="What is awakening — alone and together."
+      />
       <BloomingMapCard
         individualTrees={activity.trees}
         individualOfferings={activity.offerings}
