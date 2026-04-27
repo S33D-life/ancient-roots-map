@@ -30,6 +30,7 @@ import PathArchetypesPanel from "./quest-cave/PathArchetypesPanel";
 import BloomingMapCard from "./quest-cave/BloomingMapCard";
 import QuestHeartFlowCard from "./quest-cave/QuestHeartFlowCard";
 import SectionHeading from "./quest-cave/SectionHeading";
+import SparkBugBountyPanel from "./quest-cave/SparkBugBountyPanel";
 import {
   currentSeason,
   SEASONAL_QUESTS,
