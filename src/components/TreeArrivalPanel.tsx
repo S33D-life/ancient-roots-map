@@ -17,7 +17,7 @@ import { hapticSuccess, hapticTap, hapticWhisperReveal } from "@/lib/haptics";
 import HeartCollectAnimation from "@/components/HeartCollectAnimation";
 import GraceCountdown from "@/components/GraceCountdown";
 import { useSpeciesResonance, getSpeciesHint } from "@/hooks/use-species-resonance";
-import { useTreeRooting } from "@/hooks/use-tree-rooting";
+import { useTreeRooting, PlantHeartsRefused } from "@/hooks/use-tree-rooting";
 import PlantHeartsModal from "@/components/PlantHeartsModal";
 
 interface TreeArrivalPanelProps {
@@ -145,7 +145,24 @@ export default function TreeArrivalPanel({
       } else {
         toast.error("Couldn't plant hearts right now. Please try again.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (err instanceof PlantHeartsRefused) {
+        if (err.code === "insufficient_hearts" && err.required && err.balance !== undefined) {
+          const need = Math.max(0, err.required - err.balance);
+          toast.error(`You need ${need} more heart${need !== 1 ? "s" : ""} to plant ${err.required} at ${treeName}.`);
+        } else if (err.code === "insufficient_hearts") {
+          toast.error("You don't have enough hearts available to plant right now.");
+        } else if (err.code === "tree_not_found") {
+          toast.error("This tree could not be found in the Atlas.");
+        } else if (err.code === "invalid_amount") {
+          toast.error("Please choose a whole number of hearts to plant.");
+        } else if (err.code === "unauthenticated") {
+          toast.error("Please sign in to plant hearts.");
+        } else {
+          toast.error("Couldn't plant hearts right now. Please try again.");
+        }
+        return;
+      }
       console.error("[PlantHearts] Error:", err);
       toast.error("Couldn't plant hearts right now. Please try again.");
     }
