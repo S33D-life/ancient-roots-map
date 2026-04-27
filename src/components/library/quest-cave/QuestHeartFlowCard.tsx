@@ -13,6 +13,7 @@ import { Heart, ArrowRight, Lock, ShieldCheck, Hourglass, Sparkles } from "lucid
 import { ROUTES } from "@/lib/routes";
 import {
   HEART_FLOW_MICROCOPY,
+  HEART_FLOW_NOTE,
   rewardButtonLabel,
   isRewardButtonDisabled,
   type RewardStatus,
