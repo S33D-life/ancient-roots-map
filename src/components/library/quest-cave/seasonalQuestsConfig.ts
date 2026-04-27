@@ -6,6 +6,8 @@ export type SeasonKey = "spring" | "summer" | "autumn" | "winter";
 
 export type SeasonalQuestScope = "individual" | "hearth" | "circle" | "collective";
 
+import type { QuestRewardFlow } from "./rewardTypes";
+
 export interface SeasonalQuestSeed {
   id: string;
   scope: SeasonalQuestScope;
@@ -14,6 +16,8 @@ export interface SeasonalQuestSeed {
   goal: number;
   /** Which activity field drives derived progress, if any */
   derivedFrom?: "trees" | "offerings" | "whispers" | "visits" | "globalTrees" | "globalOfferings";
+  /** Reward metadata — visual only in v0.2; no claiming yet. */
+  rewardFlow?: QuestRewardFlow;
 }
 
 export interface SeasonMeta {
