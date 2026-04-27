@@ -23,6 +23,7 @@ const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
 const TreeResources = lazy(() => import("@/components/TreeResources"));
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 const DevRoom = lazy(() => import("@/components/library/DevRoom"));
+const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
 
 // Room aliases for backward compatibility
 const ROOM_ALIASES: Record<string, string> = {
@@ -41,6 +42,7 @@ const ROOM_ALIASES: Record<string, string> = {
 
 const ROOM_LABELS: Record<string, string> = {
   "staff-room": "Staff Room",
+  "quest-cave": "Quest Cave",
   "gallery": "Ancient Friends",
   "music-room": "Music Room",
   "greenhouse": "Greenhouse",
@@ -58,6 +60,7 @@ const ROOM_LABELS: Record<string, string> = {
 const ROOM_SEQUENCE = [
   "gallery",
   "staff-room",
+  "quest-cave",
   "bookshelf",
   "seed-cellar",
   "music-room",
@@ -197,6 +200,7 @@ const HeartwoodRoomPage = () => {
     >
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
+        {resolvedRoom === "quest-cave" && <QuestCaveRoom />}
         {resolvedRoom === "music-room" && <MusicRoom />}
         {resolvedRoom === "greenhouse" && <Greenhouse />}
         {resolvedRoom === "wishlist" && <WishingTreeUnified />}
