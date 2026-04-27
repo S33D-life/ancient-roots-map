@@ -107,6 +107,7 @@ export default function SeasonalQuestsPanel({
                 )}
               </div>
               <Progress value={pct} className="h-1.5 bg-muted/40" />
+              <QuestRewardRow reward={q.rewardFlow} bloomed={done} />
             </div>
           );
         })}
