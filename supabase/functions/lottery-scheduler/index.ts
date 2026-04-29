@@ -26,11 +26,18 @@ function nextUtcMidnightAfter(d: Date): Date {
   );
 }
 
+type LunarType = "lunar_new" | "lunar_full";
+type SolarType =
+  | "solar_equinox_spring"
+  | "solar_solstice_summer"
+  | "solar_equinox_autumn"
+  | "solar_solstice_winter";
+
 function nextLunarMoments(count: number, from: Date): Array<{
-  draw_type: "lunar_new" | "lunar_full";
+  draw_type: LunarType;
   scheduled_at: Date;
 }> {
-  const out: Array<{ draw_type: "lunar_new" | "lunar_full"; scheduled_at: Date }> = [];
+  const out: Array<{ draw_type: LunarType; scheduled_at: Date }> = [];
   let cursor = new Date(from.getTime());
   while (out.length < count) {
     const nm = Astro.SearchMoonPhase(0, cursor, 40);
@@ -43,6 +50,44 @@ function nextLunarMoments(count: number, from: Date): Array<{
       out.push({ draw_type: "lunar_full", scheduled_at: nextUtcMidnightAfter(fm.date) });
     }
     cursor = new Date((fm ?? nm)!.date.getTime() + 60 * 60 * 1000);
+  }
+  return out
+    .sort((a, b) => a.scheduled_at.getTime() - b.scheduled_at.getTime())
+    .slice(0, count);
+}
+
+/**
+ * Returns the next `count` solar events (equinox/solstice) at or after `from`,
+ * snapped to the lottery moment (next UTC midnight after the astronomical event).
+ * Walks year-by-year so we always have a horizon ≥ 1 year of solar draws queued.
+ */
+function nextSolarMoments(count: number, from: Date): Array<{
+  draw_type: SolarType;
+  scheduled_at: Date;
+}> {
+  const out: Array<{ draw_type: SolarType; scheduled_at: Date }> = [];
+  let year = from.getUTCFullYear();
+  while (out.length < count) {
+    const sea = Astro.Seasons(year);
+    const candidates: Array<{ draw_type: SolarType; date: Date }> = [
+      { draw_type: "solar_equinox_spring", date: sea.mar_equinox.date },
+      { draw_type: "solstice_summer" as never, date: sea.jun_solstice.date },
+      { draw_type: "solar_equinox_autumn", date: sea.sep_equinox.date },
+      { draw_type: "solar_solstice_winter", date: sea.dec_solstice.date },
+    ].map((c, i) => ({
+      // Re-map to canonical names; index ensures correctness regardless of typo above
+      draw_type: (
+        ["solar_equinox_spring", "solar_solstice_summer", "solar_equinox_autumn", "solar_solstice_winter"] as SolarType[]
+      )[i],
+      date: c.date,
+    }));
+    for (const c of candidates) {
+      if (c.date.getTime() >= from.getTime() && out.length < count) {
+        out.push({ draw_type: c.draw_type, scheduled_at: nextUtcMidnightAfter(c.date) });
+      }
+    }
+    year += 1;
+    if (year > from.getUTCFullYear() + 5) break; // safety
   }
   return out
     .sort((a, b) => a.scheduled_at.getTime() - b.scheduled_at.getTime())
