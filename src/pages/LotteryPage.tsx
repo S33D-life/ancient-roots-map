@@ -23,7 +23,7 @@ import LotteryRecentDraws from "@/components/lottery/LotteryRecentDraws";
 import LotteryHowItWorks from "@/components/lottery/LotteryHowItWorks";
 
 const LotteryPage = () => {
-  useDocumentTitle("Twin Moons — Lottery & Yield");
+  useDocumentTitle("Twin Moons & Four Suns — Lottery & Yield");
   const navigate = useNavigate();
   const [authReady, setAuthReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
