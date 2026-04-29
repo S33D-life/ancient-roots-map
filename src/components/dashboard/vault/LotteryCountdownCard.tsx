@@ -28,9 +28,9 @@ const LotteryCountdownCard = () => {
         <div className="flex items-center gap-2">
           <Moon className="w-4 h-4 text-accent" />
           <h3 className="text-sm font-serif tracking-wide text-foreground">
-            Twin Moons
+            Moons & Suns
             <span className="text-[9px] text-muted-foreground font-normal ml-1">
-              Lottery & Yield
+              Plant hearts · enter every draw
             </span>
           </h3>
         </div>
