@@ -100,17 +100,59 @@ const HeartJar = ({ userId, className = "" }: Props) => {
       {/* Compact jar button */}
       <motion.button
         onClick={handleTap}
-        animate={tapPulse ? { scale: [1, 1.18, 1] } : { scale: 1 }}
-        transition={{ duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }}
+        animate={
+          tapPulse
+            ? { scale: [1, 1.18, 1] }
+            : awaitingAcknowledge
+            ? { scale: [1, 1.06, 1] }
+            : { scale: 1 }
+        }
+        transition={
+          tapPulse
+            ? { duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }
+            : awaitingAcknowledge
+            ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.3 }
+        }
         className={`relative group flex items-center gap-1.5 px-2 py-1 md:px-2.5 md:py-1.5 rounded-full border transition-all ${className}`}
         style={{
-          borderColor: tapPulse ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary) / 0.2)",
+          borderColor: tapPulse || awaitingAcknowledge
+            ? "hsl(var(--primary) / 0.65)"
+            : "hsl(var(--primary) / 0.2)",
           background: "hsl(var(--card) / 0.6)",
           backdropFilter: "blur(8px)",
-          boxShadow: tapPulse ? "0 0 24px hsl(var(--primary) / 0.45)" : undefined,
+          boxShadow: tapPulse
+            ? "0 0 24px hsl(var(--primary) / 0.45)"
+            : awaitingAcknowledge
+            ? "0 0 18px hsl(var(--primary) / 0.55)"
+            : undefined,
         }}
-        aria-label="Open Heart Jar — your living balances"
+        aria-label={
+          awaitingAcknowledge
+            ? "Open Heart Jar — new hearts have arrived"
+            : "Open Heart Jar — your living balances"
+        }
       >
+        {/* Sustained glow ring while hearts await acknowledgement */}
+        {awaitingAcknowledge && !tapPulse && (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{ boxShadow: "0 0 0 2px hsl(var(--primary) / 0.45)" }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+        {/* Small "new" dot */}
+        {awaitingAcknowledge && (
+          <motion.span
+            aria-hidden
+            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+            style={{ background: "hsl(var(--primary))", boxShadow: "0 0 8px hsl(var(--primary) / 0.8)" }}
+            animate={{ opacity: [0.6, 1, 0.6], scale: [0.9, 1.15, 0.9] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
         {/* Mini jar */}
         <div className="relative w-5 h-6 md:w-6 md:h-7 rounded-b-lg rounded-t-sm overflow-hidden"
           style={{
