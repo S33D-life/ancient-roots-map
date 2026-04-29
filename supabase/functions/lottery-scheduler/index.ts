@@ -7,8 +7,13 @@
 // All DB writes go through SECURITY DEFINER RPCs in public schema, called
 // with the service-role key. No client-facing endpoints needed.
 
-import { corsHeaders } from "@supabase/supabase-js/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 import * as Astro from "npm:astronomy-engine@2.1.19";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
