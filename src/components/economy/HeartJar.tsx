@@ -24,20 +24,42 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   const [tapPulse, setTapPulse] = useState(false);
   const prevBalance = useRef(balance.s33d);
   const [pulse, setPulse] = useState(false);
+  // Sustained glow that turns on when new hearts arrive and turns off only
+  // when the wanderer opens the jar (or after a long max window).
+  const [awaitingAcknowledge, setAwaitingAcknowledge] = useState(false);
 
-  // Detect balance changes → trigger glow
+  // Detect balance changes → trigger short pulse + sustained glow
   useEffect(() => {
     if (balance.s33d !== prevBalance.current && prevBalance.current !== 0) {
       setPulse(true);
+      setAwaitingAcknowledge(true);
       const t = setTimeout(() => setPulse(false), 1200);
       return () => clearTimeout(t);
     }
     prevBalance.current = balance.s33d;
   }, [balance.s33d]);
 
+  // Listen for explicit "hearts earned/available" signals — covers the case
+  // where the balance hook hasn't refreshed yet but rewards have flowed.
+  useEffect(() => {
+    const onEarned = () => setAwaitingAcknowledge(true);
+    window.addEventListener("s33d-hearts-earned", onEarned as EventListener);
+    return () => window.removeEventListener("s33d-hearts-earned", onEarned as EventListener);
+  }, []);
+
+  // Safety cap so the glow never runs forever if the user ignores it.
+  useEffect(() => {
+    if (!awaitingAcknowledge) return;
+    const t = setTimeout(() => setAwaitingAcknowledge(false), 60_000);
+    return () => clearTimeout(t);
+  }, [awaitingAcknowledge]);
+
   // Listen for global request to open the jar (from HeartbeatNotification taps).
   useEffect(() => {
-    const open = () => setOpen(true);
+    const open = () => {
+      setOpen(true);
+      setAwaitingAcknowledge(false);
+    };
     window.addEventListener("s33d-open-heart-jar", open as EventListener);
     return () => window.removeEventListener("s33d-open-heart-jar", open as EventListener);
   }, []);
