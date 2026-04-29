@@ -60,7 +60,7 @@ const LotteryNextDrawHero = ({ draw }: Props) => {
       />
       <div className="relative px-6 py-10 text-center space-y-5">
         <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70 font-serif">
-          Next Draw
+          {isSolar ? "Next Sun" : "Next Moon"}
         </div>
 
         <div className="space-y-2">
