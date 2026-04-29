@@ -23,7 +23,7 @@ import LotteryRecentDraws from "@/components/lottery/LotteryRecentDraws";
 import LotteryHowItWorks from "@/components/lottery/LotteryHowItWorks";
 
 const LotteryPage = () => {
-  useDocumentTitle("Twin Moons — Lottery & Yield");
+  useDocumentTitle("Twin Moons & Four Suns — Lottery & Yield");
   const navigate = useNavigate();
   const [authReady, setAuthReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
@@ -60,14 +60,14 @@ const LotteryPage = () => {
             {/* Page intro */}
             <header className="space-y-2 text-center">
               <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70 font-serif">
-                Twin Moons
+                Twin Moons · Four Suns
               </p>
               <h1 className="text-3xl sm:text-4xl font-serif text-foreground tracking-wide">
-                The Lottery of the Moons
+                The Lottery of the Moons & Suns
               </h1>
               <p className="text-sm font-serif text-muted-foreground italic max-w-lg mx-auto leading-relaxed">
-                Stake hearts at trees to earn yield. Earn hearts to gather tickets.
-                The forest shares what has gathered at every new and full moon.
+                Plant hearts at trees you love — they root, return yield, and enter you in
+                every new moon, full moon, equinox and solstice draw.
               </p>
             </header>
 

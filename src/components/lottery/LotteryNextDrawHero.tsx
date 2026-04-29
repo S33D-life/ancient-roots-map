@@ -26,12 +26,21 @@ const LotteryNextDrawHero = ({ draw }: Props) => {
 
   const yieldPct = (draw.yield_bps / 100).toFixed(1);
   const phase = draw.draw_type;
+  const isSolar = phase.startsWith("solar_");
   // Subtle glow color per phase
   const glow =
     phase === "lunar_full"
       ? "hsl(48 60% 70%)"
       : phase === "lunar_new"
       ? "hsl(240 30% 35%)"
+      : phase === "solar_equinox_spring"
+      ? "hsl(340 55% 75%)"
+      : phase === "solar_solstice_summer"
+      ? "hsl(38 80% 65%)"
+      : phase === "solar_equinox_autumn"
+      ? "hsl(22 60% 55%)"
+      : phase === "solar_solstice_winter"
+      ? "hsl(210 40% 70%)"
       : "hsl(200 40% 60%)";
 
   return (
@@ -51,7 +60,7 @@ const LotteryNextDrawHero = ({ draw }: Props) => {
       />
       <div className="relative px-6 py-10 text-center space-y-5">
         <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70 font-serif">
-          Next Draw
+          {isSolar ? "Next Sun" : "Next Moon"}
         </div>
 
         <div className="space-y-2">
