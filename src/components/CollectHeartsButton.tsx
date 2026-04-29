@@ -47,7 +47,7 @@ export default function CollectHeartsButton({
     if (amount && amount > 0) {
       if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
       toast.success(`${amount} heart${amount !== 1 ? "s" : ""} gathered from ${treeName}`, { icon: "🌿" });
-      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
+      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount, source: "collect" } }));
     } else if (amount === 0) {
       toast("No hearts available right now", { icon: "🌳", description: "Hearts accumulate as wanderers visit" });
     } else {
