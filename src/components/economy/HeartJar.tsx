@@ -74,9 +74,9 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     if (open) return;
     if (navigator.vibrate) navigator.vibrate(20);
     setTapPulse(true);
+    setAwaitingAcknowledge(false);
     window.setTimeout(() => {
       setOpen(true);
-      // Let the pulse continue underneath the overlay for a moment, then reset.
       window.setTimeout(() => setTapPulse(false), 400);
     }, 280);
   };
