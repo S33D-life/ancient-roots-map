@@ -35,6 +35,13 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     prevBalance.current = balance.s33d;
   }, [balance.s33d]);
 
+  // Listen for global request to open the jar (from HeartbeatNotification taps).
+  useEffect(() => {
+    const open = () => setOpen(true);
+    window.addEventListener("s33d-open-heart-jar", open as EventListener);
+    return () => window.removeEventListener("s33d-open-heart-jar", open as EventListener);
+  }, []);
+
   /**
    * Tap handler — let the jar animate in place BEFORE the overlay covers it.
    * Sequence: tap → jar pulse/burst (~280ms) → sheet slides up.
