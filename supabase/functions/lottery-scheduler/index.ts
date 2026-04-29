@@ -137,8 +137,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ─── 2. Re-seed the next 4 lunar draws (idempotent) ──────────
-    const moments = nextLunarMoments(4, new Date());
+    // ─── 2. Re-seed the next 4 lunar + next 4 solar draws (idempotent) ─
+    const lunar = nextLunarMoments(4, new Date());
+    const solar = nextSolarMoments(4, new Date());
+    const moments = [...lunar, ...solar];
     for (const m of moments) {
       const { data, error } = await supabase.rpc("schedule_lottery_draw", {
         p_draw_type: m.draw_type,
