@@ -100,7 +100,7 @@ export default function TreeArrivalPanel({
     if (amount && amount > 0) {
       hapticSuccess();
       toast.success(`${amount} hearts gathered from this tree`, { icon: "💚" });
-      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
+      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount, source: "checkin" } }));
     } else if (amount === 0) {
       toast("No hearts ready to gather yet", {
         icon: "🌳",

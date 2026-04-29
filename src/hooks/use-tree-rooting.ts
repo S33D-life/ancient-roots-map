@@ -93,7 +93,7 @@ export function useTreeRooting(
       if (result && result.growth > 0) {
         window.dispatchEvent(
           new CustomEvent("s33d-hearts-earned", {
-            detail: { amount: result.growth },
+            detail: { amount: result.growth, source: "collect" },
           })
         );
       }
