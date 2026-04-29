@@ -218,7 +218,7 @@ export function setupPopupActions(container: HTMLElement): () => void {
           heartsBtn.style.borderColor = "hsla(140, 40%, 45%, 0.3)";
           heartsBtn.style.boxShadow = "0 0 16px hsla(140, 45%, 50%, 0.2)";
           toast.success(`${amount} heart${amount !== 1 ? "s" : ""} gathered!`, { icon: "🌿" });
-          window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
+          window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount, source: "collect" } }));
         } else {
           heartsBtn.textContent = "No hearts ready yet";
           heartsBtn.style.opacity = "1";
