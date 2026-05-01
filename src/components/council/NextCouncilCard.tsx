@@ -4,7 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video, Sparkles, Leaf } from "lucide-react";
+import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video } from "lucide-react";
+import CouncilScrollEmbed from "./CouncilScrollEmbed";
 import {
   getCurrentCouncilWithOverrides,
   getNextCouncilWithOverrides,
