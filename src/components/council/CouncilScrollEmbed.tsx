@@ -1,20 +1,22 @@
 /**
  * CouncilScrollEmbed — The "living scroll" of the Council invitation.
- * Embeds the current Notion invitation page. Update COUNCIL_INVITATION_URL
- * each new/full moon — everything else updates automatically.
+ *
+ * To update the invitation each cycle, edit src/config/councilInvitation.ts.
  */
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  COUNCIL_INVITATION_PUBLIC_URL,
+  COUNCIL_INVITATION_EMBED_URL,
+} from "@/config/councilInvitation";
 
-/** Single source of truth for the current Council invitation. Update per cycle. */
-export const COUNCIL_INVITATION_URL =
-  "https://clammy-viscount-ddb.notion.site/2ee15b58480d80c28ccce97480f7a69d";
+// Re-export for any legacy imports of this constant from this module.
+export { COUNCIL_INVITATION_PUBLIC_URL as COUNCIL_INVITATION_URL };
 
-/** Notion embed URL (uses the /ebd/ path for an embeddable view). */
-const COUNCIL_INVITATION_EMBED_URL =
-  "https://clammy-viscount-ddb.notion.site/ebd/2ee15b58480d80c28ccce97480f7a69d";
+const LOAD_TIMEOUT_MS = 10000;
 
 const CouncilScrollEmbed = () => {
   const [loaded, setLoaded] = useState(false);
@@ -25,12 +27,12 @@ const CouncilScrollEmbed = () => {
     if (loadedRef.current || errored) return;
     const t = setTimeout(() => {
       if (!loadedRef.current) setErrored(true);
-    }, 10000);
+    }, LOAD_TIMEOUT_MS);
     return () => clearTimeout(t);
   }, [errored]);
 
   const openInNotion = () => {
-    window.open(COUNCIL_INVITATION_URL, "_blank", "noopener,noreferrer");
+    window.open(COUNCIL_INVITATION_PUBLIC_URL, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -57,46 +59,55 @@ const CouncilScrollEmbed = () => {
       </div>
 
       {/* Embed container */}
-      <div className="relative rounded-lg overflow-hidden border border-border/30 bg-card/30">
-        {!loaded && !errored && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card/60 backdrop-blur-sm">
-            <div className="w-7 h-7 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            <p className="text-xs text-muted-foreground/50 font-serif mt-3 italic">
-              Unrolling the scroll…
-            </p>
-          </div>
-        )}
-
+      <div className="relative rounded-lg overflow-hidden border border-border/30 bg-card/30 min-h-[520px] md:min-h-[680px]">
         {errored ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 px-4 text-center">
-            <p className="text-sm text-muted-foreground font-serif italic">
+          // Calm fallback card
+          <div className="flex flex-col items-center justify-center py-16 gap-4 px-6 text-center min-h-[520px] md:min-h-[680px]">
+            <ScrollText className="h-8 w-8 text-primary/40" />
+            <p className="text-sm md:text-base text-muted-foreground font-serif italic max-w-sm">
               The scroll could not unfurl here.
             </p>
-            <Button variant="outline" size="sm" onClick={openInNotion} className="gap-2 font-serif">
+            <Button variant="outline" size="sm" onClick={openInNotion} className="gap-2 font-serif tracking-wide">
               <ExternalLink className="w-3.5 h-3.5" />
-              Open in Notion
+              Open Full Scroll in Notion
             </Button>
           </div>
         ) : (
-          <iframe
-            src={COUNCIL_INVITATION_EMBED_URL}
-            className="w-full h-[520px] md:h-[680px] block"
-            frameBorder={0}
-            loading="lazy"
-            allowFullScreen
-            title="Council Invitation Scroll"
-            onLoad={() => { loadedRef.current = true; setLoaded(true); }}
-            onError={() => setErrored(true)}
-          />
-        )}
-
-        {/* Optional fade gradient at bottom */}
-        {loaded && !errored && (
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[hsl(var(--card)/0.6)] to-transparent" />
+          <>
+            {!loaded && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-card/60 backdrop-blur-sm px-6">
+                <div className="w-full max-w-sm space-y-3">
+                  <Skeleton className="h-4 w-3/4 mx-auto bg-primary/10" />
+                  <Skeleton className="h-4 w-full bg-primary/10" />
+                  <Skeleton className="h-4 w-5/6 bg-primary/10" />
+                  <Skeleton className="h-4 w-2/3 mx-auto bg-primary/10" />
+                </div>
+                <p className="text-xs text-muted-foreground/60 font-serif mt-2 italic">
+                  Unrolling the scroll…
+                </p>
+              </div>
+            )}
+            <iframe
+              src={COUNCIL_INVITATION_EMBED_URL}
+              className="w-full h-[520px] md:h-[680px] block"
+              frameBorder={0}
+              loading="lazy"
+              allowFullScreen
+              title="Council Invitation Scroll"
+              onLoad={() => {
+                loadedRef.current = true;
+                setLoaded(true);
+              }}
+              onError={() => setErrored(true)}
+            />
+            {loaded && (
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[hsl(var(--card)/0.6)] to-transparent" />
+            )}
+          </>
         )}
       </div>
 
-      {/* Fallback link */}
+      {/* Persistent fallback link */}
       <div className="flex flex-col items-center gap-1.5 pt-1">
         <Button
           variant="outline"
