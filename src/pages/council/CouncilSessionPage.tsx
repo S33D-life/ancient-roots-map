@@ -13,7 +13,7 @@ import {
   type ParticipationSyncState,
 } from "@/data/council/councilParticipation";
 import EarlyCouncilRecognition from "@/components/council/EarlyCouncilRecognition";
-import CouncilScrollEmbed from "@/components/council/CouncilScrollEmbed";
+
 import CouncilQuickView from "@/components/council/CouncilQuickView";
 import { useCouncilInvitation } from "@/hooks/use-council-invitation";
 import { Button } from "@/components/ui/button";
@@ -348,4 +348,14 @@ export default function CouncilSessionPage() {
       <Footer />
     </div>
   );
+}
+
+/**
+ * Small wrapper that subscribes to the unified CouncilInvitation and
+ * renders the shared Quick View (with Council Scroll) for the current
+ * session. Kept inside this file because it's only used here.
+ */
+function CurrentSessionAgenda() {
+  const invitation = useCouncilInvitation();
+  return <CouncilQuickView invitation={invitation} />;
 }
