@@ -18,6 +18,8 @@ import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import CuratorEditor from "@/components/council/CuratorEditor";
+import CouncilQuickView from "@/components/council/CouncilQuickView";
+import { useCouncilInvitation } from "@/hooks/use-council-invitation";
 import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides";
 
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
@@ -76,6 +78,7 @@ const CouncilOfLifePage = () => {
   const [linkedRegions, setLinkedRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [curatorOpen, setCuratorOpen] = useState(false);
   const [curatorRefreshKey, setCuratorRefreshKey] = useState(0);
+  const invitation = useCouncilInvitation(curatorRefreshKey);
 
   useEffect(() => {
     supabase
