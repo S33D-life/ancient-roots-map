@@ -13,6 +13,7 @@ import {
   type ParticipationSyncState,
 } from "@/data/council/councilParticipation";
 import EarlyCouncilRecognition from "@/components/council/EarlyCouncilRecognition";
+import CouncilScrollEmbed from "@/components/council/CouncilScrollEmbed";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles, Leaf, FolderTree, Lightbulb, Heart, CheckCircle2, Clock, Loader2, CloudOff, RefreshCw } from "lucide-react";
@@ -239,60 +240,63 @@ export default function CouncilSessionPage() {
             <EarlyCouncilRecognition sessionId={session.id} />
           )}
 
-          {/* Invocation */}
-          <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-4">
-            <CardContent className="p-5">
-              <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2">
-                Invocation
+          {/* Opening Invocation */}
+          <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-5">
+            <CardContent className="p-5 md:p-6">
+              <h2 className="font-serif text-[11px] tracking-[0.18em] uppercase text-muted-foreground/50 mb-3">
+                Opening Invocation
               </h2>
-              <p className="text-sm font-serif italic text-muted-foreground leading-relaxed">
+              <p className="text-[15px] font-serif italic text-muted-foreground leading-[1.7]">
                 "{session.agenda.invocation}"
               </p>
             </CardContent>
           </Card>
 
           {/* This Moon */}
-          <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-4">
-            <CardContent className="p-5">
-              <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2">
+          <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-5">
+            <CardContent className="p-5 md:p-6">
+              <h2 className="font-serif text-[11px] tracking-[0.18em] uppercase text-muted-foreground/50 mb-3">
                 This Moon
               </h2>
-              <p className="text-sm font-serif text-foreground/80 leading-relaxed">
+              <p className="text-[15px] font-serif text-foreground/80 leading-[1.7] line-clamp-3">
                 {session.agenda.thisMoon}
               </p>
             </CardContent>
           </Card>
 
-          {/* Time Tree Question */}
-          <Card className="bg-card/60 backdrop-blur-sm border-primary/20 mb-4">
-            <CardContent className="p-5">
-              <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3 text-primary" /> The Time Tree
+          {/* Time Tree Question — emphasised */}
+          <Card className="relative bg-card/70 backdrop-blur-sm border-primary/30 mb-5 overflow-hidden shadow-[0_0_28px_-14px_hsl(var(--primary)/0.55)]">
+            <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-primary/15" />
+            <CardContent className="p-6 md:p-7">
+              <h2 className="font-serif text-[11px] tracking-[0.18em] uppercase text-primary/70 mb-3 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> The Time Tree
               </h2>
-              <p className="text-sm font-serif italic text-foreground/80 leading-relaxed mb-3">
+              <p className="text-lg md:text-xl font-serif italic text-foreground/90 leading-[1.55] mb-5">
                 "{session.agenda.timeTreeQuestion}"
               </p>
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs font-serif"
+                className="text-xs font-serif tracking-wide gap-1.5 border-primary/40"
                 onClick={() => navigate("/time-tree")}
               >
-                <Sparkles className="h-3 w-3 mr-1" /> Visit the Time Tree
+                <Sparkles className="h-3 w-3" /> Offer to the Time Tree
               </Button>
             </CardContent>
           </Card>
 
-          {/* Focus Areas */}
-          <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-4">
-            <CardContent className="p-5">
-              <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3">
+          {/* Focus Areas — glance items */}
+          <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-5">
+            <CardContent className="p-5 md:p-6">
+              <h2 className="font-serif text-[11px] tracking-[0.18em] uppercase text-muted-foreground/50 mb-4">
                 Focus Areas
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-3.5">
                 {session.agenda.focusAreas.map((area, i) => (
-                  <li key={i} className="text-sm text-foreground/80 font-serif flex items-start gap-2">
-                    <span className="text-primary/60 mt-0.5">·</span>
+                  <li
+                    key={i}
+                    className="text-[15px] md:text-base font-serif text-foreground/85 leading-snug"
+                  >
                     {area}
                   </li>
                 ))}
@@ -300,35 +304,45 @@ export default function CouncilSessionPage() {
             </CardContent>
           </Card>
 
-          {/* Highlights */}
+          {/* In Focus (Plant / Tree) */}
           {session.highlights && Object.values(session.highlights).some(Boolean) && (
-            <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-4">
-              <CardContent className="p-5">
-                <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3">
+            <Card className="bg-card/60 backdrop-blur-sm border-border/30 mb-5">
+              <CardContent className="p-5 md:p-6">
+                <h2 className="font-serif text-[11px] tracking-[0.18em] uppercase text-muted-foreground/50 mb-4">
                   In Focus This Cycle
                 </h2>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {session.highlights.plant && (
-                    <div className="flex items-center gap-2 text-sm font-serif text-foreground/80">
-                      <Leaf className="h-3.5 w-3.5 text-primary/60" />
+                    <div className="flex items-center gap-2.5 text-[15px] font-serif text-foreground/85">
+                      <Leaf className="h-4 w-4 text-primary/60 shrink-0" />
                       <span>{session.highlights.plant}</span>
                     </div>
                   )}
                   {session.highlights.tree && (
-                    <div className="flex items-center gap-2 text-sm font-serif text-foreground/80">
-                      <FolderTree className="h-3.5 w-3.5 text-primary/60" />
+                    <div className="flex items-center gap-2.5 text-[15px] font-serif text-foreground/85">
+                      <FolderTree className="h-4 w-4 text-primary/60 shrink-0" />
                       <span>{session.highlights.tree}</span>
                     </div>
                   )}
                   {session.highlights.project && (
-                    <div className="flex items-center gap-2 text-sm font-serif text-foreground/80">
-                      <Lightbulb className="h-3.5 w-3.5 text-primary/60" />
+                    <div className="flex items-center gap-2.5 text-[15px] font-serif text-foreground/85">
+                      <Lightbulb className="h-4 w-4 text-primary/60 shrink-0" />
                       <span>{session.highlights.project}</span>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Transition into the Council Scroll (current session only) */}
+          {timing === "current" && (
+            <>
+              <p className="text-center text-sm font-serif italic text-muted-foreground/70 leading-relaxed my-6 px-2">
+                For the full invitation, stories, and deeper context — continue into the Council Scroll.
+              </p>
+              <CouncilScrollEmbed />
+            </>
           )}
         </div>
       </main>
