@@ -25,21 +25,35 @@ interface NextCouncilCardProps {
   onEditCouncil?: () => void;
 }
 
+const AGENDA_OPEN_KEY = "council_agenda_open";
+
 const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCouncilCardProps) => {
   const [agendaOpen, setAgendaOpen] = useState(() => {
     try {
+      const stored = localStorage.getItem(AGENDA_OPEN_KEY);
+      if (stored !== null) return stored === "true";
+      // First visit: open by default, mirroring previous behavior.
       return !localStorage.getItem("council_agenda_seen");
     } catch {
       return false;
     }
   });
+  const prefersReducedMotion = (() => {
+    try {
+      return typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    } catch {
+      return false;
+    }
+  })();
   const navigate = useNavigate();
 
   const handleAgendaChange = (open: boolean) => {
     setAgendaOpen(open);
-    if (open) {
-      try { localStorage.setItem("council_agenda_seen", "true"); } catch {}
-    }
+    try {
+      localStorage.setItem(AGENDA_OPEN_KEY, open ? "true" : "false");
+      if (open) localStorage.setItem("council_agenda_seen", "true");
+    } catch {}
   };
 
   // Re-read when refreshKey changes (after curator save)
@@ -134,10 +148,17 @@ const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCounc
       {/* ── Council Scroll reveal — the living invitation ── */}
       <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
         <CollapsibleContent
-          className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
+          className={
+            prefersReducedMotion
+              ? "overflow-hidden"
+              : "overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
+          }
           onAnimationEnd={(e) => {
             if (agendaOpen && e.currentTarget) {
-              e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              e.currentTarget.scrollIntoView({
+                behavior: prefersReducedMotion ? "auto" : "smooth",
+                block: "nearest",
+              });
             }
           }}
         >
