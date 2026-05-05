@@ -21,8 +21,7 @@ export default function DigestSummaryCards({ summary }: { summary: AncientFriend
     return (
       <Card className="bg-card/60 border-primary/20">
         <CardContent className="p-6 text-center font-serif italic text-muted-foreground">
-          No recorded Ancient Friends activity in this moon window yet.
-          The grove is quiet, but the next offering can begin the record.
+          No Ancient Friends activity found in this moon window yet.
         </CardContent>
       </Card>
     );
