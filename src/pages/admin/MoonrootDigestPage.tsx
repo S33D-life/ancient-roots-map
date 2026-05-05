@@ -83,7 +83,11 @@ export default function MoonrootDigestPage() {
       toast({ title: "Moonroot Digest gathered", description: "Scroll below to preview & copy." });
     } catch (err) {
       console.error("[Moonroot] generation failed", err);
-      toast({ title: "Could not gather digest", description: String((err as any)?.message || err), variant: "destructive" });
+      toast({
+        title: "Could not gather this digest yet",
+        description: "Check the user ID and date range.",
+        variant: "destructive",
+      });
     } finally {
       setGenerating(false);
     }
