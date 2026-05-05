@@ -72,7 +72,7 @@ export default function DigestControls(p: Props) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground font-serif italic">
-            Paste any profile UUID. Use “Me” to preview your own digest.
+            For now, paste a profile UUID or use Me. Search comes later.
           </p>
         </div>
 

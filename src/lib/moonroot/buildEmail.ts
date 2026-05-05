@@ -17,7 +17,7 @@ export function buildMoonrootEmailSubject(digest: MoonrootDigest): string {
 
 export function buildMoonrootEmailMarkdown(digest: MoonrootDigest): string {
   const { user, ancientFriendsSummary: a, lunarLifeLedger: l, councilInvitation: c } = digest;
-  const name = user.fullName || "friend";
+  const name = user.fullName?.trim() || "Wanderer";
 
   const topTreeLine = a.topTree
     ? `\nYour most-visited Ancient Friend this moon was **${a.topTree.name}** (${a.topTree.species}) — ${a.topTree.visits} visit${a.topTree.visits === 1 ? "" : "s"}.\n`

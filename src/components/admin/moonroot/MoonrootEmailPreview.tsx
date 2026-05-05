@@ -19,13 +19,15 @@ export default function MoonrootEmailPreview({ digest }: { digest: MoonrootDiges
         <CopyButton text={plain} label="Copy email text" />
         <CopyButton text={markdown} label="Copy markdown" />
       </div>
-      <Card className="bg-card/70 border-primary/20">
-        <CardContent className="p-4">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground font-serif mb-1">Subject</div>
-          <div className="font-serif text-base text-foreground mb-4">{subject}</div>
-          <pre className="whitespace-pre-wrap font-serif text-sm leading-relaxed text-foreground/90">
-{markdown}
-          </pre>
+      <Card className="bg-[hsl(var(--card))]/80 border-primary/20 shadow-inner">
+        <CardContent className="p-6 md:p-8">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-serif mb-2">Subject</div>
+          <div className="font-serif text-lg md:text-xl text-foreground mb-6 border-b border-primary/10 pb-4">
+            {subject}
+          </div>
+          <div className="prose prose-sm max-w-none font-serif text-foreground/90 leading-relaxed whitespace-pre-wrap">
+            {markdown}
+          </div>
         </CardContent>
       </Card>
     </div>
