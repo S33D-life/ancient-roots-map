@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   text: string;
@@ -14,9 +15,11 @@ export default function CopyButton({ text, label, className }: Props) {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
+      toast("Copied to clipboard");
       setTimeout(() => setCopied(false), 1800);
     } catch (err) {
       console.warn("[Moonroot] clipboard failed", err);
+      toast("Could not copy — try selecting the text manually");
     }
   };
   return (

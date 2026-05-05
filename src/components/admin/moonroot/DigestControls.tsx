@@ -27,6 +27,16 @@ const daysAgo = (n: number) => {
   return d.toISOString().slice(0, 10);
 };
 
+/**
+ * Date preset helper.
+ *
+ * Test reference (manual QA):
+ *   weekly             → last 7 days  → end = today, start = today - 7
+ *   new_moon/full_moon → last 14 days → end = today, start = today - 14
+ *   custom             → caller-controlled (manual dates, not overwritten)
+ *
+ * Keep this pure & synchronous so it stays easy to unit-test later.
+ */
 export function presetRange(type: MoonrootDigestType): { start: string; end: string } {
   switch (type) {
     case "weekly": return { start: daysAgo(7), end: today() };
