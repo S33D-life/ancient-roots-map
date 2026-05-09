@@ -1023,6 +1023,51 @@ export type Database = {
           },
         ]
       }
+      bloom_offerings: {
+        Row: {
+          created_at: string
+          hearts_rewarded: number
+          id: string
+          image_url: string
+          latitude: number | null
+          longitude: number | null
+          note: string | null
+          season: string
+          species_guess: string | null
+          tree_id: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          hearts_rewarded?: number
+          id?: string
+          image_url: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          season: string
+          species_guess?: string | null
+          tree_id: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          hearts_rewarded?: number
+          id?: string
+          image_url?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          season?: string
+          species_guess?: string | null
+          tree_id?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       book_catalog: {
         Row: {
           author: string
