@@ -1066,6 +1066,9 @@ const TreeDetailPage = () => {
                 </motion.div>
               </CollapsibleContent>
             </Collapsible>
+
+            {/* Blooms Nearby — seasonal flower offerings */}
+            <BloomsNearbySection treeId={id!} />
           </TabsContent>
 
           {/* ── ENCOUNTERS TAB ── */}
