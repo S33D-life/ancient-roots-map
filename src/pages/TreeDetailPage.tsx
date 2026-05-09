@@ -48,6 +48,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering, findFlatPhotoIndex, flattenOfferingPhotos } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 import TreeWitnessStrip from "@/components/tree-detail/TreeWitnessStrip";
+import BloomsNearbySection from "@/components/blooms/BloomsNearbySection";
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
 const InviterContext = lazy(() => import("@/components/InviterContext"));
 const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
