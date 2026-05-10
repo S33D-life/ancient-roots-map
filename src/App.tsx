@@ -327,6 +327,7 @@ const App = () => {
                 <Route path="/" element={realm(<TetolHomePage />, "tetol-out")} />
                 <Route path="/s33d" element={realm(<S33dGatewayPage />, "seed")} />
                 <Route path="/ancient-friends" element={<Navigate to="/map" replace />} />
+                <Route path="/heartwood/quest-cave" element={realm(<QuestCavePage />, "trunk")} />
                 <Route path="/heartwood" element={<Navigate to="/library" replace />} />
                 <Route path="/your-golden-dream" element={<Navigate to="/golden-dream" replace />} />
                 <Route path="/map" element={<MapPage />} />
