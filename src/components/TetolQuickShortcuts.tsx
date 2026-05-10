@@ -4,7 +4,7 @@
  */
 import { Link } from "react-router-dom";
 import {
-  Smartphone, TreePine, Hexagon, Heart, Sparkles, Map as MapIcon,
+  Smartphone, TreePine, Hexagon, Heart, Sparkles, Map as MapIcon, Brain,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
@@ -20,6 +20,7 @@ const DEFAULT_SHORTCUTS: Shortcut[] = [
   { to: "/library/music-room", label: "Tree Radio", icon: Smartphone },
   { to: ROUTES.MAP, label: "Map", icon: MapIcon },
   { to: "/hives", label: "Hives", icon: Hexagon },
+  { to: ROUTES.TETOL_BRAIN, label: "Brain", icon: Brain },
   { to: ROUTES.SUPPORT, label: "Support", icon: Heart },
   { to: ROUTES.VAULT, label: "Vault", icon: Sparkles },
   { to: ROUTES.ROADMAP, label: "Roadmap", icon: MapIcon },

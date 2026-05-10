@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      brain_notes: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          slug: string | null
+          content: string
+          tags: string[]
+          is_public: boolean
+          linked_tree_ids: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title?: string
+          slug?: string | null
+          content?: string
+          tags?: string[]
+          is_public?: boolean
+          linked_tree_ids?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          slug?: string | null
+          content?: string
+          tags?: string[]
+          is_public?: boolean
+          linked_tree_ids?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brain_notes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       agent_capabilities: {
         Row: {
           active: boolean

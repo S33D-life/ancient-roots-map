@@ -46,6 +46,8 @@ export const ROUTES = {
   HARVEST_DETAIL: (id: string) => `/harvest/${id}` as const,
   /** Living Forest Roadmap */
   ROADMAP: "/roadmap",
+  /** TETOL Second Brain — Obsidian-style knowledge notes */
+  TETOL_BRAIN: "/tetol-brain",
   /** Species Hives index */
   HIVES: "/hives",
   /** Species Hive dashboard */

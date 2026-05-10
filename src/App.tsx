@@ -181,6 +181,7 @@ const TreeAtlasExpansionMapPage = lazyImportWithRetry(() => import("./pages/Tree
 const SeedPlanGeneratorPage = lazyImportWithRetry(() => import("./pages/SeedPlanGeneratorPage"), "seed-plan-generator");
 const CanopyProjectionPage = lazyImportWithRetry(() => import("./pages/CanopyProjectionPage"), "canopy-projection");
 const TelegramHandoffPage = lazyImportWithRetry(() => import("./pages/TelegramHandoffPage"), "telegram-handoff");
+const TetolBrainPage = lazyImportWithRetry(() => import("./pages/TetolBrainPage"), "tetol-brain");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -433,6 +434,7 @@ const App = () => {
                 <Route path="/canopy-projection" element={<CanopyProjectionPage />} />
                 <Route path="/ecosystem" element={<EcosystemMapPage />} />
                 <Route path="/telegram-handoff" element={<TelegramHandoffPage />} />
+                <Route path="/tetol-brain" element={realm(<TetolBrainPage />, "trunk")} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
