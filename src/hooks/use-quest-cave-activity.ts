@@ -26,8 +26,11 @@ const ZERO: Omit<QuestCaveActivity, "loading"> = {
   totalHearts: 0, globalTrees: 0, globalOfferings: 0, globalBlooms: 0,
 };
 
-async function safeCount(p: Promise<{ count: number | null }>): Promise<number> {
-  try { return (await p).count ?? 0; } catch { return 0; }
+async function safeCount(builder: any): Promise<number> {
+  try {
+    const { count } = await builder;
+    return count ?? 0;
+  } catch { return 0; }
 }
 
 export function useQuestCaveActivity(userId: string | null) {
@@ -37,17 +40,18 @@ export function useQuestCaveActivity(userId: string | null) {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const userScoped = (q: any) => userId ? q : Promise.resolve({ count: 0 });
+      const userScoped = async (run: () => Promise<number>) =>
+        userId ? run() : 0;
 
       const [
         trees, visits, offerings, whispers, blooms,
         gTrees, gOfferings, gBlooms,
       ] = await Promise.all([
-        userScoped(safeCount(supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId!))),
-        userScoped(safeCount(supabase.from("tree_checkins").select("*", { count: "exact", head: true }).eq("user_id", userId!))),
-        userScoped(safeCount(supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId!))),
-        userScoped(safeCount(supabase.from("tree_whispers" as any).select("*", { count: "exact", head: true }).eq("sender_user_id", userId!))),
-        userScoped(safeCount(supabase.from("bloom_offerings" as any).select("*", { count: "exact", head: true }).eq("user_id", userId!))),
+        userScoped(() => safeCount(supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId!))),
+        userScoped(() => safeCount(supabase.from("tree_checkins").select("*", { count: "exact", head: true }).eq("user_id", userId!))),
+        userScoped(() => safeCount(supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId!))),
+        userScoped(() => safeCount(supabase.from("tree_whispers" as any).select("*", { count: "exact", head: true }).eq("sender_user_id", userId!))),
+        userScoped(() => safeCount(supabase.from("bloom_offerings" as any).select("*", { count: "exact", head: true }).eq("user_id", userId!))),
         safeCount(supabase.from("trees").select("*", { count: "exact", head: true })),
         safeCount(supabase.from("offerings").select("*", { count: "exact", head: true })),
         safeCount(supabase.from("bloom_offerings" as any).select("*", { count: "exact", head: true })),
@@ -55,11 +59,7 @@ export function useQuestCaveActivity(userId: string | null) {
 
       if (cancelled) return;
       setData({
-        trees: trees as number,
-        visits: visits as number,
-        offerings: offerings as number,
-        whispersSent: whispers as number,
-        blooms: blooms as number,
+        trees, visits, offerings, whispersSent: whispers, blooms,
         totalHearts: balance.totalHearts || 0,
         globalTrees: gTrees, globalOfferings: gOfferings, globalBlooms: gBlooms,
         loading: false,
