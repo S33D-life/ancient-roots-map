@@ -93,6 +93,7 @@ const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplore
 const PathwaysPage = lazyImportWithRetry(() => import("./pages/PathwaysPage"), "pathways");
 const GalleryPage = lazyImportWithRetry(() => import("./pages/GalleryPage"), "gallery");
 const HeartwoodRoomPage = lazyImportWithRetry(() => import("./pages/library/HeartwoodRoomPage"), "heartwood-room");
+const QuestCavePage = lazyImportWithRetry(() => import("./pages/QuestCavePage"), "quest-cave");
 const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"), "dashboard");
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
