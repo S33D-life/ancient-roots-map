@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRadixScrollFix } from "@/hooks/use-radix-scroll-fix";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
