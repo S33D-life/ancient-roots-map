@@ -36,24 +36,30 @@ export default function LifeGrovePage() {
     return (
       <div className="min-h-screen botanical-heartwood">
         <Header />
-        <main className="max-w-3xl mx-auto px-4 py-24 text-center" style={{ paddingTop: "var(--content-top)" }}>
+        <main
+          className="max-w-3xl mx-auto px-4 py-24 text-center"
+          style={{ paddingTop: "var(--content-top)" }}
+          aria-busy="true"
+        >
           <p className="font-serif text-sm text-muted-foreground/80">Stirring the branches…</p>
         </main>
       </div>
     );
   }
 
-  if (!grove) {
+  if (!grove || isError) {
     return (
       <div className="min-h-screen botanical-heartwood">
         <Header />
         <main className="max-w-md mx-auto px-4 py-24 text-center" style={{ paddingTop: "var(--content-top)" }}>
-          <h1 className="font-serif text-2xl text-foreground mb-2">Grove not found</h1>
+          <h1 className="font-serif text-2xl text-foreground mb-2">This grove is quiet</h1>
           <p className="text-sm font-serif text-muted-foreground/80 mb-6">
-            This grove may be private or the link may have faded.
+            It may be a private grove, or the link may have faded.
+            If a keeper has shared it with you, ask for a fresh invitation link.
           </p>
           <Button asChild><Link to="/heartwood/life-groves">Back to Life Groves</Link></Button>
         </main>
+        <Footer />
       </div>
     );
   }
