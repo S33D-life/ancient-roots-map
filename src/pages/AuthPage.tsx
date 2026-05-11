@@ -16,6 +16,8 @@ import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken }
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
+import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
+import { trackInviteEvent } from "@/lib/invite-analytics";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -60,6 +62,7 @@ const AuthPage = () => {
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
+  const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -121,19 +124,34 @@ const AuthPage = () => {
     const giftCode = searchParams.get("gift");
     const source = searchParams.get("source");
 
+    // Fire link_opened once per arrival when the URL carries an invite param.
+    if (code) {
+      void trackInviteEvent("invite_link_opened", { code, source: "url" });
+    }
+
     // Recover an invite code persisted from a previous arrival (e.g. survived
     // an OAuth roundtrip that stripped the URL param).
     let effectiveCode = code;
+    let detectedSource: "url" | "storage" | "oauth_return" = code ? "url" : "storage";
     if (!effectiveCode) {
       try {
         effectiveCode =
           sessionStorage.getItem("s33d_pending_invite_code") ||
           localStorage.getItem("s33d_pending_invite_code");
+        // If sessionStorage was wiped but localStorage survived, this is
+        // almost certainly an OAuth round-trip.
+        if (effectiveCode && !sessionStorage.getItem("s33d_pending_invite_code")) {
+          detectedSource = "oauth_return";
+        }
       } catch {}
     }
 
     if (effectiveCode) {
-      console.log("[invite] token detected", { source: code ? "url" : "storage" });
+      console.log("[invite] token detected", { source: detectedSource });
+      void trackInviteEvent("invite_code_detected", {
+        code: effectiveCode,
+        source: detectedSource,
+      });
       setInviteCode(effectiveCode);
       setView("signup");
       try {
@@ -197,8 +215,22 @@ const AuthPage = () => {
             { p_invite_code: storedCode, p_new_user_id: session.user.id },
           );
           console.log("[invite] consume result", { consumeResult, consumeError });
-          // Fallback to old referral system if consume_invitation doesn't exist yet
-          if (!consumeResult || (consumeResult as any)?.error) {
+          const consumeOk = !!consumeResult && !(consumeResult as any)?.error && !consumeError;
+          if (consumeOk) {
+            void trackInviteEvent("invite_consumed", {
+              code: storedCode,
+              source: "system",
+              userId: session.user.id,
+            });
+          } else {
+            void trackInviteEvent("invite_consume_failed", {
+              code: storedCode,
+              source: "system",
+              userId: session.user.id,
+              metadata: {
+                error: consumeError?.message ?? (consumeResult as any)?.error ?? "unknown",
+              },
+            });
             await recordReferral(session.user.id, storedCode);
           }
           localStorage.removeItem("s33d_invite_code");
@@ -393,8 +425,22 @@ const AuthPage = () => {
 
       const validRow = Array.isArray(validation) ? validation[0] : validation;
       if (validationError || !validRow?.id) {
+        void trackInviteEvent("invite_validation_failed", {
+          code,
+          source: "manual",
+          metadata: { error: validationError?.message ?? "no_row" },
+        });
+        setInviteExpiresAt(null);
         throw new Error("INVITE_BLOOM_FAILED");
       }
+
+      // Surface a soft expiry hint when the backend reports one.
+      setInviteExpiresAt((validRow as any)?.expires_at ?? null);
+      void trackInviteEvent("invite_validation_success", {
+        code,
+        source: "manual",
+        metadata: { expires_at: (validRow as any)?.expires_at ?? null },
+      });
 
       // Persist the code BEFORE attempting signup so it survives any redirect,
       // OAuth roundtrip, email-verification roundtrip, or Safari app switch.
@@ -404,6 +450,7 @@ const AuthPage = () => {
         sessionStorage.setItem("s33d_pending_invite_code", code);
       } catch {}
 
+      void trackInviteEvent("invite_signup_started", { code, source: "manual" });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -417,6 +464,11 @@ const AuthPage = () => {
       }
       console.log("[invite] signup success — code will be consumed on first session", {
         userId: data.user?.id,
+      });
+      void trackInviteEvent("invite_signup_success", {
+        code,
+        source: "manual",
+        userId: data.user?.id ?? null,
       });
       setView("verify-email");
     } catch (err) {
@@ -816,6 +868,11 @@ const AuthPage = () => {
                   <p className="text-[10px] text-muted-foreground/60 font-serif">
                     S33D is invitation-only. Ask a wanderer for an invite link to join.
                   </p>
+                  {inviteExpiresAt && !inviteBloomFailure && (
+                    <div className="pt-1">
+                      <InviteExpiryHint expiresAt={inviteExpiresAt} />
+                    </div>
+                  )}
                   {inviteBloomFailure && (
                     <div className="pt-2">
                       <InviteBloomFailure
@@ -826,6 +883,10 @@ const AuthPage = () => {
                           handleSignup(new Event("submit") as unknown as React.FormEvent);
                         }}
                         onRequestFresh={() => {
+                          void trackInviteEvent("invite_request_fresh_clicked", {
+                            code: inviteCode || null,
+                            source: "manual",
+                          });
                           window.open(
                             "https://t.me/s33d_life_bot?start=request_invite",
                             "_blank",
@@ -833,6 +894,10 @@ const AuthPage = () => {
                           );
                         }}
                         onReturnToGrove={() => {
+                          void trackInviteEvent("invite_return_to_grove", {
+                            code: inviteCode || null,
+                            source: "manual",
+                          });
                           // Clear any persisted invite traces so a clean visit follows.
                           try {
                             localStorage.removeItem("s33d_invite_code");

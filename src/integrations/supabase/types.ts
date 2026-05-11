@@ -3937,6 +3937,39 @@ export type Database = {
           },
         ]
       }
+      invite_analytics_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          invite_code_hash: string | null
+          metadata: Json
+          source: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          invite_code_hash?: string | null
+          metadata?: Json
+          source?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          invite_code_hash?: string | null
+          metadata?: Json
+          source?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       invite_links: {
         Row: {
           code: string
@@ -11275,6 +11308,7 @@ export type Database = {
         Args: { p_code: string }
         Returns: {
           created_by: string
+          expires_at: string
           id: string
         }[]
       }
