@@ -18,40 +18,48 @@ export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
   const { userId } = useCurrentUser();
 
-  const { data: grove, isLoading } = useQuery({
+  const { data: grove, isLoading, isError } = useQuery({
     queryKey: ["life-grove", id],
     queryFn: () => (id ? getLifeGrove(id) : null),
     enabled: !!id,
+    retry: 1,
   });
 
-  const { data: offerings = [] } = useQuery({
+  const { data: offerings = [], isLoading: loadingOfferings } = useQuery({
     queryKey: ["life-grove-offerings", id],
     queryFn: () => (id ? listOfferings(id) : []),
-    enabled: !!id,
+    enabled: !!id && !!grove,
+    refetchOnMount: true,
   });
 
   if (isLoading) {
     return (
       <div className="min-h-screen botanical-heartwood">
         <Header />
-        <main className="max-w-3xl mx-auto px-4 py-24 text-center" style={{ paddingTop: "var(--content-top)" }}>
+        <main
+          className="max-w-3xl mx-auto px-4 py-24 text-center"
+          style={{ paddingTop: "var(--content-top)" }}
+          aria-busy="true"
+        >
           <p className="font-serif text-sm text-muted-foreground/80">Stirring the branches…</p>
         </main>
       </div>
     );
   }
 
-  if (!grove) {
+  if (!grove || isError) {
     return (
       <div className="min-h-screen botanical-heartwood">
         <Header />
         <main className="max-w-md mx-auto px-4 py-24 text-center" style={{ paddingTop: "var(--content-top)" }}>
-          <h1 className="font-serif text-2xl text-foreground mb-2">Grove not found</h1>
+          <h1 className="font-serif text-2xl text-foreground mb-2">This grove is quiet</h1>
           <p className="text-sm font-serif text-muted-foreground/80 mb-6">
-            This grove may be private or the link may have faded.
+            It may be a private grove, or the link may have faded.
+            If a keeper has shared it with you, ask for a fresh invitation link.
           </p>
           <Button asChild><Link to="/heartwood/life-groves">Back to Life Groves</Link></Button>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -65,25 +73,40 @@ export default function LifeGrovePage() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 pb-24" style={{ paddingTop: "var(--content-top)" }}>
         {/* Ethereal Tree Header */}
-        <section className="text-center mb-8">
+        <section className="text-center mb-10">
           <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
             Heartwood · {groveLabel}
           </p>
           <h1 className="font-serif text-3xl md:text-4xl text-foreground mt-2">
-            Ethereal {archetypeLabel} — {grove.grove_title}
+            {grove.grove_title}
           </h1>
+          <p className="font-serif text-xs uppercase tracking-[0.25em] text-muted-foreground/60 mt-2">
+            an Ethereal {archetypeLabel}
+          </p>
           {grove.remembered_or_celebrated_name && (
-            <p className="font-serif text-base italic text-muted-foreground/90 mt-1">
+            <p className="font-serif text-base italic text-muted-foreground/90 mt-2">
               for {grove.remembered_or_celebrated_name}
             </p>
           )}
-          <div className="my-6">
-            <EtherealTreePreview
-              archetype={grove.tree_archetype_species}
-              treeName={grove.tree_name}
-              size="lg"
-              offeringCount={offerings.length}
+          <div
+            className="relative my-8 mx-auto"
+            style={{ maxWidth: 360 }}
+            role="img"
+            aria-label={`Ethereal ${archetypeLabel}${grove.tree_name ? ` named ${grove.tree_name}` : ""}, holding ${offerings.length} offering${offerings.length === 1 ? "" : "s"}`}
+          >
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-0 rounded-full blur-3xl opacity-60"
+              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }}
             />
+            <div className="relative z-10">
+              <EtherealTreePreview
+                archetype={grove.tree_archetype_species}
+                treeName={grove.tree_name}
+                size="lg"
+                offeringCount={offerings.length}
+              />
+            </div>
           </div>
           <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
             The branches hold the offerings. The Heartwood holds the family library.
@@ -105,7 +128,13 @@ export default function LifeGrovePage() {
         {/* Library */}
         <section className="mb-8">
           <h2 className="font-serif text-xl text-foreground mb-3">Heartwood Library</h2>
-          <HeartwoodLibraryTabs offerings={offerings} />
+          {loadingOfferings ? (
+            <p className="font-serif text-sm italic text-muted-foreground/70 py-6 text-center">
+              Gathering offerings…
+            </p>
+          ) : (
+            <HeartwoodLibraryTabs offerings={offerings} />
+          )}
         </section>
 
         {/* Invite */}
