@@ -366,27 +366,29 @@ const AuthPage = () => {
 
     setIsLoading(true);
     try {
-      // Pre-validate the invite code before attempting signup
-      const { data: linkCheck } = await supabase
-        .from("invite_links")
-        .select("id, created_by, is_used")
-        .eq("code", code)
-        .maybeSingle();
+      // Pre-validate via SECURITY DEFINER RPC. The invite_links table has RLS
+      // restricting SELECT to the invite creator, so anonymous signup flows
+      // CANNOT read the row directly — that's why fresh invites used to look
+      // "already used or invalid". The RPC bypasses RLS safely.
+      console.log("[invite] validating", { code });
+      const { data: validation, error: validationError } = await supabase.rpc(
+        "validate_invite_code",
+        { p_code: code },
+      );
+      console.log("[invite] validation response", { validation, validationError });
 
-      if (!linkCheck || (linkCheck as any).is_used) {
-        throw new Error("This invitation has already been used or is invalid. Ask for a fresh invite.");
+      const validRow = Array.isArray(validation) ? validation[0] : validation;
+      if (validationError || !validRow?.id) {
+        throw new Error("INVITE_BLOOM_FAILED");
       }
 
-      // Check inviter has remaining invitations
-      const { data: inviterProfile } = await supabase
-        .from("profiles")
-        .select("invites_remaining")
-        .eq("id", (linkCheck as any).created_by)
-        .maybeSingle();
-
-      if (!inviterProfile || (inviterProfile as any).invites_remaining <= 0) {
-        throw new Error("The person who sent this invitation has no invites remaining.");
-      }
+      // Persist the code BEFORE attempting signup so it survives any redirect,
+      // OAuth roundtrip, email-verification roundtrip, or Safari app switch.
+      try {
+        localStorage.setItem("s33d_invite_code", code);
+        localStorage.setItem("s33d_pending_invite_code", code);
+        sessionStorage.setItem("s33d_pending_invite_code", code);
+      } catch {}
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -399,14 +401,22 @@ const AuthPage = () => {
         }
         throw error;
       }
-      // Store invite code so we can consume the invitation after email verification
-      if (data.user) {
-        localStorage.setItem("s33d_invite_code", code);
-      }
+      console.log("[invite] signup success — code will be consumed on first session", {
+        userId: data.user?.id,
+      });
       setView("verify-email");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
-      toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+      if (msg === "INVITE_BLOOM_FAILED") {
+        toast({
+          title: "This invitation could not bloom",
+          description:
+            "It may have already been planted or the link may have faded. Ask your wanderer companion for a fresh invitation.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
