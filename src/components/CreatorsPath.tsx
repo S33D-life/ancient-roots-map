@@ -67,7 +67,7 @@ const EMPTY_STATS: JourneyStats = {
   songs: 0, books: 0, ceremonies: 0, groves: 0,
 };
 
-const safe = async <T,>(p: Promise<T>, fallback: T): Promise<T> => {
+const safe = async <T,>(p: PromiseLike<T>, fallback: T): Promise<T> => {
   try { return await p; } catch { return fallback; }
 };
 
