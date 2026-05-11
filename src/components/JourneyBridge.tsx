@@ -37,12 +37,12 @@ const STEPS: StepDef[] = [
   },
   {
     key: "path",
-    label: "Creator's Path",
-    sublabel: "Journey Timeline",
+    label: "Star Trail",
+    sublabel: "Wanderer & Staff Lineage",
     icon: Footprints,
-    to: "/library/creators-path",
+    to: "/library/star-trail",
     accentHsl: "28 70% 50%",
-    heartsAction: "Review offerings, songs, ceremonies",
+    heartsAction: "Review offerings, ceremonies & journey",
   },
   {
     key: "staff",
