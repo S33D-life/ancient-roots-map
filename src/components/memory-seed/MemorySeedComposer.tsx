@@ -143,9 +143,12 @@ export default function MemorySeedComposer({
   treeSpecies,
   treeSpeciesKey,
   treeName,
+  treeLat,
+  treeLng,
 }: Props) {
   const { userId, isLoading: userLoading } = useCurrentUser();
   const [destination, setDestination] = useState<Destination>("offering");
+  const [destinationTouched, setDestinationTouched] = useState(false);
   const [type, setType] = useState<SeedType>("story");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -158,12 +161,29 @@ export default function MemorySeedComposer({
 
   const meta = TYPES.find((t) => t.value === type)!;
 
+  const resonance = useTreeResonance({
+    treeId,
+    treeLat,
+    treeLng,
+    treeSpecies,
+    userId,
+    enabled: open,
+  });
+
+  // Soft default: when far from the tree, lean toward whisper.
+  // Only applied until the wanderer touches the tabs themselves.
+  useEffect(() => {
+    if (!open || destinationTouched) return;
+    if (resonance.distanceMeters == null) return;
+    setDestination(resonance.nearOfferingRange ? "offering" : "whisper");
+  }, [open, destinationTouched, resonance.distanceMeters, resonance.nearOfferingRange]);
+
   // Reset state on close.
   useEffect(() => {
     if (!open) {
       setTitle(""); setBody(""); setMediaUrl(""); setAuthor(""); setNote("");
       setType("story"); setDestination("offering"); setUnlock("any_ancient_friend");
-      setSubmitting(false); setConfirmed(null);
+      setSubmitting(false); setConfirmed(null); setDestinationTouched(false);
     }
   }, [open]);
 
