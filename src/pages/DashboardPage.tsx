@@ -18,6 +18,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import Footer from "@/components/Footer";
 // DashboardOverview kept for potential future use
 import GroveIdentityCard from "@/components/dashboard/GroveIdentityCard";
+import IdentityLineageCard from "@/components/identity/IdentityLineageCard";
 import FirstEncounterFunnel from "@/components/FirstEncounterFunnel";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
 import DashboardProfile from "@/components/dashboard/DashboardProfile";
