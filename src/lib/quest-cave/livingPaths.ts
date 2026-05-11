@@ -143,8 +143,32 @@ export function currentSeason(d = new Date()): "Spring" | "Summer" | "Autumn" | 
   return "Winter";
 }
 
-export function speciesMatchesHive(species: string | null | undefined, hive: HiveDefinition) {
+/**
+ * Canonical species fingerprint used for de-duplicating species across
+ * synonyms ("english oak" / "oak" / "Quercus robur").
+ *
+ * TODO: full integration with the async DB-backed species_index resolver
+ * (`useSpeciesResolution`) — for now we use the synchronous treeSpecies map.
+ */
+export interface CanonicalSpecies {
+  /** Stable key — scientific name when known, else lowercase common name. */
+  key: string;
+  /** Display label (canonical common name when known). */
+  display: string;
+  /** Lowercase genus, when scientific lineage is known. */
+  genus?: string;
+  /** Botanical family, when known. */
+  family?: string;
+}
+
+export function speciesMatchesHive(
+  species: string | null | undefined,
+  hive: HiveDefinition,
+  canonical?: CanonicalSpecies | null,
+) {
+  if (canonical?.genus && hive.genuses?.includes(canonical.genus)) return true;
   if (!species) return false;
   const s = species.toLowerCase();
   return hive.speciesMatchers.some((m) => s.includes(m));
 }
+
