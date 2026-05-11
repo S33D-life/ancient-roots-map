@@ -347,7 +347,7 @@ export default function MemorySeedComposer({
                 <SelectContent>
                   {TYPES.map((t) => (
                     <SelectItem key={t.value} value={t.value} disabled={t.placeholder}>
-                      {t.label}{t.placeholder ? " (soon)" : ""}
+                      {t.label}{t.placeholder ? " · coming soon" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
