@@ -15,6 +15,7 @@ import { recordReferral } from "@/hooks/use-referrals";
 import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
+import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
