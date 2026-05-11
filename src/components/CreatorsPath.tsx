@@ -291,7 +291,7 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
           )}
           <PathCard
             icon={Mountain}
-            eyebrow="Quest Room"
+            eyebrow="Quest Cave"
             title="Continue your paths"
             subtitle="Species, hives & ancient ways"
             to="/heartwood/quest-room"

@@ -1185,13 +1185,13 @@ export default function StaffRoomGallery() {
         </div>
       )}
 
-      {/* Threshold to Quest Room — staff in hand, the path opens */}
+      {/* Threshold to Quest Cave — staff in hand, the path opens */}
       <div className="max-w-3xl mx-auto px-4 mt-6">
         <div className="rounded-2xl border border-amber-900/25 bg-gradient-to-br from-amber-100/40 via-card/60 to-emerald-100/30 dark:from-amber-950/20 dark:to-emerald-950/15 p-5 text-center">
           <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/30 mb-2">
             <Compass className="w-5 h-5 text-primary" />
           </div>
-          <h4 className="font-serif text-base text-foreground">Enter Quest Room</h4>
+          <h4 className="font-serif text-base text-foreground">Enter Quest Cave</h4>
           <p className="text-xs font-serif text-muted-foreground italic mt-1 max-w-sm mx-auto">
             Your staff opens the paths.
           </p>
