@@ -326,7 +326,12 @@ export default function MemorySeedComposer({
           </div>
         ) : (
           <div className="space-y-4">
-            <Tabs value={destination} onValueChange={(v) => setDestination(v as Destination)}>
+            <ResonancePanel resonance={resonance} treeName={treeName} />
+
+            <Tabs
+              value={destination}
+              onValueChange={(v) => { setDestinationTouched(true); setDestination(v as Destination); }}
+            >
               <TabsList className="w-full">
                 <TabsTrigger value="offering" className="flex-1 font-serif text-xs">
                   Leave Offering
