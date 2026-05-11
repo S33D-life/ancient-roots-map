@@ -215,8 +215,22 @@ const AuthPage = () => {
             { p_invite_code: storedCode, p_new_user_id: session.user.id },
           );
           console.log("[invite] consume result", { consumeResult, consumeError });
-          // Fallback to old referral system if consume_invitation doesn't exist yet
-          if (!consumeResult || (consumeResult as any)?.error) {
+          const consumeOk = !!consumeResult && !(consumeResult as any)?.error && !consumeError;
+          if (consumeOk) {
+            void trackInviteEvent("invite_consumed", {
+              code: storedCode,
+              source: "system",
+              userId: session.user.id,
+            });
+          } else {
+            void trackInviteEvent("invite_consume_failed", {
+              code: storedCode,
+              source: "system",
+              userId: session.user.id,
+              metadata: {
+                error: consumeError?.message ?? (consumeResult as any)?.error ?? "unknown",
+              },
+            });
             await recordReferral(session.user.id, storedCode);
           }
           localStorage.removeItem("s33d_invite_code");
