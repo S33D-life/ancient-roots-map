@@ -101,15 +101,19 @@ export default function LifeGroveInvitePage() {
     );
   }
 
-  if (!grove) {
+  if (!grove || isError) {
     return (
       <div className="min-h-screen botanical-heartwood">
         <Header />
         <main className="max-w-md mx-auto px-4 py-24 text-center" style={{ paddingTop: "var(--content-top)" }}>
           <h1 className="font-serif text-2xl text-foreground mb-2">This invitation has faded</h1>
-          <p className="text-sm font-serif text-muted-foreground/80">
-            The link may have been mistyped, or the grove may no longer be open.
+          <p className="text-sm font-serif text-muted-foreground/80 mb-6">
+            The link may have been mistyped, the grove may have been closed,
+            or the invitation may have been retired by its keeper.
           </p>
+          <Button asChild variant="outline">
+            <a href="/heartwood/life-groves">Return to Life Groves</a>
+          </Button>
         </main>
         <Footer />
       </div>
