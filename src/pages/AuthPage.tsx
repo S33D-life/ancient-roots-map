@@ -59,6 +59,7 @@ const AuthPage = () => {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState("");
+  const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
