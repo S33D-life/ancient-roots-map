@@ -51,6 +51,13 @@ export default function LifeGroveCreatePage() {
   const [pkg, setPkg] = useState<PlantingPackage>("symbolic");
   const [hearts, setHearts] = useState(0);
 
+  const [treeLinkType, setTreeLinkType] = useState<TreeLinkType>("symbolic_only");
+  const [linkedTreeId, setLinkedTreeId] = useState("");
+  const [plantedLocText, setPlantedLocText] = useState("");
+  const [plantedLat, setPlantedLat] = useState("");
+  const [plantedLng, setPlantedLng] = useState("");
+  const [plantingNotes, setPlantingNotes] = useState("");
+
   const packagePence = useMemo(
     () => PLANTING_PACKAGES.find((p) => p.value === pkg)?.pricePence ?? 0,
     [pkg],
