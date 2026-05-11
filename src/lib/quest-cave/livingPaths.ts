@@ -15,14 +15,15 @@ export interface Milestone {
 export interface HiveDefinition {
   id: string;
   /**
-   * Preferred: botanical family name(s). When set, hive matching uses the
-   * canonical species resolver (treeSpecies family map) which collapses
-   * "english oak" / "oak" / "Quercus robur" into a single match.
+   * Preferred: lowercase genus names (e.g. "quercus"). When the canonical
+   * resolver returns a scientific lineage, the first token is matched here.
+   * This collapses synonyms like "english oak" / "oak" / "Quercus robur"
+   * into a single hive count.
    */
-  families?: string[];
+  genuses?: string[];
   /**
    * Fallback only — case-insensitive substring matchers against the raw
-   * species string. Used when family resolution fails.
+   * species string. Used when canonical resolution fails.
    */
   speciesMatchers: string[];
   label: string; // "Oak Hive"
