@@ -158,6 +158,13 @@ export interface LifeGrove {
   cover_photo_url: string | null;
   generated_tree_image_url: string | null;
   invite_token: string;
+  tree_link_type: TreeLinkType;
+  linked_tree_id: string | null;
+  planted_tree_location_text: string | null;
+  planted_tree_latitude: number | null;
+  planted_tree_longitude: number | null;
+  planting_notes: string | null;
+  planting_status: PlantingStatus;
   created_at: string;
   updated_at: string;
 }
