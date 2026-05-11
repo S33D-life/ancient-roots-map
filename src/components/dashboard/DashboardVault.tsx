@@ -29,6 +29,7 @@ import VaultValueTree from "./vault/VaultValueTree";
 import VaultPatronBadge from "./vault/VaultPatronBadge";
 import VaultSection from "./vault/VaultSection";
 import CosmicClock from "@/components/CosmicClock";
+import IdentityLineageCard from "@/components/identity/IdentityLineageCard";
 
 const STORAGE_KEY = "s33d_vault_open_section";
 
