@@ -44,7 +44,7 @@ const TABS = [
 ] as const;
 
 export default function QuestCavePage() {
-  useDocumentTitle("Quest Cave · Heartwood");
+  useDocumentTitle("Quest Room · Heartwood");
   const { userId } = useCurrentUser();
   const activity = useQuestCaveActivity(userId);
 
