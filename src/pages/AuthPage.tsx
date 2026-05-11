@@ -372,10 +372,12 @@ const AuthPage = () => {
     // Require a valid invite code to sign up
     const code = inviteCode.trim();
     if (!code) {
-      toast({ title: "Invitation required", description: "You need an invitation to join S33D. Ask a wanderer for an invite link.", variant: "destructive" });
+      // Use the same soft Heartwood warning rather than a harsh red toast.
+      setInviteBloomFailure("No invitation code entered yet.");
       return;
     }
 
+    setInviteBloomFailure(null);
     setIsLoading(true);
     try {
       // Pre-validate via SECURITY DEFINER RPC. The invite_links table has RLS
@@ -420,14 +422,11 @@ const AuthPage = () => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
       if (msg === "INVITE_BLOOM_FAILED") {
-        toast({
-          title: "This invitation could not bloom",
-          description:
-            "It may have already been planted or the link may have faded. Ask your wanderer companion for a fresh invitation.",
-          variant: "destructive",
-        });
+        // Soft Heartwood inline state — no destructive red toast.
+        setInviteBloomFailure(`code: ${code}`);
       } else {
-        toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+        // Other signup errors stay as toasts but use a calmer default variant.
+        toast({ title: "Sign up could not complete", description: msg });
       }
     } finally {
       setIsLoading(false);
