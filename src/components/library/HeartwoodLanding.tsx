@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import TetolBridge from "@/components/TetolBridge";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
