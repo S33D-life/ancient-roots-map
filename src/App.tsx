@@ -178,6 +178,7 @@ const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/Living
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
 const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
 const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCommonsPage"), "tree-data-commons");
+const TreeProjectsPage = lazyImportWithRetry(() => import("./pages/TreeProjectsPage"), "tree-projects");
 const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPage"), "agent-garden");
 const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapPage"), "ecosystem-map");
 const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/DatasetDiscoveryAgentPage"), "discovery-agent");
@@ -436,6 +437,7 @@ const App = () => {
                 <Route path="/patron-offering" element={<PatronOfferingPage />} />
                 <Route path="/companion" element={<CompanionPage />} />
                 <Route path="/tree-data-commons" element={<TreeDataCommonsPage />} />
+                <Route path="/tree-projects" element={<TreeProjectsPage />} />
                 <Route path="/agent-garden" element={<AgentGardenPage />} />
                 <Route path="/discovery-agent" element={<DatasetDiscoveryAgentPage />} />
                 <Route path="/dataset-watcher" element={<DatasetWatcherPage />} />

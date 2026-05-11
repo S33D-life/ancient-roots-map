@@ -20,7 +20,7 @@ const VaultRoom = lazy(() => import("@/components/library/VaultRoom"));
 const AncientFriendsRoom = lazy(() => import("@/components/library/AncientFriendsRoom"));
 const PersonalBookshelf = lazy(() => import("@/components/PersonalBookshelf"));
 const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
-const TreeResources = lazy(() => import("@/components/TreeResources"));
+
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
@@ -143,6 +143,8 @@ function AncientFriendsWrapper() {
 
 /**
  * CreatorsPathWrapper — self-contained wrapper.
+ * Tree Projects Directory has been relocated to /tree-projects (linked from
+ * Tree Data Commons and from a subtle link inside Creator's Path).
  */
 function CreatorsPathWrapper() {
   const [userId, setUserId] = useState<string | undefined>();
@@ -151,12 +153,7 @@ function CreatorsPathWrapper() {
       if (user) setUserId(user.id);
     });
   }, []);
-  return (
-    <div className="space-y-6">
-      <CreatorsPath userId={userId} />
-      <TreeResources />
-    </div>
-  );
+  return <CreatorsPath userId={userId} />;
 }
 
 /**
