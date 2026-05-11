@@ -18,6 +18,7 @@ import GroveTypePicker from "@/components/life-groves/GroveTypePicker";
 import EtherealTreeArchetypePicker from "@/components/life-groves/EtherealTreeArchetypePicker";
 import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
 import HeartsDiscountPanel from "@/components/life-groves/HeartsDiscountPanel";
+import TreeLinkPicker from "@/components/life-groves/TreeLinkPicker";
 import {
   PLANTING_PACKAGES,
   PRIVACY_OPTIONS,
@@ -25,8 +26,10 @@ import {
   type GroveType,
   type PlantingPackage,
   type PlantingType,
+  type PlantingStatus,
   type Privacy,
   type TreeArchetype,
+  type TreeLinkType,
 } from "@/lib/life-groves/types";
 
 export default function LifeGroveCreatePage() {
