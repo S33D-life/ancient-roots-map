@@ -11,11 +11,11 @@ type Room = { key: string; label: string; desc: string; accentH: number; particl
 
 const PRIMARY: Room[] = [
   { key: "staff-room",      label: "🪵 Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
+  { key: "creators-path",   label: "🎨 Creator's Path",  desc: "Your Journey",                             accentH: 340, particle: "spark"   },
   { key: "ancient-friends", label: "🌳 Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
   { key: "atlas",           label: "🗺 Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
   { key: "life-groves",     label: "🌿 Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
   { key: "quest-cave",      label: "🕯 Quest Room",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
-  { key: "vault",           label: "🔐 Vault",           desc: "Staff, Tokens & Treasures",                accentH: 270, particle: "shimmer" },
 ];
 
 const LIVING_LIBRARY: Room[] = [
@@ -23,7 +23,7 @@ const LIVING_LIBRARY: Room[] = [
   { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
   { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
   { key: "press",         label: "🪶 Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
-  { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",                  accentH: 340, particle: "spark"   },
+  { key: "vault",         label: "🔐 Vault",            desc: "Staff, Tokens & Treasures",     accentH: 270, particle: "shimmer" },
 ];
 
 const GROWING_SPACES: Room[] = [
