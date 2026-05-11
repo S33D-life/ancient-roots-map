@@ -251,8 +251,11 @@ export default function LivingPathsPanel({ userId, activity }: Props) {
         defaultOpen={false}
         toneClass="from-amber-50/40 via-card/60 to-stone-100/40 dark:from-amber-950/10 dark:to-stone-900/20"
       >
-        <p className="font-serif text-[11px] italic text-muted-foreground/80">
-          Path inference is still being woven. For now, these routes wait quietly for footsteps.
+        <p className="font-serif text-[11px] italic text-muted-foreground/80 leading-relaxed">
+          Route inference is still being woven — no archaeological claims are made yet.
+          You can already begin by mapping trees near old droving roads, holloways,
+          church paths, parish boundaries, orchards, and pilgrim ways. The paths will
+          remember themselves through the trees you record.
         </p>
         <div className="space-y-2 pt-1">
           {ANCIENT_PATHS.map((q) => (
