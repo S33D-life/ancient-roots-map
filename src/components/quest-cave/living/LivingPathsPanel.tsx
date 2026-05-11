@@ -236,6 +236,10 @@ export default function LivingPathsPanel({ userId, activity }: Props) {
                 />
               ))}
             </div>
+            <p className="font-serif text-[11px] italic text-muted-foreground/70 pt-1">
+              Soon, songs, books, poems, and memories will also travel as whispers
+              through the Ancient Friends roots.
+            </p>
           </>
         )}
       </LivingSection>
