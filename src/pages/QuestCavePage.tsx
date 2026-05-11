@@ -153,7 +153,22 @@ export default function QuestCavePage() {
         />
         <Card className="border-border/30 bg-card/40 mb-8">
           <CardContent className="p-4 space-y-3">
-            {staff ? (
+            {identity.hasPermanent && identity.permanent ? (
+              <>
+                <p className="font-serif text-sm text-foreground/90">
+                  Bound to your path:{" "}
+                  <span className="text-primary">
+                    {identity.permanent.name || identity.permanent.species || "Permanent Staff"}
+                  </span>
+                  {staff ? " — your first guide is remembered." : "."}
+                </p>
+                {staff && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/80 leading-relaxed">
+                    {staff.blessing}
+                  </p>
+                )}
+              </>
+            ) : staff ? (
               <>
                 <p className="font-serif text-sm text-foreground/90">
                   Walking beside you: <span className="text-primary">{staff.temporary_name}</span> —
@@ -173,11 +188,19 @@ export default function QuestCavePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               <StaffMilestone
                 title="Borrowed Staff resonance"
-                line="Your staff stirs near old oak paths and hidden hollows."
+                line={
+                  staff
+                    ? "Your staff stirs near old paths and hidden hollows."
+                    : "Will appear once your first guide is offered."
+                }
               />
               <StaffMilestone
-                title="Permanent Staff (coming)"
-                line="Earned through long lineage with the same trees and grove."
+                title={identity.hasPermanent ? "Permanent Staff bound" : "Permanent Staff (coming)"}
+                line={
+                  identity.hasPermanent
+                    ? "Bound through ceremony — its lineage walks with yours."
+                    : "Earned through long lineage with the same trees and grove."
+                }
               />
             </div>
 
