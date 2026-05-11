@@ -24,6 +24,8 @@ const HeartwoodLanding = () => {
   const handleRoomSelect = (key: string) => {
     const routeMap: Record<string, string> = {
       "staff-room": "/library/staff-room",
+      "life-groves": "/heartwood/life-groves",
+      "quest-cave": "/heartwood/quest-cave",
       "ancient-friends": "/library/gallery",
       "atlas": "/atlas",
       "music-room": "/library/music-room",
@@ -37,6 +39,7 @@ const HeartwoodLanding = () => {
       "vault": "/vault",
       "bookshelf": "/library/bookshelf",
       "press": "/press",
+      "tap-root": "/library/tap-root",
       "tree-data-commons": "/tree-data-commons",
     };
     navigate(routeMap[key] || `/library/${key}`);
