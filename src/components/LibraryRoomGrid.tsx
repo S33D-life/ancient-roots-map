@@ -27,14 +27,14 @@ const LIVING_LIBRARY: Room[] = [
 ];
 
 const GROWING_SPACES: Room[] = [
+  { key: "seed-cellar", label: "📦 Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
   { key: "greenhouse",  label: "🌱 Greenhouse",  desc: "Houseplants & Saplings",      accentH: 130, particle: "leaf" },
   { key: "wishlist",    label: "⭐ Dream Trees", desc: "Trees you dream to visit",    accentH: 45,  particle: "star" },
-  { key: "seed-cellar", label: "📦 Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
-  { key: "rhythms",     label: "🌿 Rhythms",     desc: "Seasonal Cycle Markets",      accentH: 150, particle: "leaf" },
 ];
 
 const COMMUNITY_ATLAS: Room[] = [
   { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory",     accentH: 160, particle: "page"  },
+  { key: "rhythms",           label: "🌿 Rhythms",           desc: "Seasonal Cycle Markets",    accentH: 150, particle: "leaf"  },
   { key: "tap-root",          label: "⚙️ Dev Room",           desc: "Tap Root · Infrastructure", accentH: 210, particle: "spark" },
 ];
 
