@@ -41,6 +41,7 @@ interface TreeRow {
   estimated_age: number | null;
   created_at: string;
   nation: string | null;
+  isResearch?: boolean;
 }
 
 type OfferingRow = Database["public"]["Tables"]["offerings"]["Row"];
