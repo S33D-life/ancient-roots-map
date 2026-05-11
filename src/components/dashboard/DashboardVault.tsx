@@ -128,6 +128,9 @@ const DashboardVault = ({ userId }: Props) => {
     >
       <VaultParticles />
 
+      {/* Wanderer + Staff lineage — kept coherent across Hearth and Vault */}
+      <IdentityLineageCard userId={userId} />
+
       {/* Context */}
       <p className="text-[11px] font-serif text-muted-foreground/70 text-center italic leading-relaxed">
         Every tree mapped, every offering given, every seed planted — it all gathers here.
