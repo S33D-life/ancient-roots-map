@@ -71,6 +71,30 @@ const safe = async (p: PromiseLike<any>): Promise<{ data: any[] }> => {
   try { const r: any = await p; return { data: r?.data ?? [] }; } catch { return { data: [] }; }
 };
 
+/** Group sorted-desc events into journal buckets by recency. */
+function groupEvents(events: PathEvent[]): { label: string; events: PathEvent[] }[] {
+  const now = Date.now();
+  const DAY = 86_400_000;
+  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+  const buckets: { label: string; events: PathEvent[] }[] = [
+    { label: "Today",               events: [] },
+    { label: "This week",           events: [] },
+    { label: "Earlier this moon",   events: [] },
+    { label: "Earlier this season", events: [] },
+    { label: "Older roots",         events: [] },
+  ];
+  for (const ev of events) {
+    const t = new Date(ev.date).getTime();
+    if (Number.isNaN(t)) { buckets[4].events.push(ev); continue; }
+    if (t >= startOfToday.getTime()) buckets[0].events.push(ev);
+    else if (now - t < 7 * DAY)      buckets[1].events.push(ev);
+    else if (now - t < 30 * DAY)     buckets[2].events.push(ev);
+    else if (now - t < 90 * DAY)     buckets[3].events.push(ev);
+    else                             buckets[4].events.push(ev);
+  }
+  return buckets.filter((b) => b.events.length > 0);
+}
+
 const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
   const [events, setEvents] = useState<PathEvent[]>([]);
   const [stats, setStats] = useState<JourneyStats>(EMPTY_STATS);
