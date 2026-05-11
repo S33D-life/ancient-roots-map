@@ -25,7 +25,8 @@ const HeartwoodLanding = () => {
     const routeMap: Record<string, string> = {
       "staff-room": "/library/staff-room",
       "life-groves": "/heartwood/life-groves",
-      "quest-cave": "/heartwood/quest-cave",
+      "quest-cave": "/heartwood/quest-room",
+      "quest-room": "/heartwood/quest-room",
       "ancient-friends": "/library/gallery",
       "atlas": "/atlas",
       "music-room": "/library/music-room",
