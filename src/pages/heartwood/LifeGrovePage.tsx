@@ -37,6 +37,13 @@ export default function LifeGrovePage() {
     refetchOnMount: true,
   });
 
+  // Clear selection if the chosen offering disappears after refetch.
+  useEffect(() => {
+    if (selected && !offerings.some((o) => o.id === selected.id)) {
+      setSelected(null);
+    }
+  }, [offerings, selected]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen botanical-heartwood">
