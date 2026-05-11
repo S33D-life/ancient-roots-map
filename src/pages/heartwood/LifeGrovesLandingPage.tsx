@@ -84,39 +84,60 @@ export default function LifeGrovesLandingPage() {
           </Button>
         </div>
 
-        {userId && groves.length > 0 && (
+        {userId && (
           <section className="mb-16">
             <h2 className="font-serif text-xl text-foreground mb-4">Your Groves</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {groves.map((g) => (
-                <Link
-                  key={g.id}
-                  to={`/heartwood/life-groves/${g.id}`}
-                  className="rounded-2xl border border-border/40 bg-card/40 p-4 hover:border-primary/40 transition-all"
-                >
-                  <EtherealTreePreview
-                    archetype={g.tree_archetype_species}
-                    size="sm"
-                    treeName={g.tree_name}
-                  />
-                  <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70 mt-2">
-                    {g.grove_type}
-                  </p>
-                  <h3 className="font-serif text-base text-foreground mt-1">
-                    {g.grove_title}
-                  </h3>
-                  {g.remembered_or_celebrated_name && (
-                    <p className="text-xs font-serif text-muted-foreground/80 italic">
-                      for {g.remembered_or_celebrated_name}
+            {loadingGroves ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[0, 1, 2].map((i) => (
+                  <Skeleton key={i} className="h-44 rounded-2xl" />
+                ))}
+              </div>
+            ) : groves.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border/40 bg-card/30 p-8 text-center">
+                <p className="font-serif text-base text-foreground mb-1">
+                  No groves yet.
+                </p>
+                <p className="font-serif text-sm italic text-muted-foreground/80 mb-4">
+                  Plant your first Life Grove — a birth, a memorial, a celebration,
+                  or a family tree.
+                </p>
+                <Button onClick={() => navigate("/heartwood/life-groves/new")}>
+                  Begin a Life Grove
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groves.map((g) => (
+                  <Link
+                    key={g.id}
+                    to={`/heartwood/life-groves/${g.id}`}
+                    className="rounded-2xl border border-border/40 bg-card/40 p-4 hover:border-primary/40 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  >
+                    <EtherealTreePreview
+                      archetype={g.tree_archetype_species}
+                      size="sm"
+                      treeName={g.tree_name}
+                    />
+                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70 mt-2">
+                      {g.grove_type}
                     </p>
-                  )}
-                </Link>
-              ))}
-            </div>
+                    <h3 className="font-serif text-base text-foreground mt-1">
+                      {g.grove_title}
+                    </h3>
+                    {g.remembered_or_celebrated_name && (
+                      <p className="text-xs font-serif text-muted-foreground/80 italic">
+                        for {g.remembered_or_celebrated_name}
+                      </p>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
-        {!userId && (
+        {!userId && !loadingUser && (
           <p className="text-center text-sm font-serif text-muted-foreground/80 mb-12">
             <Link to="/auth" className="text-primary hover:underline">Sign in</Link> to
             create your first Life Grove.
