@@ -23,9 +23,11 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import {
   createOffering,
   getLifeGroveByToken,
+  listOfferings,
 } from "@/repositories/life-groves";
 import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
 import { OFFERING_TYPES, type OfferingType, type TreeArchetype } from "@/lib/life-groves/types";
+import { assignOfferingPosition } from "@/lib/life-groves/positions";
 
 export default function LifeGroveInvitePage() {
   const { inviteToken } = useParams<{ inviteToken: string }>();
