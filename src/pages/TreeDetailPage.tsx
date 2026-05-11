@@ -171,6 +171,7 @@ const TreeDetailPage = () => {
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
   const [whisperRippleVisible, setWhisperRippleVisible] = useState(false);
   const [whisperContextLabel, setWhisperContextLabel] = useState<string | null>(null);
+  const [memorySeedOpen, setMemorySeedOpen] = useState(false);
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
