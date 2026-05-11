@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { OFFERING_TYPES, type LifeGroveOffering, type OfferingType } from "@/lib/life-groves/types";
 import HangingMemoryTree from "./HangingMemoryTree";
+import LifeGroveOfferingGlyph from "./LifeGroveOfferingGlyph";
 
 interface Props {
   offerings: LifeGroveOffering[];
