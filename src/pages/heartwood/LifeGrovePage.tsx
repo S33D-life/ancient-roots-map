@@ -94,9 +94,7 @@ export default function LifeGrovePage() {
           )}
           <div
             className="relative my-8 mx-auto"
-            style={{ maxWidth: 360 }}
-            role="img"
-            aria-label={`Ethereal ${archetypeLabel}${grove.tree_name ? ` named ${grove.tree_name}` : ""}, holding ${offerings.length} offering${offerings.length === 1 ? "" : "s"}`}
+            style={{ maxWidth: 420 }}
           >
             <div
               aria-hidden
@@ -104,17 +102,29 @@ export default function LifeGrovePage() {
               style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }}
             />
             <div className="relative z-10">
-              <EtherealTreePreview
+              <EtherealOfferingTree
                 archetype={grove.tree_archetype_species}
                 treeName={grove.tree_name}
-                size="lg"
-                offeringCount={offerings.length}
+                offerings={offerings}
+                selectedId={selected?.id ?? null}
+                onSelect={setSelected}
+                size={400}
               />
             </div>
           </div>
-          <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
-            The branches hold the offerings. The Heartwood holds the family library.
-          </p>
+          {selected ? (
+            <div className="max-w-md mx-auto text-left">
+              <OfferingPreviewCard offering={selected} onClose={() => setSelected(null)} />
+            </div>
+          ) : offerings.length === 0 ? (
+            <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
+              The branches are waiting. Hang the first offering.
+            </p>
+          ) : (
+            <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
+              Tap a glyph to read what is hanging in the branches.
+            </p>
+          )}
         </section>
 
         {/* Meta */}
