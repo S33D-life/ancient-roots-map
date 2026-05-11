@@ -153,6 +153,17 @@ export default function QuestCavePage() {
           </TabsContent>
         </Tabs>
 
+        {/* Quest chambers — derived staff/path quests, seasonal & dream layers */}
+        <div className="mt-10 mb-8">
+          <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
+            <h2 className="font-serif text-lg text-foreground">Quest Chambers</h2>
+            <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+              Staff · Seasonal · Dream
+            </p>
+          </div>
+          <QuestCaveRoom />
+        </div>
+
         {/* Bridge back */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center mt-8">
           <p className="text-xs font-serif text-foreground/80">
