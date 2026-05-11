@@ -337,6 +337,7 @@ export default function OrbConstellation({
                     height: NODE_SIZE,
                     left: REDUCED_MOTION ? tx : undefined,
                     top: REDUCED_MOTION ? ty : undefined,
+                    pointerEvents: open ? "auto" : "none",
                   }}
                   aria-label={a.label}
                 >
