@@ -24,6 +24,7 @@ import {
   assignOfferingPosition,
   type OfferingPosition,
 } from "@/lib/life-groves/positions";
+import LifeGroveOfferingGlyph from "./LifeGroveOfferingGlyph";
 
 interface Props {
   archetype: TreeArchetype;
@@ -191,26 +192,24 @@ export default function EtherealOfferingTree({
             aria-label={`${meta?.label ?? "Offering"}: ${p.offering.title ?? p.offering.contributor_name}`}
             className={[
               "absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
-              "flex items-center justify-center",
+              "flex items-center justify-center bg-transparent",
               "transition-all duration-200",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "hover:scale-110",
               isSelected
-                ? "scale-125 ring-2 ring-primary shadow-[0_0_18px_hsl(38_90%_70%/0.6)]"
-                : "shadow-[0_0_10px_hsl(38_90%_70%/0.35)]",
+                ? "scale-125 drop-shadow-[0_0_10px_hsl(38_90%_70%/0.85)]"
+                : "drop-shadow-[0_0_5px_hsl(38_90%_70%/0.45)]",
             ].join(" ")}
             style={{
               left: `${leftPct}%`,
               top: `${topPct}%`,
-              width: 28,
-              height: 28,
-              fontSize: 14,
-              background:
-                "radial-gradient(circle, hsl(38 90% 80% / 0.95), hsl(38 60% 50% / 0.6) 70%, transparent)",
-              border: "1px solid hsl(38 60% 70% / 0.7)",
+              width: 32,
+              height: 32,
+              padding: 0,
+              border: "none",
             }}
           >
-            <span aria-hidden>{meta?.glyph ?? "🍃"}</span>
+            <LifeGroveOfferingGlyph type={p.offering.offering_type} size={32} variant="tree" />
           </button>
         );
       })}
@@ -251,7 +250,7 @@ export function OfferingPreviewCard({
       className="mt-4 rounded-2xl border border-primary/30 bg-card/60 p-4 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2"
     >
       <div className="flex items-center gap-2 mb-1.5">
-        <span className="text-base" aria-hidden>{meta?.glyph ?? "🍃"}</span>
+        <LifeGroveOfferingGlyph type={offering.offering_type} size={24} variant="card" />
         <span className="text-[10px] uppercase tracking-[0.2em] font-serif text-muted-foreground/70">
           {meta?.label ?? offering.offering_type}
         </span>
