@@ -77,7 +77,7 @@ export default function LivingPathsPanel({ userId, activity }: Props) {
                 {progression.recentSpecies.slice(0, 5).map((s, i) => (
                   <span key={s}>
                     {i > 0 && " · "}
-                    <span className="capitalize">{s}</span>
+                    <span>{s}</span>
                   </span>
                 ))}
               </p>
