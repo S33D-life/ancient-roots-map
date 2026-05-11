@@ -73,25 +73,40 @@ export default function LifeGrovePage() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 pb-24" style={{ paddingTop: "var(--content-top)" }}>
         {/* Ethereal Tree Header */}
-        <section className="text-center mb-8">
+        <section className="text-center mb-10">
           <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
             Heartwood · {groveLabel}
           </p>
           <h1 className="font-serif text-3xl md:text-4xl text-foreground mt-2">
-            Ethereal {archetypeLabel} — {grove.grove_title}
+            {grove.grove_title}
           </h1>
+          <p className="font-serif text-xs uppercase tracking-[0.25em] text-muted-foreground/60 mt-2">
+            an Ethereal {archetypeLabel}
+          </p>
           {grove.remembered_or_celebrated_name && (
-            <p className="font-serif text-base italic text-muted-foreground/90 mt-1">
+            <p className="font-serif text-base italic text-muted-foreground/90 mt-2">
               for {grove.remembered_or_celebrated_name}
             </p>
           )}
-          <div className="my-6">
-            <EtherealTreePreview
-              archetype={grove.tree_archetype_species}
-              treeName={grove.tree_name}
-              size="lg"
-              offeringCount={offerings.length}
+          <div
+            className="relative my-8 mx-auto"
+            style={{ maxWidth: 360 }}
+            role="img"
+            aria-label={`Ethereal ${archetypeLabel}${grove.tree_name ? ` named ${grove.tree_name}` : ""}, holding ${offerings.length} offering${offerings.length === 1 ? "" : "s"}`}
+          >
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-0 rounded-full blur-3xl opacity-60"
+              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }}
             />
+            <div className="relative z-10">
+              <EtherealTreePreview
+                archetype={grove.tree_archetype_species}
+                treeName={grove.tree_name}
+                size="lg"
+                offeringCount={offerings.length}
+              />
+            </div>
           </div>
           <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
             The branches hold the offerings. The Heartwood holds the family library.
