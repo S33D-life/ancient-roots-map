@@ -313,12 +313,13 @@ export default function MemorySeedComposer({
               </TabsList>
               <TabsContent value="offering" className="mt-3">
                 <p className="font-serif text-xs italic text-muted-foreground/80">
-                  Visible from afar once placed in {treeName ? `“${treeName}”` : "this tree"}'s branches.
+                  Offerings can be seen from afar once placed
+                  {treeName ? ` in “${treeName}”'s branches.` : " in this tree's branches."}
                 </p>
               </TabsContent>
               <TabsContent value="whisper" className="mt-3 space-y-3">
                 <p className="font-serif text-xs italic text-muted-foreground/80">
-                  A whisper waits until kin meet a qualifying tree.
+                  Whispers wait until someone checks in beneath the right tree.
                 </p>
                 <div className="space-y-1.5">
                   <Label className="font-serif text-xs">Who can find this whisper?</Label>
