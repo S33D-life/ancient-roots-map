@@ -2,6 +2,7 @@
  * LifeGrovePage — single Life Grove view.
  * Route: /heartwood/life-groves/:id
  */
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
@@ -9,14 +10,17 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
-import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
+import EtherealOfferingTree, {
+  OfferingPreviewCard,
+} from "@/components/life-groves/EtherealOfferingTree";
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
 import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
-import { GROVE_TYPES, TREE_ARCHETYPES } from "@/lib/life-groves/types";
+import { GROVE_TYPES, TREE_ARCHETYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
 
 export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
   const { userId } = useCurrentUser();
+  const [selected, setSelected] = useState<LifeGroveOffering | null>(null);
 
   const { data: grove, isLoading, isError } = useQuery({
     queryKey: ["life-grove", id],
