@@ -115,7 +115,7 @@ const HEARTWOOD_ROOMS: SearchResult[] = [
   { id: "room-staff", type: "heartwood_room", title: "🪵 Staff Room", subtitle: "144 Sacred Staffs", url: "/library", keywords: ["staff", "nft", "wand", "og"], score: 0, emoji: "🪵" },
   { id: "room-greenhouse", type: "heartwood_room", title: "🌱 Greenhouse", subtitle: "Houseplants & Saplings", url: "/library", keywords: ["greenhouse", "plant", "sapling", "nursery"], score: 0, emoji: "🌱" },
   { id: "room-wishlist", type: "heartwood_room", title: "⭐ Wishing Tree", subtitle: "Trees you dream to visit", url: "/library", keywords: ["wish", "dream", "bucket list"], score: 0, emoji: "⭐" },
-  { id: "room-creators", type: "heartwood_room", title: "🎨 Creator's Path", subtitle: "Your creative journey", url: "/library", keywords: ["creator", "art", "journey", "path"], score: 0, emoji: "🎨" },
+  { id: "room-star-trail", type: "heartwood_room", title: "✨ Star Trail", subtitle: "Wanderer & Staff lineage", url: "/library/star-trail", keywords: ["star", "trail", "creator", "journey", "path", "lineage", "timeline"], score: 0, emoji: "✨" },
   { id: "room-press", type: "heartwood_room", title: "🪶 Printing Press", subtitle: "Where reading becomes writing", url: "/library", keywords: ["press", "write", "scroll", "book"], score: 0, emoji: "🪶" },
   { id: "room-gallery", type: "heartwood_room", title: "🗺 Map Room", subtitle: "Ancient Friends Atlas", url: "/map", keywords: ["map", "atlas", "gallery", "explore"], score: 0, emoji: "🗺" },
   { id: "room-music", type: "heartwood_room", title: "🎵 Music Room", subtitle: "Tree Radio", url: "/library", keywords: ["music", "song", "radio", "listen"], score: 0, emoji: "🎵" },
