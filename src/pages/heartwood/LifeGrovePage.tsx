@@ -18,16 +18,18 @@ export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
   const { userId } = useCurrentUser();
 
-  const { data: grove, isLoading } = useQuery({
+  const { data: grove, isLoading, isError } = useQuery({
     queryKey: ["life-grove", id],
     queryFn: () => (id ? getLifeGrove(id) : null),
     enabled: !!id,
+    retry: 1,
   });
 
-  const { data: offerings = [] } = useQuery({
+  const { data: offerings = [], isLoading: loadingOfferings } = useQuery({
     queryKey: ["life-grove-offerings", id],
     queryFn: () => (id ? listOfferings(id) : []),
-    enabled: !!id,
+    enabled: !!id && !!grove,
+    refetchOnMount: true,
   });
 
   if (isLoading) {
