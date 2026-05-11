@@ -17,7 +17,7 @@ import { lazy, Suspense, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Mountain, Compass, Sparkles, Leaf, Trophy, ArrowRight,
-  Flame, TreeDeciduous, ChevronDown,
+  Flame, ChevronDown,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
