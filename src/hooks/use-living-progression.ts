@@ -14,7 +14,30 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { HIVES, speciesMatchesHive, currentSeason } from "@/lib/quest-cave/livingPaths";
+import { HIVES, speciesMatchesHive, currentSeason, type CanonicalSpecies } from "@/lib/quest-cave/livingPaths";
+import { enrichSpecies } from "@/data/treeSpecies";
+
+/**
+ * Resolve a raw species string to a canonical fingerprint via the
+ * synchronous treeSpecies map. This collapses common synonyms so that
+ * "oak", "English oak" and "Quercus robur" count as one species.
+ *
+ * TODO: upgrade to the async species_index resolver (`useSpeciesResolution`)
+ * once we batch-resolve in the hook layer.
+ */
+function canonicalize(species: string | null | undefined): CanonicalSpecies | null {
+  if (!species) return null;
+  const trimmed = species.trim();
+  if (!trimmed) return null;
+  const enriched = enrichSpecies(trimmed);
+  const genus = enriched.lineage?.split(/\s+/)[0]?.toLowerCase();
+  return {
+    key: (enriched.lineage ?? enriched.species).toLowerCase().trim(),
+    display: enriched.species,
+    genus,
+    family: enriched.family,
+  };
+}
 
 export interface LivingProgression {
   speciesEncountered: string[];
