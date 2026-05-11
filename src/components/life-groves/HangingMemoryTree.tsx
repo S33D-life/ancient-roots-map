@@ -30,7 +30,7 @@ export default function HangingMemoryTree({ offerings }: Props) {
             className="group p-3 rounded-xl border border-border/40 bg-gradient-to-br from-card/60 to-card/30 hover:border-primary/30 transition-all"
           >
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-base" aria-hidden>{meta?.glyph ?? "🍃"}</span>
+              <LifeGroveOfferingGlyph type={o.offering_type} size={22} variant="card" />
               <span className="text-[10px] uppercase tracking-[0.2em] font-serif text-muted-foreground/70">
                 {meta?.label ?? o.offering_type}
               </span>
