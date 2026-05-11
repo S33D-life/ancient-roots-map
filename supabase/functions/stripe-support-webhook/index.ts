@@ -37,17 +37,24 @@ Deno.serve(async (req) => {
   );
 
   try {
+    if (!WEBHOOK_SECRET) {
+      console.error("[webhook] STRIPE_WEBHOOK_SECRET is not configured — refusing request");
+      return new Response(JSON.stringify({ error: "Webhook secret not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.text();
     const sig = req.headers.get("stripe-signature");
-
-    let event: Stripe.Event;
-
-    if (WEBHOOK_SECRET && sig) {
-      event = await stripe.webhooks.constructEventAsync(body, sig, WEBHOOK_SECRET);
-    } else {
-      // Sandbox / dev fallback — parse directly
-      event = JSON.parse(body) as Stripe.Event;
+    if (!sig) {
+      return new Response(JSON.stringify({ error: "Missing stripe-signature header" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+
+    const event: Stripe.Event = await stripe.webhooks.constructEventAsync(body, sig, WEBHOOK_SECRET);
 
     console.log(`[webhook] Received: ${event.type}`);
 

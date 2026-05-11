@@ -355,12 +355,36 @@ route("GET", "/api/v1/offerings", async (_req, auth, _params, url) => {
 });
 
 // ── Offerings: Get by ID ──
-route("GET", "/api/v1/offerings/:id", async (_req, _auth, params) => {
+route("GET", "/api/v1/offerings/:id", async (_req, auth, params) => {
   const db = adminClient();
   const { data, error } = await db.from("offerings").select("*").eq("id", params.id).single();
   if (error || !data) return err("NOT_FOUND", "Offering not found", 404);
-  if (data.visibility === "private") return err("FORBIDDEN", "This offering is private", 403);
-  return json({ data });
+
+  // Public offerings are accessible to anyone
+  if (data.visibility === "public") return json({ data });
+
+  // All non-public visibility levels require authentication
+  if (!auth.userId) return err("UNAUTHORIZED", "Authentication required", 401);
+
+  // Author can always read their own
+  if (data.created_by === auth.userId) return json({ data });
+
+  // 'tribe' — readable by tree creator or active meeting participant
+  if (data.visibility === "tribe" && data.tree_id) {
+    const { data: tree } = await db.from("trees").select("created_by").eq("id", data.tree_id).maybeSingle();
+    if (tree?.created_by === auth.userId) return json({ data });
+    const { data: meeting } = await db
+      .from("tree_meetings")
+      .select("id")
+      .eq("tree_id", data.tree_id)
+      .eq("user_id", auth.userId)
+      .gte("expires_at", new Date().toISOString())
+      .limit(1)
+      .maybeSingle();
+    if (meeting) return json({ data });
+  }
+
+  return err("FORBIDDEN", "You do not have access to this offering", 403);
 });
 
 // ── Search ──
@@ -399,7 +423,12 @@ route("GET", "/api/v1/search", async (_req, _auth, _params, url) => {
 });
 
 // ── Species Vision ──
-route("POST", "/api/identify-tree", async (req) => {
+route("POST", "/api/identify-tree", async (req, auth) => {
+  if (!auth.userId) return err("UNAUTHORIZED", "Authentication required to identify trees", 401);
+  // Per-user rate limit on this expensive endpoint (calls paid AI vision APIs)
+  if (!rateOk(`identify:${auth.userId}`, 10, 60_000)) {
+    return err("RATE_LIMITED", "Too many identification requests, please slow down", 429);
+  }
   const MAX_IMAGE_DATA_CHARS = 14_000_000;
   let body: { imageData?: string; topK?: number; threshold?: number } | null = null;
   try {
