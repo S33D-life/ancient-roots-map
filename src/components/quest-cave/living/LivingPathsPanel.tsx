@@ -135,7 +135,7 @@ export default function LivingPathsPanel({ userId, activity }: Props) {
                       {h.blurb}
                     </p>
                     <p className="font-serif text-[10px] text-muted-foreground/70 mt-1">
-                      {count} met · next at {next}
+                      You have met {count} · next seal at {next}
                     </p>
                   </div>
                 </div>
