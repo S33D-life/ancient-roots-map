@@ -161,6 +161,11 @@ const HeartwoodLanding = () => {
           </button>
         </div>
 
+        {/* Borrowed Staff */}
+        <div className="w-full max-w-2xl mb-6">
+          <BorrowedStaffCard />
+        </div>
+
         {/* Vault Preview */}
         <div className="w-full max-w-2xl mb-10">
           <LibraryVaultPreview />
