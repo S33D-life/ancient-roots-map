@@ -31,7 +31,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useQuestCaveActivity } from "@/hooks/use-quest-cave-activity";
 import { useLivingProgression } from "@/hooks/use-living-progression";
-import { useBorrowedStaff } from "@/hooks/use-borrowed-staff";
+import { useStaffIdentity } from "@/hooks/use-staff-identity";
 import { ROUTES } from "@/lib/routes";
 import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
 import {
@@ -53,7 +53,8 @@ export default function QuestCavePage() {
   const { userId } = useCurrentUser();
   const activity = useQuestCaveActivity(userId);
   const progression = useLivingProgression(userId);
-  const { staff } = useBorrowedStaff();
+  const identity = useStaffIdentity(userId);
+  const staff = identity.borrowed;
 
   const season = currentSeason();
   const sKey = useMemo(() => seasonKey(), []);
