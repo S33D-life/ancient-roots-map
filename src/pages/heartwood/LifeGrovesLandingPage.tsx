@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { listMyLifeGroves } from "@/repositories/life-groves";
 import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
@@ -14,9 +15,9 @@ import { GROVE_TYPES } from "@/lib/life-groves/types";
 
 export default function LifeGrovesLandingPage() {
   const navigate = useNavigate();
-  const { userId } = useCurrentUser();
+  const { userId, isLoading: loadingUser } = useCurrentUser();
 
-  const { data: groves = [] } = useQuery({
+  const { data: groves = [], isLoading: loadingGroves } = useQuery({
     queryKey: ["life-groves", userId],
     queryFn: () => (userId ? listMyLifeGroves(userId) : Promise.resolve([])),
     enabled: !!userId,
