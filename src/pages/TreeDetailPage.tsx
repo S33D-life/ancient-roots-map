@@ -1559,6 +1559,8 @@ const TreeDetailPage = () => {
           treeSpecies={tree?.species}
           treeSpeciesKey={(tree as { species_key?: string | null } | null)?.species_key ?? null}
           treeName={tree?.name}
+          treeLat={tree?.latitude ?? null}
+          treeLng={tree?.longitude ?? null}
         />
       </Suspense>
 
