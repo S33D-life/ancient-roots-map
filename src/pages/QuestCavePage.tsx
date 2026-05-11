@@ -155,8 +155,8 @@ export default function QuestCavePage() {
             {staff ? (
               <>
                 <p className="font-serif text-sm text-foreground/90">
-                  You carry the <span className="text-primary">{staff.temporary_name}</span> —
-                  a Borrowed Staff of the {staff.archetype_species ?? "wild"} circle.
+                  Walking beside you: <span className="text-primary">{staff.temporary_name}</span> —
+                  a Borrowed Staff of the {staff.archetype_species ?? "wild"} circle, your first guide.
                 </p>
                 <p className="font-serif text-[11px] italic text-muted-foreground/80 leading-relaxed">
                   {staff.blessing}
@@ -164,8 +164,8 @@ export default function QuestCavePage() {
               </>
             ) : (
               <p className="font-serif text-[11px] italic text-muted-foreground/80">
-                A Borrowed Staff will be offered when you sign in. Your permanent staff
-                emerges later, through care for the trees you meet.
+                A Borrowed Staff will be offered as your first guide when you sign in. Your
+                Permanent Staff emerges later — earned, gifted, or crafted through the trees you tend.
               </p>
             )}
 
