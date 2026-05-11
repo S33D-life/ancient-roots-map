@@ -109,14 +109,35 @@ const AuthPage = () => {
     return raw || "Google sign-in could not complete. Check OAuth redirect settings and try again.";
   };
 
-  // Pre-fill invite code from URL, also capture gift param and bot handoff
+  // Pre-fill invite code from URL, also capture gift param and bot handoff.
+  // CRITICAL: persist invite code to BOTH localStorage and sessionStorage as soon
+  // as we see it, so it survives OAuth (Google/Apple) redirects, Safari app
+  // switching, page reloads, and any redirect chain that drops query params.
+  // We do NOT consume the invite here — only the post-signup auth listener does.
   useEffect(() => {
     const code = searchParams.get("invite");
     const giftCode = searchParams.get("gift");
     const source = searchParams.get("source");
-    if (code) {
-      setInviteCode(code);
-      setView("signup"); // auto-switch to signup if arriving via invite
+
+    // Recover an invite code persisted from a previous arrival (e.g. survived
+    // an OAuth roundtrip that stripped the URL param).
+    let effectiveCode = code;
+    if (!effectiveCode) {
+      try {
+        effectiveCode =
+          sessionStorage.getItem("s33d_pending_invite_code") ||
+          localStorage.getItem("s33d_pending_invite_code");
+      } catch {}
+    }
+
+    if (effectiveCode) {
+      console.log("[invite] token detected", { source: code ? "url" : "storage" });
+      setInviteCode(effectiveCode);
+      setView("signup");
+      try {
+        sessionStorage.setItem("s33d_pending_invite_code", effectiveCode);
+        localStorage.setItem("s33d_pending_invite_code", effectiveCode);
+      } catch {}
     }
     if (giftCode) {
       localStorage.setItem("s33d_gift_code", giftCode);
@@ -124,13 +145,9 @@ const AuthPage = () => {
     }
     // Bot handoff: if arriving from Telegram/OpenClaw, store context
     if (source) {
-      // The useBotHandoff hook in use-bot-handoff.ts handles localStorage
-      // but we also need to pull invite/gift from the handoff params
-      const handoffInvite = searchParams.get("invite");
       const handoffGift = searchParams.get("gift");
-      if (handoffInvite && !code) setInviteCode(handoffInvite);
       if (handoffGift) localStorage.setItem("s33d_gift_code", handoffGift);
-      setView("signup"); // default to signup for bot arrivals
+      setView("signup");
     }
   }, [searchParams]);
 
