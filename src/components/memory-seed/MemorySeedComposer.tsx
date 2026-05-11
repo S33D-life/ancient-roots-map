@@ -550,3 +550,64 @@ function BranchGlyph() {
     </svg>
   );
 }
+
+// ── Resonance hints (presence-aware, never blocking) ─────────
+
+function ResonancePanel({
+  resonance,
+  treeName,
+}: {
+  resonance: ReturnType<typeof useTreeResonance>;
+  treeName?: string | null;
+}) {
+  const lines: string[] = [];
+
+  // Proximity guidance
+  if (resonance.distanceMeters != null) {
+    if (resonance.nearOfferingRange) {
+      lines.push("This memory may wish to remain in the branches.");
+    } else {
+      const km = resonance.distanceMeters >= 1000
+        ? `${(resonance.distanceMeters / 1000).toFixed(1)}km`
+        : `${Math.round(resonance.distanceMeters)}m`;
+      lines.push(`You are about ${km} away — this memory may travel more gently through the roots.`);
+    }
+  }
+
+  // Returning visitor
+  if (resonance.visitedBefore) {
+    lines.push(
+      treeName
+        ? `You have walked with ${treeName} before.`
+        : "You have walked with this tree before.",
+    );
+  }
+
+  // Borrowed staff resonance
+  if (resonance.staffResonance) {
+    lines.push(`Your borrowed staff stirs quietly here — it resonates with ${resonance.staffResonance} paths.`);
+  }
+
+  // Life Grove link
+  if (resonance.lifeGroveLink) {
+    lines.push("This tree also carries a living family canopy.");
+  }
+
+  if (lines.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-lg px-3 py-2.5 space-y-1"
+      style={{
+        background: "hsl(var(--primary) / 0.05)",
+        border: "1px solid hsl(var(--primary) / 0.15)",
+      }}
+    >
+      {lines.map((l, i) => (
+        <p key={i} className="font-serif italic text-[12px] leading-relaxed text-foreground/70">
+          {l}
+        </p>
+      ))}
+    </div>
+  );
+}
