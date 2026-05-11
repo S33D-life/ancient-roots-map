@@ -174,51 +174,7 @@ const HeartwoodLanding = () => {
           <LibraryVaultPreview />
         </div>
 
-        {/* Life Groves entry */}
-        <div className="w-full max-w-2xl mb-3">
-          <button
-            onClick={() => navigate("/heartwood/life-groves")}
-            className="group w-full text-left rounded-2xl border border-amber-900/25 bg-gradient-to-br from-emerald-100/30 via-card/60 to-amber-100/25 dark:from-emerald-950/20 dark:to-amber-950/15 p-5 hover:border-primary/40 transition-all"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="font-serif text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
-                  Heartwood Room
-                </p>
-                <h3 className="font-serif text-xl text-foreground mt-1">Life Groves</h3>
-                <p className="text-xs font-serif text-muted-foreground/80 mt-1 italic">
-                  Living tree-libraries for births, memorials, unions, and meaningful moments.
-                </p>
-              </div>
-              <span className="font-serif text-[11px] text-primary shrink-0 group-hover:translate-x-0.5 transition-transform">
-                Enter Life Groves →
-              </span>
-            </div>
-          </button>
-        </div>
-
-        {/* Quest Cave entry */}
-        <div className="w-full max-w-2xl mb-6">
-          <button
-            onClick={() => navigate("/heartwood/quest-cave")}
-            className="group w-full text-left rounded-2xl border border-amber-900/25 bg-gradient-to-br from-amber-100/30 via-card/60 to-emerald-100/25 dark:from-amber-950/20 dark:to-emerald-950/15 p-5 hover:border-primary/40 transition-all"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="font-serif text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
-                  Heartwood Room
-                </p>
-                <h3 className="font-serif text-xl text-foreground mt-1">Quest Cave</h3>
-                <p className="text-xs font-serif text-muted-foreground/80 mt-1 italic">
-                  Personal paths, collective quests, and the living work of TETOL.
-                </p>
-              </div>
-              <span className="font-serif text-[11px] text-primary shrink-0 group-hover:translate-x-0.5 transition-transform">
-                Enter the Quest Cave →
-              </span>
-            </div>
-          </button>
-        </div>
+        {/* Life Groves & Quest Cave now live as standard tiles in the room grid below. */}
 
         {/* Room Grid */}
         <LibraryRoomGrid onRoomSelect={handleRoomSelect} />
