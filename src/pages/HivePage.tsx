@@ -41,6 +41,7 @@ interface TreeRow {
   estimated_age: number | null;
   created_at: string;
   nation: string | null;
+  isResearch?: boolean;
 }
 
 type OfferingRow = Database["public"]["Tables"]["offerings"]["Row"];
@@ -118,6 +119,7 @@ const HivePage = () => {
         estimated_age: null as number | null,
         created_at: rt.created_at,
         nation: rt.country,
+        isResearch: true,
       }));
 
       const allTrees = [...hiveTrees, ...researchTrees];
@@ -216,7 +218,10 @@ const HivePage = () => {
   const topTrees = Object.entries(treeHeartMap)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([id, hearts]) => ({ id, name: trees.find(t => t.id === id)?.name || "Unknown", hearts }));
+    .map(([id, hearts]) => {
+      const t = trees.find(t => t.id === id);
+      return { id, name: t?.name || "Unknown", hearts, isResearch: !!t?.isResearch };
+    });
 
   // Top wanderers
   const userHeartMap: Record<string, number> = {};
@@ -402,7 +407,7 @@ const HivePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {trees.slice(0, 60).map((tree, i) => (
                     <motion.div key={tree.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                      <Link to={`/tree/${tree.id}`}>
+                      <Link to={tree.isResearch ? `/tree/research/${tree.id}` : `/tree/${tree.id}`}>
                         <Card className="bg-card/60 backdrop-blur border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
                           <CardContent className="p-4">
                             <h3 className="font-serif text-foreground group-hover:text-primary transition-colors truncate">{tree.name}</h3>
@@ -541,7 +546,7 @@ const HivePage = () => {
                       ) : (
                         <div className="space-y-2">
                           {topTrees.map((t, i) => (
-                            <Link key={t.id} to={`/tree/${t.id}`} className="flex items-center gap-2 text-xs font-serif hover:text-primary transition-colors">
+                            <Link key={t.id} to={t.isResearch ? `/tree/research/${t.id}` : `/tree/${t.id}`} className="flex items-center gap-2 text-xs font-serif hover:text-primary transition-colors">
                               <span className="text-muted-foreground w-4">{i + 1}.</span>
                               <span className="flex-1 truncate">{t.name}</span>
                               <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>{t.hearts}</span>

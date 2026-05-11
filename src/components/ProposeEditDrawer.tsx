@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRadixScrollFix } from "@/hooks/use-radix-scroll-fix";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number)
 export default function ProposeEditDrawer({ open, onOpenChange, tree }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  useRadixScrollFix();
 
   // Editable fields
   const [editName, setEditName] = useState(false);
