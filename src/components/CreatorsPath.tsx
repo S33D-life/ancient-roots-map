@@ -1,11 +1,12 @@
 /**
- * CreatorsPath — Personal Journey Room.
+ * StarTrail (formerly Creator's Path) — Personal Journey Room.
  *
  * The living record of a wanderer's path with life and the Ancient Friends.
- * Aggregates trees mapped, Ancient Friends visited, offerings, whispers,
- * songs, books, Life Groves, ceremonies and quests into one warm scroll.
+ * Weaves together two lineages:
+ *   • Wanderer Lineage — visits, offerings, whispers, groves, quests, council
+ *   • Staff Lineage    — borrowed staff, ceremonies, trees mapped with staff
  *
- * Tree Projects Directory has moved to /tree-projects.
+ * Tree Projects Directory lives at /tree-projects.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
