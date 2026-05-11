@@ -212,30 +212,38 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
 
       <PathHero />
 
-      {/* Active staff card */}
-      {activeStaff && (
-        <Card className="border-amber-900/25 bg-card/70 backdrop-blur-sm overflow-hidden">
-          <CardContent className="p-0">
-            <Link to={`/staff/${activeStaff.id}`} className="flex items-center gap-4 p-4 group">
-              <div className="w-16 h-16 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0">
-                <img
-                  src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
-                  alt={activeStaff.species}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">Borrowed Staff</p>
-                <h3 className="font-serif text-base text-foreground truncate">{activeStaff.species}</h3>
-                <p className="text-[11px] text-muted-foreground/80 italic truncate">
-                  {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
-                </p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-primary/60 shrink-0" />
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+      {/* Active staff card — frames Borrowed vs Permanent based on ceremony history */}
+      {activeStaff && (() => {
+        const hasBinding = stats.ceremonies > 0;
+        const eyebrow = hasBinding ? "First guide / early companion" : "Borrowed Staff";
+        const note = hasBinding
+          ? "Remembered as the staff that walked with you at the start of the path."
+          : "Walks with you until your Permanent Staff is earned, gifted, or crafted.";
+        return (
+          <Card className="border-amber-900/25 bg-card/70 backdrop-blur-sm overflow-hidden">
+            <CardContent className="p-0">
+              <Link to={`/staff/${activeStaff.id}`} className="flex items-center gap-4 p-4 group">
+                <div className="w-16 h-16 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0">
+                  <img
+                    src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
+                    alt={activeStaff.species}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">{eyebrow}</p>
+                  <h3 className="font-serif text-base text-foreground truncate">{activeStaff.species}</h3>
+                  <p className="text-[11px] text-muted-foreground/80 italic truncate">
+                    {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 italic mt-1 truncate">{note}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-primary/60 shrink-0" />
+              </Link>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Journey overview */}
       <section>
