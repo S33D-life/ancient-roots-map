@@ -179,10 +179,10 @@ describe("invite e2e flow scenarios", () => {
     expect(r.recovered).toBe("ofresh");
     expect(r.bloomFailure).toBe(false);
     // After OAuth bounce, source should reflect oauth_return on re-detect.
-    const detect = r.events.find(
-      (e, i) => e.name === "invite_code_detected" && i > 0,
-    );
-    expect(detect?.source).toBe("oauth_return");
+    // After OAuth bounce, the second detection should be flagged oauth_return.
+    const detects = r.events.filter((e) => e.name === "invite_code_detected");
+    expect(detects.length).toBeGreaterThanOrEqual(2);
+    expect(detects[detects.length - 1].source).toBe("oauth_return");
   });
 
   it("page refresh preserves invite token", async () => {
