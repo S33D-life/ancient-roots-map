@@ -20,7 +20,7 @@ const VaultRoom = lazy(() => import("@/components/library/VaultRoom"));
 const AncientFriendsRoom = lazy(() => import("@/components/library/AncientFriendsRoom"));
 const PersonalBookshelf = lazy(() => import("@/components/PersonalBookshelf"));
 const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
-const TreeResources = lazy(() => import("@/components/TreeResources"));
+
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
