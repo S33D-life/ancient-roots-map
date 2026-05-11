@@ -1275,6 +1275,23 @@ const TreeDetailPage = () => {
               </Button>
             )}
 
+            {/* Memory Seed — unified Offering ↔ Whisper composer (prototype) */}
+            {userId && tree && (
+              <div className="rounded-2xl border border-primary/20 bg-card/40 p-3">
+                <Button
+                  onClick={() => setMemorySeedOpen(true)}
+                  variant="ghost"
+                  className="w-full font-serif justify-between text-left"
+                >
+                  <span>Share an Offering or Whisper</span>
+                  <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">New</span>
+                </Button>
+                <p className="font-serif text-[11px] italic text-muted-foreground/70 px-3 pb-1">
+                  Offerings hang in the branches. Whispers travel through the roots.
+                </p>
+              </div>
+            )}
+
             {availableWhispers.length > 0 && userId && tree && (
               <WhisperCollector
                 whispers={availableWhispers}
