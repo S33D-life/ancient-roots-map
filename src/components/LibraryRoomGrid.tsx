@@ -10,10 +10,12 @@ import { motion } from "framer-motion";
 type Room = { key: string; label: string; desc: string; accentH: number; particle: string };
 
 const PRIMARY: Room[] = [
-  { key: "staff-room",  label: "🪵 Staff Room",  desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
-  { key: "life-groves", label: "🌿 Life Groves", desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
-  { key: "quest-cave",  label: "🕯 Quest Cave",  desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
-  { key: "vault",       label: "🔐 Vault",       desc: "Staff, Tokens & Treasures",                accentH: 270, particle: "shimmer" },
+  { key: "staff-room",      label: "🪵 Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
+  { key: "ancient-friends", label: "🌳 Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
+  { key: "atlas",           label: "🗺 Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
+  { key: "life-groves",     label: "🌿 Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
+  { key: "quest-cave",      label: "🕯 Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+  { key: "vault",           label: "🔐 Vault",           desc: "Staff, Tokens & Treasures",                accentH: 270, particle: "shimmer" },
 ];
 
 const LIVING_LIBRARY: Room[] = [
@@ -32,10 +34,8 @@ const GROWING_SPACES: Room[] = [
 ];
 
 const COMMUNITY_ATLAS: Room[] = [
-  { key: "ancient-friends",   label: "🌳 Ancient Friends",   desc: "Gallery of Ancient Trees",        accentH: 140, particle: "leaf"    },
-  { key: "atlas",             label: "🗺 Map Room",          desc: "Atlas · Countries · Bio Regions", accentH: 200, particle: "compass" },
-  { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory",           accentH: 160, particle: "page"    },
-  { key: "tap-root",          label: "⚙️ Dev Room",           desc: "Tap Root · Infrastructure",       accentH: 210, particle: "spark"   },
+  { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory",     accentH: 160, particle: "page"  },
+  { key: "tap-root",          label: "⚙️ Dev Room",           desc: "Tap Root · Infrastructure", accentH: 210, particle: "spark" },
 ];
 
 /* ── Seasonal ambient hue offset (subtle) ── */
