@@ -10067,6 +10067,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_borrowed_staffs: {
+        Row: {
+          archetype_species: string | null
+          assigned_at: string
+          blessing: string | null
+          circle_number: number
+          circle_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          staff_number: number
+          temporary_name: string | null
+          user_id: string
+        }
+        Insert: {
+          archetype_species?: string | null
+          assigned_at?: string
+          blessing?: string | null
+          circle_number: number
+          circle_type: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          staff_number: number
+          temporary_name?: string | null
+          user_id: string
+        }
+        Update: {
+          archetype_species?: string | null
+          assigned_at?: string
+          blessing?: string | null
+          circle_number?: number
+          circle_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          staff_number?: number
+          temporary_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_calendar_preferences: {
         Row: {
           created_at: string
