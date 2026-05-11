@@ -413,12 +413,14 @@ function PathHero() {
       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/30 mb-2">
         <Footprints className="w-5 h-5 text-primary" />
       </div>
-      <h1 className="font-serif text-2xl sm:text-3xl text-foreground tracking-wide">Creator's Path</h1>
+      <h1 className="font-serif text-2xl sm:text-3xl text-foreground tracking-wide">Star Trail</h1>
       <p className="text-xs sm:text-sm font-serif text-muted-foreground mt-1">
         Your path is remembered here.
       </p>
       <p className="text-[11px] sm:text-xs font-serif text-muted-foreground/80 italic mt-3 max-w-md mx-auto leading-relaxed">
-        Every tree met, offering given, whisper sent, and grove tended becomes part of the journey.
+        Your Star Trail remembers the path you are weaving through trees,
+        offerings, whispers, groves, quests, and Council gatherings — and
+        the staff that walks alongside you.
       </p>
     </div>
   );
