@@ -218,7 +218,10 @@ const HivePage = () => {
   const topTrees = Object.entries(treeHeartMap)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
-    .map(([id, hearts]) => ({ id, name: trees.find(t => t.id === id)?.name || "Unknown", hearts }));
+    .map(([id, hearts]) => {
+      const t = trees.find(t => t.id === id);
+      return { id, name: t?.name || "Unknown", hearts, isResearch: !!t?.isResearch };
+    });
 
   // Top wanderers
   const userHeartMap: Record<string, number> = {};
