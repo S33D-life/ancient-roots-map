@@ -143,11 +143,12 @@ function AncientFriendsWrapper() {
 }
 
 /**
- * CreatorsPathWrapper — self-contained wrapper.
- * Tree Projects Directory has been relocated to /tree-projects (linked from
- * Tree Data Commons and from a subtle link inside Creator's Path).
+ * StarTrailWrapper — self-contained wrapper for the personal journey room
+ * (formerly "Creator's Path"). Tree Projects Directory lives at
+ * /tree-projects (linked from Tree Data Commons and from a subtle link
+ * inside the Star Trail).
  */
-function CreatorsPathWrapper() {
+function StarTrailWrapper() {
   const [userId, setUserId] = useState<string | undefined>();
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
