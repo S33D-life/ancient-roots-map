@@ -24,6 +24,7 @@ import {
   assignOfferingPosition,
   type OfferingPosition,
 } from "@/lib/life-groves/positions";
+import LifeGroveOfferingGlyph from "./LifeGroveOfferingGlyph";
 
 interface Props {
   archetype: TreeArchetype;
