@@ -2,7 +2,7 @@
  * LifeGrovePage — single Life Grove view.
  * Route: /heartwood/life-groves/:id
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
