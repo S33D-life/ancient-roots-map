@@ -250,7 +250,7 @@ export function OfferingPreviewCard({
       className="mt-4 rounded-2xl border border-primary/30 bg-card/60 p-4 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2"
     >
       <div className="flex items-center gap-2 mb-1.5">
-        <span className="text-base" aria-hidden>{meta?.glyph ?? "🍃"}</span>
+        <LifeGroveOfferingGlyph type={offering.offering_type} size={24} variant="card" />
         <span className="text-[10px] uppercase tracking-[0.2em] font-serif text-muted-foreground/70">
           {meta?.label ?? offering.offering_type}
         </span>
