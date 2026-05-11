@@ -151,7 +151,12 @@ const CouncilOfLifePage = () => {
             onEditCouncil={() => setCuratorOpen(true)}
           />
 
-          {/* ── Quick View — agenda glimpse + Council Scroll ── */}
+          {/* ── Council Calendar — upcoming gatherings ── */}
+          <div className="mt-6">
+            <CouncilCalendar />
+          </div>
+
+          {/* ── Quick View — agenda glimpse + single Council Scroll ── */}
           <div className="mt-6">
             <CouncilQuickView invitation={invitation} />
           </div>
