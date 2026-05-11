@@ -546,7 +546,7 @@ const HivePage = () => {
                       ) : (
                         <div className="space-y-2">
                           {topTrees.map((t, i) => (
-                            <Link key={t.id} to={`/tree/${t.id}`} className="flex items-center gap-2 text-xs font-serif hover:text-primary transition-colors">
+                            <Link key={t.id} to={t.isResearch ? `/tree/research/${t.id}` : `/tree/${t.id}`} className="flex items-center gap-2 text-xs font-serif hover:text-primary transition-colors">
                               <span className="text-muted-foreground w-4">{i + 1}.</span>
                               <span className="flex-1 truncate">{t.name}</span>
                               <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>{t.hearts}</span>
