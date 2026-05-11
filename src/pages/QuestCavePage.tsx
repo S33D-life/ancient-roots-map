@@ -31,6 +31,7 @@ import QuestCard from "@/components/quest-cave/QuestCard";
 import {
   buildMyPaths, buildCollective, buildSeasonal, MOCK_CIRCLE_QUESTS,
 } from "@/components/quest-cave/mockQuests";
+import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
 
 const TABS = [
   { value: "my", label: "My Paths", icon: Compass },
