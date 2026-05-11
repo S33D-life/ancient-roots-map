@@ -11,6 +11,16 @@
  *   • offerings (offering mode)
  *   • tree_whispers (whisper mode, via sendWhisper helper)
  *
+ * ── Data mapping notes (no schema change yet) ───────────────────────────
+ *   • quote / recipe / bloom  → folded into offerings.type = "story"
+ *     (quote also writes quote_text + quote_author when applicable).
+ *   • voice_note              → offerings.type = "voice"
+ *   • photo                   → offerings.type = "photo", media_url only
+ *                               (no upload pipeline yet — paste a URL).
+ *   • whispers                → recipientScope hard-coded "PUBLIC" for now.
+ *   • same_species delivery   → uses treeSpeciesKey when present, else
+ *                               falls back to the raw treeSpecies string.
+ *
  * Scope deliberately narrow: no AI, no payments, no upload, no encryption.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -303,12 +313,13 @@ export default function MemorySeedComposer({
               </TabsList>
               <TabsContent value="offering" className="mt-3">
                 <p className="font-serif text-xs italic text-muted-foreground/80">
-                  Visible from afar once placed in {treeName ? `“${treeName}”` : "this tree"}'s branches.
+                  Offerings can be seen from afar once placed
+                  {treeName ? ` in “${treeName}”'s branches.` : " in this tree's branches."}
                 </p>
               </TabsContent>
               <TabsContent value="whisper" className="mt-3 space-y-3">
                 <p className="font-serif text-xs italic text-muted-foreground/80">
-                  A whisper waits until kin meet a qualifying tree.
+                  Whispers wait until someone checks in beneath the right tree.
                 </p>
                 <div className="space-y-1.5">
                   <Label className="font-serif text-xs">Who can find this whisper?</Label>
@@ -336,7 +347,7 @@ export default function MemorySeedComposer({
                 <SelectContent>
                   {TYPES.map((t) => (
                     <SelectItem key={t.value} value={t.value} disabled={t.placeholder}>
-                      {t.label}{t.placeholder ? " (soon)" : ""}
+                      {t.label}{t.placeholder ? " · coming soon" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
