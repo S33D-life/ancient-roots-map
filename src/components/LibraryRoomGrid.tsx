@@ -9,28 +9,34 @@ import { motion } from "framer-motion";
 /* ── Room definitions with theme colors — grouped ── */
 type Room = { key: string; label: string; desc: string; accentH: number; particle: string };
 
-const YOUR_SPACES: Room[] = [
-  { key: "staff-room",    label: "🪵 Staff Room",      desc: "144 Sacred Staffs",        accentH: 280, particle: "wand"       },
-  { key: "greenhouse",    label: "🌱 Greenhouse",       desc: "Houseplants & Saplings",   accentH: 130, particle: "leaf"       },
-  { key: "wishlist",      label: "⭐ Dream Trees",      desc: "Trees you dream to visit",  accentH: 45,  particle: "star"       },
-  { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",     accentH: 25,  particle: "shimmer"    },
-  { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",             accentH: 340, particle: "spark"      },
-  { key: "vault",         label: "🔐 Vault",            desc: "Staff, Tokens & Treasures", accentH: 270, particle: "shimmer"    },
+const PRIMARY: Room[] = [
+  { key: "staff-room",  label: "🪵 Staff Room",  desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
+  { key: "life-groves", label: "🌿 Life Groves", desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
+  { key: "quest-cave",  label: "🕯 Quest Cave",  desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+  { key: "vault",       label: "🔐 Vault",       desc: "Staff, Tokens & Treasures",                accentH: 270, particle: "shimmer" },
 ];
 
-const COMMUNITY: Room[] = [
-  { key: "ancient-friends", label: "🌳 Ancient Friends",  desc: "Gallery of Ancient Trees", accentH: 140, particle: "leaf"       },
-  { key: "atlas",           label: "🗺 Map Room",         desc: "Atlas · Countries · Bio Regions", accentH: 200, particle: "compass" },
-  { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",               accentH: 260, particle: "wave"       },
-  { key: "seed-cellar",   label: "📦 Seed Cellar",      desc: "Living Data Archive",      accentH: 30,  particle: "seed"       },
-  { key: "rhythms",       label: "🌿 Rhythms",          desc: "Seasonal Cycle Markets",   accentH: 150, particle: "leaf"       },
-  { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory", accentH: 160, particle: "page" },
-  { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",          accentH: 42,  particle: "shimmer"    },
-  { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
-  { key: "tap-root",      label: "⚙️ Dev Room",          desc: "Tap Root · Infrastructure",  accentH: 210, particle: "spark"     },
+const LIVING_LIBRARY: Room[] = [
+  { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
+  { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",                    accentH: 260, particle: "wave"    },
+  { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
+  { key: "press",         label: "🪶 Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
+  { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",                  accentH: 340, particle: "spark"   },
 ];
 
-const ALL_ROOMS = [...YOUR_SPACES, ...COMMUNITY];
+const GROWING_SPACES: Room[] = [
+  { key: "greenhouse",  label: "🌱 Greenhouse",  desc: "Houseplants & Saplings",      accentH: 130, particle: "leaf" },
+  { key: "wishlist",    label: "⭐ Dream Trees", desc: "Trees you dream to visit",    accentH: 45,  particle: "star" },
+  { key: "seed-cellar", label: "📦 Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
+  { key: "rhythms",     label: "🌿 Rhythms",     desc: "Seasonal Cycle Markets",      accentH: 150, particle: "leaf" },
+];
+
+const COMMUNITY_ATLAS: Room[] = [
+  { key: "ancient-friends",   label: "🌳 Ancient Friends",   desc: "Gallery of Ancient Trees",        accentH: 140, particle: "leaf"    },
+  { key: "atlas",             label: "🗺 Map Room",          desc: "Atlas · Countries · Bio Regions", accentH: 200, particle: "compass" },
+  { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory",           accentH: 160, particle: "page"    },
+  { key: "tap-root",          label: "⚙️ Dev Room",           desc: "Tap Root · Infrastructure",       accentH: 210, particle: "spark"   },
+];
 
 /* ── Seasonal ambient hue offset (subtle) ── */
 function getSeasonalShift(): number {
