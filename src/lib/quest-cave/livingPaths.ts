@@ -14,7 +14,16 @@ export interface Milestone {
 
 export interface HiveDefinition {
   id: string;
-  /** Match against trees.species using a case-insensitive substring. */
+  /**
+   * Preferred: botanical family name(s). When set, hive matching uses the
+   * canonical species resolver (treeSpecies family map) which collapses
+   * "english oak" / "oak" / "Quercus robur" into a single match.
+   */
+  families?: string[];
+  /**
+   * Fallback only — case-insensitive substring matchers against the raw
+   * species string. Used when family resolution fails.
+   */
   speciesMatchers: string[];
   label: string; // "Oak Hive"
   sigil: string; // single-glyph SVG-friendly hint, used by glyph component
