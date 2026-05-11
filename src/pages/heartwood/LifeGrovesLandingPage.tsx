@@ -47,6 +47,10 @@ export default function LifeGrovesLandingPage() {
           </p>
         </section>
 
+        <section className="max-w-2xl mx-auto mb-10">
+          <BorrowedStaffCard />
+        </section>
+
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-12">
           {[
             { title: "Create a Life Grove", body: "Begin the seed of a new living library." },
