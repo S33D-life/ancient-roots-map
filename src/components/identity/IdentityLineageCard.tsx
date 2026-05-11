@@ -13,105 +13,51 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Footprints, Wand2, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import { useStaffIdentity } from "@/hooks/use-staff-identity";
 
 interface Props {
   userId: string | null | undefined;
   className?: string;
 }
 
-interface LineageState {
-  wandererName: string | null;
-  borrowedStaffCode: string | null;
-  borrowedStaffSpecies: string | null;
-  permanentStaffId: string | null;
-  permanentStaffSpecies: string | null;
-  ceremonies: number;
-  treesMappedWithStaff: number;
-}
-
 export default function IdentityLineageCard({ userId, className }: Props) {
-  const [state, setState] = useState<LineageState | null>(null);
+  const identity = useStaffIdentity(userId);
+  const [wandererName, setWandererName] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setWandererName(null);
+      return;
+    }
     let cancelled = false;
     (async () => {
-      const [profileRes, ceremoniesRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("full_name, active_staff_id")
-          .eq("id", userId)
-          .maybeSingle(),
-        supabase
-          .from("ceremony_logs")
-          .select("id, ceremony_type, staff_code, staff_species")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(20),
-      ]);
-
-      const ceremonies = (ceremoniesRes.data ?? []) as any[];
-      const binding = ceremonies.find((c) => c.ceremony_type === "binding");
-      const activeStaffId =
-        profileRes.data?.active_staff_id ||
-        (typeof window !== "undefined"
-          ? localStorage.getItem("linked_staff_code")
-          : null);
-
-      // Treat a "binding" ceremony as evidence of a Permanent Staff.
-      // Otherwise the active staff is the Borrowed guide.
-      let permanentStaffId: string | null = binding?.staff_code ?? null;
-      let permanentStaffSpecies: string | null = binding?.staff_species ?? null;
-      let borrowedStaffCode: string | null = null;
-      let borrowedStaffSpecies: string | null = null;
-
-      if (activeStaffId) {
-        const { data: staffRow } = await supabase
-          .from("staffs")
-          .select("species")
-          .eq("id", activeStaffId)
-          .maybeSingle();
-        const species = (staffRow as any)?.species ?? null;
-
-        if (permanentStaffId && permanentStaffId === activeStaffId) {
-          permanentStaffSpecies = permanentStaffSpecies || species;
-        } else if (permanentStaffId) {
-          // active staff is something else — treat it as the borrowed companion
-          borrowedStaffCode = activeStaffId;
-          borrowedStaffSpecies = species;
-        } else {
-          borrowedStaffCode = activeStaffId;
-          borrowedStaffSpecies = species;
-        }
-      }
-
-      // Count trees mapped by the wanderer (acts as a soft proxy for
-      // "trees mapped with this staff" until staff_id is wired into trees).
-      const { count: treeCount } = await supabase
-        .from("trees")
-        .select("id", { count: "exact", head: true })
-        .eq("created_by", userId);
-
-      if (cancelled) return;
-      setState({
-        wandererName: profileRes.data?.full_name ?? null,
-        borrowedStaffCode,
-        borrowedStaffSpecies,
-        permanentStaffId,
-        permanentStaffSpecies,
-        ceremonies: ceremonies.length,
-        treesMappedWithStaff: treeCount ?? 0,
-      });
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!cancelled) setWandererName((data as any)?.full_name ?? null);
     })();
     return () => {
       cancelled = true;
     };
   }, [userId]);
 
-  if (!userId || !state) return null;
+  if (!userId) return null;
+  if (identity.isLoading && !identity.hasBorrowed && !identity.hasPermanent) return null;
 
-  const hasPermanent = !!state.permanentStaffId;
-  const hasBorrowed = !!state.borrowedStaffCode;
+  const { hasPermanent, hasBorrowed, permanent, borrowed } = identity;
+  const permanentStaffId = permanent?.code ?? null;
+  const permanentStaffSpecies = permanent?.species ?? null;
+  const borrowedStaffCode = borrowed?.id ?? null;
+  const borrowedStaffSpecies = borrowed?.archetype_species ?? null;
+  const state = {
+    wandererName,
+    borrowedStaffCode,
+    borrowedStaffSpecies,
+    permanentStaffId,
+    permanentStaffSpecies,
+  };
 
   return (
     <section
