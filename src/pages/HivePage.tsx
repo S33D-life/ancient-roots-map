@@ -404,7 +404,7 @@ const HivePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {trees.slice(0, 60).map((tree, i) => (
                     <motion.div key={tree.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                      <Link to={`/tree/${tree.id}`}>
+                      <Link to={tree.isResearch ? `/tree/research/${tree.id}` : `/tree/${tree.id}`}>
                         <Card className="bg-card/60 backdrop-blur border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
                           <CardContent className="p-4">
                             <h3 className="font-serif text-foreground group-hover:text-primary transition-colors truncate">{tree.name}</h3>
