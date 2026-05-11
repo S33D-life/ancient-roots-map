@@ -421,6 +421,13 @@ const TreeDataCommonsPage = () => {
             control which datasets appear, and track integration of global tree sources
             into the living atlas.
           </p>
+          <p className="text-xs font-serif text-muted-foreground/70 italic mt-3">
+            Looking for partner organisations?{" "}
+            <Link to="/tree-projects" className="text-primary/80 underline-offset-2 hover:underline">
+              Browse the Tree Projects Directory
+            </Link>
+            .
+          </p>
         </motion.div>
 
         {/* ── Canopy Overview ── */}

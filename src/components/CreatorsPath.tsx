@@ -71,6 +71,30 @@ const safe = async (p: PromiseLike<any>): Promise<{ data: any[] }> => {
   try { const r: any = await p; return { data: r?.data ?? [] }; } catch { return { data: [] }; }
 };
 
+/** Group sorted-desc events into journal buckets by recency. */
+function groupEvents(events: PathEvent[]): { label: string; events: PathEvent[] }[] {
+  const now = Date.now();
+  const DAY = 86_400_000;
+  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+  const buckets: { label: string; events: PathEvent[] }[] = [
+    { label: "Today",               events: [] },
+    { label: "This week",           events: [] },
+    { label: "Earlier this moon",   events: [] },
+    { label: "Earlier this season", events: [] },
+    { label: "Older roots",         events: [] },
+  ];
+  for (const ev of events) {
+    const t = new Date(ev.date).getTime();
+    if (Number.isNaN(t)) { buckets[4].events.push(ev); continue; }
+    if (t >= startOfToday.getTime()) buckets[0].events.push(ev);
+    else if (now - t < 7 * DAY)      buckets[1].events.push(ev);
+    else if (now - t < 30 * DAY)     buckets[2].events.push(ev);
+    else if (now - t < 90 * DAY)     buckets[3].events.push(ev);
+    else                             buckets[4].events.push(ev);
+  }
+  return buckets.filter((b) => b.events.length > 0);
+}
+
 const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
   const [events, setEvents] = useState<PathEvent[]>([]);
   const [stats, setStats] = useState<JourneyStats>(EMPTY_STATS);
@@ -286,7 +310,7 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
           <Card className="border-border/30 bg-card/40">
             <CardContent className="p-6 text-center space-y-2">
               <Sparkles className="w-6 h-6 mx-auto text-primary/40" />
-              <p className="font-serif text-sm text-foreground/80">The path grows as you walk.</p>
+              <p className="font-serif text-sm text-foreground/80">The path begins with one tree.</p>
               <p className="text-xs text-muted-foreground/70 italic">
                 Map a tree, leave an offering, or check in beneath an Ancient Friend to begin.
               </p>
@@ -303,43 +327,55 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
         ) : (
           <div className="relative">
             <div className="absolute left-[18px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-amber-700/20 to-transparent" />
-            <ol className="space-y-2.5">
-              {events.slice(0, 40).map((event) => {
-                const meta = EVENT_META[event.type];
-                const Icon = meta.icon;
-                const inner = (
-                  <div className="relative flex gap-3 items-start group">
-                    <div
-                      className="relative z-10 w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
-                      style={{
-                        borderColor: `hsl(${meta.tone} / 0.45)`,
-                        backgroundColor: `hsl(${meta.tone} / 0.12)`,
-                      }}
-                    >
-                      <Icon className="w-4 h-4" style={{ color: `hsl(${meta.tone})` }} />
-                    </div>
-                    <div className="flex-1 min-w-0 rounded-lg border border-border/30 bg-card/50 px-3 py-2.5 group-hover:border-primary/30 transition-colors">
-                      <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                        <p className="font-serif text-sm text-foreground truncate">{event.title}</p>
-                        <span className="text-[10px] text-muted-foreground/70 whitespace-nowrap">
-                          {new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground/80 italic mt-0.5 truncate">
-                        {meta.label}{event.subtitle ? ` · ${event.subtitle}` : ""}
-                      </p>
-                    </div>
+            <div className="space-y-5">
+              {groupEvents(events.slice(0, 60)).map((group) => (
+                <div key={group.label}>
+                  <div className="flex items-center gap-2 mb-2 pl-12">
+                    <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                      {group.label}
+                    </span>
+                    <span className="flex-1 h-px bg-gradient-to-r from-amber-700/20 to-transparent" />
                   </div>
-                );
-                return event.link ? (
-                  <li key={event.id}>
-                    <Link to={event.link} className="block">{inner}</Link>
-                  </li>
-                ) : (
-                  <li key={event.id}>{inner}</li>
-                );
-              })}
-            </ol>
+                  <ol className="space-y-2.5">
+                    {group.events.map((event) => {
+                      const meta = EVENT_META[event.type];
+                      const Icon = meta.icon;
+                      const inner = (
+                        <div className="relative flex gap-3 items-start group">
+                          <div
+                            className="relative z-10 w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
+                            style={{
+                              borderColor: `hsl(${meta.tone} / 0.45)`,
+                              backgroundColor: `hsl(${meta.tone} / 0.12)`,
+                            }}
+                          >
+                            <Icon className="w-4 h-4" style={{ color: `hsl(${meta.tone})` }} />
+                          </div>
+                          <div className="flex-1 min-w-0 rounded-lg border border-border/30 bg-card/50 px-3 py-2.5 group-hover:border-primary/30 transition-colors">
+                            <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                              <p className="font-serif text-sm text-foreground truncate">{event.title}</p>
+                              <span className="text-[10px] text-muted-foreground/70 whitespace-nowrap">
+                                {new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground/80 italic mt-0.5 truncate">
+                              {meta.label}{event.subtitle ? ` · ${event.subtitle}` : ""}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                      return event.link ? (
+                        <li key={event.id}>
+                          <Link to={event.link} className="block">{inner}</Link>
+                        </li>
+                      ) : (
+                        <li key={event.id}>{inner}</li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </section>
