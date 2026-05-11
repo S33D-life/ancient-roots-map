@@ -124,19 +124,34 @@ const AuthPage = () => {
     const giftCode = searchParams.get("gift");
     const source = searchParams.get("source");
 
+    // Fire link_opened once per arrival when the URL carries an invite param.
+    if (code) {
+      void trackInviteEvent("invite_link_opened", { code, source: "url" });
+    }
+
     // Recover an invite code persisted from a previous arrival (e.g. survived
     // an OAuth roundtrip that stripped the URL param).
     let effectiveCode = code;
+    let detectedSource: "url" | "storage" | "oauth_return" = code ? "url" : "storage";
     if (!effectiveCode) {
       try {
         effectiveCode =
           sessionStorage.getItem("s33d_pending_invite_code") ||
           localStorage.getItem("s33d_pending_invite_code");
+        // If sessionStorage was wiped but localStorage survived, this is
+        // almost certainly an OAuth round-trip.
+        if (effectiveCode && !sessionStorage.getItem("s33d_pending_invite_code")) {
+          detectedSource = "oauth_return";
+        }
       } catch {}
     }
 
     if (effectiveCode) {
-      console.log("[invite] token detected", { source: code ? "url" : "storage" });
+      console.log("[invite] token detected", { source: detectedSource });
+      void trackInviteEvent("invite_code_detected", {
+        code: effectiveCode,
+        source: detectedSource,
+      });
       setInviteCode(effectiveCode);
       setView("signup");
       try {
