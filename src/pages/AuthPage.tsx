@@ -425,8 +425,22 @@ const AuthPage = () => {
 
       const validRow = Array.isArray(validation) ? validation[0] : validation;
       if (validationError || !validRow?.id) {
+        void trackInviteEvent("invite_validation_failed", {
+          code,
+          source: "manual",
+          metadata: { error: validationError?.message ?? "no_row" },
+        });
+        setInviteExpiresAt(null);
         throw new Error("INVITE_BLOOM_FAILED");
       }
+
+      // Surface a soft expiry hint when the backend reports one.
+      setInviteExpiresAt((validRow as any)?.expires_at ?? null);
+      void trackInviteEvent("invite_validation_success", {
+        code,
+        source: "manual",
+        metadata: { expires_at: (validRow as any)?.expires_at ?? null },
+      });
 
       // Persist the code BEFORE attempting signup so it survives any redirect,
       // OAuth roundtrip, email-verification roundtrip, or Safari app switch.
@@ -436,6 +450,7 @@ const AuthPage = () => {
         sessionStorage.setItem("s33d_pending_invite_code", code);
       } catch {}
 
+      void trackInviteEvent("invite_signup_started", { code, source: "manual" });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -449,6 +464,11 @@ const AuthPage = () => {
       }
       console.log("[invite] signup success — code will be consumed on first session", {
         userId: data.user?.id,
+      });
+      void trackInviteEvent("invite_signup_success", {
+        code,
+        source: "manual",
+        userId: data.user?.id ?? null,
       });
       setView("verify-email");
     } catch (err) {
