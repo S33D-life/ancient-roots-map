@@ -34,6 +34,7 @@ import { useLivingProgression } from "@/hooks/use-living-progression";
 import { useStaffIdentity } from "@/hooks/use-staff-identity";
 import { ROUTES } from "@/lib/routes";
 import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
+import { HeartwoodChamber, ChamberSkeleton as SharedChamberSkeleton } from "@/components/library/HeartwoodChamber";
 import {
   currentSeason, nextMilestone, SPECIES_MILESTONES, STAFF_RESONANCE,
 } from "@/lib/quest-cave/livingPaths";
