@@ -49,6 +49,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { sendWhisper } from "@/hooks/use-whispers";
+import { useTreeResonance } from "@/hooks/use-tree-resonance";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -74,6 +75,9 @@ interface Props {
   /** Optional canonical species_key for SPECIES_MATCH whispers. */
   treeSpeciesKey?: string | null;
   treeName?: string | null;
+  /** Optional coordinates — when present, enable proximity-aware guidance. */
+  treeLat?: number | null;
+  treeLng?: number | null;
 }
 
 interface SeedTypeMeta {
@@ -139,9 +143,12 @@ export default function MemorySeedComposer({
   treeSpecies,
   treeSpeciesKey,
   treeName,
+  treeLat,
+  treeLng,
 }: Props) {
   const { userId, isLoading: userLoading } = useCurrentUser();
   const [destination, setDestination] = useState<Destination>("offering");
+  const [destinationTouched, setDestinationTouched] = useState(false);
   const [type, setType] = useState<SeedType>("story");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -154,12 +161,29 @@ export default function MemorySeedComposer({
 
   const meta = TYPES.find((t) => t.value === type)!;
 
+  const resonance = useTreeResonance({
+    treeId,
+    treeLat,
+    treeLng,
+    treeSpecies,
+    userId,
+    enabled: open,
+  });
+
+  // Soft default: when far from the tree, lean toward whisper.
+  // Only applied until the wanderer touches the tabs themselves.
+  useEffect(() => {
+    if (!open || destinationTouched) return;
+    if (resonance.distanceMeters == null) return;
+    setDestination(resonance.nearOfferingRange ? "offering" : "whisper");
+  }, [open, destinationTouched, resonance.distanceMeters, resonance.nearOfferingRange]);
+
   // Reset state on close.
   useEffect(() => {
     if (!open) {
       setTitle(""); setBody(""); setMediaUrl(""); setAuthor(""); setNote("");
       setType("story"); setDestination("offering"); setUnlock("any_ancient_friend");
-      setSubmitting(false); setConfirmed(null);
+      setSubmitting(false); setConfirmed(null); setDestinationTouched(false);
     }
   }, [open]);
 
@@ -302,7 +326,12 @@ export default function MemorySeedComposer({
           </div>
         ) : (
           <div className="space-y-4">
-            <Tabs value={destination} onValueChange={(v) => setDestination(v as Destination)}>
+            <ResonancePanel resonance={resonance} treeName={treeName} />
+
+            <Tabs
+              value={destination}
+              onValueChange={(v) => { setDestinationTouched(true); setDestination(v as Destination); }}
+            >
               <TabsList className="w-full">
                 <TabsTrigger value="offering" className="flex-1 font-serif text-xs">
                   Leave Offering
@@ -519,5 +548,66 @@ function BranchGlyph() {
         <circle cx="32" cy="18" r="3" fill="currentColor" opacity="0.7" />
       </g>
     </svg>
+  );
+}
+
+// ── Resonance hints (presence-aware, never blocking) ─────────
+
+function ResonancePanel({
+  resonance,
+  treeName,
+}: {
+  resonance: ReturnType<typeof useTreeResonance>;
+  treeName?: string | null;
+}) {
+  const lines: string[] = [];
+
+  // Proximity guidance
+  if (resonance.distanceMeters != null) {
+    if (resonance.nearOfferingRange) {
+      lines.push("This memory may wish to remain in the branches.");
+    } else {
+      const km = resonance.distanceMeters >= 1000
+        ? `${(resonance.distanceMeters / 1000).toFixed(1)}km`
+        : `${Math.round(resonance.distanceMeters)}m`;
+      lines.push(`You are about ${km} away — this memory may travel more gently through the roots.`);
+    }
+  }
+
+  // Returning visitor
+  if (resonance.visitedBefore) {
+    lines.push(
+      treeName
+        ? `You have walked with ${treeName} before.`
+        : "You have walked with this tree before.",
+    );
+  }
+
+  // Borrowed staff resonance
+  if (resonance.staffResonance) {
+    lines.push(`Your borrowed staff stirs quietly here — it resonates with ${resonance.staffResonance} paths.`);
+  }
+
+  // Life Grove link
+  if (resonance.lifeGroveLink) {
+    lines.push("This tree also carries a living family canopy.");
+  }
+
+  if (lines.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-lg px-3 py-2.5 space-y-1"
+      style={{
+        background: "hsl(var(--primary) / 0.05)",
+        border: "1px solid hsl(var(--primary) / 0.15)",
+      }}
+    >
+      {lines.map((l, i) => (
+        <p key={i} className="font-serif italic text-[12px] leading-relaxed text-foreground/70">
+          {l}
+        </p>
+      ))}
+    </div>
   );
 }
