@@ -180,18 +180,28 @@ const AuthPage = () => {
       if (isRecoveryFlow()) return;
 
       if (session) {
-        // Consume invitation on first sign-in (assigns lineage + decrements inviter)
-        const storedCode = localStorage.getItem("s33d_invite_code");
+        // Consume invitation on first sign-in (assigns lineage + decrements inviter).
+        // Read from BOTH legacy and new persistence keys so any prior session can
+        // still complete its consumption. We only mark the invite "used" AFTER
+        // we have a real authenticated session — never on page load.
+        const storedCode =
+          localStorage.getItem("s33d_invite_code") ||
+          localStorage.getItem("s33d_pending_invite_code") ||
+          sessionStorage.getItem("s33d_pending_invite_code");
         if (storedCode && session.user) {
-          const { data: consumeResult } = await supabase.rpc("consume_invitation", {
-            p_invite_code: storedCode,
-            p_new_user_id: session.user.id,
-          });
+          console.log("[invite] consuming after auth success", { userId: session.user.id });
+          const { data: consumeResult, error: consumeError } = await supabase.rpc(
+            "consume_invitation",
+            { p_invite_code: storedCode, p_new_user_id: session.user.id },
+          );
+          console.log("[invite] consume result", { consumeResult, consumeError });
           // Fallback to old referral system if consume_invitation doesn't exist yet
           if (!consumeResult || (consumeResult as any)?.error) {
             await recordReferral(session.user.id, storedCode);
           }
           localStorage.removeItem("s33d_invite_code");
+          localStorage.removeItem("s33d_pending_invite_code");
+          sessionStorage.removeItem("s33d_pending_invite_code");
         }
 
         // Auto-claim gift seed if arriving via gift link
