@@ -4111,11 +4111,17 @@ export type Database = {
           id: string
           invite_token: string
           latitude: number | null
+          linked_tree_id: string | null
           location_text: string | null
           longitude: number | null
           package_price_pence: number
           passing_date: string | null
+          planted_tree_latitude: number | null
+          planted_tree_location_text: string | null
+          planted_tree_longitude: number | null
+          planting_notes: string | null
           planting_package: string
+          planting_status: string
           planting_type: string
           privacy: string
           relationship_label: string | null
@@ -4123,6 +4129,7 @@ export type Database = {
           source_tree_photo_ids: Json | null
           story_intro: string | null
           tree_archetype_species: string
+          tree_link_type: string
           tree_name: string | null
           tree_species_detail: string | null
           updated_at: string
@@ -4142,11 +4149,17 @@ export type Database = {
           id?: string
           invite_token?: string
           latitude?: number | null
+          linked_tree_id?: string | null
           location_text?: string | null
           longitude?: number | null
           package_price_pence?: number
           passing_date?: string | null
+          planted_tree_latitude?: number | null
+          planted_tree_location_text?: string | null
+          planted_tree_longitude?: number | null
+          planting_notes?: string | null
           planting_package?: string
+          planting_status?: string
           planting_type?: string
           privacy?: string
           relationship_label?: string | null
@@ -4154,6 +4167,7 @@ export type Database = {
           source_tree_photo_ids?: Json | null
           story_intro?: string | null
           tree_archetype_species?: string
+          tree_link_type?: string
           tree_name?: string | null
           tree_species_detail?: string | null
           updated_at?: string
@@ -4173,11 +4187,17 @@ export type Database = {
           id?: string
           invite_token?: string
           latitude?: number | null
+          linked_tree_id?: string | null
           location_text?: string | null
           longitude?: number | null
           package_price_pence?: number
           passing_date?: string | null
+          planted_tree_latitude?: number | null
+          planted_tree_location_text?: string | null
+          planted_tree_longitude?: number | null
+          planting_notes?: string | null
           planting_package?: string
+          planting_status?: string
           planting_type?: string
           privacy?: string
           relationship_label?: string | null
@@ -4185,6 +4205,7 @@ export type Database = {
           source_tree_photo_ids?: Json | null
           story_intro?: string | null
           tree_archetype_species?: string
+          tree_link_type?: string
           tree_name?: string | null
           tree_species_detail?: string | null
           updated_at?: string
