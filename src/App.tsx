@@ -178,6 +178,7 @@ const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/Living
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
 const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
 const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCommonsPage"), "tree-data-commons");
+const TreeProjectsPage = lazyImportWithRetry(() => import("./pages/TreeProjectsPage"), "tree-projects");
 const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPage"), "agent-garden");
 const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapPage"), "ecosystem-map");
 const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/DatasetDiscoveryAgentPage"), "discovery-agent");
