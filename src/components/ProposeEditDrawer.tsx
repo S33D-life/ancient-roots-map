@@ -43,6 +43,7 @@ function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number)
 export default function ProposeEditDrawer({ open, onOpenChange, tree }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  useRadixScrollFix();
 
   // Editable fields
   const [editName, setEditName] = useState(false);
