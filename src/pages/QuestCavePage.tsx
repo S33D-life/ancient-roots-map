@@ -74,7 +74,7 @@ export default function QuestCavePage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 border border-primary/30 mb-3">
               <Mountain className="w-6 h-6 text-primary" />
             </div>
-            <h1 className="font-serif text-3xl text-foreground tracking-wide">Quest Cave</h1>
+            <h1 className="font-serif text-3xl text-foreground tracking-wide">Quest Room</h1>
             <p className="text-sm font-serif text-muted-foreground mt-1">
               Choose a path through the living world.
             </p>
