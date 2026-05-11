@@ -1,68 +1,77 @@
 /**
  * QuestCavePage — /heartwood/quest-cave
  *
- * A quiet, candlelit map-room inside Heartwood where a wanderer's real
- * activity (mapped trees, visits, offerings, blooms, whispers) becomes
- * personal paths, circle quests, collective quests, and TETOL progress.
+ * "A place where paths become visible."
  *
- * The page is intentionally data-ready: counters come from real Supabase
- * queries via useQuestCaveActivity, while quest definitions live in
- * mockQuests.ts and can be replaced by a backed-quest table later without
- * touching the UI.
+ * Structure (post-harmonisation):
+ *   Hero → Current Resonance → Living Paths → Staff Paths →
+ *   Seasonal & Collective (collapsible) → Great Quests (collapsible) →
+ *   More Chambers (collapsible) → Bridge
+ *
+ * The page reads real progression via existing hooks. Underlying chamber
+ * components (Seasonal panel, Dream Trees, Path Archetypes, Heart Flow,
+ * Spark/Bug Bounty, Blooming Map) are preserved inside collapsibles so no
+ * data-driven feature is lost — they simply no longer dominate the room.
  */
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
-  Compass, Users, Globe2, TreePine, Leaf, MapPin, Mountain,
-  ArrowRight, Sparkles,
+  Mountain, Compass, Sparkles, Leaf, Trophy, ArrowRight,
+  Flame, ChevronDown,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import {
+  Collapsible, CollapsibleContent, CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useQuestCaveActivity } from "@/hooks/use-quest-cave-activity";
-import { supabase } from "@/integrations/supabase/client";
+import { useLivingProgression } from "@/hooks/use-living-progression";
+import { useBorrowedStaff } from "@/hooks/use-borrowed-staff";
 import { ROUTES } from "@/lib/routes";
-import QuestCard from "@/components/quest-cave/QuestCard";
-import {
-  buildMyPaths, buildCollective, buildSeasonal, MOCK_CIRCLE_QUESTS,
-} from "@/components/quest-cave/mockQuests";
 import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
-import QuestCaveRoom from "@/components/library/QuestCaveRoom";
+import {
+  currentSeason, nextMilestone, SPECIES_MILESTONES, STAFF_RESONANCE,
+} from "@/lib/quest-cave/livingPaths";
 
-const TABS = [
-  { value: "my", label: "My Paths", icon: Compass },
-  { value: "circles", label: "Circles", icon: Users },
-  { value: "collective", label: "Collective", icon: Globe2 },
-  { value: "tetol", label: "TETOL", icon: TreePine },
-  { value: "seasonal", label: "Seasonal", icon: Leaf },
-  { value: "nearby", label: "Nearby", icon: MapPin },
-] as const;
+// Heavier chambers are lazy — only mounted when the user opens "More Chambers".
+const SeasonalQuestsPanel = lazy(() => import("@/components/library/quest-cave/SeasonalQuestsPanel"));
+const FourSeasonsCard      = lazy(() => import("@/components/library/quest-cave/FourSeasonsCard"));
+const DreamTreesPanel      = lazy(() => import("@/components/library/quest-cave/DreamTreesPanel"));
+const PathArchetypesPanel  = lazy(() => import("@/components/library/quest-cave/PathArchetypesPanel"));
+const QuestHeartFlowCard   = lazy(() => import("@/components/library/quest-cave/QuestHeartFlowCard"));
+const SparkBugBountyPanel  = lazy(() => import("@/components/library/quest-cave/SparkBugBountyPanel"));
+const BloomingMapCard      = lazy(() => import("@/components/library/quest-cave/BloomingMapCard"));
+import { currentSeason as seasonKey } from "@/components/library/quest-cave/seasonalQuestsConfig";
 
 export default function QuestCavePage() {
-  useDocumentTitle("Quest Room · Heartwood");
+  useDocumentTitle("Quest Cave · Heartwood");
   const { userId } = useCurrentUser();
   const activity = useQuestCaveActivity(userId);
+  const progression = useLivingProgression(userId);
+  const { staff } = useBorrowedStaff();
 
-  const myPaths = useMemo(() => buildMyPaths(activity), [activity]);
-  const collective = useMemo(() => buildCollective(activity), [activity]);
-  const seasonal = useMemo(() => buildSeasonal(activity), [activity]);
-  const treesContributed = activity.trees + activity.blooms;
-  const activePaths = myPaths.filter(q => q.status === "active").length;
+  const season = currentSeason();
+  const sKey = useMemo(() => seasonKey(), []);
+  const speciesCount = progression.speciesEncountered.length;
+  const speciesNext = nextMilestone(speciesCount, SPECIES_MILESTONES) as number;
+  const resonanceLine = staff
+    ? STAFF_RESONANCE[(staff.archetype_species ?? "").toLowerCase()]
+    : undefined;
 
   return (
     <div className="min-h-screen relative overflow-hidden botanical-heartwood">
       <Header />
       <div
-        className="relative z-10 max-w-3xl mx-auto px-4 pb-24"
+        className="relative z-10 max-w-3xl mx-auto px-4 pb-32"
         style={{ paddingTop: "var(--content-top)" }}
       >
-        {/* Hero ─────────────────────────────────────── */}
-        <div className="relative rounded-2xl overflow-hidden border border-amber-900/25 bg-gradient-to-br from-amber-200/30 via-amber-100/20 to-emerald-200/25 dark:from-amber-900/20 dark:to-emerald-900/15 p-6 text-center mb-6">
+        {/* ── Hero ───────────────────────────────────── */}
+        <section className="relative rounded-2xl overflow-hidden border border-amber-900/25 bg-gradient-to-br from-amber-200/30 via-amber-100/20 to-emerald-200/25 dark:from-amber-900/20 dark:to-emerald-900/15 p-6 text-center mb-6">
           <div
             className="absolute inset-0 opacity-[0.08] pointer-events-none"
             style={{
@@ -74,99 +83,223 @@ export default function QuestCavePage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 border border-primary/30 mb-3">
               <Mountain className="w-6 h-6 text-primary" />
             </div>
-            <h1 className="font-serif text-3xl text-foreground tracking-wide">Quest Room</h1>
-            <p className="text-sm font-serif text-muted-foreground mt-1">
-              Choose a path through the living world.
-            </p>
-            <p className="text-xs font-serif text-muted-foreground/80 mt-3 italic max-w-md mx-auto leading-relaxed">
-              Your visits, offerings, blooms, whispers, and mapped trees become paths here.
-              Some quests are yours alone. Some belong to your circles. Some are carried by the whole forest.
+            <h1 className="font-serif text-3xl text-foreground tracking-wide">Quest Cave</h1>
+            <p className="text-sm font-serif text-muted-foreground mt-1 italic">
+              A place where paths become visible.
             </p>
           </div>
-        </div>
+        </section>
 
-        {/* Summary stats */}
-        <div className="grid grid-cols-3 gap-2 mb-6">
-          <SummaryStat label="Hearts this moon" value={activity.totalHearts} />
-          <SummaryStat label="Active paths" value={activePaths} />
-          <SummaryStat label="Trees contributed" value={treesContributed} />
-        </div>
+        {/* ── Current Resonance ──────────────────────── */}
+        <SectionTitle title="Current Resonance" caption="What stirs beneath your feet right now." />
+        <Card className="border-amber-900/20 bg-gradient-to-br from-amber-50/40 via-card/60 to-emerald-50/30 dark:from-amber-950/10 dark:to-emerald-950/10 mb-8">
+          <CardContent className="p-4 space-y-3">
+            <p className="font-serif text-[12px] italic text-muted-foreground/80">
+              The cave listens for the paths already unfolding beneath your feet.
+            </p>
 
-        {/* Living Paths — quiet ecological progression */}
+            <div className="grid grid-cols-3 gap-2">
+              <ResonanceStat label="Hearts this moon" value={activity.totalHearts} />
+              <ResonanceStat label="Species met" value={speciesCount} />
+              <ResonanceStat label="To next seal" value={Math.max(0, speciesNext - speciesCount)} />
+            </div>
+
+            <div className="rounded-lg border border-primary/15 bg-primary/5 p-3 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[10px] font-serif uppercase tracking-[0.2em] text-muted-foreground">
+                <Leaf className="w-3 h-3 text-emerald-600/70" /> Season · {season}
+              </div>
+              <p className="font-serif text-sm text-foreground/90">
+                Next species milestone at <span className="text-primary">{speciesNext}</span>
+              </p>
+              <Progress
+                value={Math.min(100, Math.round((speciesCount / speciesNext) * 100))}
+                className="h-1.5 bg-muted/40"
+              />
+            </div>
+
+            {resonanceLine && (
+              <div className="rounded-lg border border-amber-700/20 bg-amber-50/30 dark:bg-amber-950/10 p-3">
+                <div className="flex items-center gap-1.5 text-[10px] font-serif uppercase tracking-[0.2em] text-muted-foreground">
+                  <Flame className="w-3 h-3 text-amber-700/80" /> Borrowed Staff resonance
+                </div>
+                <p className="font-serif text-sm italic text-foreground/90 mt-1">{resonanceLine}</p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              <QuickLink to={ROUTES.MAP} label="Open the map" />
+              <QuickLink to={ROUTES.HIVES} label="Visit a hive" />
+              <QuickLink to={ROUTES.STAFF_ROOM} label="Staff Room" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ── Living Paths (primary) ─────────────────── */}
+        <SectionTitle
+          title="Living Paths"
+          caption="A wandering naturalist's journal."
+          icon={<Compass className="w-4 h-4 text-primary" />}
+        />
         <div className="mb-8">
-          <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
-            <h2 className="font-serif text-lg text-foreground">Living Paths</h2>
-            <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-              A wandering naturalist's journal
-            </p>
-          </div>
           <LivingPathsPanel userId={userId} activity={activity} />
         </div>
 
-        {/* Tabs ─────────────────────────────────────── */}
-        <Tabs defaultValue="my" className="w-full">
-          <TabsList className="bg-muted/40 w-full justify-start overflow-x-auto flex-nowrap">
-            {TABS.map((t) => (
-              <TabsTrigger
-                key={t.value}
-                value={t.value}
-                className="text-xs font-serif gap-1.5 shrink-0"
-              >
-                <t.icon className="w-3.5 h-3.5" /> {t.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="my" className="mt-4 space-y-3">
-            {!userId ? (
-              <SignInPrompt />
-            ) : myPaths.length === 0 ? (
-              <EmptyState />
+        {/* ── Staff Paths ────────────────────────────── */}
+        <SectionTitle
+          title="Staff Paths"
+          caption="Resonance and lineage that walk beside you."
+          icon={<Flame className="w-4 h-4 text-amber-700/80" />}
+        />
+        <Card className="border-border/30 bg-card/40 mb-8">
+          <CardContent className="p-4 space-y-3">
+            {staff ? (
+              <>
+                <p className="font-serif text-sm text-foreground/90">
+                  You carry the <span className="text-primary">{staff.temporary_name}</span> —
+                  a Borrowed Staff of the {staff.archetype_species ?? "wild"} circle.
+                </p>
+                <p className="font-serif text-[11px] italic text-muted-foreground/80 leading-relaxed">
+                  {staff.blessing}
+                </p>
+              </>
             ) : (
-              myPaths.map((q, i) => <QuestCard key={q.id} q={q} index={i} />)
+              <p className="font-serif text-[11px] italic text-muted-foreground/80">
+                A Borrowed Staff will be offered when you sign in. Your permanent staff
+                emerges later, through care for the trees you meet.
+              </p>
             )}
-          </TabsContent>
 
-          <TabsContent value="circles" className="mt-4 space-y-3">
-            <p className="text-[11px] font-serif text-muted-foreground/70 italic px-1">
-              Sample circles shown below. Your real friends, family, staff, grove and
-              council circles will appear here as the data is wired in.
-            </p>
-            {MOCK_CIRCLE_QUESTS.map((q, i) => <QuestCard key={q.id} q={q} index={i} />)}
-          </TabsContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <StaffMilestone
+                title="Borrowed Staff resonance"
+                line="Your staff stirs near old oak paths and hidden hollows."
+              />
+              <StaffMilestone
+                title="Permanent Staff (coming)"
+                line="Earned through long lineage with the same trees and grove."
+              />
+            </div>
 
-          <TabsContent value="collective" className="mt-4 space-y-3">
-            {collective.map((q, i) => <QuestCard key={q.id} q={q} index={i} />)}
-          </TabsContent>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <QuickLink to={ROUTES.STAFF_ROOM} label="Enter the Staff Room" />
+            </div>
+          </CardContent>
+        </Card>
 
-          <TabsContent value="tetol" className="mt-4">
-            <TetolPanel activity={activity} />
-          </TabsContent>
+        {/* ── Seasonal & Collective ──────────────────── */}
+        <CollapsibleSection
+          title="Seasonal & Collective Paths"
+          caption="Quests that ripen with the moon and the trees."
+          icon={<Leaf className="w-4 h-4 text-emerald-600/80" />}
+          defaultOpen={true}
+        >
+          <Suspense fallback={<ChamberSkeleton />}>
+            <SeasonalQuestsPanel
+              season={sKey}
+              activity={{
+                trees: activity.trees,
+                offerings: activity.offerings,
+                whispers: activity.whispersSent,
+                visits: activity.visits,
+                globalTrees: activity.globalTrees,
+                globalOfferings: activity.globalOfferings,
+              }}
+            />
+            <div className="mt-3">
+              <FourSeasonsCard
+                currentSeason={sKey}
+                touchedSeasons={new Set(activity.visits > 0 ? [sKey] : [])}
+              />
+            </div>
+          </Suspense>
+        </CollapsibleSection>
 
-          <TabsContent value="seasonal" className="mt-4 space-y-3">
-            <SeasonalIntro />
-            {seasonal.map((q, i) => <QuestCard key={q.id} q={q} index={i} />)}
-          </TabsContent>
-
-          <TabsContent value="nearby" className="mt-4 space-y-3">
-            <NearbyPanel userId={userId} />
-          </TabsContent>
-        </Tabs>
-
-        {/* Quest chambers — derived staff/path quests, seasonal & dream layers */}
-        <div className="mt-10 mb-8">
-          <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
-            <h2 className="font-serif text-lg text-foreground">Quest Chambers</h2>
-            <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-              Staff · Seasonal · Dream
-            </p>
+        {/* ── Great Quests ───────────────────────────── */}
+        <CollapsibleSection
+          title="Great Quests"
+          caption="Long, slow, mythic — the legendary paths."
+          icon={<Trophy className="w-4 h-4 text-primary" />}
+          defaultOpen={false}
+        >
+          <div className="space-y-2">
+            <GreatQuestRow
+              title="Meet 100 species"
+              line="Breadth across the canopy of the living world."
+              current={speciesCount}
+              target={100}
+            />
+            <GreatQuestRow
+              title="Walk 33 Yew paths"
+              line="The slow lineage of yew, returned to."
+              current={progression.hiveCounts["yew"] ?? 0}
+              target={33}
+            />
+            <GreatQuestRow
+              title="Walk 33 Oak paths"
+              line="Oaks remembered across regions and seasons."
+              current={progression.hiveCounts["oak"] ?? 0}
+              target={33}
+            />
+            <GreatQuestRow
+              title="Visit 12 ancient trees"
+              line="Elders aged 200+ years met in person."
+              current={progression.ancientCount}
+              target={12}
+            />
+            <GreatQuestRow
+              title="Pilgrim companions"
+              line="Walk an old pilgrim route alongside other wanderers."
+            />
+            <GreatQuestRow
+              title="Boundary walkers"
+              line="Map trees along parish boundaries and old droving roads."
+            />
+            <GreatQuestRow
+              title="Orchard memory routes"
+              line="Carry orchard lineages forward by recording fruit-bearers."
+            />
+            <GreatQuestRow
+              title="1,000 Ancient Friends mapped"
+              line="A collective vow held by the whole forest."
+              current={activity.globalTrees}
+              target={1000}
+            />
           </div>
-          <QuestCaveRoom />
-        </div>
+        </CollapsibleSection>
 
-        {/* Bridge back */}
+        {/* ── More Chambers (preserved data layers) ───── */}
+        <CollapsibleSection
+          title="More Chambers"
+          caption="Dream trees, path archetypes, heart flow, blooming map."
+          icon={<Sparkles className="w-4 h-4 text-primary/80" />}
+          defaultOpen={false}
+        >
+          <Suspense fallback={<ChamberSkeleton />}>
+            <div className="space-y-6">
+              <DreamTreesPanel />
+              <PathArchetypesPanel />
+              <QuestHeartFlowCard
+                baseHearts={activity.totalHearts}
+                bonusPrepared={0}
+                speciesFlow={0}
+                hearthFlow={0}
+                valueTreeContribution={0}
+                rewardStatus="Locked"
+              />
+              <SparkBugBountyPanel />
+              <BloomingMapCard
+                individualTrees={activity.trees}
+                individualOfferings={activity.offerings}
+                collectiveTrees={activity.globalTrees}
+                collectiveOfferings={activity.globalOfferings}
+              />
+            </div>
+          </Suspense>
+        </CollapsibleSection>
+
+        {/* ── Bridge back ────────────────────────────── */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center mt-8">
-          <p className="text-xs font-serif text-foreground/80">
+          <p className="text-xs font-serif text-foreground/80 italic">
             Your steps echo through the chambers.
           </p>
           <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
@@ -186,7 +319,22 @@ export default function QuestCavePage() {
 
 // ── Bits ───────────────────────────────────────────────────────────────
 
-function SummaryStat({ label, value }: { label: string; value: number }) {
+function SectionTitle({
+  title, caption, icon,
+}: { title: string; caption: string; icon?: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
+      <h2 className="font-serif text-lg text-foreground flex items-center gap-2">
+        {icon}{title}
+      </h2>
+      <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70 text-right">
+        {caption}
+      </p>
+    </div>
+  );
+}
+
+function ResonanceStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-lg border border-border/30 bg-card/40 p-3 text-center">
       <div className="text-xl font-serif text-primary">{value}</div>
@@ -197,215 +345,84 @@ function SummaryStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function EmptyState() {
-  const starters = [
-    { title: "Meet Your First Ancient Friend", to: ROUTES.ADD_TREE },
-    { title: "Record One Bloom Nearby", to: ROUTES.MAP },
-    { title: "Visit One Tree This Week", to: ROUTES.MAP },
-    { title: "Leave Your First Offering", to: ROUTES.MAP },
-    { title: "Join a Collective Quest", to: "#" },
-  ];
+function QuickLink({ to, label }: { to: string; label: string }) {
   return (
-    <Card className="border-border/30 bg-card/30">
-      <CardContent className="p-5 space-y-3">
-        <h3 className="font-serif text-base text-foreground text-center">
-          Choose a path through the living world.
-        </h3>
-        <p className="text-xs font-serif text-muted-foreground italic text-center">
-          Begin with one tree, one offering, or one bloom. Your quests will grow from there.
-        </p>
-        <div className="space-y-1.5 pt-1">
-          {starters.map((s) => (
-            <Link
-              key={s.title}
-              to={s.to}
-              className="flex items-center justify-between text-xs font-serif text-foreground/80 px-3 py-2 rounded-lg border border-border/30 bg-card/50 hover:border-primary/40"
-            >
-              <span>{s.title}</span>
-              <ArrowRight className="w-3 h-3 text-primary/70" />
-            </Link>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <Link
+      to={to}
+      className="text-[11px] font-serif text-foreground/80 px-2.5 py-1.5 rounded-md border border-border/40 bg-card/50 hover:border-primary/40 hover:text-primary transition-colors inline-flex items-center gap-1"
+    >
+      {label}<ArrowRight className="w-3 h-3" />
+    </Link>
   );
 }
 
-function SignInPrompt() {
+function StaffMilestone({ title, line }: { title: string; line: string }) {
   return (
-    <Card className="border-border/30 bg-card/30">
-      <CardContent className="p-5 text-center space-y-3">
-        <p className="text-xs font-serif text-muted-foreground italic">
-          Sign in to see the paths your steps are weaving.
-        </p>
-        <Button asChild size="sm" className="font-serif text-xs">
-          <Link to={ROUTES.AUTH}>Sign in</Link>
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-function SeasonalIntro() {
-  const month = new Date().getMonth();
-  const season =
-    month >= 2 && month <= 4 ? "Spring" :
-    month >= 5 && month <= 7 ? "Summer" :
-    month >= 8 && month <= 10 ? "Autumn" : "Winter";
-  return (
-    <Card className="border-border/30 bg-gradient-to-br from-emerald-50/30 to-amber-50/20 dark:from-emerald-950/10 dark:to-amber-950/10">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 text-xs font-serif text-muted-foreground">
-          <Leaf className="w-3.5 h-3.5 text-emerald-600/70" />
-          <span className="uppercase tracking-wider">{season}</span>
-        </div>
-        <p className="text-[11px] font-serif text-foreground/80 mt-1 italic">
-          Look for opening buds, returning blossoms, and the trees beginning their year.
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ── TETOL panel ─────────────────────────────────────────────────────────
-
-function TetolPanel({ activity }: { activity: ReturnType<typeof useQuestCaveActivity> }) {
-  const counters = [
-    { label: "Trees mapped", value: activity.globalTrees },
-    { label: "Offerings", value: activity.globalOfferings },
-    { label: "Blooms recorded", value: activity.globalBlooms },
-    { label: "My visits", value: activity.visits },
-    { label: "My whispers", value: activity.whispersSent },
-    { label: "My hearts", value: activity.totalHearts },
-  ];
-
-  const layers = [
-    { name: "Roots", desc: "Ancient Friends mapped and visited.", value: activity.globalTrees, of: 1000 },
-    { name: "Trunk", desc: "Heartwood records, offerings, seeds, songs and memories.", value: activity.globalOfferings, of: 5000 },
-    { name: "Canopy", desc: "Council activity, collective quests, governance, stewardship.", value: 0, of: 100 },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <Card className="border-amber-900/20 bg-gradient-to-br from-amber-50/40 via-card/60 to-emerald-50/30 dark:from-amber-950/10 dark:to-emerald-950/10">
-        <CardContent className="p-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <h3 className="font-serif text-base">TETOL — The Whole Living Tree</h3>
-          </div>
-          <p className="text-[11px] font-serif text-muted-foreground italic leading-relaxed">
-            Every path, circle, quest, tree, offering, and Heart becomes part of the wider organism.
-          </p>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {counters.map((c) => (
-          <div key={c.label} className="rounded-lg border border-border/30 bg-card/40 p-3 text-center">
-            <div className="text-lg font-serif text-primary">{c.value}</div>
-            <div className="text-[9px] font-serif text-muted-foreground uppercase tracking-wider mt-0.5">
-              {c.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-3">
-        {layers.map((l) => {
-          const pct = Math.min(100, Math.round((l.value / l.of) * 100));
-          return (
-            <Card key={l.name} className="border-border/30 bg-card/40">
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-serif text-sm text-foreground">{l.name}</h4>
-                  <span className="text-[10px] font-serif text-muted-foreground">{l.value} / {l.of}</span>
-                </div>
-                <p className="text-[11px] font-serif text-muted-foreground/80 italic">{l.desc}</p>
-                <Progress value={pct} className="h-1.5 bg-muted/40" />
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+    <div className="rounded-lg border border-border/30 bg-card/30 p-3">
+      <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+        {title}
+      </p>
+      <p className="font-serif text-[12px] italic text-foreground/85 mt-1 leading-snug">{line}</p>
     </div>
   );
 }
 
-// ── Nearby panel ────────────────────────────────────────────────────────
-
-interface NearbyTree {
-  id: string;
-  name: string | null;
-  species: string | null;
-}
-
-function NearbyPanel({ userId }: { userId: string | null }) {
-  const [trees, setTrees] = useState<NearbyTree[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data } = await supabase
-          .from("trees")
-          .select("id, name, species")
-          .order("created_at", { ascending: false })
-          .limit(5);
-        if (!cancelled) setTrees((data as any) || []);
-      } catch {
-        if (!cancelled) setTrees([]);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [userId]);
-
+function GreatQuestRow({
+  title, line, current, target,
+}: { title: string; line: string; current?: number; target?: number }) {
+  const hasProgress = typeof current === "number" && typeof target === "number";
+  const pct = hasProgress ? Math.min(100, Math.round((current! / target!) * 100)) : 0;
   return (
-    <div className="space-y-3">
-      <Card className="border-border/30 bg-card/30">
-        <CardContent className="p-4">
-          <p className="text-[11px] font-serif text-muted-foreground italic">
-            Open the map to find trees that count toward your quests. We'll show
-            distance and quest matches here once your location is shared.
-          </p>
-          <Button asChild size="sm" className="font-serif text-xs mt-3 w-full sm:w-auto">
-            <Link to={ROUTES.MAP}>
-              Open the Map <ArrowRight className="w-3 h-3 ml-1" />
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
-
-      {trees === null ? (
-        <div className="h-24 rounded-xl bg-card/30 animate-pulse" />
-      ) : trees.length === 0 ? (
-        <Card className="border-border/30 bg-card/30">
-          <CardContent className="p-5 text-center">
-            <p className="text-xs font-serif text-muted-foreground italic">
-              No trees yet — be the first to plant one in the atlas.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        trees.map((t) => (
-          <Card key={t.id} className="border-amber-900/20 bg-card/50">
-            <CardContent className="p-4 space-y-1.5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h4 className="font-serif text-sm text-foreground truncate">
-                    {t.name || "Unnamed Ancient Friend"}
-                  </h4>
-                  <p className="text-[11px] font-serif text-muted-foreground italic">
-                    {t.species || "Possible quest match"}
-                  </p>
-                </div>
-                <Button asChild size="sm" variant="outline" className="font-serif text-[10px] h-7 shrink-0">
-                  <Link to={ROUTES.TREE(t.id)}>View tree</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))
-      )}
+    <div className="rounded-xl border border-amber-900/20 bg-card/40 p-3 space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-serif text-sm text-foreground">{title}</p>
+          <p className="font-serif text-[11px] italic text-muted-foreground/80 leading-snug">{line}</p>
+        </div>
+        {hasProgress && (
+          <span className="font-serif text-[10px] text-muted-foreground shrink-0">
+            {current} / {target}
+          </span>
+        )}
+      </div>
+      {hasProgress && <Progress value={pct} className="h-1 bg-muted/40" />}
     </div>
   );
 }
+
+function CollapsibleSection({
+  title, caption, icon, defaultOpen, children,
+}: {
+  title: string; caption: string; icon?: React.ReactNode;
+  defaultOpen?: boolean; children: React.ReactNode;
+}) {
+  return (
+    <Collapsible defaultOpen={defaultOpen} className="mb-6">
+      <CollapsibleTrigger className="group w-full flex items-center justify-between gap-3 px-1 py-2 text-left">
+        <div className="min-w-0">
+          <h2 className="font-serif text-lg text-foreground flex items-center gap-2">
+            {icon}{title}
+          </h2>
+          <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-0.5">
+            {caption}
+          </p>
+        </div>
+        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180 shrink-0" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-3">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function ChamberSkeleton() {
+  return (
+    <div className="space-y-2">
+      {[0, 1, 2].map(i => (
+        <div key={i} className="h-24 rounded-xl bg-card/30 animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
