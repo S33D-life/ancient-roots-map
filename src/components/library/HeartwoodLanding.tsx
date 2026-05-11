@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import TetolBridge from "@/components/TetolBridge";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
@@ -158,6 +159,11 @@ const HeartwoodLanding = () => {
           >
             Active Opportunities
           </button>
+        </div>
+
+        {/* Borrowed Staff */}
+        <div className="w-full max-w-2xl mb-6">
+          <BorrowedStaffCard />
         </div>
 
         {/* Vault Preview */}

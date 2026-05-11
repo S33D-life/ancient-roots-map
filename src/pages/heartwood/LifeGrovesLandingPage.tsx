@@ -12,6 +12,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { listMyLifeGroves } from "@/repositories/life-groves";
 import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
 import { GROVE_TYPES } from "@/lib/life-groves/types";
+import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 
 export default function LifeGrovesLandingPage() {
   const navigate = useNavigate();
@@ -44,6 +45,10 @@ export default function LifeGrovesLandingPage() {
           <p className="font-serif text-sm italic text-muted-foreground/70 mt-4">
             “The tree grows in the world. The Heartwood keeps the library.”
           </p>
+        </section>
+
+        <section className="max-w-2xl mx-auto mb-10">
+          <BorrowedStaffCard />
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-12">
