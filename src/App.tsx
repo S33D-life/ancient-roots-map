@@ -437,6 +437,7 @@ const App = () => {
                 <Route path="/patron-offering" element={<PatronOfferingPage />} />
                 <Route path="/companion" element={<CompanionPage />} />
                 <Route path="/tree-data-commons" element={<TreeDataCommonsPage />} />
+                <Route path="/tree-projects" element={<TreeProjectsPage />} />
                 <Route path="/agent-garden" element={<AgentGardenPage />} />
                 <Route path="/discovery-agent" element={<DatasetDiscoveryAgentPage />} />
                 <Route path="/dataset-watcher" element={<DatasetWatcherPage />} />
