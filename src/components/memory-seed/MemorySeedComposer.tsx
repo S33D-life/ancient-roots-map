@@ -75,6 +75,9 @@ interface Props {
   /** Optional canonical species_key for SPECIES_MATCH whispers. */
   treeSpeciesKey?: string | null;
   treeName?: string | null;
+  /** Optional coordinates — when present, enable proximity-aware guidance. */
+  treeLat?: number | null;
+  treeLng?: number | null;
 }
 
 interface SeedTypeMeta {
