@@ -4042,6 +4042,155 @@ export type Database = {
         }
         Relationships: []
       }
+      life_grove_offerings: {
+        Row: {
+          body_text: string | null
+          contributor_email: string | null
+          contributor_name: string
+          contributor_user_id: string | null
+          created_at: string
+          id: string
+          life_grove_id: string
+          media_url: string | null
+          memory_position_data: Json | null
+          offering_type: string
+          title: string | null
+          visibility: string
+        }
+        Insert: {
+          body_text?: string | null
+          contributor_email?: string | null
+          contributor_name: string
+          contributor_user_id?: string | null
+          created_at?: string
+          id?: string
+          life_grove_id: string
+          media_url?: string | null
+          memory_position_data?: Json | null
+          offering_type?: string
+          title?: string | null
+          visibility?: string
+        }
+        Update: {
+          body_text?: string | null
+          contributor_email?: string | null
+          contributor_name?: string
+          contributor_user_id?: string | null
+          created_at?: string
+          id?: string
+          life_grove_id?: string
+          media_url?: string | null
+          memory_position_data?: Json | null
+          offering_type?: string
+          title?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_grove_offerings_life_grove_id_fkey"
+            columns: ["life_grove_id"]
+            isOneToOne: false
+            referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      life_groves: {
+        Row: {
+          birth_date: string | null
+          cover_photo_url: string | null
+          created_at: string
+          created_by: string
+          discount_pence: number
+          event_date: string | null
+          generated_tree_image_url: string | null
+          generated_tree_prompt: string | null
+          grove_title: string
+          grove_type: string
+          hearts_applied: number
+          id: string
+          invite_token: string
+          latitude: number | null
+          location_text: string | null
+          longitude: number | null
+          package_price_pence: number
+          passing_date: string | null
+          planting_package: string
+          planting_type: string
+          privacy: string
+          relationship_label: string | null
+          remembered_or_celebrated_name: string | null
+          source_tree_photo_ids: Json | null
+          story_intro: string | null
+          tree_archetype_species: string
+          tree_name: string | null
+          tree_species_detail: string | null
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          cover_photo_url?: string | null
+          created_at?: string
+          created_by: string
+          discount_pence?: number
+          event_date?: string | null
+          generated_tree_image_url?: string | null
+          generated_tree_prompt?: string | null
+          grove_title: string
+          grove_type?: string
+          hearts_applied?: number
+          id?: string
+          invite_token?: string
+          latitude?: number | null
+          location_text?: string | null
+          longitude?: number | null
+          package_price_pence?: number
+          passing_date?: string | null
+          planting_package?: string
+          planting_type?: string
+          privacy?: string
+          relationship_label?: string | null
+          remembered_or_celebrated_name?: string | null
+          source_tree_photo_ids?: Json | null
+          story_intro?: string | null
+          tree_archetype_species?: string
+          tree_name?: string | null
+          tree_species_detail?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          cover_photo_url?: string | null
+          created_at?: string
+          created_by?: string
+          discount_pence?: number
+          event_date?: string | null
+          generated_tree_image_url?: string | null
+          generated_tree_prompt?: string | null
+          grove_title?: string
+          grove_type?: string
+          hearts_applied?: number
+          id?: string
+          invite_token?: string
+          latitude?: number | null
+          location_text?: string | null
+          longitude?: number | null
+          package_price_pence?: number
+          passing_date?: string | null
+          planting_package?: string
+          planting_type?: string
+          privacy?: string
+          relationship_label?: string | null
+          remembered_or_celebrated_name?: string | null
+          source_tree_photo_ids?: Json | null
+          story_intro?: string | null
+          tree_archetype_species?: string
+          tree_name?: string | null
+          tree_species_detail?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lottery_config: {
         Row: {
           id: number
@@ -11032,6 +11181,19 @@ export type Database = {
           species_hearts: number
           trees_mapped: number
           user_id: string
+        }[]
+      }
+      get_life_grove_by_invite_token: {
+        Args: { p_token: string }
+        Returns: {
+          grove_title: string
+          grove_type: string
+          id: string
+          privacy: string
+          remembered_or_celebrated_name: string
+          story_intro: string
+          tree_archetype_species: string
+          tree_name: string
         }[]
       }
       get_my_lottery_stats: { Args: { p_user_id?: string }; Returns: Json }
