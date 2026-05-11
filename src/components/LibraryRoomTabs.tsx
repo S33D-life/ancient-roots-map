@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import {
-  Wand2, Globe, Music, Sprout, Star, Archive, Paintbrush, BookOpen, ScrollText, Lock, Activity,
+  Wand2, Globe, Music, Sprout, Star, Archive, Sparkles, BookOpen, ScrollText, Lock, Activity,
 } from "lucide-react";
 
 interface RoomTab {
