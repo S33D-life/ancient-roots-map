@@ -426,5 +426,3 @@ function ChamberSkeleton() {
   );
 }
 
-// Re-export an unused symbol to keep TreeDeciduous tree-shake-friendly hint
-export const __cave_icons__ = { TreeDeciduous };
