@@ -19,10 +19,10 @@ export interface PathArchetypeMeta {
 export const PATH_ARCHETYPES: PathArchetypeMeta[] = [
   {
     key: "creator",
-    title: "Creator's Path",
+    title: "The Creator",
     hint: "For offerings, songs, poems, images, stories, voice notes, and artworks.",
-    ctaLabel: "Enter Creator's Path",
-    ctaTo: "/library/creators-path",
+    ctaLabel: "Make an offering",
+    ctaTo: "/map",
     icon: "Feather",
     accent: "hsl(335, 55%, 60%)",
   },

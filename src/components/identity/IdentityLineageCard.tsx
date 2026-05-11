@@ -206,17 +206,17 @@ export default function IdentityLineageCard({ userId, className }: Props) {
                 {hasPermanent
                   ? state.permanentStaffSpecies || "Permanent Staff"
                   : hasBorrowed
-                    ? state.borrowedStaffSpecies || "Borrowed Staff"
+                    ? `${state.borrowedStaffSpecies || "Borrowed Staff"} · first guide`
                     : "No staff yet"}
               </p>
               <p className="text-[11px] text-muted-foreground/80 italic truncate">
                 {hasPermanent && hasBorrowed
-                  ? "Permanent bound · early guide remembered"
+                  ? "Bound to your path · first guide remembered"
                   : hasPermanent
                     ? "Bound to your path"
                     : hasBorrowed
-                      ? "Borrowed — walking with you for now"
-                      : "Borrow or earn a staff in the Staff Room"}
+                      ? "A temporary guide, walking with you for now"
+                      : "A first guide will be offered in the Staff Room"}
               </p>
             </div>
             <ArrowRight className="w-3.5 h-3.5 text-primary/50 shrink-0 mt-1 group-hover:translate-x-0.5 transition-transform" />
