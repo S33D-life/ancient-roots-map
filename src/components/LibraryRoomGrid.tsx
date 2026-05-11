@@ -11,7 +11,7 @@ type Room = { key: string; label: string; desc: string; accentH: number; particl
 
 const PRIMARY: Room[] = [
   { key: "staff-room",      label: "🪵 Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
-  { key: "creators-path",   label: "🎨 Creator's Path",  desc: "Your Journey",                             accentH: 340, particle: "spark"   },
+  { key: "star-trail",      label: "✨ Star Trail",      desc: "Your Journey",                             accentH: 340, particle: "spark"   },
   { key: "ancient-friends", label: "🌳 Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
   { key: "atlas",           label: "🗺 Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
   { key: "life-groves",     label: "🌿 Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
