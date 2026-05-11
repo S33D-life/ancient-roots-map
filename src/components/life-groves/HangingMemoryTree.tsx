@@ -3,6 +3,7 @@
  * Prototype: a soft grid; future: SVG branch positioning by memory_position_data.
  */
 import { OFFERING_TYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
+import LifeGroveOfferingGlyph from "./LifeGroveOfferingGlyph";
 
 interface Props {
   offerings: LifeGroveOffering[];
