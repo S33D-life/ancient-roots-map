@@ -128,7 +128,13 @@ export default function LifeGrovePage() {
         {/* Library */}
         <section className="mb-8">
           <h2 className="font-serif text-xl text-foreground mb-3">Heartwood Library</h2>
-          <HeartwoodLibraryTabs offerings={offerings} />
+          {loadingOfferings ? (
+            <p className="font-serif text-sm italic text-muted-foreground/70 py-6 text-center">
+              Gathering offerings…
+            </p>
+          ) : (
+            <HeartwoodLibraryTabs offerings={offerings} />
+          )}
         </section>
 
         {/* Invite */}
