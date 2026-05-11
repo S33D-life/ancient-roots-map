@@ -75,6 +75,9 @@ export default function LifeGroveInvitePage() {
     onSuccess: () => {
       setSuccess(true);
       toast("Your offering has been added to the branches.");
+      if (grove?.id) {
+        queryClient.invalidateQueries({ queryKey: ["life-grove-offerings", grove.id] });
+      }
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : "Could not hang the offering.";
