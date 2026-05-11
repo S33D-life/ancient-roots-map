@@ -10,7 +10,7 @@ const links = [
   { to: ROUTES.COUNCIL, icon: Leaf, label: "Council", sub: "Join the gathering" },
   { to: "/vault?from=hearth", icon: Archive, label: "Vault", sub: "Your treasury" },
   { to: ROUTES.STAFF_ROOM, icon: Wand2, label: "Staff Room", sub: "Founding circle" },
-  { to: "/heartwood/quest-room", icon: Mountain, label: "Quest Room", sub: "Living paths" },
+  { to: "/heartwood/quest-room", icon: Mountain, label: "Quest Cave", sub: "Living paths" },
   { to: ROUTES.AGENT_GARDEN, icon: Bot, label: "Agent Garden", sub: "AI contributors" },
   { to: ROUTES.SUPPORT, icon: Heart, label: "Support", sub: "Nurture S33D" },
   { to: "/living-archive", icon: Download, label: "My Data", sub: "Sovereign export" },
