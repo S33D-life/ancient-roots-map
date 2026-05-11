@@ -138,6 +138,7 @@ const TimeTreePage = lazyImportWithRetry(() => import("./pages/TimeTreePage"), "
 const BugGardenPage = lazyImportWithRetry(() => import("./pages/BugGardenPage"), "bug-garden");
 const AdminEvolutionPage = lazyImportWithRetry(() => import("./pages/AdminEvolutionPage"), "admin-evolution");
 const MoonrootDigestPage = lazyImportWithRetry(() => import("./pages/admin/MoonrootDigestPage"), "moonroot-digest");
+const InviteStatusPage = lazyImportWithRetry(() => import("./pages/admin/InviteStatusPage"), "invite-status");
 // KingOfBavleuxPage removed — route redirects to /atlas/switzerland
 // DolomitiAmpezzoPage removed — served by BioRegionPage /atlas/bio-regions/dolomites-ampezzo-cadore
 const BioRegionsIndexPage = lazyImportWithRetry(() => import("./pages/BioRegionsIndexPage"), "bio-regions-index");
