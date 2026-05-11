@@ -143,6 +143,8 @@ function AncientFriendsWrapper() {
 
 /**
  * CreatorsPathWrapper — self-contained wrapper.
+ * Tree Projects Directory has been relocated to /tree-projects (linked from
+ * Tree Data Commons and from a subtle link inside Creator's Path).
  */
 function CreatorsPathWrapper() {
   const [userId, setUserId] = useState<string | undefined>();
@@ -151,12 +153,7 @@ function CreatorsPathWrapper() {
       if (user) setUserId(user.id);
     });
   }, []);
-  return (
-    <div className="space-y-6">
-      <CreatorsPath userId={userId} />
-      <TreeResources />
-    </div>
-  );
+  return <CreatorsPath userId={userId} />;
 }
 
 /**
