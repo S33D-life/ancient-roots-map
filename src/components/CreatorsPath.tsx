@@ -89,14 +89,14 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
         treesRes, offeringsRes, ceremoniesRes, songsRes,
         whispersRes, visitsRes, grovesRes, booksRes,
       ] = await Promise.all([
-        safe(supabase.from("trees").select("id, name, species, created_at").eq("created_by", uid).order("created_at", { ascending: false }).limit(50), { data: [] as any[] }),
-        safe(supabase.from("offerings").select("id, title, type, created_at, tree_id").eq("created_by", uid).order("created_at", { ascending: false }).limit(50), { data: [] as any[] }),
-        safe(supabase.from("ceremony_logs").select("id, staff_code, staff_name, staff_species, ceremony_type, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30), { data: [] as any[] }),
-        safe(supabase.from("saved_songs").select("id, title, artist, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30), { data: [] as any[] }),
-        safe(supabase.from("tree_whispers" as any).select("id, message, created_at, tree_anchor_id").eq("sender_user_id", uid).order("created_at", { ascending: false }).limit(30) as any, { data: [] as any[] }),
-        safe(supabase.from("tree_checkins").select("id, tree_id, checked_in_at").eq("user_id", uid).order("checked_in_at", { ascending: false }).limit(50), { data: [] as any[] }),
-        safe(supabase.from("life_groves").select("id, grove_title, created_at").eq("created_by", uid).order("created_at", { ascending: false }).limit(20), { data: [] as any[] }),
-        safe(supabase.from("bookshelf_entries" as any).select("id, title, author, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30) as any, { data: [] as any[] }),
+        safe(supabase.from("trees").select("id, name, species, created_at").eq("created_by", uid).order("created_at", { ascending: false }).limit(50)),
+        safe(supabase.from("offerings").select("id, title, type, created_at, tree_id").eq("created_by", uid).order("created_at", { ascending: false }).limit(50)),
+        safe(supabase.from("ceremony_logs").select("id, staff_code, staff_name, staff_species, ceremony_type, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30)),
+        safe(supabase.from("saved_songs").select("id, title, artist, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30)),
+        safe(supabase.from("tree_whispers" as any).select("id, message, created_at, tree_anchor_id").eq("sender_user_id", uid).order("created_at", { ascending: false }).limit(30) as any),
+        safe(supabase.from("tree_checkins").select("id, tree_id, checked_in_at").eq("user_id", uid).order("checked_in_at", { ascending: false }).limit(50)),
+        safe(supabase.from("life_groves").select("id, grove_title, created_at").eq("created_by", uid).order("created_at", { ascending: false }).limit(20)),
+        safe(supabase.from("bookshelf_entries" as any).select("id, title, author, created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30) as any),
       ]);
 
       if (cancelled) return;
