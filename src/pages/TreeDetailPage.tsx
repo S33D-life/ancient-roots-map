@@ -74,6 +74,7 @@ const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
 const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
 const SeasonalMomentPanel = lazy(() => import("@/components/SeasonalMomentPanel"));
 const AddOfferingDialog = lazy(() => import("@/components/AddOfferingDialog"));
+const MemorySeedComposer = lazy(() => import("@/components/memory-seed/MemorySeedComposer"));
 const OfferingGateway = lazy(() => import("@/components/OfferingGateway"));
 const ProposeEditDrawer = lazy(() => import("@/components/ProposeEditDrawer"));
 const MeetingTimer = lazy(() => import("@/components/MeetingTimer"));
