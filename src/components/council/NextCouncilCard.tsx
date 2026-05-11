@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video } from "lucide-react";
-import CouncilScrollEmbed from "./CouncilScrollEmbed";
+import { MoonStar, CalendarDays, Clock, Mic, Video } from "lucide-react";
 import {
   getCurrentCouncilWithOverrides,
   getNextCouncilWithOverrides,
@@ -25,36 +22,8 @@ interface NextCouncilCardProps {
   onEditCouncil?: () => void;
 }
 
-const AGENDA_OPEN_KEY = "council_agenda_open";
-
 const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCouncilCardProps) => {
-  const [agendaOpen, setAgendaOpen] = useState(() => {
-    try {
-      const stored = localStorage.getItem(AGENDA_OPEN_KEY);
-      if (stored !== null) return stored === "true";
-      // First visit: open by default, mirroring previous behavior.
-      return !localStorage.getItem("council_agenda_seen");
-    } catch {
-      return false;
-    }
-  });
-  const prefersReducedMotion = (() => {
-    try {
-      return typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    } catch {
-      return false;
-    }
-  })();
   const navigate = useNavigate();
-
-  const handleAgendaChange = (open: boolean) => {
-    setAgendaOpen(open);
-    try {
-      localStorage.setItem(AGENDA_OPEN_KEY, open ? "true" : "false");
-      if (open) localStorage.setItem("council_agenda_seen", "true");
-    } catch {}
-  };
 
   // Re-read when refreshKey changes (after curator save)
   const current = getCurrentCouncilWithOverrides();
@@ -132,39 +101,9 @@ const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCounc
             >
               🌳 Reflect in the Time Tree
             </Button>
-
-            <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="gap-2 font-serif tracking-wide w-full sm:w-auto">
-                  {agendaOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  View Agenda
-                </Button>
-              </CollapsibleTrigger>
-            </Collapsible>
           </div>
         </CardHeader>
       </Card>
-
-      {/* ── Council Scroll reveal — the living invitation ── */}
-      <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
-        <CollapsibleContent
-          className={
-            prefersReducedMotion
-              ? "overflow-hidden"
-              : "overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
-          }
-          onAnimationEnd={(e) => {
-            if (agendaOpen && e.currentTarget) {
-              e.currentTarget.scrollIntoView({
-                behavior: prefersReducedMotion ? "auto" : "smooth",
-                block: "nearest",
-              });
-            }
-          }}
-        >
-          {agendaOpen && <CouncilScrollEmbed />}
-        </CollapsibleContent>
-      </Collapsible>
 
       {/* Moon cycle indicator — dynamic */}
       <div className="rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm p-4">

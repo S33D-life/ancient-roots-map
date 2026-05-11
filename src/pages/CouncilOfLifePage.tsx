@@ -19,6 +19,7 @@ import DigitalFireVote from "@/components/DigitalFireVote";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import CuratorEditor from "@/components/council/CuratorEditor";
 import CouncilQuickView from "@/components/council/CouncilQuickView";
+import CouncilCalendar from "@/components/council/CouncilCalendar";
 import { useCouncilInvitation } from "@/hooks/use-council-invitation";
 import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides";
 
@@ -150,7 +151,12 @@ const CouncilOfLifePage = () => {
             onEditCouncil={() => setCuratorOpen(true)}
           />
 
-          {/* ── Quick View — agenda glimpse + Council Scroll ── */}
+          {/* ── Council Calendar — upcoming gatherings ── */}
+          <div className="mt-6">
+            <CouncilCalendar />
+          </div>
+
+          {/* ── Quick View — agenda glimpse + single Council Scroll ── */}
           <div className="mt-6">
             <CouncilQuickView invitation={invitation} />
           </div>
