@@ -109,14 +109,35 @@ const AuthPage = () => {
     return raw || "Google sign-in could not complete. Check OAuth redirect settings and try again.";
   };
 
-  // Pre-fill invite code from URL, also capture gift param and bot handoff
+  // Pre-fill invite code from URL, also capture gift param and bot handoff.
+  // CRITICAL: persist invite code to BOTH localStorage and sessionStorage as soon
+  // as we see it, so it survives OAuth (Google/Apple) redirects, Safari app
+  // switching, page reloads, and any redirect chain that drops query params.
+  // We do NOT consume the invite here — only the post-signup auth listener does.
   useEffect(() => {
     const code = searchParams.get("invite");
     const giftCode = searchParams.get("gift");
     const source = searchParams.get("source");
-    if (code) {
-      setInviteCode(code);
-      setView("signup"); // auto-switch to signup if arriving via invite
+
+    // Recover an invite code persisted from a previous arrival (e.g. survived
+    // an OAuth roundtrip that stripped the URL param).
+    let effectiveCode = code;
+    if (!effectiveCode) {
+      try {
+        effectiveCode =
+          sessionStorage.getItem("s33d_pending_invite_code") ||
+          localStorage.getItem("s33d_pending_invite_code");
+      } catch {}
+    }
+
+    if (effectiveCode) {
+      console.log("[invite] token detected", { source: code ? "url" : "storage" });
+      setInviteCode(effectiveCode);
+      setView("signup");
+      try {
+        sessionStorage.setItem("s33d_pending_invite_code", effectiveCode);
+        localStorage.setItem("s33d_pending_invite_code", effectiveCode);
+      } catch {}
     }
     if (giftCode) {
       localStorage.setItem("s33d_gift_code", giftCode);
@@ -124,13 +145,9 @@ const AuthPage = () => {
     }
     // Bot handoff: if arriving from Telegram/OpenClaw, store context
     if (source) {
-      // The useBotHandoff hook in use-bot-handoff.ts handles localStorage
-      // but we also need to pull invite/gift from the handoff params
-      const handoffInvite = searchParams.get("invite");
       const handoffGift = searchParams.get("gift");
-      if (handoffInvite && !code) setInviteCode(handoffInvite);
       if (handoffGift) localStorage.setItem("s33d_gift_code", handoffGift);
-      setView("signup"); // default to signup for bot arrivals
+      setView("signup");
     }
   }, [searchParams]);
 
@@ -163,18 +180,28 @@ const AuthPage = () => {
       if (isRecoveryFlow()) return;
 
       if (session) {
-        // Consume invitation on first sign-in (assigns lineage + decrements inviter)
-        const storedCode = localStorage.getItem("s33d_invite_code");
+        // Consume invitation on first sign-in (assigns lineage + decrements inviter).
+        // Read from BOTH legacy and new persistence keys so any prior session can
+        // still complete its consumption. We only mark the invite "used" AFTER
+        // we have a real authenticated session — never on page load.
+        const storedCode =
+          localStorage.getItem("s33d_invite_code") ||
+          localStorage.getItem("s33d_pending_invite_code") ||
+          sessionStorage.getItem("s33d_pending_invite_code");
         if (storedCode && session.user) {
-          const { data: consumeResult } = await supabase.rpc("consume_invitation", {
-            p_invite_code: storedCode,
-            p_new_user_id: session.user.id,
-          });
+          console.log("[invite] consuming after auth success", { userId: session.user.id });
+          const { data: consumeResult, error: consumeError } = await supabase.rpc(
+            "consume_invitation",
+            { p_invite_code: storedCode, p_new_user_id: session.user.id },
+          );
+          console.log("[invite] consume result", { consumeResult, consumeError });
           // Fallback to old referral system if consume_invitation doesn't exist yet
           if (!consumeResult || (consumeResult as any)?.error) {
             await recordReferral(session.user.id, storedCode);
           }
           localStorage.removeItem("s33d_invite_code");
+          localStorage.removeItem("s33d_pending_invite_code");
+          sessionStorage.removeItem("s33d_pending_invite_code");
         }
 
         // Auto-claim gift seed if arriving via gift link
@@ -349,27 +376,29 @@ const AuthPage = () => {
 
     setIsLoading(true);
     try {
-      // Pre-validate the invite code before attempting signup
-      const { data: linkCheck } = await supabase
-        .from("invite_links")
-        .select("id, created_by, is_used")
-        .eq("code", code)
-        .maybeSingle();
+      // Pre-validate via SECURITY DEFINER RPC. The invite_links table has RLS
+      // restricting SELECT to the invite creator, so anonymous signup flows
+      // CANNOT read the row directly — that's why fresh invites used to look
+      // "already used or invalid". The RPC bypasses RLS safely.
+      console.log("[invite] validating", { code });
+      const { data: validation, error: validationError } = await supabase.rpc(
+        "validate_invite_code",
+        { p_code: code },
+      );
+      console.log("[invite] validation response", { validation, validationError });
 
-      if (!linkCheck || (linkCheck as any).is_used) {
-        throw new Error("This invitation has already been used or is invalid. Ask for a fresh invite.");
+      const validRow = Array.isArray(validation) ? validation[0] : validation;
+      if (validationError || !validRow?.id) {
+        throw new Error("INVITE_BLOOM_FAILED");
       }
 
-      // Check inviter has remaining invitations
-      const { data: inviterProfile } = await supabase
-        .from("profiles")
-        .select("invites_remaining")
-        .eq("id", (linkCheck as any).created_by)
-        .maybeSingle();
-
-      if (!inviterProfile || (inviterProfile as any).invites_remaining <= 0) {
-        throw new Error("The person who sent this invitation has no invites remaining.");
-      }
+      // Persist the code BEFORE attempting signup so it survives any redirect,
+      // OAuth roundtrip, email-verification roundtrip, or Safari app switch.
+      try {
+        localStorage.setItem("s33d_invite_code", code);
+        localStorage.setItem("s33d_pending_invite_code", code);
+        sessionStorage.setItem("s33d_pending_invite_code", code);
+      } catch {}
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -382,14 +411,22 @@ const AuthPage = () => {
         }
         throw error;
       }
-      // Store invite code so we can consume the invitation after email verification
-      if (data.user) {
-        localStorage.setItem("s33d_invite_code", code);
-      }
+      console.log("[invite] signup success — code will be consumed on first session", {
+        userId: data.user?.id,
+      });
       setView("verify-email");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
-      toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+      if (msg === "INVITE_BLOOM_FAILED") {
+        toast({
+          title: "This invitation could not bloom",
+          description:
+            "It may have already been planted or the link may have faded. Ask your wanderer companion for a fresh invitation.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
