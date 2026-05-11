@@ -414,6 +414,7 @@ const App = () => {
                 <Route path="/bug-garden" element={<BugGardenPage />} />
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
                 <Route path="/admin/moonroot-digest" element={<MoonrootDigestPage />} />
+                <Route path="/admin/invite-status" element={<InviteStatusPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />
                 <Route path="/harvest" element={<HarvestPage />} />
