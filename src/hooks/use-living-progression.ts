@@ -173,7 +173,7 @@ export function useLivingProgression(userId: string | null) {
           }).length;
 
         return {
-          speciesEncountered: Array.from(speciesSet),
+          speciesEncountered: Array.from(speciesByKey.values()),
           hiveCounts,
           ancientCount,
           regionCount: regions.size,
