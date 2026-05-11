@@ -1,7 +1,7 @@
 /**
  * JourneyBridge — A contextual "next step" navigation component that
  * threads the four core sections into a continuous journey:
- *   Hearth (Legend) → Creator's Path → Staff Room → Map Room
+ *   Hearth (Legend) → Star Trail → Staff Room → Map Room
  *
  * Place at the bottom of each section to guide wanderers forward.
  */
