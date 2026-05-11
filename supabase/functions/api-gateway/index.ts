@@ -423,7 +423,12 @@ route("GET", "/api/v1/search", async (_req, _auth, _params, url) => {
 });
 
 // ── Species Vision ──
-route("POST", "/api/identify-tree", async (req) => {
+route("POST", "/api/identify-tree", async (req, auth) => {
+  if (!auth.userId) return err("UNAUTHORIZED", "Authentication required to identify trees", 401);
+  // Per-user rate limit on this expensive endpoint (calls paid AI vision APIs)
+  if (!rateOk(`identify:${auth.userId}`, 10, 60_000)) {
+    return err("RATE_LIMITED", "Too many identification requests, please slow down", 429);
+  }
   const MAX_IMAGE_DATA_CHARS = 14_000_000;
   let body: { imageData?: string; topK?: number; threshold?: number } | null = null;
   try {
