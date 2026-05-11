@@ -31,6 +31,7 @@ import QuestCard from "@/components/quest-cave/QuestCard";
 import {
   buildMyPaths, buildCollective, buildSeasonal, MOCK_CIRCLE_QUESTS,
 } from "@/components/quest-cave/mockQuests";
+import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
 
 const TABS = [
   { value: "my", label: "My Paths", icon: Compass },
@@ -88,6 +89,17 @@ export default function QuestCavePage() {
           <SummaryStat label="Hearts this moon" value={activity.totalHearts} />
           <SummaryStat label="Active paths" value={activePaths} />
           <SummaryStat label="Trees contributed" value={treesContributed} />
+        </div>
+
+        {/* Living Paths — quiet ecological progression */}
+        <div className="mb-8">
+          <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
+            <h2 className="font-serif text-lg text-foreground">Living Paths</h2>
+            <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+              A wandering naturalist's journal
+            </p>
+          </div>
+          <LivingPathsPanel userId={userId} activity={activity} />
         </div>
 
         {/* Tabs ─────────────────────────────────────── */}
