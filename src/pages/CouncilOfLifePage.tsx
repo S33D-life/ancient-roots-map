@@ -19,6 +19,7 @@ import DigitalFireVote from "@/components/DigitalFireVote";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import CuratorEditor from "@/components/council/CuratorEditor";
 import CouncilQuickView from "@/components/council/CouncilQuickView";
+import CouncilCalendar from "@/components/council/CouncilCalendar";
 import { useCouncilInvitation } from "@/hooks/use-council-invitation";
 import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides";
 
