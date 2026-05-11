@@ -11,6 +11,16 @@
  *   • offerings (offering mode)
  *   • tree_whispers (whisper mode, via sendWhisper helper)
  *
+ * ── Data mapping notes (no schema change yet) ───────────────────────────
+ *   • quote / recipe / bloom  → folded into offerings.type = "story"
+ *     (quote also writes quote_text + quote_author when applicable).
+ *   • voice_note              → offerings.type = "voice"
+ *   • photo                   → offerings.type = "photo", media_url only
+ *                               (no upload pipeline yet — paste a URL).
+ *   • whispers                → recipientScope hard-coded "PUBLIC" for now.
+ *   • same_species delivery   → uses treeSpeciesKey when present, else
+ *                               falls back to the raw treeSpecies string.
+ *
  * Scope deliberately narrow: no AI, no payments, no upload, no encryption.
  */
 import { useEffect, useMemo, useState } from "react";
