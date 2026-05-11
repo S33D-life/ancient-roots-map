@@ -49,6 +49,9 @@ export default function LifeGrovesLandingPage() {
 
         <section className="max-w-2xl mx-auto mb-10">
           <BorrowedStaffCard />
+          <p className="font-serif text-xs italic text-muted-foreground/70 mt-2 text-center">
+            Your Borrowed Staff can help tend your first Life Grove.
+          </p>
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-12">
