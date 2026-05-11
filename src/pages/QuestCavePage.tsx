@@ -32,6 +32,7 @@ import {
   buildMyPaths, buildCollective, buildSeasonal, MOCK_CIRCLE_QUESTS,
 } from "@/components/quest-cave/mockQuests";
 import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
+import QuestCaveRoom from "@/components/library/QuestCaveRoom";
 
 const TABS = [
   { value: "my", label: "My Paths", icon: Compass },
@@ -43,7 +44,7 @@ const TABS = [
 ] as const;
 
 export default function QuestCavePage() {
-  useDocumentTitle("Quest Cave · Heartwood");
+  useDocumentTitle("Quest Room · Heartwood");
   const { userId } = useCurrentUser();
   const activity = useQuestCaveActivity(userId);
 
@@ -73,7 +74,7 @@ export default function QuestCavePage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 border border-primary/30 mb-3">
               <Mountain className="w-6 h-6 text-primary" />
             </div>
-            <h1 className="font-serif text-3xl text-foreground tracking-wide">Quest Cave</h1>
+            <h1 className="font-serif text-3xl text-foreground tracking-wide">Quest Room</h1>
             <p className="text-sm font-serif text-muted-foreground mt-1">
               Choose a path through the living world.
             </p>
@@ -151,6 +152,17 @@ export default function QuestCavePage() {
             <NearbyPanel userId={userId} />
           </TabsContent>
         </Tabs>
+
+        {/* Quest chambers — derived staff/path quests, seasonal & dream layers */}
+        <div className="mt-10 mb-8">
+          <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
+            <h2 className="font-serif text-lg text-foreground">Quest Chambers</h2>
+            <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+              Staff · Seasonal · Dream
+            </p>
+          </div>
+          <QuestCaveRoom />
+        </div>
 
         {/* Bridge back */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center mt-8">

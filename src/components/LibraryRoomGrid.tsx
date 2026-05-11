@@ -14,7 +14,7 @@ const PRIMARY: Room[] = [
   { key: "ancient-friends", label: "🌳 Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
   { key: "atlas",           label: "🗺 Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
   { key: "life-groves",     label: "🌿 Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
-  { key: "quest-cave",      label: "🕯 Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+  { key: "quest-cave",      label: "🕯 Quest Room",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
   { key: "vault",           label: "🔐 Vault",           desc: "Staff, Tokens & Treasures",                accentH: 270, particle: "shimmer" },
 ];
 

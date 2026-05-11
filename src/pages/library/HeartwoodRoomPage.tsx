@@ -38,6 +38,8 @@ const ROOM_ALIASES: Record<string, string> = {
   "markets": "rhythms",
   "cycle-market": "rhythms",
   "cycle-markets": "rhythms",
+  "quest-cave": "redirect:/heartwood/quest-room",
+  "quest-room": "redirect:/heartwood/quest-room",
 };
 
 const ROOM_LABELS: Record<string, string> = {
