@@ -32,6 +32,30 @@ export type PlantingType =
 
 export type Privacy = "private_family" | "invite_only" | "public";
 
+export type TreeLinkType =
+  | "symbolic_only"
+  | "plant_new_tree"
+  | "link_existing_planted_tree"
+  | "link_ancient_friend";
+
+export type PlantingStatus =
+  | "symbolic"
+  | "requested"
+  | "planted"
+  | "verified"
+  | "needs_visit";
+
+export const TREE_LINK_OPTIONS: Array<{
+  value: TreeLinkType;
+  label: string;
+  hint: string;
+}> = [
+  { value: "symbolic_only", label: "Not yet — keep it symbolic", hint: "Held in Heartwood for now." },
+  { value: "plant_new_tree", label: "Plant a new tree", hint: "A new tree to be planted in the world." },
+  { value: "link_existing_planted_tree", label: "Link to an existing planted tree", hint: "A tree already planted somewhere." },
+  { value: "link_ancient_friend", label: "Link to an Ancient Friend", hint: "A tree already in the S33D atlas." },
+];
+
 export type PlantingPackage = "symbolic" | "seedling" | "young_tree" | "grove_circle";
 
 export type OfferingType =
@@ -134,6 +158,13 @@ export interface LifeGrove {
   cover_photo_url: string | null;
   generated_tree_image_url: string | null;
   invite_token: string;
+  tree_link_type: TreeLinkType;
+  linked_tree_id: string | null;
+  planted_tree_location_text: string | null;
+  planted_tree_latitude: number | null;
+  planted_tree_longitude: number | null;
+  planting_notes: string | null;
+  planting_status: PlantingStatus;
   created_at: string;
   updated_at: string;
 }

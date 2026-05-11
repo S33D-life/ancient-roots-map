@@ -18,6 +18,7 @@ import GroveTypePicker from "@/components/life-groves/GroveTypePicker";
 import EtherealTreeArchetypePicker from "@/components/life-groves/EtherealTreeArchetypePicker";
 import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
 import HeartsDiscountPanel from "@/components/life-groves/HeartsDiscountPanel";
+import TreeLinkPicker from "@/components/life-groves/TreeLinkPicker";
 import {
   PLANTING_PACKAGES,
   PRIVACY_OPTIONS,
@@ -25,8 +26,10 @@ import {
   type GroveType,
   type PlantingPackage,
   type PlantingType,
+  type PlantingStatus,
   type Privacy,
   type TreeArchetype,
+  type TreeLinkType,
 } from "@/lib/life-groves/types";
 
 export default function LifeGroveCreatePage() {
@@ -48,6 +51,13 @@ export default function LifeGroveCreatePage() {
   const [pkg, setPkg] = useState<PlantingPackage>("symbolic");
   const [hearts, setHearts] = useState(0);
 
+  const [treeLinkType, setTreeLinkType] = useState<TreeLinkType>("symbolic_only");
+  const [linkedTreeId, setLinkedTreeId] = useState("");
+  const [plantedLocText, setPlantedLocText] = useState("");
+  const [plantedLat, setPlantedLat] = useState("");
+  const [plantedLng, setPlantedLng] = useState("");
+  const [plantingNotes, setPlantingNotes] = useState("");
+
   const packagePence = useMemo(
     () => PLANTING_PACKAGES.find((p) => p.value === pkg)?.pricePence ?? 0,
     [pkg],
@@ -59,6 +69,19 @@ export default function LifeGroveCreatePage() {
     mutationFn: async () => {
       if (!userId) throw new Error("Please sign in.");
       if (!groveTitle.trim()) throw new Error("A grove title is needed.");
+
+      const plantingStatus: PlantingStatus =
+        treeLinkType === "symbolic_only"
+          ? "symbolic"
+          : treeLinkType === "plant_new_tree"
+            ? "requested"
+            : "planted";
+
+      const parsedLat = plantedLat.trim() ? Number(plantedLat) : NaN;
+      const parsedLng = plantedLng.trim() ? Number(plantedLng) : NaN;
+      const wantsLatLng =
+        treeLinkType === "plant_new_tree" || treeLinkType === "link_existing_planted_tree";
+
       const grove = await createLifeGrove({
         created_by: userId,
         grove_type: groveType,
@@ -77,6 +100,17 @@ export default function LifeGroveCreatePage() {
         package_price_pence: packagePence,
         hearts_applied: hearts,
         discount_pence: discountPence,
+        tree_link_type: treeLinkType,
+        linked_tree_id:
+          treeLinkType === "link_ancient_friend" && linkedTreeId.trim()
+            ? linkedTreeId.trim()
+            : null,
+        planted_tree_location_text:
+          wantsLatLng && plantedLocText.trim() ? plantedLocText.trim() : null,
+        planted_tree_latitude: wantsLatLng && Number.isFinite(parsedLat) ? parsedLat : null,
+        planted_tree_longitude: wantsLatLng && Number.isFinite(parsedLng) ? parsedLng : null,
+        planting_notes: plantingNotes.trim() || null,
+        planting_status: plantingStatus,
       });
       return grove;
     },
@@ -194,6 +228,25 @@ export default function LifeGroveCreatePage() {
               <EtherealTreePreview archetype={archetype} treeName={treeName} size="sm" />
             </div>
           </div>
+        </section>
+
+        {/* Tree link */}
+        <section className="space-y-2">
+          <Label className="font-serif text-sm">Rooted tree</Label>
+          <TreeLinkPicker
+            treeLinkType={treeLinkType}
+            onTreeLinkType={setTreeLinkType}
+            linkedTreeId={linkedTreeId}
+            onLinkedTreeId={setLinkedTreeId}
+            plantedLocationText={plantedLocText}
+            onPlantedLocationText={setPlantedLocText}
+            plantedLatitude={plantedLat}
+            onPlantedLatitude={setPlantedLat}
+            plantedLongitude={plantedLng}
+            onPlantedLongitude={setPlantedLng}
+            plantingNotes={plantingNotes}
+            onPlantingNotes={setPlantingNotes}
+          />
         </section>
 
         {/* Planting */}

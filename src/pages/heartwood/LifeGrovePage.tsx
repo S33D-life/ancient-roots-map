@@ -15,6 +15,7 @@ import EtherealOfferingTree, {
 } from "@/components/life-groves/EtherealOfferingTree";
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
 import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
+import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
 import { GROVE_TYPES, TREE_ARCHETYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
 
 export default function LifeGrovePage() {
@@ -138,6 +139,8 @@ export default function LifeGrovePage() {
             </div>
           </section>
         )}
+
+        <RootedTreeSection grove={grove} />
 
         {/* Library */}
         <section className="mb-8">
