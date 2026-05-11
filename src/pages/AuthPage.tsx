@@ -15,6 +15,7 @@ import { recordReferral } from "@/hooks/use-referrals";
 import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
+import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -58,6 +59,7 @@ const AuthPage = () => {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState("");
+  const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -370,10 +372,12 @@ const AuthPage = () => {
     // Require a valid invite code to sign up
     const code = inviteCode.trim();
     if (!code) {
-      toast({ title: "Invitation required", description: "You need an invitation to join S33D. Ask a wanderer for an invite link.", variant: "destructive" });
+      // Use the same soft Heartwood warning rather than a harsh red toast.
+      setInviteBloomFailure("No invitation code entered yet.");
       return;
     }
 
+    setInviteBloomFailure(null);
     setIsLoading(true);
     try {
       // Pre-validate via SECURITY DEFINER RPC. The invite_links table has RLS
@@ -418,14 +422,11 @@ const AuthPage = () => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
       if (msg === "INVITE_BLOOM_FAILED") {
-        toast({
-          title: "This invitation could not bloom",
-          description:
-            "It may have already been planted or the link may have faded. Ask your wanderer companion for a fresh invitation.",
-          variant: "destructive",
-        });
+        // Soft Heartwood inline state — no destructive red toast.
+        setInviteBloomFailure(`code: ${code}`);
       } else {
-        toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+        // Other signup errors stay as toasts but use a calmer default variant.
+        toast({ title: "Sign up could not complete", description: msg });
       }
     } finally {
       setIsLoading(false);
@@ -807,7 +808,7 @@ const AuthPage = () => {
                     type="text"
                     placeholder="Enter your invitation code"
                     value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value)}
+                    onChange={(e) => { setInviteCode(e.target.value); if (inviteBloomFailure) setInviteBloomFailure(null); }}
                     disabled={isLoading}
                     className="font-mono text-sm"
                     required
@@ -815,6 +816,34 @@ const AuthPage = () => {
                   <p className="text-[10px] text-muted-foreground/60 font-serif">
                     S33D is invitation-only. Ask a wanderer for an invite link to join.
                   </p>
+                  {inviteBloomFailure && (
+                    <div className="pt-2">
+                      <InviteBloomFailure
+                        reason={inviteBloomFailure}
+                        onRetry={() => {
+                          setInviteBloomFailure(null);
+                          // Trigger a fresh validation pass with the current code.
+                          handleSignup(new Event("submit") as unknown as React.FormEvent);
+                        }}
+                        onRequestFresh={() => {
+                          window.open(
+                            "https://t.me/s33d_life_bot?start=request_invite",
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        }}
+                        onReturnToGrove={() => {
+                          // Clear any persisted invite traces so a clean visit follows.
+                          try {
+                            localStorage.removeItem("s33d_invite_code");
+                            localStorage.removeItem("s33d_pending_invite_code");
+                            sessionStorage.removeItem("s33d_pending_invite_code");
+                          } catch {}
+                          navigate("/atlas");
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 

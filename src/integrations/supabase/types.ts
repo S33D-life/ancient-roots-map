@@ -10877,6 +10877,22 @@ export type Database = {
           wanderer_count: number
         }[]
       }
+      admin_invite_status: {
+        Args: { p_code: string }
+        Returns: {
+          code: string
+          created_at: string
+          creator_id: string
+          creator_name: string
+          expires_at: string
+          is_used: boolean
+          max_uses: number
+          recipient_id: string
+          recipient_name: string
+          used_at: string
+          uses_count: number
+        }[]
+      }
       admin_platform_overview: { Args: never; Returns: Json }
       admin_species_coverage: {
         Args: never
