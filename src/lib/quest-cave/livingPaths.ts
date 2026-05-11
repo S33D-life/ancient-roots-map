@@ -14,7 +14,17 @@ export interface Milestone {
 
 export interface HiveDefinition {
   id: string;
-  /** Match against trees.species using a case-insensitive substring. */
+  /**
+   * Preferred: lowercase genus names (e.g. "quercus"). When the canonical
+   * resolver returns a scientific lineage, the first token is matched here.
+   * This collapses synonyms like "english oak" / "oak" / "Quercus robur"
+   * into a single hive count.
+   */
+  genuses?: string[];
+  /**
+   * Fallback only — case-insensitive substring matchers against the raw
+   * species string. Used when canonical resolution fails.
+   */
   speciesMatchers: string[];
   label: string; // "Oak Hive"
   sigil: string; // single-glyph SVG-friendly hint, used by glyph component
@@ -43,25 +53,25 @@ export const SPECIES_MILESTONES: Milestone[] = [
 export const HIVE_MILESTONES: number[] = [3, 12, 33, 100, 200];
 
 export const HIVES: HiveDefinition[] = [
-  { id: "oak",   label: "Oak Hive",   sigil: "oak",   speciesMatchers: ["oak", "quercus"],
+  { id: "oak",   label: "Oak Hive",   sigil: "oak",   genuses: ["quercus"], speciesMatchers: ["oak", "quercus"],
     blurb: "Endurance, lineage, the long memory.",
     toneClass: "from-amber-50/40 to-emerald-50/30 dark:from-amber-950/10 dark:to-emerald-950/10" },
-  { id: "yew",   label: "Yew Hive",   sigil: "yew",   speciesMatchers: ["yew", "taxus"],
+  { id: "yew",   label: "Yew Hive",   sigil: "yew",   genuses: ["taxus"], speciesMatchers: ["yew", "taxus"],
     blurb: "Threshold trees — between worlds.",
     toneClass: "from-emerald-50/40 to-sky-50/30 dark:from-emerald-950/10 dark:to-sky-950/10" },
-  { id: "hazel", label: "Hazel Hive", sigil: "hazel", speciesMatchers: ["hazel", "corylus"],
+  { id: "hazel", label: "Hazel Hive", sigil: "hazel", genuses: ["corylus"], speciesMatchers: ["hazel", "corylus"],
     blurb: "Wisdom, listening, gentle counsel.",
     toneClass: "from-amber-50/40 to-amber-100/30 dark:from-amber-950/10 dark:to-amber-900/10" },
-  { id: "apple", label: "Apple Hive", sigil: "apple", speciesMatchers: ["apple", "malus"],
+  { id: "apple", label: "Apple Hive", sigil: "apple", genuses: ["malus"], speciesMatchers: ["apple", "malus"],
     blurb: "Sweetness, gathering, family table.",
     toneClass: "from-rose-50/40 to-emerald-50/30 dark:from-rose-950/10 dark:to-emerald-950/10" },
-  { id: "ash",   label: "Ash Hive",   sigil: "ash",   speciesMatchers: ["ash ", "fraxinus", "ash,"],
+  { id: "ash",   label: "Ash Hive",   sigil: "ash",   genuses: ["fraxinus"], speciesMatchers: ["ash ", "fraxinus", "ash,"],
     blurb: "Spear of sky and earth.",
     toneClass: "from-sky-50/40 to-emerald-50/30 dark:from-sky-950/10 dark:to-emerald-950/10" },
-  { id: "olive", label: "Olive Hive", sigil: "olive", speciesMatchers: ["olive", "olea"],
+  { id: "olive", label: "Olive Hive", sigil: "olive", genuses: ["olea"], speciesMatchers: ["olive", "olea"],
     blurb: "Peace, anointing, lasting light.",
     toneClass: "from-amber-50/40 to-emerald-50/30 dark:from-amber-950/10 dark:to-emerald-950/10" },
-  { id: "beech", label: "Beech Hive", sigil: "beech", speciesMatchers: ["beech", "fagus"],
+  { id: "beech", label: "Beech Hive", sigil: "beech", genuses: ["fagus"], speciesMatchers: ["beech", "fagus"],
     blurb: "Quiet strength, books of the forest.",
     toneClass: "from-emerald-50/40 to-amber-50/30 dark:from-emerald-950/10 dark:to-amber-950/10" },
 ];
@@ -133,8 +143,32 @@ export function currentSeason(d = new Date()): "Spring" | "Summer" | "Autumn" | 
   return "Winter";
 }
 
-export function speciesMatchesHive(species: string | null | undefined, hive: HiveDefinition) {
+/**
+ * Canonical species fingerprint used for de-duplicating species across
+ * synonyms ("english oak" / "oak" / "Quercus robur").
+ *
+ * TODO: full integration with the async DB-backed species_index resolver
+ * (`useSpeciesResolution`) — for now we use the synchronous treeSpecies map.
+ */
+export interface CanonicalSpecies {
+  /** Stable key — scientific name when known, else lowercase common name. */
+  key: string;
+  /** Display label (canonical common name when known). */
+  display: string;
+  /** Lowercase genus, when scientific lineage is known. */
+  genus?: string;
+  /** Botanical family, when known. */
+  family?: string;
+}
+
+export function speciesMatchesHive(
+  species: string | null | undefined,
+  hive: HiveDefinition,
+  canonical?: CanonicalSpecies | null,
+) {
+  if (canonical?.genus && hive.genuses?.includes(canonical.genus)) return true;
   if (!species) return false;
   const s = species.toLowerCase();
   return hive.speciesMatchers.some((m) => s.includes(m));
 }
+
