@@ -286,7 +286,7 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
           <Card className="border-border/30 bg-card/40">
             <CardContent className="p-6 text-center space-y-2">
               <Sparkles className="w-6 h-6 mx-auto text-primary/40" />
-              <p className="font-serif text-sm text-foreground/80">The path grows as you walk.</p>
+              <p className="font-serif text-sm text-foreground/80">The path begins with one tree.</p>
               <p className="text-xs text-muted-foreground/70 italic">
                 Map a tree, leave an offering, or check in beneath an Ancient Friend to begin.
               </p>
@@ -303,43 +303,55 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
         ) : (
           <div className="relative">
             <div className="absolute left-[18px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-amber-700/20 to-transparent" />
-            <ol className="space-y-2.5">
-              {events.slice(0, 40).map((event) => {
-                const meta = EVENT_META[event.type];
-                const Icon = meta.icon;
-                const inner = (
-                  <div className="relative flex gap-3 items-start group">
-                    <div
-                      className="relative z-10 w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
-                      style={{
-                        borderColor: `hsl(${meta.tone} / 0.45)`,
-                        backgroundColor: `hsl(${meta.tone} / 0.12)`,
-                      }}
-                    >
-                      <Icon className="w-4 h-4" style={{ color: `hsl(${meta.tone})` }} />
-                    </div>
-                    <div className="flex-1 min-w-0 rounded-lg border border-border/30 bg-card/50 px-3 py-2.5 group-hover:border-primary/30 transition-colors">
-                      <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                        <p className="font-serif text-sm text-foreground truncate">{event.title}</p>
-                        <span className="text-[10px] text-muted-foreground/70 whitespace-nowrap">
-                          {new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground/80 italic mt-0.5 truncate">
-                        {meta.label}{event.subtitle ? ` · ${event.subtitle}` : ""}
-                      </p>
-                    </div>
+            <div className="space-y-5">
+              {groupEvents(events.slice(0, 60)).map((group) => (
+                <div key={group.label}>
+                  <div className="flex items-center gap-2 mb-2 pl-12">
+                    <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                      {group.label}
+                    </span>
+                    <span className="flex-1 h-px bg-gradient-to-r from-amber-700/20 to-transparent" />
                   </div>
-                );
-                return event.link ? (
-                  <li key={event.id}>
-                    <Link to={event.link} className="block">{inner}</Link>
-                  </li>
-                ) : (
-                  <li key={event.id}>{inner}</li>
-                );
-              })}
-            </ol>
+                  <ol className="space-y-2.5">
+                    {group.events.map((event) => {
+                      const meta = EVENT_META[event.type];
+                      const Icon = meta.icon;
+                      const inner = (
+                        <div className="relative flex gap-3 items-start group">
+                          <div
+                            className="relative z-10 w-9 h-9 rounded-full border flex items-center justify-center shrink-0"
+                            style={{
+                              borderColor: `hsl(${meta.tone} / 0.45)`,
+                              backgroundColor: `hsl(${meta.tone} / 0.12)`,
+                            }}
+                          >
+                            <Icon className="w-4 h-4" style={{ color: `hsl(${meta.tone})` }} />
+                          </div>
+                          <div className="flex-1 min-w-0 rounded-lg border border-border/30 bg-card/50 px-3 py-2.5 group-hover:border-primary/30 transition-colors">
+                            <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                              <p className="font-serif text-sm text-foreground truncate">{event.title}</p>
+                              <span className="text-[10px] text-muted-foreground/70 whitespace-nowrap">
+                                {new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground/80 italic mt-0.5 truncate">
+                              {meta.label}{event.subtitle ? ` · ${event.subtitle}` : ""}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                      return event.link ? (
+                        <li key={event.id}>
+                          <Link to={event.link} className="block">{inner}</Link>
+                        </li>
+                      ) : (
+                        <li key={event.id}>{inner}</li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </section>
