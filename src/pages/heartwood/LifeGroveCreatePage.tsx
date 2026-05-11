@@ -230,6 +230,25 @@ export default function LifeGroveCreatePage() {
           </div>
         </section>
 
+        {/* Tree link */}
+        <section className="space-y-2">
+          <Label className="font-serif text-sm">Rooted tree</Label>
+          <TreeLinkPicker
+            treeLinkType={treeLinkType}
+            onTreeLinkType={setTreeLinkType}
+            linkedTreeId={linkedTreeId}
+            onLinkedTreeId={setLinkedTreeId}
+            plantedLocationText={plantedLocText}
+            onPlantedLocationText={setPlantedLocText}
+            plantedLatitude={plantedLat}
+            onPlantedLatitude={setPlantedLat}
+            plantedLongitude={plantedLng}
+            onPlantedLongitude={setPlantedLng}
+            plantingNotes={plantingNotes}
+            onPlantingNotes={setPlantingNotes}
+          />
+        </section>
+
         {/* Planting */}
         <section className="space-y-3">
           <Label className="font-serif text-sm">Planting</Label>
