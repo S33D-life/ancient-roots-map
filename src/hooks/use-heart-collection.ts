@@ -14,8 +14,12 @@ import {
 export type HeartCollectionState = HeartPoolStatus;
 
 export interface HeartPoolInfo {
+  /** Currently claimable hearts (count of pending windfalls at this tree). */
   totalHearts: number;
+  /** Lifetime windfalls distributed at this tree (milestone counter). */
   windfallCount: number;
+  /** Cumulative tree hearts (used for the 144-step progress bar elsewhere). */
+  cumulativeHearts: number;
 }
 
 export function useHeartCollection(
@@ -31,15 +35,36 @@ export function useHeartCollection(
   const [collectedAmount, setCollectedAmount] = useState<number | null>(null);
   const [poolLoading, setPoolLoading] = useState(true);
 
-  // Fetch heart pool
+  // Fetch pool counters + actual pending-windfall count.
+  // FIX: tree_heart_pools.total_hearts is a *cumulative* counter (drives the 144-step
+  // windfall threshold), not the number of hearts currently available to collect.
+  // Treating it as claimable produced ghost "Collect X Hearts" buttons that returned 0
+  // and stale UI after collecting. The true claimable count is the number of
+  // windfall_pending rows at this tree with user_id IS NULL.
   const fetchPool = useCallback(async () => {
     if (!treeId) { setPoolLoading(false); return; }
-    const { data } = await supabase
-      .from("tree_heart_pools")
-      .select("total_hearts, windfall_count")
-      .eq("tree_id", treeId)
-      .maybeSingle();
-    setPool(data ? { totalHearts: data.total_hearts, windfallCount: data.windfall_count } : null);
+    const [poolRes, pendingRes] = await Promise.all([
+      supabase
+        .from("tree_heart_pools")
+        .select("total_hearts, windfall_count")
+        .eq("tree_id", treeId)
+        .maybeSingle(),
+      supabase
+        .from("heart_transactions")
+        .select("amount", { count: "exact" })
+        .eq("tree_id", treeId)
+        .eq("heart_type", "windfall_pending")
+        .is("user_id", null),
+    ]);
+    const claimable = (pendingRes.data || []).reduce(
+      (sum, r: { amount: number | null }) => sum + (r.amount ?? 0),
+      0,
+    );
+    setPool({
+      totalHearts: claimable,
+      windfallCount: poolRes.data?.windfall_count ?? 0,
+      cumulativeHearts: poolRes.data?.total_hearts ?? 0,
+    });
     setPoolLoading(false);
   }, [treeId]);
 
