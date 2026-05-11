@@ -72,27 +72,27 @@ export function useLivingProgression(userId: string | null) {
         ) as string[];
 
         // Trees the user has met (visited) plus mapped
-        let trees:
-          | Array<{ id: string; species: string | null; estimated_age: number | null; location_text: string | null }>
-          | null = null;
+        type TRow = { id: string; species: string | null; estimated_age: number | null; latitude: number | null; longitude: number | null };
+        let trees: TRow[] = [];
 
         if (visitedIds.length > 0) {
           const { data } = await supabase
             .from("trees")
-            .select("id, species, estimated_age, location_text")
+            .select("id, species, estimated_age, latitude, longitude")
             .in("id", visitedIds);
-          trees = (data ?? []) as typeof trees;
+          trees = ((data ?? []) as unknown as TRow[]);
         }
 
-        const { data: mapped } = await supabase
+        const { data: mappedRaw } = await supabase
           .from("trees")
-          .select("id, species, estimated_age, location_text")
+          .select("id, species, estimated_age, latitude, longitude")
           .eq("created_by", userId)
           .limit(500);
+        const mapped = (mappedRaw ?? []) as unknown as TRow[];
 
-        const all = new Map<string, { id: string; species: string | null; estimated_age: number | null; location_text: string | null }>();
-        for (const t of trees ?? []) all.set(t.id, t);
-        for (const t of mapped ?? []) all.set(t.id, t as never);
+        const all = new Map<string, TRow>();
+        for (const t of trees) all.set(t.id, t);
+        for (const t of mapped) all.set(t.id, t);
 
         const speciesSet = new Set<string>();
         const hiveCounts: Record<string, number> = {};
@@ -107,9 +107,9 @@ export function useLivingProgression(userId: string | null) {
             if (speciesMatchesHive(sp, h)) hiveCounts[h.id] += 1;
           }
           if ((t.estimated_age ?? 0) >= 200) ancientCount += 1;
-          if (t.location_text) {
-            const region = t.location_text.split(/[,/·]/)[0]?.trim().toLowerCase();
-            if (region) regions.add(region);
+          // Region proxy: 1° lat/lng grid cell
+          if (t.latitude != null && t.longitude != null) {
+            regions.add(`${Math.floor(t.latitude)}:${Math.floor(t.longitude)}`);
           }
         }
 
