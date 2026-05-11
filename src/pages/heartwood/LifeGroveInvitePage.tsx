@@ -30,11 +30,13 @@ import { OFFERING_TYPES, type OfferingType, type TreeArchetype } from "@/lib/lif
 export default function LifeGroveInvitePage() {
   const { inviteToken } = useParams<{ inviteToken: string }>();
   const { user } = useCurrentUser();
+  const queryClient = useQueryClient();
 
-  const { data: grove, isLoading } = useQuery({
+  const { data: grove, isLoading, isError } = useQuery({
     queryKey: ["life-grove-by-token", inviteToken],
     queryFn: () => (inviteToken ? getLifeGroveByToken(inviteToken) : null),
     enabled: !!inviteToken,
+    retry: 1,
   });
 
   const [contributorName, setContributorName] = useState("");
