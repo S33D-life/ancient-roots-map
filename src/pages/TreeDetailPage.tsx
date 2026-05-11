@@ -74,6 +74,7 @@ const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
 const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
 const SeasonalMomentPanel = lazy(() => import("@/components/SeasonalMomentPanel"));
 const AddOfferingDialog = lazy(() => import("@/components/AddOfferingDialog"));
+const MemorySeedComposer = lazy(() => import("@/components/memory-seed/MemorySeedComposer"));
 const OfferingGateway = lazy(() => import("@/components/OfferingGateway"));
 const ProposeEditDrawer = lazy(() => import("@/components/ProposeEditDrawer"));
 const MeetingTimer = lazy(() => import("@/components/MeetingTimer"));
@@ -170,6 +171,7 @@ const TreeDetailPage = () => {
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
   const [whisperRippleVisible, setWhisperRippleVisible] = useState(false);
   const [whisperContextLabel, setWhisperContextLabel] = useState<string | null>(null);
+  const [memorySeedOpen, setMemorySeedOpen] = useState(false);
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
@@ -1273,6 +1275,23 @@ const TreeDetailPage = () => {
               </Button>
             )}
 
+            {/* Memory Seed — unified Offering ↔ Whisper composer (prototype) */}
+            {userId && tree && (
+              <div className="rounded-2xl border border-primary/20 bg-card/40 p-3">
+                <Button
+                  onClick={() => setMemorySeedOpen(true)}
+                  variant="ghost"
+                  className="w-full font-serif justify-between text-left"
+                >
+                  <span>Share an Offering or Whisper</span>
+                  <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">New</span>
+                </Button>
+                <p className="font-serif text-[11px] italic text-muted-foreground/70 px-3 pb-1">
+                  Offerings hang in the branches. Whispers travel through the roots.
+                </p>
+              </div>
+            )}
+
             {availableWhispers.length > 0 && userId && tree && (
               <WhisperCollector
                 whispers={availableWhispers}
@@ -1531,6 +1550,17 @@ const TreeDetailPage = () => {
           requestAnimationFrame(() => setAddOfferingOpen(false));
         }}
       />
+
+      <Suspense fallback={null}>
+        <MemorySeedComposer
+          open={memorySeedOpen}
+          onOpenChange={setMemorySeedOpen}
+          treeId={id!}
+          treeSpecies={tree?.species}
+          treeSpeciesKey={(tree as { species_key?: string | null } | null)?.species_key ?? null}
+          treeName={tree?.name}
+        />
+      </Suspense>
 
       <ProposeEditDrawer
         open={proposeEditOpen}
