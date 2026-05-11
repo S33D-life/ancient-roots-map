@@ -210,7 +210,7 @@ const HeartwoodRoomPage = () => {
         {resolvedRoom === "vault" && <VaultRoom />}
         {resolvedRoom === "gallery" && <AncientFriendsWrapper />}
         {resolvedRoom === "bookshelf" && <BookshelfWrapper />}
-        {resolvedRoom === "creators-path" && <CreatorsPathWrapper />}
+        {resolvedRoom === "star-trail" && <StarTrailWrapper />}
         {resolvedRoom === "rhythms" && <CycleMarketRoom />}
         {resolvedRoom === "tap-root" && <DevRoom />}
       </Suspense>
