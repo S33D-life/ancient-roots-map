@@ -67,8 +67,8 @@ const EMPTY_STATS: JourneyStats = {
   songs: 0, books: 0, ceremonies: 0, groves: 0,
 };
 
-const safe = async <T,>(p: PromiseLike<T>, fallback: T): Promise<T> => {
-  try { return await p; } catch { return fallback; }
+const safe = async (p: PromiseLike<any>): Promise<{ data: any[] }> => {
+  try { const r: any = await p; return { data: r?.data ?? [] }; } catch { return { data: [] }; }
 };
 
 const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
