@@ -269,6 +269,7 @@ export default function OrbConstellation({
                 height: 52,
                 left: orbCenterX - 26,
                 top: orbCenterY - 26,
+                pointerEvents: open ? "auto" : "none",
               }}
               aria-label="TEOTAG — Enter the Hearth"
             >
