@@ -26,8 +26,8 @@ export default function HeartwoodLibraryTabs({ offerings }: Props) {
         {VISIBLE_TYPES.map((t) => {
           const meta = OFFERING_TYPES.find((m) => m.value === t)!;
           return (
-            <TabsTrigger key={t} value={t} className="text-xs font-serif">
-              <span className="mr-1" aria-hidden>{meta.glyph}</span>
+            <TabsTrigger key={t} value={t} className="text-xs font-serif gap-1.5">
+              <LifeGroveOfferingGlyph type={t} size={16} variant="card" />
               {meta.label}
             </TabsTrigger>
           );
