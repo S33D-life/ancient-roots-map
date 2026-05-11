@@ -119,6 +119,7 @@ const HivePage = () => {
         estimated_age: null as number | null,
         created_at: rt.created_at,
         nation: rt.country,
+        isResearch: true,
       }));
 
       const allTrees = [...hiveTrees, ...researchTrees];
