@@ -48,6 +48,7 @@ export default function LifeGrovePage() {
         >
           <p className="font-serif text-sm text-muted-foreground/80">Stirring the branches…</p>
         </main>
+        <Footer />
       </div>
     );
   }
