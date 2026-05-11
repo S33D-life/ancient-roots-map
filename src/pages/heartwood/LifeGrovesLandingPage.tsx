@@ -12,6 +12,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { listMyLifeGroves } from "@/repositories/life-groves";
 import EtherealTreePreview from "@/components/life-groves/EtherealTreePreview";
 import { GROVE_TYPES } from "@/lib/life-groves/types";
+import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 
 export default function LifeGrovesLandingPage() {
   const navigate = useNavigate();
