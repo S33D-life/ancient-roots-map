@@ -34,6 +34,7 @@ import { useLivingProgression } from "@/hooks/use-living-progression";
 import { useStaffIdentity } from "@/hooks/use-staff-identity";
 import { ROUTES } from "@/lib/routes";
 import LivingPathsPanel from "@/components/quest-cave/living/LivingPathsPanel";
+import { HeartwoodChamber } from "@/components/library/HeartwoodChamber";
 import {
   currentSeason, nextMilestone, SPECIES_MILESTONES, STAFF_RESONANCE,
 } from "@/lib/quest-cave/livingPaths";
@@ -421,22 +422,19 @@ function CollapsibleSection({
   defaultOpen?: boolean; children: React.ReactNode;
 }) {
   return (
-    <Collapsible defaultOpen={defaultOpen} className="mb-6">
-      <CollapsibleTrigger className="group w-full flex items-center justify-between gap-3 px-1 py-2 text-left">
-        <div className="min-w-0">
-          <h2 className="font-serif text-lg text-foreground flex items-center gap-2">
-            {icon}{title}
-          </h2>
-          <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-0.5">
-            {caption}
-          </p>
-        </div>
-        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180 shrink-0" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-3">
+    <div className="mb-6">
+      <HeartwoodChamber
+        title={title}
+        caption={caption}
+        icon={icon}
+        collapsible
+        defaultOpen={defaultOpen}
+        ambient
+        tone="warm"
+      >
         {children}
-      </CollapsibleContent>
-    </Collapsible>
+      </HeartwoodChamber>
+    </div>
   );
 }
 
