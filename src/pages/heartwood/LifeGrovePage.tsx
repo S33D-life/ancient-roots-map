@@ -2,7 +2,7 @@
  * LifeGrovePage — single Life Grove view.
  * Route: /heartwood/life-groves/:id
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
@@ -37,6 +37,13 @@ export default function LifeGrovePage() {
     refetchOnMount: true,
   });
 
+  // Clear selection if the chosen offering disappears after refetch.
+  useEffect(() => {
+    if (selected && !offerings.some((o) => o.id === selected.id)) {
+      setSelected(null);
+    }
+  }, [offerings, selected]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen botanical-heartwood">
@@ -48,6 +55,7 @@ export default function LifeGrovePage() {
         >
           <p className="font-serif text-sm text-muted-foreground/80">Stirring the branches…</p>
         </main>
+        <Footer />
       </div>
     );
   }
