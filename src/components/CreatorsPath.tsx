@@ -1,11 +1,12 @@
 /**
- * CreatorsPath — Personal Journey Room.
+ * StarTrail (formerly Creator's Path) — Personal Journey Room.
  *
  * The living record of a wanderer's path with life and the Ancient Friends.
- * Aggregates trees mapped, Ancient Friends visited, offerings, whispers,
- * songs, books, Life Groves, ceremonies and quests into one warm scroll.
+ * Weaves together two lineages:
+ *   • Wanderer Lineage — visits, offerings, whispers, groves, quests, council
+ *   • Staff Lineage    — borrowed staff, ceremonies, trees mapped with staff
  *
- * Tree Projects Directory has moved to /tree-projects.
+ * Tree Projects Directory lives at /tree-projects.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -211,30 +212,38 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
 
       <PathHero />
 
-      {/* Active staff card */}
-      {activeStaff && (
-        <Card className="border-amber-900/25 bg-card/70 backdrop-blur-sm overflow-hidden">
-          <CardContent className="p-0">
-            <Link to={`/staff/${activeStaff.id}`} className="flex items-center gap-4 p-4 group">
-              <div className="w-16 h-16 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0">
-                <img
-                  src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
-                  alt={activeStaff.species}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">Borrowed Staff</p>
-                <h3 className="font-serif text-base text-foreground truncate">{activeStaff.species}</h3>
-                <p className="text-[11px] text-muted-foreground/80 italic truncate">
-                  {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
-                </p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-primary/60 shrink-0" />
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+      {/* Active staff card — frames Borrowed vs Permanent based on ceremony history */}
+      {activeStaff && (() => {
+        const hasBinding = stats.ceremonies > 0;
+        const eyebrow = hasBinding ? "First guide / early companion" : "Borrowed Staff";
+        const note = hasBinding
+          ? "Remembered as the staff that walked with you at the start of the path."
+          : "Walks with you until your Permanent Staff is earned, gifted, or crafted.";
+        return (
+          <Card className="border-amber-900/25 bg-card/70 backdrop-blur-sm overflow-hidden">
+            <CardContent className="p-0">
+              <Link to={`/staff/${activeStaff.id}`} className="flex items-center gap-4 p-4 group">
+                <div className="w-16 h-16 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0">
+                  <img
+                    src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
+                    alt={activeStaff.species}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">{eyebrow}</p>
+                  <h3 className="font-serif text-base text-foreground truncate">{activeStaff.species}</h3>
+                  <p className="text-[11px] text-muted-foreground/80 italic truncate">
+                    {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 italic mt-1 truncate">{note}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-primary/60 shrink-0" />
+              </Link>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Journey overview */}
       <section>
@@ -404,12 +413,14 @@ function PathHero() {
       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/30 mb-2">
         <Footprints className="w-5 h-5 text-primary" />
       </div>
-      <h1 className="font-serif text-2xl sm:text-3xl text-foreground tracking-wide">Creator's Path</h1>
+      <h1 className="font-serif text-2xl sm:text-3xl text-foreground tracking-wide">Star Trail</h1>
       <p className="text-xs sm:text-sm font-serif text-muted-foreground mt-1">
         Your path is remembered here.
       </p>
       <p className="text-[11px] sm:text-xs font-serif text-muted-foreground/80 italic mt-3 max-w-md mx-auto leading-relaxed">
-        Every tree met, offering given, whisper sent, and grove tended becomes part of the journey.
+        Your Star Trail remembers the path you are weaving through trees,
+        offerings, whispers, groves, quests, and Council gatherings — and
+        the staff that walks alongside you.
       </p>
     </div>
   );

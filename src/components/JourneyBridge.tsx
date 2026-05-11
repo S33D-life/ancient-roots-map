@@ -1,7 +1,7 @@
 /**
  * JourneyBridge — A contextual "next step" navigation component that
  * threads the four core sections into a continuous journey:
- *   Hearth (Legend) → Creator's Path → Staff Room → Map Room
+ *   Hearth (Legend) → Star Trail → Staff Room → Map Room
  *
  * Place at the bottom of each section to guide wanderers forward.
  */
@@ -37,12 +37,12 @@ const STEPS: StepDef[] = [
   },
   {
     key: "path",
-    label: "Creator's Path",
-    sublabel: "Journey Timeline",
+    label: "Star Trail",
+    sublabel: "Wanderer & Staff Lineage",
     icon: Footprints,
-    to: "/library/creators-path",
+    to: "/library/star-trail",
     accentHsl: "28 70% 50%",
-    heartsAction: "Review offerings, songs, ceremonies",
+    heartsAction: "Review offerings, ceremonies & journey",
   },
   {
     key: "staff",

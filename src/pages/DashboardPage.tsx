@@ -18,6 +18,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import Footer from "@/components/Footer";
 // DashboardOverview kept for potential future use
 import GroveIdentityCard from "@/components/dashboard/GroveIdentityCard";
+import IdentityLineageCard from "@/components/identity/IdentityLineageCard";
 import FirstEncounterFunnel from "@/components/FirstEncounterFunnel";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
 import DashboardProfile from "@/components/dashboard/DashboardProfile";
@@ -421,6 +422,7 @@ const DashboardPage = () => {
         {/* Identity & Daily Status — always open */}
         <section className="space-y-5">
           <HearthSectionHeader icon={Flame} title="Today" subtitle="Your daily pulse and earnable rewards" />
+          <IdentityLineageCard userId={userId} />
           <GroveIdentityCard userId={userId} userName={p?.full_name} />
           <EarnableToday userId={userId} />
         </section>

@@ -29,6 +29,7 @@ import VaultValueTree from "./vault/VaultValueTree";
 import VaultPatronBadge from "./vault/VaultPatronBadge";
 import VaultSection from "./vault/VaultSection";
 import CosmicClock from "@/components/CosmicClock";
+import IdentityLineageCard from "@/components/identity/IdentityLineageCard";
 
 const STORAGE_KEY = "s33d_vault_open_section";
 
@@ -126,6 +127,9 @@ const DashboardVault = ({ userId }: Props) => {
       transition={{ duration: 0.4 }}
     >
       <VaultParticles />
+
+      {/* Wanderer + Staff lineage — kept coherent across Hearth and Vault */}
+      <IdentityLineageCard userId={userId} />
 
       {/* Context */}
       <p className="text-[11px] font-serif text-muted-foreground/70 text-center italic leading-relaxed">
