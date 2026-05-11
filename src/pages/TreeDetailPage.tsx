@@ -1551,6 +1551,17 @@ const TreeDetailPage = () => {
         }}
       />
 
+      <Suspense fallback={null}>
+        <MemorySeedComposer
+          open={memorySeedOpen}
+          onOpenChange={setMemorySeedOpen}
+          treeId={id!}
+          treeSpecies={tree?.species}
+          treeSpeciesKey={(tree as { species_key?: string | null } | null)?.species_key ?? null}
+          treeName={tree?.name}
+        />
+      </Suspense>
+
       <ProposeEditDrawer
         open={proposeEditOpen}
         onOpenChange={setProposeEditOpen}
