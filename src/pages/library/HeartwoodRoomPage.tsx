@@ -28,8 +28,9 @@ const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
 // Room aliases for backward compatibility
 const ROOM_ALIASES: Record<string, string> = {
   "ancient-friends": "gallery",
-  "resources": "creators-path",
-  "tree-resources": "creators-path",
+  "resources": "star-trail",
+  "tree-resources": "star-trail",
+  "creators-path": "star-trail",        // legacy alias — Creator's Path → Star Trail
   "tree-data-commons": "redirect:/tree-data-commons",
   "wishing-tree": "wishlist",
   "ledger": "scrolls",
@@ -50,7 +51,7 @@ const ROOM_LABELS: Record<string, string> = {
   "greenhouse": "Greenhouse",
   "wishlist": "Wishing Tree",
   "seed-cellar": "Seed Cellar",
-  "creators-path": "Creator's Path",
+  "star-trail": "Star Trail",
   "scrolls": "Scrolls & Records",
   "vault": "Vaults",
   "bookshelf": "Bookshelf",
@@ -70,7 +71,7 @@ const ROOM_SEQUENCE = [
   "wishlist",
   "scrolls",
   "vault",
-  "creators-path",
+  "star-trail",
   "rhythms",
   "tap-root",
 ];
