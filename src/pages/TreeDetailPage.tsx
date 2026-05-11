@@ -940,7 +940,8 @@ const TreeDetailPage = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-8 pt-4"
+                  className="space-y-8 pt-4 mt-2 rounded-2xl border border-primary/15 bg-card/40 backdrop-blur-sm px-3 sm:px-4 py-5 shadow-inner"
+                  style={{ minHeight: "auto" }}
                 >
                   {/* Seasonal Moment */}
                   <SeasonalMomentPanel
