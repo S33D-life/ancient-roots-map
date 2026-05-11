@@ -243,8 +243,17 @@ interface Props {
 export default function LibraryRoomGrid({ onRoomSelect }: Props) {
   const seasonShift = useMemo(() => getSeasonalShift(), []);
 
+  const groups: { label: string; rooms: Room[] }[] = [
+    { label: "Primary Rooms", rooms: PRIMARY },
+    { label: "Living Library", rooms: LIVING_LIBRARY },
+    { label: "Growing Spaces", rooms: GROWING_SPACES },
+    { label: "Community & Atlas", rooms: COMMUNITY_ATLAS },
+  ];
+
+  let runningIdx = 0;
+
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-2xl pb-32">
       <p
         className="font-serif text-xs tracking-[0.2em] uppercase text-center mb-5"
         style={{ color: `hsl(${38 + seasonShift} 30% 50% / 0.5)` }}
@@ -253,14 +262,22 @@ export default function LibraryRoomGrid({ onRoomSelect }: Props) {
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
-        <SectionHeader label="Your Spaces" seasonShift={seasonShift} />
-        {YOUR_SPACES.map((room, idx) => (
-          <RoomTile key={room.key} room={room} idx={idx} seasonShift={seasonShift} onSelect={onRoomSelect} />
-        ))}
-
-        <SectionHeader label="Community" seasonShift={seasonShift} />
-        {COMMUNITY.map((room, idx) => (
-          <RoomTile key={room.key} room={room} idx={idx + YOUR_SPACES.length} seasonShift={seasonShift} onSelect={onRoomSelect} />
+        {groups.map((g) => (
+          <div key={g.label} className="contents">
+            <SectionHeader label={g.label} seasonShift={seasonShift} />
+            {g.rooms.map((room) => {
+              const idx = runningIdx++;
+              return (
+                <RoomTile
+                  key={room.key}
+                  room={room}
+                  idx={idx}
+                  seasonShift={seasonShift}
+                  onSelect={onRoomSelect}
+                />
+              );
+            })}
+          </div>
         ))}
       </div>
     </div>
