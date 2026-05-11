@@ -117,17 +117,21 @@ export function useLivingProgression(userId: string | null) {
         for (const t of trees) all.set(t.id, t);
         for (const t of mapped) all.set(t.id, t);
 
-        const speciesSet = new Set<string>();
-        const hiveCounts: Record<string, number> = {};
-        for (const h of HIVES) hiveCounts[h.id] = 0;
+        // Canonical species: key -> display label. De-dups synonyms.
+        const speciesByKey = new Map<string, string>();
+        const hiveCounted: Record<string, Set<string>> = {};
+        for (const h of HIVES) hiveCounted[h.id] = new Set();
         let ancientCount = 0;
         const regions = new Set<string>();
 
         for (const t of all.values()) {
           const sp = (t.species ?? "").trim();
-          if (sp) speciesSet.add(sp.toLowerCase());
-          for (const h of HIVES) {
-            if (speciesMatchesHive(sp, h)) hiveCounts[h.id] += 1;
+          const canon = canonicalize(sp);
+          if (canon) {
+            speciesByKey.set(canon.key, canon.display);
+            for (const h of HIVES) {
+              if (speciesMatchesHive(sp, h, canon)) hiveCounted[h.id].add(canon.key);
+            }
           }
           if ((t.estimated_age ?? 0) >= 200) ancientCount += 1;
           // Region proxy: 1° lat/lng grid cell
@@ -136,9 +140,13 @@ export function useLivingProgression(userId: string | null) {
           }
         }
 
-        // Recent species — last 5 distinct from checkins (most recent first)
+        const hiveCounts: Record<string, number> = {};
+        for (const h of HIVES) hiveCounts[h.id] = hiveCounted[h.id].size;
+
+        // Recent species — last 5 distinct (canonical) from checkins
         const recentSet: string[] = [];
-        if (checkins && trees) {
+        const recentKeys = new Set<string>();
+        if (checkins && trees.length) {
           const idToSpecies = new Map(trees.map((t) => [t.id, (t.species ?? "").trim()]));
           const sorted = [...checkins].sort(
             (a, b) =>
@@ -146,8 +154,12 @@ export function useLivingProgression(userId: string | null) {
               new Date(a.checked_in_at).getTime(),
           );
           for (const c of sorted) {
-            const s = idToSpecies.get(c.tree_id) ?? "";
-            if (s && !recentSet.includes(s)) recentSet.push(s);
+            const raw = idToSpecies.get(c.tree_id) ?? "";
+            const canon = canonicalize(raw);
+            if (canon && !recentKeys.has(canon.key)) {
+              recentKeys.add(canon.key);
+              recentSet.push(canon.display);
+            }
             if (recentSet.length >= 5) break;
           }
         }
