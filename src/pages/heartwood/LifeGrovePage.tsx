@@ -140,6 +140,8 @@ export default function LifeGrovePage() {
           </section>
         )}
 
+        <RootedTreeSection grove={grove} />
+
         {/* Library */}
         <section className="mb-8">
           <h2 className="font-serif text-xl text-foreground mb-3">Heartwood Library</h2>
