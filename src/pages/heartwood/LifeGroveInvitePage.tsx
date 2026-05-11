@@ -61,6 +61,14 @@ export default function LifeGroveInvitePage() {
       if (!bodyText.trim() && !mediaUrl.trim() && !title.trim()) {
         throw new Error("Add a title, words, or a link.");
       }
+      // Pull the latest offerings to compute a non-overlapping branch slot.
+      let position;
+      try {
+        const existing = await listOfferings(grove.id);
+        position = assignOfferingPosition(existing);
+      } catch {
+        position = assignOfferingPosition([]);
+      }
       await createOffering({
         life_grove_id: grove.id,
         contributor_user_id: user?.id ?? null,
@@ -71,7 +79,7 @@ export default function LifeGroveInvitePage() {
         body_text: bodyText.trim() || null,
         media_url: mediaUrl.trim() || null,
         visibility,
-        memory_position_data: null,
+        memory_position_data: position,
       });
     },
     onSuccess: () => {
