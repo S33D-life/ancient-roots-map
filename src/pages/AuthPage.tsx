@@ -868,6 +868,11 @@ const AuthPage = () => {
                   <p className="text-[10px] text-muted-foreground/60 font-serif">
                     S33D is invitation-only. Ask a wanderer for an invite link to join.
                   </p>
+                  {inviteExpiresAt && !inviteBloomFailure && (
+                    <div className="pt-1">
+                      <InviteExpiryHint expiresAt={inviteExpiresAt} />
+                    </div>
+                  )}
                   {inviteBloomFailure && (
                     <div className="pt-2">
                       <InviteBloomFailure
@@ -878,6 +883,10 @@ const AuthPage = () => {
                           handleSignup(new Event("submit") as unknown as React.FormEvent);
                         }}
                         onRequestFresh={() => {
+                          void trackInviteEvent("invite_request_fresh_clicked", {
+                            code: inviteCode || null,
+                            source: "manual",
+                          });
                           window.open(
                             "https://t.me/s33d_life_bot?start=request_invite",
                             "_blank",
@@ -885,6 +894,10 @@ const AuthPage = () => {
                           );
                         }}
                         onReturnToGrove={() => {
+                          void trackInviteEvent("invite_return_to_grove", {
+                            code: inviteCode || null,
+                            source: "manual",
+                          });
                           // Clear any persisted invite traces so a clean visit follows.
                           try {
                             localStorage.removeItem("s33d_invite_code");
