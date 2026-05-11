@@ -132,39 +132,9 @@ const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCounc
             >
               🌳 Reflect in the Time Tree
             </Button>
-
-            <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="gap-2 font-serif tracking-wide w-full sm:w-auto">
-                  {agendaOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  View Agenda
-                </Button>
-              </CollapsibleTrigger>
-            </Collapsible>
           </div>
         </CardHeader>
       </Card>
-
-      {/* ── Council Scroll reveal — the living invitation ── */}
-      <Collapsible open={agendaOpen} onOpenChange={handleAgendaChange}>
-        <CollapsibleContent
-          className={
-            prefersReducedMotion
-              ? "overflow-hidden"
-              : "overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
-          }
-          onAnimationEnd={(e) => {
-            if (agendaOpen && e.currentTarget) {
-              e.currentTarget.scrollIntoView({
-                behavior: prefersReducedMotion ? "auto" : "smooth",
-                block: "nearest",
-              });
-            }
-          }}
-        >
-          {agendaOpen && <CouncilScrollEmbed />}
-        </CollapsibleContent>
-      </Collapsible>
 
       {/* Moon cycle indicator — dynamic */}
       <div className="rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm p-4">
