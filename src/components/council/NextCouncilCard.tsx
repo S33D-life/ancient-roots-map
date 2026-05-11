@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video } from "lucide-react";
-import CouncilScrollEmbed from "./CouncilScrollEmbed";
+import { MoonStar, CalendarDays, Clock, Mic, Video } from "lucide-react";
 import {
   getCurrentCouncilWithOverrides,
   getNextCouncilWithOverrides,
@@ -25,36 +22,8 @@ interface NextCouncilCardProps {
   onEditCouncil?: () => void;
 }
 
-const AGENDA_OPEN_KEY = "council_agenda_open";
-
 const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCouncilCardProps) => {
-  const [agendaOpen, setAgendaOpen] = useState(() => {
-    try {
-      const stored = localStorage.getItem(AGENDA_OPEN_KEY);
-      if (stored !== null) return stored === "true";
-      // First visit: open by default, mirroring previous behavior.
-      return !localStorage.getItem("council_agenda_seen");
-    } catch {
-      return false;
-    }
-  });
-  const prefersReducedMotion = (() => {
-    try {
-      return typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    } catch {
-      return false;
-    }
-  })();
   const navigate = useNavigate();
-
-  const handleAgendaChange = (open: boolean) => {
-    setAgendaOpen(open);
-    try {
-      localStorage.setItem(AGENDA_OPEN_KEY, open ? "true" : "false");
-      if (open) localStorage.setItem("council_agenda_seen", "true");
-    } catch {}
-  };
 
   // Re-read when refreshKey changes (after curator save)
   const current = getCurrentCouncilWithOverrides();
