@@ -277,7 +277,7 @@ const AuthPage = () => {
           // onAuthStateChange will handle the warm toast + cleanup;
           // we still navigate here to cover the case where the listener
           // fires before this view mounts.
-          clearPendingEmail();
+          clearPendingEmail(); clearUnverifiedEmail();
           navigate(resolvePostAuthPath(), { replace: true });
         }
       } catch (e) {
@@ -336,7 +336,7 @@ const AuthPage = () => {
           authLog("verification round-trip complete", { userEmail: session.user?.email });
           toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
         }
-        clearPendingEmail();
+        clearPendingEmail(); clearUnverifiedEmail();
         // Consume invitation on first sign-in (assigns lineage + decrements inviter).
         // Read from BOTH legacy and new persistence keys so any prior session can
         // still complete its consumption. We only mark the invite "used" AFTER
@@ -591,7 +591,7 @@ const AuthPage = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (sessionData.session) {
         authLog("continue-after-verify: session found, navigating");
-        clearPendingEmail();
+        clearPendingEmail(); clearUnverifiedEmail();
         navigate(resolvePostAuthPath(), { replace: true });
         return;
       }
@@ -959,7 +959,7 @@ const AuthPage = () => {
               })()}
               <Button
                 variant="ghost"
-                onClick={() => { clearPendingEmail(); setView("signup"); clearErrors(); }}
+                onClick={() => { clearPendingEmail(); clearUnverifiedEmail(); setView("signup"); clearErrors(); }}
                 className="w-full font-serif gap-2"
                 aria-label="Change the email address used for signup"
               >
