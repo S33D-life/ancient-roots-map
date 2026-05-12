@@ -2,15 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Copy } from "lucide-react";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface Props {
   inviteToken: string;
 }
 
 export default function InviteLinkPanel({ inviteToken }: Props) {
-  const url = typeof window !== "undefined"
-    ? `${window.location.origin}/life-grove-invite/${inviteToken}`
-    : `/life-grove-invite/${inviteToken}`;
+  const url = getPublicAppUrl(`/life-grove-invite/${inviteToken}`);
 
   const copy = async () => {
     try {
