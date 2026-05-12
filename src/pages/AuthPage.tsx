@@ -545,6 +545,9 @@ const AuthPage = () => {
         source: "manual",
         userId: data.user?.id ?? null,
       });
+      writePendingEmail(email);
+      setUnverifiedEmail(email);
+      authLog("signup ok → verify-email", { email });
       setView("verify-email");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
