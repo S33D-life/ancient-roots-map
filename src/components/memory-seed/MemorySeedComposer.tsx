@@ -537,11 +537,45 @@ export default function MemorySeedComposer({
 // ── Confirmation ─────────────────────────────────────────────
 
 function ConfirmationView({
-  destination,
+  state,
   onClose,
-}: { destination: Destination; onClose: () => void }) {
-  const isWhisper = destination === "whisper";
-  const isBoth = destination === "both";
+  onRetryWhisper,
+  submitting,
+}: {
+  state: Destination | "partial_whisper_failed";
+  onClose: () => void;
+  onRetryWhisper?: () => void;
+  submitting?: boolean;
+}) {
+  const isPartial = state === "partial_whisper_failed";
+  const isWhisper = state === "whisper";
+  const isBoth = state === "both";
+
+  if (isPartial) {
+    return (
+      <div className="py-6 text-center space-y-4">
+        <div className="mx-auto w-24 h-24 grid place-items-center" aria-hidden>
+          <BranchGlyph />
+        </div>
+        <p className="font-serif text-base text-foreground">
+          Your memory was hung in the branches, but the whisper could not enter the roots.
+        </p>
+        <p className="font-serif text-xs italic text-muted-foreground/80">
+          The offering is safe at this tree. You can try sending the whisper again.
+        </p>
+        <div className="flex justify-center gap-2">
+          {onRetryWhisper && (
+            <Button onClick={onRetryWhisper} variant="default" size="sm" disabled={submitting}>
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Try sending the whisper again
+            </Button>
+          )}
+          <Button onClick={onClose} variant="outline" size="sm" disabled={submitting}>Close</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-6 text-center space-y-4">
       <div className="mx-auto w-24 h-24 grid place-items-center" aria-hidden>
