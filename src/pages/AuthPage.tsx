@@ -135,6 +135,13 @@ const AuthPage = () => {
   const [resendCooldownUntil, setResendCooldownUntil] = useState<number>(0);
   const [resendNote, setResendNote] = useState<string | null>(null);
   const [verifyChecking, setVerifyChecking] = useState(false);
+  // "waiting" → still listening for confirmation
+  // "redirecting" → session detected, opening the grove
+  // "expired" → URL came back with an auth error (link expired/used)
+  const [verifyStatus, setVerifyStatus] = useState<"waiting" | "redirecting" | "expired">("waiting");
+  const [verifyExpiredMessage, setVerifyExpiredMessage] = useState<string | null>(null);
+  // Stops the polling loop and prevents duplicate redirect/toast/profile-ensure work.
+  const hasDetectedSessionRef = useRef(false);
   const [tickNow, setTickNow] = useState(() => Date.now());
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
