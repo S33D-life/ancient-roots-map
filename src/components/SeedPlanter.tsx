@@ -188,8 +188,14 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
-      const note = result.overrideUsed ? " (override used)" : "";
-      toast.success(`🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.${note}`);
+      if (result.overrideUsed) {
+        setOverrideEnabled(false);
+        toast.success("🌱 Seed planted (approximate location)", {
+          description: "Recorded with your true distance — thank you for being honest.",
+        });
+      } else {
+        toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
+      }
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
       const { title, description } = explainFailure(refineForToast(result));
