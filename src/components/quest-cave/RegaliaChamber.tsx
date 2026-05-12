@@ -202,7 +202,7 @@ export default function RegaliaChamber({
                 strokeDasharray="2 2"
               />
               {/* Sigil pins on the cloak */}
-              {sigils.slice(0, 5).map((_, i) => (
+              {safeSigils.slice(0, 5).map((_, i) => (
                 <circle
                   key={i}
                   cx={32 + (i % 3) * 18}
@@ -290,19 +290,19 @@ export default function RegaliaChamber({
               <Sparkles className="w-3 h-3" /> Sigils
             </div>
             <p className="font-serif text-[11px] text-foreground/85 mt-0.5 leading-snug">
-              {sigils.length > 0 ? `${sigils.length} earned` : "None yet"}
+              {safeSigils.length > 0 ? `${safeSigils.length} earned` : "None yet"}
             </p>
           </div>
         </div>
       </div>
 
-      {affinitySpecies.length > 0 && (
+      {safeAffinitySpecies.length > 0 && (
         <div className="px-4 pb-4 -mt-1">
           <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70 mb-1">
             Species affinity
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {affinitySpecies.slice(0, 6).map((s) => (
+            {safeAffinitySpecies.slice(0, 6).map((s) => (
               <span
                 key={s}
                 className="font-serif text-[10px] px-2 py-0.5 rounded-full border border-emerald-700/25 bg-emerald-50/30 dark:bg-emerald-950/15 text-foreground/80"
