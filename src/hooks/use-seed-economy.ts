@@ -133,29 +133,29 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
 
   /** Get a fresh GPS fix — never cached. Returns structured failure info. */
   const getFreshPosition = async (): Promise<
-    | { ok: true; position: GeolocationPosition }
-    | { ok: false; reason: ActionFailureReason; error?: string }
+    | { kind: "ok"; position: GeolocationPosition }
+    | { kind: "err"; reason: ActionFailureReason; error?: string }
   > => {
     if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
-      return { ok: false, reason: "geo_unsupported" };
+      return { kind: "err", reason: "geo_unsupported" };
     }
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 12000,
-          maximumAge: 0, // never cached
+          maximumAge: 0,
         });
       });
-      return { ok: true, position };
+      return { kind: "ok", position };
     } catch (err: unknown) {
       const e = err as GeolocationPositionError | undefined;
       const code = e?.code;
       const msg = e?.message ?? String(err);
-      if (code === 1) return { ok: false, reason: "geo_denied", error: msg };
-      if (code === 2) return { ok: false, reason: "geo_unavailable", error: msg };
-      if (code === 3) return { ok: false, reason: "geo_timeout", error: msg };
-      return { ok: false, reason: "geo_unavailable", error: msg };
+      if (code === 1) return { kind: "err", reason: "geo_denied", error: msg };
+      if (code === 2) return { kind: "err", reason: "geo_unavailable", error: msg };
+      if (code === 3) return { kind: "err", reason: "geo_timeout", error: msg };
+      return { kind: "err", reason: "geo_unavailable", error: msg };
     }
   };
 
