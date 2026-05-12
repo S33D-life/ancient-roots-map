@@ -6,7 +6,6 @@
  */
 import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface PathwayGatewayProps {
   title: string;
