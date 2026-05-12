@@ -4,12 +4,53 @@ import { Sprout, Heart, Loader2, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useSeedEconomy, PROXIMITY_METERS } from "@/hooks/use-seed-economy";
+import { useSeedEconomy, PROXIMITY_METERS, type ActionResult, type ActionFailureReason } from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
 import RewardReceipt from "@/components/RewardReceipt";
 import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
+
+const POOR_GPS_ACCURACY_M = 75; // accuracy worse than this is "uncertain"
+
+function explainFailure(r: ActionResult): { title: string; description?: string } {
+  const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
+  const a = r.accuracy != null ? `±${Math.round(r.accuracy)}m` : null;
+  switch (r.reason) {
+    case "no_user":
+      return { title: "Sign in required", description: "Please sign in to collect Hearts." };
+    case "no_seeds":
+      return { title: "No seeds remaining today", description: "They refresh at midnight." };
+    case "per_tree_limit":
+      return { title: "Daily limit reached at this tree", description: "Try another tree today." };
+    case "seed_missing":
+      return { title: "This Heart is no longer here", description: "It may have just been collected." };
+    case "already_collected":
+      return { title: "This Heart was already collected" };
+    case "own_seed":
+      return { title: "This is your own Seed", description: "Another wanderer must collect it." };
+    case "not_bloomed":
+      return { title: "This Seed hasn't bloomed yet", description: "Come back when it's ready." };
+    case "no_seed_coords":
+      return { title: "This Heart has no location", description: "Please report this tree." };
+    case "geo_unsupported":
+      return { title: "Location isn't supported on this device" };
+    case "geo_denied":
+      return { title: "Please enable location access for S33D" };
+    case "geo_unavailable":
+      return { title: "Location access is needed to collect this Heart", description: r.error };
+    case "geo_timeout":
+      return { title: "Couldn't get a GPS fix in time", description: "Try stepping outside and try again." };
+    case "geo_poor_accuracy":
+      return { title: `GPS is uncertain ${a ?? ""} — try stepping outside` };
+    case "too_far":
+      return { title: `You appear to be ${d ?? "too far"} away`, description: a ? `GPS accuracy ${a}` : undefined };
+    case "rpc_error":
+      return { title: "Something went wrong on our side", description: r.error };
+    default:
+      return { title: "Couldn't collect Heart" };
+  }
+}
 
 interface SeedPlanterProps {
   treeId: string;
