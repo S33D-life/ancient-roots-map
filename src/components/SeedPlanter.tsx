@@ -328,18 +328,84 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         </Card>
       )}
 
-      {/* Dev-only diagnostics — last action attempt */}
-      {import.meta.env.DEV && lastResult && (
-        <div className="rounded-md border border-dashed border-border/40 bg-muted/30 p-3 text-[10px] font-mono text-muted-foreground space-y-0.5">
-          <div className="font-semibold text-foreground/80">Heart Collection Diagnostics</div>
-          <div>user: {lastResult.userLat?.toFixed(6) ?? "—"}, {lastResult.userLng?.toFixed(6) ?? "—"}</div>
-          <div>tree: {lastResult.treeLat?.toFixed(6) ?? treeLat?.toFixed(6) ?? "—"}, {lastResult.treeLng?.toFixed(6) ?? treeLng?.toFixed(6) ?? "—"}</div>
-          <div>distance: {lastResult.distance != null ? `${lastResult.distance.toFixed(1)}m` : "—"} · radius: {PROXIMITY_METERS}m</div>
-          <div>gps accuracy: {lastResult.accuracy != null ? `±${lastResult.accuracy.toFixed(0)}m` : "—"}</div>
-          <div>result: {lastResult.ok ? "ok" : `blocked (${lastResult.reason ?? "unknown"})`}</div>
-          {lastResult.error && <div className="text-destructive/80 break-all">error: {lastResult.error}</div>}
+      {/* Live "locating" pulse — shown while GPS is being acquired */}
+      <AnimatePresence>
+        {locatingMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="flex items-center gap-2 text-[11px] font-serif text-muted-foreground italic px-1"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-primary/40 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary/70" />
+            </span>
+            <Compass className="w-3 h-3 opacity-60" />
+            {locatingMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Override toggle — DEV or keeper only */}
+      {canOverride && (
+        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Radio className="w-3.5 h-3.5 text-amber-600" />
+            <div>
+              <p className="text-[11px] font-serif text-amber-700 dark:text-amber-400">
+                Allow encounter despite uncertain GPS
+              </p>
+              <p className="text-[9px] font-serif text-muted-foreground">
+                {import.meta.env.DEV ? "Dev override" : "Keeper override"} · usage is logged
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={overrideEnabled}
+            onCheckedChange={setOverrideEnabled}
+            aria-label="Allow encounter despite uncertain GPS"
+          />
         </div>
       )}
+
+      {/* Diagnostics — DEV or keeper, shown after an attempt */}
+      {(import.meta.env.DEV || isKeeper) && lastResult && (() => {
+        const r = lastResult;
+        const tone = accuracyTone(r.confidence);
+        const within = r.effectiveDistance != null && r.effectiveDistance <= PROXIMITY_METERS;
+        return (
+          <div className="rounded-md border border-dashed border-border/40 bg-muted/30 p-3 text-[10px] font-mono text-muted-foreground space-y-0.5">
+            <div className="font-semibold text-foreground/80 flex items-center justify-between">
+              <span>Heart Collection Diagnostics</span>
+              <span className={tone}>GPS confidence: {confidenceLabel(r.confidence)}</span>
+            </div>
+            <div>device: {getPlatform()}</div>
+            <div>user: {r.userLat?.toFixed(6) ?? "—"}, {r.userLng?.toFixed(6) ?? "—"}</div>
+            <div>tree: {r.treeLat?.toFixed(6) ?? treeLat?.toFixed(6) ?? "—"}, {r.treeLng?.toFixed(6) ?? treeLng?.toFixed(6) ?? "—"}</div>
+            <div>
+              distance: {r.distance != null ? `${r.distance.toFixed(1)}m` : "—"}
+              {" · effective: "}
+              {r.effectiveDistance != null ? `${r.effectiveDistance.toFixed(1)}m` : "—"}
+              {" · radius: "}{PROXIMITY_METERS}m
+            </div>
+            <div className={tone}>
+              accuracy: {r.accuracy != null ? `±${r.accuracy.toFixed(0)}m` : "—"}
+            </div>
+            <div>
+              gps fix: {r.gpsTimestamp ? new Date(r.gpsTimestamp).toLocaleTimeString() : "—"}
+              {" · age: "}{r.gpsAgeMs != null ? `${(r.gpsAgeMs / 1000).toFixed(1)}s` : "—"}
+              {" · "}{r.gpsAgeMs != null && r.gpsAgeMs < 5000 ? "fresh" : "cached?"}
+            </div>
+            <div>retries: {r.retries ?? 0} · within radius (with tolerance): {within ? "yes" : "no"}</div>
+            <div>result: {r.ok ? `ok${r.overrideUsed ? " (override)" : ""}` : `blocked (${r.reason ?? "unknown"})`}</div>
+            {r.error && <div className="text-destructive/80 break-all">error: {r.error}</div>}
+          </div>
+        );
+      })()}
+
 
       <RewardReceipt
         visible={receiptVisible}
