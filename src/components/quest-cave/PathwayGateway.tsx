@@ -30,9 +30,21 @@ export default function PathwayGateway({
   children,
 }: PathwayGatewayProps) {
   const [open, setOpen] = useState(defaultOpen);
+  // Latch — once a gateway is entered, its quests stay mounted so re-opening
+  // is instant and progress isn't re-fetched. Quests do NOT mount until the
+  // wanderer crosses the threshold for the first time.
+  const [hasEntered, setHasEntered] = useState(defaultOpen);
   const reactId = useId();
   const headerId = `gateway-h-${reactId}`;
   const bodyId = `gateway-b-${reactId}`;
+
+  const handleToggle = () => {
+    setOpen((v) => {
+      const next = !v;
+      if (next) setHasEntered(true);
+      return next;
+    });
+  };
 
   return (
     <section
