@@ -43,7 +43,7 @@ import CurrentPathChamber from "@/components/quest-cave/CurrentPathChamber";
 import TeotagGuidancePanel, {
   type TeotagHint,
 } from "@/components/quest-cave/TeotagGuidancePanel";
-import RegaliaChamber from "@/components/quest-cave/RegaliaChamber";
+import RegaliaChamber, { deepestHive } from "@/components/quest-cave/RegaliaChamber";
 import PathwayGateway from "@/components/quest-cave/PathwayGateway";
 import QuestChamberCard from "@/components/quest-cave/QuestChamberCard";
 import OpportunitiesBoard, {
