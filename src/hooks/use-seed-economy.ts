@@ -34,24 +34,44 @@ export type ActionFailureReason =
   | "too_far"
   | "rpc_error";
 
+export type GpsConfidence = "high" | "medium" | "low" | "unknown";
+
 export interface ActionResult {
   ok: boolean;
   reason?: ActionFailureReason;
   distance?: number;
+  /** Distance after subtracting GPS accuracy tolerance — what we actually gate on. */
+  effectiveDistance?: number;
   accuracy?: number;
+  confidence?: GpsConfidence;
   userLat?: number;
   userLng?: number;
   treeLat?: number;
   treeLng?: number;
+  /** Browser-reported coords timestamp (ms since epoch). */
+  gpsTimestamp?: number;
+  /** Age of the GPS fix in ms at the time it was used. */
+  gpsAgeMs?: number;
+  /** Number of GPS retries that occurred. */
+  retries?: number;
+  /** True if the encounter was allowed via the dev/admin override. */
+  overrideUsed?: boolean;
   error?: string;
+}
+
+export interface ActionOptions {
+  /** Bypass distance gate (DEV or keeper role only — enforced at UI). */
+  override?: boolean;
+  /** Optional callback fired between GPS attempts so the UI can show progress. */
+  onAttempt?: (attempt: number) => void;
 }
 
 interface SeedEconomy {
   seedsRemaining: number;
   seedsUsedToday: number;
   loading: boolean;
-  plantSeed: (treeId: string, treeLat: number, treeLng: number) => Promise<ActionResult>;
-  collectHeart: (seedId: string) => Promise<ActionResult>;
+  plantSeed: (treeId: string, treeLat: number, treeLng: number, opts?: ActionOptions) => Promise<ActionResult>;
+  collectHeart: (seedId: string, opts?: ActionOptions) => Promise<ActionResult>;
   getSeedsAtTree: (treeId: string) => PlantedSeed[];
   getBloomedSeedsAtTree: (treeId: string) => PlantedSeed[];
   allSeeds: PlantedSeed[];
