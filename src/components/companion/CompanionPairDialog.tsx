@@ -48,7 +48,7 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
 
   // Build the companion URL for QR
   const companionUrl = session
-    ? `${window.location.origin}/companion?code=${session.code}`
+    ? getPublicAppUrl(`/companion?code=${session.code}`)
     : "";
 
   const qrApiUrl = session
