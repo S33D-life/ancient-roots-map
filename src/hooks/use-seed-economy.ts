@@ -369,6 +369,8 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       distance: serverDistance,
       effectiveDistance: serverEffective,
       overrideUsed: !!r.override_used,
+      overrideKind: (r.override_kind as "manual" | "keeper" | undefined) ?? undefined,
+      manualOverrideRadiusM: typeof r.manual_override_radius_m === "number" ? r.manual_override_radius_m : undefined,
     };
   }, [userId, allSeeds]);
 
