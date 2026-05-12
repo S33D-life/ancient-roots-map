@@ -77,19 +77,42 @@ export default function RegaliaChamber({
   // briefly glow the cloak and cross-fade the label so ascension feels alive.
   const prevLabelRef = useRef<string | null>(null);
   const [ascending, setAscending] = useState(false);
+  const { history, inscribeAscension } = useCloakHistory();
+
   useEffect(() => {
     const prev = prevLabelRef.current;
-    if (prev !== null && prev !== cloak.label) {
+    if (prev === null) {
+      // First sighting: silently inscribe the current mantle as a baseline so
+      // the wanderer's history begins from where they stand today.
+      inscribeAscension({
+        stage_label: cloak.label,
+        stage_min: cloak.min,
+        score,
+        species_count: speciesCount,
+        visits,
+        affinity_depth: affinityDepth,
+      });
+    } else if (prev !== cloak.label) {
+      // True ascension: animate AND inscribe the new mantle into history.
       setAscending(true);
+      inscribeAscension({
+        stage_label: cloak.label,
+        stage_min: cloak.min,
+        score,
+        species_count: speciesCount,
+        visits,
+        affinity_depth: affinityDepth,
+      });
       const t = window.setTimeout(() => setAscending(false), 2600);
+      prevLabelRef.current = cloak.label;
       return () => window.clearTimeout(t);
     }
     prevLabelRef.current = cloak.label;
+    // We deliberately key on the label only; signal counts are snapshotted above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloak.label]);
-  // Keep ref in sync once animation lifecycle has read the previous value.
-  useEffect(() => {
-    prevLabelRef.current = cloak.label;
-  }, [cloak.label]);
+
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   return (
     <section
