@@ -15,6 +15,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import SkystampSeal from "@/components/SkystampSeal";
 import { getOfferingPhotos, getOfferingCover } from "@/utils/offeringPhotos";
 import type { Database } from "@/integrations/supabase/types";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
 type OfferingType = Database["public"]["Enums"]["offering_type"];
