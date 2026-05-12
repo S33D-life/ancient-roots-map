@@ -107,7 +107,7 @@ const ReferralsPage = () => {
     setGenerating(false);
   };
 
-  const shareLink = inviteCode ? `${window.location.origin}/auth?invite=${inviteCode}` : null;
+  const shareLink = inviteCode ? getPublicAppUrl(`/auth?invite=${inviteCode}`) : null;
 
   const shareVia = (platform: "whatsapp" | "telegram" | "native") => {
     if (!shareLink) return;
