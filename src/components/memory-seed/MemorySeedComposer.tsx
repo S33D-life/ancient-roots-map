@@ -526,20 +526,30 @@ function ConfirmationView({
   onClose,
 }: { destination: Destination; onClose: () => void }) {
   const isWhisper = destination === "whisper";
+  const isBoth = destination === "both";
   return (
     <div className="py-6 text-center space-y-4">
       <div className="mx-auto w-24 h-24 grid place-items-center" aria-hidden>
-        {isWhisper ? <RootsTrail /> : <BranchGlyph />}
+        {isBoth ? (
+          <div className="flex items-center gap-1">
+            <BranchGlyph />
+            <RootsTrail />
+          </div>
+        ) : isWhisper ? <RootsTrail /> : <BranchGlyph />}
       </div>
       <p className="font-serif text-base text-foreground">
-        {isWhisper
-          ? "Your whisper has entered the roots."
-          : "Your offering has been hung in the branches."}
+        {isBoth
+          ? "Your memory has been hung in the branches and sent through the roots."
+          : isWhisper
+            ? "Your memory has entered the roots."
+            : "Your memory has been hung in the branches."}
       </p>
       <p className="font-serif text-xs italic text-muted-foreground/80">
-        {isWhisper
-          ? "It will wait quietly until kin meet the right tree."
-          : "Others may now find it on this tree."}
+        {isBoth
+          ? "Some kin will see it from afar; others will meet it as a whisper."
+          : isWhisper
+            ? "It will wait quietly until kin meet the right tree."
+            : "Others may now find it on this tree."}
       </p>
       <Button onClick={onClose} variant="outline" size="sm">Close</Button>
     </div>
