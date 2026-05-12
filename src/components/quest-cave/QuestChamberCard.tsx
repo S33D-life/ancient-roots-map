@@ -51,10 +51,14 @@ export default function QuestChamberCard({
   defaultOpen = false,
 }: QuestChamberCardProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const reactId = useId();
+  const headerId = `quest-h-${reactId}`;
+  const bodyId = `quest-b-${reactId}`;
   const hasProgress = typeof current === "number" && typeof target === "number";
   const pct = hasProgress
     ? Math.max(0, Math.min(100, Math.round((current! / target!) * 100)))
     : 0;
+  const progressLabel = hasProgress ? `${pct} percent complete` : undefined;
 
   return (
     <article
