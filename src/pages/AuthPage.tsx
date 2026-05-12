@@ -1080,6 +1080,74 @@ const AuthPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Unverified-account modal — shown when a user tries to log in before confirming their email. */}
+      <Dialog open={unverifiedModalOpen} onOpenChange={setUnverifiedModalOpen}>
+        <DialogContent
+          className="sm:max-w-md border rounded-2xl"
+          style={{
+            background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card)))",
+            borderColor: "hsl(var(--primary) / 0.35)",
+          }}
+        >
+          <DialogHeader className="items-center text-center space-y-3">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                background: "hsl(var(--primary) / 0.15)",
+                border: "1px solid hsl(var(--primary) / 0.4)",
+              }}
+            >
+              <Mail className="w-7 h-7 text-primary" />
+            </div>
+            <DialogTitle className="font-serif text-xl">🌱 Almost there — please confirm your email</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              An account for <span className="text-foreground font-medium">{unverifiedEmail}</span> already exists,
+              but it hasn't been verified yet. Open the confirmation link we sent you to enter the grove.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 pt-2">
+            <Button
+              onClick={() => { window.location.href = "mailto:"; }}
+              className="w-full font-serif gap-2"
+            >
+              <Mail className="w-4 h-4" /> Open Mail App
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleResendVerification(unverifiedEmail)}
+              disabled={resending}
+              className="w-full font-serif gap-2"
+            >
+              {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              Resend Verification Email
+            </Button>
+          </div>
+
+          <p
+            className="text-[11px] text-center leading-relaxed pt-2 border-t"
+            style={{
+              color: "hsl(var(--muted-foreground))",
+              borderColor: "hsl(var(--primary) / 0.15)",
+            }}
+          >
+            Emails sometimes land in <span className="font-medium">Junk</span>,{" "}
+            <span className="font-medium">Spam</span>, or{" "}
+            <span className="font-medium">Promotions</span>.
+          </p>
+
+          <DialogFooter className="sm:justify-center">
+            <Button
+              variant="ghost"
+              className="font-serif"
+              onClick={() => setUnverifiedModalOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
