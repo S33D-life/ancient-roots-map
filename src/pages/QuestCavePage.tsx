@@ -182,7 +182,11 @@ export default function QuestCavePage() {
             level={currentPath.level}
             percent={speciesPct}
             streak={streakLine}
-            nextMilestone={`${speciesNext - speciesCount} species to next seal`}
+            nextMilestone={
+              speciesNext > speciesCount
+                ? `${speciesNext - speciesCount} species to next seal`
+                : "All seals broken — keep wandering"
+            }
             resonanceBonuses={currentPath.bonuses}
             ctaLabel="Continue your path"
             ctaTo={ROUTES.MAP}
