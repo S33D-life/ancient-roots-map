@@ -17,12 +17,41 @@ interface PlantedSeed {
   longitude: number | null;
 }
 
+export type ActionFailureReason =
+  | "no_user"
+  | "no_seeds"
+  | "per_tree_limit"
+  | "seed_missing"
+  | "already_collected"
+  | "own_seed"
+  | "not_bloomed"
+  | "no_seed_coords"
+  | "geo_unsupported"
+  | "geo_denied"
+  | "geo_unavailable"
+  | "geo_timeout"
+  | "geo_poor_accuracy"
+  | "too_far"
+  | "rpc_error";
+
+export interface ActionResult {
+  ok: boolean;
+  reason?: ActionFailureReason;
+  distance?: number;
+  accuracy?: number;
+  userLat?: number;
+  userLng?: number;
+  treeLat?: number;
+  treeLng?: number;
+  error?: string;
+}
+
 interface SeedEconomy {
   seedsRemaining: number;
   seedsUsedToday: number;
   loading: boolean;
-  plantSeed: (treeId: string, treeLat: number, treeLng: number) => Promise<boolean>;
-  collectHeart: (seedId: string) => Promise<boolean>;
+  plantSeed: (treeId: string, treeLat: number, treeLng: number) => Promise<ActionResult>;
+  collectHeart: (seedId: string) => Promise<ActionResult>;
   getSeedsAtTree: (treeId: string) => PlantedSeed[];
   getBloomedSeedsAtTree: (treeId: string) => PlantedSeed[];
   allSeeds: PlantedSeed[];
