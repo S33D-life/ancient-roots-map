@@ -215,6 +215,14 @@ const AuthPage = () => {
   const viewRef = useRef(view);
   useEffect(() => { viewRef.current = view; }, [view]);
 
+  // Tick once a second while the resend button is in cooldown so the countdown rerenders.
+  useEffect(() => {
+    if (resendCooldownUntil <= Date.now()) return;
+    const id = window.setInterval(() => setTickNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [resendCooldownUntil, tickNow]);
+
+
   // Helper: is the current flow a password recovery flow?
   const isRecoveryFlow = () =>
     viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
