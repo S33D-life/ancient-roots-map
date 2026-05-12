@@ -78,7 +78,7 @@ export function useTreeRooting(
         speciesKey: params.speciesKey,
       });
       if (result.ok === false) {
-        throw new PlantHeartsRefused(result.error, result.balance, result.required);
+        throw new PlantHeartsRefused(result.error, result.balance, result.required, (result as any).message);
       }
       return result.root;
     },
