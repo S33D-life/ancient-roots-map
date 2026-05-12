@@ -142,6 +142,8 @@ const ApiDocsPage = lazyImportWithRetry(() => import("./pages/ApiDocsPage"), "ap
 const TimeTreePage = lazyImportWithRetry(() => import("./pages/TimeTreePage"), "time-tree");
 const BugGardenPage = lazyImportWithRetry(() => import("./pages/BugGardenPage"), "bug-garden");
 const AdminEvolutionPage = lazyImportWithRetry(() => import("./pages/AdminEvolutionPage"), "admin-evolution");
+const AdminRoomPage = lazyImportWithRetry(() => import("./pages/admin/AdminRoomPage"), "admin-room");
+const AdminUsersPage = lazyImportWithRetry(() => import("./pages/admin/AdminUsersPage"), "admin-users");
 const MoonrootDigestPage = lazyImportWithRetry(() => import("./pages/admin/MoonrootDigestPage"), "moonroot-digest");
 const InviteStatusPage = lazyImportWithRetry(() => import("./pages/admin/InviteStatusPage"), "invite-status");
 // KingOfBavleuxPage removed — route redirects to /atlas/switzerland
