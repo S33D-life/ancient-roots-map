@@ -7,7 +7,7 @@
  */
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuietMode } from "@/contexts/QuietModeContext";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MapPin, TreeDeciduous, Gift, Check, X, ChevronRight } from "lucide-react";
 import { useFirstWalk, type WalkStep } from "@/hooks/use-first-walk";
 
