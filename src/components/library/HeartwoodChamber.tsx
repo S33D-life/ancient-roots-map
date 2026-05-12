@@ -158,6 +158,9 @@ export function HeartwoodChamber({
   ].join(" ");
 
   if (collapsible) {
+    // Note: actions are NEVER rendered inside CollapsibleTrigger (which is a
+    // <button>) to avoid nested-button a11y violations. They render only in
+    // the open body footer.
     return (
       <Collapsible
         open={isOpen}
@@ -165,15 +168,10 @@ export function HeartwoodChamber({
         className={shellClass}
       >
         <CollapsibleTrigger
-          className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-2xl"
-          // Larger tap target on mobile (≥44px header height via padding above).
+          className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-2xl min-h-[44px]"
+          aria-expanded={isOpen}
         >
           {Header}
-          {!isOpen && actions && (
-            <div className="flex items-center gap-2 px-3 sm:px-4 pb-3 pt-2 flex-wrap">
-              {actions}
-            </div>
-          )}
         </CollapsibleTrigger>
         <AnimatePresence initial={false}>
           {isOpen && (
