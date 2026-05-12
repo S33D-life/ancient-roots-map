@@ -24,8 +24,9 @@ export class PlantHeartsRefused extends Error {
     public code: PlantHeartsError | "rpc_error",
     public balance?: number,
     public required?: number,
+    public detail?: string,
   ) {
-    super(code);
+    super(detail || code);
     this.name = "PlantHeartsRefused";
   }
 }
