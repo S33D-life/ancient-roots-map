@@ -821,29 +821,51 @@ const AuthPage = () => {
               <h1 className="text-2xl font-serif">🌱 Your account has been created</h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 We've sent a confirmation email to{" "}
-                <span className="text-foreground font-medium">{email || "your inbox"}</span>.
+                <span className="text-foreground font-medium">{email || readPendingEmail() || "your inbox"}</span>.
                 <br />
                 Please open the link in the email to enter the grove.
               </p>
             </div>
 
             <div className="space-y-2 pt-1">
-              <Button onClick={openMail} className="w-full font-serif gap-2">
-                <Mail className="w-4 h-4" /> Open Mail App
+              <Button
+                onClick={handleContinueAfterVerification}
+                disabled={verifyChecking}
+                className="w-full font-serif gap-2"
+                aria-label="I have verified my email — continue to sign in"
+              >
+                {verifyChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                I've verified — continue
               </Button>
               <Button
                 variant="outline"
-                onClick={() => handleResendVerification(email)}
-                disabled={resending}
+                onClick={openMail}
                 className="w-full font-serif gap-2"
+                aria-label="Open the Mail app on your device"
               >
-                {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                Resend Verification Email
+                <Mail className="w-4 h-4" /> Open Mail App
               </Button>
+              {(() => {
+                const remaining = Math.max(0, Math.ceil((resendCooldownUntil - tickNow) / 1000));
+                const cooling = remaining > 0;
+                return (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleResendVerification(email || unverifiedEmail)}
+                    disabled={resending || cooling}
+                    className="w-full font-serif gap-2"
+                    aria-label="Resend the verification email"
+                  >
+                    {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {cooling ? `Resend available in ${remaining}s` : "Resend Verification Email"}
+                  </Button>
+                );
+              })()}
               <Button
                 variant="ghost"
-                onClick={() => { setView("signup"); clearErrors(); }}
+                onClick={() => { clearPendingEmail(); setView("signup"); clearErrors(); }}
                 className="w-full font-serif gap-2"
+                aria-label="Change the email address used for signup"
               >
                 <Pencil className="w-4 h-4" /> Change Email Address
               </Button>
@@ -854,6 +876,16 @@ const AuthPage = () => {
                 ← Back to Login
               </button>
             </div>
+
+            {resendNote && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="text-xs leading-relaxed text-foreground/80 px-2"
+              >
+                {resendNote}
+              </p>
+            )}
 
             <p
               className="text-[11px] leading-relaxed pt-2 border-t"
