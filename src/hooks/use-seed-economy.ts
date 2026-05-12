@@ -59,8 +59,12 @@ export interface ActionResult {
   gpsAgeMs?: number;
   /** Number of GPS retries that occurred. */
   retries?: number;
-  /** True if the encounter was allowed via the dev/admin override. */
+  /** True if the encounter was allowed via an approximate-location / keeper override. */
   overrideUsed?: boolean;
+  /** Which kind of override was applied server-side, if any. */
+  overrideKind?: "manual" | "keeper";
+  /** Maximum distance allowed when using the manual approximate-location override. */
+  manualOverrideRadiusM?: number;
   error?: string;
 }
 
