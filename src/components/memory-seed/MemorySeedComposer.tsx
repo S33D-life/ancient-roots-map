@@ -165,7 +165,9 @@ export default function MemorySeedComposer({
   const [note, setNote] = useState("");
   const [unlock, setUnlock] = useState<WhisperUnlock>("any_ancient_friend");
   const [submitting, setSubmitting] = useState(false);
-  const [confirmed, setConfirmed] = useState<Destination | null>(null);
+  const [confirmed, setConfirmed] = useState<Destination | "partial_whisper_failed" | null>(null);
+  /** Tracks an offering that already persisted in a "both" submit so retrying the whisper does not insert a second offering. */
+  const [persistedOfferingId, setPersistedOfferingId] = useState<string | undefined>(undefined);
 
   const meta = TYPES.find((t) => t.value === type)!;
 
@@ -192,6 +194,7 @@ export default function MemorySeedComposer({
       setTitle(""); setBody(""); setMediaUrl(""); setAuthor(""); setNote("");
       setType("story"); setDestination("offering"); setUnlock("any_ancient_friend");
       setSubmitting(false); setConfirmed(null); setDestinationTouched(false);
+      setPersistedOfferingId(undefined);
     }
   }, [open]);
 
@@ -214,49 +217,56 @@ export default function MemorySeedComposer({
       return;
     }
     setSubmitting(true);
-    try {
-      const wantsOffering = destination === "offering" || destination === "both";
-      const wantsWhisper  = destination === "whisper"  || destination === "both";
+    const wantsOffering = destination === "offering" || destination === "both";
+    const wantsWhisper  = destination === "whisper"  || destination === "both";
 
-      // For "both" we save the offering first so the whisper can reference it
-      // in metadata when a safe column is available. (TODO below.)
-      let offeringId: string | undefined;
-      let whisperId: string | undefined;
+    let offeringId: string | undefined = persistedOfferingId;
+    let offeringJustSaved = false;
+    let whisperId: string | undefined;
 
-      if (wantsOffering) {
+    // Step 1 — offering. Skip if already persisted from an earlier partial submit.
+    if (wantsOffering && !offeringId) {
+      try {
         offeringId = await saveAsOffering();
+        offeringJustSaved = true;
+        setPersistedOfferingId(offeringId);
+      } catch (err) {
+        console.error("MemorySeedComposer offering error:", err);
+        toast.error("The offering could not settle in the branches. Try again.");
+        setSubmitting(false);
+        return; // No events fired. Whisper not attempted.
       }
-      if (wantsWhisper) {
-        // TODO(linkage): when offerings/whispers gain a metadata jsonb or
-        // explicit `source_offering_id` column, pass `offeringId` here so the
-        // two halves of a "both" memory can be cross-referenced. For now we
-        // dispatch two events but write no DB-level link.
-        whisperId = await saveAsWhisper();
-      }
-
-      // Touch the unused vars so future linkage work is obvious.
-      void offeringId; void whisperId;
-
-      setConfirmed(destination);
-
-      if (wantsOffering) {
-        window.dispatchEvent(new CustomEvent("offering-created"));
-      }
-      if (wantsWhisper) {
-        window.dispatchEvent(new CustomEvent("whisper-sent"));
-      }
-    } catch (err) {
-      console.error("MemorySeedComposer error:", err);
-      const msg =
-        destination === "whisper"
-          ? "The whisper could not enter the roots. Try again."
-          : destination === "offering"
-            ? "The offering could not settle in the branches. Try again."
-            : "Part of the memory could not travel. Try again.";
-      toast.error(msg);
-    } finally {
-      setSubmitting(false);
     }
+
+    // Fire offering-created exactly once, only on the submit that actually inserted it.
+    if (wantsOffering && offeringJustSaved) {
+      window.dispatchEvent(new CustomEvent("offering-created"));
+    }
+
+    // Step 2 — whisper.
+    if (wantsWhisper) {
+      try {
+        // TODO(linkage): pass `offeringId` once a `source_offering_id` column exists.
+        whisperId = await saveAsWhisper();
+        void whisperId;
+        window.dispatchEvent(new CustomEvent("whisper-sent"));
+      } catch (err) {
+        console.error("MemorySeedComposer whisper error:", err);
+        if (destination === "both") {
+          // Offering already persisted (either now or earlier). Be honest about the partial state.
+          toast.error("The whisper could not enter the roots — your offering is safe in the branches.");
+          setConfirmed("partial_whisper_failed");
+        } else {
+          toast.error("The whisper could not enter the roots. Try again.");
+        }
+        setSubmitting(false);
+        return;
+      }
+    }
+
+    // Full success.
+    setConfirmed(destination);
+    setSubmitting(false);
   };
 
   async function saveAsOffering(): Promise<string | undefined> {
@@ -357,8 +367,14 @@ export default function MemorySeedComposer({
 
         {confirmed ? (
           <ConfirmationView
-            destination={confirmed}
+            state={confirmed}
             onClose={() => onOpenChange(false)}
+            onRetryWhisper={
+              confirmed === "partial_whisper_failed"
+                ? () => { setConfirmed(null); /* persistedOfferingId guards re-insert */ void handleSubmit(); }
+                : undefined
+            }
+            submitting={submitting}
           />
         ) : !userId && !userLoading ? (
           <div className="py-6 text-center">
@@ -521,11 +537,45 @@ export default function MemorySeedComposer({
 // ── Confirmation ─────────────────────────────────────────────
 
 function ConfirmationView({
-  destination,
+  state,
   onClose,
-}: { destination: Destination; onClose: () => void }) {
-  const isWhisper = destination === "whisper";
-  const isBoth = destination === "both";
+  onRetryWhisper,
+  submitting,
+}: {
+  state: Destination | "partial_whisper_failed";
+  onClose: () => void;
+  onRetryWhisper?: () => void;
+  submitting?: boolean;
+}) {
+  const isPartial = state === "partial_whisper_failed";
+  const isWhisper = state === "whisper";
+  const isBoth = state === "both";
+
+  if (isPartial) {
+    return (
+      <div className="py-6 text-center space-y-4">
+        <div className="mx-auto w-24 h-24 grid place-items-center" aria-hidden>
+          <BranchGlyph />
+        </div>
+        <p className="font-serif text-base text-foreground">
+          Your memory was hung in the branches, but the whisper could not enter the roots.
+        </p>
+        <p className="font-serif text-xs italic text-muted-foreground/80">
+          The offering is safe at this tree. You can try sending the whisper again.
+        </p>
+        <div className="flex justify-center gap-2">
+          {onRetryWhisper && (
+            <Button onClick={onRetryWhisper} variant="default" size="sm" disabled={submitting}>
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Try sending the whisper again
+            </Button>
+          )}
+          <Button onClick={onClose} variant="outline" size="sm" disabled={submitting}>Close</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-6 text-center space-y-4">
       <div className="mx-auto w-24 h-24 grid place-items-center" aria-hidden>
