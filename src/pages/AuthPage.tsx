@@ -845,8 +845,8 @@ const AuthPage = () => {
       if (error) throw error;
       setView("reset-sent");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not send reset email";
-      toast({ title: "Reset failed", description: msg, variant: "destructive" });
+      const msg = err instanceof Error ? err.message : "We couldn't send a reset link just now";
+      toast({ title: "This reset could not take root yet", description: "Take a breath and try once more — emails sometimes land in Junk or Promotions." });
     } finally {
       setIsLoading(false);
     }
@@ -866,8 +866,8 @@ const AuthPage = () => {
       if (error) throw error;
       setView("magic-sent");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not send magic link";
-      toast({ title: "Magic link failed", description: msg, variant: "destructive" });
+      const msg = err instanceof Error ? err.message : "We couldn't send a magic link just now";
+      toast({ title: "This link could not take root yet", description: "Take a breath and try once more." });
     } finally {
       setIsLoading(false);
     }
@@ -889,12 +889,12 @@ const AuthPage = () => {
       if (result?.error) {
         const msg = getGoogleErrorMessage(result.error.message);
         setOauthError(msg);
-        toast({ title: "Google login failed", description: msg, variant: "destructive" });
+        toast({ title: "Google sign-in didn't take root", description: msg });
       }
     } catch (err) {
       const msg = getGoogleErrorMessage(err instanceof Error ? err.message : "Google sign-in unavailable");
       setOauthError(msg);
-      toast({ title: "Google login failed", description: msg, variant: "destructive" });
+      toast({ title: "Google sign-in didn't take root", description: msg });
     } finally {
       setIsLoading(false);
     }
@@ -916,8 +916,8 @@ const AuthPage = () => {
       sessionStorage.removeItem("s33d_recovery_active");
       setView("reset-success");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not update password";
-      toast({ title: "Update failed", description: msg, variant: "destructive" });
+      const msg = err instanceof Error ? err.message : "We couldn't update your password just now";
+      toast({ title: "This update could not take root yet", description: "Take a breath and try once more." });
     } finally {
       setIsLoading(false);
     }
