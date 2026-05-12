@@ -138,7 +138,8 @@ function toOfferingType(t: SeedType): "story" | "song" | "book" | "poem" | "phot
   if (t === "poem")  return "poem";
   if (t === "photo") return "photo";
   if (t === "voice_note") return "voice";
-  // story / quote / recipe / bloom → stored as story for now (TODO: enum extension)
+  // story / quote / recipe / artwork / bloom → stored as story for now.
+  // TODO(schema): extend offerings.type enum with `quote`, `recipe`, `artwork`, `bloom`.
   return "story";
 }
 
