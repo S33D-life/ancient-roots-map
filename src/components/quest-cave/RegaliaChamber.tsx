@@ -278,6 +278,84 @@ export default function RegaliaChamber({
         </div>
       )}
 
+      {/* Mantle history — chronicle of past ascensions */}
+      <div className="px-4 pb-3 border-t border-amber-900/15 pt-3">
+        <button
+          type="button"
+          onClick={() => setHistoryOpen((v) => !v)}
+          aria-expanded={historyOpen}
+          aria-controls="regalia-mantle-history"
+          className="w-full flex items-center justify-between gap-2 text-left rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <span className="flex items-center gap-1.5 font-serif text-[11px] uppercase tracking-[0.18em] text-muted-foreground/85">
+            <ScrollText className="w-3 h-3" /> Mantle history
+            {history.length > 0 && (
+              <span className="font-serif text-[10px] normal-case tracking-normal text-muted-foreground/60">
+                · {history.length}
+              </span>
+            )}
+          </span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-muted-foreground/70 transition-transform duration-300 motion-reduce:transition-none ${historyOpen ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+
+        <div
+          id="regalia-mantle-history"
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${
+            historyOpen ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
+          }`}
+          style={{ contain: "layout paint" }}
+          {...(!historyOpen ? { inert: "" as const } : {})}
+          aria-hidden={!historyOpen}
+        >
+          <div className="min-h-0 overflow-hidden">
+            {history.length === 0 ? (
+              <p className="font-serif text-[11px] italic text-muted-foreground/70">
+                No ascensions inscribed yet — your first mantle awaits.
+              </p>
+            ) : (
+              <ol className="space-y-1.5">
+                {history.map((row) => {
+                  const signalLabel =
+                    row.primary_signal === "affinity"
+                      ? "deep affinity"
+                      : row.primary_signal === "returns"
+                        ? "faithful returns"
+                        : "wide breadth";
+                  const when = (() => {
+                    try {
+                      return formatDistanceToNow(new Date(row.achieved_at), { addSuffix: true });
+                    } catch {
+                      return "recently";
+                    }
+                  })();
+                  return (
+                    <li
+                      key={row.id}
+                      className="flex items-start justify-between gap-3 rounded-md border border-border/25 bg-card/40 px-2.5 py-1.5"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-serif text-[12px] text-foreground/90 leading-snug truncate">
+                          {row.stage_label}
+                        </p>
+                        <p className="font-serif text-[10px] italic text-muted-foreground/75 leading-snug">
+                          carried by {signalLabel} · {when}
+                        </p>
+                      </div>
+                      <span className="font-serif text-[10px] uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80 shrink-0">
+                        {row.score}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="px-4 pb-4">
         <Link
           to={ROUTES.STAFF_ROOM}
