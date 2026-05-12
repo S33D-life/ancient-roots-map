@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   TreeDeciduous, Gift, Wand2, Music, BookOpen, Sparkles,
-  MessageCircle, Footprints, Leaf, Mountain, ArrowRight, Loader2,
+  MessageCircle, Footprints, Leaf, Mountain, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
