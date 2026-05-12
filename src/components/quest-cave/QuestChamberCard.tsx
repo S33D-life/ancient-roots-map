@@ -75,8 +75,15 @@ export default function QuestChamberCard({
         className="w-full text-left p-3 sm:p-4 flex items-center gap-3 min-h-[72px] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
       >
         {/* Artwork well + progress ring */}
-        <div className="relative w-14 h-14 shrink-0">
-          <svg viewBox="0 0 36 36" className="absolute inset-0 w-full h-full -rotate-90">
+        <div
+          className="relative w-14 h-14 shrink-0"
+          role={hasProgress ? "progressbar" : undefined}
+          aria-valuemin={hasProgress ? 0 : undefined}
+          aria-valuemax={hasProgress ? 100 : undefined}
+          aria-valuenow={hasProgress ? pct : undefined}
+          aria-label={progressLabel}
+        >
+          <svg viewBox="0 0 36 36" className="absolute inset-0 w-full h-full -rotate-90" aria-hidden>
             <circle
               cx="18" cy="18" r="15"
               fill="none"
