@@ -117,37 +117,36 @@ export default function RegaliaChamber({
   const { history, inscribeAscension } = useCloakHistory();
 
   useEffect(() => {
+    // Wait until at least one progression signal is known. Otherwise a
+    // first-paint snapshot during a partial load would seed the wanderer's
+    // history with a meaningless "Plain wool" baseline.
+    if (!hasAnySignal) return;
+
     const prev = prevLabelRef.current;
+    const snapshot = {
+      stage_label: cloak.label,
+      stage_min: cloak.min,
+      score,
+      species_count: safeSpecies,
+      visits: safeVisits,
+      affinity_depth: safeAffinity,
+    };
+
     if (prev === null) {
-      // First sighting: silently inscribe the current mantle as a baseline so
-      // the wanderer's history begins from where they stand today.
-      inscribeAscension({
-        stage_label: cloak.label,
-        stage_min: cloak.min,
-        score,
-        species_count: speciesCount,
-        visits,
-        affinity_depth: affinityDepth,
-      });
+      // First valid sighting — inscribe a baseline so the chronicle begins.
+      inscribeAscension(snapshot);
     } else if (prev !== cloak.label) {
-      // True ascension: animate AND inscribe the new mantle into history.
+      // True ascension: animate AND inscribe the new mantle.
       setAscending(true);
-      inscribeAscension({
-        stage_label: cloak.label,
-        stage_min: cloak.min,
-        score,
-        species_count: speciesCount,
-        visits,
-        affinity_depth: affinityDepth,
-      });
+      inscribeAscension(snapshot);
       const t = window.setTimeout(() => setAscending(false), 2600);
       prevLabelRef.current = cloak.label;
       return () => window.clearTimeout(t);
     }
     prevLabelRef.current = cloak.label;
-    // We deliberately key on the label only; signal counts are snapshotted above.
+    // We deliberately key on the label + readiness; signal counts are snapshotted above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cloak.label]);
+  }, [cloak.label, hasAnySignal]);
 
   const [historyOpen, setHistoryOpen] = useState(false);
 
