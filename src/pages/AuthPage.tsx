@@ -249,6 +249,7 @@ const AuthPage = () => {
 
   // Use a ref for view to avoid re-subscribing on every view change
   const viewRef = useRef(view);
+  const resendButtonRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => { viewRef.current = view; }, [view]);
 
   // Tick once a second while the resend button is in cooldown so the countdown rerenders.
