@@ -190,6 +190,7 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
    */
   const getFreshPosition = async (
     onAttempt?: (attempt: number) => void,
+    flow: "plant" | "collect" = "collect",
   ): Promise<
     | { kind: "ok"; position: GeolocationPosition; retries: number }
     | { kind: "err"; reason: ActionFailureReason; error?: string; retries: number }
