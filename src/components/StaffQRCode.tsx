@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface StaffQRCodeProps {
   staffCode: string;
