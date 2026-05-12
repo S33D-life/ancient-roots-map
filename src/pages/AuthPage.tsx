@@ -27,6 +27,9 @@ type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "v
 
 // Persisted across reloads so the verify-email screen can rebuild after refresh.
 const PENDING_EMAIL_KEY = "s33d_pending_verify_email";
+const UNVERIFIED_EMAIL_KEY = "s33d_unverified_email";
+const UNVERIFIED_MODAL_KEY = "s33d_unverified_modal_open";
+
 const readPendingEmail = (): string => {
   try {
     return localStorage.getItem(PENDING_EMAIL_KEY) || sessionStorage.getItem(PENDING_EMAIL_KEY) || "";
@@ -42,6 +45,36 @@ const clearPendingEmail = () => {
   try {
     localStorage.removeItem(PENDING_EMAIL_KEY);
     sessionStorage.removeItem(PENDING_EMAIL_KEY);
+  } catch {}
+};
+
+// Persisted "this email exists but isn't verified" state. Survives refresh so the
+// resend flow and modal still target the right address after the page reloads.
+const readUnverifiedEmail = (): string => {
+  try {
+    return localStorage.getItem(UNVERIFIED_EMAIL_KEY) || sessionStorage.getItem(UNVERIFIED_EMAIL_KEY) || "";
+  } catch { return ""; }
+};
+const writeUnverifiedEmail = (addr: string) => {
+  try {
+    localStorage.setItem(UNVERIFIED_EMAIL_KEY, addr);
+    sessionStorage.setItem(UNVERIFIED_EMAIL_KEY, addr);
+  } catch {}
+};
+const clearUnverifiedEmail = () => {
+  try {
+    localStorage.removeItem(UNVERIFIED_EMAIL_KEY);
+    sessionStorage.removeItem(UNVERIFIED_EMAIL_KEY);
+    sessionStorage.removeItem(UNVERIFIED_MODAL_KEY);
+  } catch {}
+};
+const readUnverifiedModalOpen = (): boolean => {
+  try { return sessionStorage.getItem(UNVERIFIED_MODAL_KEY) === "1"; } catch { return false; }
+};
+const writeUnverifiedModalOpen = (open: boolean) => {
+  try {
+    if (open) sessionStorage.setItem(UNVERIFIED_MODAL_KEY, "1");
+    else sessionStorage.removeItem(UNVERIFIED_MODAL_KEY);
   } catch {}
 };
 
@@ -93,8 +126,11 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState<string>(_pendingOnLoad);
+  const _persistedUnverified = readUnverifiedEmail();
+  const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(
+    () => readUnverifiedModalOpen() && !!_persistedUnverified,
+  );
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string>(_persistedUnverified || _pendingOnLoad);
   const [resending, setResending] = useState(false);
   const [resendCooldownUntil, setResendCooldownUntil] = useState<number>(0);
   const [resendNote, setResendNote] = useState<string | null>(null);
@@ -241,7 +277,7 @@ const AuthPage = () => {
           // onAuthStateChange will handle the warm toast + cleanup;
           // we still navigate here to cover the case where the listener
           // fires before this view mounts.
-          clearPendingEmail();
+          clearPendingEmail(); clearUnverifiedEmail();
           navigate(resolvePostAuthPath(), { replace: true });
         }
       } catch (e) {
@@ -300,7 +336,7 @@ const AuthPage = () => {
           authLog("verification round-trip complete", { userEmail: session.user?.email });
           toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
         }
-        clearPendingEmail();
+        clearPendingEmail(); clearUnverifiedEmail();
         // Consume invitation on first sign-in (assigns lineage + decrements inviter).
         // Read from BOTH legacy and new persistence keys so any prior session can
         // still complete its consumption. We only mark the invite "used" AFTER
@@ -483,7 +519,9 @@ const AuthPage = () => {
         if (error.message.includes("Email not confirmed")) {
           // Soft modal flow instead of red inline error.
           setUnverifiedEmail(email);
+          writeUnverifiedEmail(email);
           setUnverifiedModalOpen(true);
+          writeUnverifiedModalOpen(true);
           return;
         }
         if (error.message.includes("rate") || error.status === 429) {
@@ -553,7 +591,7 @@ const AuthPage = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (sessionData.session) {
         authLog("continue-after-verify: session found, navigating");
-        clearPendingEmail();
+        clearPendingEmail(); clearUnverifiedEmail();
         navigate(resolvePostAuthPath(), { replace: true });
         return;
       }
@@ -658,6 +696,7 @@ const AuthPage = () => {
         userId: data.user?.id ?? null,
       });
       writePendingEmail(email);
+      writeUnverifiedEmail(email);
       setUnverifiedEmail(email);
       authLog("signup ok → verify-email", { email });
       setView("verify-email");
@@ -920,7 +959,7 @@ const AuthPage = () => {
               })()}
               <Button
                 variant="ghost"
-                onClick={() => { clearPendingEmail(); setView("signup"); clearErrors(); }}
+                onClick={() => { clearPendingEmail(); clearUnverifiedEmail(); setView("signup"); clearErrors(); }}
                 className="w-full font-serif gap-2"
                 aria-label="Change the email address used for signup"
               >
@@ -1278,6 +1317,7 @@ const AuthPage = () => {
         open={unverifiedModalOpen}
         onOpenChange={(open) => {
           setUnverifiedModalOpen(open);
+          writeUnverifiedModalOpen(open);
           if (open) setResendNote(null);
         }}
       >
@@ -1359,7 +1399,7 @@ const AuthPage = () => {
             <Button
               variant="ghost"
               className="font-serif"
-              onClick={() => setUnverifiedModalOpen(false)}
+              onClick={() => { setUnverifiedModalOpen(false); writeUnverifiedModalOpen(false); }}
               aria-label="Close this dialog"
             >
               Close
