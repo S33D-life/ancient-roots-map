@@ -175,8 +175,17 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
   }
 
   /**
-   * Get a fresh GPS fix with auto-retry. Up to 3 total attempts.
-   * Retries on timeout / unavailable / poor accuracy.
+   * Get a fresh GPS fix with auto-retry and gentle backoff.
+   *
+   * - Up to 4 attempts, all high-accuracy, never cached.
+   * - Each attempt opens a short watchPosition window so the GPS chip can
+   *   converge (mobile GPS accuracy improves dramatically over a few seconds
+   *   once it has line-of-sight to enough satellites).
+   * - Backoff between attempts: 600ms → 1.2s → 2s → 3s.
+   * - Tracks the best (lowest-accuracy-number) fix seen across all attempts;
+   *   if every attempt is "poor" we return that best fix anyway and let the
+   *   server-side tolerance gate decide, instead of blocking the user with
+   *   a "too far / poor accuracy" wall.
    */
   const getFreshPosition = async (
     onAttempt?: (attempt: number) => void,
@@ -188,41 +197,96 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       return { kind: "err", reason: "geo_unsupported", retries: 0 };
     }
 
-    const MAX_ATTEMPTS = 3;
+    const MAX_ATTEMPTS = 4;
+    const ACCURACY_GOOD_M = 30;     // resolve immediately if we hit this
+    const ACCURACY_OK_M = 75;       // accept without retrying
+    const BACKOFF_MS = [600, 1200, 2000, 3000];
+    const WATCH_WINDOW_MS = [3500, 5000, 7000, 9000]; // grow each attempt
+
     let lastErr: { reason: ActionFailureReason; error?: string } | null = null;
+    let best: GeolocationPosition | null = null;
 
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      onAttempt?.(attempt);
+    /** Run one attempt: a short watchPosition window that resolves on the
+     *  first "good" fix, or returns the best fix seen when the window ends. */
+    const runAttempt = (idx: number): Promise<
+      | { kind: "ok"; position: GeolocationPosition }
+      | { kind: "err"; reason: ActionFailureReason; error?: string }
+    > => new Promise((resolve) => {
+      let watchId: number | null = null;
+      let bestThisAttempt: GeolocationPosition | null = null;
+      let settled = false;
+
+      const finish = (
+        v: { kind: "ok"; position: GeolocationPosition } | { kind: "err"; reason: ActionFailureReason; error?: string },
+      ) => {
+        if (settled) return;
+        settled = true;
+        if (watchId != null) navigator.geolocation.clearWatch(watchId);
+        clearTimeout(windowTimer);
+        resolve(v);
+      };
+
+      const windowTimer = setTimeout(() => {
+        if (bestThisAttempt) finish({ kind: "ok", position: bestThisAttempt });
+        else finish({ kind: "err", reason: "geo_timeout" });
+      }, WATCH_WINDOW_MS[idx] ?? 5000);
+
       try {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: attempt === 1 ? 8000 : 14000,
-            maximumAge: 0,
-          });
-        });
-
-        // Treat very poor accuracy as a retryable signal
-        if (position.coords.accuracy > 75 && attempt < MAX_ATTEMPTS) {
-          lastErr = { reason: "geo_poor_accuracy" };
-          await new Promise(r => setTimeout(r, 800));
-          continue;
-        }
-
-        return { kind: "ok", position, retries: attempt - 1 };
-      } catch (err: unknown) {
-        const e = err as GeolocationPositionError | undefined;
-        const code = e?.code;
-        const msg = e?.message ?? String(err);
-        if (code === 1) {
-          // Permission denied — never retry
-          return { kind: "err", reason: "geo_denied", error: msg, retries: attempt - 1 };
-        }
-        if (code === 2) lastErr = { reason: "geo_unavailable", error: msg };
-        else if (code === 3) lastErr = { reason: "geo_timeout", error: msg };
-        else lastErr = { reason: "geo_unavailable", error: msg };
-        if (attempt < MAX_ATTEMPTS) await new Promise(r => setTimeout(r, 800));
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const acc = pos.coords.accuracy;
+            if (!bestThisAttempt || acc < bestThisAttempt.coords.accuracy) {
+              bestThisAttempt = pos;
+              if (!best || acc < best.coords.accuracy) best = pos;
+            }
+            if (acc <= ACCURACY_GOOD_M) finish({ kind: "ok", position: pos });
+          },
+          (err) => {
+            const code = err?.code;
+            const msg = err?.message ?? String(err);
+            if (code === 1) finish({ kind: "err", reason: "geo_denied", error: msg });
+            else if (code === 2) finish({ kind: "err", reason: "geo_unavailable", error: msg });
+            else if (code === 3) finish({ kind: "err", reason: "geo_timeout", error: msg });
+            else finish({ kind: "err", reason: "geo_unavailable", error: msg });
+          },
+          { enableHighAccuracy: true, timeout: WATCH_WINDOW_MS[idx] ?? 5000, maximumAge: 0 },
+        );
+      } catch (e) {
+        finish({ kind: "err", reason: "geo_unavailable", error: String(e) });
       }
+    });
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      onAttempt?.(attempt + 1);
+      const r = await runAttempt(attempt);
+
+      if (r.kind === "ok") {
+        const acc = r.position.coords.accuracy;
+        // Accept now if accuracy is already acceptable
+        if (acc <= ACCURACY_OK_M) {
+          return { kind: "ok", position: r.position, retries: attempt };
+        }
+        // Otherwise keep going — GPS often sharpens over the next attempt
+        lastErr = { reason: "geo_poor_accuracy" };
+      } else {
+        // Permission denied — never retry
+        if (r.reason === "geo_denied") {
+          return { kind: "err", reason: "geo_denied", error: r.error, retries: attempt };
+        }
+        lastErr = { reason: r.reason, error: r.error };
+      }
+
+      // Backoff before the next attempt (skip after the final attempt)
+      if (attempt < MAX_ATTEMPTS - 1) {
+        await new Promise(r => setTimeout(r, BACKOFF_MS[attempt] ?? 1500));
+      }
+    }
+
+    // All attempts exhausted. If we ever got a fix, hand it to the server —
+    // the proximity gate's tolerance + manual override will deal with it
+    // gracefully, which is friendlier than a hard "too far / poor accuracy" block.
+    if (best) {
+      return { kind: "ok", position: best, retries: MAX_ATTEMPTS - 1 };
     }
 
     return {

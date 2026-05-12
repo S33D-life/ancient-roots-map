@@ -159,11 +159,10 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   if (!userId || treeLat == null || treeLng == null) return null;
 
   const onAttempt = (attempt: number) => {
-    setLocatingMessage(
-      attempt === 1
-        ? "Locating your position…"
-        : "Seeking a clearer signal beneath the canopy…",
-    );
+    if (attempt === 1) setLocatingMessage("Locating your position…");
+    else if (attempt === 2) setLocatingMessage("Seeking a clearer signal beneath the canopy…");
+    else if (attempt === 3) setLocatingMessage("Letting the GPS settle… (attempt 3 of 4)");
+    else setLocatingMessage("One last try for a stronger fix… (attempt 4 of 4)");
   };
 
   const refineForToast = (result: ActionResult): ActionResult => {
