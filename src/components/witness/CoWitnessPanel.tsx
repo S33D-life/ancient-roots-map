@@ -33,6 +33,7 @@ import { WITNESS_BONUS_HEARTS } from "@/lib/witness-types";
 import EnvironmentCapture from "./EnvironmentCapture";
 import SnapshotBadge from "./SnapshotBadge";
 import type { TreeHealthSnapshot, SnapshotQuality } from "@/lib/env-snapshot-types";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface CoWitnessPanelProps {
   treeId: string;
