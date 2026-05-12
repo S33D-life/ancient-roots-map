@@ -25,6 +25,30 @@ const passwordSchema = z.string().min(6, "Password must be at least 6 characters
 
 type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password" | "reset-success";
 
+// Persisted across reloads so the verify-email screen can rebuild after refresh.
+const PENDING_EMAIL_KEY = "s33d_pending_verify_email";
+const readPendingEmail = (): string => {
+  try {
+    return localStorage.getItem(PENDING_EMAIL_KEY) || sessionStorage.getItem(PENDING_EMAIL_KEY) || "";
+  } catch { return ""; }
+};
+const writePendingEmail = (addr: string) => {
+  try {
+    localStorage.setItem(PENDING_EMAIL_KEY, addr);
+    sessionStorage.setItem(PENDING_EMAIL_KEY, addr);
+  } catch {}
+};
+const clearPendingEmail = () => {
+  try {
+    localStorage.removeItem(PENDING_EMAIL_KEY);
+    sessionStorage.removeItem(PENDING_EMAIL_KEY);
+  } catch {}
+};
+
+// Dev-only logger — never logs passwords or tokens.
+const isDev = (() => { try { return Boolean((import.meta as any)?.env?.DEV); } catch { return false; } })();
+const authLog = (...args: unknown[]) => { if (isDev) console.log("[auth]", ...args); };
+
 // Detect recovery from URL hash OR query params before first render
 // This must run synchronously before any auth listener fires
 const detectRecoveryFromHash = (): AuthView => {
