@@ -30,9 +30,21 @@ export default function PathwayGateway({
   children,
 }: PathwayGatewayProps) {
   const [open, setOpen] = useState(defaultOpen);
+  // Latch — once a gateway is entered, its quests stay mounted so re-opening
+  // is instant and progress isn't re-fetched. Quests do NOT mount until the
+  // wanderer crosses the threshold for the first time.
+  const [hasEntered, setHasEntered] = useState(defaultOpen);
   const reactId = useId();
   const headerId = `gateway-h-${reactId}`;
   const bodyId = `gateway-b-${reactId}`;
+
+  const handleToggle = () => {
+    setOpen((v) => {
+      const next = !v;
+      if (next) setHasEntered(true);
+      return next;
+    });
+  };
 
   return (
     <section
@@ -48,7 +60,7 @@ export default function PathwayGateway({
       />
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         aria-expanded={open}
         aria-controls={bodyId}
         id={headerId}
@@ -97,7 +109,17 @@ export default function PathwayGateway({
         }`}
       >
         <div className="min-h-0 overflow-hidden [contain:layout_paint]">
-          <div className="px-4 sm:px-5 pb-5 pt-1 space-y-3">{children}</div>
+          <div className="px-4 sm:px-5 pb-5 pt-1 space-y-3">
+            {hasEntered ? (
+              children
+            ) : (
+              // Placeholder slot — never renders the real quests until the
+              // wanderer has actually crossed the threshold once.
+              <p className="font-serif text-[11px] italic text-muted-foreground/70">
+                Crossing the threshold…
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
