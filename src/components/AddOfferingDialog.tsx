@@ -143,6 +143,14 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const navigate = useNavigate();
   const location = useLocation();
 
+  const routeBackToTree = useCallback(() => {
+    if (!treeId) return;
+    const targetPath = `/tree/${treeId}`;
+    if (!location.pathname.startsWith(targetPath)) {
+      navigate(targetPath);
+    }
+  }, [treeId, location.pathname, navigate]);
+
   /**
    * Centralised post-success handoff:
    * 1) close the offering dialog so it isn't trapped behind the receipt
@@ -151,22 +159,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
    */
   const finishOfferingFlow = useCallback((earnedReward: boolean) => {
     setShowCelebration(false);
-    onOpenChange(false); // ALWAYS close the offering modal first
+    onOpenChange(false);
     if (earnedReward) {
       setShowRewardReceipt(true);
     } else {
       routeBackToTree();
     }
-  }, [onOpenChange]);
-
-  const routeBackToTree = useCallback(() => {
-    if (!treeId) return;
-    const targetPath = `/tree/${treeId}`;
-    // Only navigate if we aren't already on this tree's page (avoids unnecessary route churn).
-    if (!location.pathname.startsWith(targetPath)) {
-      navigate(targetPath);
-    }
-  }, [treeId, location.pathname, navigate]);
+  }, [onOpenChange, routeBackToTree]);
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
   const [tagQuery, setTagQuery] = useState("");
