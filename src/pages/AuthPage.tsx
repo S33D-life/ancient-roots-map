@@ -222,6 +222,8 @@ const AuthPage = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      authLog("event", event, "hasSession:", !!session);
+
       // Handle password recovery redirect — show reset form instead of navigating away
       if (event === "PASSWORD_RECOVERY") {
         sessionStorage.setItem("s33d_recovery_active", "1");
@@ -240,6 +242,13 @@ const AuthPage = () => {
       if (isRecoveryFlow()) return;
 
       if (session) {
+        // Verification round-trip success: warm welcome and clean up the pending email.
+        const wasPending = !!readPendingEmail();
+        if (event === "SIGNED_IN" && wasPending) {
+          authLog("verification round-trip complete", { userEmail: session.user?.email });
+          toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
+        }
+        clearPendingEmail();
         // Consume invitation on first sign-in (assigns lineage + decrements inviter).
         // Read from BOTH legacy and new persistence keys so any prior session can
         // still complete its consumption. We only mark the invite "used" AFTER
