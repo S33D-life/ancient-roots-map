@@ -89,36 +89,50 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
   if (!userId || treeLat == null || treeLng == null) return null;
 
+  const [lastResult, setLastResult] = useState<ActionResult | null>(null);
+
   const handlePlant = async () => {
     setPlanting(true);
-    const success = await plantSeed(treeId, treeLat, treeLng);
+    const result = await plantSeed(treeId, treeLat, treeLng);
     setPlanting(false);
+    setLastResult(result);
 
-    if (success) {
+    // Soft-warn on poor accuracy when too_far
+    if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
       toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
-      if (seedsRemaining <= 0) {
-        toast.error("No seeds remaining today. They refresh at midnight.");
-      } else {
-        toast.error(`You need to be within ${PROXIMITY_METERS}m of this tree to plant a seed.`);
-      }
+      // Surface poor-accuracy hint when user is "too far" but GPS is unreliable
+      const refined: ActionResult =
+        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
+          ? { ...result, reason: "geo_poor_accuracy" }
+          : result;
+      const { title, description } = explainFailure(refined);
+      toast.error(title, description ? { description } : undefined);
+      if (import.meta.env.DEV) console.warn("[SeedPlanter] plant failed", result);
     }
   };
 
   const handleCollect = async (seed: PlantedSeed) => {
     setCollecting(seed.id);
-    const success = await collectHeart(seed.id);
+    const result = await collectHeart(seed.id);
     setCollecting(null);
+    setLastResult(result);
 
-    if (success) {
+    if (result.ok) {
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
     } else {
-      toast.error(`You need to be within ${PROXIMITY_METERS}m to collect this Heart.`);
+      const refined: ActionResult =
+        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
+          ? { ...result, reason: "geo_poor_accuracy" }
+          : result;
+      const { title, description } = explainFailure(refined);
+      toast.error(title, description ? { description } : undefined);
+      if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
     }
   };
 
