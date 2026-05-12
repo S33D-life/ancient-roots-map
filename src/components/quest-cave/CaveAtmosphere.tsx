@@ -100,6 +100,9 @@ export default function CaveAtmosphere({ spores = 14, className }: Props) {
           85%  { opacity: var(--final-opacity, 0.6); }
           100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
         }
+        @media (prefers-reduced-motion: reduce) {
+          [aria-hidden] [style*="cave-spore"] { animation: none !important; opacity: 0 !important; }
+        }
       `}</style>
     </div>
   );
