@@ -67,7 +67,8 @@ export type OfferingType =
   | "recipe"
   | "letter"
   | "voice_note"
-  | "video";
+  | "video"
+  | "bloom";
 
 export const GROVE_TYPES: Array<{ value: GroveType; label: string; hint: string }> = [
   { value: "birth", label: "Birth Grove", hint: "Welcoming a new life" },
