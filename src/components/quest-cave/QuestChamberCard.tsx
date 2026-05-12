@@ -62,14 +62,17 @@ export default function QuestChamberCard({
 
   return (
     <article
-      className="relative rounded-xl border border-amber-900/20 bg-card/55 overflow-hidden"
+      className="relative rounded-xl border border-amber-900/20 bg-card/55 overflow-hidden focus-within:border-primary/40"
       style={{ boxShadow: `inset 0 0 40px -28px ${accent}` }}
+      aria-labelledby={headerId}
     >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full text-left p-3 sm:p-4 flex items-center gap-3 min-h-[72px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        aria-controls={bodyId}
+        id={headerId}
+        className="w-full text-left p-3 sm:p-4 flex items-center gap-3 min-h-[72px] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
       >
         {/* Artwork well + progress ring */}
         <div className="relative w-14 h-14 shrink-0">
