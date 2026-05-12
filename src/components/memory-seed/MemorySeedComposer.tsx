@@ -61,10 +61,17 @@ export type SeedType =
   | "quote"
   | "recipe"
   | "photo"
+  | "artwork"
   | "voice_note"
   | "bloom";
 
-export type Destination = "offering" | "whisper";
+/**
+ * Destination for a memory seed:
+ *   • offering — hung in the branches at this tree (public, visible from afar)
+ *   • whisper  — sent through the roots, unlocked when kin meet a qualifying tree
+ *   • both     — hung AND sent (creates one of each, linked by metadata when safe)
+ */
+export type Destination = "offering" | "whisper" | "both";
 export type WhisperUnlock = "any_ancient_friend" | "same_tree" | "same_species";
 
 interface Props {
@@ -100,6 +107,7 @@ const TYPES: SeedTypeMeta[] = [
   { value: "quote",  label: "Quote",   hint: "A line worth remembering.", authorLabel: "Attributed to" },
   { value: "recipe", label: "Recipe",  hint: "A small recipe tied to this place or season." },
   { value: "photo",  label: "Photo",   hint: "Paste a photo URL for now (upload coming).", showMediaUrl: true },
+  { value: "artwork", label: "Painting / artwork", hint: "Title, artist, and a link to the image if you have one.", showMediaUrl: true, authorLabel: "Artist" },
   { value: "voice_note", label: "Voice note", hint: "Voice notes coming soon.", placeholder: true },
   { value: "bloom",  label: "Bloom",   hint: "Bloom offerings coming soon.", placeholder: true },
 ];
@@ -114,7 +122,7 @@ const WHISPER_UNLOCKS: { value: WhisperUnlock; label: string; hint: string }[] =
 
 const Schema = z.object({
   type: z.enum([
-    "story", "song", "book", "poem", "quote", "recipe", "photo", "voice_note", "bloom",
+    "story", "song", "book", "poem", "quote", "recipe", "photo", "artwork", "voice_note", "bloom",
   ]),
   title: z.string().trim().max(120, "Keep the title under 120 characters."),
   body: z.string().trim().max(2000, "Keep the body under 2000 characters."),
@@ -130,7 +138,8 @@ function toOfferingType(t: SeedType): "story" | "song" | "book" | "poem" | "phot
   if (t === "poem")  return "poem";
   if (t === "photo") return "photo";
   if (t === "voice_note") return "voice";
-  // story / quote / recipe / bloom → stored as story for now (TODO: enum extension)
+  // story / quote / recipe / artwork / bloom → stored as story for now.
+  // TODO(schema): extend offerings.type enum with `quote`, `recipe`, `artwork`, `bloom`.
   return "story";
 }
 
@@ -207,40 +216,65 @@ export default function MemorySeedComposer({
     }
     setSubmitting(true);
     try {
-      if (destination === "offering") {
-        await saveAsOffering();
-      } else {
-        await saveAsWhisper();
+      const wantsOffering = destination === "offering" || destination === "both";
+      const wantsWhisper  = destination === "whisper"  || destination === "both";
+
+      // For "both" we save the offering first so the whisper can reference it
+      // in metadata when a safe column is available. (TODO below.)
+      let offeringId: string | undefined;
+      let whisperId: string | undefined;
+
+      if (wantsOffering) {
+        offeringId = await saveAsOffering();
       }
+      if (wantsWhisper) {
+        // TODO(linkage): when offerings/whispers gain a metadata jsonb or
+        // explicit `source_offering_id` column, pass `offeringId` here so the
+        // two halves of a "both" memory can be cross-referenced. For now we
+        // dispatch two events but write no DB-level link.
+        whisperId = await saveAsWhisper();
+      }
+
+      // Touch the unused vars so future linkage work is obvious.
+      void offeringId; void whisperId;
+
       setConfirmed(destination);
-      window.dispatchEvent(new CustomEvent(
-        destination === "offering" ? "offering-created" : "whisper-sent",
-      ));
+
+      if (wantsOffering) {
+        window.dispatchEvent(new CustomEvent("offering-created"));
+      }
+      if (wantsWhisper) {
+        window.dispatchEvent(new CustomEvent("whisper-sent"));
+      }
     } catch (err) {
       console.error("MemorySeedComposer error:", err);
-      toast.error(
-        destination === "offering"
-          ? "The offering could not settle in the branches. Try again."
-          : "The whisper could not enter the roots. Try again.",
-      );
+      const msg =
+        destination === "whisper"
+          ? "The whisper could not enter the roots. Try again."
+          : destination === "offering"
+            ? "The offering could not settle in the branches. Try again."
+            : "Part of the memory could not travel. Try again.";
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  async function saveAsOffering() {
+  async function saveAsOffering(): Promise<string | undefined> {
     const offType = toOfferingType(type);
     const composedTitle =
       title.trim() ||
       (type === "song" && author ? `${author}` : "") ||
       (type === "book" && author ? `${title || "Untitled"} — ${author}` : "") ||
+      (type === "artwork" && author ? `${title || "Untitled"} — ${author}` : "") ||
       `${meta.label}`;
     const composedContent = [
       body.trim(),
       author.trim() ? `— ${author.trim()}` : "",
       note.trim() ? `Note: ${note.trim()}` : "",
-      type === "recipe" ? "(Recipe offering)" : "",
-      type === "quote"  ? "(Quote offering)"  : "",
+      type === "recipe"  ? "(Recipe offering)"  : "",
+      type === "quote"   ? "(Quote offering)"   : "",
+      type === "artwork" ? "(Artwork offering)" : "",
     ].filter(Boolean).join("\n\n");
 
     const insertBody: Record<string, unknown> = {
@@ -259,12 +293,22 @@ export default function MemorySeedComposer({
       insertBody.quote_author = author.trim() || null;
     }
 
-    const { error } = await supabase.from("offerings").insert(insertBody as never);
+    const { data, error } = await supabase
+      .from("offerings")
+      .insert(insertBody as never)
+      .select("id")
+      .single();
     if (error) throw error;
+    return (data as { id?: string } | null)?.id;
   }
 
-  async function saveAsWhisper() {
+  async function saveAsWhisper(): Promise<string | undefined> {
+    // Carry the seed-type label so future Tree Radio / Star Trail surfaces can
+    // distinguish "song shared as whisper" from "story whispered". We tuck it
+    // into the message body as a small bracketed prefix — no schema change.
+    const typeLabel = `[${meta.label}]`;
     const message = [
+      typeLabel,
       title.trim() ? `**${title.trim()}**` : "",
       body.trim(),
       author.trim() ? `— ${author.trim()}` : "",
@@ -279,7 +323,7 @@ export default function MemorySeedComposer({
       : unlock === "same_species" ? "SPECIES_MATCH"
       : "ANY_TREE";
 
-    const { error } = await sendWhisper({
+    const { data, error } = await sendWhisper({
       senderUserId: userId!,
       recipientScope: "PUBLIC",
       treeAnchorId: treeId,
@@ -294,6 +338,7 @@ export default function MemorySeedComposer({
       isActive: true,
     });
     if (error) throw error;
+    return (data as { id?: string } | null | undefined)?.id;
   }
 
   // ── Render ────────────────────────────────────────────────
@@ -303,10 +348,11 @@ export default function MemorySeedComposer({
       <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">
-            Share an Offering or Whisper
+            Where should this memory travel?
           </DialogTitle>
           <DialogDescription className="font-serif italic text-xs">
-            Offerings hang in the branches. Whispers travel through the roots.
+            Some memories are hung in the branches. Some are carried through the
+            roots. Some become both.
           </DialogDescription>
         </DialogHeader>
 
@@ -328,46 +374,30 @@ export default function MemorySeedComposer({
           <div className="space-y-4">
             <ResonancePanel resonance={resonance} treeName={treeName} />
 
-            <Tabs
+            <DestinationPicker
               value={destination}
-              onValueChange={(v) => { setDestinationTouched(true); setDestination(v as Destination); }}
-            >
-              <TabsList className="w-full">
-                <TabsTrigger value="offering" className="flex-1 font-serif text-xs">
-                  Leave Offering
-                </TabsTrigger>
-                <TabsTrigger value="whisper" className="flex-1 font-serif text-xs">
-                  Send Whisper
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="offering" className="mt-3">
-                <p className="font-serif text-xs italic text-muted-foreground/80">
-                  Offerings can be seen from afar once placed
-                  {treeName ? ` in “${treeName}”'s branches.` : " in this tree's branches."}
-                </p>
-              </TabsContent>
-              <TabsContent value="whisper" className="mt-3 space-y-3">
-                <p className="font-serif text-xs italic text-muted-foreground/80">
-                  Whispers wait until someone checks in beneath the right tree.
-                </p>
-                <div className="space-y-1.5">
-                  <Label className="font-serif text-xs">Who can find this whisper?</Label>
-                  <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
-                    <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {WHISPER_UNLOCKS.map((u) => (
-                        <SelectItem key={u.value} value={u.value}>
-                          <div>
-                            <div>{u.label}</div>
-                            <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-            </Tabs>
+              onChange={(d) => { setDestinationTouched(true); setDestination(d); }}
+              treeName={treeName}
+            />
+
+            {(destination === "whisper" || destination === "both") && (
+              <div className="space-y-1.5">
+                <Label className="font-serif text-xs">Who can find this whisper?</Label>
+                <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
+                  <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {WHISPER_UNLOCKS.map((u) => (
+                      <SelectItem key={u.value} value={u.value}>
+                        <div>
+                          <div>{u.label}</div>
+                          <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <Label className="font-serif text-xs">Type</Label>
@@ -386,8 +416,8 @@ export default function MemorySeedComposer({
 
             {meta.placeholder ? (
               <p className="font-serif text-xs italic text-muted-foreground/80">
-                This seed type is being prepared. Choose Story, Song, Book, Poem, Quote,
-                Recipe, or Photo for now.
+                This seed type is being prepared. Choose Story, Song, Book, Poem,
+                Quote, Recipe, Photo, or Painting / artwork for now.
               </p>
             ) : (
               <>
@@ -475,7 +505,11 @@ export default function MemorySeedComposer({
               </Button>
               <Button onClick={handleSubmit} disabled={!canSubmit || submitting}>
                 {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {destination === "offering" ? "Hang in the branches" : "Send through the roots"}
+                {destination === "offering"
+                  ? "Hang in the branches"
+                  : destination === "whisper"
+                    ? "Send through the roots"
+                    : "Hang & send"}
               </Button>
             </div>
           </div>
@@ -492,20 +526,30 @@ function ConfirmationView({
   onClose,
 }: { destination: Destination; onClose: () => void }) {
   const isWhisper = destination === "whisper";
+  const isBoth = destination === "both";
   return (
     <div className="py-6 text-center space-y-4">
       <div className="mx-auto w-24 h-24 grid place-items-center" aria-hidden>
-        {isWhisper ? <RootsTrail /> : <BranchGlyph />}
+        {isBoth ? (
+          <div className="flex items-center gap-1">
+            <BranchGlyph />
+            <RootsTrail />
+          </div>
+        ) : isWhisper ? <RootsTrail /> : <BranchGlyph />}
       </div>
       <p className="font-serif text-base text-foreground">
-        {isWhisper
-          ? "Your whisper has entered the roots."
-          : "Your offering has been hung in the branches."}
+        {isBoth
+          ? "Your memory has been hung in the branches and sent through the roots."
+          : isWhisper
+            ? "Your memory has entered the roots."
+            : "Your memory has been hung in the branches."}
       </p>
       <p className="font-serif text-xs italic text-muted-foreground/80">
-        {isWhisper
-          ? "It will wait quietly until kin meet the right tree."
-          : "Others may now find it on this tree."}
+        {isBoth
+          ? "Some kin will see it from afar; others will meet it as a whisper."
+          : isWhisper
+            ? "It will wait quietly until kin meet the right tree."
+            : "Others may now find it on this tree."}
       </p>
       <Button onClick={onClose} variant="outline" size="sm">Close</Button>
     </div>
@@ -608,6 +652,71 @@ function ResonancePanel({
           {l}
         </p>
       ))}
+    </div>
+  );
+}
+
+// ── Destination picker ──────────────────────────────────────
+/**
+ * Three-way segmented selector — "branches", "roots", or "both".
+ * Mobile-friendly: tall tap targets, no nested buttons, keyboard-navigable
+ * via native radiogroup semantics.
+ */
+function DestinationPicker({
+  value,
+  onChange,
+  treeName,
+}: {
+  value: Destination;
+  onChange: (d: Destination) => void;
+  treeName?: string | null;
+}) {
+  const options: { value: Destination; label: string; hint: string }[] = [
+    {
+      value: "offering",
+      label: "Hang in the branches",
+      hint: treeName
+        ? `Visible at ${treeName} from afar.`
+        : "Visible at this tree from afar.",
+    },
+    {
+      value: "whisper",
+      label: "Send through the roots",
+      hint: "Waits until kin checks in beneath the right tree.",
+    },
+    {
+      value: "both",
+      label: "Both",
+      hint: "Hung at this tree and carried through the roots.",
+    },
+  ];
+
+  return (
+    <div role="radiogroup" aria-label="Where should this memory travel?" className="space-y-2">
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(opt.value)}
+            className={[
+              "w-full text-left rounded-xl px-3 py-2.5 border transition-colors",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              selected
+                ? "border-primary/50 bg-primary/10"
+                : "border-border/40 bg-card/40 hover:border-primary/30",
+            ].join(" ")}
+          >
+            <div className="font-serif text-sm text-foreground">{opt.label}</div>
+            <div className="font-serif italic text-[11px] text-muted-foreground/75 mt-0.5">
+              {opt.hint}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }
