@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { track } from "@/lib/telemetry";
 import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import type { OfferingPrompt } from "@/hooks/use-seasonal-offerings";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
@@ -158,6 +159,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
    * 3) on receipt close, ensure the user lands on the tree detail page
    */
   const finishOfferingFlow = useCallback((earnedReward: boolean) => {
+    track("offering_made", { treeId, meta: { reward: earnedReward, type: activeType } });
     setShowCelebration(false);
     onOpenChange(false);
     if (earnedReward) {
@@ -165,7 +167,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     } else {
       routeBackToTree();
     }
-  }, [onOpenChange, routeBackToTree]);
+  }, [onOpenChange, routeBackToTree, treeId, activeType]);
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
   const [tagQuery, setTagQuery] = useState("");
@@ -334,7 +336,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         submittingRef.current = false;
         setLoading(false);
         setUploading(false);
-        toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" });
+        track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." });
       }
     }, 30000);
 
@@ -590,7 +592,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       return;
     } catch (err: any) {
-      toast({ title: "Something went wrong", description: "Try again — your content is still here", variant: "destructive" });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your content is still here — try again in a moment." });
     } finally {
       clearTimeout(timeout);
       setLoading(false);
@@ -604,7 +606,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
     const timeout = setTimeout(() => {
-      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
     }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -643,7 +645,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
-      toast({ title: "Something went wrong", description: "Try again — your selection is still here", variant: "destructive" });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your selection is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
@@ -653,7 +655,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
     const timeout = setTimeout(() => {
-      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
     }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -680,7 +682,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
-      toast({ title: "Something went wrong", description: "Try again — your recording is still here", variant: "destructive" });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your recording is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
@@ -690,7 +692,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
     const timeout = setTimeout(() => {
-      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
     }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -733,7 +735,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
-      toast({ title: "Something went wrong", description: "Try again — your entry is still here", variant: "destructive" });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your entry is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
