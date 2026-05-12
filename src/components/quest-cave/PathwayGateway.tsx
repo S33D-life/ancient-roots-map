@@ -4,7 +4,7 @@
  * Each gateway has its own glow color and sigil. Collapsed by default to
  * preserve the cave's mystery; the user enters a path by tapping it.
  */
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
 export interface PathwayGatewayProps {
