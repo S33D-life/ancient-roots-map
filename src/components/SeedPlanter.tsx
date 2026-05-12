@@ -40,6 +40,9 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
       return { title: "This Seed hasn't bloomed yet", description: "Come back when it's ready." };
     case "no_seed_coords":
       return { title: "This Heart has no location", description: "Please report this tree." };
+    case "no_user_coords":
+    case "no_target_coords":
+      return { title: "Location data missing", description: "Please try again or report this tree." };
     case "geo_unsupported":
       return { title: "Location isn't supported on this device" };
     case "geo_denied":
