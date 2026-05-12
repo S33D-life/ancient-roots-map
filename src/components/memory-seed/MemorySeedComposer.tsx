@@ -130,8 +130,10 @@ const Schema = z.object({
   note: z.string().trim().max(500).or(z.literal("")),
 });
 
-/** Map a SeedType to a value accepted by the offerings.type enum. */
-function toOfferingType(t: SeedType): "story" | "song" | "book" | "poem" | "photo" | "voice" {
+/** Map a SeedType to a value accepted by the offerings.type enum.
+ *  Exported for unit testing — pure helper, no runtime behaviour change.
+ */
+export function toOfferingType(t: SeedType): "story" | "song" | "book" | "poem" | "photo" | "voice" {
   if (t === "song")  return "song";
   if (t === "book")  return "book";
   if (t === "poem")  return "poem";
