@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Heart, Loader2, MapPin, Clock } from "lucide-react";
+import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { useSeedEconomy, PROXIMITY_METERS, type ActionResult, type ActionFailureReason } from "@/hooks/use-seed-economy";
+import {
+  useSeedEconomy,
+  PROXIMITY_METERS,
+  type ActionResult,
+  type GpsConfidence,
+} from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
 import RewardReceipt from "@/components/RewardReceipt";
 import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
-
-const POOR_GPS_ACCURACY_M = 75; // accuracy worse than this is "uncertain"
+import { useHasRole } from "@/hooks/use-role";
 
 function explainFailure(r: ActionResult): { title: string; description?: string } {
   const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
@@ -38,13 +43,16 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
     case "geo_denied":
       return { title: "Please enable location access for S33D" };
     case "geo_unavailable":
-      return { title: "Location access is needed to collect this Heart", description: r.error };
+      return { title: "Signal uncertain beneath the canopy", description: "Try stepping into a clearer patch of sky." };
     case "geo_timeout":
-      return { title: "Couldn't get a GPS fix in time", description: "Try stepping outside and try again." };
+      return { title: "Seeking a clearer signal beneath the canopy…", description: "Try stepping into a clearer patch of sky." };
     case "geo_poor_accuracy":
-      return { title: `GPS is uncertain ${a ?? ""} — try stepping outside` };
+      return {
+        title: "You appear nearby, but GPS confidence is low",
+        description: a ? `GPS uncertain ${a} — try stepping into a clearer patch of sky.` : undefined,
+      };
     case "too_far":
-      return { title: `You appear to be ${d ?? "too far"} away`, description: a ? `GPS accuracy ${a}` : undefined };
+      return { title: `You appear to be ${d ?? "some distance"} away`, description: a ? `GPS accuracy ${a}` : undefined };
     case "rpc_error":
       return { title: "Something went wrong on our side", description: r.error };
     default:
@@ -52,6 +60,38 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
   }
 }
 
+function confidenceLabel(c: GpsConfidence | undefined): string {
+  if (c === "high") return "High";
+  if (c === "medium") return "Medium";
+  if (c === "low") return "Low";
+  return "—";
+}
+
+function accuracyTone(c: GpsConfidence | undefined): string {
+  // returns Tailwind text color class
+  if (c === "high") return "text-emerald-600";
+  if (c === "medium") return "text-amber-600";
+  if (c === "low") return "text-red-600";
+  return "text-muted-foreground";
+}
+
+function getPlatform(): string {
+  if (typeof navigator === "undefined") return "ssr";
+  const ua = navigator.userAgent;
+  const isiOS = /iP(hone|ad|od)/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isStandalone = (window.matchMedia?.("(display-mode: standalone)").matches) ||
+    // @ts-expect-error iOS Safari
+    !!window.navigator.standalone;
+  const browser = /CriOS/.test(ua) ? "Chrome iOS"
+    : /FxiOS/.test(ua) ? "Firefox iOS"
+    : /Safari/.test(ua) && !/Chrome/.test(ua) ? "Safari"
+    : /Chrome/.test(ua) ? "Chrome"
+    : /Firefox/.test(ua) ? "Firefox"
+    : "Browser";
+  const os = isiOS ? "iOS" : isAndroid ? "Android" : "Desktop";
+  return `${os} · ${browser}${isStandalone ? " · PWA" : ""}`;
+}
 interface SeedPlanterProps {
   treeId: string;
   treeLat: number | null;
@@ -75,6 +115,12 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   const [showBurst, setShowBurst] = useState(false);
   const [receiptVisible, setReceiptVisible] = useState(false);
   const [receiptData, setReceiptData] = useState<{ s33dHearts: number; speciesHearts: number; speciesFamily?: string }>({ s33dHearts: 0, speciesHearts: 0 });
+  const [lastResult, setLastResult] = useState<ActionResult | null>(null);
+  const [locatingMessage, setLocatingMessage] = useState<string | null>(null);
+  const [overrideEnabled, setOverrideEnabled] = useState(false);
+
+  const { hasRole: isKeeper } = useHasRole("keeper");
+  const canOverride = import.meta.env.DEV || isKeeper;
 
   const seedsHere = getSeedsAtTree(treeId);
   const bloomedSeeds = getBloomedSeedsAtTree(treeId);
@@ -82,34 +128,47 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     (s) => !s.collected_by && new Date(s.blooms_at) > new Date()
   );
 
-  // Collectible = bloomed & not planted by current user
   const collectibleSeeds = bloomedSeeds.filter(
     (s) => s.planter_id !== userId
   );
 
   if (!userId || treeLat == null || treeLng == null) return null;
 
-  const [lastResult, setLastResult] = useState<ActionResult | null>(null);
+  const onAttempt = (attempt: number) => {
+    setLocatingMessage(
+      attempt === 1
+        ? "Locating your position…"
+        : "Seeking a clearer signal beneath the canopy…",
+    );
+  };
+
+  const refineForToast = (result: ActionResult): ActionResult => {
+    // "Too far" with low confidence is really a signal-quality issue, not user position.
+    if (result.reason === "too_far" && result.confidence === "low") {
+      return { ...result, reason: "geo_poor_accuracy" };
+    }
+    return result;
+  };
 
   const handlePlant = async () => {
     setPlanting(true);
-    const result = await plantSeed(treeId, treeLat, treeLng);
+    setLocatingMessage("Locating your position…");
+    const result = await plantSeed(treeId, treeLat, treeLng, {
+      onAttempt,
+      override: overrideEnabled && canOverride,
+    });
     setPlanting(false);
+    setLocatingMessage(null);
     setLastResult(result);
 
-    // Soft-warn on poor accuracy when too_far
     if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
-      toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
+      const note = result.overrideUsed ? " (override used)" : "";
+      toast.success(`🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.${note}`);
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
-      // Surface poor-accuracy hint when user is "too far" but GPS is unreliable
-      const refined: ActionResult =
-        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
-          ? { ...result, reason: "geo_poor_accuracy" }
-          : result;
-      const { title, description } = explainFailure(refined);
+      const { title, description } = explainFailure(refineForToast(result));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] plant failed", result);
     }
@@ -117,8 +176,13 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
   const handleCollect = async (seed: PlantedSeed) => {
     setCollecting(seed.id);
-    const result = await collectHeart(seed.id);
+    setLocatingMessage("Locating your position…");
+    const result = await collectHeart(seed.id, {
+      onAttempt,
+      override: overrideEnabled && canOverride,
+    });
     setCollecting(null);
+    setLocatingMessage(null);
     setLastResult(result);
 
     if (result.ok) {
@@ -126,11 +190,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
     } else {
-      const refined: ActionResult =
-        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
-          ? { ...result, reason: "geo_poor_accuracy" }
-          : result;
-      const { title, description } = explainFailure(refined);
+      const { title, description } = explainFailure(refineForToast(result));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
     }
@@ -268,18 +328,84 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         </Card>
       )}
 
-      {/* Dev-only diagnostics — last action attempt */}
-      {import.meta.env.DEV && lastResult && (
-        <div className="rounded-md border border-dashed border-border/40 bg-muted/30 p-3 text-[10px] font-mono text-muted-foreground space-y-0.5">
-          <div className="font-semibold text-foreground/80">Heart Collection Diagnostics</div>
-          <div>user: {lastResult.userLat?.toFixed(6) ?? "—"}, {lastResult.userLng?.toFixed(6) ?? "—"}</div>
-          <div>tree: {lastResult.treeLat?.toFixed(6) ?? treeLat?.toFixed(6) ?? "—"}, {lastResult.treeLng?.toFixed(6) ?? treeLng?.toFixed(6) ?? "—"}</div>
-          <div>distance: {lastResult.distance != null ? `${lastResult.distance.toFixed(1)}m` : "—"} · radius: {PROXIMITY_METERS}m</div>
-          <div>gps accuracy: {lastResult.accuracy != null ? `±${lastResult.accuracy.toFixed(0)}m` : "—"}</div>
-          <div>result: {lastResult.ok ? "ok" : `blocked (${lastResult.reason ?? "unknown"})`}</div>
-          {lastResult.error && <div className="text-destructive/80 break-all">error: {lastResult.error}</div>}
+      {/* Live "locating" pulse — shown while GPS is being acquired */}
+      <AnimatePresence>
+        {locatingMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="flex items-center gap-2 text-[11px] font-serif text-muted-foreground italic px-1"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-primary/40 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary/70" />
+            </span>
+            <Compass className="w-3 h-3 opacity-60" />
+            {locatingMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Override toggle — DEV or keeper only */}
+      {canOverride && (
+        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Radio className="w-3.5 h-3.5 text-amber-600" />
+            <div>
+              <p className="text-[11px] font-serif text-amber-700 dark:text-amber-400">
+                Allow encounter despite uncertain GPS
+              </p>
+              <p className="text-[9px] font-serif text-muted-foreground">
+                {import.meta.env.DEV ? "Dev override" : "Keeper override"} · usage is logged
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={overrideEnabled}
+            onCheckedChange={setOverrideEnabled}
+            aria-label="Allow encounter despite uncertain GPS"
+          />
         </div>
       )}
+
+      {/* Diagnostics — DEV or keeper, shown after an attempt */}
+      {(import.meta.env.DEV || isKeeper) && lastResult && (() => {
+        const r = lastResult;
+        const tone = accuracyTone(r.confidence);
+        const within = r.effectiveDistance != null && r.effectiveDistance <= PROXIMITY_METERS;
+        return (
+          <div className="rounded-md border border-dashed border-border/40 bg-muted/30 p-3 text-[10px] font-mono text-muted-foreground space-y-0.5">
+            <div className="font-semibold text-foreground/80 flex items-center justify-between">
+              <span>Heart Collection Diagnostics</span>
+              <span className={tone}>GPS confidence: {confidenceLabel(r.confidence)}</span>
+            </div>
+            <div>device: {getPlatform()}</div>
+            <div>user: {r.userLat?.toFixed(6) ?? "—"}, {r.userLng?.toFixed(6) ?? "—"}</div>
+            <div>tree: {r.treeLat?.toFixed(6) ?? treeLat?.toFixed(6) ?? "—"}, {r.treeLng?.toFixed(6) ?? treeLng?.toFixed(6) ?? "—"}</div>
+            <div>
+              distance: {r.distance != null ? `${r.distance.toFixed(1)}m` : "—"}
+              {" · effective: "}
+              {r.effectiveDistance != null ? `${r.effectiveDistance.toFixed(1)}m` : "—"}
+              {" · radius: "}{PROXIMITY_METERS}m
+            </div>
+            <div className={tone}>
+              accuracy: {r.accuracy != null ? `±${r.accuracy.toFixed(0)}m` : "—"}
+            </div>
+            <div>
+              gps fix: {r.gpsTimestamp ? new Date(r.gpsTimestamp).toLocaleTimeString() : "—"}
+              {" · age: "}{r.gpsAgeMs != null ? `${(r.gpsAgeMs / 1000).toFixed(1)}s` : "—"}
+              {" · "}{r.gpsAgeMs != null && r.gpsAgeMs < 5000 ? "fresh" : "cached?"}
+            </div>
+            <div>retries: {r.retries ?? 0} · within radius (with tolerance): {within ? "yes" : "no"}</div>
+            <div>result: {r.ok ? `ok${r.overrideUsed ? " (override)" : ""}` : `blocked (${r.reason ?? "unknown"})`}</div>
+            {r.error && <div className="text-destructive/80 break-all">error: {r.error}</div>}
+          </div>
+        );
+      })()}
+
 
       <RewardReceipt
         visible={receiptVisible}
