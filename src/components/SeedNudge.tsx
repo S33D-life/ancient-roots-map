@@ -105,7 +105,7 @@ const SeedNudge = ({
         toast.error("Location access is needed to plant a seed.");
       else if (r === "too_far") toast.error(`You appear to be ${Math.round(result.distance ?? 0)}m away.`);
       else if (r === "rpc_error") toast.error("Could not plant seed", { description: result.error });
-      else toast.error("Move closer to this tree to plant a seed.");
+      else toast.error("Seeking your roots…", { description: "Step a little closer to plant a seed here." });
     }
   }, [treeId, treeLat, treeLng, plantSeed, seedsRemaining, dismiss]);
 
