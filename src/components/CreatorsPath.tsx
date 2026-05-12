@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ROUTES } from "@/lib/routes";
 import JourneyBridge from "@/components/JourneyBridge";
 import JourneyStatusBar from "@/components/JourneyStatusBar";
+import { HeartwoodChamber, ChamberSkeleton } from "@/components/library/HeartwoodChamber";
 import type { CachedStaff } from "@/hooks/use-wallet";
 
 interface CreatorsPathProps {
