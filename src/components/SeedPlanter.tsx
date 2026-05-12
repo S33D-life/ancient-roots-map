@@ -135,7 +135,16 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   const [overrideEnabled, setOverrideEnabled] = useState(false);
 
   const { hasRole: isKeeper } = useHasRole("keeper");
-  const canOverride = import.meta.env.DEV || isKeeper;
+  // The override is now available to anyone — keepers/dev see it always; everyone else
+  // sees it once an attempt has hinted at GPS uncertainty so we don't tempt misuse.
+  const lastReason = lastResult?.reason;
+  const lastConfidence = lastResult?.confidence;
+  const gpsUncertaintyHinted =
+    lastReason === "geo_poor_accuracy" ||
+    lastReason === "geo_timeout" ||
+    lastReason === "geo_unavailable" ||
+    (lastReason === "too_far" && (lastConfidence === "low" || lastConfidence === "medium"));
+  const showOverrideToggle = import.meta.env.DEV || isKeeper || gpsUncertaintyHinted;
 
   const seedsHere = getSeedsAtTree(treeId);
   const bloomedSeeds = getBloomedSeedsAtTree(treeId);
