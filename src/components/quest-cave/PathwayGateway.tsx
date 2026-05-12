@@ -60,7 +60,7 @@ export default function PathwayGateway({
       />
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         aria-expanded={open}
         aria-controls={bodyId}
         id={headerId}
