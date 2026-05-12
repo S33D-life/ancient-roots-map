@@ -655,3 +655,68 @@ function ResonancePanel({
     </div>
   );
 }
+
+// ── Destination picker ──────────────────────────────────────
+/**
+ * Three-way segmented selector — "branches", "roots", or "both".
+ * Mobile-friendly: tall tap targets, no nested buttons, keyboard-navigable
+ * via native radiogroup semantics.
+ */
+function DestinationPicker({
+  value,
+  onChange,
+  treeName,
+}: {
+  value: Destination;
+  onChange: (d: Destination) => void;
+  treeName?: string | null;
+}) {
+  const options: { value: Destination; label: string; hint: string }[] = [
+    {
+      value: "offering",
+      label: "Hang in the branches",
+      hint: treeName
+        ? `Visible at ${treeName} from afar.`
+        : "Visible at this tree from afar.",
+    },
+    {
+      value: "whisper",
+      label: "Send through the roots",
+      hint: "Waits until kin checks in beneath the right tree.",
+    },
+    {
+      value: "both",
+      label: "Both",
+      hint: "Hung at this tree and carried through the roots.",
+    },
+  ];
+
+  return (
+    <div role="radiogroup" aria-label="Where should this memory travel?" className="space-y-2">
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(opt.value)}
+            className={[
+              "w-full text-left rounded-xl px-3 py-2.5 border transition-colors",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              selected
+                ? "border-primary/50 bg-primary/10"
+                : "border-border/40 bg-card/40 hover:border-primary/30",
+            ].join(" ")}
+          >
+            <div className="font-serif text-sm text-foreground">{opt.label}</div>
+            <div className="font-serif italic text-[11px] text-muted-foreground/75 mt-0.5">
+              {opt.hint}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
