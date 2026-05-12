@@ -2,7 +2,7 @@
  * SendWhisperModal — Send a whisper through an Ancient Friend.
  * Ceremonial, organic, not like chat.
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { track } from "@/lib/telemetry";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -172,32 +172,43 @@ export default function SendWhisperModal({
     return () => clearTimeout(t);
   }, [recipientSearch, recipientScope, userId]);
 
-  // Map a raw send-whisper error to a specific, friendly explanation.
-  // Logs the full error in development so testers can see exactly what failed.
-  const explainWhisperError = (err: any, data?: any): string => {
+  // Map a raw send-whisper error to a (reason, friendly message) pair.
+  const explainWhisperError = (err: any, data?: any): { reason: string; message: string } => {
     if (import.meta.env.DEV) console.warn("[whisper] send failed", { err, data });
-    if (!userId) return "You're not signed in. Please sign in and try again.";
-    if (recipientScope === "PRIVATE" && !recipientUserId) return "Choose who should receive this whisper.";
-    if (audienceType === "group" && !groupId) return "Choose a group to whisper into.";
-    if (!treeId) return "This tree is missing — please reopen from the map.";
+    if (!userId) return { reason: "not_signed_in", message: "You're not signed in. Please sign in and try again." };
+    if (recipientScope === "PRIVATE" && !recipientUserId) return { reason: "missing_recipient", message: "Choose who should receive this whisper." };
+    if (audienceType === "group" && !groupId) return { reason: "missing_group", message: "Choose a group to whisper into." };
+    if (!treeId) return { reason: "missing_tree", message: "This tree is missing — please reopen from the map." };
     const code = err?.code || data?.error;
     const msg: string = err?.message || data?.error || "";
+    if (/whisper_presence_required/i.test(msg))
+      return { reason: "presence_required", message: "Check in at this tree first to send a live whisper — or send it as a dormant seed." };
     if (code === "insufficient_hearts" || /insufficient_hearts/i.test(msg))
-      return "Offer a few hearts to send this into the network.";
+      return { reason: "insufficient_hearts", message: "Offer a few hearts to send this into the network." };
     if (code === "23503" || /foreign key|tree.*not.*exist/i.test(msg))
-      return "This tree could not be found in the Atlas.";
+      return { reason: "tree_not_found", message: "This tree could not be found in the Atlas." };
     if (code === "42501" || /row-level security|permission denied/i.test(msg))
-      return "Permission was refused. Visit this tree first or sign back in.";
+      return { reason: "permission_denied", message: "Permission was refused. Visit this tree first or sign back in." };
+    if (code === "23505" || /duplicate key|already exists/i.test(msg))
+      return { reason: "duplicate", message: "That whisper is already on its way." };
+    if (code === "429" || /rate.?limit|too many/i.test(msg))
+      return { reason: "rate_limited", message: "Take a breath — try again in a moment." };
     if (/Failed to fetch|NetworkError|net::|ECONN/i.test(msg))
-      return "Network hiccup — check your connection and try again.";
+      return { reason: "network", message: "Network hiccup — check your connection and try again." };
     if (/jwt|JWT|expired|invalid token/i.test(msg))
-      return "Your session expired. Please sign in again.";
-    return "Couldn't send the whisper. Tap again in a moment, or refresh.";
+      return { reason: "session_expired", message: "Your session expired. Please sign in again." };
+    return { reason: "unknown", message: "Couldn't send the whisper. Tap again in a moment, or refresh." };
   };
 
+  // Synchronous in-flight guard (prevents rapid double-submit before React re-renders).
+  const inFlightRef = useRef(false);
+
   const handleSend = async () => {
+    if (inFlightRef.current || sending) return;
     if (!userId) { toast.error("Please sign in to send a whisper."); return; }
-    if (!message.trim()) { toast.error("Write a message first."); return; }
+    const trimmed = message.trim();
+    if (!trimmed) { toast.error("Write a message first."); return; }
+    if (trimmed.length > 2000) { toast.error("Whisper is too long (max 2000 characters)."); return; }
     if (recipientScope === "PRIVATE" && !recipientUserId) {
       toast.error("Select a recipient.");
       return;
@@ -211,53 +222,84 @@ export default function SendWhisperModal({
       return;
     }
 
+    inFlightRef.current = true;
     setSending(true);
+    track("whisper_sent", { treeId, userId, reason: "started", meta: { audience: audienceType, scope: recipientScope, channel: channelType } });
     const speciesKey = treeSpecies?.toLowerCase().replace(/\s+/g, "_");
     let createdWhisperId: string | null = null;
     let sendError: any = null;
 
-    if (audienceType === "group") {
-      // Mycelial / channel-based group whisper through RPC
-      const channelId =
-        channelType === "tree" ? treeId :
-        channelType === "species" ? speciesKey :
-        null;
-      const { data, error } = await sendMycelialWhisper({
-        channelType,
-        channelId,
-        audienceType: "group",
-        groupId,
-        treeAnchorId: treeId,
-        messageContent: message.trim(),
-        isActive: presence.atTree,
-      });
-      if (error || !data?.ok) {
-        track("whisper_failed", { treeId, userId, reason: (error as any)?.code || (data as any)?.error || "unknown" });
-        toast.error(explainWhisperError(error, data));
-        sendError = error || data?.error;
-      } else {
-        createdWhisperId = data.whisper_id || null;
+    // Only mark active when presence is confirmed by an actual check-in
+    // (the DB trigger requires a recent check-in for is_active=true).
+    const liveActive = presence.source === "checkin";
+
+    const doSend = async (active: boolean) => {
+      if (audienceType === "group") {
+        const channelId =
+          channelType === "tree" ? treeId :
+          channelType === "species" ? speciesKey :
+          null;
+        return await sendMycelialWhisper({
+          channelType,
+          channelId,
+          audienceType: "group",
+          groupId,
+          treeAnchorId: treeId,
+          messageContent: trimmed,
+          isActive: active,
+        });
       }
-    } else {
-      // Existing individual flow (preserved)
-      const { error, data: whisperData } = await sendWhisper({
+      const res = await sendWhisper({
         senderUserId: userId,
         recipientScope,
         recipientUserId: recipientScope === "PRIVATE" ? recipientUserId! : undefined,
         treeAnchorId: treeId,
-        messageContent: message.trim(),
+        messageContent: trimmed,
         deliveryScope,
         deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
         deliverySpeciesKey: deliveryScope === "SPECIES_MATCH" ? speciesKey : undefined,
-        isActive: presence.atTree,
+        isActive: active,
       });
-      if (error) {
-        track("whisper_failed", { treeId, userId, reason: (error as any)?.code || "unknown" });
-        toast.error(explainWhisperError(error));
-        sendError = error;
-      } else if (whisperData && typeof whisperData === "object" && "id" in (whisperData as any)) {
-        createdWhisperId = (whisperData as any).id;
+      return { data: res.data as any, error: res.error };
+    };
+
+    try {
+      let { data, error } = await doSend(liveActive);
+
+      // Auto-recover: presence trigger rejected an active whisper → retry as dormant seed.
+      if (liveActive && error && /whisper_presence_required/i.test(error.message || "")) {
+        const retry = await doSend(false);
+        data = retry.data; error = retry.error;
+        if (!error) {
+          toast("Sent as a dormant seed — it will stir when you check in here.");
+        }
       }
+
+      if (audienceType === "group") {
+        const ok = !error && (data as any)?.ok;
+        if (!ok) {
+          const explained = explainWhisperError(error, data);
+          track("whisper_failed", { treeId, userId, reason: explained.reason });
+          toast.error(explained.message);
+          sendError = error || (data as any)?.error;
+        } else {
+          createdWhisperId = (data as any)?.whisper_id || null;
+        }
+      } else {
+        if (error) {
+          const explained = explainWhisperError(error);
+          track("whisper_failed", { treeId, userId, reason: explained.reason });
+          toast.error(explained.message);
+          sendError = error;
+        } else if (data && typeof data === "object" && "id" in (data as any)) {
+          createdWhisperId = (data as any).id;
+        }
+      }
+    } catch (e: any) {
+      const explained = explainWhisperError(e);
+      track("whisper_failed", { treeId, userId, reason: explained.reason });
+      toast.error(explained.message);
+      sendError = e;
     }
 
     if (!sendError) {
@@ -281,11 +323,12 @@ export default function SendWhisperModal({
         from: senderLocation,
       });
       setSent(true);
-      track("whisper_sent", { treeId, userId, meta: { atTree: presence.atTree, audience: audienceType } });
+      track("whisper_sent", { treeId, userId, reason: "success", meta: { atTree: liveActive, audience: audienceType } });
       if (inviteEnabled) toast.success("Whisper sent — now share the invitation!");
       window.dispatchEvent(new CustomEvent("whisper-sent", { detail: { treeId } }));
     }
     setSending(false);
+    inFlightRef.current = false;
   };
 
   /* ── Share helpers for invite flow ── */
