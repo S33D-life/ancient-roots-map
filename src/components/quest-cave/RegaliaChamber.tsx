@@ -46,15 +46,39 @@ const CLOAK_STAGES = [
   { min: 120, label: "Ancient mantle",   tone: "from-amber-400/55 to-emerald-400/45" },
 ];
 
+/** Coerce any signal value to a safe non-negative finite integer. */
+function safeCount(v: unknown): number {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
+}
+
+/** Reduce a (possibly partial / undefined) hive-counts map to its deepest count. */
+export function deepestHive(
+  hiveCounts: Record<string, unknown> | null | undefined,
+): number {
+  if (!hiveCounts || typeof hiveCounts !== "object") return 0;
+  let max = 0;
+  for (const v of Object.values(hiveCounts)) {
+    const n = safeCount(v);
+    if (n > max) max = n;
+  }
+  return max;
+}
+
 function resonanceScore(species: number, visits: number, affinity: number) {
-  const breadth  = Math.min(40, species)  * 1.5;   // soft-cap at 40 species
-  const returns  = Math.min(50, visits)   * 1.0;   // soft-cap at 50 visits
-  const affinityScore = Math.min(20, affinity) * 2.0; // soft-cap at 20 in one hive
+  const s = safeCount(species);
+  const v = safeCount(visits);
+  const a = safeCount(affinity);
+  const breadth  = Math.min(40, s) * 1.5;   // soft-cap at 40 species
+  const returns  = Math.min(50, v) * 1.0;   // soft-cap at 50 visits
+  const affinityScore = Math.min(20, a) * 2.0; // soft-cap at 20 in one hive
   return Math.round(breadth + returns + affinityScore);
 }
 
 function cloakStage(score: number) {
-  return [...CLOAK_STAGES].reverse().find((s) => score >= s.min) ?? CLOAK_STAGES[0];
+  const s = Number.isFinite(score) ? score : 0;
+  return [...CLOAK_STAGES].reverse().find((st) => s >= st.min) ?? CLOAK_STAGES[0];
 }
 
 export default function RegaliaChamber({
@@ -62,16 +86,29 @@ export default function RegaliaChamber({
   staffSpecies,
   isPermanent,
   affinitySpecies = [],
-  speciesCount = 0,
-  visits = 0,
-  affinityDepth = 0,
+  speciesCount,
+  visits,
+  affinityDepth,
   sigils = [],
   streak,
 }: RegaliaChamberProps) {
-  const score = resonanceScore(speciesCount, visits, affinityDepth);
+  // Defensive defaulting — props may arrive undefined / NaN during partial loads.
+  const safeSpecies = safeCount(speciesCount);
+  const safeVisits = safeCount(visits);
+  const safeAffinity = safeCount(affinityDepth);
+  const safeSigils = Array.isArray(sigils) ? sigils.filter(Boolean) : [];
+  const safeAffinitySpecies = Array.isArray(affinitySpecies)
+    ? affinitySpecies.filter((x): x is string => typeof x === "string" && x.length > 0)
+    : [];
+
+  const score = resonanceScore(safeSpecies, safeVisits, safeAffinity);
   const cloak = cloakStage(score);
   const nextStage = CLOAK_STAGES.find((s) => s.min > score);
   const toNext = nextStage ? Math.max(0, nextStage.min - score) : 0;
+
+  // A "ready" snapshot has at least one signal — until then we don't inscribe
+  // a baseline, so partial loads can't seed a meaningless "Plain wool" record.
+  const hasAnySignal = safeSpecies > 0 || safeVisits > 0 || safeAffinity > 0;
 
   // Stage-transition animation: when the cloak label changes (after first paint),
   // briefly glow the cloak and cross-fade the label so ascension feels alive.
