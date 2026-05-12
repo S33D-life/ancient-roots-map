@@ -24,8 +24,9 @@ export class PlantHeartsRefused extends Error {
     public code: PlantHeartsError | "rpc_error",
     public balance?: number,
     public required?: number,
+    public detail?: string,
   ) {
-    super(code);
+    super(detail || code);
     this.name = "PlantHeartsRefused";
   }
 }
@@ -77,7 +78,7 @@ export function useTreeRooting(
         speciesKey: params.speciesKey,
       });
       if (result.ok === false) {
-        throw new PlantHeartsRefused(result.error, result.balance, result.required);
+        throw new PlantHeartsRefused(result.error, result.balance, result.required, (result as any).message);
       }
       return result.root;
     },

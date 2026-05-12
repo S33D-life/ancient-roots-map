@@ -100,6 +100,7 @@ const ContributionFeed = lazy(() => import("@/components/contributions/Contribut
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
 const MycelialWhispersBeneath = lazy(() => import("@/components/MycelialWhispersBeneath"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
+import AncientFriendDebugPanel from "@/components/AncientFriendDebugPanel";
 const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
 const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
@@ -1104,6 +1105,15 @@ const TreeDetailPage = () => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }}
                 />
+                {import.meta.env.DEV && (
+                  <AncientFriendDebugPanel
+                    treeId={tree.id}
+                    treeSpecies={tree.species}
+                    userId={userId}
+                    isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
+                    isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
+                  />
+                )}
               </Suspense>
             )}
 

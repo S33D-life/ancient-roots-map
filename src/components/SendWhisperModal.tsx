@@ -171,6 +171,29 @@ export default function SendWhisperModal({
     return () => clearTimeout(t);
   }, [recipientSearch, recipientScope, userId]);
 
+  // Map a raw send-whisper error to a specific, friendly explanation.
+  // Logs the full error in development so testers can see exactly what failed.
+  const explainWhisperError = (err: any, data?: any): string => {
+    if (import.meta.env.DEV) console.warn("[whisper] send failed", { err, data });
+    if (!userId) return "You're not signed in. Please sign in and try again.";
+    if (recipientScope === "PRIVATE" && !recipientUserId) return "Choose who should receive this whisper.";
+    if (audienceType === "group" && !groupId) return "Choose a group to whisper into.";
+    if (!treeId) return "This tree is missing — please reopen from the map.";
+    const code = err?.code || data?.error;
+    const msg: string = err?.message || data?.error || "";
+    if (code === "insufficient_hearts" || /insufficient_hearts/i.test(msg))
+      return "Offer a few hearts to send this into the network.";
+    if (code === "23503" || /foreign key|tree.*not.*exist/i.test(msg))
+      return "This tree could not be found in the Atlas.";
+    if (code === "42501" || /row-level security|permission denied/i.test(msg))
+      return "Permission was refused. Visit this tree first or sign back in.";
+    if (/Failed to fetch|NetworkError|net::|ECONN/i.test(msg))
+      return "Network hiccup — check your connection and try again.";
+    if (/jwt|JWT|expired|invalid token/i.test(msg))
+      return "Your session expired. Please sign in again.";
+    return "Couldn't send the whisper. Tap again in a moment, or refresh.";
+  };
+
   const handleSend = async () => {
     if (!userId) { toast.error("Please sign in to send a whisper."); return; }
     if (!message.trim()) { toast.error("Write a message first."); return; }
@@ -208,11 +231,7 @@ export default function SendWhisperModal({
         isActive: presence.atTree,
       });
       if (error || !data?.ok) {
-        if (data?.error === "insufficient_hearts") {
-          toast.error("Offer a few hearts to send this into the network.");
-        } else {
-          toast.error("Failed to send whisper.");
-        }
+        toast.error(explainWhisperError(error, data));
         sendError = error || data?.error;
       } else {
         createdWhisperId = data.whisper_id || null;
@@ -231,7 +250,7 @@ export default function SendWhisperModal({
         isActive: presence.atTree,
       });
       if (error) {
-        toast.error("Failed to send whisper.");
+        toast.error(explainWhisperError(error));
         sendError = error;
       } else if (whisperData && typeof whisperData === "object" && "id" in (whisperData as any)) {
         createdWhisperId = (whisperData as any).id;
