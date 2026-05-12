@@ -1072,7 +1072,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       </ResponsiveDialog>
       <RewardReceipt
         visible={showRewardReceipt}
-        onClose={() => { setShowRewardReceipt(false); setRewardResult(null); onOpenChange(false); }}
+        onClose={() => { setShowRewardReceipt(false); setRewardResult(null); onOpenChange(false); routeBackToTree(); }}
         speciesHearts={rewardResult?.speciesHearts}
         speciesFamily={rewardResult?.speciesFamily}
         influence={rewardResult?.influence}
