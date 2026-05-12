@@ -57,8 +57,8 @@ function loadPos(): StoredPos {
       if (typeof p.y === "number" && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  // Default: right edge, above bottom nav safe zone
-  const safeY = Math.round(window.innerHeight * 0.5);
+  // Default: right edge, sitting just above the bottom nav so it doesn't cover content.
+  const safeY = Math.max(EDGE_PAD + 56, window.innerHeight - FAB_SIZE - BOTTOM_SAFE_ZONE);
   return { y: safeY, edge: "right" };
 }
 
