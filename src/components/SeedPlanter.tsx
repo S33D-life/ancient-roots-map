@@ -373,24 +373,27 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         )}
       </AnimatePresence>
 
-      {/* Override toggle — DEV or keeper only */}
-      {canOverride && (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
-          <div className="flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 text-amber-600" />
-            <div>
+      {/* Approximate-location override — visible to keepers/dev always, and to anyone
+          once GPS uncertainty has shown up in the last attempt. */}
+      {showOverrideToggle && (
+        <div className="flex items-start justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <div className="flex items-start gap-2">
+            <Radio className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+            <div className="space-y-0.5">
               <p className="text-[11px] font-serif text-amber-700 dark:text-amber-400">
-                Allow encounter despite uncertain GPS
+                Mark this as an approximate-location encounter
               </p>
-              <p className="text-[9px] font-serif text-muted-foreground">
-                {import.meta.env.DEV ? "Dev override" : "Keeper override"} · usage is logged
+              <p className="text-[10px] font-serif text-muted-foreground leading-snug">
+                Use this only if you're truly beside this tree but GPS is shaky.
+                Your real distance and accuracy are recorded with the action.
+                {isKeeper ? " · keeper override" : import.meta.env.DEV ? " · dev override" : ""}
               </p>
             </div>
           </div>
           <Switch
             checked={overrideEnabled}
             onCheckedChange={setOverrideEnabled}
-            aria-label="Allow encounter despite uncertain GPS"
+            aria-label="Mark this as an approximate-location encounter"
           />
         </div>
       )}
