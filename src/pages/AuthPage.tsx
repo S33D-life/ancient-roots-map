@@ -519,7 +519,9 @@ const AuthPage = () => {
         if (error.message.includes("Email not confirmed")) {
           // Soft modal flow instead of red inline error.
           setUnverifiedEmail(email);
+          writeUnverifiedEmail(email);
           setUnverifiedModalOpen(true);
+          writeUnverifiedModalOpen(true);
           return;
         }
         if (error.message.includes("rate") || error.status === 429) {
