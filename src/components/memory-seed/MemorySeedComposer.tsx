@@ -348,10 +348,11 @@ export default function MemorySeedComposer({
       <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">
-            Share an Offering or Whisper
+            Where should this memory travel?
           </DialogTitle>
           <DialogDescription className="font-serif italic text-xs">
-            Offerings hang in the branches. Whispers travel through the roots.
+            Some memories are hung in the branches. Some are carried through the
+            roots. Some become both.
           </DialogDescription>
         </DialogHeader>
 
@@ -373,46 +374,30 @@ export default function MemorySeedComposer({
           <div className="space-y-4">
             <ResonancePanel resonance={resonance} treeName={treeName} />
 
-            <Tabs
+            <DestinationPicker
               value={destination}
-              onValueChange={(v) => { setDestinationTouched(true); setDestination(v as Destination); }}
-            >
-              <TabsList className="w-full">
-                <TabsTrigger value="offering" className="flex-1 font-serif text-xs">
-                  Leave Offering
-                </TabsTrigger>
-                <TabsTrigger value="whisper" className="flex-1 font-serif text-xs">
-                  Send Whisper
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="offering" className="mt-3">
-                <p className="font-serif text-xs italic text-muted-foreground/80">
-                  Offerings can be seen from afar once placed
-                  {treeName ? ` in “${treeName}”'s branches.` : " in this tree's branches."}
-                </p>
-              </TabsContent>
-              <TabsContent value="whisper" className="mt-3 space-y-3">
-                <p className="font-serif text-xs italic text-muted-foreground/80">
-                  Whispers wait until someone checks in beneath the right tree.
-                </p>
-                <div className="space-y-1.5">
-                  <Label className="font-serif text-xs">Who can find this whisper?</Label>
-                  <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
-                    <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {WHISPER_UNLOCKS.map((u) => (
-                        <SelectItem key={u.value} value={u.value}>
-                          <div>
-                            <div>{u.label}</div>
-                            <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-            </Tabs>
+              onChange={(d) => { setDestinationTouched(true); setDestination(d); }}
+              treeName={treeName}
+            />
+
+            {(destination === "whisper" || destination === "both") && (
+              <div className="space-y-1.5">
+                <Label className="font-serif text-xs">Who can find this whisper?</Label>
+                <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
+                  <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {WHISPER_UNLOCKS.map((u) => (
+                      <SelectItem key={u.value} value={u.value}>
+                        <div>
+                          <div>{u.label}</div>
+                          <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <Label className="font-serif text-xs">Type</Label>
