@@ -368,6 +368,8 @@ const App = () => {
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/reset-password" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/welcome" element={<WelcomePage />} />
+                <Route path="/email-confirmed" element={<Navigate to="/welcome" replace />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
