@@ -688,15 +688,90 @@ const AuthPage = () => {
     );
   }
 
-  // Success / confirmation screens
-  if (view === "verify-email" || view === "magic-sent" || view === "reset-sent") {
+  // Dedicated verification waiting screen — feels like progress, not failure.
+  if (view === "verify-email") {
+    const openMail = () => {
+      // mailto: with no recipient opens the default mail app on most mobile OSes.
+      window.location.href = "mailto:";
+    };
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-background">
+        <div className="w-full max-w-sm">
+          <div
+            className="rounded-2xl p-6 md:p-8 shadow-xl space-y-5 text-center border"
+            style={{
+              background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card) / 0.95))",
+              borderColor: "hsl(var(--primary) / 0.35)",
+            }}
+          >
+            <div
+              className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
+              style={{
+                background: "hsl(var(--primary) / 0.15)",
+                border: "1px solid hsl(var(--primary) / 0.4)",
+                boxShadow: "0 0 24px hsl(var(--primary) / 0.25)",
+              }}
+            >
+              <Sparkles className="w-7 h-7 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-serif">🌱 Your account has been created</h1>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                We've sent a confirmation email to{" "}
+                <span className="text-foreground font-medium">{email || "your inbox"}</span>.
+                <br />
+                Please open the link in the email to enter the grove.
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <Button onClick={openMail} className="w-full font-serif gap-2">
+                <Mail className="w-4 h-4" /> Open Mail App
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleResendVerification(email)}
+                disabled={resending}
+                className="w-full font-serif gap-2"
+              >
+                {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                Resend Verification Email
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => { setView("signup"); clearErrors(); }}
+                className="w-full font-serif gap-2"
+              >
+                <Pencil className="w-4 h-4" /> Change Email Address
+              </Button>
+              <button
+                onClick={() => { setView("login"); clearErrors(); }}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1"
+              >
+                ← Back to Login
+              </button>
+            </div>
+
+            <p
+              className="text-[11px] leading-relaxed pt-2 border-t"
+              style={{
+                color: "hsl(var(--muted-foreground))",
+                borderColor: "hsl(var(--primary) / 0.15)",
+              }}
+            >
+              Emails sometimes land in <span className="font-medium">Junk</span>,{" "}
+              <span className="font-medium">Spam</span>, or{" "}
+              <span className="font-medium">Promotions</span>.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Magic link / reset email confirmation screens
+  if (view === "magic-sent" || view === "reset-sent") {
     const configs = {
-      "verify-email": {
-        icon: <Mail className="w-8 h-8 text-primary" />,
-        title: "Check your inbox",
-        desc: `We've sent a verification link to ${email}. Click it to activate your account.`,
-        action: "Back to Login",
-      },
       "magic-sent": {
         icon: <Wand2 className="w-8 h-8 text-primary" />,
         title: "Magic link sent!",
