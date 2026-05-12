@@ -179,7 +179,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setLocatingMessage("Locating your position…");
     const result = await plantSeed(treeId, treeLat, treeLng, {
       onAttempt,
-      override: overrideEnabled && canOverride,
+      override: overrideEnabled,
     });
     setPlanting(false);
     setLocatingMessage(null);
