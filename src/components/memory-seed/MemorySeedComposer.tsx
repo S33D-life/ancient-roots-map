@@ -108,7 +108,7 @@ export const TYPES: SeedTypeMeta[] = [
   { value: "photo",  label: "Photo",   hint: "Paste a photo URL for now (upload coming).", showMediaUrl: true },
   { value: "artwork", label: "Painting / artwork", hint: "Title, artist, and a link to the image if you have one.", showMediaUrl: true, authorLabel: "Artist" },
   { value: "voice_note", label: "Voice note", hint: "Voice notes coming soon.", placeholder: true },
-  { value: "bloom",  label: "Bloom",   hint: "Bloom offerings coming soon.", placeholder: true },
+  { value: "bloom",  label: "Bloom",   hint: "A nearby flower, blossom, petal, or fruiting sign.", showMediaUrl: true },
 ];
 
 const WHISPER_UNLOCKS: { value: WhisperUnlock; label: string; hint: string }[] = [
