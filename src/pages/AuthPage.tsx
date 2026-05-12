@@ -455,7 +455,13 @@ const AuthPage = () => {
       toast({ title: "Enter your email first", description: "We need an email to resend the link." });
       return;
     }
+    if (Date.now() < resendCooldownUntil) {
+      const sec = Math.ceil((resendCooldownUntil - Date.now()) / 1000);
+      setResendNote(`Please wait ${sec}s before requesting another email.`);
+      return;
+    }
     setResending(true);
+    setResendNote(null);
     try {
       const { error } = await supabase.auth.resend({
         type: "signup",
@@ -463,13 +469,54 @@ const AuthPage = () => {
         options: { emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) throw error;
-      toast({ title: "Verification email sent 🌱", description: `Check ${addr} (and Junk / Spam / Promotions).` });
+      writePendingEmail(addr);
+      authLog("resend ok", { addr });
+      setResendCooldownUntil(Date.now() + 30_000);
+      setResendNote("Sent! Check your inbox (and Junk / Spam / Promotions).");
+      toast({ title: "Verification email sent 🌱", description: `Sent to ${addr}.` });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not resend verification email";
-      toast({ title: "Could not resend", description: msg, variant: "destructive" });
+      const raw = err instanceof Error ? err.message : "Could not resend verification email";
+      const isRate = /rate|too many|429/i.test(raw);
+      if (isRate) {
+        setResendCooldownUntil(Date.now() + 60_000);
+        setResendNote("Email service is throttling — please wait a minute and try again.");
+      } else {
+        setResendNote(raw);
+      }
+      authLog("resend error", { isRate, raw });
+      toast({ title: "Could not resend", description: raw, variant: "destructive" });
     } finally {
       setResending(false);
     }
+  };
+
+  // "I've verified — continue" button. Try silent sign-in if we still have the password,
+  // otherwise drop the user back at the login form with a friendly nudge.
+  const handleContinueAfterVerification = async () => {
+    const addr = (unverifiedEmail || email || readPendingEmail()).trim();
+    authLog("continue-after-verify clicked", { hasPassword: !!password, addr });
+    if (addr && password) {
+      setVerifyChecking(true);
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email: addr, password });
+        if (!error) {
+          // onAuthStateChange will fire SIGNED_IN, show the welcome toast and clear pending email.
+          return;
+        }
+        if (error.message.includes("Email not confirmed")) {
+          setResendNote("Still waiting for confirmation — please open the link in your email first.");
+          return;
+        }
+        // Any other error → fall through to login fallback.
+        authLog("silent sign-in failed", error.message);
+      } finally {
+        setVerifyChecking(false);
+      }
+    }
+    setEmail(addr);
+    setView("login");
+    clearErrors();
+    toast({ title: "Great — please sign in to enter the grove." });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
