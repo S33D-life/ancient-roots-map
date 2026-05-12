@@ -4,6 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /** Set up event delegation for popup buttons (wish + share + plant seed) */
 export function setupPopupActions(container: HTMLElement): () => void {
@@ -241,7 +242,7 @@ export function setupPopupActions(container: HTMLElement): () => void {
       const treeId = shareBtn.dataset.shareTree;
       if (!treeId) return;
 
-      const url = `${window.location.origin}/tree/${treeId}`;
+      const url = getPublicAppUrl(`/tree/${treeId}`);
       try {
         if (navigator.share) {
           await navigator.share({ title: "Meet this Ancient Friend", url });

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface StaffQRCodeProps {
   staffCode: string;
@@ -16,7 +17,7 @@ interface StaffQRCodeProps {
 export default function StaffQRCode({ staffCode, size = 96, className }: StaffQRCodeProps) {
   const [copied, setCopied] = useState(false);
 
-  const staffUrl = `${window.location.origin}/staff/${encodeURIComponent(staffCode)}`;
+  const staffUrl = getPublicAppUrl(`/staff/${encodeURIComponent(staffCode)}`);
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size * 2}x${size * 2}&data=${encodeURIComponent(staffUrl)}&bgcolor=0a0a08&color=c8a96e&margin=1&format=svg`;
 
   const handleCopy = async () => {

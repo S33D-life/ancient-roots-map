@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Search, UserPlus, UserMinus, Heart, HeartHandshake, Check, X, Loader2, Users, Copy, TreeDeciduous, Gift, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface Props {
   userId: string;
@@ -155,7 +156,7 @@ const DashboardWanderers = ({ userId }: Props) => {
     setGeneratingInvite(true);
     // Reuse existing invite link if available
     if (inviteCode) {
-      const link = `${window.location.origin}/auth?invite=${inviteCode}`;
+      const link = getPublicAppUrl(`/auth?invite=${inviteCode}`);
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });
       setGeneratingInvite(false);
@@ -172,7 +173,7 @@ const DashboardWanderers = ({ userId }: Props) => {
       return;
     }
     if (data) {
-      const link = `${window.location.origin}/auth?invite=${data.code}`;
+      const link = getPublicAppUrl(`/auth?invite=${data.code}`);
       setInviteCode(data.code);
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });

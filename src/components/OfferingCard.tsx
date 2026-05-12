@@ -15,6 +15,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import SkystampSeal from "@/components/SkystampSeal";
 import { getOfferingPhotos, getOfferingCover } from "@/utils/offeringPhotos";
 import type { Database } from "@/integrations/supabase/types";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -78,7 +79,7 @@ const SealedByLabel = ({ staff }: { staff: string | null }) => {
 };
 
 const shareOffering = async (offering: Offering) => {
-  const url = `${window.location.origin}/tree/${offering.tree_id}`;
+  const url = getPublicAppUrl(`/tree/${offering.tree_id}`);
   const text = `"${offering.title}" — an offering at S33D`;
   try {
     if (navigator.share) {

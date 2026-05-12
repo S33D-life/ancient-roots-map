@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanion } from "@/contexts/CompanionContext";
 import type { CompanionFlowMode } from "@/lib/companion-types";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /**
  * CompanionPairDialog — desktop overlay with two modes:
@@ -47,7 +48,7 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
 
   // Build the companion URL for QR
   const companionUrl = session
-    ? `${window.location.origin}/companion?code=${session.code}`
+    ? getPublicAppUrl(`/companion?code=${session.code}`)
     : "";
 
   const qrApiUrl = session

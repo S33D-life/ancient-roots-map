@@ -12,6 +12,7 @@ import { type TreeCardData } from "@/utils/treeCardTypes";
 import { useTreesPresenceLookup } from "@/hooks/use-trees-presence-lookup";
 import { Search, Globe, MapPin, TreeDeciduous, Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 type DiscoveryList = "all" | "global_notable" | "european_monumental" | "uk_ancient";
 
@@ -115,7 +116,7 @@ const DiscoveryPage = () => {
 
   const handleShare = async (name: string, description: string, url: string) => {
     // Always share the canonical page URL, never an internal function route
-    const shareUrl = url.includes("/functions/v1/") ? window.location.origin + (url.match(/\/tree\/[a-f0-9-]+/i)?.[0] || "") : url;
+    const shareUrl = url.includes("/functions/v1/") ? getPublicAppUrl(url.match(/\/tree\/[a-f0-9-]+/i)?.[0] || "/") : url;
     if (navigator.share) {
       navigator.share({ title: name, text: description, url: shareUrl }).catch(() => {});
     } else {

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import SeedNudge from "@/components/SeedNudge";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 const CANOPY_RADIUS_KM = 0.1; // 100m
 
@@ -418,7 +419,7 @@ export default function CanopyCheckinModal({
           onDismiss={() => setShowShareOverlay(false)}
           treeName={treeName}
           treeSpecies={treeSpecies}
-          shareLink={`${window.location.origin}/tree/${treeId}`}
+          shareLink={getPublicAppUrl(`/tree/${treeId}`)}
         />
       </>
     );

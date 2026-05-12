@@ -16,6 +16,7 @@ import {
   Gift, TreeDeciduous, Heart, Copy, Users, ArrowLeft, Loader2, Sprout, Share2, Milestone,
 } from "lucide-react";
 import TelegramBotLink from "@/components/referrals/TelegramBotLink";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /* ── Milestones — presented as grove growth, not leaderboard ── */
 const MILESTONES = [
@@ -96,7 +97,7 @@ const ReferralsPage = () => {
       .single();
     if (data) {
       setInviteCode(data.code);
-      const link = `${window.location.origin}/auth?invite=${data.code}`;
+      const link = getPublicAppUrl(`/auth?invite=${data.code}`);
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });
     }
@@ -106,7 +107,7 @@ const ReferralsPage = () => {
     setGenerating(false);
   };
 
-  const shareLink = inviteCode ? `${window.location.origin}/auth?invite=${inviteCode}` : null;
+  const shareLink = inviteCode ? getPublicAppUrl(`/auth?invite=${inviteCode}`) : null;
 
   const shareVia = (platform: "whatsapp" | "telegram" | "native") => {
     if (!shareLink) return;

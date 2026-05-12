@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMarketSeeds } from "@/hooks/use-market-seeds";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /**
  * GiftSeedSender — modal to send daily gift seeds to friends (in-app or invite link).
@@ -65,7 +66,7 @@ const GiftSeedSender = () => {
   };
 
   const inviteUrl = inviteCode
-    ? `${window.location.origin}/auth?gift=${inviteCode}`
+    ? getPublicAppUrl(`/auth?gift=${inviteCode}`)
     : null;
 
   if (!userId) return null;

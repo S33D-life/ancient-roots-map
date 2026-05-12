@@ -31,6 +31,7 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
@@ -95,7 +96,7 @@ function filterStaffs(items: StaffItem[], filter: StaffFilter): StaffItem[] {
 }
 
 const handleShare = async (title: string, text: string) => {
-  const url = `${window.location.origin}/library/staff-room`;
+  const url = getPublicAppUrl(`/library/staff-room`);
   try {
     if (navigator.share) {
       await navigator.share({ title, text, url });

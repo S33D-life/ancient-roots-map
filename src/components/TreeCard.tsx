@@ -14,6 +14,7 @@ import QuickSeedButton from "@/components/QuickSeedButton";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import AccessibilityFrame from "@/components/AccessibilityFrame";
 import { useTreeAccessibility } from "@/hooks/use-tree-accessibility";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 export type TreeCardVariant = "gallery" | "compact";
 
@@ -133,7 +134,7 @@ const TreeCard = ({
     onShare?.(
       tree.name,
       `${tree.name} — a ${tree.species} on the Ancient Friends Map`,
-      `${window.location.origin}/tree/${tree.id}`
+      getPublicAppUrl(`/tree/${tree.id}`)
     );
   };
 
