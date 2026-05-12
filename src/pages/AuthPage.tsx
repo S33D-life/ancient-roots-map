@@ -222,6 +222,50 @@ const AuthPage = () => {
     return () => window.clearInterval(id);
   }, [resendCooldownUntil, tickNow]);
 
+  // Auto-redirect once the email is confirmed.
+  // Supabase syncs sessions across tabs via storage events (so onAuthStateChange
+  // fires automatically when the user clicks the link in another tab), but we
+  // also poll as a safety net for browsers / webviews where storage events
+  // are flaky (Safari private mode, some in-app browsers, BFCache restores).
+  // We additionally re-check on tab focus.
+  useEffect(() => {
+    if (view !== "verify-email") return;
+
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (data.session) {
+          authLog("verify-email poll detected session — redirecting");
+          // onAuthStateChange will handle the warm toast + cleanup;
+          // we still navigate here to cover the case where the listener
+          // fires before this view mounts.
+          clearPendingEmail();
+          navigate(resolvePostAuthPath(), { replace: true });
+        }
+      } catch (e) {
+        authLog("verify-email poll error", e);
+      }
+    };
+
+    // Run once on entry, then every 4s.
+    void check();
+    const id = window.setInterval(check, 4000);
+
+    const onFocus = () => { void check(); };
+    const onVisibility = () => { if (document.visibilityState === "visible") void check(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [view, navigate, resolvePostAuthPath]);
+
 
   // Helper: is the current flow a password recovery flow?
   const isRecoveryFlow = () =>
