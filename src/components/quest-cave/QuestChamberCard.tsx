@@ -128,20 +128,25 @@ export default function QuestChamberCard({
         </div>
 
         <ChevronDown
-          className={`w-4 h-4 text-muted-foreground/70 shrink-0 transition-transform duration-300 ${
+          className={`w-4 h-4 text-muted-foreground/70 shrink-0 transition-transform duration-300 motion-reduce:transition-none ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden
         />
+        <span className="sr-only">{open ? "Collapse" : "Expand"} {title}</span>
       </button>
 
       {/* CSS-grid expand: animates grid-template-rows 0fr → 1fr (GPU/composited,
           no per-frame layout measurement, motion-safe). */}
       <div
+        id={bodyId}
+        role="region"
+        aria-labelledby={headerId}
+        aria-hidden={!open}
+        {...(!open ? ({ inert: "" } as Record<string, string>) : {})}
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
-        aria-hidden={!open}
       >
         <div className="min-h-0 overflow-hidden [contain:layout_paint] [will-change:grid-template-rows]">
           <div className="px-3 sm:px-4 pb-4 pt-1 space-y-3 border-t border-border/30">
