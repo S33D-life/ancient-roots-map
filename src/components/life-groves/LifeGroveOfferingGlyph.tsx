@@ -90,9 +90,34 @@ function Glyph({ type, variant }: { type: OfferingType; variant: "tree" | "card"
       return <Lantern variant={variant} />;
     case "video":
       return <Window />;
+    case "bloom":
+      return <Bloom />;
     default:
       return <Leaf />;
   }
+}
+
+function Bloom() {
+  // Five soft petals around a gold heart — a tender flower memory glyph.
+  return (
+    <g>
+      {[0, 72, 144, 216, 288].map((deg) => (
+        <ellipse
+          key={deg}
+          cx="16"
+          cy="10.5"
+          rx="3.4"
+          ry="5.2"
+          fill={LEAF_SOFT}
+          stroke={LEAF}
+          strokeWidth="0.7"
+          transform={`rotate(${deg} 16 16)`}
+        />
+      ))}
+      <circle cx="16" cy="16" r="2.6" fill={GOLD} stroke={GOLD_SOFT} strokeWidth="0.6" />
+      <circle cx="16" cy="16" r="0.9" fill={INK} opacity="0.55" />
+    </g>
+  );
 }
 
 function Leaf() {
