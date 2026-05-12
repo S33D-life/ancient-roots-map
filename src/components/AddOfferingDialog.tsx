@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import type { OfferingPrompt } from "@/hooks/use-seasonal-offerings";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
@@ -139,6 +140,32 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const submittingRef = useRef(false);
   const { toast } = useToast();
   const { online } = useConnectivity();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const routeBackToTree = useCallback(() => {
+    if (!treeId) return;
+    const targetPath = `/tree/${treeId}`;
+    if (!location.pathname.startsWith(targetPath)) {
+      navigate(targetPath);
+    }
+  }, [treeId, location.pathname, navigate]);
+
+  /**
+   * Centralised post-success handoff:
+   * 1) close the offering dialog so it isn't trapped behind the receipt
+   * 2) show the heart reward receipt (or just close, if no reward)
+   * 3) on receipt close, ensure the user lands on the tree detail page
+   */
+  const finishOfferingFlow = useCallback((earnedReward: boolean) => {
+    setShowCelebration(false);
+    onOpenChange(false);
+    if (earnedReward) {
+      setShowRewardReceipt(true);
+    } else {
+      routeBackToTree();
+    }
+  }, [onOpenChange, routeBackToTree]);
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
   const [tagQuery, setTagQuery] = useState("");
@@ -461,7 +488,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 subtitle: "Photos will upload when you're back online",
               });
               setShowCelebration(true);
-              setTimeout(() => { setShowCelebration(false); onOpenChange(false); }, 2400);
+              setTimeout(() => { finishOfferingFlow(false); }, 2400);
               resetForm();
               return;
             } catch {
@@ -559,7 +586,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const treePart = treeName ? ` to ${treeName}` : "";
       setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed${treePart}`, subtitle: "Your offering is now part of this tree's story" });
       setShowCelebration(true);
-      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2400);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2400);
       resetForm();
       return;
     } catch (err: any) {
@@ -614,7 +641,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
       setShowCelebration(true);
       resetForm();
-      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
       toast({ title: "Something went wrong", description: "Try again — your selection is still here", variant: "destructive" });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
@@ -651,7 +678,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       setCelebrationMsg({ emoji: "🎙️", message: "Voice offering sealed!", subtitle: "Your voice has been offered" });
       setShowCelebration(true);
       resetForm();
-      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
       toast({ title: "Something went wrong", description: "Try again — your recording is still here", variant: "destructive" });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
@@ -704,7 +731,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       setCelebrationMsg({ emoji: "📖", message: "Your book has been placed", subtitle: `"${data.title}" is now in the Library` });
       setShowCelebration(true);
       resetForm();
-      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
       toast({ title: "Something went wrong", description: "Try again — your entry is still here", variant: "destructive" });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
@@ -1045,7 +1072,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       </ResponsiveDialog>
       <RewardReceipt
         visible={showRewardReceipt}
-        onClose={() => { setShowRewardReceipt(false); setRewardResult(null); onOpenChange(false); }}
+        onClose={() => { setShowRewardReceipt(false); setRewardResult(null); onOpenChange(false); routeBackToTree(); }}
         speciesHearts={rewardResult?.speciesHearts}
         speciesFamily={rewardResult?.speciesFamily}
         influence={rewardResult?.influence}
