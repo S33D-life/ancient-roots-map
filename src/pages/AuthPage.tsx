@@ -696,6 +696,7 @@ const AuthPage = () => {
         userId: data.user?.id ?? null,
       });
       writePendingEmail(email);
+      writeUnverifiedEmail(email);
       setUnverifiedEmail(email);
       authLog("signup ok → verify-email", { email });
       setView("verify-email");
