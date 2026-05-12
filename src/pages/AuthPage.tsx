@@ -266,34 +266,109 @@ const AuthPage = () => {
     return () => window.clearInterval(id);
   }, [resendCooldownUntil, tickNow]);
 
+  // Best-effort safety check: confirm the auth user exists, that their email is
+  // verified, and that a profiles row is present. The DB trigger normally creates
+  // the profile on signup; this is a recovery path for older accounts or trigger
+  // hiccups. Returns true when it's safe to enter the grove.
+  const ensureProfileAndVerified = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        authLog("safety: getUser failed", userErr?.message);
+        return false;
+      }
+      const u = userData.user;
+      // email_confirmed_at is the canonical verified-email field on auth.users.
+      const verified = !!(u.email_confirmed_at || (u as any).confirmed_at);
+      if (!verified) {
+        authLog("safety: user found but email not yet verified");
+        return false;
+      }
+      // Best-effort profile recovery — never block the user if this fails.
+      try {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", u.id)
+          .maybeSingle();
+        if (!prof) {
+          authLog("safety: profile missing → upserting recovery row");
+          await supabase.from("profiles").upsert({ id: u.id }, { onConflict: "id" });
+        }
+      } catch (e) {
+        console.warn("[auth] profile recovery upsert failed (non-blocking):", e);
+      }
+      return true;
+    } catch (e) {
+      authLog("safety check threw", e);
+      return false;
+    }
+  }, []);
+
+  // Detect expired / used confirmation links coming back via URL hash or query.
+  // Supabase appends ?error=... or #error=... when the link is invalid.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const err = params.get("error") || hashParams.get("error");
+    const errCode = params.get("error_code") || hashParams.get("error_code");
+    const errDesc =
+      params.get("error_description") || hashParams.get("error_description") || "";
+    if (!err) return;
+    // Recovery flow handles its own errors — leave it alone.
+    if (sessionStorage.getItem("s33d_recovery_active") === "1") return;
+    const looksExpired =
+      /expired|invalid|otp_expired|access_denied/i.test(errCode || "") ||
+      /expired|invalid|already/i.test(errDesc);
+    if (looksExpired) {
+      setVerifyExpiredMessage("This link has expired or has already been used.");
+      setVerifyStatus("expired");
+      setView("verify-email");
+      authLog("verification link expired", { err, errCode, errDesc });
+    }
+  }, []);
+
   // Auto-redirect once the email is confirmed.
   // Supabase syncs sessions across tabs via storage events (so onAuthStateChange
   // fires automatically when the user clicks the link in another tab), but we
   // also poll as a safety net for browsers / webviews where storage events
   // are flaky (Safari private mode, some in-app browsers, BFCache restores).
-  // We additionally re-check on tab focus.
+  // We additionally re-check on tab focus, and listen on a BroadcastChannel
+  // so a sibling tab that completes auth can close this one cleanly.
   useEffect(() => {
     if (view !== "verify-email") return;
 
     let cancelled = false;
+    const finish = async (source: string) => {
+      if (hasDetectedSessionRef.current) return; // single-shot
+      hasDetectedSessionRef.current = true;
+      authLog("verify-email session detected", { source });
+      setVerifyStatus("redirecting");
+      const safe = await ensureProfileAndVerified();
+      if (cancelled) return;
+      if (!safe) {
+        // Roll back so the user can retry — usually means email_confirmed_at
+        // hasn't propagated yet, or the session was revoked.
+        hasDetectedSessionRef.current = false;
+        setVerifyStatus("waiting");
+        return;
+      }
+      clearPendingEmail();
+      clearUnverifiedEmail();
+      navigate(resolvePostAuthPath(), { replace: true });
+    };
+
     const check = async () => {
+      if (hasDetectedSessionRef.current) return;
       try {
         const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-        if (data.session) {
-          authLog("verify-email poll detected session — redirecting");
-          // onAuthStateChange will handle the warm toast + cleanup;
-          // we still navigate here to cover the case where the listener
-          // fires before this view mounts.
-          clearPendingEmail(); clearUnverifiedEmail();
-          navigate(resolvePostAuthPath(), { replace: true });
-        }
+        if (cancelled || hasDetectedSessionRef.current) return;
+        if (data.session) await finish("poll");
       } catch (e) {
         authLog("verify-email poll error", e);
       }
     };
 
-    // Run once on entry, then every 4s.
     void check();
     const id = window.setInterval(check, 4000);
 
@@ -302,13 +377,25 @@ const AuthPage = () => {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Cross-tab handshake. Another tab that completes auth posts "verified",
+    // letting this tab redirect immediately and skip duplicate toasts.
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("s33d-auth");
+      channel.onmessage = (e) => {
+        if (e?.data?.type === "verified") void finish("broadcast");
+      };
+    } catch { /* BroadcastChannel not supported — polling still covers us */ }
+
     return () => {
       cancelled = true;
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
+      try { channel?.close(); } catch {}
     };
-  }, [view, navigate, resolvePostAuthPath]);
+  }, [view, navigate, resolvePostAuthPath, ensureProfileAndVerified]);
+
 
 
   // Helper: is the current flow a password recovery flow?
