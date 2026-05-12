@@ -12,6 +12,7 @@ import { type TreeCardData } from "@/utils/treeCardTypes";
 import { useTreesPresenceLookup } from "@/hooks/use-trees-presence-lookup";
 import { Search, Globe, MapPin, TreeDeciduous, Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 type DiscoveryList = "all" | "global_notable" | "european_monumental" | "uk_ancient";
 
