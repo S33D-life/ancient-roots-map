@@ -131,6 +131,10 @@ export const OFFERING_TYPES: Array<{
   { value: "letter", label: "Letter", glyph: "✉️" },
   { value: "voice_note", label: "Voice note", glyph: "🏮" },
   { value: "video", label: "Video", glyph: "🪟" },
+  // "Flower Memory" — a bloom for this grove. Stored as offering_type="bloom"
+  // (life_grove_offerings.offering_type is a free-form string column, so this
+  // is a safe additive value with no enum migration required).
+  { value: "bloom", label: "Flower Memory", glyph: "🌸" },
 ];
 
 export interface LifeGrove {
