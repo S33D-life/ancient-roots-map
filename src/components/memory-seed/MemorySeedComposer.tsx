@@ -216,40 +216,65 @@ export default function MemorySeedComposer({
     }
     setSubmitting(true);
     try {
-      if (destination === "offering") {
-        await saveAsOffering();
-      } else {
-        await saveAsWhisper();
+      const wantsOffering = destination === "offering" || destination === "both";
+      const wantsWhisper  = destination === "whisper"  || destination === "both";
+
+      // For "both" we save the offering first so the whisper can reference it
+      // in metadata when a safe column is available. (TODO below.)
+      let offeringId: string | undefined;
+      let whisperId: string | undefined;
+
+      if (wantsOffering) {
+        offeringId = await saveAsOffering();
       }
+      if (wantsWhisper) {
+        // TODO(linkage): when offerings/whispers gain a metadata jsonb or
+        // explicit `source_offering_id` column, pass `offeringId` here so the
+        // two halves of a "both" memory can be cross-referenced. For now we
+        // dispatch two events but write no DB-level link.
+        whisperId = await saveAsWhisper();
+      }
+
+      // Touch the unused vars so future linkage work is obvious.
+      void offeringId; void whisperId;
+
       setConfirmed(destination);
-      window.dispatchEvent(new CustomEvent(
-        destination === "offering" ? "offering-created" : "whisper-sent",
-      ));
+
+      if (wantsOffering) {
+        window.dispatchEvent(new CustomEvent("offering-created"));
+      }
+      if (wantsWhisper) {
+        window.dispatchEvent(new CustomEvent("whisper-sent"));
+      }
     } catch (err) {
       console.error("MemorySeedComposer error:", err);
-      toast.error(
-        destination === "offering"
-          ? "The offering could not settle in the branches. Try again."
-          : "The whisper could not enter the roots. Try again.",
-      );
+      const msg =
+        destination === "whisper"
+          ? "The whisper could not enter the roots. Try again."
+          : destination === "offering"
+            ? "The offering could not settle in the branches. Try again."
+            : "Part of the memory could not travel. Try again.";
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  async function saveAsOffering() {
+  async function saveAsOffering(): Promise<string | undefined> {
     const offType = toOfferingType(type);
     const composedTitle =
       title.trim() ||
       (type === "song" && author ? `${author}` : "") ||
       (type === "book" && author ? `${title || "Untitled"} — ${author}` : "") ||
+      (type === "artwork" && author ? `${title || "Untitled"} — ${author}` : "") ||
       `${meta.label}`;
     const composedContent = [
       body.trim(),
       author.trim() ? `— ${author.trim()}` : "",
       note.trim() ? `Note: ${note.trim()}` : "",
-      type === "recipe" ? "(Recipe offering)" : "",
-      type === "quote"  ? "(Quote offering)"  : "",
+      type === "recipe"  ? "(Recipe offering)"  : "",
+      type === "quote"   ? "(Quote offering)"   : "",
+      type === "artwork" ? "(Artwork offering)" : "",
     ].filter(Boolean).join("\n\n");
 
     const insertBody: Record<string, unknown> = {
@@ -268,12 +293,22 @@ export default function MemorySeedComposer({
       insertBody.quote_author = author.trim() || null;
     }
 
-    const { error } = await supabase.from("offerings").insert(insertBody as never);
+    const { data, error } = await supabase
+      .from("offerings")
+      .insert(insertBody as never)
+      .select("id")
+      .single();
     if (error) throw error;
+    return (data as { id?: string } | null)?.id;
   }
 
-  async function saveAsWhisper() {
+  async function saveAsWhisper(): Promise<string | undefined> {
+    // Carry the seed-type label so future Tree Radio / Star Trail surfaces can
+    // distinguish "song shared as whisper" from "story whispered". We tuck it
+    // into the message body as a small bracketed prefix — no schema change.
+    const typeLabel = `[${meta.label}]`;
     const message = [
+      typeLabel,
       title.trim() ? `**${title.trim()}**` : "",
       body.trim(),
       author.trim() ? `— ${author.trim()}` : "",
@@ -288,7 +323,7 @@ export default function MemorySeedComposer({
       : unlock === "same_species" ? "SPECIES_MATCH"
       : "ANY_TREE";
 
-    const { error } = await sendWhisper({
+    const { data, error } = await sendWhisper({
       senderUserId: userId!,
       recipientScope: "PUBLIC",
       treeAnchorId: treeId,
@@ -303,6 +338,7 @@ export default function MemorySeedComposer({
       isActive: true,
     });
     if (error) throw error;
+    return (data as { id?: string } | null | undefined)?.id;
   }
 
   // ── Render ────────────────────────────────────────────────
