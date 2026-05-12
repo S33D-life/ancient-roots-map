@@ -203,7 +203,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setLocatingMessage("Locating your position…");
     const result = await collectHeart(seed.id, {
       onAttempt,
-      override: overrideEnabled && canOverride,
+      override: overrideEnabled,
     });
     setCollecting(null);
     setLocatingMessage(null);
