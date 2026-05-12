@@ -14,25 +14,44 @@ export interface RegaliaChamberProps {
   staffSpecies?: string | null;
   isPermanent?: boolean;
   affinitySpecies?: string[];
-  /** Distinct species count, used to drive cloak evolution stage. */
+  /** Distinct species count — drives breadth signal. */
   speciesCount?: number;
+  /** Visit count — drives streak/return signal. */
+  visits?: number;
+  /** Deepest single-hive count — drives affinity signal. */
+  affinityDepth?: number;
   /** Earned sigils/badges (short labels). */
   sigils?: string[];
   /** Streak label, e.g. "9 moon cycles". */
   streak?: string;
 }
 
+/**
+ * Cloak evolves from a combined resonance score:
+ *   breadth  (species learnt)   weight 1.5
+ *   returns  (visits / streak)  weight 1.0
+ *   affinity (deepest hive)     weight 2.0
+ * Each axis is also softly capped so a single signal can't carry the cloak alone —
+ * the mantle truly thickens only when wandering, returning, and tending all grow.
+ */
 const CLOAK_STAGES = [
-  { min: 0,  label: "Plain wool",         tone: "from-stone-200/30 to-stone-400/20" },
-  { min: 3,  label: "Rooted weave",       tone: "from-emerald-300/30 to-stone-400/25" },
-  { min: 12, label: "Mossbound mantle",   tone: "from-emerald-400/35 to-amber-300/25" },
-  { min: 33, label: "Lichen-threaded",    tone: "from-emerald-500/40 to-amber-400/30" },
-  { min: 66, label: "Heartwood cloak",    tone: "from-amber-500/40 to-emerald-500/35" },
-  { min: 100,label: "Ancient mantle",     tone: "from-amber-400/55 to-emerald-400/45" },
+  { min: 0,   label: "Plain wool",       tone: "from-stone-200/30 to-stone-400/20" },
+  { min: 6,   label: "Rooted weave",     tone: "from-emerald-300/30 to-stone-400/25" },
+  { min: 18,  label: "Mossbound mantle", tone: "from-emerald-400/35 to-amber-300/25" },
+  { min: 40,  label: "Lichen-threaded",  tone: "from-emerald-500/40 to-amber-400/30" },
+  { min: 75,  label: "Heartwood cloak",  tone: "from-amber-500/40 to-emerald-500/35" },
+  { min: 120, label: "Ancient mantle",   tone: "from-amber-400/55 to-emerald-400/45" },
 ];
 
-function cloakStage(species: number) {
-  return [...CLOAK_STAGES].reverse().find((s) => species >= s.min) ?? CLOAK_STAGES[0];
+function resonanceScore(species: number, visits: number, affinity: number) {
+  const breadth  = Math.min(40, species)  * 1.5;   // soft-cap at 40 species
+  const returns  = Math.min(50, visits)   * 1.0;   // soft-cap at 50 visits
+  const affinityScore = Math.min(20, affinity) * 2.0; // soft-cap at 20 in one hive
+  return Math.round(breadth + returns + affinityScore);
+}
+
+function cloakStage(score: number) {
+  return [...CLOAK_STAGES].reverse().find((s) => score >= s.min) ?? CLOAK_STAGES[0];
 }
 
 export default function RegaliaChamber({
