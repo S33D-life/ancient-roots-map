@@ -133,6 +133,11 @@ export default function RegaliaChamber({
           <p className="font-serif text-[10px] uppercase tracking-[0.18em] text-muted-foreground/75 mt-1.5 text-center">
             {cloak.label}
           </p>
+          {nextStage && (
+            <p className="font-serif text-[10px] italic text-muted-foreground/60 mt-0.5 text-center leading-snug">
+              {toNext} resonance to {nextStage.label.toLowerCase()}
+            </p>
+          )}
         </div>
 
         {/* Staff + sigils */}
