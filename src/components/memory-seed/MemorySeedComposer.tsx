@@ -713,7 +713,7 @@ function ResonancePanel({
  * Mobile-friendly: tall tap targets, no nested buttons, keyboard-navigable
  * via native radiogroup semantics.
  */
-function DestinationPicker({
+export function DestinationPicker({
   value,
   onChange,
   treeName,
