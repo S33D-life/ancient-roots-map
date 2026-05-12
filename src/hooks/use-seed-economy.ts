@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logEncounterEvent } from "@/lib/encounterDiagnostics";
 
 const SEEDS_PER_DAY = 3;
 const SEEDS_PER_TREE = 3;
