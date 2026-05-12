@@ -7,8 +7,10 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Shield, Wand2, Sparkles, ArrowRight } from "lucide-react";
+import { Shield, Wand2, Sparkles, ArrowRight, ScrollText, ChevronDown } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
+import { useCloakHistory } from "@/hooks/use-cloak-history";
+import { formatDistanceToNow } from "date-fns";
 
 export interface RegaliaChamberProps {
   staffName?: string | null;
