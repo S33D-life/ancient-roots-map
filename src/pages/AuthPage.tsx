@@ -27,6 +27,9 @@ type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "v
 
 // Persisted across reloads so the verify-email screen can rebuild after refresh.
 const PENDING_EMAIL_KEY = "s33d_pending_verify_email";
+const UNVERIFIED_EMAIL_KEY = "s33d_unverified_email";
+const UNVERIFIED_MODAL_KEY = "s33d_unverified_modal_open";
+
 const readPendingEmail = (): string => {
   try {
     return localStorage.getItem(PENDING_EMAIL_KEY) || sessionStorage.getItem(PENDING_EMAIL_KEY) || "";
@@ -42,6 +45,36 @@ const clearPendingEmail = () => {
   try {
     localStorage.removeItem(PENDING_EMAIL_KEY);
     sessionStorage.removeItem(PENDING_EMAIL_KEY);
+  } catch {}
+};
+
+// Persisted "this email exists but isn't verified" state. Survives refresh so the
+// resend flow and modal still target the right address after the page reloads.
+const readUnverifiedEmail = (): string => {
+  try {
+    return localStorage.getItem(UNVERIFIED_EMAIL_KEY) || sessionStorage.getItem(UNVERIFIED_EMAIL_KEY) || "";
+  } catch { return ""; }
+};
+const writeUnverifiedEmail = (addr: string) => {
+  try {
+    localStorage.setItem(UNVERIFIED_EMAIL_KEY, addr);
+    sessionStorage.setItem(UNVERIFIED_EMAIL_KEY, addr);
+  } catch {}
+};
+const clearUnverifiedEmail = () => {
+  try {
+    localStorage.removeItem(UNVERIFIED_EMAIL_KEY);
+    sessionStorage.removeItem(UNVERIFIED_EMAIL_KEY);
+    sessionStorage.removeItem(UNVERIFIED_MODAL_KEY);
+  } catch {}
+};
+const readUnverifiedModalOpen = (): boolean => {
+  try { return sessionStorage.getItem(UNVERIFIED_MODAL_KEY) === "1"; } catch { return false; }
+};
+const writeUnverifiedModalOpen = (open: boolean) => {
+  try {
+    if (open) sessionStorage.setItem(UNVERIFIED_MODAL_KEY, "1");
+    else sessionStorage.removeItem(UNVERIFIED_MODAL_KEY);
   } catch {}
 };
 
