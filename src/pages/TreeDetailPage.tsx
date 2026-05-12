@@ -100,6 +100,7 @@ const ContributionFeed = lazy(() => import("@/components/contributions/Contribut
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
 const MycelialWhispersBeneath = lazy(() => import("@/components/MycelialWhispersBeneath"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
+import AncientFriendDebugPanel from "@/components/AncientFriendDebugPanel";
 const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
 const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
