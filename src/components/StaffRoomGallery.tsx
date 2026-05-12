@@ -96,7 +96,7 @@ function filterStaffs(items: StaffItem[], filter: StaffFilter): StaffItem[] {
 }
 
 const handleShare = async (title: string, text: string) => {
-  const url = `${window.location.origin}/library/staff-room`;
+  const url = getPublicAppUrl(`/library/staff-room`);
   try {
     if (navigator.share) {
       await navigator.share({ title, text, url });
