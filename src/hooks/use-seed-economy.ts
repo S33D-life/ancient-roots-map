@@ -69,7 +69,7 @@ export interface ActionResult {
 }
 
 export interface ActionOptions {
-  /** Bypass distance gate (DEV or keeper role only — enforced at UI). */
+  /** Manual "approximate location" override — accepts moderate GPS uncertainty. */
   override?: boolean;
   /** Optional callback fired between GPS attempts so the UI can show progress. */
   onAttempt?: (attempt: number) => void;
