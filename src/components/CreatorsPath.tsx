@@ -454,17 +454,6 @@ function PathHero() {
   );
 }
 
-function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
-      <h2 className="font-serif text-base sm:text-lg text-foreground">{title}</h2>
-      <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
-        {eyebrow}
-      </p>
-    </div>
-  );
-}
-
 function PathCard({
   icon: Icon, eyebrow, title, subtitle, to,
 }: {
