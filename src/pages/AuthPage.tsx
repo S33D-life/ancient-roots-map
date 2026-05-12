@@ -634,7 +634,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          throw new Error("Invalid email or password. Please try again.");
+          throw new Error("That email and password didn't quite match. Please try once more.");
         }
         if (error.message.includes("Email not confirmed")) {
           // Soft modal flow instead of red inline error.
@@ -645,15 +645,15 @@ const AuthPage = () => {
           return;
         }
         if (error.message.includes("rate") || error.status === 429) {
-          throw new Error("Too many attempts. Please wait a moment before trying again.");
+          throw new Error("Lots of attempts in a short time — please pause for a moment and try again.");
         }
         throw error;
       }
       toast({ title: "Welcome back!", description: "You've entered the grove" });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
+      const msg = err instanceof Error ? err.message : "This sign-in could not take root yet";
       setFieldErrors(prev => ({ ...prev, password: msg }));
-      toast({ title: "Login failed", description: msg, variant: "destructive" });
+      toast({ title: "This sign-in could not take root yet", description: msg });
     } finally {
       setIsLoading(false);
     }
@@ -694,7 +694,7 @@ const AuthPage = () => {
         setResendNote(raw);
       }
       authLog("resend error", { isRate, raw });
-      toast({ title: "Could not resend", description: raw, variant: "destructive" });
+      toast({ title: "We couldn't send a fresh link just now", description: isRate ? "Please pause a minute and try again." : "Take a breath and try once more — emails sometimes land in Junk or Promotions." });
     } finally {
       setResending(false);
     }
