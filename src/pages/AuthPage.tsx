@@ -428,8 +428,33 @@ const AuthPage = () => {
         // Verification round-trip success: warm welcome and clean up the pending email.
         const wasPending = !!readPendingEmail();
         if (event === "SIGNED_IN" && wasPending) {
-          authLog("verification round-trip complete", { userEmail: session.user?.email });
-          toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
+          // Cross-tab dedupe: only the first tab to observe SIGNED_IN shows the toast.
+          const TOAST_KEY = "s33d_verify_toast_shown";
+          let alreadyShown = false;
+          try { alreadyShown = sessionStorage.getItem(TOAST_KEY) === "1"; } catch {}
+          // Use localStorage as a short-lived cross-tab lock too.
+          try {
+            const stamp = localStorage.getItem(TOAST_KEY);
+            if (stamp && Date.now() - Number(stamp) < 10_000) alreadyShown = true;
+            localStorage.setItem(TOAST_KEY, String(Date.now()));
+          } catch {}
+          if (!alreadyShown) {
+            try { sessionStorage.setItem(TOAST_KEY, "1"); } catch {}
+            authLog("verification round-trip complete", { userEmail: session.user?.email });
+            toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
+          }
+          // Tell sibling verify-email tabs to redirect cleanly without re-toasting.
+          try {
+            const ch = new BroadcastChannel("s33d_auth");
+            ch.postMessage({ type: "verified" });
+            ch.close();
+          } catch {}
+          // Also notify the polling effect's channel name.
+          try {
+            const ch2 = new BroadcastChannel("s33d-auth");
+            ch2.postMessage({ type: "verified" });
+            ch2.close();
+          } catch {}
         }
         clearPendingEmail(); clearUnverifiedEmail();
         // Consume invitation on first sign-in (assigns lineage + decrements inviter).
