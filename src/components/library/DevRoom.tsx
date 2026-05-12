@@ -4,6 +4,8 @@
  * "The tap root feeds the entire living tree."
  */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useHasRole } from "@/hooks/use-role";
+import { isDevHost } from "@/lib/env";
 import { SkillViewer } from "@/components/library/SkillViewer";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
