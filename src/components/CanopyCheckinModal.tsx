@@ -184,10 +184,21 @@ export default function CanopyCheckinModal({
     }
 
     if (error || !result.accepted) {
+      if (import.meta.env.DEV) console.warn("[canopy-checkin] refused", { error, result });
+      // Compute when the next UTC midnight occurs, in the user's local time.
+      const nextUtcMidnight = (() => {
+        const now = new Date();
+        const next = new Date(Date.UTC(
+          now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0,
+        ));
+        const hh = String(next.getHours()).padStart(2, "0");
+        const mm = String(next.getMinutes()).padStart(2, "0");
+        return `${hh}:${mm} your time`;
+      })();
       const friendlyMessages: Record<string, string> = {
-        user_daily_cap: "You've reached your daily check-in limit. Come back tomorrow 🌿",
-        tree_daily_cap: "This tree has reached its daily check-in limit.",
-        too_soon: "Please wait a bit before checking in again.",
+        user_daily_cap: `You've reached your daily check-in limit (per wanderer, resets at ${nextUtcMidnight}).`,
+        tree_daily_cap: `This tree has reached its daily check-in limit (per tree, resets at ${nextUtcMidnight}).`,
+        too_soon: "Please wait a bit before checking in again at this tree.",
         too_far: "You're too far from this tree for a verified check-in.",
         low_accuracy: "GPS accuracy is too low. Try again in a clearer spot.",
         missing_location: "Location data is required for check-in.",
