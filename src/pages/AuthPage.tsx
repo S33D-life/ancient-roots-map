@@ -1380,6 +1380,7 @@ const AuthPage = () => {
               const cooling = remaining > 0;
               return (
                 <Button
+                  ref={resendButtonRef}
                   variant="outline"
                   onClick={() => handleResendVerification(unverifiedEmail)}
                   disabled={resending || cooling}
