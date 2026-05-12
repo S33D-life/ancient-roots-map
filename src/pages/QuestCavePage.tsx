@@ -213,11 +213,8 @@ export default function QuestCavePage() {
             isPermanent={identity.hasPermanent}
             speciesCount={speciesCount}
             visits={activity.visits}
-            affinityDepth={Math.max(
-              0,
-              ...Object.values(progression.hiveCounts ?? {}),
-            )}
-            affinitySpecies={progression.recentSpecies.slice(0, 6)}
+            affinityDepth={deepestHive(progression.hiveCounts)}
+            affinitySpecies={(progression.recentSpecies ?? []).slice(0, 6)}
             sigils={deriveSigils(activity, speciesCount, progression.ancientCount)}
             streak={streakLine}
           />
