@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio } from "lucide-react";
+import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio, Download, Copy, Trash2 } from "lucide-react";
+import {
+  getEncounterLog,
+  subscribeEncounterLog,
+  downloadEncounterLog,
+  copyEncounterLog,
+  clearEncounterLog,
+} from "@/lib/encounterDiagnostics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -444,6 +451,9 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         );
       })()}
 
+      {/* Exportable encounter log — visible to anyone after at least one attempt */}
+      {lastResult && <EncounterLogPanel />}
+
 
       <RewardReceipt
         visible={receiptVisible}
@@ -461,3 +471,99 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 };
 
 export default SeedPlanter;
+
+/**
+ * Tiny panel that surfaces the in-tab encounter log so anyone can copy or
+ * download it when reporting an issue. Subscribes to the log buffer so it
+ * updates live as new attempts come in.
+ */
+function EncounterLogPanel() {
+  const log = useSyncExternalStore(
+    (cb) => subscribeEncounterLog(cb),
+    () => getEncounterLog(),
+    () => [],
+  );
+  const [expanded, setExpanded] = useState(false);
+  const recent = log.slice(-12).reverse();
+
+  return (
+    <div className="rounded-md border border-dashed border-border/40 bg-muted/20 p-3 text-[10px] font-mono text-muted-foreground space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setExpanded(v => !v)}
+          className="font-semibold text-foreground/80 hover:text-foreground transition-colors"
+          aria-expanded={expanded}
+        >
+          Encounter log · {log.length} {log.length === 1 ? "entry" : "entries"} {expanded ? "▾" : "▸"}
+        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={async () => {
+              const ok = await copyEncounterLog();
+              if (ok) toast.success("Log copied to clipboard");
+              else toast.error("Couldn't copy log");
+            }}
+            className="inline-flex items-center gap-1 px-1.5 py-1 rounded hover:bg-muted/60"
+            title="Copy log to clipboard"
+            aria-label="Copy log"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadEncounterLog("txt")}
+            className="inline-flex items-center gap-1 px-1.5 py-1 rounded hover:bg-muted/60"
+            title="Download as .txt"
+            aria-label="Download log as text"
+          >
+            <Download className="w-3 h-3" /> txt
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadEncounterLog("json")}
+            className="inline-flex items-center gap-1 px-1.5 py-1 rounded hover:bg-muted/60"
+            title="Download as .json"
+            aria-label="Download log as JSON"
+          >
+            <Download className="w-3 h-3" /> json
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              clearEncounterLog();
+              toast.success("Log cleared");
+            }}
+            className="inline-flex items-center gap-1 px-1.5 py-1 rounded hover:bg-muted/60"
+            title="Clear log"
+            aria-label="Clear log"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      <p className="text-[10px] font-serif italic text-muted-foreground/80 leading-snug">
+        Includes GPS fixes, accuracy, distance, radius, and any backend error codes.
+        Share with a keeper if a Heart won't collect.
+      </p>
+
+      {expanded && (
+        <ul className="space-y-1 max-h-64 overflow-auto">
+          {recent.length === 0 && <li className="opacity-60">No entries yet.</li>}
+          {recent.map((e, i) => (
+            <li key={`${e.ts}-${i}`} className="break-all">
+              <span className="opacity-60">{e.ts.slice(11, 19)}</span>{" "}
+              <span className="text-foreground/80">{e.flow}/{e.event}</span>
+              {e.data && Object.keys(e.data).length > 0 && (
+                <span className="opacity-70"> {JSON.stringify(e.data)}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
