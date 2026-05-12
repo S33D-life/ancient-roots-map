@@ -61,6 +61,9 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string>("");
+  const [resending, setResending] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
