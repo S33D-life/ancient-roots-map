@@ -547,28 +547,41 @@ const AuthPage = () => {
   const handleContinueAfterVerification = async () => {
     const addr = (unverifiedEmail || email || readPendingEmail()).trim();
     authLog("continue-after-verify clicked", { hasPassword: !!password, addr });
-    if (addr && password) {
-      setVerifyChecking(true);
-      try {
+    setVerifyChecking(true);
+    try {
+      // 1. If a session already exists (verification link opened in another tab), go straight in.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) {
+        authLog("continue-after-verify: session found, navigating");
+        clearPendingEmail();
+        navigate(resolvePostAuthPath(), { replace: true });
+        return;
+      }
+
+      // 2. Check the user's confirmation status without signing in.
+      // getUser() returns null when there's no session, so we rely on a silent sign-in attempt
+      // when we still have the password in memory.
+      if (addr && password) {
         const { error } = await supabase.auth.signInWithPassword({ email: addr, password });
         if (!error) {
-          // onAuthStateChange will fire SIGNED_IN, show the welcome toast and clear pending email.
+          // onAuthStateChange will fire SIGNED_IN and route the user.
           return;
         }
-        if (error.message.includes("Email not confirmed")) {
+        if (/Email not confirmed/i.test(error.message)) {
           setResendNote("Still waiting for confirmation — please open the link in your email first.");
           return;
         }
-        // Any other error → fall through to login fallback.
         authLog("silent sign-in failed", error.message);
-      } finally {
-        setVerifyChecking(false);
       }
+
+      // 3. Fallback: send the user to the login form with a friendly nudge.
+      setEmail(addr);
+      setView("login");
+      clearErrors();
+      toast({ title: "Great — please sign in to enter the grove." });
+    } finally {
+      setVerifyChecking(false);
     }
-    setEmail(addr);
-    setView("login");
-    clearErrors();
-    toast({ title: "Great — please sign in to enter the grove." });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
