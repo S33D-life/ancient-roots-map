@@ -30,6 +30,9 @@ export default function PathwayGateway({
   children,
 }: PathwayGatewayProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const reactId = useId();
+  const headerId = `gateway-h-${reactId}`;
+  const bodyId = `gateway-b-${reactId}`;
 
   return (
     <section
