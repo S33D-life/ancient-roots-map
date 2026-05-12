@@ -14,9 +14,28 @@
  *   3. Global S33D branded share image
  */
 
-export const APP_URL = "https://ancient-roots-map.lovable.app";
+export const APP_URL = "https://www.s33d.life";
 export const DEFAULT_OG_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
 export const OG_CARD_BASE = `${APP_URL}/functions/v1/og-card`;
+
+/**
+ * Resolve the canonical public app URL for user-facing share/copy links.
+ *
+ * Always returns the production domain (https://www.s33d.life) so that
+ * links shared via WhatsApp / Telegram / clipboard never leak the
+ * Lovable preview origin. Optionally accepts a path to append.
+ */
+export function getPublicAppUrl(path: string = "/"): string {
+  try {
+    const env = (import.meta as any)?.env?.VITE_PUBLIC_SITE_URL;
+    const base = (env || APP_URL).replace(/\/+$/, "");
+    const p = path.startsWith("/") ? path : `/${path}`;
+    return `${base}${p}`;
+  } catch {
+    const p = path.startsWith("/") ? path : `/${path}`;
+    return `${APP_URL}${p}`;
+  }
+}
 
 /** Build a generated OG card image URL for a tree */
 export function treeOgCardUrl(treeId: string): string {
