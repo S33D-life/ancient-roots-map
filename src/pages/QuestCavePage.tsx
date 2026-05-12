@@ -438,13 +438,4 @@ function CollapsibleSection({
   );
 }
 
-function ChamberSkeleton() {
-  return (
-    <div className="space-y-2">
-      {[0, 1, 2].map(i => (
-        <div key={i} className="h-24 rounded-xl bg-card/30 animate-pulse" />
-      ))}
-    </div>
-  );
-}
 
