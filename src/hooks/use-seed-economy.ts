@@ -260,25 +260,37 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       onAttempt?.(attempt + 1);
+      logEncounterEvent(flow, "gps_attempt", {
+        attempt: attempt + 1,
+        windowMs: WATCH_WINDOW_MS[attempt],
+      });
       const r = await runAttempt(attempt);
 
       if (r.kind === "ok") {
         const acc = r.position.coords.accuracy;
-        // Accept now if accuracy is already acceptable
+        logEncounterEvent(flow, "gps_fix", {
+          attempt: attempt + 1,
+          accuracyM: Math.round(acc),
+          lat: r.position.coords.latitude,
+          lng: r.position.coords.longitude,
+          fixTs: r.position.timestamp,
+        });
         if (acc <= ACCURACY_OK_M) {
           return { kind: "ok", position: r.position, retries: attempt };
         }
-        // Otherwise keep going — GPS often sharpens over the next attempt
         lastErr = { reason: "geo_poor_accuracy" };
       } else {
-        // Permission denied — never retry
+        logEncounterEvent(flow, "gps_error", {
+          attempt: attempt + 1,
+          reason: r.reason,
+          error: r.error,
+        });
         if (r.reason === "geo_denied") {
           return { kind: "err", reason: "geo_denied", error: r.error, retries: attempt };
         }
         lastErr = { reason: r.reason, error: r.error };
       }
 
-      // Backoff before the next attempt (skip after the final attempt)
       if (attempt < MAX_ATTEMPTS - 1) {
         await new Promise(r => setTimeout(r, BACKOFF_MS[attempt] ?? 1500));
       }
