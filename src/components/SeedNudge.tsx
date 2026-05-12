@@ -86,10 +86,10 @@ const SeedNudge = ({
   const handlePlant = useCallback(async () => {
     if (!treeLat || !treeLng) return;
     setPlanting(true);
-    const ok = await plantSeed(treeId, treeLat, treeLng);
+    const result = await plantSeed(treeId, treeLat, treeLng);
     setPlanting(false);
 
-    if (ok) {
+    if (result.ok) {
       setShowBurst(true);
       setPlanted(true);
       toast.success("🌱 Seed planted! It carries 33 hearts.");
@@ -98,11 +98,14 @@ const SeedNudge = ({
         dismiss();
       }, 2200);
     } else {
-      if (seedsRemaining <= 0) {
-        toast.error("No seeds remaining today.");
-      } else {
-        toast.error("Move closer to this tree to plant a seed.");
-      }
+      const r = result.reason;
+      if (r === "no_seeds") toast.error("No seeds remaining today.");
+      else if (r === "geo_denied") toast.error("Please enable location access for S33D.");
+      else if (r === "geo_unavailable" || r === "geo_timeout" || r === "geo_unsupported")
+        toast.error("Location access is needed to plant a seed.");
+      else if (r === "too_far") toast.error(`You appear to be ${Math.round(result.distance ?? 0)}m away.`);
+      else if (r === "rpc_error") toast.error("Could not plant seed", { description: result.error });
+      else toast.error("Move closer to this tree to plant a seed.");
     }
   }, [treeId, treeLat, treeLng, plantSeed, seedsRemaining, dismiss]);
 
