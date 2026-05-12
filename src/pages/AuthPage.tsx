@@ -126,8 +126,11 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState<string>(_pendingOnLoad);
+  const _persistedUnverified = readUnverifiedEmail();
+  const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(
+    () => readUnverifiedModalOpen() && !!_persistedUnverified,
+  );
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string>(_persistedUnverified || _pendingOnLoad);
   const [resending, setResending] = useState(false);
   const [resendCooldownUntil, setResendCooldownUntil] = useState<number>(0);
   const [resendNote, setResendNote] = useState<string | null>(null);
