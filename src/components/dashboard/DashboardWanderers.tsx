@@ -173,7 +173,7 @@ const DashboardWanderers = ({ userId }: Props) => {
       return;
     }
     if (data) {
-      const link = `${window.location.origin}/auth?invite=${data.code}`;
+      const link = getPublicAppUrl(`/auth?invite=${data.code}`);
       setInviteCode(data.code);
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });
