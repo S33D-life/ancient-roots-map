@@ -4,12 +4,53 @@ import { Sprout, Heart, Loader2, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useSeedEconomy, PROXIMITY_METERS } from "@/hooks/use-seed-economy";
+import { useSeedEconomy, PROXIMITY_METERS, type ActionResult, type ActionFailureReason } from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
 import RewardReceipt from "@/components/RewardReceipt";
 import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
+
+const POOR_GPS_ACCURACY_M = 75; // accuracy worse than this is "uncertain"
+
+function explainFailure(r: ActionResult): { title: string; description?: string } {
+  const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
+  const a = r.accuracy != null ? `±${Math.round(r.accuracy)}m` : null;
+  switch (r.reason) {
+    case "no_user":
+      return { title: "Sign in required", description: "Please sign in to collect Hearts." };
+    case "no_seeds":
+      return { title: "No seeds remaining today", description: "They refresh at midnight." };
+    case "per_tree_limit":
+      return { title: "Daily limit reached at this tree", description: "Try another tree today." };
+    case "seed_missing":
+      return { title: "This Heart is no longer here", description: "It may have just been collected." };
+    case "already_collected":
+      return { title: "This Heart was already collected" };
+    case "own_seed":
+      return { title: "This is your own Seed", description: "Another wanderer must collect it." };
+    case "not_bloomed":
+      return { title: "This Seed hasn't bloomed yet", description: "Come back when it's ready." };
+    case "no_seed_coords":
+      return { title: "This Heart has no location", description: "Please report this tree." };
+    case "geo_unsupported":
+      return { title: "Location isn't supported on this device" };
+    case "geo_denied":
+      return { title: "Please enable location access for S33D" };
+    case "geo_unavailable":
+      return { title: "Location access is needed to collect this Heart", description: r.error };
+    case "geo_timeout":
+      return { title: "Couldn't get a GPS fix in time", description: "Try stepping outside and try again." };
+    case "geo_poor_accuracy":
+      return { title: `GPS is uncertain ${a ?? ""} — try stepping outside` };
+    case "too_far":
+      return { title: `You appear to be ${d ?? "too far"} away`, description: a ? `GPS accuracy ${a}` : undefined };
+    case "rpc_error":
+      return { title: "Something went wrong on our side", description: r.error };
+    default:
+      return { title: "Couldn't collect Heart" };
+  }
+}
 
 interface SeedPlanterProps {
   treeId: string;
@@ -48,36 +89,50 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
   if (!userId || treeLat == null || treeLng == null) return null;
 
+  const [lastResult, setLastResult] = useState<ActionResult | null>(null);
+
   const handlePlant = async () => {
     setPlanting(true);
-    const success = await plantSeed(treeId, treeLat, treeLng);
+    const result = await plantSeed(treeId, treeLat, treeLng);
     setPlanting(false);
+    setLastResult(result);
 
-    if (success) {
+    // Soft-warn on poor accuracy when too_far
+    if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
       toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
-      if (seedsRemaining <= 0) {
-        toast.error("No seeds remaining today. They refresh at midnight.");
-      } else {
-        toast.error(`You need to be within ${PROXIMITY_METERS}m of this tree to plant a seed.`);
-      }
+      // Surface poor-accuracy hint when user is "too far" but GPS is unreliable
+      const refined: ActionResult =
+        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
+          ? { ...result, reason: "geo_poor_accuracy" }
+          : result;
+      const { title, description } = explainFailure(refined);
+      toast.error(title, description ? { description } : undefined);
+      if (import.meta.env.DEV) console.warn("[SeedPlanter] plant failed", result);
     }
   };
 
   const handleCollect = async (seed: PlantedSeed) => {
     setCollecting(seed.id);
-    const success = await collectHeart(seed.id);
+    const result = await collectHeart(seed.id);
     setCollecting(null);
+    setLastResult(result);
 
-    if (success) {
+    if (result.ok) {
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
     } else {
-      toast.error(`You need to be within ${PROXIMITY_METERS}m to collect this Heart.`);
+      const refined: ActionResult =
+        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
+          ? { ...result, reason: "geo_poor_accuracy" }
+          : result;
+      const { title, description } = explainFailure(refined);
+      toast.error(title, description ? { description } : undefined);
+      if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
     }
   };
 
@@ -212,7 +267,20 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
           </CardContent>
         </Card>
       )}
-      {/* Reward Receipt */}
+
+      {/* Dev-only diagnostics — last action attempt */}
+      {import.meta.env.DEV && lastResult && (
+        <div className="rounded-md border border-dashed border-border/40 bg-muted/30 p-3 text-[10px] font-mono text-muted-foreground space-y-0.5">
+          <div className="font-semibold text-foreground/80">Heart Collection Diagnostics</div>
+          <div>user: {lastResult.userLat?.toFixed(6) ?? "—"}, {lastResult.userLng?.toFixed(6) ?? "—"}</div>
+          <div>tree: {lastResult.treeLat?.toFixed(6) ?? treeLat?.toFixed(6) ?? "—"}, {lastResult.treeLng?.toFixed(6) ?? treeLng?.toFixed(6) ?? "—"}</div>
+          <div>distance: {lastResult.distance != null ? `${lastResult.distance.toFixed(1)}m` : "—"} · radius: {PROXIMITY_METERS}m</div>
+          <div>gps accuracy: {lastResult.accuracy != null ? `±${lastResult.accuracy.toFixed(0)}m` : "—"}</div>
+          <div>result: {lastResult.ok ? "ok" : `blocked (${lastResult.reason ?? "unknown"})`}</div>
+          {lastResult.error && <div className="text-destructive/80 break-all">error: {lastResult.error}</div>}
+        </div>
+      )}
+
       <RewardReceipt
         visible={receiptVisible}
         onClose={() => setReceiptVisible(false)}
