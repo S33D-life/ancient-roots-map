@@ -135,7 +135,7 @@ export async function plantHeartsDetailed(params: {
   speciesKey?: string;
 }): Promise<
   | { ok: true; root: TreeRoot }
-  | { ok: false; error: PlantHeartsError | "rpc_error"; balance?: number; required?: number }
+  | { ok: false; error: PlantHeartsError | "rpc_error"; balance?: number; required?: number; message?: string }
 > {
   const { data, error } = await supabase.rpc("plant_hearts_at_tree", {
     p_user_id: params.userId,
@@ -144,7 +144,10 @@ export async function plantHeartsDetailed(params: {
     p_species_key: params.speciesKey || null,
   });
 
-  if (error) return { ok: false, error: "rpc_error" };
+  if (error) {
+    if (import.meta.env.DEV) console.warn("[plantHearts] RPC error", error);
+    return { ok: false, error: "rpc_error", message: error.message };
+  }
 
   const envelope = (Array.isArray(data) ? data[0] : data) as unknown as {
     ok: boolean;
@@ -155,6 +158,7 @@ export async function plantHeartsDetailed(params: {
   } | null;
 
   if (!envelope || !envelope.ok) {
+    if (import.meta.env.DEV) console.warn("[plantHearts] refused", envelope);
     return {
       ok: false,
       error: (envelope?.error as PlantHeartsError) || "rpc_error",
