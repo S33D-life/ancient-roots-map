@@ -171,7 +171,7 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     if (todaySeeds.length >= SEEDS_PER_TREE) return { ok: false, reason: "per_tree_limit" };
 
     const geo = await getFreshPosition();
-    if (!geo.ok) return { ok: false, reason: geo.reason, error: geo.error, treeLat, treeLng };
+    if (geo.kind === "err") return { ok: false, reason: geo.reason, error: geo.error, treeLat, treeLng };
 
     const { latitude: userLat, longitude: userLng, accuracy } = geo.position.coords;
     const dist = distanceMeters(userLat, userLng, treeLat, treeLng);
