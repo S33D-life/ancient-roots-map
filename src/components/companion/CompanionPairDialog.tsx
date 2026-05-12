@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanion } from "@/contexts/CompanionContext";
 import type { CompanionFlowMode } from "@/lib/companion-types";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /**
  * CompanionPairDialog — desktop overlay with two modes:
