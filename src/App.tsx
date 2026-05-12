@@ -99,6 +99,7 @@ const LifeGroveCreatePage = lazyImportWithRetry(() => import("./pages/heartwood/
 const LifeGrovePage = lazyImportWithRetry(() => import("./pages/heartwood/LifeGrovePage"), "life-groves-detail");
 const LifeGroveInvitePage = lazyImportWithRetry(() => import("./pages/heartwood/LifeGroveInvitePage"), "life-groves-invite");
 const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"), "dashboard");
+const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "welcome");
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
