@@ -1034,28 +1034,62 @@ const AuthPage = () => {
               <Sparkles className="w-7 h-7 text-primary" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-serif">🌱 Your account has been created</h1>
+              <h1 className="text-2xl font-serif">
+                {verifyStatus === "redirecting"
+                  ? "🌿 Verification received"
+                  : verifyStatus === "expired"
+                    ? "🍂 This link has rested too long"
+                    : "🌱 Your account has been created"}
+              </h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                We've sent a confirmation email to{" "}
-                <span className="text-foreground font-medium">{email || readPendingEmail() || "your inbox"}</span>.
-                <br />
-                Please open the link in the email to enter the grove.
+                {verifyStatus === "redirecting" ? (
+                  <>Verification received — opening the Grove…</>
+                ) : verifyStatus === "expired" ? (
+                  <>
+                    {verifyExpiredMessage ?? "This link has expired or has already been used."}
+                    <br />
+                    Send a fresh one and we'll keep listening here.
+                  </>
+                ) : (
+                  <>
+                    We've sent a confirmation email to{" "}
+                    <span className="text-foreground font-medium">
+                      {email || readPendingEmail() || "your inbox"}
+                    </span>.
+                    <br />
+                    Please open the link in the email to enter the grove.
+                  </>
+                )}
               </p>
             </div>
+
+            {verifyStatus === "redirecting" && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center justify-center gap-2 text-sm text-primary"
+              >
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                Opening the Grove…
+              </div>
+            )}
 
             <div className="space-y-2 pt-1">
               <Button
                 onClick={handleContinueAfterVerification}
-                disabled={verifyChecking}
+                disabled={verifyChecking || verifyStatus === "redirecting"}
                 className="w-full font-serif gap-2"
                 aria-label="I have verified my email — continue to sign in"
               >
-                {verifyChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                {verifyChecking || verifyStatus === "redirecting"
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <CheckCircle2 className="w-4 h-4" />}
                 I've verified — continue
               </Button>
               <Button
                 variant="outline"
                 onClick={openMail}
+                disabled={verifyStatus === "redirecting"}
                 className="w-full font-serif gap-2"
                 aria-label="Open the Mail app on your device"
               >
@@ -1064,11 +1098,12 @@ const AuthPage = () => {
               {(() => {
                 const remaining = Math.max(0, Math.ceil((resendCooldownUntil - tickNow) / 1000));
                 const cooling = remaining > 0;
+                const disabled = resending || cooling || verifyStatus === "redirecting";
                 return (
                   <Button
                     variant="outline"
                     onClick={() => handleResendVerification(email || unverifiedEmail)}
-                    disabled={resending || cooling}
+                    disabled={disabled}
                     className="w-full font-serif gap-2"
                     aria-label="Resend the verification email"
                   >
@@ -1080,6 +1115,7 @@ const AuthPage = () => {
               <Button
                 variant="ghost"
                 onClick={() => { clearPendingEmail(); clearUnverifiedEmail(); setView("signup"); clearErrors(); }}
+                disabled={verifyStatus === "redirecting"}
                 className="w-full font-serif gap-2"
                 aria-label="Change the email address used for signup"
               >
@@ -1087,7 +1123,8 @@ const AuthPage = () => {
               </Button>
               <button
                 onClick={() => { setView("login"); clearErrors(); }}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1"
+                disabled={verifyStatus === "redirecting"}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1 disabled:opacity-50"
               >
                 ← Back to Login
               </button>
@@ -1100,6 +1137,12 @@ const AuthPage = () => {
                 className="text-xs leading-relaxed text-foreground/80 px-2"
               >
                 {resendNote}
+              </p>
+            )}
+
+            {verifyStatus === "waiting" && (
+              <p className="text-xs italic text-muted-foreground/80 leading-relaxed px-2">
+                You can leave this page open — it will continue listening for your confirmation.
               </p>
             )}
 
