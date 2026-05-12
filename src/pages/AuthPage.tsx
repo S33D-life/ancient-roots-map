@@ -249,6 +249,7 @@ const AuthPage = () => {
 
   // Use a ref for view to avoid re-subscribing on every view change
   const viewRef = useRef(view);
+  const resendButtonRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => { viewRef.current = view; }, [view]);
 
   // Tick once a second while the resend button is in cooldown so the countdown rerenders.
@@ -1322,13 +1323,29 @@ const AuthPage = () => {
         }}
       >
         <DialogContent
-          className="sm:max-w-md border rounded-2xl"
+          className="sm:max-w-md border rounded-2xl focus:outline-none"
           style={{
             background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card)))",
             borderColor: "hsl(var(--primary) / 0.35)",
           }}
+          role="alertdialog"
           aria-labelledby="unverified-title"
           aria-describedby="unverified-desc"
+          tabIndex={-1}
+          onOpenAutoFocus={(e) => {
+            // Keep Radix focus trap, but move initial focus to the primary action
+            // so keyboard users land on "Resend" rather than the close (X) button.
+            // Screen readers still announce the title + description because they
+            // remain wired via aria-labelledby / aria-describedby.
+            e.preventDefault();
+            requestAnimationFrame(() => resendButtonRef.current?.focus());
+          }}
+          onCloseAutoFocus={(e) => {
+            // Return focus to the email field so the login form is keyboard-ready.
+            e.preventDefault();
+            const emailInput = document.getElementById("login-email") as HTMLInputElement | null;
+            emailInput?.focus();
+          }}
         >
           <DialogHeader className="items-center text-center space-y-3">
             <div
@@ -1355,7 +1372,6 @@ const AuthPage = () => {
               onClick={() => { window.location.href = "mailto:"; }}
               className="w-full font-serif gap-2"
               aria-label="Open the Mail app on your device"
-              autoFocus
             >
               <Mail className="w-4 h-4" aria-hidden="true" /> Open Mail App
             </Button>
@@ -1364,6 +1380,7 @@ const AuthPage = () => {
               const cooling = remaining > 0;
               return (
                 <Button
+                  ref={resendButtonRef}
                   variant="outline"
                   onClick={() => handleResendVerification(unverifiedEmail)}
                   disabled={resending || cooling}
