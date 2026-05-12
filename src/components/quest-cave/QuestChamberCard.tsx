@@ -7,7 +7,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface QuestChamberCardProps {
   title: string;
@@ -122,66 +121,65 @@ export default function QuestChamberCard({
         />
       </button>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="quest-body"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            style={{ overflow: "hidden" }}
-          >
-            <div className="px-3 sm:px-4 pb-4 pt-1 space-y-3 border-t border-border/30">
-              {lore && (
-                <p className="font-serif text-[12px] italic text-foreground/85 leading-relaxed mt-2">
-                  {lore}
-                </p>
-              )}
+      {/* CSS-grid expand: animates grid-template-rows 0fr → 1fr (GPU/composited,
+          no per-frame layout measurement, motion-safe). */}
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+        aria-hidden={!open}
+      >
+        <div className="min-h-0 overflow-hidden [contain:layout_paint] [will-change:grid-template-rows]">
+          <div className="px-3 sm:px-4 pb-4 pt-1 space-y-3 border-t border-border/30">
+            {lore && (
+              <p className="font-serif text-[12px] italic text-foreground/85 leading-relaxed mt-2">
+                {lore}
+              </p>
+            )}
 
-              {(roots?.length || branches?.length) && (
-                <div className="rounded-lg border border-emerald-900/15 bg-emerald-50/20 dark:bg-emerald-950/10 p-2.5 space-y-1.5">
-                  {roots && roots.length > 0 && (
-                    <div className="flex items-start gap-2">
-                      <span className="font-serif text-[9px] uppercase tracking-[0.2em] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 shrink-0">
-                        Roots
-                      </span>
-                      <p className="font-serif text-[11px] text-foreground/80 leading-snug">
-                        {roots.join(" · ")}
-                      </p>
-                    </div>
-                  )}
-                  {branches && branches.length > 0 && (
-                    <div className="flex items-start gap-2">
-                      <span className="font-serif text-[9px] uppercase tracking-[0.2em] text-amber-700/80 dark:text-amber-300/80 mt-0.5 shrink-0">
-                        Branches
-                      </span>
-                      <p className="font-serif text-[11px] text-foreground/80 leading-snug">
-                        {branches.join(" · ")}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+            {(roots?.length || branches?.length) && (
+              <div className="rounded-lg border border-emerald-900/15 bg-emerald-50/20 dark:bg-emerald-950/10 p-2.5 space-y-1.5">
+                {roots && roots.length > 0 && (
+                  <div className="flex items-start gap-2">
+                    <span className="font-serif text-[9px] uppercase tracking-[0.2em] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 shrink-0">
+                      Roots
+                    </span>
+                    <p className="font-serif text-[11px] text-foreground/80 leading-snug">
+                      {roots.join(" · ")}
+                    </p>
+                  </div>
+                )}
+                {branches && branches.length > 0 && (
+                  <div className="flex items-start gap-2">
+                    <span className="font-serif text-[9px] uppercase tracking-[0.2em] text-amber-700/80 dark:text-amber-300/80 mt-0.5 shrink-0">
+                      Branches
+                    </span>
+                    <p className="font-serif text-[11px] text-foreground/80 leading-snug">
+                      {branches.join(" · ")}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
-              {hasProgress && (
-                <p className="font-serif text-[10px] text-muted-foreground">
-                  {current} of {target} · {pct}%
-                </p>
-              )}
+            {hasProgress && (
+              <p className="font-serif text-[10px] text-muted-foreground">
+                {current} of {target} · {pct}%
+              </p>
+            )}
 
-              {ctaTo && (
-                <Link
-                  to={ctaTo}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-serif text-xs transition-colors min-h-[40px]"
-                >
-                  {ctaLabel} <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {ctaTo && (
+              <Link
+                to={ctaTo}
+                tabIndex={open ? 0 : -1}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-serif text-xs transition-colors min-h-[40px]"
+              >
+                {ctaLabel} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
     </article>
   );
 }
