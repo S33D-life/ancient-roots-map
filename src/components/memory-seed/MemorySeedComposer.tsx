@@ -61,10 +61,17 @@ export type SeedType =
   | "quote"
   | "recipe"
   | "photo"
+  | "artwork"
   | "voice_note"
   | "bloom";
 
-export type Destination = "offering" | "whisper";
+/**
+ * Destination for a memory seed:
+ *   • offering — hung in the branches at this tree (public, visible from afar)
+ *   • whisper  — sent through the roots, unlocked when kin meet a qualifying tree
+ *   • both     — hung AND sent (creates one of each, linked by metadata when safe)
+ */
+export type Destination = "offering" | "whisper" | "both";
 export type WhisperUnlock = "any_ancient_friend" | "same_tree" | "same_species";
 
 interface Props {
