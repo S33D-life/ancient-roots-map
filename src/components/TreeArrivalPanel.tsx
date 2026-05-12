@@ -147,6 +147,9 @@ export default function TreeArrivalPanel({
       }
     } catch (err: unknown) {
       if (err instanceof PlantHeartsRefused) {
+        if (import.meta.env.DEV) {
+          console.warn("[PlantHearts] refused:", { code: err.code, balance: err.balance, required: err.required, detail: err.detail });
+        }
         if (err.code === "insufficient_hearts" && err.required && err.balance !== undefined) {
           const need = Math.max(0, err.required - err.balance);
           toast.error(`You need ${need} more heart${need !== 1 ? "s" : ""} to plant ${err.required} at ${treeName}.`);
@@ -158,6 +161,18 @@ export default function TreeArrivalPanel({
           toast.error("Please choose a whole number of hearts to plant.");
         } else if (err.code === "unauthenticated") {
           toast.error("Please sign in to plant hearts.");
+        } else if (err.code === "rpc_error") {
+          // Surface RLS / profile / network specifics from the underlying message.
+          const msg = err.detail || "";
+          if (/row-level security|permission denied/i.test(msg)) {
+            toast.error("Permission was refused — your profile may be missing. Try refreshing.");
+          } else if (/Failed to fetch|NetworkError|net::|ECONN/i.test(msg)) {
+            toast.error("Network hiccup — check your connection and try again.");
+          } else if (/jwt|JWT|expired|invalid token/i.test(msg)) {
+            toast.error("Your session expired. Please sign in again.");
+          } else {
+            toast.error(msg ? `Couldn't plant: ${msg}` : "Couldn't plant hearts right now. Please try again.");
+          }
         } else {
           toast.error("Couldn't plant hearts right now. Please try again.");
         }
