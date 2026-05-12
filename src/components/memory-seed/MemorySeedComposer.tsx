@@ -538,7 +538,7 @@ export default function MemorySeedComposer({
 
 // ── Confirmation ─────────────────────────────────────────────
 
-function ConfirmationView({
+export function ConfirmationView({
   state,
   onClose,
   onRetryWhisper,
