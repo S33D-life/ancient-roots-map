@@ -227,6 +227,29 @@ function OverviewSection({ stats }: { stats: Record<string, number> }) {
 
   return (
     <div className="space-y-6">
+      {showAdminRoom && (
+        <Link to="/admin" className="block group">
+          <Card className="bg-gradient-to-br from-amber-500/10 via-card/60 to-emerald-500/10 border-amber-500/30 hover:border-amber-500/50 transition-all">
+            <CardContent className="p-5 flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-serif text-base text-foreground">Admin Room</h3>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-amber-500/80 border border-amber-500/30 rounded-full px-1.5">
+                    inner ring
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground/80 font-serif mt-0.5">
+                  Curator tools, evolution, signups, moderation, and system health.
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-amber-500/60 group-hover:translate-x-0.5 transition-transform" />
+            </CardContent>
+          </Card>
+        </Link>
+      )}
       {/* Status grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {cards.map(c => (
