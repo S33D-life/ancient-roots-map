@@ -313,6 +313,21 @@ export default function MemorySeedComposer({
   };
 
   async function saveAsOffering(): Promise<string | undefined> {
+    // Bloom offerings live in their own dedicated table (`bloom_offerings`)
+    // because they carry season/year/lat/lng metadata the generic offerings
+    // table doesn't model. We reuse the established repository helper.
+    if (type === "bloom") {
+      const result = await createBloomOffering({
+        treeId,
+        userId: userId!,
+        imageUrl: mediaUrl.trim(),
+        note: [title.trim(), body.trim(), note.trim()].filter(Boolean).join(" — "),
+        speciesGuess: author.trim(),
+      });
+      // Let bloom-aware surfaces refresh themselves.
+      window.dispatchEvent(new CustomEvent("bloom-offering-created", { detail: { treeId } }));
+      return result.bloom?.id;
+    }
     const offType = toOfferingType(type);
     const composedTitle =
       title.trim() ||
