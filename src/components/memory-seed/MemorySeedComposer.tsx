@@ -122,7 +122,7 @@ const WHISPER_UNLOCKS: { value: WhisperUnlock; label: string; hint: string }[] =
 
 const Schema = z.object({
   type: z.enum([
-    "story", "song", "book", "poem", "quote", "recipe", "photo", "voice_note", "bloom",
+    "story", "song", "book", "poem", "quote", "recipe", "photo", "artwork", "voice_note", "bloom",
   ]),
   title: z.string().trim().max(120, "Keep the title under 120 characters."),
   body: z.string().trim().max(2000, "Keep the body under 2000 characters."),
