@@ -58,6 +58,16 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
       };
     case "too_far":
       return { title: `You appear to be ${d ?? "some distance"} away`, description: a ? `GPS accuracy ${a}` : undefined };
+    case "override_too_far":
+      return {
+        title: "Too far for an approximate-location encounter",
+        description: d ? `You're ~${d} from this tree — the override only works when you're nearby.` : undefined,
+      };
+    case "override_disabled":
+      return {
+        title: "Approximate-location override is currently off",
+        description: "A keeper has paused this option. Please try again with a clearer GPS signal.",
+      };
     case "rpc_error":
       return { title: "Something went wrong on our side", description: r.error };
     default:
