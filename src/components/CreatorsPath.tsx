@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   TreeDeciduous, Gift, Wand2, Music, BookOpen, Sparkles,
-  MessageCircle, Footprints, Leaf, Mountain, ArrowRight, Loader2,
+  MessageCircle, Footprints, Leaf, Mountain, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ROUTES } from "@/lib/routes";
 import JourneyBridge from "@/components/JourneyBridge";
 import JourneyStatusBar from "@/components/JourneyStatusBar";
+import { HeartwoodChamber } from "@/components/library/HeartwoodChamber";
 import type { CachedStaff } from "@/hooks/use-wallet";
 
 interface CreatorsPathProps {
@@ -212,42 +213,64 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
 
       <PathHero />
 
-      {/* Active staff card — frames Borrowed vs Permanent based on ceremony history */}
-      {activeStaff && (() => {
-        const hasBinding = stats.ceremonies > 0;
-        const eyebrow = hasBinding ? "First guide / early companion" : "Borrowed Staff";
-        const note = hasBinding
-          ? "Remembered as the staff that walked with you at the start of the path."
-          : "Walks with you until your Permanent Staff is earned, gifted, or crafted.";
-        return (
-          <Card className="border-amber-900/25 bg-card/70 backdrop-blur-sm overflow-hidden">
-            <CardContent className="p-0">
-              <Link to={`/staff/${activeStaff.id}`} className="flex items-center gap-4 p-4 group">
-                <div className="w-16 h-16 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0">
-                  <img
-                    src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
-                    alt={activeStaff.species}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">{eyebrow}</p>
-                  <h3 className="font-serif text-base text-foreground truncate">{activeStaff.species}</h3>
-                  <p className="text-[11px] text-muted-foreground/80 italic truncate">
-                    {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/70 italic mt-1 truncate">{note}</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-primary/60 shrink-0" />
-              </Link>
-            </CardContent>
-          </Card>
-        );
-      })()}
+      {/* Identity / staff card area */}
+      <HeartwoodChamber
+        title="Wanderer & Staff Lineage"
+        caption="The person who walks, and the staff that carries memory."
+        icon={<Wand2 className="w-4 h-4 text-primary" />}
+        tone="warm"
+        ambient
+      >
+        {activeStaff ? (() => {
+          const hasBinding = stats.ceremonies > 0;
+          const eyebrow = hasBinding ? "First guide / early companion" : "Borrowed Staff";
+          const note = hasBinding
+            ? "Remembered as the staff that walked with you at the start of the path."
+            : "Walks with you until your Permanent Staff is earned, gifted, or crafted.";
+          return (
+            <Link
+              to={`/staff/${activeStaff.id}`}
+              className="flex items-center gap-4 rounded-xl border border-amber-900/25 bg-card/60 p-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            >
+              <div className="w-16 h-16 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0">
+                <img
+                  src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
+                  alt={activeStaff.species}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">{eyebrow}</p>
+                <h3 className="font-serif text-base text-foreground truncate">{activeStaff.species}</h3>
+                <p className="text-[11px] text-muted-foreground/80 italic truncate">
+                  {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
+                </p>
+                <p className="text-[10px] text-muted-foreground/70 italic mt-1 truncate">{note}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-primary/60 shrink-0" />
+            </Link>
+          );
+        })() : (
+          <div className="rounded-xl border border-border/30 bg-card/40 p-4 text-center space-y-2">
+            <p className="font-serif text-sm text-foreground/80">No staff walks with you yet.</p>
+            <p className="text-[11px] text-muted-foreground/70 italic">
+              Borrow a staff to open the paths — your first guide will be remembered.
+            </p>
+            <Button asChild size="sm" variant="outline" className="font-serif text-xs">
+              <Link to={ROUTES.STAFF_ROOM}>Visit the Staff Room</Link>
+            </Button>
+          </div>
+        )}
+      </HeartwoodChamber>
 
-      {/* Journey overview */}
-      <section>
-        <SectionTitle eyebrow="Journey overview" title="What your path holds" />
+      {/* Journey Overview */}
+      <HeartwoodChamber
+        title="Journey Overview"
+        caption="The living shape of your path so far."
+        icon={<Sparkles className="w-4 h-4 text-primary" />}
+        tone="muted"
+        loading={loading}
+      >
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
           {overviewTiles.map((t) => (
             <div
@@ -262,11 +285,15 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
             </div>
           ))}
         </div>
-      </section>
+      </HeartwoodChamber>
 
-      {/* Current path cards */}
-      <section>
-        <SectionTitle eyebrow="Currently walking" title="Living threads of your path" />
+      {/* Current Path Cards */}
+      <HeartwoodChamber
+        title="Current Path"
+        caption="What is walking with you now."
+        icon={<Footprints className="w-4 h-4 text-primary" />}
+        tone="cool"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {recentTree && (
             <PathCard
@@ -306,34 +333,35 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
             />
           )}
         </div>
-      </section>
+      </HeartwoodChamber>
 
-      {/* Path timeline */}
-      <section>
-        <SectionTitle eyebrow="Path timeline" title="Your path is remembered here" />
-        {loading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="w-5 h-5 animate-spin text-primary/70" />
+      {/* Path Timeline */}
+      <HeartwoodChamber
+        title="Star Trail"
+        caption="The path grows as you walk."
+        icon={<Sparkles className="w-4 h-4 text-primary" />}
+        tone="warm"
+        ambient
+        loading={loading}
+        empty={
+          <div className="text-center space-y-2 py-2">
+            <Sparkles className="w-6 h-6 mx-auto text-primary/40" />
+            <p className="font-serif text-sm text-foreground/80">The path begins with one tree.</p>
+            <p className="text-xs text-muted-foreground/70 italic">
+              The path grows as you walk. Map a tree, leave an offering, or check in beneath an Ancient Friend to begin.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
+              <Button asChild size="sm" variant="outline" className="font-serif text-xs">
+                <Link to={ROUTES.MAP}>Open the Map</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="font-serif text-xs">
+                <Link to={ROUTES.ADD_TREE}>Map a Tree</Link>
+              </Button>
+            </div>
           </div>
-        ) : events.length === 0 ? (
-          <Card className="border-border/30 bg-card/40">
-            <CardContent className="p-6 text-center space-y-2">
-              <Sparkles className="w-6 h-6 mx-auto text-primary/40" />
-              <p className="font-serif text-sm text-foreground/80">The path begins with one tree.</p>
-              <p className="text-xs text-muted-foreground/70 italic">
-                Map a tree, leave an offering, or check in beneath an Ancient Friend to begin.
-              </p>
-              <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
-                <Button asChild size="sm" variant="outline" className="font-serif text-xs">
-                  <Link to={ROUTES.MAP}>Open the Map</Link>
-                </Button>
-                <Button asChild size="sm" variant="outline" className="font-serif text-xs">
-                  <Link to={ROUTES.ADD_TREE}>Map a Tree</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
+        }
+      >
+        {events.length > 0 && (
           <div className="relative">
             <div className="absolute left-[18px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-amber-700/20 to-transparent" />
             <div className="space-y-5">
@@ -375,7 +403,7 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
                       );
                       return event.link ? (
                         <li key={event.id}>
-                          <Link to={event.link} className="block">{inner}</Link>
+                          <Link to={event.link} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg">{inner}</Link>
                         </li>
                       ) : (
                         <li key={event.id}>{inner}</li>
@@ -387,7 +415,7 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
             </div>
           </div>
         )}
-      </section>
+      </HeartwoodChamber>
 
       {/* Subtle relocation note */}
       <div className="rounded-xl border border-border/30 bg-card/30 p-3 text-center">
@@ -421,17 +449,6 @@ function PathHero() {
         Your Star Trail remembers the path you are weaving through trees,
         offerings, whispers, groves, quests, and Council gatherings — and
         the staff that walks alongside you.
-      </p>
-    </div>
-  );
-}
-
-function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
-      <h2 className="font-serif text-base sm:text-lg text-foreground">{title}</h2>
-      <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
-        {eyebrow}
       </p>
     </div>
   );
