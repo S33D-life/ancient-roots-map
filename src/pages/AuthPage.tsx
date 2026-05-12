@@ -1217,13 +1217,21 @@ const AuthPage = () => {
       </div>
 
       {/* Unverified-account modal — shown when a user tries to log in before confirming their email. */}
-      <Dialog open={unverifiedModalOpen} onOpenChange={setUnverifiedModalOpen}>
+      <Dialog
+        open={unverifiedModalOpen}
+        onOpenChange={(open) => {
+          setUnverifiedModalOpen(open);
+          if (open) setResendNote(null);
+        }}
+      >
         <DialogContent
           className="sm:max-w-md border rounded-2xl"
           style={{
             background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card)))",
             borderColor: "hsl(var(--primary) / 0.35)",
           }}
+          aria-labelledby="unverified-title"
+          aria-describedby="unverified-desc"
         >
           <DialogHeader className="items-center text-center space-y-3">
             <div
@@ -1232,11 +1240,14 @@ const AuthPage = () => {
                 background: "hsl(var(--primary) / 0.15)",
                 border: "1px solid hsl(var(--primary) / 0.4)",
               }}
+              aria-hidden="true"
             >
               <Mail className="w-7 h-7 text-primary" />
             </div>
-            <DialogTitle className="font-serif text-xl">🌱 Almost there — please confirm your email</DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed">
+            <DialogTitle id="unverified-title" className="font-serif text-xl">
+              🌱 Almost there — please confirm your email
+            </DialogTitle>
+            <DialogDescription id="unverified-desc" className="text-sm leading-relaxed">
               An account for <span className="text-foreground font-medium">{unverifiedEmail}</span> already exists,
               but it hasn't been verified yet. Open the confirmation link we sent you to enter the grove.
             </DialogDescription>
@@ -1246,19 +1257,34 @@ const AuthPage = () => {
             <Button
               onClick={() => { window.location.href = "mailto:"; }}
               className="w-full font-serif gap-2"
+              aria-label="Open the Mail app on your device"
+              autoFocus
             >
-              <Mail className="w-4 h-4" /> Open Mail App
+              <Mail className="w-4 h-4" aria-hidden="true" /> Open Mail App
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleResendVerification(unverifiedEmail)}
-              disabled={resending}
-              className="w-full font-serif gap-2"
-            >
-              {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              Resend Verification Email
-            </Button>
+            {(() => {
+              const remaining = Math.max(0, Math.ceil((resendCooldownUntil - tickNow) / 1000));
+              const cooling = remaining > 0;
+              return (
+                <Button
+                  variant="outline"
+                  onClick={() => handleResendVerification(unverifiedEmail)}
+                  disabled={resending || cooling}
+                  className="w-full font-serif gap-2"
+                  aria-label="Resend the verification email"
+                >
+                  {resending ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="w-4 h-4" aria-hidden="true" />}
+                  {cooling ? `Resend available in ${remaining}s` : "Resend Verification Email"}
+                </Button>
+              );
+            })()}
           </div>
+
+          {resendNote && (
+            <p role="status" aria-live="polite" className="text-xs leading-relaxed text-foreground/80 px-2 text-center">
+              {resendNote}
+            </p>
+          )}
 
           <p
             className="text-[11px] text-center leading-relaxed pt-2 border-t"
@@ -1277,6 +1303,7 @@ const AuthPage = () => {
               variant="ghost"
               className="font-serif"
               onClick={() => setUnverifiedModalOpen(false)}
+              aria-label="Close this dialog"
             >
               Close
             </Button>
