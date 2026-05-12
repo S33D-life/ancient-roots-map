@@ -499,6 +499,16 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     });
 
     if (error) {
+      // Anti-inflation guard: if the trigger fires for this user+seed, the heart
+      // was already credited on a prior tap. Treat it as success-equivalent so
+      // the UI shows a calm "already collected" message instead of a fatal toast.
+      const msg = error.message || "";
+      if (/duplicate heart transaction/i.test(msg)) {
+        logEncounterEvent("collect", "result_failed", { reason: "already_collected", note: "duplicate-trigger" });
+        // Force a refresh so the bloomed list updates immediately.
+        fetchSeeds();
+        return { ok: false, reason: "already_collected", ...base };
+      }
       console.error("[collectHeart] rpc error:", error);
       logEncounterEvent("collect", "rpc_error", {
         message: error.message,
@@ -555,7 +565,7 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       overrideKind: (r.override_kind as "manual" | "keeper" | undefined) ?? undefined,
       manualOverrideRadiusM: typeof r.manual_override_radius_m === "number" ? r.manual_override_radius_m : undefined,
     };
-  }, [userId, allSeeds]);
+  }, [userId, allSeeds, fetchSeeds]);
 
   const getSeedsAtTree = useCallback((treeId: string) => {
     return allSeeds.filter(s => s.tree_id === treeId);
