@@ -71,6 +71,24 @@ export default function RegaliaChamber({
   const nextStage = CLOAK_STAGES.find((s) => s.min > score);
   const toNext = nextStage ? Math.max(0, nextStage.min - score) : 0;
 
+  // Stage-transition animation: when the cloak label changes (after first paint),
+  // briefly glow the cloak and cross-fade the label so ascension feels alive.
+  const prevLabelRef = useRef<string | null>(null);
+  const [ascending, setAscending] = useState(false);
+  useEffect(() => {
+    const prev = prevLabelRef.current;
+    if (prev !== null && prev !== cloak.label) {
+      setAscending(true);
+      const t = window.setTimeout(() => setAscending(false), 2600);
+      return () => window.clearTimeout(t);
+    }
+    prevLabelRef.current = cloak.label;
+  }, [cloak.label]);
+  // Keep ref in sync once animation lifecycle has read the previous value.
+  useEffect(() => {
+    prevLabelRef.current = cloak.label;
+  }, [cloak.label]);
+
   return (
     <section
       className="relative rounded-2xl border border-amber-900/25 overflow-hidden bg-card/55 backdrop-blur-sm"
