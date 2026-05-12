@@ -212,6 +212,10 @@ const DevRoom = () => {
    OVERVIEW
    ═══════════════════════════════════════════════════ */
 function OverviewSection({ stats }: { stats: Record<string, number> }) {
+  const { hasRole: isCurator } = useHasRole("curator");
+  const { hasRole: isKeeper } = useHasRole("keeper");
+  const showAdminRoom = isCurator || isKeeper || isDevHost();
+
   const cards = [
     { label: "Connected Agents", value: stats.agents, icon: <Bot className="w-4 h-4 text-emerald-400" />, route: "/agent-garden" },
     { label: "Active Datasets", value: stats.datasets, icon: <Database className="w-4 h-4 text-blue-400" />, route: "/tree-data-commons" },
