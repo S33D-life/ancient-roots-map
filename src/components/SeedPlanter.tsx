@@ -115,6 +115,12 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   const [showBurst, setShowBurst] = useState(false);
   const [receiptVisible, setReceiptVisible] = useState(false);
   const [receiptData, setReceiptData] = useState<{ s33dHearts: number; speciesHearts: number; speciesFamily?: string }>({ s33dHearts: 0, speciesHearts: 0 });
+  const [lastResult, setLastResult] = useState<ActionResult | null>(null);
+  const [locatingMessage, setLocatingMessage] = useState<string | null>(null);
+  const [overrideEnabled, setOverrideEnabled] = useState(false);
+
+  const { hasRole: isKeeper } = useHasRole("keeper");
+  const canOverride = import.meta.env.DEV || isKeeper;
 
   const seedsHere = getSeedsAtTree(treeId);
   const bloomedSeeds = getBloomedSeedsAtTree(treeId);
@@ -122,34 +128,47 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     (s) => !s.collected_by && new Date(s.blooms_at) > new Date()
   );
 
-  // Collectible = bloomed & not planted by current user
   const collectibleSeeds = bloomedSeeds.filter(
     (s) => s.planter_id !== userId
   );
 
   if (!userId || treeLat == null || treeLng == null) return null;
 
-  const [lastResult, setLastResult] = useState<ActionResult | null>(null);
+  const onAttempt = (attempt: number) => {
+    setLocatingMessage(
+      attempt === 1
+        ? "Locating your position…"
+        : "Seeking a clearer signal beneath the canopy…",
+    );
+  };
+
+  const refineForToast = (result: ActionResult): ActionResult => {
+    // "Too far" with low confidence is really a signal-quality issue, not user position.
+    if (result.reason === "too_far" && result.confidence === "low") {
+      return { ...result, reason: "geo_poor_accuracy" };
+    }
+    return result;
+  };
 
   const handlePlant = async () => {
     setPlanting(true);
-    const result = await plantSeed(treeId, treeLat, treeLng);
+    setLocatingMessage("Locating your position…");
+    const result = await plantSeed(treeId, treeLat, treeLng, {
+      onAttempt,
+      override: overrideEnabled && canOverride,
+    });
     setPlanting(false);
+    setLocatingMessage(null);
     setLastResult(result);
 
-    // Soft-warn on poor accuracy when too_far
     if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
-      toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
+      const note = result.overrideUsed ? " (override used)" : "";
+      toast.success(`🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.${note}`);
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
-      // Surface poor-accuracy hint when user is "too far" but GPS is unreliable
-      const refined: ActionResult =
-        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
-          ? { ...result, reason: "geo_poor_accuracy" }
-          : result;
-      const { title, description } = explainFailure(refined);
+      const { title, description } = explainFailure(refineForToast(result));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] plant failed", result);
     }
@@ -157,8 +176,13 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
   const handleCollect = async (seed: PlantedSeed) => {
     setCollecting(seed.id);
-    const result = await collectHeart(seed.id);
+    setLocatingMessage("Locating your position…");
+    const result = await collectHeart(seed.id, {
+      onAttempt,
+      override: overrideEnabled && canOverride,
+    });
     setCollecting(null);
+    setLocatingMessage(null);
     setLastResult(result);
 
     if (result.ok) {
@@ -166,11 +190,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
     } else {
-      const refined: ActionResult =
-        result.reason === "too_far" && (result.accuracy ?? 0) > POOR_GPS_ACCURACY_M
-          ? { ...result, reason: "geo_poor_accuracy" }
-          : result;
-      const { title, description } = explainFailure(refined);
+      const { title, description } = explainFailure(refineForToast(result));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
     }
