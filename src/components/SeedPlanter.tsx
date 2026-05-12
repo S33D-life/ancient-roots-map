@@ -26,7 +26,7 @@ import { getFamilyForSpecies } from "@/data/treeSpecies";
 import { useHasRole } from "@/hooks/use-role";
 import { isDebugUser, isDevHost } from "@/lib/env";
 
-function explainFailure(r: ActionResult): { title: string; description?: string } {
+function explainFailure(r: ActionResult, debug = false): { title: string; description?: string } {
   const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
   const a = r.accuracy != null ? `±${Math.round(r.accuracy)}m` : null;
   switch (r.reason) {
@@ -77,7 +77,7 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
         description: "A keeper has paused this option. Please try again with a clearer GPS signal.",
       };
     case "rpc_error":
-      return { title: "Something went wrong on our side", description: r.error };
+      return { title: "This action could not take root yet", description: debug ? r.error : "Take a breath and try once more." };
     default:
       return { title: "Couldn't collect Heart" };
   }
