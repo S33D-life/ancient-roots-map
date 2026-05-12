@@ -1104,6 +1104,15 @@ const TreeDetailPage = () => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }}
                 />
+                {import.meta.env.DEV && (
+                  <AncientFriendDebugPanel
+                    treeId={tree.id}
+                    treeSpecies={tree.species}
+                    userId={userId}
+                    isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
+                    isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
+                  />
+                )}
               </Suspense>
             )}
 
