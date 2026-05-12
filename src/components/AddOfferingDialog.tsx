@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { track } from "@/lib/telemetry";
 import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import type { OfferingPrompt } from "@/hooks/use-seasonal-offerings";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
@@ -158,6 +159,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
    * 3) on receipt close, ensure the user lands on the tree detail page
    */
   const finishOfferingFlow = useCallback((earnedReward: boolean) => {
+    track("offering_made", { treeId, meta: { reward: earnedReward, type: activeType } });
     setShowCelebration(false);
     onOpenChange(false);
     if (earnedReward) {
