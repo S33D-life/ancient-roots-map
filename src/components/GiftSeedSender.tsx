@@ -66,7 +66,7 @@ const GiftSeedSender = () => {
   };
 
   const inviteUrl = inviteCode
-    ? `${window.location.origin}/auth?gift=${inviteCode}`
+    ? getPublicAppUrl(`/auth?gift=${inviteCode}`)
     : null;
 
   if (!userId) return null;
