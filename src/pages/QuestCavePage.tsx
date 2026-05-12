@@ -43,7 +43,7 @@ import CurrentPathChamber from "@/components/quest-cave/CurrentPathChamber";
 import TeotagGuidancePanel, {
   type TeotagHint,
 } from "@/components/quest-cave/TeotagGuidancePanel";
-import RegaliaChamber from "@/components/quest-cave/RegaliaChamber";
+import RegaliaChamber, { deepestHive } from "@/components/quest-cave/RegaliaChamber";
 import PathwayGateway from "@/components/quest-cave/PathwayGateway";
 import QuestChamberCard from "@/components/quest-cave/QuestChamberCard";
 import OpportunitiesBoard, {
@@ -213,11 +213,8 @@ export default function QuestCavePage() {
             isPermanent={identity.hasPermanent}
             speciesCount={speciesCount}
             visits={activity.visits}
-            affinityDepth={Math.max(
-              0,
-              ...Object.values(progression.hiveCounts ?? {}),
-            )}
-            affinitySpecies={progression.recentSpecies.slice(0, 6)}
+            affinityDepth={deepestHive(progression.hiveCounts)}
+            affinitySpecies={(progression.recentSpecies ?? []).slice(0, 6)}
             sigils={deriveSigils(activity, speciesCount, progression.ancientCount)}
             streak={streakLine}
           />

@@ -46,15 +46,39 @@ const CLOAK_STAGES = [
   { min: 120, label: "Ancient mantle",   tone: "from-amber-400/55 to-emerald-400/45" },
 ];
 
+/** Coerce any signal value to a safe non-negative finite integer. */
+function safeCount(v: unknown): number {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
+}
+
+/** Reduce a (possibly partial / undefined) hive-counts map to its deepest count. */
+export function deepestHive(
+  hiveCounts: Record<string, unknown> | null | undefined,
+): number {
+  if (!hiveCounts || typeof hiveCounts !== "object") return 0;
+  let max = 0;
+  for (const v of Object.values(hiveCounts)) {
+    const n = safeCount(v);
+    if (n > max) max = n;
+  }
+  return max;
+}
+
 function resonanceScore(species: number, visits: number, affinity: number) {
-  const breadth  = Math.min(40, species)  * 1.5;   // soft-cap at 40 species
-  const returns  = Math.min(50, visits)   * 1.0;   // soft-cap at 50 visits
-  const affinityScore = Math.min(20, affinity) * 2.0; // soft-cap at 20 in one hive
+  const s = safeCount(species);
+  const v = safeCount(visits);
+  const a = safeCount(affinity);
+  const breadth  = Math.min(40, s) * 1.5;   // soft-cap at 40 species
+  const returns  = Math.min(50, v) * 1.0;   // soft-cap at 50 visits
+  const affinityScore = Math.min(20, a) * 2.0; // soft-cap at 20 in one hive
   return Math.round(breadth + returns + affinityScore);
 }
 
 function cloakStage(score: number) {
-  return [...CLOAK_STAGES].reverse().find((s) => score >= s.min) ?? CLOAK_STAGES[0];
+  const s = Number.isFinite(score) ? score : 0;
+  return [...CLOAK_STAGES].reverse().find((st) => s >= st.min) ?? CLOAK_STAGES[0];
 }
 
 export default function RegaliaChamber({
@@ -62,16 +86,29 @@ export default function RegaliaChamber({
   staffSpecies,
   isPermanent,
   affinitySpecies = [],
-  speciesCount = 0,
-  visits = 0,
-  affinityDepth = 0,
+  speciesCount,
+  visits,
+  affinityDepth,
   sigils = [],
   streak,
 }: RegaliaChamberProps) {
-  const score = resonanceScore(speciesCount, visits, affinityDepth);
+  // Defensive defaulting — props may arrive undefined / NaN during partial loads.
+  const safeSpecies = safeCount(speciesCount);
+  const safeVisits = safeCount(visits);
+  const safeAffinity = safeCount(affinityDepth);
+  const safeSigils = Array.isArray(sigils) ? sigils.filter(Boolean) : [];
+  const safeAffinitySpecies = Array.isArray(affinitySpecies)
+    ? affinitySpecies.filter((x): x is string => typeof x === "string" && x.length > 0)
+    : [];
+
+  const score = resonanceScore(safeSpecies, safeVisits, safeAffinity);
   const cloak = cloakStage(score);
   const nextStage = CLOAK_STAGES.find((s) => s.min > score);
   const toNext = nextStage ? Math.max(0, nextStage.min - score) : 0;
+
+  // A "ready" snapshot has at least one signal — until then we don't inscribe
+  // a baseline, so partial loads can't seed a meaningless "Plain wool" record.
+  const hasAnySignal = safeSpecies > 0 || safeVisits > 0 || safeAffinity > 0;
 
   // Stage-transition animation: when the cloak label changes (after first paint),
   // briefly glow the cloak and cross-fade the label so ascension feels alive.
@@ -80,37 +117,36 @@ export default function RegaliaChamber({
   const { history, inscribeAscension } = useCloakHistory();
 
   useEffect(() => {
+    // Wait until at least one progression signal is known. Otherwise a
+    // first-paint snapshot during a partial load would seed the wanderer's
+    // history with a meaningless "Plain wool" baseline.
+    if (!hasAnySignal) return;
+
     const prev = prevLabelRef.current;
+    const snapshot = {
+      stage_label: cloak.label,
+      stage_min: cloak.min,
+      score,
+      species_count: safeSpecies,
+      visits: safeVisits,
+      affinity_depth: safeAffinity,
+    };
+
     if (prev === null) {
-      // First sighting: silently inscribe the current mantle as a baseline so
-      // the wanderer's history begins from where they stand today.
-      inscribeAscension({
-        stage_label: cloak.label,
-        stage_min: cloak.min,
-        score,
-        species_count: speciesCount,
-        visits,
-        affinity_depth: affinityDepth,
-      });
+      // First valid sighting — inscribe a baseline so the chronicle begins.
+      inscribeAscension(snapshot);
     } else if (prev !== cloak.label) {
-      // True ascension: animate AND inscribe the new mantle into history.
+      // True ascension: animate AND inscribe the new mantle.
       setAscending(true);
-      inscribeAscension({
-        stage_label: cloak.label,
-        stage_min: cloak.min,
-        score,
-        species_count: speciesCount,
-        visits,
-        affinity_depth: affinityDepth,
-      });
+      inscribeAscension(snapshot);
       const t = window.setTimeout(() => setAscending(false), 2600);
       prevLabelRef.current = cloak.label;
       return () => window.clearTimeout(t);
     }
     prevLabelRef.current = cloak.label;
-    // We deliberately key on the label only; signal counts are snapshotted above.
+    // We deliberately key on the label + readiness; signal counts are snapshotted above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cloak.label]);
+  }, [cloak.label, hasAnySignal]);
 
   const [historyOpen, setHistoryOpen] = useState(false);
 
@@ -166,7 +202,7 @@ export default function RegaliaChamber({
                 strokeDasharray="2 2"
               />
               {/* Sigil pins on the cloak */}
-              {sigils.slice(0, 5).map((_, i) => (
+              {safeSigils.slice(0, 5).map((_, i) => (
                 <circle
                   key={i}
                   cx={32 + (i % 3) * 18}
@@ -254,19 +290,19 @@ export default function RegaliaChamber({
               <Sparkles className="w-3 h-3" /> Sigils
             </div>
             <p className="font-serif text-[11px] text-foreground/85 mt-0.5 leading-snug">
-              {sigils.length > 0 ? `${sigils.length} earned` : "None yet"}
+              {safeSigils.length > 0 ? `${safeSigils.length} earned` : "None yet"}
             </p>
           </div>
         </div>
       </div>
 
-      {affinitySpecies.length > 0 && (
+      {safeAffinitySpecies.length > 0 && (
         <div className="px-4 pb-4 -mt-1">
           <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70 mb-1">
             Species affinity
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {affinitySpecies.slice(0, 6).map((s) => (
+            {safeAffinitySpecies.slice(0, 6).map((s) => (
               <span
                 key={s}
                 className="font-serif text-[10px] px-2 py-0.5 rounded-full border border-emerald-700/25 bg-emerald-50/30 dark:bg-emerald-950/15 text-foreground/80"
