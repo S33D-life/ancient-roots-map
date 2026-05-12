@@ -36,12 +36,13 @@ import { useLongPress } from "@/hooks/use-long-press";
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
 const STORAGE_KEY = "s33d-firefly-fab-pos";
-const EDGE_PAD = 72;
+/** Inset from edge — larger so the orb doesn't overlap right-aligned content/buttons on first load. */
+const EDGE_PAD = 20;
 const FAB_SIZE = 48;
 const DRAG_THRESHOLD = 8;
 const TAP_DEBOUNCE_MS = 800;
-/** Keep orb away from bottom nav area on mobile */
-const BOTTOM_SAFE_ZONE = 120;
+/** Keep orb well above bottom nav + safe-area on mobile */
+const BOTTOM_SAFE_ZONE = 144;
 
 interface StoredPos {
   y: number;
@@ -56,8 +57,8 @@ function loadPos(): StoredPos {
       if (typeof p.y === "number" && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  // Default: right edge, above bottom nav safe zone
-  const safeY = Math.round(window.innerHeight * 0.5);
+  // Default: right edge, sitting just above the bottom nav so it doesn't cover content.
+  const safeY = Math.max(EDGE_PAD + 56, window.innerHeight - FAB_SIZE - BOTTOM_SAFE_ZONE);
   return { y: safeY, edge: "right" };
 }
 
