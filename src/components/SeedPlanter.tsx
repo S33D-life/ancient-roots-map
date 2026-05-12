@@ -451,6 +451,9 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         );
       })()}
 
+      {/* Exportable encounter log — visible to anyone after at least one attempt */}
+      {lastResult && <EncounterLogPanel />}
+
 
       <RewardReceipt
         visible={receiptVisible}
