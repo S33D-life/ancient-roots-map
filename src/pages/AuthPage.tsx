@@ -518,7 +518,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: addr,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        options: { emailRedirectTo: `${window.location.origin}/welcome` },
       });
       if (error) throw error;
       writePendingEmail(addr);
@@ -641,7 +641,7 @@ const AuthPage = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        options: { emailRedirectTo: `${window.location.origin}/welcome` },
       });
       if (error) {
         if (error.message.includes("User already registered")) {
@@ -702,7 +702,7 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        options: { emailRedirectTo: `${window.location.origin}/welcome` },
       });
       if (error) throw error;
       setView("magic-sent");
