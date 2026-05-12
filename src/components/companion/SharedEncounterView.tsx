@@ -4,6 +4,7 @@ import { Users, TreePine, Heart, WifiOff, RotateCcw, AlertCircle, Scan, ArrowLef
 import { Input } from "@/components/ui/input";
 import { useSharedEncounter } from "@/hooks/use-shared-encounter";
 import type { SharedEncounterState } from "@/lib/companion-types";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface Props {
   onBack: () => void;
