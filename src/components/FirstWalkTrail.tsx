@@ -19,11 +19,17 @@ const STEP_META: Record<WalkStep, { icon: typeof MapPin; label: string; hint: st
 
 const FirstWalkTrail = () => {
   const { steps, completed, finished, dismissed, dismiss, currentIndex } = useFirstWalk();
-
   const { showOnboardingNudges } = useQuietMode();
+  const location = useLocation();
 
-  // Don't render if finished, dismissed, or nudges disabled
-  if (finished || dismissed || !showOnboardingNudges) return null;
+  // Hide entirely during auth flows so the widget doesn't compete with sign-in / verification UI.
+  const onAuthRoute =
+    location.pathname.startsWith("/auth") ||
+    location.pathname.startsWith("/reset-password") ||
+    location.pathname.startsWith("/~oauth");
+
+  // Don't render if finished, dismissed, on auth route, or nudges disabled
+  if (finished || dismissed || onAuthRoute || !showOnboardingNudges) return null;
 
   const progress = completed.size;
 
