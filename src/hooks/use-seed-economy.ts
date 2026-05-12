@@ -263,25 +263,43 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     }
 
     const base = buildBase(geo.position, treeLat, treeLng, geo.retries);
-    const allowed = base.effectiveDistance <= PROXIMITY_METERS || opts?.override === true;
 
-    if (!allowed) return { ok: false, reason: "too_far", ...base };
-
-    const { error } = await supabase.from("planted_seeds").insert({
-      planter_id: userId,
-      tree_id: treeId,
-      latitude: treeLat,
-      longitude: treeLng,
+    // Server is the source of truth — pass live coords + accuracy + optional override.
+    const { data, error } = await supabase.rpc("plant_seed_with_proximity", {
+      p_tree_id: treeId,
+      p_user_lat: base.userLat,
+      p_user_lng: base.userLng,
+      p_user_accuracy: base.accuracy ?? null,
+      p_override: opts?.override === true,
     });
 
     if (error) {
-      console.error("[plantSeed] supabase error:", error);
+      console.error("[plantSeed] rpc error:", error);
       return { ok: false, reason: "rpc_error", error: error.message, ...base };
     }
-    if (opts?.override) {
-      console.warn("[s33d] override used: plantSeed", { treeId, userId, ...base });
+
+    const r = (data ?? {}) as Record<string, unknown>;
+    const serverDistance = typeof r.distance === "number" ? r.distance : base.distance;
+    const serverEffective = typeof r.effective_distance === "number" ? r.effective_distance : base.effectiveDistance;
+
+    if (!r.ok) {
+      const reason = (r.reason as ActionFailureReason) ?? "too_far";
+      return {
+        ok: false, reason,
+        ...base,
+        distance: serverDistance,
+        effectiveDistance: serverEffective,
+        error: typeof r.error === "string" ? r.error : undefined,
+      };
     }
-    return { ok: true, ...base, overrideUsed: !!opts?.override };
+
+    return {
+      ok: true,
+      ...base,
+      distance: serverDistance,
+      effectiveDistance: serverEffective,
+      overrideUsed: !!r.override_used,
+    };
   }, [userId, seedsRemaining, allSeeds]);
 
   const collectHeart = useCallback(async (
@@ -305,23 +323,42 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     }
 
     const base = buildBase(geo.position, seed.latitude, seed.longitude, geo.retries);
-    const allowed = base.effectiveDistance <= PROXIMITY_METERS || opts?.override === true;
 
-    if (!allowed) return { ok: false, reason: "too_far", ...base };
-
-    const { error } = await supabase
-      .from("planted_seeds")
-      .update({ collected_by: userId, collected_at: new Date().toISOString() })
-      .eq("id", seedId);
+    const { data, error } = await supabase.rpc("collect_planted_heart_with_proximity", {
+      p_seed_id: seedId,
+      p_user_lat: base.userLat,
+      p_user_lng: base.userLng,
+      p_user_accuracy: base.accuracy ?? null,
+      p_override: opts?.override === true,
+    });
 
     if (error) {
-      console.error("[collectHeart] supabase error:", error);
+      console.error("[collectHeart] rpc error:", error);
       return { ok: false, reason: "rpc_error", error: error.message, ...base };
     }
-    if (opts?.override) {
-      console.warn("[s33d] override used: collectHeart", { seedId, userId, ...base });
+
+    const r = (data ?? {}) as Record<string, unknown>;
+    const serverDistance = typeof r.distance === "number" ? r.distance : base.distance;
+    const serverEffective = typeof r.effective_distance === "number" ? r.effective_distance : base.effectiveDistance;
+
+    if (!r.ok) {
+      const reason = (r.reason as ActionFailureReason) ?? "too_far";
+      return {
+        ok: false, reason,
+        ...base,
+        distance: serverDistance,
+        effectiveDistance: serverEffective,
+        error: typeof r.error === "string" ? r.error : undefined,
+      };
     }
-    return { ok: true, ...base, overrideUsed: !!opts?.override };
+
+    return {
+      ok: true,
+      ...base,
+      distance: serverDistance,
+      effectiveDistance: serverEffective,
+      overrideUsed: !!r.override_used,
+    };
   }, [userId, allSeeds]);
 
   const getSeedsAtTree = useCallback((treeId: string) => {
