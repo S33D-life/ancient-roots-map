@@ -156,7 +156,7 @@ const DashboardWanderers = ({ userId }: Props) => {
     setGeneratingInvite(true);
     // Reuse existing invite link if available
     if (inviteCode) {
-      const link = `${window.location.origin}/auth?invite=${inviteCode}`;
+      const link = getPublicAppUrl(`/auth?invite=${inviteCode}`);
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });
       setGeneratingInvite(false);
