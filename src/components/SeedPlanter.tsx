@@ -207,7 +207,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       }
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
-      const { title, description } = explainFailure(refineForToast(result));
+      const { title, description } = explainFailure(refineForToast(result), isDebugUser(isKeeper));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] plant failed", result);
     }
@@ -235,7 +235,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         });
       }
     } else {
-      const { title, description } = explainFailure(refineForToast(result));
+      const { title, description } = explainFailure(refineForToast(result), isDebugUser(isKeeper));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
     }
