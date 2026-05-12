@@ -358,10 +358,7 @@ export default function MemorySeedComposer({
 
     if (!message) throw new Error("Whisper has no content");
 
-    const deliveryScope =
-      unlock === "same_tree" ? "SPECIFIC_TREE"
-      : unlock === "same_species" ? "SPECIES_MATCH"
-      : "ANY_TREE";
+    const delivery = buildWhisperDelivery(unlock, treeId, treeSpeciesKey, treeSpecies);
 
     const { data, error } = await sendWhisper({
       senderUserId: userId!,
@@ -369,12 +366,9 @@ export default function MemorySeedComposer({
       treeAnchorId: treeId,
       messageContent: message.slice(0, 2000),
       mediaUrl: mediaUrl.trim() || undefined,
-      deliveryScope,
-      deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
-      deliverySpeciesKey:
-        deliveryScope === "SPECIES_MATCH"
-          ? (treeSpeciesKey || treeSpecies || undefined)
-          : undefined,
+      deliveryScope: delivery.deliveryScope,
+      deliveryTreeId: delivery.deliveryTreeId,
+      deliverySpeciesKey: delivery.deliverySpeciesKey,
       isActive: true,
     });
     if (error) throw error;
