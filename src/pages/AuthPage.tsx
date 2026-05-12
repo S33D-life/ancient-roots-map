@@ -1317,6 +1317,7 @@ const AuthPage = () => {
         open={unverifiedModalOpen}
         onOpenChange={(open) => {
           setUnverifiedModalOpen(open);
+          writeUnverifiedModalOpen(open);
           if (open) setResendNote(null);
         }}
       >
