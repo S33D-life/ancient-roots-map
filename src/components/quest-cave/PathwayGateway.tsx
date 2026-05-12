@@ -91,7 +91,7 @@ export default function PathwayGateway({
         role="region"
         aria-labelledby={headerId}
         aria-hidden={!open}
-        inert={!open || undefined}
+        {...(!open ? ({ inert: "" } as Record<string, string>) : {})}
         className={`grid transition-[grid-template-rows,opacity] duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
