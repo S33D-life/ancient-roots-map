@@ -419,7 +419,7 @@ export default function CanopyCheckinModal({
           onDismiss={() => setShowShareOverlay(false)}
           treeName={treeName}
           treeSpecies={treeSpecies}
-          shareLink={`${window.location.origin}/tree/${treeId}`}
+          shareLink={getPublicAppUrl(`/tree/${treeId}`)}
         />
       </>
     );
