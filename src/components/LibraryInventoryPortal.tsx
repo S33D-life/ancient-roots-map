@@ -66,26 +66,28 @@ const LibraryInventoryPortal = ({ userId, shelves, onImport, onCreateShelves }: 
           background: "linear-gradient(135deg, hsl(var(--card) / 0.5), hsl(30 20% 15% / 0.15))",
         }}
       >
-        <div className="px-4 py-3 flex items-start gap-3">
-          {/* Subtle library icon */}
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-            style={{ background: "hsl(30 30% 25% / 0.2)", border: "1px solid hsl(30 25% 30% / 0.15)" }}
-          >
-            <Library className="h-4 w-4" style={{ color: "hsl(30 40% 55%)" }} />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-xs tracking-wide text-foreground/70">Library Inventory</span>
-              <Badge variant="outline" className="text-[8px] px-1 py-0 font-serif text-muted-foreground/50">Source</Badge>
+        <div className="px-4 py-3 flex flex-col sm:flex-row sm:items-start gap-3">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            {/* Subtle library icon */}
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+              style={{ background: "hsl(30 30% 25% / 0.2)", border: "1px solid hsl(30 25% 30% / 0.15)" }}
+            >
+              <Library className="h-4 w-4" style={{ color: "hsl(30 40% 55%)" }} />
             </div>
-            <p className="text-[10px] text-muted-foreground/40 font-serif mt-0.5 leading-relaxed">
-              Grow by scanning or entering books. Heartwood mirrors what you choose.
-            </p>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-serif text-xs tracking-wide text-foreground/70">Library Inventory</span>
+                <Badge variant="outline" className="text-[8px] px-1 py-0 font-serif text-muted-foreground/50">Source</Badge>
+              </div>
+              <p className="text-[10px] text-muted-foreground/40 font-serif mt-0.5 leading-relaxed break-words">
+                Grow by scanning or entering books. Heartwood mirrors what you choose.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap sm:shrink-0 -mx-1 px-1 sm:mx-0 sm:px-0 sm:justify-end">
             <Button
               variant="ghost"
               size="sm"
