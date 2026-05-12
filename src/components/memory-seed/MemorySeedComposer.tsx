@@ -509,14 +509,17 @@ export default function MemorySeedComposer({
                   />
                 </div>
 
-                {meta.authorLabel && (
+                {(meta.authorLabel || type === "bloom") && (
                   <div className="space-y-1.5">
-                    <Label className="font-serif text-xs" htmlFor="seed-author">{meta.authorLabel}</Label>
+                    <Label className="font-serif text-xs" htmlFor="seed-author">
+                      {type === "bloom" ? "Species guess (optional)" : meta.authorLabel}
+                    </Label>
                     <Input
                       id="seed-author"
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
                       maxLength={120}
+                      placeholder={type === "bloom" ? "e.g. bluebell, hawthorn" : undefined}
                       className="text-base"
                     />
                   </div>
@@ -525,7 +528,7 @@ export default function MemorySeedComposer({
                 {meta.showMediaUrl && (
                   <div className="space-y-1.5">
                     <Label className="font-serif text-xs" htmlFor="seed-media">
-                      {type === "song" ? "Song link" : "Media URL"}
+                      {type === "bloom" ? "Flower photo" : type === "song" ? "Song link" : "Media URL"}
                     </Label>
                     <Input
                       id="seed-media"
@@ -537,12 +540,18 @@ export default function MemorySeedComposer({
                       placeholder="https://…"
                       className="text-base"
                     />
+                    {type === "bloom" && (
+                      <p className="font-serif text-[11px] italic text-muted-foreground/70">
+                        Paste a photo URL of a flower, blossom, petal, or fruiting sign nearby.
+                        {/* TODO(uploads): in-app camera capture (already wired in AddBloomOfferingDialog). */}
+                      </p>
+                    )}
                   </div>
                 )}
 
                 <div className="space-y-1.5">
                   <Label className="font-serif text-xs" htmlFor="seed-body">
-                    {type === "quote" ? "Quote" : type === "recipe" ? "Recipe" : "Body"}
+                    {type === "quote" ? "Quote" : type === "recipe" ? "Recipe" : type === "bloom" ? "What did you notice?" : "Body"}
                   </Label>
                   <Textarea
                     id="seed-body"
