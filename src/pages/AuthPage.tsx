@@ -1399,7 +1399,7 @@ const AuthPage = () => {
             <Button
               variant="ghost"
               className="font-serif"
-              onClick={() => setUnverifiedModalOpen(false)}
+              onClick={() => { setUnverifiedModalOpen(false); writeUnverifiedModalOpen(false); }}
               aria-label="Close this dialog"
             >
               Close
