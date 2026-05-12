@@ -49,6 +49,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { sendWhisper } from "@/hooks/use-whispers";
 import { useTreeResonance } from "@/hooks/use-tree-resonance";
+import { createBloomOffering } from "@/repositories/blooms";
 
 // ── Types ────────────────────────────────────────────────────
 
