@@ -384,7 +384,10 @@ const AuthPage = () => {
           throw new Error("Invalid email or password. Please try again.");
         }
         if (error.message.includes("Email not confirmed")) {
-          throw new Error("Please verify your email before signing in. Check your inbox.");
+          // Soft modal flow instead of red inline error.
+          setUnverifiedEmail(email);
+          setUnverifiedModalOpen(true);
+          return;
         }
         if (error.message.includes("rate") || error.status === 429) {
           throw new Error("Too many attempts. Please wait a moment before trying again.");
@@ -398,6 +401,29 @@ const AuthPage = () => {
       toast({ title: "Login failed", description: msg, variant: "destructive" });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async (target?: string) => {
+    const addr = (target ?? unverifiedEmail ?? email).trim();
+    if (!addr) {
+      toast({ title: "Enter your email first", description: "We need an email to resend the link." });
+      return;
+    }
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: addr,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      toast({ title: "Verification email sent 🌱", description: `Check ${addr} (and Junk / Spam / Promotions).` });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not resend verification email";
+      toast({ title: "Could not resend", description: msg, variant: "destructive" });
+    } finally {
+      setResending(false);
     }
   };
 
