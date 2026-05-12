@@ -1854,6 +1854,45 @@ export type Database = {
           },
         ]
       }
+      cloak_stage_history: {
+        Row: {
+          achieved_at: string
+          affinity_depth: number
+          id: string
+          primary_signal: string | null
+          score: number
+          species_count: number
+          stage_label: string
+          stage_min: number
+          user_id: string
+          visits: number
+        }
+        Insert: {
+          achieved_at?: string
+          affinity_depth?: number
+          id?: string
+          primary_signal?: string | null
+          score: number
+          species_count?: number
+          stage_label: string
+          stage_min: number
+          user_id: string
+          visits?: number
+        }
+        Update: {
+          achieved_at?: string
+          affinity_depth?: number
+          id?: string
+          primary_signal?: string | null
+          score?: number
+          species_count?: number
+          stage_label?: string
+          stage_min?: number
+          user_id?: string
+          visits?: number
+        }
+        Relationships: []
+      }
       collaborator_experiments: {
         Row: {
           created_at: string
