@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import type { OfferingPrompt } from "@/hooks/use-seasonal-offerings";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
