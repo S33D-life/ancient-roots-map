@@ -267,7 +267,20 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
           </CardContent>
         </Card>
       )}
-      {/* Reward Receipt */}
+
+      {/* Dev-only diagnostics — last action attempt */}
+      {import.meta.env.DEV && lastResult && (
+        <div className="rounded-md border border-dashed border-border/40 bg-muted/30 p-3 text-[10px] font-mono text-muted-foreground space-y-0.5">
+          <div className="font-semibold text-foreground/80">Heart Collection Diagnostics</div>
+          <div>user: {lastResult.userLat?.toFixed(6) ?? "—"}, {lastResult.userLng?.toFixed(6) ?? "—"}</div>
+          <div>tree: {lastResult.treeLat?.toFixed(6) ?? treeLat?.toFixed(6) ?? "—"}, {lastResult.treeLng?.toFixed(6) ?? treeLng?.toFixed(6) ?? "—"}</div>
+          <div>distance: {lastResult.distance != null ? `${lastResult.distance.toFixed(1)}m` : "—"} · radius: {PROXIMITY_METERS}m</div>
+          <div>gps accuracy: {lastResult.accuracy != null ? `±${lastResult.accuracy.toFixed(0)}m` : "—"}</div>
+          <div>result: {lastResult.ok ? "ok" : `blocked (${lastResult.reason ?? "unknown"})`}</div>
+          {lastResult.error && <div className="text-destructive/80 break-all">error: {lastResult.error}</div>}
+        </div>
+      )}
+
       <RewardReceipt
         visible={receiptVisible}
         onClose={() => setReceiptVisible(false)}
