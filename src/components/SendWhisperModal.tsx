@@ -3,6 +3,7 @@
  * Ceremonial, organic, not like chat.
  */
 import { useState, useEffect, useMemo } from "react";
+import { track } from "@/lib/telemetry";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhisper } from "@/hooks/use-whispers";
@@ -231,6 +232,7 @@ export default function SendWhisperModal({
         isActive: presence.atTree,
       });
       if (error || !data?.ok) {
+        track("whisper_failed", { treeId, userId, reason: (error as any)?.code || (data as any)?.error || "unknown" });
         toast.error(explainWhisperError(error, data));
         sendError = error || data?.error;
       } else {
@@ -250,6 +252,7 @@ export default function SendWhisperModal({
         isActive: presence.atTree,
       });
       if (error) {
+        track("whisper_failed", { treeId, userId, reason: (error as any)?.code || "unknown" });
         toast.error(explainWhisperError(error));
         sendError = error;
       } else if (whisperData && typeof whisperData === "object" && "id" in (whisperData as any)) {
@@ -278,6 +281,7 @@ export default function SendWhisperModal({
         from: senderLocation,
       });
       setSent(true);
+      track("whisper_sent", { treeId, userId, meta: { atTree: presence.atTree, audience: audienceType } });
       if (inviteEnabled) toast.success("Whisper sent — now share the invitation!");
       window.dispatchEvent(new CustomEvent("whisper-sent", { detail: { treeId } }));
     }
