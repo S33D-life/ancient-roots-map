@@ -204,7 +204,7 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     if (seed.latitude == null || seed.longitude == null) return { ok: false, reason: "no_seed_coords" };
 
     const geo = await getFreshPosition();
-    if (!geo.ok) {
+    if (geo.kind === "err") {
       return { ok: false, reason: geo.reason, error: geo.error, treeLat: seed.latitude, treeLng: seed.longitude };
     }
 
