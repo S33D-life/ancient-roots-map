@@ -30,6 +30,8 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
       return { title: "Daily limit reached at this tree", description: "Try another tree today." };
     case "seed_missing":
       return { title: "This Heart is no longer here", description: "It may have just been collected." };
+    case "tree_missing":
+      return { title: "This tree is no longer registered", description: "Please report this to a keeper." };
     case "already_collected":
       return { title: "This Heart was already collected" };
     case "own_seed":
@@ -38,6 +40,9 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
       return { title: "This Seed hasn't bloomed yet", description: "Come back when it's ready." };
     case "no_seed_coords":
       return { title: "This Heart has no location", description: "Please report this tree." };
+    case "no_user_coords":
+    case "no_target_coords":
+      return { title: "Location data missing", description: "Please try again or report this tree." };
     case "geo_unsupported":
       return { title: "Location isn't supported on this device" };
     case "geo_denied":
