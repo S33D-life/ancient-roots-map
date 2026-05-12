@@ -135,6 +135,13 @@ const AuthPage = () => {
   const [resendCooldownUntil, setResendCooldownUntil] = useState<number>(0);
   const [resendNote, setResendNote] = useState<string | null>(null);
   const [verifyChecking, setVerifyChecking] = useState(false);
+  // "waiting" → still listening for confirmation
+  // "redirecting" → session detected, opening the grove
+  // "expired" → URL came back with an auth error (link expired/used)
+  const [verifyStatus, setVerifyStatus] = useState<"waiting" | "redirecting" | "expired">("waiting");
+  const [verifyExpiredMessage, setVerifyExpiredMessage] = useState<string | null>(null);
+  // Stops the polling loop and prevents duplicate redirect/toast/profile-ensure work.
+  const hasDetectedSessionRef = useRef(false);
   const [tickNow, setTickNow] = useState(() => Date.now());
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
@@ -259,34 +266,109 @@ const AuthPage = () => {
     return () => window.clearInterval(id);
   }, [resendCooldownUntil, tickNow]);
 
+  // Best-effort safety check: confirm the auth user exists, that their email is
+  // verified, and that a profiles row is present. The DB trigger normally creates
+  // the profile on signup; this is a recovery path for older accounts or trigger
+  // hiccups. Returns true when it's safe to enter the grove.
+  const ensureProfileAndVerified = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        authLog("safety: getUser failed", userErr?.message);
+        return false;
+      }
+      const u = userData.user;
+      // email_confirmed_at is the canonical verified-email field on auth.users.
+      const verified = !!(u.email_confirmed_at || (u as any).confirmed_at);
+      if (!verified) {
+        authLog("safety: user found but email not yet verified");
+        return false;
+      }
+      // Best-effort profile recovery — never block the user if this fails.
+      try {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", u.id)
+          .maybeSingle();
+        if (!prof) {
+          authLog("safety: profile missing → upserting recovery row");
+          await supabase.from("profiles").upsert({ id: u.id }, { onConflict: "id" });
+        }
+      } catch (e) {
+        console.warn("[auth] profile recovery upsert failed (non-blocking):", e);
+      }
+      return true;
+    } catch (e) {
+      authLog("safety check threw", e);
+      return false;
+    }
+  }, []);
+
+  // Detect expired / used confirmation links coming back via URL hash or query.
+  // Supabase appends ?error=... or #error=... when the link is invalid.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const err = params.get("error") || hashParams.get("error");
+    const errCode = params.get("error_code") || hashParams.get("error_code");
+    const errDesc =
+      params.get("error_description") || hashParams.get("error_description") || "";
+    if (!err) return;
+    // Recovery flow handles its own errors — leave it alone.
+    if (sessionStorage.getItem("s33d_recovery_active") === "1") return;
+    const looksExpired =
+      /expired|invalid|otp_expired|access_denied/i.test(errCode || "") ||
+      /expired|invalid|already/i.test(errDesc);
+    if (looksExpired) {
+      setVerifyExpiredMessage("This link has expired or has already been used.");
+      setVerifyStatus("expired");
+      setView("verify-email");
+      authLog("verification link expired", { err, errCode, errDesc });
+    }
+  }, []);
+
   // Auto-redirect once the email is confirmed.
   // Supabase syncs sessions across tabs via storage events (so onAuthStateChange
   // fires automatically when the user clicks the link in another tab), but we
   // also poll as a safety net for browsers / webviews where storage events
   // are flaky (Safari private mode, some in-app browsers, BFCache restores).
-  // We additionally re-check on tab focus.
+  // We additionally re-check on tab focus, and listen on a BroadcastChannel
+  // so a sibling tab that completes auth can close this one cleanly.
   useEffect(() => {
     if (view !== "verify-email") return;
 
     let cancelled = false;
+    const finish = async (source: string) => {
+      if (hasDetectedSessionRef.current) return; // single-shot
+      hasDetectedSessionRef.current = true;
+      authLog("verify-email session detected", { source });
+      setVerifyStatus("redirecting");
+      const safe = await ensureProfileAndVerified();
+      if (cancelled) return;
+      if (!safe) {
+        // Roll back so the user can retry — usually means email_confirmed_at
+        // hasn't propagated yet, or the session was revoked.
+        hasDetectedSessionRef.current = false;
+        setVerifyStatus("waiting");
+        return;
+      }
+      clearPendingEmail();
+      clearUnverifiedEmail();
+      navigate(resolvePostAuthPath(), { replace: true });
+    };
+
     const check = async () => {
+      if (hasDetectedSessionRef.current) return;
       try {
         const { data } = await supabase.auth.getSession();
-        if (cancelled) return;
-        if (data.session) {
-          authLog("verify-email poll detected session — redirecting");
-          // onAuthStateChange will handle the warm toast + cleanup;
-          // we still navigate here to cover the case where the listener
-          // fires before this view mounts.
-          clearPendingEmail(); clearUnverifiedEmail();
-          navigate(resolvePostAuthPath(), { replace: true });
-        }
+        if (cancelled || hasDetectedSessionRef.current) return;
+        if (data.session) await finish("poll");
       } catch (e) {
         authLog("verify-email poll error", e);
       }
     };
 
-    // Run once on entry, then every 4s.
     void check();
     const id = window.setInterval(check, 4000);
 
@@ -295,13 +377,25 @@ const AuthPage = () => {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Cross-tab handshake. Another tab that completes auth posts "verified",
+    // letting this tab redirect immediately and skip duplicate toasts.
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("s33d-auth");
+      channel.onmessage = (e) => {
+        if (e?.data?.type === "verified") void finish("broadcast");
+      };
+    } catch { /* BroadcastChannel not supported — polling still covers us */ }
+
     return () => {
       cancelled = true;
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
+      try { channel?.close(); } catch {}
     };
-  }, [view, navigate, resolvePostAuthPath]);
+  }, [view, navigate, resolvePostAuthPath, ensureProfileAndVerified]);
+
 
 
   // Helper: is the current flow a password recovery flow?
@@ -334,8 +428,33 @@ const AuthPage = () => {
         // Verification round-trip success: warm welcome and clean up the pending email.
         const wasPending = !!readPendingEmail();
         if (event === "SIGNED_IN" && wasPending) {
-          authLog("verification round-trip complete", { userEmail: session.user?.email });
-          toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
+          // Cross-tab dedupe: only the first tab to observe SIGNED_IN shows the toast.
+          const TOAST_KEY = "s33d_verify_toast_shown";
+          let alreadyShown = false;
+          try { alreadyShown = sessionStorage.getItem(TOAST_KEY) === "1"; } catch {}
+          // Use localStorage as a short-lived cross-tab lock too.
+          try {
+            const stamp = localStorage.getItem(TOAST_KEY);
+            if (stamp && Date.now() - Number(stamp) < 10_000) alreadyShown = true;
+            localStorage.setItem(TOAST_KEY, String(Date.now()));
+          } catch {}
+          if (!alreadyShown) {
+            try { sessionStorage.setItem(TOAST_KEY, "1"); } catch {}
+            authLog("verification round-trip complete", { userEmail: session.user?.email });
+            toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
+          }
+          // Tell sibling verify-email tabs to redirect cleanly without re-toasting.
+          try {
+            const ch = new BroadcastChannel("s33d_auth");
+            ch.postMessage({ type: "verified" });
+            ch.close();
+          } catch {}
+          // Also notify the polling effect's channel name.
+          try {
+            const ch2 = new BroadcastChannel("s33d-auth");
+            ch2.postMessage({ type: "verified" });
+            ch2.close();
+          } catch {}
         }
         clearPendingEmail(); clearUnverifiedEmail();
         // Consume invitation on first sign-in (assigns lineage + decrements inviter).
@@ -915,28 +1034,62 @@ const AuthPage = () => {
               <Sparkles className="w-7 h-7 text-primary" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-serif">🌱 Your account has been created</h1>
+              <h1 className="text-2xl font-serif">
+                {verifyStatus === "redirecting"
+                  ? "🌿 Verification received"
+                  : verifyStatus === "expired"
+                    ? "🍂 This link has rested too long"
+                    : "🌱 Your account has been created"}
+              </h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                We've sent a confirmation email to{" "}
-                <span className="text-foreground font-medium">{email || readPendingEmail() || "your inbox"}</span>.
-                <br />
-                Please open the link in the email to enter the grove.
+                {verifyStatus === "redirecting" ? (
+                  <>Verification received — opening the Grove…</>
+                ) : verifyStatus === "expired" ? (
+                  <>
+                    {verifyExpiredMessage ?? "This link has expired or has already been used."}
+                    <br />
+                    Send a fresh one and we'll keep listening here.
+                  </>
+                ) : (
+                  <>
+                    We've sent a confirmation email to{" "}
+                    <span className="text-foreground font-medium">
+                      {email || readPendingEmail() || "your inbox"}
+                    </span>.
+                    <br />
+                    Please open the link in the email to enter the grove.
+                  </>
+                )}
               </p>
             </div>
+
+            {verifyStatus === "redirecting" && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center justify-center gap-2 text-sm text-primary"
+              >
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                Opening the Grove…
+              </div>
+            )}
 
             <div className="space-y-2 pt-1">
               <Button
                 onClick={handleContinueAfterVerification}
-                disabled={verifyChecking}
+                disabled={verifyChecking || verifyStatus === "redirecting"}
                 className="w-full font-serif gap-2"
                 aria-label="I have verified my email — continue to sign in"
               >
-                {verifyChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                {verifyChecking || verifyStatus === "redirecting"
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <CheckCircle2 className="w-4 h-4" />}
                 I've verified — continue
               </Button>
               <Button
                 variant="outline"
                 onClick={openMail}
+                disabled={verifyStatus === "redirecting"}
                 className="w-full font-serif gap-2"
                 aria-label="Open the Mail app on your device"
               >
@@ -945,11 +1098,12 @@ const AuthPage = () => {
               {(() => {
                 const remaining = Math.max(0, Math.ceil((resendCooldownUntil - tickNow) / 1000));
                 const cooling = remaining > 0;
+                const disabled = resending || cooling || verifyStatus === "redirecting";
                 return (
                   <Button
                     variant="outline"
                     onClick={() => handleResendVerification(email || unverifiedEmail)}
-                    disabled={resending || cooling}
+                    disabled={disabled}
                     className="w-full font-serif gap-2"
                     aria-label="Resend the verification email"
                   >
@@ -961,6 +1115,7 @@ const AuthPage = () => {
               <Button
                 variant="ghost"
                 onClick={() => { clearPendingEmail(); clearUnverifiedEmail(); setView("signup"); clearErrors(); }}
+                disabled={verifyStatus === "redirecting"}
                 className="w-full font-serif gap-2"
                 aria-label="Change the email address used for signup"
               >
@@ -968,7 +1123,8 @@ const AuthPage = () => {
               </Button>
               <button
                 onClick={() => { setView("login"); clearErrors(); }}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1"
+                disabled={verifyStatus === "redirecting"}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1 disabled:opacity-50"
               >
                 ← Back to Login
               </button>
@@ -981,6 +1137,12 @@ const AuthPage = () => {
                 className="text-xs leading-relaxed text-foreground/80 px-2"
               >
                 {resendNote}
+              </p>
+            )}
+
+            {verifyStatus === "waiting" && (
+              <p className="text-xs italic text-muted-foreground/80 leading-relaxed px-2">
+                You can leave this page open — it will continue listening for your confirmation.
               </p>
             )}
 
