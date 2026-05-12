@@ -52,7 +52,7 @@ export default function AdminRoomPage() {
           <p className="text-muted-foreground font-serif">
             The Admin Room is reserved for keepers and Heartwood curators.
           </p>
-          <Link to="/library/room/tap-root" className="inline-block mt-6 text-sm text-primary underline-offset-4 hover:underline">
+          <Link to="/library/tap-root" className="inline-block mt-6 text-sm text-primary underline-offset-4 hover:underline">
             Return to Taproot
           </Link>
         </div>
@@ -195,7 +195,7 @@ export default function AdminRoomPage() {
         {/* Footer return */}
         <div className="mt-10 text-center">
           <Link
-            to="/library/room/tap-root"
+            to="/library/tap-root"
             className="text-xs font-mono tracking-wider uppercase text-muted-foreground/60 hover:text-primary transition-colors"
           >
             ← Return to Taproot
