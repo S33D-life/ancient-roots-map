@@ -152,34 +152,101 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
   const totalSeedHeartsEarned = heartBreakdown.wanderer + heartBreakdown.sower + heartBreakdown.windfall;
 
   /** Get a fresh GPS fix — never cached. Returns structured failure info. */
-  const getFreshPosition = async (): Promise<
-    | { kind: "ok"; position: GeolocationPosition }
-    | { kind: "err"; reason: ActionFailureReason; error?: string }
+  function getConfidence(accuracy: number | undefined): GpsConfidence {
+    if (accuracy == null) return "unknown";
+    if (accuracy < 20) return "high";
+    if (accuracy <= 75) return "medium";
+    return "low";
+  }
+
+  /** Tolerance: subtract up to 40m of accuracy uncertainty from raw distance. */
+  function applyTolerance(distance: number, accuracy: number | undefined): number {
+    const slack = Math.min((accuracy ?? 0) * 0.5, 40);
+    return Math.max(0, distance - slack);
+  }
+
+  /**
+   * Get a fresh GPS fix with auto-retry. Up to 3 total attempts.
+   * Retries on timeout / unavailable / poor accuracy.
+   */
+  const getFreshPosition = async (
+    onAttempt?: (attempt: number) => void,
+  ): Promise<
+    | { kind: "ok"; position: GeolocationPosition; retries: number }
+    | { kind: "err"; reason: ActionFailureReason; error?: string; retries: number }
   > => {
     if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
-      return { kind: "err", reason: "geo_unsupported" };
+      return { kind: "err", reason: "geo_unsupported", retries: 0 };
     }
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 12000,
-          maximumAge: 0,
+
+    const MAX_ATTEMPTS = 3;
+    let lastErr: { reason: ActionFailureReason; error?: string } | null = null;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      onAttempt?.(attempt);
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: attempt === 1 ? 8000 : 14000,
+            maximumAge: 0,
+          });
         });
-      });
-      return { kind: "ok", position };
-    } catch (err: unknown) {
-      const e = err as GeolocationPositionError | undefined;
-      const code = e?.code;
-      const msg = e?.message ?? String(err);
-      if (code === 1) return { kind: "err", reason: "geo_denied", error: msg };
-      if (code === 2) return { kind: "err", reason: "geo_unavailable", error: msg };
-      if (code === 3) return { kind: "err", reason: "geo_timeout", error: msg };
-      return { kind: "err", reason: "geo_unavailable", error: msg };
+
+        // Treat very poor accuracy as a retryable signal
+        if (position.coords.accuracy > 75 && attempt < MAX_ATTEMPTS) {
+          lastErr = { reason: "geo_poor_accuracy" };
+          await new Promise(r => setTimeout(r, 800));
+          continue;
+        }
+
+        return { kind: "ok", position, retries: attempt - 1 };
+      } catch (err: unknown) {
+        const e = err as GeolocationPositionError | undefined;
+        const code = e?.code;
+        const msg = e?.message ?? String(err);
+        if (code === 1) {
+          // Permission denied — never retry
+          return { kind: "err", reason: "geo_denied", error: msg, retries: attempt - 1 };
+        }
+        if (code === 2) lastErr = { reason: "geo_unavailable", error: msg };
+        else if (code === 3) lastErr = { reason: "geo_timeout", error: msg };
+        else lastErr = { reason: "geo_unavailable", error: msg };
+        if (attempt < MAX_ATTEMPTS) await new Promise(r => setTimeout(r, 800));
+      }
     }
+
+    return {
+      kind: "err",
+      reason: lastErr?.reason ?? "geo_unavailable",
+      error: lastErr?.error,
+      retries: MAX_ATTEMPTS - 1,
+    };
   };
 
-  const plantSeed = useCallback(async (treeId: string, treeLat: number, treeLng: number): Promise<ActionResult> => {
+  function buildBase(position: GeolocationPosition, treeLat: number, treeLng: number, retries: number) {
+    const { latitude: userLat, longitude: userLng, accuracy } = position.coords;
+    const dist = distanceMeters(userLat, userLng, treeLat, treeLng);
+    const effective = applyTolerance(dist, accuracy);
+    const gpsTimestamp = position.timestamp;
+    return {
+      distance: dist,
+      effectiveDistance: effective,
+      accuracy,
+      confidence: getConfidence(accuracy),
+      userLat,
+      userLng,
+      treeLat,
+      treeLng,
+      gpsTimestamp,
+      gpsAgeMs: Date.now() - gpsTimestamp,
+      retries,
+    };
+  }
+
+  const plantSeed = useCallback(async (
+    treeId: string, treeLat: number, treeLng: number, opts?: ActionOptions,
+  ): Promise<ActionResult> => {
     if (!userId) return { ok: false, reason: "no_user" };
     if (seedsRemaining <= 0) return { ok: false, reason: "no_seeds" };
 
@@ -190,14 +257,15 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     );
     if (todaySeeds.length >= SEEDS_PER_TREE) return { ok: false, reason: "per_tree_limit" };
 
-    const geo = await getFreshPosition();
-    if (geo.kind === "err") return { ok: false, reason: geo.reason, error: geo.error, treeLat, treeLng };
+    const geo = await getFreshPosition(opts?.onAttempt);
+    if (geo.kind === "err") {
+      return { ok: false, reason: geo.reason, error: geo.error, treeLat, treeLng, retries: geo.retries };
+    }
 
-    const { latitude: userLat, longitude: userLng, accuracy } = geo.position.coords;
-    const dist = distanceMeters(userLat, userLng, treeLat, treeLng);
-    const base = { distance: dist, accuracy, userLat, userLng, treeLat, treeLng };
+    const base = buildBase(geo.position, treeLat, treeLng, geo.retries);
+    const allowed = base.effectiveDistance <= PROXIMITY_METERS || opts?.override === true;
 
-    if (dist > PROXIMITY_METERS) return { ok: false, reason: "too_far", ...base };
+    if (!allowed) return { ok: false, reason: "too_far", ...base };
 
     const { error } = await supabase.from("planted_seeds").insert({
       planter_id: userId,
@@ -210,10 +278,15 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       console.error("[plantSeed] supabase error:", error);
       return { ok: false, reason: "rpc_error", error: error.message, ...base };
     }
-    return { ok: true, ...base };
+    if (opts?.override) {
+      console.warn("[s33d] override used: plantSeed", { treeId, userId, ...base });
+    }
+    return { ok: true, ...base, overrideUsed: !!opts?.override };
   }, [userId, seedsRemaining, allSeeds]);
 
-  const collectHeart = useCallback(async (seedId: string): Promise<ActionResult> => {
+  const collectHeart = useCallback(async (
+    seedId: string, opts?: ActionOptions,
+  ): Promise<ActionResult> => {
     if (!userId) return { ok: false, reason: "no_user" };
 
     const seed = allSeeds.find(s => s.id === seedId);
@@ -223,16 +296,18 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     if (new Date(seed.blooms_at) > new Date()) return { ok: false, reason: "not_bloomed" };
     if (seed.latitude == null || seed.longitude == null) return { ok: false, reason: "no_seed_coords" };
 
-    const geo = await getFreshPosition();
+    const geo = await getFreshPosition(opts?.onAttempt);
     if (geo.kind === "err") {
-      return { ok: false, reason: geo.reason, error: geo.error, treeLat: seed.latitude, treeLng: seed.longitude };
+      return {
+        ok: false, reason: geo.reason, error: geo.error,
+        treeLat: seed.latitude, treeLng: seed.longitude, retries: geo.retries,
+      };
     }
 
-    const { latitude: userLat, longitude: userLng, accuracy } = geo.position.coords;
-    const dist = distanceMeters(userLat, userLng, seed.latitude, seed.longitude);
-    const base = { distance: dist, accuracy, userLat, userLng, treeLat: seed.latitude, treeLng: seed.longitude };
+    const base = buildBase(geo.position, seed.latitude, seed.longitude, geo.retries);
+    const allowed = base.effectiveDistance <= PROXIMITY_METERS || opts?.override === true;
 
-    if (dist > PROXIMITY_METERS) return { ok: false, reason: "too_far", ...base };
+    if (!allowed) return { ok: false, reason: "too_far", ...base };
 
     const { error } = await supabase
       .from("planted_seeds")
@@ -243,7 +318,10 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       console.error("[collectHeart] supabase error:", error);
       return { ok: false, reason: "rpc_error", error: error.message, ...base };
     }
-    return { ok: true, ...base };
+    if (opts?.override) {
+      console.warn("[s33d] override used: collectHeart", { seedId, userId, ...base });
+    }
+    return { ok: true, ...base, overrideUsed: !!opts?.override };
   }, [userId, allSeeds]);
 
   const getSeedsAtTree = useCallback((treeId: string) => {
