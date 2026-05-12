@@ -7,8 +7,10 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Shield, Wand2, Sparkles, ArrowRight } from "lucide-react";
+import { Shield, Wand2, Sparkles, ArrowRight, ScrollText, ChevronDown } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
+import { useCloakHistory } from "@/hooks/use-cloak-history";
+import { formatDistanceToNow } from "date-fns";
 
 export interface RegaliaChamberProps {
   staffName?: string | null;
@@ -75,19 +77,42 @@ export default function RegaliaChamber({
   // briefly glow the cloak and cross-fade the label so ascension feels alive.
   const prevLabelRef = useRef<string | null>(null);
   const [ascending, setAscending] = useState(false);
+  const { history, inscribeAscension } = useCloakHistory();
+
   useEffect(() => {
     const prev = prevLabelRef.current;
-    if (prev !== null && prev !== cloak.label) {
+    if (prev === null) {
+      // First sighting: silently inscribe the current mantle as a baseline so
+      // the wanderer's history begins from where they stand today.
+      inscribeAscension({
+        stage_label: cloak.label,
+        stage_min: cloak.min,
+        score,
+        species_count: speciesCount,
+        visits,
+        affinity_depth: affinityDepth,
+      });
+    } else if (prev !== cloak.label) {
+      // True ascension: animate AND inscribe the new mantle into history.
       setAscending(true);
+      inscribeAscension({
+        stage_label: cloak.label,
+        stage_min: cloak.min,
+        score,
+        species_count: speciesCount,
+        visits,
+        affinity_depth: affinityDepth,
+      });
       const t = window.setTimeout(() => setAscending(false), 2600);
+      prevLabelRef.current = cloak.label;
       return () => window.clearTimeout(t);
     }
     prevLabelRef.current = cloak.label;
+    // We deliberately key on the label only; signal counts are snapshotted above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloak.label]);
-  // Keep ref in sync once animation lifecycle has read the previous value.
-  useEffect(() => {
-    prevLabelRef.current = cloak.label;
-  }, [cloak.label]);
+
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   return (
     <section
@@ -252,6 +277,84 @@ export default function RegaliaChamber({
           </div>
         </div>
       )}
+
+      {/* Mantle history — chronicle of past ascensions */}
+      <div className="px-4 pb-3 border-t border-amber-900/15 pt-3">
+        <button
+          type="button"
+          onClick={() => setHistoryOpen((v) => !v)}
+          aria-expanded={historyOpen}
+          aria-controls="regalia-mantle-history"
+          className="w-full flex items-center justify-between gap-2 text-left rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <span className="flex items-center gap-1.5 font-serif text-[11px] uppercase tracking-[0.18em] text-muted-foreground/85">
+            <ScrollText className="w-3 h-3" /> Mantle history
+            {history.length > 0 && (
+              <span className="font-serif text-[10px] normal-case tracking-normal text-muted-foreground/60">
+                · {history.length}
+              </span>
+            )}
+          </span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-muted-foreground/70 transition-transform duration-300 motion-reduce:transition-none ${historyOpen ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+
+        <div
+          id="regalia-mantle-history"
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${
+            historyOpen ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"
+          }`}
+          style={{ contain: "layout paint" }}
+          {...(!historyOpen ? { inert: "" as const } : {})}
+          aria-hidden={!historyOpen}
+        >
+          <div className="min-h-0 overflow-hidden">
+            {history.length === 0 ? (
+              <p className="font-serif text-[11px] italic text-muted-foreground/70">
+                No ascensions inscribed yet — your first mantle awaits.
+              </p>
+            ) : (
+              <ol className="space-y-1.5">
+                {history.map((row) => {
+                  const signalLabel =
+                    row.primary_signal === "affinity"
+                      ? "deep affinity"
+                      : row.primary_signal === "returns"
+                        ? "faithful returns"
+                        : "wide breadth";
+                  const when = (() => {
+                    try {
+                      return formatDistanceToNow(new Date(row.achieved_at), { addSuffix: true });
+                    } catch {
+                      return "recently";
+                    }
+                  })();
+                  return (
+                    <li
+                      key={row.id}
+                      className="flex items-start justify-between gap-3 rounded-md border border-border/25 bg-card/40 px-2.5 py-1.5"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-serif text-[12px] text-foreground/90 leading-snug truncate">
+                          {row.stage_label}
+                        </p>
+                        <p className="font-serif text-[10px] italic text-muted-foreground/75 leading-snug">
+                          carried by {signalLabel} · {when}
+                        </p>
+                      </div>
+                      <span className="font-serif text-[10px] uppercase tracking-[0.18em] text-amber-700/80 dark:text-amber-300/80 shrink-0">
+                        {row.score}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="px-4 pb-4">
         <Link
