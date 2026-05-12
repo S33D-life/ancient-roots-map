@@ -481,6 +481,15 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
 
     const base = buildBase(geo.position, seed.latitude, seed.longitude, geo.retries);
 
+    logEncounterEvent("collect", "rpc_call", {
+      rpc: "collect_planted_heart_with_proximity",
+      seedId,
+      userLat: base.userLat, userLng: base.userLng,
+      accuracyM: base.accuracy != null ? Math.round(base.accuracy) : null,
+      clientDistanceM: Math.round(base.distance),
+      override: opts?.override === true,
+    });
+
     const { data, error } = await supabase.rpc("collect_planted_heart_with_proximity", {
       p_seed_id: seedId,
       p_user_lat: base.userLat,
@@ -491,6 +500,12 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
 
     if (error) {
       console.error("[collectHeart] rpc error:", error);
+      logEncounterEvent("collect", "rpc_error", {
+        message: error.message,
+        code: (error as { code?: string }).code,
+        details: (error as { details?: string }).details,
+        hint: (error as { hint?: string }).hint,
+      });
       return { ok: false, reason: "rpc_error", error: error.message, ...base };
     }
 
@@ -498,8 +513,20 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     const serverDistance = typeof r.distance === "number" ? r.distance : base.distance;
     const serverEffective = typeof r.effective_distance === "number" ? r.effective_distance : base.effectiveDistance;
 
+    logEncounterEvent("collect", "rpc_response", {
+      ok: !!r.ok,
+      reason: r.reason ?? null,
+      distanceM: typeof serverDistance === "number" ? Math.round(serverDistance) : null,
+      effectiveDistanceM: typeof serverEffective === "number" ? Math.round(serverEffective) : null,
+      radiusM: r.radius_m ?? null,
+      manualOverrideRadiusM: r.manual_override_radius_m ?? null,
+      overrideUsed: !!r.override_used,
+      overrideKind: r.override_kind ?? null,
+    });
+
     if (!r.ok) {
       const reason = (r.reason as ActionFailureReason) ?? "too_far";
+      logEncounterEvent("collect", "result_failed", { reason });
       return {
         ok: false, reason,
         ...base,
@@ -508,6 +535,16 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
         error: typeof r.error === "string" ? r.error : undefined,
       };
     }
+
+    if (r.override_used) {
+      logEncounterEvent("collect", "override_used", {
+        kind: r.override_kind ?? null,
+        distanceM: typeof serverDistance === "number" ? Math.round(serverDistance) : null,
+      });
+    }
+    logEncounterEvent("collect", "result_ok", {
+      distanceM: typeof serverDistance === "number" ? Math.round(serverDistance) : null,
+    });
 
     return {
       ok: true,
