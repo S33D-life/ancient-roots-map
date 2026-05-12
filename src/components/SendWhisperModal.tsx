@@ -2,7 +2,7 @@
  * SendWhisperModal — Send a whisper through an Ancient Friend.
  * Ceremonial, organic, not like chat.
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { track } from "@/lib/telemetry";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
