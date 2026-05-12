@@ -5536,6 +5536,33 @@ export type Database = {
           },
         ]
       }
+      presence_config: {
+        Row: {
+          accuracy_factor: number
+          accuracy_tolerance_max_m: number
+          id: number
+          radius_m: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          accuracy_factor?: number
+          accuracy_tolerance_max_m?: number
+          id?: number
+          radius_m?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          accuracy_factor?: number
+          accuracy_tolerance_max_m?: number
+          id?: number
+          radius_m?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       presence_streaks: {
         Row: {
           current_streak: number
@@ -11139,6 +11166,22 @@ export type Database = {
       }
     }
     Functions: {
+      _gate_proximity: {
+        Args: {
+          p_accuracy: number
+          p_is_keeper?: boolean
+          p_override?: boolean
+          p_target_lat: number
+          p_target_lng: number
+          p_user_lat: number
+          p_user_lng: number
+        }
+        Returns: Json
+      }
+      _haversine_m: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
       admin_daily_signups: {
         Args: { days_back?: number }
         Returns: {
@@ -11241,6 +11284,16 @@ export type Database = {
       claim_windfall_hearts: {
         Args: { p_tree_id: string; p_user_id: string }
         Returns: number
+      }
+      collect_planted_heart_with_proximity: {
+        Args: {
+          p_override?: boolean
+          p_seed_id: string
+          p_user_accuracy?: number
+          p_user_lat: number
+          p_user_lng: number
+        }
+        Returns: Json
       }
       compute_hot_score: {
         Args: { p_created_at: string; p_influence: number }
@@ -11485,6 +11538,16 @@ export type Database = {
           p_species_key?: string
           p_tree_id: string
           p_user_id: string
+        }
+        Returns: Json
+      }
+      plant_seed_with_proximity: {
+        Args: {
+          p_override?: boolean
+          p_tree_id: string
+          p_user_accuracy?: number
+          p_user_lat: number
+          p_user_lng: number
         }
         Returns: Json
       }
