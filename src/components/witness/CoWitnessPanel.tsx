@@ -109,7 +109,7 @@ export default function CoWitnessPanel({
   }, [cancelSession, toast]);
 
   const shareUrl = session
-    ? `${window.location.origin}/tree/${treeId}?witness=${session.id}`
+    ? getPublicAppUrl(`/tree/${treeId}?witness=${session.id}`)
     : "";
 
   const qrUrl = session
