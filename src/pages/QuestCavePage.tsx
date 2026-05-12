@@ -378,17 +378,23 @@ export default function QuestCavePage() {
         </div>
 
         {/* ── 6. Deeper Chambers (preserved data layers) ── */}
-        <details className="group rounded-2xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden mb-6">
-          <summary className="cursor-pointer list-none p-4 flex items-center gap-2 min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
-            <Sparkles className="w-4 h-4 text-primary/80" />
+        <details className="group rounded-2xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden mb-6 focus-within:border-primary/40">
+          <summary
+            className="cursor-pointer list-none p-4 flex items-center gap-2 min-h-[56px] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl"
+            aria-label="Deeper Chambers — seasonal quests, dream trees, heart flow, blooming map"
+          >
+            <Sparkles className="w-4 h-4 text-primary/80" aria-hidden />
             <div className="min-w-0 flex-1">
               <p className="font-serif text-base text-foreground">Deeper Chambers</p>
               <p className="font-serif text-[11px] italic text-muted-foreground/80 leading-snug">
                 Seasonal quests, dream trees, heart flow, blooming map.
               </p>
             </div>
-            <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">
+            <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60 group-open:hidden">
               Open
+            </span>
+            <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60 hidden group-open:inline">
+              Close
             </span>
           </summary>
           <div className="px-4 pb-5 space-y-6">

@@ -4,7 +4,7 @@
  * Each gateway has its own glow color and sigil. Collapsed by default to
  * preserve the cave's mystery; the user enters a path by tapping it.
  */
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
 export interface PathwayGatewayProps {
@@ -30,11 +30,15 @@ export default function PathwayGateway({
   children,
 }: PathwayGatewayProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const reactId = useId();
+  const headerId = `gateway-h-${reactId}`;
+  const bodyId = `gateway-b-${reactId}`;
 
   return (
     <section
       className="relative rounded-2xl border border-amber-900/25 overflow-hidden bg-gradient-to-br from-card/70 via-card/55 to-card/40 backdrop-blur-sm"
       style={{ boxShadow: `inset 0 0 60px -30px ${glow}` }}
+      aria-labelledby={headerId}
     >
       {/* Sigil glow */}
       <div
@@ -46,7 +50,9 @@ export default function PathwayGateway({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="relative w-full text-left p-4 sm:p-5 flex items-start gap-3 min-h-[88px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-2xl"
+        aria-controls={bodyId}
+        id={headerId}
+        className="relative w-full text-left p-4 sm:p-5 flex items-start gap-3 min-h-[88px] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-shadow"
       >
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 border"
@@ -54,6 +60,7 @@ export default function PathwayGateway({
             background: `radial-gradient(circle at 30% 30%, ${glow}, transparent 70%)`,
             borderColor: glow,
           }}
+          aria-hidden
         >
           {icon}
         </div>
@@ -71,18 +78,23 @@ export default function PathwayGateway({
           )}
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-muted-foreground/70 shrink-0 mt-2 transition-transform duration-300 ${
+          className={`w-4 h-4 text-muted-foreground/70 shrink-0 mt-2 transition-transform duration-300 motion-reduce:transition-none ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden
         />
+        <span className="sr-only">{open ? "Collapse" : "Expand"} {title} pathway</span>
       </button>
       {/* CSS-grid expand for buttery, low-cost mobile animation. */}
       <div
+        id={bodyId}
+        role="region"
+        aria-labelledby={headerId}
+        aria-hidden={!open}
+        {...(!open ? ({ inert: "" } as Record<string, string>) : {})}
         className={`grid transition-[grid-template-rows,opacity] duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
-        aria-hidden={!open}
       >
         <div className="min-h-0 overflow-hidden [contain:layout_paint]">
           <div className="px-4 sm:px-5 pb-5 pt-1 space-y-3">{children}</div>

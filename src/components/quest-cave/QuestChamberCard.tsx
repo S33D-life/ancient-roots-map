@@ -4,7 +4,7 @@
  *
  * Pure presentation. Wires real data via props.
  */
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, ArrowRight } from "lucide-react";
 
@@ -51,25 +51,39 @@ export default function QuestChamberCard({
   defaultOpen = false,
 }: QuestChamberCardProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const reactId = useId();
+  const headerId = `quest-h-${reactId}`;
+  const bodyId = `quest-b-${reactId}`;
   const hasProgress = typeof current === "number" && typeof target === "number";
   const pct = hasProgress
     ? Math.max(0, Math.min(100, Math.round((current! / target!) * 100)))
     : 0;
+  const progressLabel = hasProgress ? `${pct} percent complete` : undefined;
 
   return (
     <article
-      className="relative rounded-xl border border-amber-900/20 bg-card/55 overflow-hidden"
+      className="relative rounded-xl border border-amber-900/20 bg-card/55 overflow-hidden focus-within:border-primary/40"
       style={{ boxShadow: `inset 0 0 40px -28px ${accent}` }}
+      aria-labelledby={headerId}
     >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full text-left p-3 sm:p-4 flex items-center gap-3 min-h-[72px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        aria-controls={bodyId}
+        id={headerId}
+        className="w-full text-left p-3 sm:p-4 flex items-center gap-3 min-h-[72px] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-xl"
       >
         {/* Artwork well + progress ring */}
-        <div className="relative w-14 h-14 shrink-0">
-          <svg viewBox="0 0 36 36" className="absolute inset-0 w-full h-full -rotate-90">
+        <div
+          className="relative w-14 h-14 shrink-0"
+          role={hasProgress ? "progressbar" : undefined}
+          aria-valuemin={hasProgress ? 0 : undefined}
+          aria-valuemax={hasProgress ? 100 : undefined}
+          aria-valuenow={hasProgress ? pct : undefined}
+          aria-label={progressLabel}
+        >
+          <svg viewBox="0 0 36 36" className="absolute inset-0 w-full h-full -rotate-90" aria-hidden>
             <circle
               cx="18" cy="18" r="15"
               fill="none"
@@ -114,20 +128,25 @@ export default function QuestChamberCard({
         </div>
 
         <ChevronDown
-          className={`w-4 h-4 text-muted-foreground/70 shrink-0 transition-transform duration-300 ${
+          className={`w-4 h-4 text-muted-foreground/70 shrink-0 transition-transform duration-300 motion-reduce:transition-none ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden
         />
+        <span className="sr-only">{open ? "Collapse" : "Expand"} {title}</span>
       </button>
 
       {/* CSS-grid expand: animates grid-template-rows 0fr → 1fr (GPU/composited,
           no per-frame layout measurement, motion-safe). */}
       <div
+        id={bodyId}
+        role="region"
+        aria-labelledby={headerId}
+        aria-hidden={!open}
+        {...(!open ? ({ inert: "" } as Record<string, string>) : {})}
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
-        aria-hidden={!open}
       >
         <div className="min-h-0 overflow-hidden [contain:layout_paint] [will-change:grid-template-rows]">
           <div className="px-3 sm:px-4 pb-4 pt-1 space-y-3 border-t border-border/30">

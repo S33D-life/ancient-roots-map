@@ -75,7 +75,17 @@ export default function OpportunitiesBoard({
             );
             return (
               <li key={n.id}>
-                {n.to ? <Link to={n.to}>{Inner}</Link> : Inner}
+                {n.to ? (
+                  <Link
+                    to={n.to}
+                    aria-label={`${n.kind}: ${n.title}. ${n.line}`}
+                    className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    {Inner}
+                  </Link>
+                ) : (
+                  Inner
+                )}
               </li>
             );
           })}
