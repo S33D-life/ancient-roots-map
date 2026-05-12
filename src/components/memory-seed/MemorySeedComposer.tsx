@@ -367,8 +367,14 @@ export default function MemorySeedComposer({
 
         {confirmed ? (
           <ConfirmationView
-            destination={confirmed}
+            state={confirmed}
             onClose={() => onOpenChange(false)}
+            onRetryWhisper={
+              confirmed === "partial_whisper_failed"
+                ? () => { setConfirmed(null); /* persistedOfferingId guards re-insert */ void handleSubmit(); }
+                : undefined
+            }
+            submitting={submitting}
           />
         ) : !userId && !userLoading ? (
           <div className="py-6 text-center">
