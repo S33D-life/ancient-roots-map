@@ -5,6 +5,7 @@
  * Pure presentation — wires real data via props from useStaffIdentity and
  * useLivingProgression. Avoids RPG inventory tropes; reads as ceremonial.
  */
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Shield, Wand2, Sparkles, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
