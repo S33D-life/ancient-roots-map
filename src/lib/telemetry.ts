@@ -30,7 +30,10 @@ export type TelemetryEvent =
   | "gps_poor_accuracy"
   | "too_far"
   | "rpc_error"
-  | "override_used";
+  | "override_used"
+  | "admin_room_opened"
+  | "admin_users_viewed"
+  | "evolution_dashboard_opened";
 
 export interface TelemetryPayload {
   reason?: string | null;
