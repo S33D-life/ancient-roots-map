@@ -134,7 +134,7 @@ const TreeCard = ({
     onShare?.(
       tree.name,
       `${tree.name} — a ${tree.species} on the Ancient Friends Map`,
-      `${window.location.origin}/tree/${tree.id}`
+      getPublicAppUrl(`/tree/${tree.id}`)
     );
   };
 
