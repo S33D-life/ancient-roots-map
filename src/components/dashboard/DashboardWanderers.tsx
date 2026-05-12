@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Search, UserPlus, UserMinus, Heart, HeartHandshake, Check, X, Loader2, Users, Copy, TreeDeciduous, Gift, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 interface Props {
   userId: string;
