@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio, Download, Copy, Trash2 } from "lucide-react";
 import {
@@ -135,6 +135,10 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
   const [planting, setPlanting] = useState(false);
   const [collecting, setCollecting] = useState<string | null>(null);
+  // Synchronous double-tap guard: state updates aren't immediate, so a fast
+  // double-tap can squeak through `disabled={collecting === seed.id}` and fire
+  // the RPC twice (which then trips the anti-inflation trigger).
+  const inFlightCollects = useRef<Set<string>>(new Set());
   const [showPlanted, setShowPlanted] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
   const [receiptVisible, setReceiptVisible] = useState(false);
@@ -218,33 +222,45 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   };
 
   const handleCollect = async (seed: PlantedSeed) => {
+    // Hard guard against double-submit (sync, runs before React re-renders).
+    if (inFlightCollects.current.has(seed.id)) return;
+    inFlightCollects.current.add(seed.id);
     setCollecting(seed.id);
     setLocatingMessage("Locating your position…");
-    const result = await collectHeart(seed.id, {
-      onAttempt,
-      override: overrideEnabled,
-    });
-    setCollecting(null);
-    setLocatingMessage(null);
-    setLastResult(result);
+    try {
+      const result = await collectHeart(seed.id, {
+        onAttempt,
+        override: overrideEnabled,
+      });
+      setLastResult(result);
 
-    if (result.ok) {
-      track("heart_planted", { treeId, userId, meta: { action: "collect", override: !!result.overrideUsed } });
-      const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
-      setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
-      setReceiptVisible(true);
-      if (result.overrideUsed) {
-        setOverrideEnabled(false);
-        track("override_used", { treeId, userId, meta: { action: "collect" } });
-        toast.success("Heart collected (approximate location)", {
-          description: "Recorded with your true distance — thank you for being honest.",
+      if (result.ok) {
+        track("heart_planted", { treeId, userId, meta: { action: "collect", override: !!result.overrideUsed } });
+        const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
+        setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
+        setReceiptVisible(true);
+        if (result.overrideUsed) {
+          setOverrideEnabled(false);
+          track("override_used", { treeId, userId, meta: { action: "collect" } });
+          toast.success("Heart collected (approximate location)", {
+            description: "Recorded with your true distance — thank you for being honest.",
+          });
+        }
+      } else if (result.reason === "already_collected") {
+        // Soft path — backend trigger or stale list told us the heart is gone.
+        toast("This heart has already been collected", {
+          description: "The list will refresh in a moment.",
         });
+      } else {
+        track("heart_collect_failed", { treeId, userId, reason: result.reason || "unknown" });
+        const { title, description } = explainFailure(refineForToast(result), isDebugUser(isKeeper));
+        toast.error(title, description ? { description } : undefined);
+        if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
       }
-    } else {
-      track("heart_collect_failed", { treeId, userId, reason: result.reason || "unknown" });
-      const { title, description } = explainFailure(refineForToast(result), isDebugUser(isKeeper));
-      toast.error(title, description ? { description } : undefined);
-      if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
+    } finally {
+      inFlightCollects.current.delete(seed.id);
+      setCollecting(null);
+      setLocatingMessage(null);
     }
   };
 
