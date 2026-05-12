@@ -505,7 +505,11 @@ export default function MemorySeedComposer({
               </Button>
               <Button onClick={handleSubmit} disabled={!canSubmit || submitting}>
                 {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {destination === "offering" ? "Hang in the branches" : "Send through the roots"}
+                {destination === "offering"
+                  ? "Hang in the branches"
+                  : destination === "whisper"
+                    ? "Send through the roots"
+                    : "Hang & send"}
               </Button>
             </div>
           </div>
