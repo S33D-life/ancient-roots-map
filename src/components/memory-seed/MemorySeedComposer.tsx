@@ -98,7 +98,7 @@ interface SeedTypeMeta {
   placeholder?: boolean;
 }
 
-const TYPES: SeedTypeMeta[] = [
+export const TYPES: SeedTypeMeta[] = [
   { value: "story",  label: "Story",   hint: "A short memory, encounter, or reflection." },
   { value: "song",   label: "Song",    hint: "Paste a Spotify, YouTube, or Apple Music link.", showMediaUrl: true, authorLabel: "Artist" },
   { value: "book",   label: "Book",    hint: "Title and author. A note if you wish.", authorLabel: "Author" },
@@ -119,7 +119,7 @@ const WHISPER_UNLOCKS: { value: WhisperUnlock; label: string; hint: string }[] =
 
 // ── Validation ───────────────────────────────────────────────
 
-const Schema = z.object({
+export const Schema = z.object({
   type: z.enum([
     "story", "song", "book", "poem", "quote", "recipe", "photo", "artwork", "voice_note", "bloom",
   ]),
@@ -129,6 +129,35 @@ const Schema = z.object({
   author: z.string().trim().max(120).or(z.literal("")),
   note: z.string().trim().max(500).or(z.literal("")),
 });
+
+/**
+ * Build the delivery payload sent to `sendWhisper` for a given unlock rule.
+ * Pure helper — exported for unit testing. Keeps the inline mapping in the
+ * component identical, just hoisted so the contract is verifiable.
+ */
+export function buildWhisperDelivery(
+  unlock: WhisperUnlock,
+  treeId: string,
+  treeSpeciesKey?: string | null,
+  treeSpecies?: string | null,
+): {
+  deliveryScope: "ANY_TREE" | "SPECIFIC_TREE" | "SPECIES_MATCH";
+  deliveryTreeId?: string;
+  deliverySpeciesKey?: string;
+} {
+  const deliveryScope =
+    unlock === "same_tree" ? "SPECIFIC_TREE"
+    : unlock === "same_species" ? "SPECIES_MATCH"
+    : "ANY_TREE";
+  return {
+    deliveryScope,
+    deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
+    deliverySpeciesKey:
+      deliveryScope === "SPECIES_MATCH"
+        ? (treeSpeciesKey || treeSpecies || undefined)
+        : undefined,
+  };
+}
 
 /** Map a SeedType to a value accepted by the offerings.type enum.
  *  Exported for unit testing — pure helper, no runtime behaviour change.
@@ -329,10 +358,7 @@ export default function MemorySeedComposer({
 
     if (!message) throw new Error("Whisper has no content");
 
-    const deliveryScope =
-      unlock === "same_tree" ? "SPECIFIC_TREE"
-      : unlock === "same_species" ? "SPECIES_MATCH"
-      : "ANY_TREE";
+    const delivery = buildWhisperDelivery(unlock, treeId, treeSpeciesKey, treeSpecies);
 
     const { data, error } = await sendWhisper({
       senderUserId: userId!,
@@ -340,12 +366,9 @@ export default function MemorySeedComposer({
       treeAnchorId: treeId,
       messageContent: message.slice(0, 2000),
       mediaUrl: mediaUrl.trim() || undefined,
-      deliveryScope,
-      deliveryTreeId: deliveryScope === "SPECIFIC_TREE" ? treeId : undefined,
-      deliverySpeciesKey:
-        deliveryScope === "SPECIES_MATCH"
-          ? (treeSpeciesKey || treeSpecies || undefined)
-          : undefined,
+      deliveryScope: delivery.deliveryScope,
+      deliveryTreeId: delivery.deliveryTreeId,
+      deliverySpeciesKey: delivery.deliverySpeciesKey,
       isActive: true,
     });
     if (error) throw error;
