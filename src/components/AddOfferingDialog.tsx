@@ -167,7 +167,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     } else {
       routeBackToTree();
     }
-  }, [onOpenChange, routeBackToTree]);
+  }, [onOpenChange, routeBackToTree, treeId, activeType]);
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
   const [tagQuery, setTagQuery] = useState("");
