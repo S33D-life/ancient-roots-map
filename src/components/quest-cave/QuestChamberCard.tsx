@@ -7,7 +7,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface QuestChamberCardProps {
   title: string;
