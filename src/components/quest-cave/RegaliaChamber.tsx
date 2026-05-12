@@ -7,10 +7,11 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Shield, Wand2, Sparkles, ArrowRight, ScrollText, ChevronDown } from "lucide-react";
+import { Shield, Wand2, Sparkles, ArrowRight, ScrollText, ChevronDown, Info } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 import { useCloakHistory } from "@/hooks/use-cloak-history";
 import { formatDistanceToNow } from "date-fns";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 export interface RegaliaChamberProps {
   staffName?: string | null;
