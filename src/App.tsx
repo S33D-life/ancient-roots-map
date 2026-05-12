@@ -142,6 +142,8 @@ const ApiDocsPage = lazyImportWithRetry(() => import("./pages/ApiDocsPage"), "ap
 const TimeTreePage = lazyImportWithRetry(() => import("./pages/TimeTreePage"), "time-tree");
 const BugGardenPage = lazyImportWithRetry(() => import("./pages/BugGardenPage"), "bug-garden");
 const AdminEvolutionPage = lazyImportWithRetry(() => import("./pages/AdminEvolutionPage"), "admin-evolution");
+const AdminRoomPage = lazyImportWithRetry(() => import("./pages/admin/AdminRoomPage"), "admin-room");
+const AdminUsersPage = lazyImportWithRetry(() => import("./pages/admin/AdminUsersPage"), "admin-users");
 const MoonrootDigestPage = lazyImportWithRetry(() => import("./pages/admin/MoonrootDigestPage"), "moonroot-digest");
 const InviteStatusPage = lazyImportWithRetry(() => import("./pages/admin/InviteStatusPage"), "invite-status");
 // KingOfBavleuxPage removed — route redirects to /atlas/switzerland
@@ -426,6 +428,8 @@ const App = () => {
                 {ShowDevPanel && <Route path="/api/docs" element={<ApiDocsPage />} />}
                 <Route path="/bug-garden" element={<BugGardenPage />} />
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
+                <Route path="/admin" element={<AdminRoomPage />} />
+                <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/moonroot-digest" element={<MoonrootDigestPage />} />
                 <Route path="/admin/invite-status" element={<InviteStatusPage />} />
                 <Route path="/press" element={<PressPage />} />

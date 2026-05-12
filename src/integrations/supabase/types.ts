@@ -11276,6 +11276,25 @@ export type Database = {
           unique_visitors: number
         }[]
       }
+      admin_users_list: {
+        Args: {
+          result_limit?: number
+          search_query?: string
+          sort_newest?: boolean
+        }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          hearts_earned: number
+          is_curator: boolean
+          is_keeper: boolean
+          last_sign_in_at: string
+          offerings_count: number
+          trees_added: number
+          user_id: string
+        }[]
+      }
       aggregate_phenology: { Args: never; Returns: undefined }
       assign_staff_steward: {
         Args: { p_new_owner_id: string; p_staff_code: string }
