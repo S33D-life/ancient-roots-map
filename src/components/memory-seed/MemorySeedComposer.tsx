@@ -441,29 +441,38 @@ export default function MemorySeedComposer({
           <div className="space-y-4">
             <ResonancePanel resonance={resonance} treeName={treeName} />
 
-            <DestinationPicker
-              value={destination}
-              onChange={(d) => { setDestinationTouched(true); setDestination(d); }}
-              treeName={treeName}
-            />
+            {type === "bloom" ? (
+              <p className="font-serif text-[11px] italic text-muted-foreground/80 px-0.5">
+                Blooms are always hung in the branches near this tree — they
+                travel through season, not through whispered roots.
+              </p>
+            ) : (
+              <>
+                <DestinationPicker
+                  value={destination}
+                  onChange={(d) => { setDestinationTouched(true); setDestination(d); }}
+                  treeName={treeName}
+                />
 
-            {(destination === "whisper" || destination === "both") && (
-              <div className="space-y-1.5">
-                <Label className="font-serif text-xs">Who can find this whisper?</Label>
-                <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
-                  <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {WHISPER_UNLOCKS.map((u) => (
-                      <SelectItem key={u.value} value={u.value}>
-                        <div>
-                          <div>{u.label}</div>
-                          <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                {(destination === "whisper" || destination === "both") && (
+                  <div className="space-y-1.5">
+                    <Label className="font-serif text-xs">Who can find this whisper?</Label>
+                    <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
+                      <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {WHISPER_UNLOCKS.map((u) => (
+                          <SelectItem key={u.value} value={u.value}>
+                            <div>
+                              <div>{u.label}</div>
+                              <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="space-y-1.5">
