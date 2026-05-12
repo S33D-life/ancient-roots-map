@@ -336,7 +336,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         submittingRef.current = false;
         setLoading(false);
         setUploading(false);
-        toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." });
+        track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." });
       }
     }, 30000);
 
@@ -606,7 +606,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
     const timeout = setTimeout(() => {
-      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
     }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -655,7 +655,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
     const timeout = setTimeout(() => {
-      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
     }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -692,7 +692,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
     const timeout = setTimeout(() => {
-      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); track("offering_failed", { treeId, meta: { type: activeType } }); toast({ title: "This offering didn't take root yet", description: "Take a breath and try once more." }); }
     }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
