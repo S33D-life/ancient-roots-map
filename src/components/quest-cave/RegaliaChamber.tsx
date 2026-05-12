@@ -5,6 +5,7 @@
  * Pure presentation — wires real data via props from useStaffIdentity and
  * useLivingProgression. Avoids RPG inventory tropes; reads as ceremonial.
  */
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Shield, Wand2, Sparkles, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
@@ -70,6 +71,24 @@ export default function RegaliaChamber({
   const nextStage = CLOAK_STAGES.find((s) => s.min > score);
   const toNext = nextStage ? Math.max(0, nextStage.min - score) : 0;
 
+  // Stage-transition animation: when the cloak label changes (after first paint),
+  // briefly glow the cloak and cross-fade the label so ascension feels alive.
+  const prevLabelRef = useRef<string | null>(null);
+  const [ascending, setAscending] = useState(false);
+  useEffect(() => {
+    const prev = prevLabelRef.current;
+    if (prev !== null && prev !== cloak.label) {
+      setAscending(true);
+      const t = window.setTimeout(() => setAscending(false), 2600);
+      return () => window.clearTimeout(t);
+    }
+    prevLabelRef.current = cloak.label;
+  }, [cloak.label]);
+  // Keep ref in sync once animation lifecycle has read the previous value.
+  useEffect(() => {
+    prevLabelRef.current = cloak.label;
+  }, [cloak.label]);
+
   return (
     <section
       className="relative rounded-2xl border border-amber-900/25 overflow-hidden bg-card/55 backdrop-blur-sm"
@@ -96,7 +115,12 @@ export default function RegaliaChamber({
         {/* Cloak silhouette */}
         <div className="relative">
           <div
-            className={`relative h-32 rounded-xl border border-border/30 bg-gradient-to-b ${cloak.tone} overflow-hidden`}
+            className={`relative h-32 rounded-xl border bg-gradient-to-b ${cloak.tone} overflow-hidden transition-[border-color,box-shadow] duration-700 motion-reduce:transition-none ${
+              ascending
+                ? "border-amber-400/70 shadow-[0_0_28px_6px_hsl(38_90%_60%/0.45)]"
+                : "border-border/30"
+            }`}
+            aria-live="polite"
           >
             <svg
               viewBox="0 0 100 120"
@@ -129,15 +153,60 @@ export default function RegaliaChamber({
                 />
               ))}
             </svg>
+            {/* Ascension glow overlay */}
+            {ascending && (
+              <>
+                <div
+                  className="pointer-events-none absolute inset-0 motion-reduce:hidden"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 55%, hsl(38 95% 65% / 0.55), transparent 65%)",
+                    animation: "regalia-ascend-glow 2.4s ease-out forwards",
+                  }}
+                  aria-hidden="true"
+                />
+                <div
+                  className="pointer-events-none absolute inset-x-6 top-1/2 h-px motion-reduce:hidden"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, hsl(38 95% 70% / 0.85), transparent)",
+                    animation: "regalia-ascend-sweep 1.6s ease-out forwards",
+                  }}
+                  aria-hidden="true"
+                />
+              </>
+            )}
           </div>
-          <p className="font-serif text-[10px] uppercase tracking-[0.18em] text-muted-foreground/75 mt-1.5 text-center">
+          <p
+            key={cloak.label}
+            className={`font-serif text-[10px] uppercase tracking-[0.18em] mt-1.5 text-center transition-colors duration-700 motion-reduce:transition-none ${
+              ascending
+                ? "text-amber-700 dark:text-amber-300 animate-fade-in"
+                : "text-muted-foreground/75"
+            }`}
+          >
             {cloak.label}
+            {ascending && (
+              <span className="sr-only"> — new mantle attained</span>
+            )}
           </p>
           {nextStage && (
             <p className="font-serif text-[10px] italic text-muted-foreground/60 mt-0.5 text-center leading-snug">
               {toNext} resonance to {nextStage.label.toLowerCase()}
             </p>
           )}
+          <style>{`
+            @keyframes regalia-ascend-glow {
+              0%   { opacity: 0; transform: scale(0.85); }
+              35%  { opacity: 1; transform: scale(1.05); }
+              100% { opacity: 0; transform: scale(1.25); }
+            }
+            @keyframes regalia-ascend-sweep {
+              0%   { transform: translateX(-120%); opacity: 0; }
+              25%  { opacity: 1; }
+              100% { transform: translateX(120%); opacity: 0; }
+            }
+          `}</style>
         </div>
 
         {/* Staff + sigils */}
