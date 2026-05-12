@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, TreePine, Wallet, Wand2, Mail, ArrowLeft, Eye, EyeOff, CheckCircle2, KeyRound, Gift } from "lucide-react";
+import { Loader2, TreePine, Wallet, Wand2, Mail, ArrowLeft, Eye, EyeOff, CheckCircle2, KeyRound, Gift, Sparkles, RefreshCw, Pencil } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
@@ -60,6 +61,9 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string>("");
+  const [resending, setResending] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
@@ -380,7 +384,10 @@ const AuthPage = () => {
           throw new Error("Invalid email or password. Please try again.");
         }
         if (error.message.includes("Email not confirmed")) {
-          throw new Error("Please verify your email before signing in. Check your inbox.");
+          // Soft modal flow instead of red inline error.
+          setUnverifiedEmail(email);
+          setUnverifiedModalOpen(true);
+          return;
         }
         if (error.message.includes("rate") || error.status === 429) {
           throw new Error("Too many attempts. Please wait a moment before trying again.");
@@ -394,6 +401,29 @@ const AuthPage = () => {
       toast({ title: "Login failed", description: msg, variant: "destructive" });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async (target?: string) => {
+    const addr = (target ?? unverifiedEmail ?? email).trim();
+    if (!addr) {
+      toast({ title: "Enter your email first", description: "We need an email to resend the link." });
+      return;
+    }
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: addr,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      toast({ title: "Verification email sent 🌱", description: `Check ${addr} (and Junk / Spam / Promotions).` });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not resend verification email";
+      toast({ title: "Could not resend", description: msg, variant: "destructive" });
+    } finally {
+      setResending(false);
     }
   };
 
@@ -658,15 +688,90 @@ const AuthPage = () => {
     );
   }
 
-  // Success / confirmation screens
-  if (view === "verify-email" || view === "magic-sent" || view === "reset-sent") {
+  // Dedicated verification waiting screen — feels like progress, not failure.
+  if (view === "verify-email") {
+    const openMail = () => {
+      // mailto: with no recipient opens the default mail app on most mobile OSes.
+      window.location.href = "mailto:";
+    };
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-background">
+        <div className="w-full max-w-sm">
+          <div
+            className="rounded-2xl p-6 md:p-8 shadow-xl space-y-5 text-center border"
+            style={{
+              background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card) / 0.95))",
+              borderColor: "hsl(var(--primary) / 0.35)",
+            }}
+          >
+            <div
+              className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
+              style={{
+                background: "hsl(var(--primary) / 0.15)",
+                border: "1px solid hsl(var(--primary) / 0.4)",
+                boxShadow: "0 0 24px hsl(var(--primary) / 0.25)",
+              }}
+            >
+              <Sparkles className="w-7 h-7 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-serif">🌱 Your account has been created</h1>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                We've sent a confirmation email to{" "}
+                <span className="text-foreground font-medium">{email || "your inbox"}</span>.
+                <br />
+                Please open the link in the email to enter the grove.
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <Button onClick={openMail} className="w-full font-serif gap-2">
+                <Mail className="w-4 h-4" /> Open Mail App
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleResendVerification(email)}
+                disabled={resending}
+                className="w-full font-serif gap-2"
+              >
+                {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                Resend Verification Email
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => { setView("signup"); clearErrors(); }}
+                className="w-full font-serif gap-2"
+              >
+                <Pencil className="w-4 h-4" /> Change Email Address
+              </Button>
+              <button
+                onClick={() => { setView("login"); clearErrors(); }}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1"
+              >
+                ← Back to Login
+              </button>
+            </div>
+
+            <p
+              className="text-[11px] leading-relaxed pt-2 border-t"
+              style={{
+                color: "hsl(var(--muted-foreground))",
+                borderColor: "hsl(var(--primary) / 0.15)",
+              }}
+            >
+              Emails sometimes land in <span className="font-medium">Junk</span>,{" "}
+              <span className="font-medium">Spam</span>, or{" "}
+              <span className="font-medium">Promotions</span>.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Magic link / reset email confirmation screens
+  if (view === "magic-sent" || view === "reset-sent") {
     const configs = {
-      "verify-email": {
-        icon: <Mail className="w-8 h-8 text-primary" />,
-        title: "Check your inbox",
-        desc: `We've sent a verification link to ${email}. Click it to activate your account.`,
-        action: "Back to Login",
-      },
       "magic-sent": {
         icon: <Wand2 className="w-8 h-8 text-primary" />,
         title: "Magic link sent!",
@@ -975,6 +1080,74 @@ const AuthPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Unverified-account modal — shown when a user tries to log in before confirming their email. */}
+      <Dialog open={unverifiedModalOpen} onOpenChange={setUnverifiedModalOpen}>
+        <DialogContent
+          className="sm:max-w-md border rounded-2xl"
+          style={{
+            background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card)))",
+            borderColor: "hsl(var(--primary) / 0.35)",
+          }}
+        >
+          <DialogHeader className="items-center text-center space-y-3">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                background: "hsl(var(--primary) / 0.15)",
+                border: "1px solid hsl(var(--primary) / 0.4)",
+              }}
+            >
+              <Mail className="w-7 h-7 text-primary" />
+            </div>
+            <DialogTitle className="font-serif text-xl">🌱 Almost there — please confirm your email</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              An account for <span className="text-foreground font-medium">{unverifiedEmail}</span> already exists,
+              but it hasn't been verified yet. Open the confirmation link we sent you to enter the grove.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 pt-2">
+            <Button
+              onClick={() => { window.location.href = "mailto:"; }}
+              className="w-full font-serif gap-2"
+            >
+              <Mail className="w-4 h-4" /> Open Mail App
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleResendVerification(unverifiedEmail)}
+              disabled={resending}
+              className="w-full font-serif gap-2"
+            >
+              {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              Resend Verification Email
+            </Button>
+          </div>
+
+          <p
+            className="text-[11px] text-center leading-relaxed pt-2 border-t"
+            style={{
+              color: "hsl(var(--muted-foreground))",
+              borderColor: "hsl(var(--primary) / 0.15)",
+            }}
+          >
+            Emails sometimes land in <span className="font-medium">Junk</span>,{" "}
+            <span className="font-medium">Spam</span>, or{" "}
+            <span className="font-medium">Promotions</span>.
+          </p>
+
+          <DialogFooter className="sm:justify-center">
+            <Button
+              variant="ghost"
+              className="font-serif"
+              onClick={() => setUnverifiedModalOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
