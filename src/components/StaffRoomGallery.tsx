@@ -31,6 +31,7 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
