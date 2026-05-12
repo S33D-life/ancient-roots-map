@@ -592,7 +592,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       return;
     } catch (err: any) {
-      toast({ title: "This offering didn\'t take root yet", description: "Your content is still here — try again in a moment." });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your content is still here — try again in a moment." });
     } finally {
       clearTimeout(timeout);
       setLoading(false);
@@ -645,7 +645,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
-      toast({ title: "This offering didn\'t take root yet", description: "Your selection is still here — try again in a moment." });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your selection is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
@@ -682,7 +682,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
-      toast({ title: "This offering didn\'t take root yet", description: "Your recording is still here — try again in a moment." });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your recording is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
@@ -735,7 +735,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
     } catch (err: any) {
-      toast({ title: "This offering didn\'t take root yet", description: "Your entry is still here — try again in a moment." });
+      track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your entry is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
