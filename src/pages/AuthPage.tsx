@@ -75,8 +75,16 @@ const AuthPage = () => {
     _recoveryDetected = true;
     sessionStorage.setItem("s33d_recovery_active", "1");
   }
-  const [view, setView] = useState<AuthView>(_recoveryDetected ? "reset-password" : "login");
-  const [email, setEmail] = useState("");
+  // If we have a pending email and we're not in recovery, prefer the verification waiting screen.
+  const _pendingOnLoad = readPendingEmail();
+  const _initialView: AuthView = _recoveryDetected
+    ? "reset-password"
+    : _pendingOnLoad
+      ? "verify-email"
+      : "login";
+
+  const [view, setView] = useState<AuthView>(_initialView);
+  const [email, setEmail] = useState(_pendingOnLoad);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -86,8 +94,12 @@ const AuthPage = () => {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState<string>("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string>(_pendingOnLoad);
   const [resending, setResending] = useState(false);
+  const [resendCooldownUntil, setResendCooldownUntil] = useState<number>(0);
+  const [resendNote, setResendNote] = useState<string | null>(null);
+  const [verifyChecking, setVerifyChecking] = useState(false);
+  const [tickNow, setTickNow] = useState(() => Date.now());
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
