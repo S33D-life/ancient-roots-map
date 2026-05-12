@@ -24,6 +24,7 @@ import RewardReceipt from "@/components/RewardReceipt";
 import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 import { useHasRole } from "@/hooks/use-role";
+import { isDebugUser, isDevHost } from "@/lib/env";
 
 function explainFailure(r: ActionResult): { title: string; description?: string } {
   const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
@@ -151,7 +152,9 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     lastReason === "geo_timeout" ||
     lastReason === "geo_unavailable" ||
     (lastReason === "too_far" && (lastConfidence === "low" || lastConfidence === "medium"));
-  const showOverrideToggle = import.meta.env.DEV || isKeeper || gpsUncertaintyHinted;
+  // Override surface is only ever shown to debug users (keeper or non-prod host).
+  // Ordinary users never see the toggle, even after a poor-GPS attempt.
+  const showOverrideToggle = isDebugUser(isKeeper) && (isDevHost() || isKeeper || gpsUncertaintyHinted);
 
   const seedsHere = getSeedsAtTree(treeId);
   const bloomedSeeds = getBloomedSeedsAtTree(treeId);
@@ -417,7 +420,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       )}
 
       {/* Diagnostics — DEV or keeper, shown after an attempt */}
-      {(import.meta.env.DEV || isKeeper) && lastResult && (() => {
+      {isDebugUser(isKeeper) && lastResult && (() => {
         const r = lastResult;
         const tone = accuracyTone(r.confidence);
         const within = r.effectiveDistance != null && r.effectiveDistance <= PROXIMITY_METERS;
@@ -451,8 +454,8 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         );
       })()}
 
-      {/* Exportable encounter log — visible to anyone after at least one attempt */}
-      {lastResult && <EncounterLogPanel />}
+      {/* Exportable encounter log — debug users only (keeper or non-prod host) */}
+      {lastResult && isDebugUser(isKeeper) && <EncounterLogPanel />}
 
 
       <RewardReceipt
