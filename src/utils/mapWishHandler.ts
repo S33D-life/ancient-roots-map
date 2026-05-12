@@ -4,6 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /** Set up event delegation for popup buttons (wish + share + plant seed) */
 export function setupPopupActions(container: HTMLElement): () => void {
