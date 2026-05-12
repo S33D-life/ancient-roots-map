@@ -97,7 +97,7 @@ const ReferralsPage = () => {
       .single();
     if (data) {
       setInviteCode(data.code);
-      const link = `${window.location.origin}/auth?invite=${data.code}`;
+      const link = getPublicAppUrl(`/auth?invite=${data.code}`);
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });
     }
