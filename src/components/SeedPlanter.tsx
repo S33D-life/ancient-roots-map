@@ -30,6 +30,8 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
       return { title: "Daily limit reached at this tree", description: "Try another tree today." };
     case "seed_missing":
       return { title: "This Heart is no longer here", description: "It may have just been collected." };
+    case "tree_missing":
+      return { title: "This tree is no longer registered", description: "Please report this to a keeper." };
     case "already_collected":
       return { title: "This Heart was already collected" };
     case "own_seed":
