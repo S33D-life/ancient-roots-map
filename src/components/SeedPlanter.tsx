@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio } from "lucide-react";
+import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio, Download, Copy, Trash2 } from "lucide-react";
+import {
+  getEncounterLog,
+  subscribeEncounterLog,
+  downloadEncounterLog,
+  copyEncounterLog,
+  clearEncounterLog,
+} from "@/lib/encounterDiagnostics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
