@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Heart, Loader2, MapPin, Clock } from "lucide-react";
+import { Sprout, Heart, Loader2, MapPin, Clock, Compass, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { useSeedEconomy, PROXIMITY_METERS, type ActionResult, type ActionFailureReason } from "@/hooks/use-seed-economy";
+import {
+  useSeedEconomy,
+  PROXIMITY_METERS,
+  type ActionResult,
+  type GpsConfidence,
+} from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
 import RewardReceipt from "@/components/RewardReceipt";
 import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
-
-const POOR_GPS_ACCURACY_M = 75; // accuracy worse than this is "uncertain"
+import { useHasRole } from "@/hooks/use-role";
 
 function explainFailure(r: ActionResult): { title: string; description?: string } {
   const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
@@ -38,13 +43,16 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
     case "geo_denied":
       return { title: "Please enable location access for S33D" };
     case "geo_unavailable":
-      return { title: "Location access is needed to collect this Heart", description: r.error };
+      return { title: "Signal uncertain beneath the canopy", description: "Try stepping into a clearer patch of sky." };
     case "geo_timeout":
-      return { title: "Couldn't get a GPS fix in time", description: "Try stepping outside and try again." };
+      return { title: "Seeking a clearer signal beneath the canopy…", description: "Try stepping into a clearer patch of sky." };
     case "geo_poor_accuracy":
-      return { title: `GPS is uncertain ${a ?? ""} — try stepping outside` };
+      return {
+        title: "You appear nearby, but GPS confidence is low",
+        description: a ? `GPS uncertain ${a} — try stepping into a clearer patch of sky.` : undefined,
+      };
     case "too_far":
-      return { title: `You appear to be ${d ?? "too far"} away`, description: a ? `GPS accuracy ${a}` : undefined };
+      return { title: `You appear to be ${d ?? "some distance"} away`, description: a ? `GPS accuracy ${a}` : undefined };
     case "rpc_error":
       return { title: "Something went wrong on our side", description: r.error };
     default:
@@ -52,6 +60,38 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
   }
 }
 
+function confidenceLabel(c: GpsConfidence | undefined): string {
+  if (c === "high") return "High";
+  if (c === "medium") return "Medium";
+  if (c === "low") return "Low";
+  return "—";
+}
+
+function accuracyTone(c: GpsConfidence | undefined): string {
+  // returns Tailwind text color class
+  if (c === "high") return "text-emerald-600";
+  if (c === "medium") return "text-amber-600";
+  if (c === "low") return "text-red-600";
+  return "text-muted-foreground";
+}
+
+function getPlatform(): string {
+  if (typeof navigator === "undefined") return "ssr";
+  const ua = navigator.userAgent;
+  const isiOS = /iP(hone|ad|od)/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isStandalone = (window.matchMedia?.("(display-mode: standalone)").matches) ||
+    // @ts-expect-error iOS Safari
+    !!window.navigator.standalone;
+  const browser = /CriOS/.test(ua) ? "Chrome iOS"
+    : /FxiOS/.test(ua) ? "Firefox iOS"
+    : /Safari/.test(ua) && !/Chrome/.test(ua) ? "Safari"
+    : /Chrome/.test(ua) ? "Chrome"
+    : /Firefox/.test(ua) ? "Firefox"
+    : "Browser";
+  const os = isiOS ? "iOS" : isAndroid ? "Android" : "Desktop";
+  return `${os} · ${browser}${isStandalone ? " · PWA" : ""}`;
+}
 interface SeedPlanterProps {
   treeId: string;
   treeLat: number | null;
