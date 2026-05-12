@@ -220,6 +220,15 @@ export default function MemorySeedComposer({
     setDestination(resonance.nearOfferingRange ? "offering" : "whisper");
   }, [open, destinationTouched, resonance.distanceMeters, resonance.nearOfferingRange]);
 
+  // Bloom is always an offering for now — whispers carry no photo, and a bloom
+  // without its image isn't really a bloom. We force-pin the destination and
+  // hide the destination picker for this type.
+  useEffect(() => {
+    if (type === "bloom" && destination !== "offering") {
+      setDestination("offering");
+    }
+  }, [type, destination]);
+
   // Reset state on close.
   useEffect(() => {
     if (!open) {
@@ -233,10 +242,12 @@ export default function MemorySeedComposer({
   const canSubmit = useMemo(() => {
     if (meta.placeholder) return false;
     if (!userId) return false;
-    // At least one of title / body / mediaUrl must be filled.
+    // Bloom requires a flower photo URL — without it, there's no bloom to leave.
+    if (type === "bloom") return !!mediaUrl.trim();
+    // Otherwise at least one of title / body / mediaUrl must be filled.
     if (!title.trim() && !body.trim() && !mediaUrl.trim()) return false;
     return true;
-  }, [meta.placeholder, userId, title, body, mediaUrl]);
+  }, [meta.placeholder, userId, title, body, mediaUrl, type]);
 
   const handleSubmit = async () => {
     if (!userId) {
