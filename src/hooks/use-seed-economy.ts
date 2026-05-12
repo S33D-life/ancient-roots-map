@@ -35,6 +35,8 @@ export type ActionFailureReason =
   | "geo_timeout"
   | "geo_poor_accuracy"
   | "too_far"
+  | "override_too_far"
+  | "override_disabled"
   | "rpc_error";
 
 export type GpsConfidence = "high" | "medium" | "low" | "unknown";
