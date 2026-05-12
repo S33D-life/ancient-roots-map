@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flower2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useBlooms } from "@/hooks/use-blooms";
+import { useBlooms, useInvalidateBlooms } from "@/hooks/use-blooms";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import AddBloomOfferingDialog from "./AddBloomOfferingDialog";
 import BloomGallery from "./BloomGallery";
@@ -16,7 +16,18 @@ interface Props {
 export default function BloomsNearbySection({ treeId }: Props) {
   const { userId } = useCurrentUser();
   const { data: blooms = [], isLoading } = useBlooms(treeId);
+  const invalidate = useInvalidateBlooms();
   const [open, setOpen] = useState(false);
+
+  // Refresh when a bloom is added from elsewhere (e.g. MemorySeedComposer).
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ treeId?: string }>).detail;
+      if (!detail?.treeId || detail.treeId === treeId) invalidate(treeId);
+    };
+    window.addEventListener("bloom-offering-created", handler);
+    return () => window.removeEventListener("bloom-offering-created", handler);
+  }, [treeId, invalidate]);
 
   const handleAdd = () => {
     if (!userId) {

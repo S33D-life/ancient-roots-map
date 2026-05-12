@@ -49,6 +49,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { sendWhisper } from "@/hooks/use-whispers";
 import { useTreeResonance } from "@/hooks/use-tree-resonance";
+import { createBloomOffering } from "@/repositories/blooms";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -108,7 +109,7 @@ export const TYPES: SeedTypeMeta[] = [
   { value: "photo",  label: "Photo",   hint: "Paste a photo URL for now (upload coming).", showMediaUrl: true },
   { value: "artwork", label: "Painting / artwork", hint: "Title, artist, and a link to the image if you have one.", showMediaUrl: true, authorLabel: "Artist" },
   { value: "voice_note", label: "Voice note", hint: "Voice notes coming soon.", placeholder: true },
-  { value: "bloom",  label: "Bloom",   hint: "Bloom offerings coming soon.", placeholder: true },
+  { value: "bloom",  label: "Bloom",   hint: "A nearby flower, blossom, petal, or fruiting sign.", showMediaUrl: true },
 ];
 
 const WHISPER_UNLOCKS: { value: WhisperUnlock; label: string; hint: string }[] = [
@@ -219,6 +220,15 @@ export default function MemorySeedComposer({
     setDestination(resonance.nearOfferingRange ? "offering" : "whisper");
   }, [open, destinationTouched, resonance.distanceMeters, resonance.nearOfferingRange]);
 
+  // Bloom is always an offering for now — whispers carry no photo, and a bloom
+  // without its image isn't really a bloom. We force-pin the destination and
+  // hide the destination picker for this type.
+  useEffect(() => {
+    if (type === "bloom" && destination !== "offering") {
+      setDestination("offering");
+    }
+  }, [type, destination]);
+
   // Reset state on close.
   useEffect(() => {
     if (!open) {
@@ -232,10 +242,12 @@ export default function MemorySeedComposer({
   const canSubmit = useMemo(() => {
     if (meta.placeholder) return false;
     if (!userId) return false;
-    // At least one of title / body / mediaUrl must be filled.
+    // Bloom requires a flower photo URL — without it, there's no bloom to leave.
+    if (type === "bloom") return !!mediaUrl.trim();
+    // Otherwise at least one of title / body / mediaUrl must be filled.
     if (!title.trim() && !body.trim() && !mediaUrl.trim()) return false;
     return true;
-  }, [meta.placeholder, userId, title, body, mediaUrl]);
+  }, [meta.placeholder, userId, title, body, mediaUrl, type]);
 
   const handleSubmit = async () => {
     if (!userId) {
@@ -301,6 +313,21 @@ export default function MemorySeedComposer({
   };
 
   async function saveAsOffering(): Promise<string | undefined> {
+    // Bloom offerings live in their own dedicated table (`bloom_offerings`)
+    // because they carry season/year/lat/lng metadata the generic offerings
+    // table doesn't model. We reuse the established repository helper.
+    if (type === "bloom") {
+      const result = await createBloomOffering({
+        treeId,
+        userId: userId!,
+        imageUrl: mediaUrl.trim(),
+        note: [title.trim(), body.trim(), note.trim()].filter(Boolean).join(" — "),
+        speciesGuess: author.trim(),
+      });
+      // Let bloom-aware surfaces refresh themselves.
+      window.dispatchEvent(new CustomEvent("bloom-offering-created", { detail: { treeId } }));
+      return result.bloom?.id;
+    }
     const offType = toOfferingType(type);
     const composedTitle =
       title.trim() ||
@@ -414,29 +441,38 @@ export default function MemorySeedComposer({
           <div className="space-y-4">
             <ResonancePanel resonance={resonance} treeName={treeName} />
 
-            <DestinationPicker
-              value={destination}
-              onChange={(d) => { setDestinationTouched(true); setDestination(d); }}
-              treeName={treeName}
-            />
+            {type === "bloom" ? (
+              <p className="font-serif text-[11px] italic text-muted-foreground/80 px-0.5">
+                Blooms are always hung in the branches near this tree — they
+                travel through season, not through whispered roots.
+              </p>
+            ) : (
+              <>
+                <DestinationPicker
+                  value={destination}
+                  onChange={(d) => { setDestinationTouched(true); setDestination(d); }}
+                  treeName={treeName}
+                />
 
-            {(destination === "whisper" || destination === "both") && (
-              <div className="space-y-1.5">
-                <Label className="font-serif text-xs">Who can find this whisper?</Label>
-                <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
-                  <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {WHISPER_UNLOCKS.map((u) => (
-                      <SelectItem key={u.value} value={u.value}>
-                        <div>
-                          <div>{u.label}</div>
-                          <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                {(destination === "whisper" || destination === "both") && (
+                  <div className="space-y-1.5">
+                    <Label className="font-serif text-xs">Who can find this whisper?</Label>
+                    <Select value={unlock} onValueChange={(v) => setUnlock(v as WhisperUnlock)}>
+                      <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {WHISPER_UNLOCKS.map((u) => (
+                          <SelectItem key={u.value} value={u.value}>
+                            <div>
+                              <div>{u.label}</div>
+                              <div className="text-[11px] italic text-muted-foreground/70">{u.hint}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="space-y-1.5">
@@ -473,14 +509,17 @@ export default function MemorySeedComposer({
                   />
                 </div>
 
-                {meta.authorLabel && (
+                {(meta.authorLabel || type === "bloom") && (
                   <div className="space-y-1.5">
-                    <Label className="font-serif text-xs" htmlFor="seed-author">{meta.authorLabel}</Label>
+                    <Label className="font-serif text-xs" htmlFor="seed-author">
+                      {type === "bloom" ? "Species guess (optional)" : meta.authorLabel}
+                    </Label>
                     <Input
                       id="seed-author"
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
                       maxLength={120}
+                      placeholder={type === "bloom" ? "e.g. bluebell, hawthorn" : undefined}
                       className="text-base"
                     />
                   </div>
@@ -489,7 +528,7 @@ export default function MemorySeedComposer({
                 {meta.showMediaUrl && (
                   <div className="space-y-1.5">
                     <Label className="font-serif text-xs" htmlFor="seed-media">
-                      {type === "song" ? "Song link" : "Media URL"}
+                      {type === "bloom" ? "Flower photo" : type === "song" ? "Song link" : "Media URL"}
                     </Label>
                     <Input
                       id="seed-media"
@@ -501,12 +540,18 @@ export default function MemorySeedComposer({
                       placeholder="https://…"
                       className="text-base"
                     />
+                    {type === "bloom" && (
+                      <p className="font-serif text-[11px] italic text-muted-foreground/70">
+                        Paste a photo URL of a flower, blossom, petal, or fruiting sign nearby.
+                        {/* TODO(uploads): in-app camera capture (already wired in AddBloomOfferingDialog). */}
+                      </p>
+                    )}
                   </div>
                 )}
 
                 <div className="space-y-1.5">
                   <Label className="font-serif text-xs" htmlFor="seed-body">
-                    {type === "quote" ? "Quote" : type === "recipe" ? "Recipe" : "Body"}
+                    {type === "quote" ? "Quote" : type === "recipe" ? "Recipe" : type === "bloom" ? "What did you notice?" : "Body"}
                   </Label>
                   <Textarea
                     id="seed-body"

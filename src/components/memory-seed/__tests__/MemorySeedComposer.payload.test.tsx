@@ -141,10 +141,11 @@ describe("TYPES placeholders", () => {
     expect(t?.placeholder).toBe(true);
     expect(t?.hint.toLowerCase()).toContain("coming soon");
   });
-  it("bloom is marked placeholder with 'coming soon' hint", () => {
+  it("bloom is now an active type, not a placeholder", () => {
     const t = TYPES.find((x) => x.value === "bloom");
-    expect(t?.placeholder).toBe(true);
-    expect(t?.hint.toLowerCase()).toContain("coming soon");
+    expect(t?.placeholder).toBeFalsy();
+    expect(t?.showMediaUrl).toBe(true);
+    expect(t?.hint.toLowerCase()).not.toContain("coming soon");
   });
 });
 
