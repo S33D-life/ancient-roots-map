@@ -257,6 +257,78 @@ export default function RegaliaChamber({
               {toNext} resonance to {nextStage.label.toLowerCase()}
             </p>
           )}
+          {/* Resonance breakdown — small info button reveals the exact weighted values. */}
+          <div className="mt-1 flex justify-center">
+            <Popover>
+              <PopoverTrigger
+                className="inline-flex items-center gap-1 font-serif text-[10px] text-muted-foreground/70 hover:text-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md px-1.5 py-0.5"
+                aria-label="Show resonance breakdown"
+              >
+                <Info className="w-3 h-3" />
+                <span>resonance {score}</span>
+              </PopoverTrigger>
+              <PopoverContent
+                side="bottom"
+                align="center"
+                className="w-64 p-3 bg-card/95 backdrop-blur-sm border border-amber-900/25"
+              >
+                {(() => {
+                  const breadthRaw = Math.min(40, safeSpecies);
+                  const returnsRaw = Math.min(50, safeVisits);
+                  const affinityRaw = Math.min(20, safeAffinity);
+                  const breadth = breadthRaw * 1.5;
+                  const returns = returnsRaw * 1.0;
+                  const affinity = affinityRaw * 2.0;
+                  const rows: Array<{
+                    label: string;
+                    raw: number;
+                    cap: number;
+                    weight: string;
+                    contrib: number;
+                  }> = [
+                    { label: "Breadth", raw: safeSpecies, cap: 40, weight: "×1.5", contrib: breadth },
+                    { label: "Returns", raw: safeVisits, cap: 50, weight: "×1.0", contrib: returns },
+                    { label: "Affinity", raw: safeAffinity, cap: 20, weight: "×2.0", contrib: affinity },
+                  ];
+                  return (
+                    <div>
+                      <p className="font-serif text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 mb-2">
+                        Resonance breakdown
+                      </p>
+                      <ul className="space-y-1.5" aria-label="Resonance components">
+                        {rows.map((r) => {
+                          const capped = Math.min(r.raw, r.cap);
+                          const atCap = r.raw >= r.cap;
+                          return (
+                            <li
+                              key={r.label}
+                              className="flex items-baseline justify-between gap-2 font-serif text-[11px]"
+                            >
+                              <span className="text-foreground/85">{r.label}</span>
+                              <span className="text-muted-foreground/85 tabular-nums">
+                                {capped}
+                                {atCap && <span className="text-amber-700/80 dark:text-amber-300/80"> (cap)</span>}
+                                <span className="text-muted-foreground/60"> {r.weight}</span>
+                                <span className="text-foreground/85"> = {Math.round(r.contrib)}</span>
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      <div className="mt-2 pt-2 border-t border-border/40 flex items-baseline justify-between font-serif text-[11px]">
+                        <span className="text-foreground/85">Total</span>
+                        <span className="text-foreground tabular-nums">{score}</span>
+                      </div>
+                      <p className="mt-2 font-serif text-[10px] italic text-muted-foreground/70 leading-snug">
+                        Current mantle: <span className="text-foreground/85">{cloak.label}</span>
+                        {nextStage && <> · {toNext} to {nextStage.label.toLowerCase()}</>}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </PopoverContent>
+            </Popover>
+          </div>
           <style>{`
             @keyframes regalia-ascend-glow {
               0%   { opacity: 0; transform: scale(0.85); }
