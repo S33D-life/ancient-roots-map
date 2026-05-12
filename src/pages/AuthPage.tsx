@@ -25,6 +25,30 @@ const passwordSchema = z.string().min(6, "Password must be at least 6 characters
 
 type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password" | "reset-success";
 
+// Persisted across reloads so the verify-email screen can rebuild after refresh.
+const PENDING_EMAIL_KEY = "s33d_pending_verify_email";
+const readPendingEmail = (): string => {
+  try {
+    return localStorage.getItem(PENDING_EMAIL_KEY) || sessionStorage.getItem(PENDING_EMAIL_KEY) || "";
+  } catch { return ""; }
+};
+const writePendingEmail = (addr: string) => {
+  try {
+    localStorage.setItem(PENDING_EMAIL_KEY, addr);
+    sessionStorage.setItem(PENDING_EMAIL_KEY, addr);
+  } catch {}
+};
+const clearPendingEmail = () => {
+  try {
+    localStorage.removeItem(PENDING_EMAIL_KEY);
+    sessionStorage.removeItem(PENDING_EMAIL_KEY);
+  } catch {}
+};
+
+// Dev-only logger — never logs passwords or tokens.
+const isDev = (() => { try { return Boolean((import.meta as any)?.env?.DEV); } catch { return false; } })();
+const authLog = (...args: unknown[]) => { if (isDev) console.log("[auth]", ...args); };
+
 // Detect recovery from URL hash OR query params before first render
 // This must run synchronously before any auth listener fires
 const detectRecoveryFromHash = (): AuthView => {
@@ -51,8 +75,16 @@ const AuthPage = () => {
     _recoveryDetected = true;
     sessionStorage.setItem("s33d_recovery_active", "1");
   }
-  const [view, setView] = useState<AuthView>(_recoveryDetected ? "reset-password" : "login");
-  const [email, setEmail] = useState("");
+  // If we have a pending email and we're not in recovery, prefer the verification waiting screen.
+  const _pendingOnLoad = readPendingEmail();
+  const _initialView: AuthView = _recoveryDetected
+    ? "reset-password"
+    : _pendingOnLoad
+      ? "verify-email"
+      : "login";
+
+  const [view, setView] = useState<AuthView>(_initialView);
+  const [email, setEmail] = useState(_pendingOnLoad);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -62,8 +94,12 @@ const AuthPage = () => {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [unverifiedModalOpen, setUnverifiedModalOpen] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState<string>("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string>(_pendingOnLoad);
   const [resending, setResending] = useState(false);
+  const [resendCooldownUntil, setResendCooldownUntil] = useState<number>(0);
+  const [resendNote, setResendNote] = useState<string | null>(null);
+  const [verifyChecking, setVerifyChecking] = useState(false);
+  const [tickNow, setTickNow] = useState(() => Date.now());
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
@@ -179,6 +215,14 @@ const AuthPage = () => {
   const viewRef = useRef(view);
   useEffect(() => { viewRef.current = view; }, [view]);
 
+  // Tick once a second while the resend button is in cooldown so the countdown rerenders.
+  useEffect(() => {
+    if (resendCooldownUntil <= Date.now()) return;
+    const id = window.setInterval(() => setTickNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [resendCooldownUntil, tickNow]);
+
+
   // Helper: is the current flow a password recovery flow?
   const isRecoveryFlow = () =>
     viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
@@ -186,6 +230,8 @@ const AuthPage = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      authLog("event", event, "hasSession:", !!session);
+
       // Handle password recovery redirect — show reset form instead of navigating away
       if (event === "PASSWORD_RECOVERY") {
         sessionStorage.setItem("s33d_recovery_active", "1");
@@ -204,6 +250,13 @@ const AuthPage = () => {
       if (isRecoveryFlow()) return;
 
       if (session) {
+        // Verification round-trip success: warm welcome and clean up the pending email.
+        const wasPending = !!readPendingEmail();
+        if (event === "SIGNED_IN" && wasPending) {
+          authLog("verification round-trip complete", { userEmail: session.user?.email });
+          toast({ title: "Email confirmed — welcome to the grove 🌱", description: "You're signed in." });
+        }
+        clearPendingEmail();
         // Consume invitation on first sign-in (assigns lineage + decrements inviter).
         // Read from BOTH legacy and new persistence keys so any prior session can
         // still complete its consumption. We only mark the invite "used" AFTER
@@ -410,7 +463,13 @@ const AuthPage = () => {
       toast({ title: "Enter your email first", description: "We need an email to resend the link." });
       return;
     }
+    if (Date.now() < resendCooldownUntil) {
+      const sec = Math.ceil((resendCooldownUntil - Date.now()) / 1000);
+      setResendNote(`Please wait ${sec}s before requesting another email.`);
+      return;
+    }
     setResending(true);
+    setResendNote(null);
     try {
       const { error } = await supabase.auth.resend({
         type: "signup",
@@ -418,13 +477,54 @@ const AuthPage = () => {
         options: { emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) throw error;
-      toast({ title: "Verification email sent 🌱", description: `Check ${addr} (and Junk / Spam / Promotions).` });
+      writePendingEmail(addr);
+      authLog("resend ok", { addr });
+      setResendCooldownUntil(Date.now() + 30_000);
+      setResendNote("Sent! Check your inbox (and Junk / Spam / Promotions).");
+      toast({ title: "Verification email sent 🌱", description: `Sent to ${addr}.` });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not resend verification email";
-      toast({ title: "Could not resend", description: msg, variant: "destructive" });
+      const raw = err instanceof Error ? err.message : "Could not resend verification email";
+      const isRate = /rate|too many|429/i.test(raw);
+      if (isRate) {
+        setResendCooldownUntil(Date.now() + 60_000);
+        setResendNote("Email service is throttling — please wait a minute and try again.");
+      } else {
+        setResendNote(raw);
+      }
+      authLog("resend error", { isRate, raw });
+      toast({ title: "Could not resend", description: raw, variant: "destructive" });
     } finally {
       setResending(false);
     }
+  };
+
+  // "I've verified — continue" button. Try silent sign-in if we still have the password,
+  // otherwise drop the user back at the login form with a friendly nudge.
+  const handleContinueAfterVerification = async () => {
+    const addr = (unverifiedEmail || email || readPendingEmail()).trim();
+    authLog("continue-after-verify clicked", { hasPassword: !!password, addr });
+    if (addr && password) {
+      setVerifyChecking(true);
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email: addr, password });
+        if (!error) {
+          // onAuthStateChange will fire SIGNED_IN, show the welcome toast and clear pending email.
+          return;
+        }
+        if (error.message.includes("Email not confirmed")) {
+          setResendNote("Still waiting for confirmation — please open the link in your email first.");
+          return;
+        }
+        // Any other error → fall through to login fallback.
+        authLog("silent sign-in failed", error.message);
+      } finally {
+        setVerifyChecking(false);
+      }
+    }
+    setEmail(addr);
+    setView("login");
+    clearErrors();
+    toast({ title: "Great — please sign in to enter the grove." });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -500,6 +600,9 @@ const AuthPage = () => {
         source: "manual",
         userId: data.user?.id ?? null,
       });
+      writePendingEmail(email);
+      setUnverifiedEmail(email);
+      authLog("signup ok → verify-email", { email });
       setView("verify-email");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
@@ -718,29 +821,51 @@ const AuthPage = () => {
               <h1 className="text-2xl font-serif">🌱 Your account has been created</h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 We've sent a confirmation email to{" "}
-                <span className="text-foreground font-medium">{email || "your inbox"}</span>.
+                <span className="text-foreground font-medium">{email || readPendingEmail() || "your inbox"}</span>.
                 <br />
                 Please open the link in the email to enter the grove.
               </p>
             </div>
 
             <div className="space-y-2 pt-1">
-              <Button onClick={openMail} className="w-full font-serif gap-2">
-                <Mail className="w-4 h-4" /> Open Mail App
+              <Button
+                onClick={handleContinueAfterVerification}
+                disabled={verifyChecking}
+                className="w-full font-serif gap-2"
+                aria-label="I have verified my email — continue to sign in"
+              >
+                {verifyChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                I've verified — continue
               </Button>
               <Button
                 variant="outline"
-                onClick={() => handleResendVerification(email)}
-                disabled={resending}
+                onClick={openMail}
                 className="w-full font-serif gap-2"
+                aria-label="Open the Mail app on your device"
               >
-                {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                Resend Verification Email
+                <Mail className="w-4 h-4" /> Open Mail App
               </Button>
+              {(() => {
+                const remaining = Math.max(0, Math.ceil((resendCooldownUntil - tickNow) / 1000));
+                const cooling = remaining > 0;
+                return (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleResendVerification(email || unverifiedEmail)}
+                    disabled={resending || cooling}
+                    className="w-full font-serif gap-2"
+                    aria-label="Resend the verification email"
+                  >
+                    {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {cooling ? `Resend available in ${remaining}s` : "Resend Verification Email"}
+                  </Button>
+                );
+              })()}
               <Button
                 variant="ghost"
-                onClick={() => { setView("signup"); clearErrors(); }}
+                onClick={() => { clearPendingEmail(); setView("signup"); clearErrors(); }}
                 className="w-full font-serif gap-2"
+                aria-label="Change the email address used for signup"
               >
                 <Pencil className="w-4 h-4" /> Change Email Address
               </Button>
@@ -751,6 +876,16 @@ const AuthPage = () => {
                 ← Back to Login
               </button>
             </div>
+
+            {resendNote && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="text-xs leading-relaxed text-foreground/80 px-2"
+              >
+                {resendNote}
+              </p>
+            )}
 
             <p
               className="text-[11px] leading-relaxed pt-2 border-t"
@@ -1082,13 +1217,21 @@ const AuthPage = () => {
       </div>
 
       {/* Unverified-account modal — shown when a user tries to log in before confirming their email. */}
-      <Dialog open={unverifiedModalOpen} onOpenChange={setUnverifiedModalOpen}>
+      <Dialog
+        open={unverifiedModalOpen}
+        onOpenChange={(open) => {
+          setUnverifiedModalOpen(open);
+          if (open) setResendNote(null);
+        }}
+      >
         <DialogContent
           className="sm:max-w-md border rounded-2xl"
           style={{
             background: "linear-gradient(160deg, hsl(var(--primary) / 0.08), hsl(var(--card)))",
             borderColor: "hsl(var(--primary) / 0.35)",
           }}
+          aria-labelledby="unverified-title"
+          aria-describedby="unverified-desc"
         >
           <DialogHeader className="items-center text-center space-y-3">
             <div
@@ -1097,11 +1240,14 @@ const AuthPage = () => {
                 background: "hsl(var(--primary) / 0.15)",
                 border: "1px solid hsl(var(--primary) / 0.4)",
               }}
+              aria-hidden="true"
             >
               <Mail className="w-7 h-7 text-primary" />
             </div>
-            <DialogTitle className="font-serif text-xl">🌱 Almost there — please confirm your email</DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed">
+            <DialogTitle id="unverified-title" className="font-serif text-xl">
+              🌱 Almost there — please confirm your email
+            </DialogTitle>
+            <DialogDescription id="unverified-desc" className="text-sm leading-relaxed">
               An account for <span className="text-foreground font-medium">{unverifiedEmail}</span> already exists,
               but it hasn't been verified yet. Open the confirmation link we sent you to enter the grove.
             </DialogDescription>
@@ -1111,19 +1257,34 @@ const AuthPage = () => {
             <Button
               onClick={() => { window.location.href = "mailto:"; }}
               className="w-full font-serif gap-2"
+              aria-label="Open the Mail app on your device"
+              autoFocus
             >
-              <Mail className="w-4 h-4" /> Open Mail App
+              <Mail className="w-4 h-4" aria-hidden="true" /> Open Mail App
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleResendVerification(unverifiedEmail)}
-              disabled={resending}
-              className="w-full font-serif gap-2"
-            >
-              {resending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              Resend Verification Email
-            </Button>
+            {(() => {
+              const remaining = Math.max(0, Math.ceil((resendCooldownUntil - tickNow) / 1000));
+              const cooling = remaining > 0;
+              return (
+                <Button
+                  variant="outline"
+                  onClick={() => handleResendVerification(unverifiedEmail)}
+                  disabled={resending || cooling}
+                  className="w-full font-serif gap-2"
+                  aria-label="Resend the verification email"
+                >
+                  {resending ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="w-4 h-4" aria-hidden="true" />}
+                  {cooling ? `Resend available in ${remaining}s` : "Resend Verification Email"}
+                </Button>
+              );
+            })()}
           </div>
+
+          {resendNote && (
+            <p role="status" aria-live="polite" className="text-xs leading-relaxed text-foreground/80 px-2 text-center">
+              {resendNote}
+            </p>
+          )}
 
           <p
             className="text-[11px] text-center leading-relaxed pt-2 border-t"
@@ -1142,6 +1303,7 @@ const AuthPage = () => {
               variant="ghost"
               className="font-serif"
               onClick={() => setUnverifiedModalOpen(false)}
+              aria-label="Close this dialog"
             >
               Close
             </Button>
