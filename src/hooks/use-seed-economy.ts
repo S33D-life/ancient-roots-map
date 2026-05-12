@@ -334,24 +334,44 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
   const plantSeed = useCallback(async (
     treeId: string, treeLat: number, treeLng: number, opts?: ActionOptions,
   ): Promise<ActionResult> => {
-    if (!userId) return { ok: false, reason: "no_user" };
-    if (seedsRemaining <= 0) return { ok: false, reason: "no_seeds" };
+    logEncounterEvent("plant", "attempt_start", {
+      treeId, treeLat, treeLng, override: opts?.override === true,
+    });
+    if (!userId) {
+      logEncounterEvent("plant", "result_failed", { reason: "no_user" });
+      return { ok: false, reason: "no_user" };
+    }
+    if (seedsRemaining <= 0) {
+      logEncounterEvent("plant", "result_failed", { reason: "no_seeds" });
+      return { ok: false, reason: "no_seeds" };
+    }
 
     const todaySeeds = allSeeds.filter(s =>
       s.planter_id === userId &&
       s.tree_id === treeId &&
       new Date(s.planted_at) >= getLocalMidnight()
     );
-    if (todaySeeds.length >= SEEDS_PER_TREE) return { ok: false, reason: "per_tree_limit" };
+    if (todaySeeds.length >= SEEDS_PER_TREE) {
+      logEncounterEvent("plant", "result_failed", { reason: "per_tree_limit" });
+      return { ok: false, reason: "per_tree_limit" };
+    }
 
-    const geo = await getFreshPosition(opts?.onAttempt);
+    const geo = await getFreshPosition(opts?.onAttempt, "plant");
     if (geo.kind === "err") {
+      logEncounterEvent("plant", "result_failed", { reason: geo.reason, error: geo.error, retries: geo.retries });
       return { ok: false, reason: geo.reason, error: geo.error, treeLat, treeLng, retries: geo.retries };
     }
 
     const base = buildBase(geo.position, treeLat, treeLng, geo.retries);
 
-    // Server is the source of truth — pass live coords + accuracy + optional override.
+    logEncounterEvent("plant", "rpc_call", {
+      rpc: "plant_seed_with_proximity",
+      userLat: base.userLat, userLng: base.userLng,
+      accuracyM: base.accuracy != null ? Math.round(base.accuracy) : null,
+      clientDistanceM: Math.round(base.distance),
+      override: opts?.override === true,
+    });
+
     const { data, error } = await supabase.rpc("plant_seed_with_proximity", {
       p_tree_id: treeId,
       p_user_lat: base.userLat,
@@ -362,6 +382,12 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
 
     if (error) {
       console.error("[plantSeed] rpc error:", error);
+      logEncounterEvent("plant", "rpc_error", {
+        message: error.message,
+        code: (error as { code?: string }).code,
+        details: (error as { details?: string }).details,
+        hint: (error as { hint?: string }).hint,
+      });
       return { ok: false, reason: "rpc_error", error: error.message, ...base };
     }
 
@@ -369,8 +395,20 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     const serverDistance = typeof r.distance === "number" ? r.distance : base.distance;
     const serverEffective = typeof r.effective_distance === "number" ? r.effective_distance : base.effectiveDistance;
 
+    logEncounterEvent("plant", "rpc_response", {
+      ok: !!r.ok,
+      reason: r.reason ?? null,
+      distanceM: typeof serverDistance === "number" ? Math.round(serverDistance) : null,
+      effectiveDistanceM: typeof serverEffective === "number" ? Math.round(serverEffective) : null,
+      radiusM: r.radius_m ?? null,
+      manualOverrideRadiusM: r.manual_override_radius_m ?? null,
+      overrideUsed: !!r.override_used,
+      overrideKind: r.override_kind ?? null,
+    });
+
     if (!r.ok) {
       const reason = (r.reason as ActionFailureReason) ?? "too_far";
+      logEncounterEvent("plant", "result_failed", { reason });
       return {
         ok: false, reason,
         ...base,
@@ -379,6 +417,16 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
         error: typeof r.error === "string" ? r.error : undefined,
       };
     }
+
+    if (r.override_used) {
+      logEncounterEvent("plant", "override_used", {
+        kind: r.override_kind ?? null,
+        distanceM: typeof serverDistance === "number" ? Math.round(serverDistance) : null,
+      });
+    }
+    logEncounterEvent("plant", "result_ok", {
+      distanceM: typeof serverDistance === "number" ? Math.round(serverDistance) : null,
+    });
 
     return {
       ok: true,
@@ -394,17 +442,37 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
   const collectHeart = useCallback(async (
     seedId: string, opts?: ActionOptions,
   ): Promise<ActionResult> => {
-    if (!userId) return { ok: false, reason: "no_user" };
+    logEncounterEvent("collect", "attempt_start", { seedId, override: opts?.override === true });
+    if (!userId) {
+      logEncounterEvent("collect", "result_failed", { reason: "no_user" });
+      return { ok: false, reason: "no_user" };
+    }
 
     const seed = allSeeds.find(s => s.id === seedId);
-    if (!seed) return { ok: false, reason: "seed_missing" };
-    if (seed.collected_by) return { ok: false, reason: "already_collected" };
-    if (seed.planter_id === userId) return { ok: false, reason: "own_seed" };
-    if (new Date(seed.blooms_at) > new Date()) return { ok: false, reason: "not_bloomed" };
-    if (seed.latitude == null || seed.longitude == null) return { ok: false, reason: "no_seed_coords" };
+    if (!seed) {
+      logEncounterEvent("collect", "result_failed", { reason: "seed_missing" });
+      return { ok: false, reason: "seed_missing" };
+    }
+    if (seed.collected_by) {
+      logEncounterEvent("collect", "result_failed", { reason: "already_collected" });
+      return { ok: false, reason: "already_collected" };
+    }
+    if (seed.planter_id === userId) {
+      logEncounterEvent("collect", "result_failed", { reason: "own_seed" });
+      return { ok: false, reason: "own_seed" };
+    }
+    if (new Date(seed.blooms_at) > new Date()) {
+      logEncounterEvent("collect", "result_failed", { reason: "not_bloomed" });
+      return { ok: false, reason: "not_bloomed" };
+    }
+    if (seed.latitude == null || seed.longitude == null) {
+      logEncounterEvent("collect", "result_failed", { reason: "no_seed_coords" });
+      return { ok: false, reason: "no_seed_coords" };
+    }
 
-    const geo = await getFreshPosition(opts?.onAttempt);
+    const geo = await getFreshPosition(opts?.onAttempt, "collect");
     if (geo.kind === "err") {
+      logEncounterEvent("collect", "result_failed", { reason: geo.reason, error: geo.error, retries: geo.retries });
       return {
         ok: false, reason: geo.reason, error: geo.error,
         treeLat: seed.latitude, treeLng: seed.longitude, retries: geo.retries,
