@@ -219,6 +219,12 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
+      if (result.overrideUsed) {
+        setOverrideEnabled(false);
+        toast.success("Heart collected (approximate location)", {
+          description: "Recorded with your true distance — thank you for being honest.",
+        });
+      }
     } else {
       const { title, description } = explainFailure(refineForToast(result));
       toast.error(title, description ? { description } : undefined);
