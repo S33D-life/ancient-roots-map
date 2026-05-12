@@ -416,8 +416,8 @@ export default function MemorySeedComposer({
 
             {meta.placeholder ? (
               <p className="font-serif text-xs italic text-muted-foreground/80">
-                This seed type is being prepared. Choose Story, Song, Book, Poem, Quote,
-                Recipe, or Photo for now.
+                This seed type is being prepared. Choose Story, Song, Book, Poem,
+                Quote, Recipe, Photo, or Painting / artwork for now.
               </p>
             ) : (
               <>
