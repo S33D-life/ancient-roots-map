@@ -153,12 +153,30 @@ const CouncilOfLifePage = () => {
 
           {/* ── Council Calendar — upcoming gatherings ── */}
           <div className="mt-6">
-            <CouncilCalendar />
+            <HeartwoodChamber
+              title="Council Calendar"
+              caption="Upcoming gatherings, marked by moon and season."
+              icon={<ScrollText className="w-4 h-4 text-primary" />}
+              collapsible
+              defaultOpen
+              tone="cool"
+            >
+              <CouncilCalendar />
+            </HeartwoodChamber>
           </div>
 
           {/* ── Quick View — agenda glimpse + single Council Scroll ── */}
           <div className="mt-6">
-            <CouncilQuickView invitation={invitation} />
+            <HeartwoodChamber
+              title="Quick View"
+              caption="A glimpse of the agenda and current scroll."
+              icon={<Users className="w-4 h-4 text-primary" />}
+              collapsible
+              defaultOpen
+              tone="warm"
+            >
+              <CouncilQuickView invitation={invitation} />
+            </HeartwoodChamber>
           </div>
 
           {/* ── Room Grid ── */}
