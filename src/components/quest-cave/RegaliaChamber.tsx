@@ -60,10 +60,15 @@ export default function RegaliaChamber({
   isPermanent,
   affinitySpecies = [],
   speciesCount = 0,
+  visits = 0,
+  affinityDepth = 0,
   sigils = [],
   streak,
 }: RegaliaChamberProps) {
-  const cloak = cloakStage(speciesCount);
+  const score = resonanceScore(speciesCount, visits, affinityDepth);
+  const cloak = cloakStage(score);
+  const nextStage = CLOAK_STAGES.find((s) => s.min > score);
+  const toNext = nextStage ? Math.max(0, nextStage.min - score) : 0;
 
   return (
     <section
