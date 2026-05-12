@@ -77,20 +77,17 @@ export default function PathwayGateway({
           aria-hidden
         />
       </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="gateway-body"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            style={{ overflow: "hidden" }}
-          >
-            <div className="px-4 sm:px-5 pb-5 pt-1 space-y-3">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* CSS-grid expand for buttery, low-cost mobile animation. */}
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-[340ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+        aria-hidden={!open}
+      >
+        <div className="min-h-0 overflow-hidden [contain:layout_paint]">
+          <div className="px-4 sm:px-5 pb-5 pt-1 space-y-3">{children}</div>
+        </div>
+      </div>
     </section>
   );
 }
