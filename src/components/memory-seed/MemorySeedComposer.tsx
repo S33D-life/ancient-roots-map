@@ -165,7 +165,9 @@ export default function MemorySeedComposer({
   const [note, setNote] = useState("");
   const [unlock, setUnlock] = useState<WhisperUnlock>("any_ancient_friend");
   const [submitting, setSubmitting] = useState(false);
-  const [confirmed, setConfirmed] = useState<Destination | null>(null);
+  const [confirmed, setConfirmed] = useState<Destination | "partial_whisper_failed" | null>(null);
+  /** Tracks an offering that already persisted in a "both" submit so retrying the whisper does not insert a second offering. */
+  const [persistedOfferingId, setPersistedOfferingId] = useState<string | undefined>(undefined);
 
   const meta = TYPES.find((t) => t.value === type)!;
 
