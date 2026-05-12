@@ -58,6 +58,16 @@ function explainFailure(r: ActionResult): { title: string; description?: string 
       };
     case "too_far":
       return { title: `You appear to be ${d ?? "some distance"} away`, description: a ? `GPS accuracy ${a}` : undefined };
+    case "override_too_far":
+      return {
+        title: "Too far for an approximate-location encounter",
+        description: d ? `You're ~${d} from this tree — the override only works when you're nearby.` : undefined,
+      };
+    case "override_disabled":
+      return {
+        title: "Approximate-location override is currently off",
+        description: "A keeper has paused this option. Please try again with a clearer GPS signal.",
+      };
     case "rpc_error":
       return { title: "Something went wrong on our side", description: r.error };
     default:
@@ -125,7 +135,16 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   const [overrideEnabled, setOverrideEnabled] = useState(false);
 
   const { hasRole: isKeeper } = useHasRole("keeper");
-  const canOverride = import.meta.env.DEV || isKeeper;
+  // The override is now available to anyone — keepers/dev see it always; everyone else
+  // sees it once an attempt has hinted at GPS uncertainty so we don't tempt misuse.
+  const lastReason = lastResult?.reason;
+  const lastConfidence = lastResult?.confidence;
+  const gpsUncertaintyHinted =
+    lastReason === "geo_poor_accuracy" ||
+    lastReason === "geo_timeout" ||
+    lastReason === "geo_unavailable" ||
+    (lastReason === "too_far" && (lastConfidence === "low" || lastConfidence === "medium"));
+  const showOverrideToggle = import.meta.env.DEV || isKeeper || gpsUncertaintyHinted;
 
   const seedsHere = getSeedsAtTree(treeId);
   const bloomedSeeds = getBloomedSeedsAtTree(treeId);
@@ -160,7 +179,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setLocatingMessage("Locating your position…");
     const result = await plantSeed(treeId, treeLat, treeLng, {
       onAttempt,
-      override: overrideEnabled && canOverride,
+      override: overrideEnabled,
     });
     setPlanting(false);
     setLocatingMessage(null);
@@ -169,8 +188,14 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
-      const note = result.overrideUsed ? " (override used)" : "";
-      toast.success(`🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.${note}`);
+      if (result.overrideUsed) {
+        setOverrideEnabled(false);
+        toast.success("🌱 Seed planted (approximate location)", {
+          description: "Recorded with your true distance — thank you for being honest.",
+        });
+      } else {
+        toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
+      }
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
       const { title, description } = explainFailure(refineForToast(result));
@@ -184,7 +209,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setLocatingMessage("Locating your position…");
     const result = await collectHeart(seed.id, {
       onAttempt,
-      override: overrideEnabled && canOverride,
+      override: overrideEnabled,
     });
     setCollecting(null);
     setLocatingMessage(null);
@@ -194,6 +219,12 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
+      if (result.overrideUsed) {
+        setOverrideEnabled(false);
+        toast.success("Heart collected (approximate location)", {
+          description: "Recorded with your true distance — thank you for being honest.",
+        });
+      }
     } else {
       const { title, description } = explainFailure(refineForToast(result));
       toast.error(title, description ? { description } : undefined);
@@ -354,24 +385,27 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         )}
       </AnimatePresence>
 
-      {/* Override toggle — DEV or keeper only */}
-      {canOverride && (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
-          <div className="flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 text-amber-600" />
-            <div>
+      {/* Approximate-location override — visible to keepers/dev always, and to anyone
+          once GPS uncertainty has shown up in the last attempt. */}
+      {showOverrideToggle && (
+        <div className="flex items-start justify-between gap-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <div className="flex items-start gap-2">
+            <Radio className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+            <div className="space-y-0.5">
               <p className="text-[11px] font-serif text-amber-700 dark:text-amber-400">
-                Allow encounter despite uncertain GPS
+                Mark this as an approximate-location encounter
               </p>
-              <p className="text-[9px] font-serif text-muted-foreground">
-                {import.meta.env.DEV ? "Dev override" : "Keeper override"} · usage is logged
+              <p className="text-[10px] font-serif text-muted-foreground leading-snug">
+                Use this only if you're truly beside this tree but GPS is shaky.
+                Your real distance and accuracy are recorded with the action.
+                {isKeeper ? " · keeper override" : import.meta.env.DEV ? " · dev override" : ""}
               </p>
             </div>
           </div>
           <Switch
             checked={overrideEnabled}
             onCheckedChange={setOverrideEnabled}
-            aria-label="Allow encounter despite uncertain GPS"
+            aria-label="Mark this as an approximate-location encounter"
           />
         </div>
       )}

@@ -35,6 +35,8 @@ export type ActionFailureReason =
   | "geo_timeout"
   | "geo_poor_accuracy"
   | "too_far"
+  | "override_too_far"
+  | "override_disabled"
   | "rpc_error";
 
 export type GpsConfidence = "high" | "medium" | "low" | "unknown";
@@ -57,13 +59,17 @@ export interface ActionResult {
   gpsAgeMs?: number;
   /** Number of GPS retries that occurred. */
   retries?: number;
-  /** True if the encounter was allowed via the dev/admin override. */
+  /** True if the encounter was allowed via an approximate-location / keeper override. */
   overrideUsed?: boolean;
+  /** Which kind of override was applied server-side, if any. */
+  overrideKind?: "manual" | "keeper";
+  /** Maximum distance allowed when using the manual approximate-location override. */
+  manualOverrideRadiusM?: number;
   error?: string;
 }
 
 export interface ActionOptions {
-  /** Bypass distance gate (DEV or keeper role only — enforced at UI). */
+  /** Manual "approximate location" override — accepts moderate GPS uncertainty. */
   override?: boolean;
   /** Optional callback fired between GPS attempts so the UI can show progress. */
   onAttempt?: (attempt: number) => void;
@@ -302,6 +308,8 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       distance: serverDistance,
       effectiveDistance: serverEffective,
       overrideUsed: !!r.override_used,
+      overrideKind: (r.override_kind as "manual" | "keeper" | undefined) ?? undefined,
+      manualOverrideRadiusM: typeof r.manual_override_radius_m === "number" ? r.manual_override_radius_m : undefined,
     };
   }, [userId, seedsRemaining, allSeeds]);
 
@@ -361,6 +369,8 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       distance: serverDistance,
       effectiveDistance: serverEffective,
       overrideUsed: !!r.override_used,
+      overrideKind: (r.override_kind as "manual" | "keeper" | undefined) ?? undefined,
+      manualOverrideRadiusM: typeof r.manual_override_radius_m === "number" ? r.manual_override_radius_m : undefined,
     };
   }, [userId, allSeeds]);
 

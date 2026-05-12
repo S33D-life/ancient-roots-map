@@ -5541,6 +5541,8 @@ export type Database = {
           accuracy_factor: number
           accuracy_tolerance_max_m: number
           id: number
+          manual_override_enabled: boolean
+          manual_override_radius_m: number
           radius_m: number
           updated_at: string
           updated_by: string | null
@@ -5549,6 +5551,8 @@ export type Database = {
           accuracy_factor?: number
           accuracy_tolerance_max_m?: number
           id?: number
+          manual_override_enabled?: boolean
+          manual_override_radius_m?: number
           radius_m?: number
           updated_at?: string
           updated_by?: string | null
@@ -5557,6 +5561,8 @@ export type Database = {
           accuracy_factor?: number
           accuracy_tolerance_max_m?: number
           id?: number
+          manual_override_enabled?: boolean
+          manual_override_radius_m?: number
           radius_m?: number
           updated_at?: string
           updated_by?: string | null
@@ -5947,6 +5953,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      proximity_override_log: {
+        Row: {
+          accuracy_m: number | null
+          action: string
+          created_at: string
+          distance_m: number | null
+          id: string
+          is_keeper: boolean
+          seed_id: string | null
+          tree_id: string | null
+          user_id: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          action: string
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          is_keeper?: boolean
+          seed_id?: string | null
+          tree_id?: string | null
+          user_id: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          action?: string
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          is_keeper?: boolean
+          seed_id?: string | null
+          tree_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       quote_likes: {
         Row: {
