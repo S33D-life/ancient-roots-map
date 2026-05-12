@@ -26,6 +26,7 @@ const FirstWalkTrail = () => {
   const onAuthRoute =
     location.pathname.startsWith("/auth") ||
     location.pathname.startsWith("/reset-password") ||
+    location.pathname.startsWith("/welcome") ||
     location.pathname.startsWith("/~oauth");
 
   // Don't render if finished, dismissed, on auth route, or nudges disabled
