@@ -36,7 +36,7 @@ export default function SharedEncounterView({ onBack, treeContext, user }: Props
   };
 
   const qrUrl = session
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/companion?encounter=${session.code}`)}&bgcolor=0a0a08&color=c8a96e&margin=2&format=svg`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(getPublicAppUrl(`/companion?encounter=${session.code}`))}&bgcolor=0a0a08&color=c8a96e&margin=2&format=svg`
     : "";
 
   if (paired && encounter) {
