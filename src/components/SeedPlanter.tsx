@@ -25,6 +25,7 @@ import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 import { useHasRole } from "@/hooks/use-role";
 import { isDebugUser, isDevHost } from "@/lib/env";
+import { track } from "@/lib/telemetry";
 
 function explainFailure(r: ActionResult, debug = false): { title: string; description?: string } {
   const d = r.distance != null ? `${Math.round(r.distance)}m` : null;
@@ -197,8 +198,10 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     if (result.ok) {
       setShowBurst(true);
       setShowPlanted(true);
+      track("heart_planted", { treeId, userId, meta: { override: !!result.overrideUsed } });
       if (result.overrideUsed) {
         setOverrideEnabled(false);
+        track("override_used", { treeId, userId, meta: { action: "plant" } });
         toast.success("🌱 Seed planted (approximate location)", {
           description: "Recorded with your true distance — thank you for being honest.",
         });
@@ -207,6 +210,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
       }
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
+      track("heart_collect_failed", { treeId, userId, reason: result.reason || "unknown", meta: { stage: "plant" } });
       const { title, description } = explainFailure(refineForToast(result), isDebugUser(isKeeper));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] plant failed", result);
@@ -225,16 +229,19 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setLastResult(result);
 
     if (result.ok) {
+      track("heart_planted", { treeId, userId, meta: { action: "collect", override: !!result.overrideUsed } });
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
       setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
       if (result.overrideUsed) {
         setOverrideEnabled(false);
+        track("override_used", { treeId, userId, meta: { action: "collect" } });
         toast.success("Heart collected (approximate location)", {
           description: "Recorded with your true distance — thank you for being honest.",
         });
       }
     } else {
+      track("heart_collect_failed", { treeId, userId, reason: result.reason || "unknown" });
       const { title, description } = explainFailure(refineForToast(result), isDebugUser(isKeeper));
       toast.error(title, description ? { description } : undefined);
       if (import.meta.env.DEV) console.warn("[SeedPlanter] collect failed", result);
