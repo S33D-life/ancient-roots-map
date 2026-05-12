@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flower2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useBlooms } from "@/hooks/use-blooms";
+import { useBlooms, useInvalidateBlooms } from "@/hooks/use-blooms";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import AddBloomOfferingDialog from "./AddBloomOfferingDialog";
 import BloomGallery from "./BloomGallery";
