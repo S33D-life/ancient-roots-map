@@ -194,6 +194,7 @@ export default function MemorySeedComposer({
       setTitle(""); setBody(""); setMediaUrl(""); setAuthor(""); setNote("");
       setType("story"); setDestination("offering"); setUnlock("any_ancient_friend");
       setSubmitting(false); setConfirmed(null); setDestinationTouched(false);
+      setPersistedOfferingId(undefined);
     }
   }, [open]);
 
