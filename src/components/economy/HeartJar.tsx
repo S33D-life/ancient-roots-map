@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { Heart, X, Sun, Moon, ScrollText } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
@@ -27,6 +27,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
+  const dragControls = useDragControls();
   const [pulse, setPulse] = useState(false);
   // Sustained glow that turns on when new hearts arrive and turns off only
   // when the wanderer opens the jar (or after a long max window).
@@ -323,6 +324,8 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                 exit={{ y: "100%" }}
                 transition={{ type: "spring", damping: 28, stiffness: 300 }}
                 drag="y"
+                dragListener={false}
+                dragControls={dragControls}
                 dragDirectionLock
                 dragConstraints={{ top: 0, bottom: 0 }}
                 dragElastic={{ top: 0, bottom: 0.5 }}
@@ -330,9 +333,26 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                   if (info.offset.y > 120 || info.velocity.y > 600) setOpen(false);
                 }}
               >
-                {/* Handle */}
-                <div className="flex justify-center pt-3 pb-1 shrink-0">
-                  <div className="w-10 h-1 rounded-full" style={{ background: "hsl(var(--muted-foreground) / 0.2)" }} />
+                {/* Drag handle — swipe down to dismiss */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Drag handle — swipe down to close Heart Jar"
+                  onPointerDown={(e) => dragControls.start(e)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || e.key === "Escape") {
+                      e.preventDefault();
+                      setOpen(false);
+                    }
+                  }}
+                  className="flex flex-col items-center justify-center pt-2.5 pb-2 shrink-0 cursor-grab active:cursor-grabbing touch-none select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-t-2xl"
+                  style={{ touchAction: "none" }}
+                >
+                  <div
+                    className="w-12 h-1.5 rounded-full transition-colors"
+                    style={{ background: "hsl(var(--muted-foreground) / 0.35)" }}
+                  />
+                  <span className="sr-only">Swipe down to close</span>
                 </div>
 
                 {/* Header */}
