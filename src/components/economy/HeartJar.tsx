@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { Heart, X, Sun, Moon, ScrollText } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
