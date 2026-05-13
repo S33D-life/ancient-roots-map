@@ -484,7 +484,7 @@ export default function SendWhisperModal({
           )}
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
+        <div className="space-y-5 px-6 py-4 flex-1 overflow-y-auto overscroll-contain">
           {/* Step 1: Recipient */}
           <div className="space-y-3">
             <Label className="font-serif text-sm">Who can collect this whisper?</Label>
