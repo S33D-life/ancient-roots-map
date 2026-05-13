@@ -1274,14 +1274,7 @@ const TreeDetailPage = () => {
               </div>
             )}
 
-            {/* Seed Planter (moved from Encounters) */}
-            <SeedPlanter
-              treeId={id!}
-              treeLat={tree.latitude}
-              treeLng={tree.longitude}
-              userId={userId}
-              treeSpecies={tree.species}
-            />
+            {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
             {/* Whispers (moved from Encounters) */}
             {userId && tree && (
