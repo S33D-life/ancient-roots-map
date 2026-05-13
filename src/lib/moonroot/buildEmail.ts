@@ -1,4 +1,5 @@
 import type { MoonrootDigest } from "./types";
+import { deriveLunarFraming } from "./lunar";
 
 const fmt = (iso: string) => {
   if (!iso) return "—";
@@ -12,24 +13,41 @@ const fmt = (iso: string) => {
 const placeholder = (v: string) => (v.trim() ? v.trim() : "Not yet recorded");
 
 export function buildMoonrootEmailSubject(digest: MoonrootDigest): string {
-  return "Your Moonroot Digest is ready 🌙";
+  const f = deriveLunarFraming(digest.type, new Date(digest.endDate));
+  return `${f.glyph} ${f.label} — your Moonroot scroll`;
 }
 
 export function buildMoonrootEmailMarkdown(digest: MoonrootDigest): string {
   const { user, ancientFriendsSummary: a, lunarLifeLedger: l, councilInvitation: c } = digest;
   const name = user.fullName?.trim() || "Wanderer";
+  const f = deriveLunarFraming(digest.type, new Date(digest.endDate));
 
   const topTreeLine = a.topTree
     ? `\nYour most-visited Ancient Friend this moon was **${a.topTree.name}** (${a.topTree.species}) — ${a.topTree.visits} visit${a.topTree.visits === 1 ? "" : "s"}.\n`
     : "";
 
+  const memoryBlock = a.emotionalMemory.length
+    ? `\n## A few things this moon remembered\n\n${a.emotionalMemory.map((m) => `> ${m}`).join("\n\n")}\n`
+    : "";
+
+  const themesBlock = a.cycleThemes.length
+    ? `\n## Themes of this cycle\n\n${a.cycleThemes.join(" · ")}\n`
+    : "";
+
+  const returningBlock = a.returningTrees.length
+    ? `\n## Trees that returned\n\n${a.returningTrees
+        .map((t) => `- **${t.name}** (${t.species}) — ${t.visits} returns`)
+        .join("\n")}\n`
+    : "";
+
   return `Hello ${name},
 
-Every moon, the living world writes back.
+${f.glyph} **${f.label}**
+*${f.whisper}*
 
-Here is what moved through your grove between **${fmt(digest.startDate)}** and **${fmt(digest.endDate)}**.
-
-## Ancient Friends
+A reflection from **${fmt(digest.startDate)}** to **${fmt(digest.endDate)}**.
+${memoryBlock}${themesBlock}${returningBlock}
+## What moved through your grove
 
 - Trees mapped: ${a.treesMappedCount}
 - Trees visited: ${a.treesVisitedCount}
