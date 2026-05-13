@@ -10,7 +10,7 @@
  *   Taproot          → systems, diagnostics, stewardship (keepers only)
  */
 import { Link } from "react-router-dom";
-import { Mountain, Archive, Wrench, ArrowRight } from "lucide-react";
+import { Flame, BookHeart, Sprout, ArrowRight } from "lucide-react";
 import { useHasRole } from "@/hooks/use-role";
 
 interface Doorway {
@@ -18,31 +18,35 @@ interface Doorway {
   icon: React.ElementType;
   label: string;
   whisper: string;
-  tint: string; // hsl tone for soft glow
+  tint: string;       // hsl tone for soft glow
+  atmosphere: "ember" | "archive" | "roots";
   keeperOnly?: boolean;
 }
 
 const DOORWAYS: Doorway[] = [
   {
     to: "/heartwood/quest-room",
-    icon: Mountain,
+    icon: Flame,
     label: "Quest Cave",
-    whisper: "Your unfolding path",
-    tint: "30 70% 55%",
+    whisper: "An adventure waits below",
+    tint: "18 85% 55%",
+    atmosphere: "ember",
   },
   {
     to: "/vault?from=hearth",
-    icon: Archive,
+    icon: BookHeart,
     label: "Heartwood Vault",
-    whisper: "Hearts, memory, and exchange",
-    tint: "140 40% 50%",
+    whisper: "Where memories are kept warm",
+    tint: "35 65% 50%",
+    atmosphere: "archive",
   },
   {
     to: "/admin/room",
-    icon: Wrench,
+    icon: Sprout,
     label: "Taproot",
-    whisper: "Systems and stewardship",
-    tint: "260 35% 55%",
+    whisper: "Tend the roots of the grove",
+    tint: "150 35% 42%",
+    atmosphere: "roots",
     keeperOnly: true,
   },
 ];
