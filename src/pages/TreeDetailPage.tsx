@@ -1081,8 +1081,7 @@ const TreeDetailPage = () => {
               </CollapsibleContent>
             </Collapsible>
 
-            {/* Blooms Nearby — seasonal flower offerings */}
-            <BloomsNearbySection treeId={id!} />
+            {/* Blooms Nearby moved to Offerings tab */}
           </TabsContent>
 
           {/* ── ENCOUNTERS TAB ── */}
@@ -1326,6 +1325,9 @@ const TreeDetailPage = () => {
                 treeSpecies={tree.species || ""}
               />
             )}
+
+            {/* Blooms Nearby — seasonal flower offerings (moved from Overview) */}
+            <BloomsNearbySection treeId={id!} />
 
             {/* Empty state — only when truly no offerings, no birdsong */}
             {offerings.length === 0 && birdsongCount === 0 ? (
