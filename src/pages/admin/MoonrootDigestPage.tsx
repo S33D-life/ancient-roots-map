@@ -48,9 +48,14 @@ export default function MoonrootDigestPage() {
   const [digest, setDigest] = useState<MoonrootDigest | null>(null);
   const [generating, setGenerating] = useState(false);
 
+  useEffect(() => {
+    track("moonroot_digest_previewed");
+  }, []);
+
   const generate = async () => {
     if (!userId) return;
     setGenerating(true);
+    track(digest ? "moonroot_digest_regenerated" : "moonroot_digest_previewed", { userId });
     try {
       const startISO = new Date(`${startDate}T00:00:00`).toISOString();
       const endISO = new Date(`${endDate}T23:59:59`).toISOString();
