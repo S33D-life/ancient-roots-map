@@ -322,6 +322,13 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
                 transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                drag="y"
+                dragDirectionLock
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={{ top: 0, bottom: 0.5 }}
+                onDragEnd={(_, info) => {
+                  if (info.offset.y > 120 || info.velocity.y > 600) setOpen(false);
+                }}
               >
                 {/* Handle */}
                 <div className="flex justify-center pt-3 pb-1 shrink-0">
