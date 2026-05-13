@@ -431,6 +431,7 @@ const App = () => {
                 <Route path="/admin" element={<AdminRoomPage />} />
                 <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/moonroot-digest" element={<MoonrootDigestPage />} />
+                <Route path="/admin/moonroot" element={<MoonrootDigestPage />} />
                 <Route path="/admin/invite-status" element={<InviteStatusPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />

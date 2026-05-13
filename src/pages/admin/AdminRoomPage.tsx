@@ -8,7 +8,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Shield, Activity, Users, Mail, TreePine,
-  Heart, Wrench, Sparkles, ChevronRight, Bug } from "lucide-react";
+  Heart, Wrench, Sparkles, ChevronRight, Bug, Moon } from "lucide-react";
 import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { useHasRole } from "@/hooks/use-role";
@@ -163,6 +163,30 @@ export default function AdminRoomPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all hidden sm:block" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Moonroot Digest — reflective lunar scroll */}
+        <Link
+          to="/admin/moonroot"
+          onClick={() => track("moonroot_digest_opened")}
+          className="block mt-4"
+        >
+          <Card className="group border-primary/15 bg-gradient-to-br from-slate-50/40 via-card to-indigo-50/20 dark:from-slate-950/30 dark:to-indigo-950/10 hover:border-primary/30 transition-all overflow-hidden">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-2xl bg-primary/8 border border-primary/15 shrink-0">
+                  <Moon className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-serif text-foreground">Moonroot Digest</h2>
+                  <p className="text-sm text-muted-foreground font-serif italic mt-0.5">
+                    Two-week reflections from the wandering path.
+                  </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all hidden sm:block" />
               </div>
