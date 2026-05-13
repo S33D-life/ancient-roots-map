@@ -155,51 +155,97 @@ export default function MoonrootDigestPage() {
               startDate={startDate}
               endDate={endDate}
               loading={generating}
+              compact={compact}
               onUserId={setUserId}
               onType={setType}
               onStart={setStartDate}
               onEnd={setEndDate}
               onGenerate={generate}
+              onCompact={setCompact}
             />
           </CardContent>
         </Card>
 
-        {liveDigest && (
-          <>
-            <Card className="bg-card/70 border-primary/20">
-              <CardHeader><CardTitle className="font-serif text-xl">Ancient Friends</CardTitle></CardHeader>
-              <CardContent>
-                <DigestSummaryCards summary={liveDigest.ancientFriendsSummary} />
-              </CardContent>
-            </Card>
+        {liveDigest && (() => {
+          const framing = deriveLunarFraming(liveDigest.type, new Date(liveDigest.endDate));
+          const fmtDay = (iso: string) =>
+            new Date(iso).toLocaleDateString(undefined, { month: "long", day: "numeric" });
+          return (
+            <>
+              <LunarFramingHeader
+                framing={framing}
+                startLabel={fmtDay(liveDigest.startDate)}
+                endLabel={fmtDay(liveDigest.endDate)}
+              />
 
-            <Card className="bg-card/70 border-primary/20">
-              <CardHeader>
-                <CardTitle className="font-serif text-xl">Lunar Life Ledger</CardTitle>
-                <p className="text-xs text-muted-foreground font-serif italic">
-                  Manual for now — future moons will draw from seed, book, garden &amp; foraging tables.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <LunarLifeLedgerFields value={ledger} onChange={setLedger} />
-              </CardContent>
-            </Card>
+              {liveDigest.ancientFriendsSummary.cycleThemes.length > 0 && (
+                <CycleThemes summary={liveDigest.ancientFriendsSummary} />
+              )}
 
-            <Card className="bg-card/70 border-primary/20">
-              <CardHeader><CardTitle className="font-serif text-xl">Council Invitation</CardTitle></CardHeader>
-              <CardContent>
-                <CouncilInvitationFields value={council} onChange={setCouncil} />
-              </CardContent>
-            </Card>
+              {liveDigest.ancientFriendsSummary.emotionalMemory.length > 0 && (
+                <div className="py-2">
+                  <EmotionalMemory summary={liveDigest.ancientFriendsSummary} />
+                </div>
+              )}
 
-            <Card className="bg-card/70 border-primary/20">
-              <CardHeader><CardTitle className="font-serif text-xl">Email Preview</CardTitle></CardHeader>
-              <CardContent>
-                <MoonrootEmailPreview digest={liveDigest} />
-              </CardContent>
-            </Card>
-          </>
-        )}
+              {liveDigest.ancientFriendsSummary.returningTrees.length > 0 && (
+                <Card className="bg-card/70 border-primary/15">
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg">Trees that returned</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ReturningTrees summary={liveDigest.ancientFriendsSummary} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {!compact && (
+                <Card className="bg-card/70 border-primary/15">
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg">What moved through the grove</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DigestSummaryCards summary={liveDigest.ancientFriendsSummary} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {!compact && (
+                <Card className="bg-card/70 border-primary/15">
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg">Lunar Life Ledger</CardTitle>
+                    <p className="text-xs text-muted-foreground font-serif italic">
+                      Manual for now — future moons will draw from seed, book, garden &amp; foraging tables.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <LunarLifeLedgerFields value={ledger} onChange={setLedger} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {!compact && (
+                <Card className="bg-card/70 border-primary/15">
+                  <CardHeader>
+                    <CardTitle className="font-serif text-lg">Council Invitation</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CouncilInvitationFields value={council} onChange={setCouncil} />
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className="bg-card/70 border-primary/15">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Email Preview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MoonrootEmailPreview digest={liveDigest} />
+                </CardContent>
+              </Card>
+            </>
+          );
+        })()}
       </main>
     </div>
   );
