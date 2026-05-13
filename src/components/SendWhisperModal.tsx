@@ -466,8 +466,8 @@ export default function SendWhisperModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 flex flex-col h-[100dvh] sm:h-auto max-h-[100dvh] sm:max-h-[90vh]">
+        <DialogHeader className="px-6 pt-6 pb-3 shrink-0 border-b border-border/30">
           <div className="flex items-center gap-2">
             <TreeDeciduous className="h-5 w-5 text-primary" />
             <DialogTitle className="font-serif text-primary tracking-wide">
