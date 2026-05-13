@@ -93,7 +93,10 @@ export default function HearthDoorways() {
                 <h4 className="font-serif text-base text-foreground/90 leading-tight">
                   {d.label}
                 </h4>
-                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight
+                  className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5"
+                  style={{ transition: "transform var(--dur-soft) var(--ease-breathe), color var(--dur-soft) var(--ease-breathe)" }}
+                />
               </div>
               <p className="text-xs font-serif italic text-muted-foreground/70 mt-0.5 leading-snug">
                 {d.whisper}
