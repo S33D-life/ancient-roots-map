@@ -52,6 +52,7 @@ export default function MoonrootDigestPage() {
 
   const [digest, setDigest] = useState<MoonrootDigest | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [compact, setCompact] = useState(false);
 
   useEffect(() => {
     track("moonroot_digest_previewed");
