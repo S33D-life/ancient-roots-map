@@ -400,7 +400,7 @@ const DashboardPage = () => {
       ? `${greeting}, ${p.full_name.split(" ")[0]}`
       : `${greeting}, wanderer`;
     return (
-      <div className="space-y-10">
+      <div className="space-y-12">
         {/* Onboarding (only when needed) */}
         <FirstEncounterFunnel userId={userId} />
 
@@ -410,21 +410,20 @@ const DashboardPage = () => {
           <p className="text-sm font-serif text-muted-foreground/70 italic">{whisper}</p>
         </section>
 
-        {/* Today — identity & personal snapshot */}
-        <section className="space-y-4">
-          <HearthSectionHeader icon={Flame} title="Today" subtitle="Where you are, how you are doing" />
+        {/* Today — identity & gentle snapshot */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Flame} title="Today" subtitle="Where you are at the fire" />
           <IdentityLineageCard userId={userId} />
           <GroveIdentityCard userId={userId} userName={p?.full_name} />
-          <EarnableToday userId={userId} />
         </section>
 
-        {/* What matters now — one gentle next step + invitation to friends */}
-        <section className="space-y-4">
+        {/* What matters now — one gentle next step + a thread to pass on */}
+        <section className="space-y-5">
           <HearthSectionHeader icon={Compass} title="What matters now" subtitle="A glimpse of the path ahead" />
           <NextStepGlimpse userId={userId} />
           <Link
             to="/referrals"
-            className="block rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 transition-all hover:border-primary/40 hover:bg-card/60 group"
+            className="block rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 transition-all hover:border-accent/40 hover:bg-card/60 group"
           >
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
@@ -432,7 +431,7 @@ const DashboardPage = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h4 className="font-serif text-base text-foreground/90 leading-tight">Invite a friend</h4>
+                  <h4 className="font-serif text-base text-foreground/90 leading-tight">Invite someone into the grove</h4>
                   <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
                 </div>
                 <p className="text-xs font-serif italic text-muted-foreground/70 mt-0.5">
