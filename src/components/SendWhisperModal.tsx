@@ -466,8 +466,8 @@ export default function SendWhisperModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 flex flex-col h-[100dvh] sm:h-auto max-h-[100dvh] sm:max-h-[90vh]">
+        <DialogHeader className="px-6 pt-6 pb-3 shrink-0 border-b border-border/30">
           <div className="flex items-center gap-2">
             <TreeDeciduous className="h-5 w-5 text-primary" />
             <DialogTitle className="font-serif text-primary tracking-wide">
@@ -484,7 +484,7 @@ export default function SendWhisperModal({
           )}
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
+        <div className="space-y-5 px-6 py-4 flex-1 overflow-y-auto overscroll-contain">
           {/* Step 1: Recipient */}
           <div className="space-y-3">
             <Label className="font-serif text-sm">Who can collect this whisper?</Label>
@@ -793,7 +793,10 @@ export default function SendWhisperModal({
           }
 
           return (
-            <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch sm:space-x-0">
+            <DialogFooter
+              className="flex-col gap-2 sm:flex-col sm:items-stretch sm:space-x-0 shrink-0 border-t border-border/30 bg-background px-6 py-3"
+              style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+            >
               <Button
                 onClick={handleSend}
                 disabled={isDisabled}
