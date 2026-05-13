@@ -33,7 +33,10 @@ export type TelemetryEvent =
   | "override_used"
   | "admin_room_opened"
   | "admin_users_viewed"
-  | "evolution_dashboard_opened";
+  | "evolution_dashboard_opened"
+  | "moonroot_digest_opened"
+  | "moonroot_digest_previewed"
+  | "moonroot_digest_regenerated";
 
 export interface TelemetryPayload {
   reason?: string | null;
