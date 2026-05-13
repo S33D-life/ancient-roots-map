@@ -21,6 +21,16 @@ export interface AncientFriendsSummary {
   topTree?: { id: string; name: string; species: string; visits: number } | null;
   speciesConnectedWith: string[];
   recentTrees: Array<{ id: string; name: string; species: string }>;
+  /** Trees revisited 2+ times in the cycle, strongest first. */
+  returningTrees: Array<{ id: string; name: string; species: string; visits: number }>;
+  /** Longest streak of consecutive days with at least one check-in. */
+  longestStreakDays: number;
+  /** Species seen on multiple distinct trees this cycle. */
+  recurringSpecies: Array<{ species: string; treeCount: number }>;
+  /** Soft, behaviour-derived themes for the cycle. */
+  cycleThemes: string[];
+  /** Sparse, poetic memory lines surfaced from the data. */
+  emotionalMemory: string[];
 }
 
 export interface LunarLifeLedger {
