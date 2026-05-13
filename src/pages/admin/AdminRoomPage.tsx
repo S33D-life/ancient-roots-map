@@ -133,7 +133,7 @@ export default function AdminRoomPage() {
 
         {/* Featured: Evolution Dashboard */}
         <Link to="/evolution" onClick={() => track("evolution_dashboard_opened")}>
-          <Card className="group border-primary/20 bg-gradient-to-br from-amber-50/40 via-card to-emerald-50/30 dark:from-amber-950/20 dark:to-emerald-950/10 hover:border-primary/40 transition-all overflow-hidden">
+          <Card className="group border-primary/20 bg-gradient-to-br from-amber-50/40 via-card to-emerald-50/30 dark:from-amber-950/20 dark:to-emerald-950/10 hover:border-primary/40 breathe-card breathe-glow overflow-hidden">
             <CardContent className="p-6 sm:p-8">
               <div className="flex items-start gap-4">
                 <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shrink-0">
@@ -176,7 +176,7 @@ export default function AdminRoomPage() {
           onClick={() => track("moonroot_digest_opened")}
           className="block mt-4"
         >
-          <Card className="group border-primary/15 bg-gradient-to-br from-slate-50/40 via-card to-indigo-50/20 dark:from-slate-950/30 dark:to-indigo-950/10 hover:border-primary/30 transition-all overflow-hidden">
+          <Card className="group border-primary/15 bg-gradient-to-br from-slate-50/40 via-card to-indigo-50/20 dark:from-slate-950/30 dark:to-indigo-950/10 hover:border-primary/30 breathe-card breathe-glow overflow-hidden">
             <CardContent className="p-5 sm:p-6">
               <div className="flex items-start gap-4">
                 <div className="p-3 rounded-2xl bg-primary/8 border border-primary/15 shrink-0">
@@ -198,7 +198,7 @@ export default function AdminRoomPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
           {sections.map((s) => (
             <Link key={s.title} to={s.to} className="group">
-              <Card className="bg-card/40 border-border/30 hover:border-primary/30 hover:bg-card/70 transition-all h-full">
+              <Card className="bg-card/40 border-border/30 hover:border-primary/30 hover:bg-card/70 breathe-card breathe-glow h-full">
                 <CardContent className="p-5 flex items-start gap-3">
                   <div className="p-2 rounded-xl bg-primary/8 border border-primary/15 text-primary shrink-0">
                     {s.icon}
