@@ -1024,9 +1024,6 @@ const TreeDetailPage = () => {
                   {/* Weather */}
                   <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
-                  {/* Tree Heart Pool */}
-                  <TreeHeartPool treeId={id!} userId={userId} />
-
                   {/* Blooming Clock */}
                   {tree?.species && (
                     <BloomingClock species={tree.species} region={tree.nation} />
