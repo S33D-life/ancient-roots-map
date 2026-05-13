@@ -8,7 +8,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Shield, Activity, Users, Mail, TreePine,
-  Heart, Wrench, Sparkles, ChevronRight, Bug } from "lucide-react";
+  Heart, Wrench, Sparkles, ChevronRight, Bug, Moon } from "lucide-react";
 import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { useHasRole } from "@/hooks/use-role";
