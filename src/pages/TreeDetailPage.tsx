@@ -1081,8 +1081,7 @@ const TreeDetailPage = () => {
               </CollapsibleContent>
             </Collapsible>
 
-            {/* Blooms Nearby — seasonal flower offerings */}
-            <BloomsNearbySection treeId={id!} />
+            {/* Blooms Nearby moved to Offerings tab */}
           </TabsContent>
 
           {/* ── ENCOUNTERS TAB ── */}
