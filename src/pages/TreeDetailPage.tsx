@@ -867,6 +867,19 @@ const TreeDetailPage = () => {
               <TreeActivityStats treeId={id!} />
             </Suspense>
 
+            {/* Seeds & Hearts — first interaction zone (moved from Offerings/Secondary) */}
+            {id && (
+              <Suspense fallback={null}>
+                <TreeSeedsHeartsSection
+                  treeId={id}
+                  treeLat={tree.latitude}
+                  treeLng={tree.longitude}
+                  treeSpecies={tree.species}
+                  userId={userId}
+                />
+              </Suspense>
+            )}
+
             {/* Relationship Journey Card */}
             {userId && relationship && (
               <Suspense fallback={null}>
