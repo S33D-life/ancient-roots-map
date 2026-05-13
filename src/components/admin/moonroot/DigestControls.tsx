@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import type { MoonrootDigestType } from "@/lib/moonroot/types";
-import { Sparkles, Loader2, User } from "lucide-react";
+import { previousPhaseDate, nextPhaseDate } from "@/lib/moonroot/lunar";
+import { Sparkles, Loader2, User, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 
 interface Props {
   userId: string;
@@ -13,11 +14,13 @@ interface Props {
   startDate: string;
   endDate: string;
   loading: boolean;
+  compact: boolean;
   onUserId: (v: string) => void;
   onType: (v: MoonrootDigestType) => void;
   onStart: (v: string) => void;
   onEnd: (v: string) => void;
   onGenerate: () => void;
+  onCompact: (v: boolean) => void;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
