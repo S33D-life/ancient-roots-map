@@ -60,15 +60,7 @@ const TreeSeedsHeartsSection = ({ treeId, treeLat, treeLng, treeSpecies, userId 
         <Suspense fallback={null}>
           <TreeHeartPool treeId={treeId} userId={userId} />
         </Suspense>
-        <Suspense fallback={null}>
-          <SeedPlanter
-            treeId={treeId}
-            treeLat={treeLat as any}
-            treeLng={treeLng as any}
-            userId={userId}
-            treeSpecies={treeSpecies}
-          />
-        </Suspense>
+        {/* Plant a Seed temporarily hidden */}
       </div>
     </motion.section>
   );
