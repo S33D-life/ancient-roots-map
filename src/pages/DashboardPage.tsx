@@ -443,9 +443,16 @@ const DashboardPage = () => {
         </section>
 
         {/* Doorways — calm passages to deeper rooms */}
-        <section className="space-y-4">
+        <section className="space-y-5">
           <HearthSectionHeader icon={DoorOpen} title="Doorways" subtitle="Step into a deeper room" />
           <HearthDoorways />
+        </section>
+
+        {/* Aliveness today — quiet, collapsed by default (lives behind a single tap) */}
+        <section>
+          <HearthCollapsibleSection icon={Leaf} title="Aliveness today" subtitle="What is gently in reach">
+            <EarnableToday userId={userId} />
+          </HearthCollapsibleSection>
         </section>
 
         {/* Quiet conversation — collapsed by default */}
