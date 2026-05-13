@@ -24,6 +24,9 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   const [open, setOpen] = useState(false);
   const [tapPulse, setTapPulse] = useState(false);
   const prevBalance = useRef(balance.s33d);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
   const [pulse, setPulse] = useState(false);
   // Sustained glow that turns on when new hearts arrive and turns off only
   // when the wanderer opens the jar (or after a long max window).
@@ -79,6 +82,67 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     };
   }, [open]);
 
+  // Focus trap: when the jar opens, move focus into the panel and cycle Tab
+  // within it. Restore focus to the trigger when it closes. Escape closes.
+  useEffect(() => {
+    if (!open) return;
+    lastFocusedRef.current = (document.activeElement as HTMLElement) ?? null;
+
+    const getFocusable = (): HTMLElement[] => {
+      const root = panelRef.current;
+      if (!root) return [];
+      return Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute("aria-hidden") && el.offsetParent !== null);
+    };
+
+    // Move focus to first focusable inside the panel after mount/animation.
+    const focusTimer = window.setTimeout(() => {
+      const focusables = getFocusable();
+      (focusables[0] ?? panelRef.current)?.focus();
+    }, 60);
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = getFocusable();
+      if (focusables.length === 0) {
+        e.preventDefault();
+        panelRef.current?.focus();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey) {
+        if (active === first || !panelRef.current?.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !panelRef.current?.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", handleKey);
+      // Restore focus to trigger (or last focused element) on close.
+      const restore = triggerRef.current ?? lastFocusedRef.current;
+      restore?.focus?.();
+    };
+  }, [open]);
+
   /**
    * Tap handler — let the jar animate in place BEFORE the overlay covers it.
    * Sequence: tap → jar pulse/burst (~280ms) → sheet slides up.
@@ -114,6 +178,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     <>
       {/* Compact jar button */}
       <motion.button
+        ref={triggerRef}
         onClick={handleTap}
         animate={
           tapPulse
@@ -241,7 +306,12 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                 onClick={() => setOpen(false)}
               />
               <motion.div
-                className="fixed left-0 right-0 z-[9999] flex flex-col rounded-t-2xl border-t"
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Heart Jar"
+                tabIndex={-1}
+                className="fixed left-0 right-0 z-[9999] flex flex-col rounded-t-2xl border-t outline-none"
                 style={{
                   bottom: 0,
                   maxHeight: "min(85dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 24px))",
