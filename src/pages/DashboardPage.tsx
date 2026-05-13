@@ -34,9 +34,6 @@ import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
 import HearthWarmth from "@/components/dashboard/HearthWarmth";
 import EarnableToday from "@/components/dashboard/EarnableToday";
-import SeedTrailPanel from "@/components/SeedTrailPanel";
-import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
-import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import HearthDoorways from "@/components/dashboard/HearthDoorways";
 import NextStepGlimpse from "@/components/dashboard/NextStepGlimpse";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
@@ -50,11 +47,8 @@ import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
 import { useSpeciesBadges } from "@/hooks/use-species-badges";
-import { useSeasonalQuests } from "@/hooks/use-seasonal-quests";
 import StreakBadge from "@/components/growth/StreakBadge";
 import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
-import SeasonalQuestCard from "@/components/growth/SeasonalQuestCard";
-import ContributionPathways from "@/components/growth/ContributionPathways";
 
 /** Contextual pill showing the last tree the user visited, for easy return */
 const ReturnPill = () => {
