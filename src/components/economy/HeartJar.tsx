@@ -355,8 +355,16 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                   <span className="sr-only">Swipe down to close</span>
                 </div>
 
-                {/* Header */}
-                <div className="px-5 pb-1 flex items-center justify-between shrink-0">
+                {/* Header — also acts as a drag zone (but only when starting on empty area, not on buttons) */}
+                <div
+                  className="px-5 pb-1 flex items-center justify-between shrink-0 touch-none"
+                  onPointerDown={(e) => {
+                    // Only initiate drag from non-interactive areas of the header.
+                    const target = e.target as HTMLElement;
+                    if (target.closest("button, a, input, [role='button']")) return;
+                    dragControls.start(e);
+                  }}
+                >
                   <div className="flex items-center gap-2">
                     <Heart className="w-5 h-5 text-primary fill-primary/20" />
                     <div>
