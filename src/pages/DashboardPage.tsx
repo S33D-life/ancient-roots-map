@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame, Compass, Bot, BellDot } from "lucide-react";
+import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame, Compass, Bot, BellDot, UserPlus, ArrowRight, DoorOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -32,27 +32,20 @@ import PageShell from "@/components/PageShell";
 import AncientFriendPassport from "@/components/AncientFriendPassport";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
-import HearthWarmth from "@/components/dashboard/HearthWarmth";
 import EarnableToday from "@/components/dashboard/EarnableToday";
-import SeedTrailPanel from "@/components/SeedTrailPanel";
-import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
-import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
-import PresenceSpiralCard from "@/components/PresenceSpiralCard";
+import HearthDoorways from "@/components/dashboard/HearthDoorways";
+import NextStepGlimpse from "@/components/dashboard/NextStepGlimpse";
 import TeotagAITab from "@/components/dashboard/TeotagAITab";
 import TeotagFace from "@/components/TeotagFace";
 import TeotagChatPanel from "@/components/TeotagChatPanel";
 import HearthNotificationSettings from "@/components/dashboard/HearthNotificationSettings";
 import HearthLocationSettings from "@/components/dashboard/HearthLocationSettings";
-import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
 import { useSpeciesBadges } from "@/hooks/use-species-badges";
-import { useSeasonalQuests } from "@/hooks/use-seasonal-quests";
 import StreakBadge from "@/components/growth/StreakBadge";
 import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
-import SeasonalQuestCard from "@/components/growth/SeasonalQuestCard";
-import ContributionPathways from "@/components/growth/ContributionPathways";
 
 /** Contextual pill showing the last tree the user visited, for easy return */
 const ReturnPill = () => {
@@ -401,57 +394,71 @@ const DashboardPage = () => {
   };
 
   const GrowthEngineHearth = ({ userId, profile: p }: { userId: string; profile: Profile | null }) => {
-    const { data: quests, initQuests, season } = useSeasonalQuests(userId);
     const hour = new Date().getHours();
     const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
     const whisper = p?.full_name
       ? `${greeting}, ${p.full_name.split(" ")[0]}`
       : `${greeting}, wanderer`;
     return (
-      <div className="space-y-8">
-        {/* Onboarding */}
+      <div className="space-y-10">
+        {/* Onboarding (only when needed) */}
         <FirstEncounterFunnel userId={userId} />
 
-        {/* TEOTAG presence — gentle greeting + chat panel */}
-        <div className="flex items-center gap-3 py-2">
+        {/* Welcome — quiet greeting at the fire */}
+        <section className="flex items-center gap-3 pt-1">
           <TeotagFace size="sm" delay={0.5} />
           <p className="text-sm font-serif text-muted-foreground/70 italic">{whisper}</p>
-        </div>
-        <TeotagChatPanel variant="hearth" defaultOpen={false} />
+        </section>
 
-        {/* Identity & Daily Status — always open */}
-        <section className="space-y-5">
-          <HearthSectionHeader icon={Flame} title="Today" subtitle="Your daily pulse and earnable rewards" />
+        {/* Today — identity & personal snapshot */}
+        <section className="space-y-4">
+          <HearthSectionHeader icon={Flame} title="Today" subtitle="Where you are, how you are doing" />
           <IdentityLineageCard userId={userId} />
           <GroveIdentityCard userId={userId} userName={p?.full_name} />
           <EarnableToday userId={userId} />
         </section>
 
-        {/* Growth — collapsed by default, surfaces quests */}
-        <section>
-          <HearthCollapsibleSection icon={Sprout} title="Growth" subtitle="Quests, campaigns, and contributions">
-            <SeasonalQuestCard
-              quests={quests || []}
-              season={season}
-              onInit={() => initQuests.mutate()}
-            />
-            <SeedTrailPanel userId={userId} />
-            <ContributionPathways />
-            <ActiveCampaigns />
-          </HearthCollapsibleSection>
+        {/* What matters now — one gentle next step + invitation to friends */}
+        <section className="space-y-4">
+          <HearthSectionHeader icon={Compass} title="What matters now" subtitle="A glimpse of the path ahead" />
+          <NextStepGlimpse userId={userId} />
+          <Link
+            to="/referrals"
+            className="block rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 transition-all hover:border-primary/40 hover:bg-card/60 group"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
+                <UserPlus className="w-4 h-4 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h4 className="font-serif text-base text-foreground/90 leading-tight">Invite a friend</h4>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+                </div>
+                <p className="text-xs font-serif italic text-muted-foreground/70 mt-0.5">
+                  Pass a thread of the grove onward.
+                </p>
+              </div>
+            </div>
+          </Link>
         </section>
 
-        {/* Explore — collapsed by default */}
+        {/* Doorways — calm passages to deeper rooms */}
+        <section className="space-y-4">
+          <HearthSectionHeader icon={DoorOpen} title="Doorways" subtitle="Step into a deeper room" />
+          <HearthDoorways />
+        </section>
+
+        {/* Quiet conversation — collapsed by default */}
         <section>
-          <HearthCollapsibleSection icon={Compass} title="Explore" subtitle="Warmth, presence, and pathways">
-            <PresenceSpiralCard userId={userId} />
-            <HearthWarmth userId={userId} />
-            <HearthCrossLinks />
+          <HearthCollapsibleSection icon={Bot} title="A word with TEOTAG" subtitle="If you wish to listen or speak">
+            <TeotagChatPanel variant="hearth" defaultOpen={false} />
           </HearthCollapsibleSection>
         </section>
       </div>
     );
   };
+
 
   const GrowthEngineJourney = ({ userId }: { userId: string }) => {
     const { data: badges } = useSpeciesBadges(userId);
