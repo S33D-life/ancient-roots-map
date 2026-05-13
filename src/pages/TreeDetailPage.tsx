@@ -1324,6 +1324,7 @@ const TreeDetailPage = () => {
                 treeId={tree.id}
                 treeSpecies={tree.species || ""}
               />
+            )}
 
             {/* Blooms Nearby — seasonal flower offerings (moved from Overview) */}
             <BloomsNearbySection treeId={id!} />
