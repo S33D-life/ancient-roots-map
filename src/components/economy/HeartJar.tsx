@@ -24,6 +24,9 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   const [open, setOpen] = useState(false);
   const [tapPulse, setTapPulse] = useState(false);
   const prevBalance = useRef(balance.s33d);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
   const [pulse, setPulse] = useState(false);
   // Sustained glow that turns on when new hearts arrive and turns off only
   // when the wanderer opens the jar (or after a long max window).
