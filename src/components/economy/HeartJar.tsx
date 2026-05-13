@@ -65,6 +65,20 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     return () => window.removeEventListener("s33d-open-heart-jar", open as EventListener);
   }, []);
 
+  // Lock background scroll while the jar overlay is open (mobile portrait fix).
+  useEffect(() => {
+    if (!open) return;
+    const { body } = document;
+    const prevOverflow = body.style.overflow;
+    const prevOverscroll = body.style.overscrollBehavior;
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "contain";
+    return () => {
+      body.style.overflow = prevOverflow;
+      body.style.overscrollBehavior = prevOverscroll;
+    };
+  }, [open]);
+
   /**
    * Tap handler — let the jar animate in place BEFORE the overlay covers it.
    * Sequence: tap → jar pulse/burst (~280ms) → sheet slides up.
