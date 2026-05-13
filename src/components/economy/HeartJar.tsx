@@ -117,6 +117,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
     <>
       {/* Compact jar button */}
       <motion.button
+        ref={triggerRef}
         onClick={handleTap}
         animate={
           tapPulse
