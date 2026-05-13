@@ -114,15 +114,64 @@ export default function DigestControls(p: Props) {
         </div>
       </div>
 
-      <Button
-        onClick={p.onGenerate}
-        disabled={p.loading || !p.userId}
-        variant="mystical"
-        className="w-full md:w-auto"
-      >
-        {p.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-        {p.loading ? "Gathering what moved through the grove…" : "Generate digest"}
-      </Button>
+      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+        <Button
+          onClick={p.onGenerate}
+          disabled={p.loading || !p.userId}
+          variant="mystical"
+          className="w-full md:w-auto"
+        >
+          {p.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {p.loading ? "Gathering what moved through the grove…" : "Gather this moon"}
+        </Button>
+
+        {(p.type === "new_moon" || p.type === "full_moon") && (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const phase = p.type as "new_moon" | "full_moon";
+                const anchor = new Date(`${p.endDate}T00:00:00`);
+                const prev = previousPhaseDate(phase, anchor);
+                const start = new Date(prev.getTime() - 14 * 86400000);
+                p.onStart(start.toISOString().slice(0, 10));
+                p.onEnd(prev.toISOString().slice(0, 10));
+              }}
+              title="Previous moon"
+            >
+              <ChevronLeft className="w-4 h-4" /> Prev moon
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const phase = p.type as "new_moon" | "full_moon";
+                const anchor = new Date(`${p.endDate}T00:00:00`);
+                const next = nextPhaseDate(phase, new Date(anchor.getTime() + 86400000));
+                const start = new Date(next.getTime() - 14 * 86400000);
+                p.onStart(start.toISOString().slice(0, 10));
+                p.onEnd(next.toISOString().slice(0, 10));
+              }}
+              title="Next moon"
+            >
+              Next moon <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => p.onCompact(!p.compact)}
+          className="md:ml-auto text-muted-foreground"
+        >
+          <Eye className="w-4 h-4" /> {p.compact ? "Full view" : "Compact view"}
+        </Button>
+      </div>
     </div>
   );
 }
