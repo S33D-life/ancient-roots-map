@@ -61,9 +61,8 @@ const HeartCanopyPulse = lazy(() => import("@/components/HeartCanopyPulse"));
 const WishTagSigils = lazy(() => import("@/components/WishTagSigils"));
 const TreeJourneyInvitations = lazy(() => import("@/components/tree-sections/TreeJourneyInvitations"));
 const TreeAliveness = lazy(() => import("@/components/tree-sections/TreeAliveness"));
-const SeedPlanter = lazy(() => import("@/components/SeedPlanter"));
 const WhisperRipple = lazy(() => import("@/components/WhisperRipple"));
-const TreeHeartPool = lazy(() => import("@/components/TreeHeartPool"));
+const TreeSeedsHeartsSection = lazy(() => import("@/components/tree-sections/TreeSeedsHeartsSection"));
 const SpeciesAttestation = lazy(() => import("@/components/SpeciesAttestation"));
 const GroveContext = lazy(() => import("@/components/GroveContext"));
 const TreePulseIndicator = lazy(() => import("@/components/TreePulseIndicator"));
@@ -868,6 +867,19 @@ const TreeDetailPage = () => {
               <TreeActivityStats treeId={id!} />
             </Suspense>
 
+            {/* Seeds & Hearts — first interaction zone (moved from Offerings/Secondary) */}
+            {id && (
+              <Suspense fallback={null}>
+                <TreeSeedsHeartsSection
+                  treeId={id}
+                  treeLat={tree.latitude}
+                  treeLng={tree.longitude}
+                  treeSpecies={tree.species}
+                  userId={userId}
+                />
+              </Suspense>
+            )}
+
             {/* Relationship Journey Card */}
             {userId && relationship && (
               <Suspense fallback={null}>
@@ -1012,9 +1024,6 @@ const TreeDetailPage = () => {
                   {/* Weather */}
                   <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
-                  {/* Tree Heart Pool */}
-                  <TreeHeartPool treeId={id!} userId={userId} />
-
                   {/* Blooming Clock */}
                   {tree?.species && (
                     <BloomingClock species={tree.species} region={tree.nation} />
@@ -1087,10 +1096,7 @@ const TreeDetailPage = () => {
               <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
             </div>
 
-            {/* Encounter Cluster */}
-            <EncounterClusterPanel tree={tree} />
-
-            {/* Tree Arrival Panel — unified staggered reveal */}
+            {/* Tree Arrival Panel — Meet Again / Presence state */}
             {userId && tree && (
               <Suspense fallback={null}>
                 <TreeArrivalPanel
@@ -1128,7 +1134,7 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* 333s Presence Ritual — deeper layer of encounter */}
+            {/* Deepen Your Presence — 333s ritual */}
             {userId && (
               <Card className="bg-card/60 backdrop-blur border-primary/20">
                 <CardContent className="p-4 flex items-center justify-between gap-4">
@@ -1156,27 +1162,7 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* Meeting Timer */}
-            <MeetingTimer
-              treeId={id!}
-              treeName={tree.name}
-              treeSpecies={tree.species}
-              userId={userId}
-              onMeetingChange={setActiveMeeting}
-              onStatusChange={setMeetingStatus}
-            />
-
-            {/* Canopy Visits Timeline */}
-            <CanopyVisitsTimeline
-              checkins={checkins}
-              stats={checkinStats}
-              loading={checkinsLoading}
-              onCheckin={tryOpenCheckin}
-              userId={userId}
-              onRefresh={refetchCheckins}
-            />
-
-            {/* Co-Witness Scan */}
+            {/* Co-Witness — shared presence */}
             {userId && tree && (
               <Suspense fallback={null}>
                 <CoWitnessPanel
@@ -1186,6 +1172,29 @@ const TreeDetailPage = () => {
                 />
               </Suspense>
             )}
+
+            {/* Canopy Visits Timeline — visits & streaks */}
+            <CanopyVisitsTimeline
+              checkins={checkins}
+              stats={checkinStats}
+              loading={checkinsLoading}
+              onCheckin={tryOpenCheckin}
+              userId={userId}
+              onRefresh={refetchCheckins}
+            />
+
+            {/* Meeting Timer — current encounter window */}
+            <MeetingTimer
+              treeId={id!}
+              treeName={tree.name}
+              treeSpecies={tree.species}
+              userId={userId}
+              onMeetingChange={setActiveMeeting}
+              onStatusChange={setMeetingStatus}
+            />
+
+            {/* Other wanderers who met this tree */}
+            <EncounterClusterPanel tree={tree} />
 
             {/* Location Refinement */}
             {userId && tree && tree.latitude != null && tree.longitude != null && (
@@ -1265,14 +1274,7 @@ const TreeDetailPage = () => {
               </div>
             )}
 
-            {/* Seed Planter (moved from Encounters) */}
-            <SeedPlanter
-              treeId={id!}
-              treeLat={tree.latitude}
-              treeLng={tree.longitude}
-              userId={userId}
-              treeSpecies={tree.species}
-            />
+            {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
             {/* Whispers (moved from Encounters) */}
             {userId && tree && (
