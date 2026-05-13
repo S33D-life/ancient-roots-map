@@ -547,11 +547,11 @@ const DashboardPage = () => {
       <main className="container mx-auto px-4 pb-20 relative z-10" style={{ paddingTop: 'var(--content-top)' }}>
         <PageShell>
         <div className="max-w-5xl mx-auto">
-          {/* Page header */}
+          {/* Page header — singular, calm arrival */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-serif text-mystical mb-1">Hearth</h1>
-            <p className="text-sm text-muted-foreground font-serif">
-              Welcome back, {profile?.full_name || "Ancient Friend"}
+            <h1 className="text-3xl md:text-4xl font-serif text-mystical">Hearth</h1>
+            <p className="text-xs font-serif italic tracking-wide text-muted-foreground/60 mt-1">
+              The fire at the centre of the grove
             </p>
             {/* Return pill — contextual link back to last visited tree */}
             <ReturnPill />
