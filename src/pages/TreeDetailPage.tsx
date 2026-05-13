@@ -1096,10 +1096,7 @@ const TreeDetailPage = () => {
               <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
             </div>
 
-            {/* Encounter Cluster */}
-            <EncounterClusterPanel tree={tree} />
-
-            {/* Tree Arrival Panel — unified staggered reveal */}
+            {/* Tree Arrival Panel — Meet Again / Presence state */}
             {userId && tree && (
               <Suspense fallback={null}>
                 <TreeArrivalPanel
@@ -1137,7 +1134,7 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* 333s Presence Ritual — deeper layer of encounter */}
+            {/* Deepen Your Presence — 333s ritual */}
             {userId && (
               <Card className="bg-card/60 backdrop-blur border-primary/20">
                 <CardContent className="p-4 flex items-center justify-between gap-4">
@@ -1165,27 +1162,7 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* Meeting Timer */}
-            <MeetingTimer
-              treeId={id!}
-              treeName={tree.name}
-              treeSpecies={tree.species}
-              userId={userId}
-              onMeetingChange={setActiveMeeting}
-              onStatusChange={setMeetingStatus}
-            />
-
-            {/* Canopy Visits Timeline */}
-            <CanopyVisitsTimeline
-              checkins={checkins}
-              stats={checkinStats}
-              loading={checkinsLoading}
-              onCheckin={tryOpenCheckin}
-              userId={userId}
-              onRefresh={refetchCheckins}
-            />
-
-            {/* Co-Witness Scan */}
+            {/* Co-Witness — shared presence */}
             {userId && tree && (
               <Suspense fallback={null}>
                 <CoWitnessPanel
@@ -1195,6 +1172,29 @@ const TreeDetailPage = () => {
                 />
               </Suspense>
             )}
+
+            {/* Canopy Visits Timeline — visits & streaks */}
+            <CanopyVisitsTimeline
+              checkins={checkins}
+              stats={checkinStats}
+              loading={checkinsLoading}
+              onCheckin={tryOpenCheckin}
+              userId={userId}
+              onRefresh={refetchCheckins}
+            />
+
+            {/* Meeting Timer — current encounter window */}
+            <MeetingTimer
+              treeId={id!}
+              treeName={tree.name}
+              treeSpecies={tree.species}
+              userId={userId}
+              onMeetingChange={setActiveMeeting}
+              onStatusChange={setMeetingStatus}
+            />
+
+            {/* Other wanderers who met this tree */}
+            <EncounterClusterPanel tree={tree} />
 
             {/* Location Refinement */}
             {userId && tree && tree.latitude != null && tree.longitude != null && (
