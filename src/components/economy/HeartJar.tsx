@@ -4,6 +4,7 @@
  * Expands into a full balance panel on tap.
  */
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, X, Sun, Moon, ScrollText } from "lucide-react";
