@@ -306,7 +306,12 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                 onClick={() => setOpen(false)}
               />
               <motion.div
-                className="fixed left-0 right-0 z-[9999] flex flex-col rounded-t-2xl border-t"
+                ref={panelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Heart Jar"
+                tabIndex={-1}
+                className="fixed left-0 right-0 z-[9999] flex flex-col rounded-t-2xl border-t outline-none"
                 style={{
                   bottom: 0,
                   maxHeight: "min(85dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 24px))",
