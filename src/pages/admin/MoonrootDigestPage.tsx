@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useHasRole } from "@/hooks/use-role";
 import Header from "@/components/Header";
 import { Shield, Loader2, Moon } from "lucide-react";
@@ -13,11 +13,16 @@ import {
   type MoonrootDigest,
   type MoonrootDigestType,
 } from "@/lib/moonroot/types";
+import { deriveLunarFraming } from "@/lib/moonroot/lunar";
 import DigestControls, { presetRange } from "@/components/admin/moonroot/DigestControls";
 import DigestSummaryCards from "@/components/admin/moonroot/DigestSummaryCards";
 import LunarLifeLedgerFields from "@/components/admin/moonroot/LunarLifeLedgerFields";
 import CouncilInvitationFields from "@/components/admin/moonroot/CouncilInvitationFields";
 import MoonrootEmailPreview from "@/components/admin/moonroot/MoonrootEmailPreview";
+import LunarFramingHeader from "@/components/admin/moonroot/LunarFramingHeader";
+import ReturningTrees from "@/components/admin/moonroot/ReturningTrees";
+import CycleThemes from "@/components/admin/moonroot/CycleThemes";
+import EmotionalMemory from "@/components/admin/moonroot/EmotionalMemory";
 import { toast } from "@/hooks/use-toast";
 import { track } from "@/lib/telemetry";
 
