@@ -1140,3 +1140,103 @@ All colors MUST be HSL.
   .constellation-breath { animation: none !important; }
   .constellation-particle { animation: none !important; display: none; }
 }
+
+/* ────────────────────────────────────────────────────────────
+   Quiet Aliveness — shared motion tokens
+   Subtle, breathed-into easing applied across:
+   Hearth · Tree pages · Taproot · Admin Room · Moonroot
+   ──────────────────────────────────────────────────────────── */
+:root {
+  /* Easings — soft, organic */
+  --ease-breathe: cubic-bezier(0.22, 0.61, 0.36, 1);   /* gentle in/out */
+  --ease-root:    cubic-bezier(0.16, 0.84, 0.44, 1);   /* slow settle */
+  --ease-bloom:   cubic-bezier(0.34, 1.56, 0.64, 1);   /* very mild overshoot */
+
+  /* Durations — longer than SaaS defaults */
+  --dur-quick:   220ms;
+  --dur-soft:    420ms;
+  --dur-breath:  680ms;
+  --dur-reveal:  900ms;
+}
+
+@layer utilities {
+  /* Card / doorway hover — softened from `transition-all` */
+  .breathe-card {
+    transition:
+      background-color var(--dur-soft) var(--ease-breathe),
+      border-color    var(--dur-soft) var(--ease-breathe),
+      box-shadow      var(--dur-breath) var(--ease-breathe),
+      transform       var(--dur-soft)  var(--ease-breathe);
+    will-change: transform;
+  }
+  .breathe-card:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Doorways — slow warming, not a pop */
+  .breathe-doorway {
+    transition:
+      background-color var(--dur-breath) var(--ease-breathe),
+      border-color    var(--dur-breath) var(--ease-breathe),
+      box-shadow      var(--dur-reveal) var(--ease-root),
+      transform       var(--dur-breath) var(--ease-breathe);
+  }
+  .breathe-doorway:hover { transform: translateY(-1px); }
+
+  /* Glow that softly intensifies on hover/focus */
+  .breathe-glow:hover,
+  .breathe-glow:focus-visible {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.18),
+                0 8px 32px -12px hsl(var(--primary) / 0.22);
+  }
+
+  /* Section reveal — replaces snappy fade-in for tabs/sheets */
+  @keyframes section-rise {
+    0%   { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+    60%  { filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0);   filter: blur(0); }
+  }
+  .section-reveal {
+    animation: section-rise var(--dur-reveal) var(--ease-root) both;
+  }
+  .section-reveal-delay-1 { animation-delay: 80ms; }
+  .section-reveal-delay-2 { animation-delay: 160ms; }
+  .section-reveal-delay-3 { animation-delay: 240ms; }
+
+  /* Reward bloom — used after hearts/seeds events */
+  @keyframes reward-bloom {
+    0%   { opacity: 0; transform: scale(0.92); }
+    55%  { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .reward-bloom {
+    animation: reward-bloom var(--dur-breath) var(--ease-bloom) both;
+  }
+
+  /* Sheet / receipt — slower than radix defaults, no bounce */
+  @keyframes sheet-rise {
+    0%   { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .sheet-rise {
+    animation: sheet-rise var(--dur-breath) var(--ease-breathe) both;
+  }
+
+  /* Tab transition — replaces abrupt swap */
+  @keyframes tab-cross {
+    0%   { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .tab-cross {
+    animation: tab-cross var(--dur-soft) var(--ease-breathe) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe-card,
+  .breathe-doorway { transition: none !important; transform: none !important; }
+  .section-reveal,
+  .reward-bloom,
+  .sheet-rise,
+  .tab-cross { animation: none !important; }
+}

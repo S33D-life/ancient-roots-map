@@ -146,7 +146,7 @@ export default function MoonrootDigestPage() {
           </p>
         </header>
 
-        <Card className="bg-card/70 border-primary/20">
+        <Card className="bg-card/70 border-primary/20 breathe-card section-reveal">
           <CardHeader><CardTitle className="font-serif text-xl">Compose</CardTitle></CardHeader>
           <CardContent>
             <DigestControls
@@ -189,7 +189,7 @@ export default function MoonrootDigestPage() {
               )}
 
               {liveDigest.ancientFriendsSummary.returningTrees.length > 0 && (
-                <Card className="bg-card/70 border-primary/15">
+                <Card className="bg-card/70 border-primary/15 breathe-card section-reveal">
                   <CardHeader>
                     <CardTitle className="font-serif text-lg">Trees that returned</CardTitle>
                   </CardHeader>
@@ -200,7 +200,7 @@ export default function MoonrootDigestPage() {
               )}
 
               {!compact && (
-                <Card className="bg-card/70 border-primary/15">
+                <Card className="bg-card/70 border-primary/15 breathe-card section-reveal">
                   <CardHeader>
                     <CardTitle className="font-serif text-lg">What moved through the grove</CardTitle>
                   </CardHeader>
@@ -211,7 +211,7 @@ export default function MoonrootDigestPage() {
               )}
 
               {!compact && (
-                <Card className="bg-card/70 border-primary/15">
+                <Card className="bg-card/70 border-primary/15 breathe-card section-reveal">
                   <CardHeader>
                     <CardTitle className="font-serif text-lg">Lunar Life Ledger</CardTitle>
                     <p className="text-xs text-muted-foreground font-serif italic">
@@ -225,7 +225,7 @@ export default function MoonrootDigestPage() {
               )}
 
               {!compact && (
-                <Card className="bg-card/70 border-primary/15">
+                <Card className="bg-card/70 border-primary/15 breathe-card section-reveal">
                   <CardHeader>
                     <CardTitle className="font-serif text-lg">Council Invitation</CardTitle>
                   </CardHeader>
@@ -235,7 +235,7 @@ export default function MoonrootDigestPage() {
                 </Card>
               )}
 
-              <Card className="bg-card/70 border-primary/15">
+              <Card className="bg-card/70 border-primary/15 breathe-card section-reveal">
                 <CardHeader>
                   <CardTitle className="font-serif text-lg">Email Preview</CardTitle>
                 </CardHeader>

@@ -58,16 +58,19 @@ export default function HearthDoorways() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {visible.map((d) => (
+      {visible.map((d, i) => (
         <Link
           key={d.to}
           to={d.to}
-          className="group relative overflow-hidden rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-5 transition-all hover:border-primary/40 hover:bg-card/60"
+          className={`group relative overflow-hidden rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-5 breathe-doorway breathe-glow hover:border-primary/40 hover:bg-card/55 section-reveal ${
+            i === 1 ? "section-reveal-delay-1" : i === 2 ? "section-reveal-delay-2" : ""
+          }`}
         >
           {/* atmosphere — a quiet, persistent tint that warms on hover */}
           <div
-            className="absolute inset-0 opacity-60 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+            className="absolute inset-0 opacity-60 group-hover:opacity-100 pointer-events-none"
             style={{
+              transition: "opacity var(--dur-reveal) var(--ease-root)",
               background:
                 d.atmosphere === "ember"
                   ? `radial-gradient(ellipse 90% 70% at 30% 110%, hsl(${d.tint} / 0.22), transparent 70%)`
@@ -90,7 +93,10 @@ export default function HearthDoorways() {
                 <h4 className="font-serif text-base text-foreground/90 leading-tight">
                   {d.label}
                 </h4>
-                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight
+                  className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5"
+                  style={{ transition: "transform var(--dur-soft) var(--ease-breathe), color var(--dur-soft) var(--ease-breathe)" }}
+                />
               </div>
               <p className="text-xs font-serif italic text-muted-foreground/70 mt-0.5 leading-snug">
                 {d.whisper}

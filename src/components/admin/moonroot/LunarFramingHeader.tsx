@@ -9,7 +9,7 @@ interface Props {
 
 export default function LunarFramingHeader({ framing, startLabel, endLabel }: Props) {
   return (
-    <Card className="bg-gradient-to-br from-card/80 via-card/60 to-primary/5 border-primary/20 overflow-hidden">
+    <Card className="bg-gradient-to-br from-card/80 via-card/60 to-primary/5 border-primary/20 overflow-hidden breathe-card section-reveal">
       <CardContent className="p-6 md:p-8 text-center space-y-3">
         <div className="text-5xl md:text-6xl leading-none select-none" aria-hidden>
           {framing.glyph}
