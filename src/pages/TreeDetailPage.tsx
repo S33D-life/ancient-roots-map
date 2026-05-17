@@ -1118,30 +1118,18 @@ const TreeDetailPage = () => {
               <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
             </div>
 
-            {/* Tree Arrival Panel — Meet Again / Presence state */}
-            {userId && tree && (
+            {/* Plant / collect / whisper actions now live in the unified
+                Seeds & Hearts panel above the tabs. Encounters keeps the
+                dev-only debug panel for inspecting presence state. */}
+            {userId && tree && import.meta.env.DEV && (
               <Suspense fallback={null}>
-                <TreeArrivalPanel
+                <AncientFriendDebugPanel
                   treeId={tree.id}
-                  treeName={tree.name}
-                  treeSpecies={tree.species || ""}
+                  treeSpecies={tree.species}
                   userId={userId}
                   isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  onCheckIn={tryOpenCheckin}
-                  onWhisperCollected={() => {
-                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
-                  }}
                 />
-                {import.meta.env.DEV && (
-                  <AncientFriendDebugPanel
-                    treeId={tree.id}
-                    treeSpecies={tree.species}
-                    userId={userId}
-                    isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
-                    isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  />
-                )}
               </Suspense>
             )}
 
