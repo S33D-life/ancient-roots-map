@@ -1466,7 +1466,6 @@ const TreeDetailPage = () => {
                   </TabsContent>
                 </Tabs>
               </>
-            )}
 
             {/* Anchored Memories (moved from Encounters — these are offerings) */}
             {anchoredOfferings.length > 0 && (
