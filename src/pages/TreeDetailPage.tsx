@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2,
 } from "lucide-react";
 import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import type { Database } from "@/integrations/supabase/types";
@@ -826,6 +826,40 @@ const TreeDetailPage = () => {
           />
         </Suspense>
 
+        {/* ══════ Unified Seeds & Hearts Action Panel ══════
+            Lives above the section tabs as the single place to collect,
+            hang, and plant. Pulls TreeSeedsHeartsSection (reservoir + planter)
+            together with TreeArrivalPanel (collect / plant / whispers actions). */}
+        {id && tree && (
+          <section className="space-y-4">
+            <Suspense fallback={null}>
+              <TreeSeedsHeartsSection
+                treeId={id}
+                treeLat={tree.latitude}
+                treeLng={tree.longitude}
+                treeSpecies={tree.species}
+                userId={userId}
+              />
+            </Suspense>
+            {userId && (
+              <Suspense fallback={null}>
+                <TreeArrivalPanel
+                  treeId={tree.id}
+                  treeName={tree.name}
+                  treeSpecies={tree.species || ""}
+                  userId={userId}
+                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
+                  isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
+                  onCheckIn={tryOpenCheckin}
+                  onWhisperCollected={() => {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }}
+                />
+              </Suspense>
+            )}
+          </section>
+        )}
+
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
@@ -867,18 +901,7 @@ const TreeDetailPage = () => {
               <TreeActivityStats treeId={id!} />
             </Suspense>
 
-            {/* Seeds & Hearts — first interaction zone (moved from Offerings/Secondary) */}
-            {id && (
-              <Suspense fallback={null}>
-                <TreeSeedsHeartsSection
-                  treeId={id}
-                  treeLat={tree.latitude}
-                  treeLng={tree.longitude}
-                  treeSpecies={tree.species}
-                  userId={userId}
-                />
-              </Suspense>
-            )}
+            {/* Seeds & Hearts now lives in the unified action panel above the tabs */}
 
             {/* Relationship Journey Card */}
             {userId && relationship && (
@@ -1095,30 +1118,18 @@ const TreeDetailPage = () => {
               <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
             </div>
 
-            {/* Tree Arrival Panel — Meet Again / Presence state */}
-            {userId && tree && (
+            {/* Plant / collect / whisper actions now live in the unified
+                Seeds & Hearts panel above the tabs. Encounters keeps the
+                dev-only debug panel for inspecting presence state. */}
+            {userId && tree && import.meta.env.DEV && (
               <Suspense fallback={null}>
-                <TreeArrivalPanel
+                <AncientFriendDebugPanel
                   treeId={tree.id}
-                  treeName={tree.name}
-                  treeSpecies={tree.species || ""}
+                  treeSpecies={tree.species}
                   userId={userId}
                   isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  onCheckIn={tryOpenCheckin}
-                  onWhisperCollected={() => {
-                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
-                  }}
                 />
-                {import.meta.env.DEV && (
-                  <AncientFriendDebugPanel
-                    treeId={tree.id}
-                    treeSpecies={tree.species}
-                    userId={userId}
-                    isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
-                    isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  />
-                )}
               </Suspense>
             )}
 
@@ -1326,15 +1337,15 @@ const TreeDetailPage = () => {
               />
             )}
 
-            {/* Blooms Nearby — seasonal flower offerings (moved from Overview) */}
-            <BloomsNearbySection treeId={id!} />
-
+            {/* Blooms Nearby now appears as the "Blooms" tab in the offering categories below. */}
             {/* Empty state — only when truly no offerings, no birdsong */}
-            {offerings.length === 0 && birdsongCount === 0 ? (
-              <div className="py-8 text-center">
+            {offerings.length === 0 && birdsongCount === 0 && (
+              <div className="py-6 text-center">
                 <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
                 <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
-                <p className="text-xs text-muted-foreground/60 font-serif mt-1">Be the first to leave something meaningful.</p>
+                <p className="text-xs text-muted-foreground/60 font-serif mt-1">
+                  Be the first to leave something meaningful — or notice a bloom nearby.
+                </p>
                 {userId && (meetingStatus === "active" || meetingStatus === "expiring") && (
                   <Button
                     size="sm"
@@ -1346,8 +1357,9 @@ const TreeDetailPage = () => {
                   </Button>
                 )}
               </div>
-            ) : (
-              <>
+            )}
+
+            <>
                 {/* Birdsong Button */}
                 <Button
                   onClick={() => setBirdsongOpen(true)}
@@ -1383,6 +1395,13 @@ const TreeDetailPage = () => {
                       <Bird className="h-4 w-4" />
                       Birdsong
                       <span className="text-[10px] opacity-60">({birdsongCount})</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="blooms"
+                      className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                    >
+                      <Flower2 className="h-4 w-4" />
+                      Blooms
                     </TabsTrigger>
                   </TabsList>
 
@@ -1441,9 +1460,12 @@ const TreeDetailPage = () => {
                     </div>
                     <BirdsongTab treeId={id!} />
                   </TabsContent>
+
+                  <TabsContent value="blooms">
+                    <BloomsNearbySection treeId={id!} />
+                  </TabsContent>
                 </Tabs>
               </>
-            )}
 
             {/* Anchored Memories (moved from Encounters — these are offerings) */}
             {anchoredOfferings.length > 0 && (
