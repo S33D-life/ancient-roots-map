@@ -1359,21 +1359,7 @@ const TreeDetailPage = () => {
               </div>
             )}
 
-            {(
-              <>
-                {/* Birdsong Button */}
-                <Button
-                  onClick={() => setBirdsongOpen(true)}
-                  variant="outline"
-                  className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-                >
-                  <Bird className="h-4 w-4" />
-                  Offer a Birdsong
-                  {birdsongCount > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
-                  )}
-                </Button>
-
+            <>
                 {/* Birdsong Button */}
                 <Button
                   onClick={() => setBirdsongOpen(true)}
