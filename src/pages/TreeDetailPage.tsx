@@ -1474,6 +1474,10 @@ const TreeDetailPage = () => {
                     </div>
                     <BirdsongTab treeId={id!} />
                   </TabsContent>
+
+                  <TabsContent value="blooms">
+                    <BloomsNearbySection treeId={id!} />
+                  </TabsContent>
                 </Tabs>
               </>
             )}
