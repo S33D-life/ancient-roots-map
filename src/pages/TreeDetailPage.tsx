@@ -1410,6 +1410,13 @@ const TreeDetailPage = () => {
                       Birdsong
                       <span className="text-[10px] opacity-60">({birdsongCount})</span>
                     </TabsTrigger>
+                    <TabsTrigger
+                      value="blooms"
+                      className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                    >
+                      <Flower2 className="h-4 w-4" />
+                      Blooms
+                    </TabsTrigger>
                   </TabsList>
 
                   {(Object.keys(offeringLabels) as OfferingType[]).map((type) => {
