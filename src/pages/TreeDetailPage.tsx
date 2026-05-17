@@ -901,18 +901,7 @@ const TreeDetailPage = () => {
               <TreeActivityStats treeId={id!} />
             </Suspense>
 
-            {/* Seeds & Hearts — first interaction zone (moved from Offerings/Secondary) */}
-            {id && (
-              <Suspense fallback={null}>
-                <TreeSeedsHeartsSection
-                  treeId={id}
-                  treeLat={tree.latitude}
-                  treeLng={tree.longitude}
-                  treeSpecies={tree.species}
-                  userId={userId}
-                />
-              </Suspense>
-            )}
+            {/* Seeds & Hearts now lives in the unified action panel above the tabs */}
 
             {/* Relationship Journey Card */}
             {userId && relationship && (
