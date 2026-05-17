@@ -826,6 +826,40 @@ const TreeDetailPage = () => {
           />
         </Suspense>
 
+        {/* ══════ Unified Seeds & Hearts Action Panel ══════
+            Lives above the section tabs as the single place to collect,
+            hang, and plant. Pulls TreeSeedsHeartsSection (reservoir + planter)
+            together with TreeArrivalPanel (collect / plant / whispers actions). */}
+        {id && tree && (
+          <section className="space-y-4">
+            <Suspense fallback={null}>
+              <TreeSeedsHeartsSection
+                treeId={id}
+                treeLat={tree.latitude}
+                treeLng={tree.longitude}
+                treeSpecies={tree.species}
+                userId={userId}
+              />
+            </Suspense>
+            {userId && (
+              <Suspense fallback={null}>
+                <TreeArrivalPanel
+                  treeId={tree.id}
+                  treeName={tree.name}
+                  treeSpecies={tree.species || ""}
+                  userId={userId}
+                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
+                  isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
+                  onCheckIn={tryOpenCheckin}
+                  onWhisperCollected={() => {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }}
+                />
+              </Suspense>
+            )}
+          </section>
+        )}
+
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
