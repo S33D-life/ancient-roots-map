@@ -1339,11 +1339,13 @@ const TreeDetailPage = () => {
 
             {/* Blooms Nearby now appears as the "Blooms" tab in the offering categories below. */}
             {/* Empty state — only when truly no offerings, no birdsong */}
-            {offerings.length === 0 && birdsongCount === 0 ? (
-              <div className="py-8 text-center">
+            {offerings.length === 0 && birdsongCount === 0 && (
+              <div className="py-6 text-center">
                 <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
                 <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
-                <p className="text-xs text-muted-foreground/60 font-serif mt-1">Be the first to leave something meaningful.</p>
+                <p className="text-xs text-muted-foreground/60 font-serif mt-1">
+                  Be the first to leave something meaningful — or notice a bloom nearby.
+                </p>
                 {userId && (meetingStatus === "active" || meetingStatus === "expiring") && (
                   <Button
                     size="sm"
@@ -1355,8 +1357,23 @@ const TreeDetailPage = () => {
                   </Button>
                 )}
               </div>
-            ) : (
+            )}
+
+            {(
               <>
+                {/* Birdsong Button */}
+                <Button
+                  onClick={() => setBirdsongOpen(true)}
+                  variant="outline"
+                  className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                >
+                  <Bird className="h-4 w-4" />
+                  Offer a Birdsong
+                  {birdsongCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
+                  )}
+                </Button>
+
                 {/* Birdsong Button */}
                 <Button
                   onClick={() => setBirdsongOpen(true)}
