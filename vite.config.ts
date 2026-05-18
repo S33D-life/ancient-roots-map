@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { readFileSync } from "node:fs";
 import path from "path";
@@ -184,6 +184,25 @@ export default defineConfig(async ({ mode }) => {
     ? `${env.VITE_SUPABASE_URL}/functions/v1`
     : null;
   const pwaPlugin = await loadPwaPlugin();
+
+  // Static patrons portal — guarantees /patronsportal/ resolves to
+  // /patronsportal/index.html in `vite preview`, regardless of how
+  // Vite's stock SPA fallback resolves directory-style URLs. Production
+  // hosting uses _redirects rules (public/_redirects).
+  const patronsPortalPreviewPlugin: Plugin = {
+    name: "patronsportal-preview-static",
+    configurePreviewServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        const raw = req.url ?? "";
+        const [pathname, search = ""] = raw.split("?");
+        if (pathname === "/patronsportal" || pathname === "/patronsportal/") {
+          req.url = "/patronsportal/index.html" + (search ? `?${search}` : "");
+        }
+        next();
+      });
+    },
+  };
+
   return ({
   server: {
     host: "::",
@@ -213,6 +232,7 @@ export default defineConfig(async ({ mode }) => {
   plugins: [
     react(),
     pwaPlugin,
+    patronsPortalPreviewPlugin,
   ].filter(Boolean),
   resolve: {
     dedupe: ["react", "react-dom", "react/jsx-runtime", "framer-motion"],
