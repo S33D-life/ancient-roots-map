@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Offering } from "@/hooks/use-offerings";
 import { getOfferingPhotos } from "@/utils/offeringPhotos";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /* ---------- Shared Helpers ---------- */
 
