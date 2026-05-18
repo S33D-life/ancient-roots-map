@@ -450,3 +450,66 @@ function buildStaffMeta(code: string): Meta {
     imageHeight: 630,
   };
 }
+
+/* ── Offering meta — used when shared link includes ?offering=<id> ── */
+
+const OFFERING_TYPE_LABELS: Record<string, string> = {
+  photo: "memory", song: "song", poem: "poem", story: "musing",
+  nft: "NFT", voice: "whisper", book: "book",
+};
+
+async function fetchOfferingMeta(treeId: string, offeringId: string): Promise<Meta | null> {
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const [offeringRes, treeRes] = await Promise.all([
+      supabase
+        .from("offerings")
+        .select("id, title, content, type, media_url, photos, thumbnail_url, tree_id, created_at, updated_at")
+        .eq("id", offeringId)
+        .maybeSingle(),
+      supabase
+        .from("trees")
+        .select("id, name, species, nation, state, latitude, longitude")
+        .eq("id", treeId)
+        .maybeSingle(),
+    ]);
+
+    const offering: any = offeringRes.data;
+    const tree: any = treeRes.data;
+    if (!offering || !tree || offering.tree_id !== tree.id) return null;
+
+    const treeName = tree.name || "an Ancient Friend";
+    const location = [tree.state, tree.nation].filter(Boolean).join(", ") || tree.nation || "";
+    const typeLabel = OFFERING_TYPE_LABELS[offering.type] || "offering";
+
+    // Image priority: first photo → media_url → thumbnail → tree og-card
+    const photos: string[] = Array.isArray(offering.photos) ? offering.photos : [];
+    const rawImage =
+      photos[0] ||
+      offering.media_url ||
+      offering.thumbnail_url ||
+      versionedOgCardUrl("tree", tree.id, offering.updated_at);
+
+    // Ensure absolute URL for crawler image fetch
+    const image = rawImage.startsWith("http") ? rawImage : `${APP_URL}${rawImage.startsWith("/") ? "" : "/"}${rawImage}`;
+
+    const title = `"${offering.title}" — a ${typeLabel} at ${treeName}`;
+    const desc = offering.content
+      ? offering.content.slice(0, 150).trim() + (offering.content.length > 150 ? "…" : "")
+      : `An offering left at ${treeName}${location ? ` in ${location}` : ""}. Memories hang in the branches. Whispers travel through the roots.`;
+
+    return {
+      title: title.length > 90 ? title.slice(0, 87) + "…" : title,
+      description: desc,
+      image,
+      url: `${APP_URL}/tree/${tree.id}?offering=${offering.id}`,
+      imageWidth: 1200,
+      imageHeight: 1200,
+      geoLat: tree.latitude,
+      geoLon: tree.longitude,
+    };
+  } catch (err) {
+    console.error(`[og-proxy] fetchOfferingMeta error:`, err);
+    return null;
+  }
+}
