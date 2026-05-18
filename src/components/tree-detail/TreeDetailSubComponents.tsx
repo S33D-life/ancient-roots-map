@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Offering } from "@/hooks/use-offerings";
 import { getOfferingPhotos } from "@/utils/offeringPhotos";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /* ---------- Shared Helpers ---------- */
 
@@ -19,12 +20,13 @@ import { getOfferingPhotos } from "@/utils/offeringPhotos";
  */
 export const buildOfferingDeepLink = (offering: Offering, photoIndex?: number): string => {
   if (typeof window === "undefined") return "";
-  const url = new URL(window.location.href);
+  // Always build canonical s33d.life share links — never leak preview origins.
+  const treeId = offering.tree_id;
+  const path = treeId ? `/tree/${treeId}` : window.location.pathname;
+  const url = new URL(getPublicAppUrl(path));
   url.searchParams.set("offering", offering.id);
   if (typeof photoIndex === "number" && photoIndex > 0) {
     url.searchParams.set("photo", String(photoIndex));
-  } else {
-    url.searchParams.delete("photo");
   }
   return url.toString();
 };
@@ -132,17 +134,21 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
                 <Layers className="w-2.5 h-2.5" />+{extra}
               </div>
             )}
+            {/* Always-visible gold share glyph on each offering */}
+            <button
+              onClick={(e) => { e.stopPropagation(); shareOffering(offering); }}
+              title="Share this offering"
+              aria-label="Share this offering"
+              className="absolute bottom-2 right-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-background/50 backdrop-blur-md border border-primary/40 text-primary shadow-[0_0_16px_hsl(var(--primary)/0.35)] hover:shadow-[0_0_22px_hsl(var(--primary)/0.55)] hover:bg-background/70 active:scale-95 transition-all"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+            <div className="absolute bottom-0 left-0 right-0 p-3 pr-12 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
               <p className="text-sm font-serif text-foreground truncate">{offering.title}</p>
               <div className="flex items-center justify-between">
                 <p className="text-[10px] text-muted-foreground">{new Date(offering.created_at).toLocaleDateString()}</p>
-                <div className="flex items-center gap-2">
-                  <button onClick={(e) => { e.stopPropagation(); shareOffering(offering); }} className="text-muted-foreground hover:text-primary transition-colors" title="Share">
-                    <Share2 className="w-3.5 h-3.5" />
-                  </button>
-                  <SealedByLabel staff={offering.sealed_by_staff} />
-                </div>
+                <SealedByLabel staff={offering.sealed_by_staff} />
               </div>
             </div>
           </motion.div>
