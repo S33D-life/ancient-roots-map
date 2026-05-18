@@ -1,14 +1,19 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /patronsportal/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /patronsportal/
 
 User-agent: Twitterbot
 Allow: /
+Disallow: /patronsportal/
 
 User-agent: facebookexternalhit
 Allow: /
+Disallow: /patronsportal/
 
 User-agent: *
 Allow: /
+Disallow: /patronsportal/

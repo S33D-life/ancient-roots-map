@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S33D — A Living Library</title>
+<script src="theme-init.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-bright: #E2BF6A;
+    --gold-line: rgba(201,168,76,0.25);
+    --gold-bg: rgba(201,168,76,0.08);
+    --bg: #0E0D0A;
+    --card: #161410;
+    --card2: #1C1A15;
+    --border: #2A2820;
+    --text: #F0EBE0;
+    --text-mid: #C8C0AC;
+    --text-soft: #96907E;
+    --text-dim: #6A6456;
+  }
+  [data-theme="light"] {
+    --gold: #8B6A1A;
+    --gold-bright: #B89331;
+    --gold-line: rgba(139,106,26,0.32);
+    --gold-bg: rgba(139,106,26,0.06);
+    --bg: #F5EFE3;
+    --card: #FAF5EA;
+    --card2: #EDE6D2;
+    --border: #D8CDB3;
+    --text: #2B2118;
+    --text-mid: #4A3F30;
+    --text-soft: #6A5D48;
+    --text-dim: #9A8D75;
+  }
+  html, body { transition: background-color 0.35s ease, color 0.35s ease; }
+  .corner { color: var(--gold); }
+
+  /* THEME TOGGLE (floating) */
+  .theme-toggle {
+    position: fixed;
+    top: 1.2rem; right: 1.2rem;
+    z-index: 100;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    border: 1px solid var(--gold-line);
+    background: var(--card);
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    transition: all 0.2s;
+    line-height: 1;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .theme-toggle:hover { background: var(--gold-bg); border-color: var(--gold); }
+  .theme-toggle .icon-light { display: none; }
+  .theme-toggle .icon-dark { display: inline; }
+  [data-theme="light"] .theme-toggle .icon-light { display: inline; }
+  [data-theme="light"] .theme-toggle .icon-dark { display: none; }
+  @media print { .theme-toggle { display: none; } }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 52px 72px;
+    position: relative;
+  }
+
+  /* Border */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 16px; left: 16px; right: 16px; bottom: 16px;
+    border: 1px solid var(--gold-line);
+    pointer-events: none;
+  }
+
+  /* Corner marks */
+  .corner { position: absolute; width: 28px; height: 28px; }
+  .corner-tl { top: 10px; left: 10px; }
+  .corner-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+  .corner-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+  .corner-br { bottom: 10px; right: 10px; transform: scale(-1); }
+  .corner svg { width: 100%; height: 100%; }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    padding: 16px 0 32px;
+  }
+  .s33d-mark {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 52px; height: 52px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    font-family: 'Cinzel', serif;
+    font-size: 12px; letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .s33d-mark::after {
+    content: '';
+    position: absolute;
+    width: 62px; height: 62px;
+    border: 0.5px solid rgba(201,168,76,0.2);
+    border-radius: 50%;
+  }
+  .main-title {
+    font-family: 'Cinzel', serif;
+    font-size: 40px; font-weight: 400;
+    color: var(--text);
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+  }
+  .main-sub {
+    font-size: 20px; font-weight: 300; font-style: italic;
+    color: var(--text-mid);
+    margin-bottom: 16px;
+  }
+  .divider {
+    display: flex; align-items: center; gap: 14px;
+    justify-content: center; margin: 10px 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; max-width: 180px;
+    height: 0.5px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+  .divider span {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .tagline {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text-soft);
+  }
+
+  /* ── SECTION ── */
+  .section { margin: 36px 0 0; }
+  .sec-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .sec-num {
+    width: 26px; height: 26px; flex-shrink: 0;
+    border: 1px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 10px; color: var(--gold);
+  }
+  .sec-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text);
+  }
+  .sec-line {
+    flex: 1; height: 0.5px;
+    background: linear-gradient(to right, var(--gold-line), transparent);
+  }
+
+  /* ── ARC ── */
+  .arc {
+    display: grid;
+    grid-template-columns: 1fr 28px 1fr 28px 1fr 28px 1fr;
+    align-items: start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 22px 16px;
+    margin-bottom: 16px;
+  }
+  .arc-node { text-align: center; padding: 0 8px; }
+  .arc-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+  .arc-lbl {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold);
+    display: block; margin-bottom: 5px;
+  }
+  .arc-desc { font-size: 12px; color: var(--text-mid); line-height: 1.45; font-style: italic; }
+  .arc-arr {
+    display: flex; align-items: center; justify-content: center;
+    padding-top: 14px; color: var(--gold); opacity: 0.4; font-size: 16px;
+  }
+
+  /* ── PULL QUOTE ── */
+  .pull {
+    border-left: 2px solid var(--gold);
+    padding: 6px 0 6px 18px;
+    margin: 14px 0;
+  }
+  .pull p {
+    font-size: 15px; font-style: italic;
+    color: var(--text-mid); line-height: 1.65;
+  }
+
+  /* ── DARK PANEL ── */
+  .dark-panel {
+    background: var(--card2);
+    border: 1px solid var(--gold-line);
+    padding: 26px 28px;
+    margin: 8px 0;
+    position: relative;
+  }
+  .dark-panel::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 4px; right: 4px; bottom: 4px;
+    border: 0.5px solid rgba(201,168,76,0.1);
+    pointer-events: none;
+  }
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  }
+  .panel-div { background: rgba(201,168,76,0.18); }
+  .panel-item { padding: 0 22px; text-align: center; }
+  .panel-item:first-child { padding-left: 4px; }
+  .panel-item:last-child { padding-right: 4px; }
+  .pi-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+  .pi-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 7px; display: block;
+  }
+  .pi-body { font-size: 13px; color: var(--text-mid); line-height: 1.55; }
+
+  /* ── SEED MECHANIC ── */
+  .seed-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 22px;
+    margin: 8px 0;
+  }
+  .seed-flow {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 0; margin-bottom: 20px;
+  }
+  .sf-step {
+    text-align: center; padding: 0 10px;
+    position: relative;
+  }
+  .sf-step:not(:last-child)::after {
+    content: '→';
+    position: absolute; right: -6px; top: 12px;
+    color: var(--gold); opacity: 0.4; font-size: 13px;
+  }
+  .sf-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+  .sf-lbl {
+    font-family: 'Cinzel', serif;
+    font-size: 8px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 4px; display: block;
+  }
+  .sf-desc { font-size: 11px; color: var(--text-mid); line-height: 1.4; font-style: italic; }
+
+  .split-33 {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    background: var(--bg); border: 1px solid var(--gold-line);
+    padding: 14px 0; margin-bottom: 16px;
+  }
+  .split-div { background: rgba(201,168,76,0.18); }
+  .split-party { text-align: center; padding: 0 14px; }
+  .split-num {
+    font-family: 'Cinzel', serif;
+    font-size: 30px; color: var(--gold);
+    display: block; line-height: 1; margin-bottom: 4px;
+  }
+  .split-lbl { font-size: 12px; color: var(--text-soft); }
+
+  .decay-section { margin-top: 4px; }
+  .decay-head {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    opacity: 0.65; margin-bottom: 8px; display: block;
+  }
+  .decay-row {
+    display: grid; grid-template-columns: 88px 1fr 64px;
+    gap: 10px; align-items: center; margin-bottom: 5px;
+  }
+  .dr-lbl { font-size: 12px; color: var(--text-soft); }
+  .dr-bg { background: rgba(201,168,76,0.1); border-radius: 2px; height: 5px; overflow: hidden; }
+  .dr-fill { height: 100%; border-radius: 2px; }
+  .dr-val {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; color: var(--gold); text-align: right;
+  }
+  .seed-note {
+    font-size: 12px; color: var(--text-dim); font-style: italic;
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+    line-height: 1.55;
+  }
+
+  /* ── TIERS ── */
+  .tiers {
+    display: grid; grid-template-columns: repeat(5,1fr);
+    border: 1px solid var(--border); overflow: hidden;
+    margin: 10px 0;
+  }
+  .t-cell {
+    padding: 14px 10px; text-align: center;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+  }
+  .t-cell:last-child { border-right: none; }
+  .t-cell.hi { background: var(--card2); border-color: var(--gold-line); }
+  .t-name {
+    font-family: 'Cinzel', serif;
+    font-size: 8px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold);
+    display: block; margin-bottom: 5px;
+  }
+  .t-price { font-size: 12px; color: var(--text-mid); display: block; margin-bottom: 5px; }
+  .t-seeds {
+    font-family: 'Cinzel', serif;
+    font-size: 24px; color: var(--gold-bright);
+    display: block; line-height: 1; margin-bottom: 2px;
+  }
+  .t-slbl { font-size: 10px; color: var(--text-dim); }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 18px;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .card-title span { font-size: 15px; }
+  .card-body { font-size: 13px; color: var(--text-mid); line-height: 1.6; margin-bottom: 11px; }
+  .card-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .card-list li {
+    font-size: 12px; color: var(--text-mid);
+    display: flex; gap: 8px; align-items: flex-start; line-height: 1.4;
+  }
+  .card-list li::before { content: '·'; color: var(--gold); opacity: 0.6; flex-shrink: 0; }
+
+  /* ── STATS ── */
+  .stats {
+    display: flex; border: 1px solid var(--border);
+    overflow: hidden; margin: 10px 0;
+  }
+  .stat {
+    flex: 1; text-align: center; padding: 14px 8px;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-n {
+    font-family: 'Cinzel', serif;
+    font-size: 22px; color: var(--gold-bright);
+    display: block; margin-bottom: 4px;
+  }
+  .stat-l { font-size: 11px; color: var(--text-soft); }
+
+  /* ── ECONOMY FLOW ── */
+  .econ-flow {
+    display: grid; grid-template-columns: repeat(6,1fr);
+    gap: 0; background: var(--bg);
+    border: 1px solid var(--gold-line); padding: 18px 0;
+    margin: 8px 0;
+  }
+  .ef-node {
+    text-align: center; padding: 0 10px;
+    position: relative;
+  }
+  .ef-node:not(:last-child)::after {
+    content: '→';
+    position: absolute; right: -7px; top: 14px;
+    color: var(--gold); opacity: 0.35; font-size: 12px;
+  }
+  .ef-icon { font-size: 18px; margin-bottom: 6px; display: block; }
+  .ef-title {
+    font-family: 'Cinzel', serif;
+    font-size: 8px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 4px; display: block;
+  }
+  .ef-desc { font-size: 10px; color: var(--text-soft); line-height: 1.4; }
+
+  /* ── CHAIN ROW ── */
+  .chain-row {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    border: 1px solid var(--border); overflow: hidden; margin: 8px 0;
+  }
+  .chain {
+    padding: 14px 14px;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+  }
+  .chain:first-child { background: rgba(247,147,26,0.04); border-right-color: rgba(247,147,26,0.2); }
+  .chain:last-child { border-right: none; }
+  .chain-name {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 1.5px; color: var(--gold);
+    margin-bottom: 2px; display: flex; align-items: center; gap: 5px;
+  }
+  .chain:first-child .chain-name { color: #F7931A; }
+  .chain-role { font-size: 10px; color: var(--text-dim); font-style: italic; margin-bottom: 8px; }
+  .chain-item {
+    font-size: 11px; color: var(--text-mid);
+    margin-bottom: 4px; display: flex; gap: 6px; line-height: 1.4;
+  }
+  .chain-item::before { content: '—'; color: var(--gold); opacity: 0.35; flex-shrink: 0; }
+
+  /* ── REVENUE ── */
+  .rev-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 8px 0; }
+  .rev-col { background: var(--card); border: 1px solid var(--border); padding: 16px; }
+  .rev-stage {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    display: block; margin-bottom: 10px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .rev-item {
+    font-size: 12px; color: var(--text-mid);
+    display: flex; gap: 7px; align-items: flex-start;
+    margin-bottom: 7px; line-height: 1.4;
+  }
+  .rev-item::before { content: '·'; color: var(--gold); opacity: 0.55; flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 32px 32px 16px;
+  }
+  .foot-rule {
+    width: 50px; height: 0.5px; background: var(--gold);
+    margin: 0 auto 24px; opacity: 0.4;
+  }
+  .foot-quote {
+    font-size: 21px; font-style: italic; font-weight: 300;
+    color: var(--text-mid); line-height: 1.55; margin-bottom: 14px;
+  }
+  .foot-url {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold); opacity: 0.65;
+  }
+
+  /* ── ORNAMENT ── */
+  .orn {
+    display: flex; align-items: center; gap: 8px; margin: 8px 0;
+  }
+  .orn-l { flex: 1; height: 0.5px; background: var(--border); }
+  .orn-d { width: 3px; height: 3px; border-radius: 50%; background: var(--gold); opacity: 0.4; }
+
+  /* ── ANCIENT WITNESS ── */
+  .witness {
+    margin: 0 0 36px;
+    background: var(--card2);
+    border: 1px solid var(--gold-line);
+    padding: 32px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .witness::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+  .witness::after {
+    content: '';
+    position: absolute;
+    top: 4px; left: 4px; right: 4px; bottom: 4px;
+    border: 0.5px solid rgba(201,168,76,0.1);
+    pointer-events: none;
+  }
+  .witness-intro {
+    font-size: 13px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    font-family: 'Cinzel', serif;
+    text-align: center; margin-bottom: 20px; opacity: 0.75;
+  }
+  .witness-statement {
+    font-size: 24px; font-weight: 300; font-style: italic;
+    color: var(--text); line-height: 1.5;
+    text-align: center; margin-bottom: 28px;
+  }
+  .witness-statement em { color: var(--gold-bright); font-style: normal; }
+  .witness-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; border-top: 1px solid var(--border); padding-top: 22px;
+  }
+  .wg-item {
+    padding: 0 20px; text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .wg-item:last-child { border-right: none; }
+  .wg-age {
+    font-family: 'Cinzel', serif;
+    font-size: 28px; color: var(--gold-bright);
+    display: block; line-height: 1; margin-bottom: 6px;
+  }
+  .wg-species {
+    font-size: 13px; color: var(--text-mid);
+    display: block; margin-bottom: 6px;
+    font-style: italic;
+  }
+  .wg-body { font-size: 11px; color: var(--text-soft); line-height: 1.55; }
+
+  .witness-row {
+    display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr 1px 1fr 1px 1fr;
+    border: 1px solid var(--border); margin: 14px 0; overflow: hidden;
+  }
+  .wr-div { background: var(--border); }
+  .wr-item {
+    padding: 14px 12px; text-align: center;
+    background: var(--card);
+  }
+  .wr-icon { font-size: 18px; display: block; margin-bottom: 5px; }
+  .wr-label {
+    font-family: 'Cinzel', serif;
+    font-size: 8px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold);
+    display: block; margin-bottom: 4px;
+  }
+  .wr-desc { font-size: 11px; color: var(--text-mid); line-height: 1.4; }
+
+  .link-statement {
+    background: var(--bg);
+    border: 1px solid var(--gold-line);
+    padding: 18px 24px;
+    margin: 8px 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px; align-items: center;
+  }
+  .ls-side { text-align: center; }
+  .ls-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 8px; display: block;
+  }
+  .ls-items { display: flex; flex-direction: column; gap: 4px; }
+  .ls-item { font-size: 12px; color: var(--text-mid); display: flex; gap: 7px; align-items: center; justify-content: center; }
+  .ls-item::before { content: '·'; color: var(--gold); opacity: 0.5; }
+  .ls-bridge {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+  }
+  .ls-bridge-icon { font-size: 28px; }
+  .ls-bridge-text {
+    font-family: 'Cinzel', serif;
+    font-size: 8px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    opacity: 0.6; text-align: center;
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle theme">
+  <span class="icon-dark">☀</span>
+  <span class="icon-light">☾</span>
+</button>
+<div class="page">
+
+  <!-- corners -->
+  <div class="corner corner-tl"><svg viewBox="0 0 28 28" fill="none"><path d="M2 26L2 2L26 2" stroke="currentColor" stroke-width="0.8" opacity="0.45"/><circle cx="2" cy="2" r="1.5" fill="currentColor" opacity="0.45"/></svg></div>
+  <div class="corner corner-tr"><svg viewBox="0 0 28 28" fill="none"><path d="M2 26L2 2L26 2" stroke="currentColor" stroke-width="0.8" opacity="0.45"/><circle cx="2" cy="2" r="1.5" fill="currentColor" opacity="0.45"/></svg></div>
+  <div class="corner corner-bl"><svg viewBox="0 0 28 28" fill="none"><path d="M2 26L2 2L26 2" stroke="currentColor" stroke-width="0.8" opacity="0.45"/><circle cx="2" cy="2" r="1.5" fill="currentColor" opacity="0.45"/></svg></div>
+  <div class="corner corner-br"><svg viewBox="0 0 28 28" fill="none"><path d="M2 26L2 2L26 2" stroke="currentColor" stroke-width="0.8" opacity="0.45"/><circle cx="2" cy="2" r="1.5" fill="currentColor" opacity="0.45"/></svg></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="s33d-mark">S33D</div>
+    <div class="main-title">S33D</div>
+    <div class="main-sub">A living library of ancient trees</div>
+    <div class="divider"><span>Business Model</span></div>
+    <div class="tagline">Presence · Participation · Stewardship</div>
+  </div>
+
+  <!-- ANCIENT WITNESS -->
+  <div class="witness">
+    <div class="witness-intro">The Ancient Record</div>
+    <div class="witness-statement">
+      Some trees alive today were <em>already ancient</em> when the first libraries were built.<br>
+      They have witnessed everything we have ever written down.<br>
+      They remember more than we do.
+    </div>
+    <div class="witness-grid">
+      <div class="wg-item">
+        <span class="wg-age">5,000+</span>
+        <span class="wg-species">Fortingall Yew, Scotland</span>
+        <span class="wg-body">Alive before the pyramids were complete. A witness to every civilisation that has risen and fallen in its shadow.</span>
+      </div>
+      <div class="wg-item">
+        <span class="wg-age">1,000+</span>
+        <span class="wg-species">Ancient Oaks, England</span>
+        <span class="wg-body">Present at the signing of Magna Carta. Still standing. Unmapped. Unrecorded. Unknown to most who pass beneath them.</span>
+      </div>
+      <div class="wg-item">
+        <span class="wg-age">400+</span>
+        <span class="wg-species">Veteran Beeches, Britain</span>
+        <span class="wg-body">Older than the printing press. Carrying centuries of ecological memory in their bark, their roots, their hollows.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE LINK -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">◯</div>
+      <div class="sec-title">The Ancient Tree as Living Library</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="witness-row">
+      <div class="wr-item">
+        <span class="wr-icon">📖</span>
+        <span class="wr-label">Books</span>
+        <span class="wr-desc">Knowledge passed across generations. The tree has always done the same — in seeds, in rings, in root networks.</span>
+      </div>
+      <div class="wr-div"></div>
+      <div class="wr-item">
+        <span class="wr-icon">🌱</span>
+        <span class="wr-label">Seeds</span>
+        <span class="wr-desc">The original archive. Genetic memory encoded and passed forward through centuries of growth and propagation.</span>
+      </div>
+      <div class="wr-div"></div>
+      <div class="wr-item">
+        <span class="wr-icon">🎵</span>
+        <span class="wr-label">Music</span>
+        <span class="wr-desc">Songs sung beneath certain trees for hundreds of years. Place as memory. Tree as witness and resonance chamber.</span>
+      </div>
+      <div class="wr-div"></div>
+      <div class="wr-item">
+        <span class="wr-icon">✍️</span>
+        <span class="wr-label">Letters</span>
+        <span class="wr-desc">The intimate record. Voices across time. A tree that has held a family for generations holds their letters too.</span>
+      </div>
+      <div class="wr-div"></div>
+      <div class="wr-item">
+        <span class="wr-icon">🖼️</span>
+        <span class="wr-label">Images</span>
+        <span class="wr-desc">Every visit photographed. Every bloom recorded. A visual archive of a single tree across decades of seasons.</span>
+      </div>
+    </div>
+
+    <div class="link-statement">
+      <div class="ls-side">
+        <span class="ls-title">The Ancient Tree Holds</span>
+        <div class="ls-items">
+          <div class="ls-item">Centuries of ecological memory</div>
+          <div class="ls-item">Species lineage and seed ancestry</div>
+          <div class="ls-item">The witness record of a place</div>
+          <div class="ls-item">Mycorrhizal knowledge networks</div>
+          <div class="ls-item">Cultural and sacred significance</div>
+        </div>
+      </div>
+      <div class="ls-bridge">
+        <div class="ls-bridge-icon">🌳</div>
+        <div class="ls-bridge-text">S33D links<br>these worlds</div>
+        <div style="color:var(--gold);opacity:0.4;font-size:20px;">⟷</div>
+      </div>
+      <div class="ls-side">
+        <span class="ls-title">The S33D Library Holds</span>
+        <div class="ls-items">
+          <div class="ls-item">Books, music, photos, letters</div>
+          <div class="ls-item">Seed lineage and growing records</div>
+          <div class="ls-item">Encounter history and offerings</div>
+          <div class="ls-item">Family memory across generations</div>
+          <div class="ls-item">Memorial archives — permanent</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pull">
+      <p>The ancient tree was already a library. S33D makes that visible — and makes the human library permanent by anchoring it to the one archive that has always outlasted us. A tree five thousand years old has survived every empire, every technology, every company. That is where we choose to keep our records.</p>
+    </div>
+  </div>
+
+  <!-- I — THE ARC -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">I</div>
+      <div class="sec-title">The Arc — Birth Tree to Memorial Tree</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="arc">
+      <div class="arc-node">
+        <span class="arc-icon">🌱</span>
+        <span class="arc-lbl">Birth Tree</span>
+        <span class="arc-desc">A tree chosen or planted for a new life. The first encounter recorded.</span>
+      </div>
+      <div class="arc-arr">→</div>
+      <div class="arc-node">
+        <span class="arc-icon">📚</span>
+        <span class="arc-lbl">School Years</span>
+        <span class="arc-desc">Seasonal visits, bloom records, offerings. The Heartwood Library fills year by ring.</span>
+      </div>
+      <div class="arc-arr">→</div>
+      <div class="arc-node">
+        <span class="arc-icon">🌿</span>
+        <span class="arc-lbl">Wanderer</span>
+        <span class="arc-desc">Hearts earned. Staff pathway begins. The Commons tended across a lifetime.</span>
+      </div>
+      <div class="arc-arr">→</div>
+      <div class="arc-node">
+        <span class="arc-icon">🕯️</span>
+        <span class="arc-lbl">Memorial Tree</span>
+        <span class="arc-desc">Archive uploads to a chosen Ancient Friend. The tree holds what remains — forever.</span>
+      </div>
+    </div>
+
+    <div class="pull"><p>The birth tree and the memorial tree are the same product — experienced sixty years apart. No other platform has ever built a product designed to last a human lifetime. S33D is designed to last several.</p></div>
+  </div>
+
+  <!-- II — CORE SYSTEM -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">II</div>
+      <div class="sec-title">The Core System</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="dark-panel">
+      <div class="panel-grid">
+        <div class="panel-item">
+          <span class="pi-icon">📚</span>
+          <span class="pi-title">The Library</span>
+          <span class="pi-body">Private, immutable digital libraries for people, families, and communities. Personal memory infrastructure. This is where S33D earns.</span>
+        </div>
+        <div class="panel-div"></div>
+        <div class="panel-item">
+          <span class="pi-icon">🌳</span>
+          <span class="pi-title">The Commons</span>
+          <span class="pi-body">A living atlas of ancient trees — mapped, verified, held in common. Open to everyone. Funded by the private libraries above.</span>
+        </div>
+        <div class="panel-div"></div>
+        <div class="panel-item">
+          <span class="pi-icon">💛</span>
+          <span class="pi-title">The Economy</span>
+          <span class="pi-body">Hearts earned through presence. Seeds planted daily. Value generated when two people meet at a real tree. Not speculation — encounter.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pull"><p>Private memory funds public commons. The subscription that preserves a family's story simultaneously funds the permanent public record of the ancient tree it is anchored to. Two things most people deeply want — paid for by one decision.</p></div>
+  </div>
+
+  <!-- III — THE GAME -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">III</div>
+      <div class="sec-title">The Game — Encounter Economics</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="seed-box">
+      <div class="seed-flow">
+        <div class="sf-step">
+          <span class="sf-icon">🌱</span>
+          <span class="sf-lbl">Plant</span>
+          <span class="sf-desc">Wanderer plants a Seed at an Ancient Friend each day</span>
+        </div>
+        <div class="sf-step">
+          <span class="sf-icon">✨</span>
+          <span class="sf-lbl">Sprout</span>
+          <span class="sf-desc">Seed sits at the tree — sprouting into Hearts over 24 hours</span>
+        </div>
+        <div class="sf-step">
+          <span class="sf-icon">🤲</span>
+          <span class="sf-lbl">Find</span>
+          <span class="sf-desc">Another Wanderer visits the tree and discovers the Seed</span>
+        </div>
+        <div class="sf-step">
+          <span class="sf-icon">💛</span>
+          <span class="sf-lbl">Share</span>
+          <span class="sf-desc">Hearts flow three ways — planter, finder, and the tree itself</span>
+        </div>
+      </div>
+
+      <div class="split-33">
+        <div class="split-party">
+          <span class="split-num">33</span>
+          <span class="split-lbl">🌱 Planter</span>
+        </div>
+        <div class="split-div"></div>
+        <div class="split-party">
+          <span class="split-num">33</span>
+          <span class="split-lbl">🤲 Finder</span>
+        </div>
+        <div class="split-div"></div>
+        <div class="split-party">
+          <span class="split-num">33</span>
+          <span class="split-lbl">🌳 Tree</span>
+        </div>
+      </div>
+
+      <div class="decay-section">
+        <span class="decay-head">Decay — find early, find full</span>
+        <div class="decay-row">
+          <div class="dr-lbl">0–8 hours</div>
+          <div class="dr-bg"><div class="dr-fill" style="width:100%;background:var(--gold);"></div></div>
+          <div class="dr-val">33 each</div>
+        </div>
+        <div class="decay-row">
+          <div class="dr-lbl">8–16 hours</div>
+          <div class="dr-bg"><div class="dr-fill" style="width:39%;background:rgba(201,168,76,0.55);"></div></div>
+          <div class="dr-val" style="opacity:0.55;">13 each</div>
+        </div>
+        <div class="decay-row">
+          <div class="dr-lbl">16–24 hours</div>
+          <div class="dr-bg"><div class="dr-fill" style="width:9%;background:rgba(201,168,76,0.3);"></div></div>
+          <div class="dr-val" style="opacity:0.35;">3 each</div>
+        </div>
+        <div class="decay-row">
+          <div class="dr-lbl">24+ hours</div>
+          <div class="dr-bg"></div>
+          <div class="dr-val" style="opacity:0.2;">expired</div>
+        </div>
+      </div>
+      <div class="seed-note">33 Hearts is the current sprout rate. S33DAO governance can reduce this as the network matures — rewarding early Wanderers most and preserving long-term scarcity.</div>
+    </div>
+
+    <div class="orn"><div class="orn-l"></div><div class="orn-d"></div><div class="orn-l"></div></div>
+
+    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:0.65;">Daily seeds by tier</div>
+    <div class="tiers">
+      <div class="t-cell">
+        <span class="t-name">Commons</span>
+        <span class="t-price">Free</span>
+        <span class="t-seeds">3</span>
+        <span class="t-slbl">seeds / day</span>
+      </div>
+      <div class="t-cell">
+        <span class="t-name">Monthly</span>
+        <span class="t-price">£10/mo</span>
+        <span class="t-seeds">5</span>
+        <span class="t-slbl">seeds / day</span>
+      </div>
+      <div class="t-cell">
+        <span class="t-name">Annual</span>
+        <span class="t-price">£96/yr</span>
+        <span class="t-seeds">7</span>
+        <span class="t-slbl">seeds / day</span>
+      </div>
+      <div class="t-cell hi">
+        <span class="t-name">Decade Ring</span>
+        <span class="t-price">£600/10yr</span>
+        <span class="t-seeds">9</span>
+        <span class="t-slbl">seeds / day</span>
+      </div>
+      <div class="t-cell hi">
+        <span class="t-name">Staff Patron</span>
+        <span class="t-price">Staff held</span>
+        <span class="t-seeds">11</span>
+        <span class="t-slbl">seeds / day</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- IV — THE LIBRARY -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">IV</div>
+      <div class="sec-title">The Library — A Legacy Product</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title"><span>📚</span> Personal and Family Heartwood</div>
+        <div class="card-body">Private, immutable digital archive. Books, music, photos, seeds, letters, journals. Yours — not a platform's. Permanent across generations.</div>
+        <ul class="card-list">
+          <li>Personal library — books, music, journals, seeds</li>
+          <li>Family library — shared generational memory</li>
+          <li>Community library — a group's shared archive</li>
+          <li>Lunar Life Updates — new and full moon digest</li>
+          <li>Memorial tree designation — one per account</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🕯️</span> The Memorial Archive</div>
+        <div class="card-body">When someone passes, their archive uploads to a chosen Ancient Friend. The tree holds what remains — permanent, immutable, and passing through the species if the tree dies.</div>
+        <ul class="card-list">
+          <li>Family controls private, family, community, public layers</li>
+          <li>Time-release — open a letter in ten years</li>
+          <li>Geogated — some content accessible only at the tree</li>
+          <li>Succession on-chain — archive passes through species</li>
+          <li>A memorial archive deepens with every generation that tends it.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="stat-n">£10</span><span class="stat-l">Monthly</span></div>
+      <div class="stat"><span class="stat-n">£96</span><span class="stat-l">Annual — save 20%</span></div>
+      <div class="stat"><span class="stat-n">£600</span><span class="stat-l">Decade Ring — 10 years</span></div>
+      <div class="stat"><span class="stat-n">∞</span><span class="stat-l">Memorial — permanent</span></div>
+    </div>
+  </div>
+
+  <!-- V — THE COMMONWEALTH -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">V</div>
+      <div class="sec-title">The Commonwealth — Tree Commons</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="econ-flow">
+      <div class="ef-node">
+        <span class="ef-icon">🌱</span>
+        <span class="ef-title">Visit</span>
+        <span class="ef-desc">Real tree. Real presence. Verified.</span>
+      </div>
+      <div class="ef-node">
+        <span class="ef-icon">💛</span>
+        <span class="ef-title">Earn</span>
+        <span class="ef-desc">Hearts earned. Species hearts grow.</span>
+      </div>
+      <div class="ef-node">
+        <span class="ef-icon">🌳</span>
+        <span class="ef-title">Plant</span>
+        <span class="ef-desc">Hearts planted. Tree pool grows.</span>
+      </div>
+      <div class="ef-node">
+        <span class="ef-icon">🪵</span>
+        <span class="ef-title">Mint</span>
+        <span class="ef-desc">Staff + Hearts = NFTree. Bitcoin address.</span>
+      </div>
+      <div class="ef-node">
+        <span class="ef-icon">🌕</span>
+        <span class="ef-title">Lotto</span>
+        <span class="ef-desc">Lunar and Solar draws reward depth.</span>
+      </div>
+      <div class="ef-node">
+        <span class="ef-icon">🏛️</span>
+        <span class="ef-title">Govern</span>
+        <span class="ef-desc">S33DAO. Council of Life. Staff Room.</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title"><span>🪵</span> Staff Patrons — Lineage Guardians</div>
+        <div class="card-body">The Staff NFT is a governance artifact. 144 founding staffs, each anchored to a real ancient UK tree. Full library unlocked for all Staff holders.</div>
+        <ul class="card-list">
+          <li>6 Family Root staffs — the founding root</li>
+          <li>30 Spiral Staffs — species firsts, donation tier</li>
+          <li>108 Circle Staffs — Lending Grove, loan to own</li>
+          <li>Patronhood earned through years, presence, endorsement</li>
+          <li>Progression: Wanderer → Grower → Steward → Keeper → Staff Bearer</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>🏛️</span> S33DAO and Hearts Distribution</div>
+        <div class="card-body">777,777,777 S33D Hearts total supply. Species fractal hearts — Oak, Yew, Beech, Holly, Ash — earned by tending specific trees, powering species Councils.</div>
+        <ul class="card-list">
+          <li>28% — Commons participation rewards</li>
+          <li>18% — Ancient Friends mapping rewards</li>
+          <li>12% — Staff Patrons and future lineages</li>
+          <li>12% — S33DAO Treasury</li>
+          <li>10% — Tree, species, and grove capital pools</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- VI — INFRASTRUCTURE -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">VI</div>
+      <div class="sec-title">Infrastructure — Each Layer Does What It Does Best</div>
+      <div class="sec-line"></div>
+    </div>
+    <div class="chain-row">
+      <div class="chain">
+        <div class="chain-name">⚡ Bitcoin</div>
+        <div class="chain-role">Permanence + Territory</div>
+        <div class="chain-item">Vision hash and inventory records anchored forever</div>
+        <div class="chain-item">Bitmap — sovereign digital address per Ancient Friend</div>
+        <div class="chain-item">The most permanent ledger on earth</div>
+      </div>
+      <div class="chain">
+        <div class="chain-name">🔷 Ethereum</div>
+        <div class="chain-role">Trust Layer</div>
+        <div class="chain-item">Staff NFTs — governance artifacts</div>
+        <div class="chain-item">NFTrees — verified Ancient Friends</div>
+        <div class="chain-item">Memorial archives and treasury</div>
+      </div>
+      <div class="chain">
+        <div class="chain-name">🟣 Polkadot</div>
+        <div class="chain-role">Coordination</div>
+        <div class="chain-item">Hearts, Seeds, species hearts</div>
+        <div class="chain-item">S33DAO governance and lottos</div>
+        <div class="chain-item">Cross-chain interoperability</div>
+      </div>
+      <div class="chain">
+        <div class="chain-name">🟢 Holochain</div>
+        <div class="chain-role">Living Layer</div>
+        <div class="chain-item">Pods — seed exchange, local records</div>
+        <div class="chain-item">Whispers — peer-to-peer, offline</div>
+        <div class="chain-item">Agent-centric personal libraries</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VII — REVENUE -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-num">VII</div>
+      <div class="sec-title">Revenue — Compounding Value Across Generations</div>
+      <div class="sec-line"></div>
+    </div>
+    <div class="pull"><p>Every subscription funds a living commons. Every memorial archive deepens with time. Every child who grows up with a tree becomes a subscriber for life. The model compounds because the product is not content — it is memory. And memory, once rooted in something living, does not leave.</p></div>
+    <div class="rev-grid">
+      <div class="rev-col">
+        <span class="rev-stage">Launching Now</span>
+        <div class="rev-item">Monthly and annual subscriptions</div>
+        <div class="rev-item">Decade Ring — £600 upfront</div>
+        <div class="rev-item">Staff donations — founding tier</div>
+        <div class="rev-item">Heart purchases</div>
+        <div class="rev-item">NFTree minting fees</div>
+      </div>
+      <div class="rev-col">
+        <span class="rev-stage">Medium Term</span>
+        <div class="rev-item">School subscriptions — annual licence</div>
+        <div class="rev-item">Memorial archive subscriptions</div>
+        <div class="rev-item">Series Two staff sales</div>
+        <div class="rev-item">Tree harvest marketplace</div>
+        <div class="rev-item">Physical pod sponsorships</div>
+      </div>
+      <div class="rev-col">
+        <span class="rev-stage">Long Term</span>
+        <div class="rev-item">Memorial archives deepen over generations</div>
+        <div class="rev-item">Children become Decade Ring holders</div>
+        <div class="rev-item">Multi-generational family libraries</div>
+        <div class="rev-item">Tree Radio — artist fees</div>
+        <div class="rev-item">S33DAO Commonwealth treasury</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="foot-rule"></div>
+    <div class="foot-quote">
+      "There are trees alive today that were ancient<br>
+      when the first libraries were built.<br>
+      <em>We are building the library they deserve.</em>"
+    </div>
+    <div class="foot-url">s33d.life · Presence · Participation · Stewardship</div>
+  </div>
+
+</div>
+</body>
+</html>

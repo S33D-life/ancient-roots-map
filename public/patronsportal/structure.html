@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>S33D — Structure & Governance</title>
+<meta name="description" content="The phased transition from company to ecosystem infrastructure. Papaya Seed Ltd as steward, not extractor." />
+<script src="theme-init.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-bright: #E2BF6A;
+    --gold-line: rgba(201,168,76,0.25);
+    --gold-bg: rgba(201,168,76,0.08);
+    --bg: #0E0D0A;
+    --card: #161410;
+    --card2: #1C1A15;
+    --border: #2A2820;
+    --text: #F0EBE0;
+    --text-mid: #C8C0AC;
+    --text-soft: #96907E;
+    --text-dim: #6A6456;
+    --nav-bg: rgba(14, 13, 10, 0.92);
+  }
+  [data-theme="light"] {
+    --gold: #8B6A1A;
+    --gold-bright: #B89331;
+    --gold-line: rgba(139,106,26,0.32);
+    --gold-bg: rgba(139,106,26,0.06);
+    --bg: #F5EFE3;
+    --card: #FAF5EA;
+    --card2: #EDE6D2;
+    --border: #D8CDB3;
+    --text: #2B2118;
+    --text-mid: #4A3F30;
+    --text-soft: #6A5D48;
+    --text-dim: #9A8D75;
+    --nav-bg: rgba(245, 239, 227, 0.92);
+  }
+  body { transition: background-color 0.35s ease, color 0.35s ease; }
+  section, nav, .hero, .phase, .hierarchy, .flow-section, .archetype, .contrast, .principle, footer { transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease; }
+
+  /* THEME TOGGLE */
+  .theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold-line);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    margin-right: 0.8rem;
+    transition: all 0.2s;
+    line-height: 1;
+    padding: 0;
+  }
+  .theme-toggle:hover { background: var(--gold-bg); border-color: var(--gold); }
+  .theme-toggle .icon-light { display: none; }
+  .theme-toggle .icon-dark { display: inline; }
+  [data-theme="light"] .theme-toggle .icon-light { display: inline; }
+  [data-theme="light"] .theme-toggle .icon-dark { display: none; }
+  .nav-right { display: flex; align-items: center; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; line-height: 1.15; color: var(--text); letter-spacing: -0.005em; }
+  h1 { font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 300; }
+  h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); margin-bottom: 0.4em; font-weight: 400; }
+  h3 { font-size: clamp(1.15rem, 1.8vw, 1.4rem); margin-bottom: 0.4em; font-weight: 500; }
+  p { margin-bottom: 1em; color: var(--text-mid); }
+  a { color: var(--gold); text-decoration: none; transition: all 0.2s; }
+  a:hover { color: var(--gold-bright); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 2rem; }
+  section { padding: 5rem 0; border-bottom: 1px solid var(--border); }
+
+  /* DIVIDERS / LABELS */
+  .divider {
+    display: flex; align-items: center; gap: 14px;
+    justify-content: center; margin: 1.5rem 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; max-width: 160px;
+    height: 0.5px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+  .divider span {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold); opacity: 0.85;
+  }
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 1.2rem; display: inline-block;
+    opacity: 0.85;
+  }
+  .sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 2rem; }
+  .sec-num {
+    width: 28px; height: 28px; flex-shrink: 0;
+    border: 1px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 11px; color: var(--gold);
+  }
+  .sec-title-inline {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text);
+  }
+  .sec-line { flex: 1; height: 0.5px; background: linear-gradient(to right, var(--gold-line), transparent); }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+  }
+  .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+  .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+  }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.78rem; font-family: 'Cinzel', serif; letter-spacing: 2px; text-transform: uppercase; }
+  .nav-links a { color: var(--text-soft); }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a.current { color: var(--gold); }
+  @media (max-width: 800px) { .nav-links { display: none; } }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 1.8rem;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--gold-bg); color: var(--gold-bright); }
+  .btn-solid { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .btn-solid:hover { background: var(--gold-bright); color: var(--bg); }
+
+  /* HERO */
+  .hero {
+    padding: 7rem 0 5rem;
+    text-align: center;
+    background:
+      radial-gradient(ellipse at top, rgba(201,168,76,0.06), transparent 60%),
+      var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; max-width: 18ch; margin: 0 auto 1rem; }
+  .hero .lede {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    font-style: italic;
+    color: var(--text-mid);
+    max-width: 52ch;
+    margin: 0 auto 2rem;
+    font-weight: 300;
+  }
+
+  /* PULL QUOTES */
+  .pull {
+    border-left: 2px solid var(--gold);
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .pull p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.2rem, 1.7vw, 1.4rem);
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* PHASES (vertical timeline) */
+  .phases { margin-top: 2.5rem; }
+  .phase {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 2rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase-marker {
+    text-align: right;
+    padding-right: 1.5rem;
+    border-right: 1px solid var(--gold-line);
+  }
+  .phase-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem; letter-spacing: 3px;
+    color: var(--gold); text-transform: uppercase;
+    display: block; margin-bottom: 0.4rem;
+    opacity: 0.7;
+  }
+  .phase-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    color: var(--gold-bright);
+    font-style: italic;
+    line-height: 1.2;
+  }
+  .phase-body h3 { margin-bottom: 0.6rem; }
+  .phase-body p { font-size: 1rem; line-height: 1.75; color: var(--text-mid); }
+  .phase-list {
+    margin-top: 1rem;
+    list-style: none;
+    columns: 2;
+    column-gap: 2rem;
+  }
+  .phase-list li {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    padding-left: 1rem;
+    position: relative;
+    break-inside: avoid;
+  }
+  .phase-list li::before {
+    content: '·';
+    color: var(--gold);
+    position: absolute; left: 0;
+    opacity: 0.6;
+  }
+  @media (max-width: 800px) {
+    .phase { grid-template-columns: 1fr; gap: 1rem; }
+    .phase-marker { text-align: left; border-right: none; border-left: 1px solid var(--gold-line); padding-right: 0; padding-left: 1.2rem; }
+    .phase-list { columns: 1; }
+  }
+
+  /* HIERARCHY (vertical stack) */
+  .hierarchy {
+    background: var(--card2);
+    border: 1px solid var(--gold-line);
+    padding: 2.5rem;
+    margin-top: 2rem;
+  }
+  .h-node {
+    text-align: center;
+    padding: 1.4rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    margin: 0 auto;
+  }
+  .h-node + .h-arrow { display: block; }
+  .h-arrow {
+    text-align: center;
+    color: var(--gold);
+    opacity: 0.4;
+    font-size: 1.3rem;
+    padding: 0.5rem 0;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .h-node-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--gold-bright);
+    margin-bottom: 0.3rem;
+    font-style: italic;
+  }
+  .h-node-name strong { font-style: normal; font-weight: 500; color: var(--text); }
+  .h-node-desc {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 2.5px;
+    color: var(--gold); text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .h-node-body {
+    margin-top: 0.6rem;
+    font-size: 0.92rem;
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+  .h-1 { max-width: 380px; border-color: var(--gold-line); }
+  .h-2 { max-width: 460px; }
+  .h-3 { max-width: 540px; }
+  .h-4 { max-width: 620px; }
+
+  /* IS / IS NOT */
+  .contrast {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    margin-top: 2.5rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+  .contrast-div { background: var(--border); }
+  .contrast-col { padding: 2rem; }
+  .contrast-col h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2.5px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .contrast-col.not h3 { color: var(--text-dim); }
+  .contrast-col ul { list-style: none; }
+  .contrast-col li {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    padding-left: 1.2rem;
+    position: relative;
+    margin-bottom: 0.4rem;
+  }
+  .contrast-col li::before {
+    content: '·';
+    color: var(--gold);
+    position: absolute; left: 0;
+    opacity: 0.6;
+  }
+  .contrast-col.not li { color: var(--text-dim); text-decoration: line-through; text-decoration-thickness: 0.5px; text-decoration-color: rgba(150, 144, 126, 0.4); }
+  .contrast-col.not li::before { color: var(--text-dim); content: '×'; }
+  @media (max-width: 800px) {
+    .contrast { grid-template-columns: 1fr; }
+    .contrast-div { display: none; }
+    .contrast-col { border-top: 1px solid var(--border); }
+    .contrast-col:first-child { border-top: none; }
+  }
+
+  /* ARCHETYPES */
+  .archetypes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .archetype {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.4rem 1.2rem;
+    text-align: center;
+  }
+  .archetype-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--gold-bright);
+    font-style: italic;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  .archetype-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 2px;
+    color: var(--text-soft); text-transform: uppercase;
+  }
+  @media (max-width: 800px) { .archetypes { grid-template-columns: 1fr 1fr; } }
+
+  /* CIRCULAR FLOW */
+  .flow-section {
+    background: var(--card2);
+    border-top: 1px solid var(--gold-line);
+    border-bottom: 1px solid var(--gold-line);
+    position: relative;
+  }
+  .flow-section::before, .flow-section::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+  .flow-section::before { top: 0; }
+  .flow-section::after { bottom: 0; }
+  .flow-diagram {
+    margin: 2.5rem auto 0;
+    max-width: 540px;
+  }
+  .flow-step {
+    text-align: center;
+    padding: 1rem 1.4rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .flow-step.gold { border-color: var(--gold-line); background: var(--gold-bg); color: var(--gold-bright); }
+  .flow-arrow {
+    text-align: center;
+    color: var(--gold);
+    opacity: 0.5;
+    font-size: 1.1rem;
+    padding: 0.4rem 0;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .flow-close {
+    text-align: center;
+    margin-top: 1rem;
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    opacity: 0.65;
+  }
+
+  /* PHILOSOPHY (closing principle list) */
+  .principles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .principle {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.6rem 1.4rem;
+  }
+  .principle-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem; letter-spacing: 2px;
+    color: var(--gold); text-transform: uppercase;
+    opacity: 0.7;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .principle-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--text);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .principle-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+    font-style: italic;
+  }
+  @media (max-width: 800px) { .principles { grid-template-columns: 1fr; } }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg);
+    color: var(--text-soft);
+    padding: 4rem 0 2rem;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .foot-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    font-style: italic;
+    color: var(--text-mid);
+    line-height: 1.5;
+    text-align: center;
+    max-width: 44ch;
+    margin: 0 auto 3rem;
+  }
+  .foot-grid {
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    gap: 2rem; align-items: end; padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a href="index.html" class="logo">S33D</a>
+    <div class="nav-links">
+      <a href="index.html#witness">The Record</a>
+      <a href="index.html#arc">The Arc</a>
+      <a href="index.html#system">The System</a>
+      <a href="index.html#model">The Model</a>
+      <a href="structure.html" class="current">Structure</a>
+      <a href="index.html#materials">Materials</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle theme">
+        <span class="icon-dark">☀</span>
+        <span class="icon-light">☾</span>
+      </button>
+      <a href="index.html#ask" class="btn">Get in touch</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="divider"><span>Structure &amp; Governance</span></div>
+    <h1>A company that becomes infrastructure.</h1>
+    <p class="lede">
+      Papaya Seed Ltd is the bootstrap vessel. Over time, the gravity of value shifts from the company toward the commons — from shareholder extraction toward planetary stewardship. This page explains how, and why.
+    </p>
+  </div>
+</header>
+
+<!-- THE FRAMING -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">◯</div>
+      <div class="sec-title-inline">The Framing</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Not a venture-backed extraction loop. Regenerative infrastructure.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      What we are building sits closer to a regenerative holding, treasury steward, and infrastructure builder than to a traditional startup forever extracting value from its users. The company is the vessel that gets the network into the world. The network is what the value migrates to.
+    </p>
+
+    <div class="pull">
+      <p>The long-term aim is not to centralise value extraction, but to grow a planetary commons.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PHASES -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">I</div>
+      <div class="sec-title-inline">The Three Phases</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Formation. Treasury. Transition.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      The structure evolves in three movements — each laying the ground for the next. Investor exposure remains aligned with ecosystem health at every step.
+    </p>
+
+    <div class="phases">
+
+      <div class="phase">
+        <div class="phase-marker">
+          <span class="phase-num">Phase One</span>
+          <span class="phase-name">Formation</span>
+        </div>
+        <div class="phase-body">
+          <h3>Papaya Seed Ltd — the bootstrap vessel.</h3>
+          <p>A dormant shell activated for EIS/SEIS-compatible investment. Receives Staff Patron funds, hires builders, develops the core infrastructure, owns early IP and contracts, and operates app infrastructure. Revenue arrives through subscriptions, donations, Staff patronage, and early partnerships.</p>
+          <ul class="phase-list">
+            <li>Subscriptions — Monthly, Annual, Decade Ring</li>
+            <li>Staff patronage — founding tier donations</li>
+            <li>Early partnerships — schools, councils</li>
+            <li>Core infrastructure development</li>
+            <li>Early IP and contracts</li>
+            <li>App and platform operations</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-marker">
+          <span class="phase-num">Phase Two</span>
+          <span class="phase-name">Treasury Exposure</span>
+        </div>
+        <div class="phase-body">
+          <h3>The company accumulates ecosystem positioning.</h3>
+          <p>Papaya Seed builds a strategic reserve of S33D Hearts, governance positioning, treasury exposure, ecosystem equity, Staff holdings, and infrastructure ownership. Shareholder value becomes <em>indirect exposure to ecosystem growth</em> — rather than extracting value directly from users in perpetuity. This is a very different philosophy.</p>
+          <ul class="phase-list">
+            <li>Strategic Hearts treasury reserve</li>
+            <li>Governance positioning</li>
+            <li>Ecosystem equity stakes</li>
+            <li>Staff holdings — lineage rights</li>
+            <li>Infrastructure ownership</li>
+            <li>Platform revenue streams</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-marker">
+          <span class="phase-num">Phase Three</span>
+          <span class="phase-name">Ecosystem Transition</span>
+        </div>
+        <div class="phase-body">
+          <h3>The company becomes a regenerative infrastructure fund.</h3>
+          <p>Most value migrates into S33DAO, Grove DAOs, Species DAOs, tree treasuries, pod economies, and Hearts circulation. Papaya Seed evolves into a fund that invests in ecosystem projects, supports pod formation, builds tooling, funds public goods, and maintains the core stack the network rests on.</p>
+          <ul class="phase-list">
+            <li>Invests in ecosystem projects</li>
+            <li>Supports pod formation</li>
+            <li>Builds and maintains tooling</li>
+            <li>Funds public goods</li>
+            <li>Incubates grove economies</li>
+            <li>Supports governance transitions</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pull">
+      <p>The company benefits if the ecosystem flourishes. But the ecosystem is not permanently extractable by the company.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LONG-TERM STRUCTURE -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">II</div>
+      <div class="sec-title-inline">The Long-Term Structure</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Four layers, descending toward the commons.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      Each layer holds a different responsibility. Value flows downward — from infrastructure to public goods to protocol to place.
+    </p>
+
+    <div class="hierarchy">
+      <div class="h-node h-1">
+        <div class="h-node-name"><strong>Papaya Seed Ltd</strong></div>
+        <div class="h-node-desc">Early-stage company</div>
+        <div class="h-node-body">EIS/SEIS. Core infrastructure builder. Bootstrap vessel.</div>
+      </div>
+      <div class="h-arrow">↓</div>
+      <div class="h-node h-2">
+        <div class="h-node-name"><strong>Papaya Foundation</strong></div>
+        <div class="h-node-desc">Public goods</div>
+        <div class="h-node-body">Education. Commons. Grants. Councils. Pods.</div>
+      </div>
+      <div class="h-arrow">↓</div>
+      <div class="h-node h-3">
+        <div class="h-node-name"><strong>S33DAO</strong></div>
+        <div class="h-node-desc">Protocol governance</div>
+        <div class="h-node-body">Treasury. Ecosystem coordination. Species Councils. Council of Life.</div>
+      </div>
+      <div class="h-arrow">↓</div>
+      <div class="h-node h-4">
+        <div class="h-node-name"><strong>Grove · Species · Tree DAOs</strong></div>
+        <div class="h-node-desc">Fractal local governance</div>
+        <div class="h-node-body">Place-based stewardship. Pod economies. Living-tree treasuries.</div>
+      </div>
+    </div>
+
+    <div class="pull">
+      <p>The company does not disappear. It becomes a steward of the ecosystem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE CIRCULAR FLOW -->
+<section class="flow-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">III</div>
+      <div class="sec-title-inline">The Regenerative Flow</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>A circle, not a drain.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      Investment returns to the network instead of leaving it. Treasury appreciation funds further ecosystem investment. The flow regenerates rather than depletes.
+    </p>
+
+    <div class="flow-diagram">
+      <div class="flow-step gold">Investment</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Papaya Seed Ltd</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Core Infrastructure</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">S33D Ecosystem</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Hearts · DAOs · Pods · Libraries</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Public Commons Expansion</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Ecosystem Growth</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step gold">Treasury Appreciation · Network Strength</div>
+      <div class="flow-arrow">↺</div>
+      <div class="flow-close">— flows back to ecosystem investment —</div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHETYPES -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">IV</div>
+      <div class="sec-title-inline">Closest Archetypes</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Not an exact match. Spiritually close.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      The shape resembles a few existing structures — but the combination is new. A venture studio crossed with a treasury fund crossed with a regenerative commons.
+    </p>
+
+    <div class="archetypes">
+      <div class="archetype">
+        <span class="archetype-name">Linux Foundation</span>
+        <span class="archetype-tag">Infrastructure stewardship</span>
+      </div>
+      <div class="archetype">
+        <span class="archetype-name">Mozilla</span>
+        <span class="archetype-tag">Public-good software</span>
+      </div>
+      <div class="archetype">
+        <span class="archetype-name">Ethereum Foundation</span>
+        <span class="archetype-tag">Protocol stewardship</span>
+      </div>
+      <div class="archetype">
+        <span class="archetype-name">Patagonia Purpose Trust</span>
+        <span class="archetype-tag">Mission lock</span>
+      </div>
+      <div class="archetype">
+        <span class="archetype-name">Cooperative Land Trusts</span>
+        <span class="archetype-tag">Place-based commons</span>
+      </div>
+      <div class="archetype">
+        <span class="archetype-name">Regenerative Commons Funds</span>
+        <span class="archetype-tag">Long-horizon capital</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HEARTS FRAMING -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">V</div>
+      <div class="sec-title-inline">The Hearts — Framing Matters</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>What Hearts are. What Hearts are not.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      Hearts are governance, coordination, stewardship, and ecological commons currency. They are not, at launch, framed as investment returns. Secondary value may emerge naturally — but the framing must hold.
+    </p>
+
+    <div class="contrast">
+      <div class="contrast-col">
+        <h3>What Hearts are</h3>
+        <ul>
+          <li>Governance coordination</li>
+          <li>Stewardship incentives</li>
+          <li>Participation infrastructure</li>
+          <li>Ecological commons currency</li>
+          <li>Treasury alignment</li>
+          <li>Ecosystem utility</li>
+        </ul>
+      </div>
+      <div class="contrast-div"></div>
+      <div class="contrast-col not">
+        <h3>What Hearts are not</h3>
+        <ul>
+          <li>Investment returns</li>
+          <li>Speculation tokens</li>
+          <li>Yield farming instruments</li>
+          <li>Tree NFTs as collectibles</li>
+          <li>Web3 financialisation</li>
+          <li>Extractive shareholder value</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">VI</div>
+      <div class="sec-title-inline">The Deeper Layer</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Rebuilding the commons through living memory infrastructure.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--text-mid); max-width: 60ch;">
+      Tokens, NFTs, and chains are implementation layers. The deeper layer is older — ecological continuity, intergenerational archives, place-based stewardship, community coordination, regenerative treasury systems.
+    </p>
+
+    <div class="principles">
+      <div class="principle">
+        <span class="principle-num">Principle 01</span>
+        <span class="principle-name">Ecological continuity</span>
+        <span class="principle-body">The living world is the substrate. Every record anchors to a real tree, in a real place, that has been there longer than us.</span>
+      </div>
+      <div class="principle">
+        <span class="principle-num">Principle 02</span>
+        <span class="principle-name">Intergenerational archives</span>
+        <span class="principle-body">Memory is built to survive companies, platforms, and decades. The archive deepens — it does not lapse.</span>
+      </div>
+      <div class="principle">
+        <span class="principle-num">Principle 03</span>
+        <span class="principle-name">Place-based stewardship</span>
+        <span class="principle-body">Value emerges where people physically meet trees, learn, and tend. Local commons, not global feed.</span>
+      </div>
+      <div class="principle">
+        <span class="principle-num">Principle 04</span>
+        <span class="principle-name">Regenerative treasuries</span>
+        <span class="principle-body">Capital pools are connected to living places. As the ecosystem grows, so does the treasury that funds its continued public infrastructure.</span>
+      </div>
+    </div>
+
+    <div class="pull">
+      <p>Rare. And increasingly attractive to regenerative capital, aligned DAOs, mission-driven investors, and long-horizon funds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IS THIS FOR -->
+<section>
+  <div class="wrap" style="text-align: center;">
+    <div class="divider"><span>Who this structure is for</span></div>
+    <h2 style="max-width: 30ch; margin: 0 auto 2rem;">Investors who recognise that the value is in the network — not in the dam.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-style: italic; color: var(--text-mid); max-width: 56ch; margin: 0 auto 3rem;">
+      If you read this and the phased transition feels like a feature rather than a risk — we should talk.
+    </p>
+    <a href="index.html#ask" class="btn btn-solid">hello@s33d.life</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <p class="foot-quote">
+      The company is how we begin.<br>
+      <em>The commons is where we are going.</em>
+    </p>
+    <div class="foot-grid">
+      <div>
+        <div class="logo" style="font-size: 1.1rem;">S33D</div>
+      </div>
+      <div>
+        <a href="index.html">Hub</a> &nbsp;·&nbsp;
+        <a href="onepager.html">One-pager</a> &nbsp;·&nbsp;
+        <a href="structure.html">Structure</a> &nbsp;·&nbsp;
+        <a href="index.html#ask">Contact</a>
+      </div>
+      <div>s33d.life · Presence · Participation · Stewardship</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
