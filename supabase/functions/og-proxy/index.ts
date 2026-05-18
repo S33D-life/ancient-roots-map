@@ -274,6 +274,12 @@ Deno.serve(async (req) => {
     if (treeMatch) {
       const id = treeMatch[1];
       if (!isValidUUID(id)) return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
+      // If a specific offering was shared, render offering-first OG
+      const offeringId = url.searchParams.get("offering");
+      if (offeringId && isValidUUID(offeringId)) {
+        const meta = await fetchOfferingMeta(id, offeringId);
+        if (meta) return respond(meta);
+      }
       return respond(await fetchTreeMeta(id));
     }
 
