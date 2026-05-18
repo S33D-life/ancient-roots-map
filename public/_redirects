@@ -9,6 +9,7 @@
 /sw.js /sw.js 200
 /og/* /og/:splat 200
 /images/* /images/:splat 200
+/patronsportal/* /patronsportal/:splat 200
 
 # Dynamic OG: proxy pages through og-proxy for crawler metadata
 /tree/* https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/tree/:splat 200

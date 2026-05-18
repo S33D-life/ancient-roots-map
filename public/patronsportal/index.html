@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>S33D — A Living Library of Ancient Trees</title>
+<meta name="description" content="S33D is a living library of ancient trees. Private memory funds public commons. Memorial archives deepen across generations." />
+<script src="theme-init.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Cinzel:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-bright: #E2BF6A;
+    --gold-line: rgba(201,168,76,0.25);
+    --gold-bg: rgba(201,168,76,0.08);
+    --bg: #0E0D0A;
+    --card: #161410;
+    --card2: #1C1A15;
+    --border: #2A2820;
+    --text: #F0EBE0;
+    --text-mid: #C8C0AC;
+    --text-soft: #96907E;
+    --text-dim: #6A6456;
+    --nav-bg: rgba(14, 13, 10, 0.92);
+  }
+  [data-theme="light"] {
+    --gold: #8B6A1A;
+    --gold-bright: #B89331;
+    --gold-line: rgba(139,106,26,0.32);
+    --gold-bg: rgba(139,106,26,0.06);
+    --bg: #F5EFE3;
+    --card: #FAF5EA;
+    --card2: #EDE6D2;
+    --border: #D8CDB3;
+    --text: #2B2118;
+    --text-mid: #4A3F30;
+    --text-soft: #6A5D48;
+    --text-dim: #9A8D75;
+    --nav-bg: rgba(245, 239, 227, 0.92);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+  section, nav, .hero, .witness, .downloads, .ask, footer, .panel-grid, .stage, .stat, .app-card, .download-card, .arc, .hierarchy, .use-item { transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease; }
+  h1, h2, h3, .serif { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; letter-spacing: -0.005em; line-height: 1.15; color: var(--text); }
+  .cinzel { font-family: 'Cinzel', serif; }
+  h1 { font-size: clamp(2.8rem, 6vw, 5.2rem); font-weight: 300; }
+  h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 0.4em; font-weight: 400; }
+  h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); margin-bottom: 0.4em; font-weight: 500; }
+  p { margin-bottom: 1em; color: var(--text-mid); }
+  a { color: var(--gold); text-decoration: none; transition: all 0.2s; }
+  a:hover { color: var(--gold-bright); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 2rem; }
+  section { padding: 6rem 0; border-bottom: 1px solid var(--border); position: relative; }
+
+  /* DECORATIVE DIVIDERS */
+  .rule { width: 48px; height: 1px; background: var(--gold); opacity: 0.5; margin: 1.5rem 0; }
+  .rule.center { margin: 1.5rem auto; }
+  .divider {
+    display: flex; align-items: center; gap: 14px;
+    justify-content: center; margin: 1.5rem 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; max-width: 180px;
+    height: 0.5px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+  .divider span {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold); opacity: 0.85;
+  }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 1.5rem; display: inline-block;
+    opacity: 0.85;
+  }
+  .sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 2rem; }
+  .sec-num {
+    width: 28px; height: 28px; flex-shrink: 0;
+    border: 1px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 11px; color: var(--gold);
+  }
+  .sec-title-inline {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text);
+  }
+  .sec-line { flex: 1; height: 0.5px; background: linear-gradient(to right, var(--gold-line), transparent); }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+  }
+
+  /* THEME TOGGLE */
+  .theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold-line);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    margin-right: 0.8rem;
+    transition: all 0.2s;
+    line-height: 1;
+    padding: 0;
+  }
+  .theme-toggle:hover { background: var(--gold-bg); border-color: var(--gold); }
+  .theme-toggle .icon-light { display: none; }
+  .theme-toggle .icon-dark { display: inline; }
+  [data-theme="light"] .theme-toggle .icon-light { display: inline; }
+  [data-theme="light"] .theme-toggle .icon-dark { display: none; }
+  .nav-right { display: flex; align-items: center; }
+  .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+  .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+    border: none;
+  }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.78rem; font-family: 'Cinzel', serif; letter-spacing: 2px; text-transform: uppercase; }
+  .nav-links a { color: var(--text-soft); }
+  .nav-links a:hover { color: var(--gold); }
+  @media (max-width: 800px) { .nav-links { display: none; } }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 1.8rem;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 0;
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--gold-bg); color: var(--gold-bright); }
+  .btn-solid { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .btn-solid:hover { background: var(--gold-bright); color: var(--bg); }
+
+  /* HERO */
+  .hero {
+    padding: 8rem 0 7rem;
+    text-align: center;
+    background:
+      radial-gradient(ellipse at top, rgba(201,168,76,0.06), transparent 60%),
+      var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .s33d-mark {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    font-family: 'Cinzel', serif;
+    font-size: 12px; letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .s33d-mark::after {
+    content: '';
+    position: absolute;
+    width: 70px; height: 70px;
+    border: 0.5px solid rgba(201,168,76,0.2);
+    border-radius: 50%;
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .hero .lede {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+    font-style: italic;
+    color: var(--text-mid);
+    max-width: 30ch;
+    margin: 0 auto 1.5rem;
+    font-weight: 300;
+  }
+  .hero .tagline {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 3rem;
+  }
+  .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* WITNESS - opening movement */
+  .witness {
+    background: var(--card2);
+    border-top: 1px solid var(--gold-line);
+    border-bottom: 1px solid var(--gold-line);
+    position: relative;
+  }
+  .witness::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+  .witness-statement {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+    font-weight: 300; font-style: italic;
+    color: var(--text); line-height: 1.5;
+    text-align: center;
+    max-width: 48ch; margin: 0 auto 3rem;
+  }
+  .witness-statement em { color: var(--gold-bright); font-style: normal; }
+  .witness-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; border-top: 1px solid var(--border); padding-top: 2.5rem;
+  }
+  .wg-item {
+    padding: 0 1.5rem; text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .wg-item:last-child { border-right: none; }
+  .wg-age {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--gold-bright);
+    display: block; line-height: 1; margin-bottom: 0.5rem;
+  }
+  .wg-species {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; color: var(--text-mid);
+    display: block; margin-bottom: 0.5rem;
+    font-style: italic;
+  }
+  .wg-body { font-size: 0.85rem; color: var(--text-soft); line-height: 1.6; }
+  @media (max-width: 800px) {
+    .witness-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .wg-item { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 2rem; }
+    .wg-item:last-child { border-bottom: none; padding-bottom: 0; }
+  }
+
+  /* THESIS / ARC */
+  .arc {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr 24px 1fr 24px 1fr;
+    align-items: start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2.5rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .arc-node { text-align: center; padding: 0 1rem; }
+  .arc-icon { font-size: 1.6rem; margin-bottom: 0.6rem; display: block; }
+  .arc-lbl {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold);
+    display: block; margin-bottom: 0.5rem;
+  }
+  .arc-desc { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--text-mid); line-height: 1.5; font-style: italic; }
+  .arc-arr {
+    display: flex; align-items: center; justify-content: center;
+    padding-top: 1rem; color: var(--gold); opacity: 0.4; font-size: 1.1rem;
+  }
+  @media (max-width: 800px) {
+    .arc { grid-template-columns: 1fr; gap: 1.5rem; }
+    .arc-arr { display: none; }
+  }
+
+  /* PULL QUOTES */
+  .pull {
+    border-left: 2px solid var(--gold);
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .pull p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    font-style: italic;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* CORE SYSTEM PANEL */
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    background: var(--card2);
+    border: 1px solid var(--gold-line);
+    padding: 2.5rem 0;
+    margin-top: 2rem;
+    position: relative;
+  }
+  .panel-div { background: rgba(201,168,76,0.18); }
+  .panel-item { padding: 0 2rem; text-align: center; }
+  .pi-icon { font-size: 1.8rem; margin-bottom: 0.8rem; display: block; }
+  .pi-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 2.5px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 0.8rem; display: block;
+  }
+  .pi-body { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--text-mid); line-height: 1.6; }
+  @media (max-width: 800px) {
+    .panel-grid { grid-template-columns: 1fr; gap: 2rem; padding: 2rem 1rem; }
+    .panel-div { display: none; }
+  }
+
+  /* MODEL — STAGES */
+  .stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; }
+  .stage {
+    padding: 2rem 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+  .stage-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 1rem; display: block;
+    padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);
+  }
+  .stage h3 { color: var(--text); margin-bottom: 0.8rem; }
+  .stage p { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--text-mid); margin: 0; font-size: 1rem; }
+  @media (max-width: 800px) { .stages { grid-template-columns: 1fr; } }
+
+  /* PRICING STATS */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  .stat {
+    text-align: center; padding: 1.5rem 1rem;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-n {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem; color: var(--gold-bright);
+    display: block; margin-bottom: 0.4rem; line-height: 1;
+  }
+  .stat-l { font-size: 0.8rem; color: var(--text-soft); }
+  @media (max-width: 800px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+  }
+
+  /* APP LINKS */
+  .app-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+  .app-card {
+    display: block;
+    padding: 1.8rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .app-card:hover { border-color: var(--gold); background: var(--card2); color: var(--text); }
+  .app-card .arrow { float: right; color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; opacity: 0.7; }
+  .app-card h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; margin-bottom: 0.4rem; color: var(--text); font-weight: 500; }
+  .app-card p { font-size: 0.9rem; color: var(--text-soft); margin: 0; }
+  @media (max-width: 800px) { .app-links { grid-template-columns: 1fr; } }
+
+  /* DOWNLOADS */
+  .downloads { background: var(--card2); }
+  .download-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 2rem; }
+  .download-card {
+    background: var(--card);
+    padding: 2rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .download-card:hover { border-color: var(--gold); }
+  .download-card .meta {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 2px;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 0.8rem; display: block;
+  }
+  .download-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; margin-bottom: 0.6rem; color: var(--text); font-weight: 500; }
+  .download-card p { font-size: 0.92rem; color: var(--text-mid); margin-bottom: 1.5rem; line-height: 1.6; }
+  @media (max-width: 800px) { .download-grid { grid-template-columns: 1fr; } }
+
+  /* ASK */
+  .ask {
+    text-align: center;
+    background:
+      radial-gradient(ellipse at center, rgba(201,168,76,0.08), transparent 70%),
+      var(--bg);
+  }
+  .ask .wrap { max-width: 720px; }
+  .ask .uses {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.8rem; margin: 2.5rem 0;
+    text-align: left;
+  }
+  .use-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1rem 1.2rem;
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .use-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem; color: var(--gold);
+    opacity: 0.7; flex-shrink: 0;
+  }
+  .use-text { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: var(--text-mid); line-height: 1.5; }
+  @media (max-width: 800px) { .ask .uses { grid-template-columns: 1fr; } }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg);
+    color: var(--text-soft);
+    padding: 5rem 0 2.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .foot-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.5;
+    text-align: center;
+    max-width: 40ch;
+    margin: 0 auto 3rem;
+  }
+  .foot-quote em { color: var(--gold-bright); font-style: normal; }
+  .foot-grid {
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    gap: 2rem; align-items: end; padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .foot-url {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a href="#top" class="logo">S33D</a>
+    <div class="nav-links">
+      <a href="#witness">The Record</a>
+      <a href="#arc">The Arc</a>
+      <a href="#system">The System</a>
+      <a href="#model">The Model</a>
+      <a href="structure.html">Structure</a>
+      <a href="#materials">Materials</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle theme">
+        <span class="icon-dark">☀</span>
+        <span class="icon-light">☾</span>
+      </button>
+      <a href="#ask" class="btn">Get in touch</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="s33d-mark">S33D</div>
+    <h1>S33D</h1>
+    <p class="lede">A living library of ancient trees.</p>
+    <div class="divider"><span>For Investors · Seed Round 2026</span></div>
+    <p class="tagline">Presence · Participation · Stewardship</p>
+    <div class="hero-ctas">
+      <a href="#materials" class="btn btn-solid">View materials</a>
+      <a href="#witness" class="btn">Read the story</a>
+    </div>
+  </div>
+</header>
+
+<!-- WITNESS -->
+<section class="witness" id="witness">
+  <div class="wrap">
+    <div class="section-label" style="display: block; text-align: center;">The Ancient Record</div>
+    <p class="witness-statement">
+      Some trees alive today were <em>already ancient</em> when the first libraries were built. They have witnessed everything we have ever written down. They remember more than we do.
+    </p>
+    <div class="witness-grid">
+      <div class="wg-item">
+        <span class="wg-age">5,000+</span>
+        <span class="wg-species">Fortingall Yew, Scotland</span>
+        <span class="wg-body">Alive before the pyramids were complete. A witness to every civilisation that has risen and fallen in its shadow.</span>
+      </div>
+      <div class="wg-item">
+        <span class="wg-age">1,000+</span>
+        <span class="wg-species">Ancient Oaks, England</span>
+        <span class="wg-body">Present at the signing of Magna Carta. Still standing. Unmapped. Unrecorded. Unknown to most who pass beneath them.</span>
+      </div>
+      <div class="wg-item">
+        <span class="wg-age">400+</span>
+        <span class="wg-species">Veteran Beeches, Britain</span>
+        <span class="wg-body">Older than the printing press. Carrying centuries of ecological memory in their bark, their roots, their hollows.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE ARC -->
+<section id="arc">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">I</div>
+      <div class="sec-title-inline">The Arc — Birth Tree to Memorial Tree</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>One product. A human lifetime.</h2>
+    <p style="max-width: 60ch; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; color: var(--text-mid);">
+      The birth tree and the memorial tree are the same product — experienced sixty years apart. From a child pressing their hand to the bark to the family that returns to leave a memorial — one continuous record, anchored to one living thing.
+    </p>
+
+    <div class="arc">
+      <div class="arc-node">
+        <span class="arc-icon">🌱</span>
+        <span class="arc-lbl">Birth Tree</span>
+        <span class="arc-desc">A tree chosen or planted for a new life. The first encounter recorded.</span>
+      </div>
+      <div class="arc-arr">→</div>
+      <div class="arc-node">
+        <span class="arc-icon">📚</span>
+        <span class="arc-lbl">School Years</span>
+        <span class="arc-desc">Seasonal visits, bloom records, offerings. The Heartwood Library fills year by ring.</span>
+      </div>
+      <div class="arc-arr">→</div>
+      <div class="arc-node">
+        <span class="arc-icon">🌿</span>
+        <span class="arc-lbl">Wanderer</span>
+        <span class="arc-desc">Hearts earned. Staff pathway begins. The Commons tended across a lifetime.</span>
+      </div>
+      <div class="arc-arr">→</div>
+      <div class="arc-node">
+        <span class="arc-icon">🕯️</span>
+        <span class="arc-lbl">Memorial Tree</span>
+        <span class="arc-desc">Archive uploads to a chosen Ancient Friend. The tree holds what remains — forever.</span>
+      </div>
+    </div>
+
+    <div class="pull">
+      <p>No other platform has ever built a product designed to last a human lifetime. S33D is designed to last several.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE SYSTEM -->
+<section id="system">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">II</div>
+      <div class="sec-title-inline">The Core System</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Private memory funds public commons.</h2>
+    <p style="max-width: 60ch; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; color: var(--text-mid);">
+      Three movements, one ecology. The subscription that preserves a family's story simultaneously funds the permanent public record of the ancient tree it is anchored to.
+    </p>
+
+    <div class="panel-grid">
+      <div class="panel-item">
+        <span class="pi-icon">📚</span>
+        <span class="pi-title">The Library</span>
+        <span class="pi-body">Private, immutable digital libraries for people, families, and communities. Personal memory infrastructure. This is where S33D earns.</span>
+      </div>
+      <div class="panel-div"></div>
+      <div class="panel-item">
+        <span class="pi-icon">🌳</span>
+        <span class="pi-title">The Commons</span>
+        <span class="pi-body">A living atlas of ancient trees — mapped, verified, held in common. Open to everyone. Funded by the private libraries above.</span>
+      </div>
+      <div class="panel-div"></div>
+      <div class="panel-item">
+        <span class="pi-icon">💛</span>
+        <span class="pi-title">The Economy</span>
+        <span class="pi-body">Hearts earned through presence. Seeds planted daily. Value generated when two people meet at a real tree. Not speculation — encounter.</span>
+      </div>
+    </div>
+
+    <div class="pull">
+      <p>Two things most people deeply want — paid for by one decision.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE MODEL -->
+<section id="model">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">III</div>
+      <div class="sec-title-inline">The Model — Compounding Across Generations</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>The longer it exists, the more it is worth.</h2>
+    <p style="max-width: 60ch; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; color: var(--text-mid);">
+      A memorial archive deepens with every generation that tends it. A Decade Ring is a generational commitment. A child who grows up with a tree returns with their own children.
+    </p>
+
+    <div class="stages">
+      <div class="stage">
+        <span class="stage-label">Stage one</span>
+        <h3>Encounter</h3>
+        <p>A person visits, maps, and offers. Hearts flow. The tree's page begins to fill with presence.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-label">Stage two</span>
+        <h3>Stewardship</h3>
+        <p>Families, communities, and schools subscribe. They return, contribute, and pass care forward.</p>
+      </div>
+      <div class="stage">
+        <span class="stage-label">Stage three</span>
+        <h3>Memorial — permanent</h3>
+        <p>The archive deepens with every generation that tends it. The product becomes a heritage layer.</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="stat-n">£10</span><span class="stat-l">Monthly</span></div>
+      <div class="stat"><span class="stat-n">£96</span><span class="stat-l">Annual — save 20%</span></div>
+      <div class="stat"><span class="stat-n">£600</span><span class="stat-l">Decade Ring</span></div>
+      <div class="stat"><span class="stat-n">∞</span><span class="stat-l">Memorial — permanent</span></div>
+    </div>
+
+    <div class="pull">
+      <p>The model compounds because the product is not content — it is memory. And memory, once rooted in something living, does not leave.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE APP -->
+<section id="app">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">IV</div>
+      <div class="sec-title-inline">The Product — Step Inside</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>The app is live. Walk through it.</h2>
+    <p style="max-width: 60ch; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; color: var(--text-mid);">
+      S33D is not a deck — it is a working system. Below are the rooms we'd most like you to walk through.
+    </p>
+
+    <div class="app-links">
+      <a href="https://www.s33d.life/atlas" class="app-card" target="_blank" rel="noopener" data-link="atlas">
+        <span class="arrow">→</span>
+        <h4>The Atlas</h4>
+        <p>Live global map of Ancient Friends — mapped, verified, held in common.</p>
+      </a>
+      <a href="https://www.s33d.life/tree/b72afd4a-d6b1-4a7b-aea0-a65042f8a64a" class="app-card" target="_blank" rel="noopener" data-link="featured-tree">
+        <span class="arrow">→</span>
+        <h4>A Featured Ancient Friend</h4>
+        <p>An ancient oak — offerings, encounters, whispers. The model made tangible in one living tree.</p>
+      </a>
+      <a href="https://www.s33d.life/map" class="app-card" target="_blank" rel="noopener" data-link="hearts">
+        <span class="arrow">→</span>
+        <h4>The Encounter Economy</h4>
+        <p>Plant. Sprout. Find. Share. How Hearts flow — 33 to planter, 33 to finder, 33 to the tree.</p>
+      </a>
+      <a href="https://www.s33d.life" class="app-card" target="_blank" rel="noopener" data-link="join">
+        <span class="arrow">→</span>
+        <h4>Join the Grove</h4>
+        <p>Create an account. Add your first tree. The system in under two minutes.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOADS -->
+<section id="materials" class="downloads">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">V</div>
+      <div class="sec-title-inline">Investor Materials</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Take it with you.</h2>
+    <p style="max-width: 56ch; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; color: var(--text-mid);">
+      Everything required to evaluate, share, and respond. The deck tells the full story. The one-pager carries it forward.
+    </p>
+
+    <div class="download-grid">
+      <div class="download-card">
+        <span class="meta">HTML · One page</span>
+        <h3>The One-Pager</h3>
+        <p>Business model, mechanics, economics, ask — printable, forwardable, the whole picture at a glance.</p>
+        <a href="onepager.html" class="btn">Open</a>
+      </div>
+      <div class="download-card">
+        <span class="meta">Page · Long form</span>
+        <h3>Structure &amp; Governance</h3>
+        <p>The phased transition from company to ecosystem infrastructure. Papaya Seed Ltd → Foundation → S33DAO → Grove DAOs.</p>
+        <a href="structure.html" class="btn">Open</a>
+      </div>
+      <div class="download-card">
+        <span class="meta">Deck · 24 slides</span>
+        <h3>The Pitch Deck</h3>
+        <p>Problem, structure, commons, subscriptions, mechanics, governance, infrastructure, ask.</p>
+        <a href="deck.html" class="btn">Open</a>
+      </div>
+      <div class="download-card">
+        <span class="meta">Live · Web app</span>
+        <h3>The Product</h3>
+        <p>Open the atlas, walk into a tree page, leave your own offering, feel the system.</p>
+        <a href="https://www.s33d.life" target="_blank" rel="noopener" class="btn">Open S33D</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE ASK -->
+<section id="ask" class="ask">
+  <div class="wrap">
+    <div class="section-label" style="display: block; text-align: center;">The Ask</div>
+    <h2>Seed funding.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem; color: var(--text-mid); max-width: 50ch; margin: 1rem auto 0;">
+      To build the infrastructure that makes memory permanent and the living world visible.
+    </p>
+
+    <div class="uses">
+      <div class="use-item"><span class="use-num">01</span><span class="use-text">Map and verify the 144 founding ancient UK trees</span></div>
+      <div class="use-item"><span class="use-num">02</span><span class="use-text">Build the Heartwood Library — Personal, Family, and Decade Ring tiers</span></div>
+      <div class="use-item"><span class="use-num">03</span><span class="use-text">Deploy the founding staff collection and Hearts economy on-chain</span></div>
+      <div class="use-item"><span class="use-num">04</span><span class="use-text">Build the memorial archive with access controls and succession</span></div>
+      <div class="use-item"><span class="use-num">05</span><span class="use-text">Launch the education layer — school subscriptions, Council tools, child libraries</span></div>
+      <div class="use-item"><span class="use-num">06</span><span class="use-text">Build and install the first physical pods beside founding Ancient Friends</span></div>
+    </div>
+
+    <div class="rule center"></div>
+    <a href="mailto:hello@s33d.life" class="btn btn-solid">hello@s33d.life</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <p class="foot-quote">
+      There are trees alive today that were ancient when the first libraries were built.<br>
+      <em>We are building the library they deserve.</em>
+    </p>
+    <div class="foot-grid">
+      <div>
+        <div class="logo" style="font-size: 1.1rem;">S33D</div>
+        <p style="margin-top: 0.5rem; font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--text-soft); font-size: 0.95rem;">The echo of the ancient groves.</p>
+      </div>
+      <div style="font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;">
+        <a href="#witness">The Record</a> &nbsp;·&nbsp;
+        <a href="#system">The System</a> &nbsp;·&nbsp;
+        <a href="#model">The Model</a> &nbsp;·&nbsp;
+        <a href="#materials">Materials</a>
+      </div>
+      <div class="foot-url">s33d.life · Presence · Participation · Stewardship</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -69,7 +69,7 @@ async function loadPwaPlugin() {
       injectRegister: false,
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
-        navigateFallbackDenylist: [/^\/~oauth/],
+        navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/],
         // Never precache version.json — always fetch fresh
         globIgnores: ["**/version.json"],
         runtimeCaching: [
