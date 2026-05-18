@@ -20,12 +20,13 @@ import { getPublicAppUrl } from "@/utils/ogMeta";
  */
 export const buildOfferingDeepLink = (offering: Offering, photoIndex?: number): string => {
   if (typeof window === "undefined") return "";
-  const url = new URL(window.location.href);
+  // Always build canonical s33d.life share links — never leak preview origins.
+  const treeId = offering.tree_id;
+  const path = treeId ? `/tree/${treeId}` : window.location.pathname;
+  const url = new URL(getPublicAppUrl(path));
   url.searchParams.set("offering", offering.id);
   if (typeof photoIndex === "number" && photoIndex > 0) {
     url.searchParams.set("photo", String(photoIndex));
-  } else {
-    url.searchParams.delete("photo");
   }
   return url.toString();
 };
