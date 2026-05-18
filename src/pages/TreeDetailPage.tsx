@@ -49,6 +49,7 @@ import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering, findFlatP
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 import TreeWitnessStrip from "@/components/tree-detail/TreeWitnessStrip";
 import BloomsNearbySection from "@/components/blooms/BloomsNearbySection";
+const OfferingHero = lazy(() => import("@/components/tree-detail/OfferingHero"));
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
 const InviterContext = lazy(() => import("@/components/InviterContext"));
 const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
