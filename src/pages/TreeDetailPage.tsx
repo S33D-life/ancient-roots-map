@@ -741,6 +741,25 @@ const TreeDetailPage = () => {
           }}
         />
 
+        {/* ══════ Shared offering hero — appears when ?offering=<id> is present ══════ */}
+        {(() => {
+          const sharedOfferingId = searchParams.get("offering");
+          if (!sharedOfferingId) return null;
+          const sharedOffering = offerings.find((o) => o.id === sharedOfferingId);
+          if (!sharedOffering) return null;
+          return (
+            <Suspense fallback={null}>
+              <OfferingHero
+                offering={sharedOffering}
+                treeName={tree.name}
+                treeLocation={[tree.state, tree.nation].filter(Boolean).join(", ") || null}
+                onCheckin={tryOpenCheckin}
+                onMakeOffering={openOfferingGateway}
+              />
+            </Suspense>
+          );
+        })()}
+
         {/* Witness CTA — surfaces resonance gesture impossible-to-miss */}
         <TreeWitnessStrip offerings={offerings} userId={userId} />
 
