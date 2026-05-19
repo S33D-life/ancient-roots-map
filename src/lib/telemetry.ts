@@ -36,7 +36,8 @@ export type TelemetryEvent =
   | "evolution_dashboard_opened"
   | "moonroot_digest_opened"
   | "moonroot_digest_previewed"
-  | "moonroot_digest_regenerated";
+  | "moonroot_digest_regenerated"
+  | "artizen_readiness_opened";
 
 export interface TelemetryPayload {
   reason?: string | null;
