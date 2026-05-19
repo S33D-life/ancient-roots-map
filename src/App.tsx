@@ -145,6 +145,7 @@ const AdminEvolutionPage = lazyImportWithRetry(() => import("./pages/AdminEvolut
 const AdminRoomPage = lazyImportWithRetry(() => import("./pages/admin/AdminRoomPage"), "admin-room");
 const AdminUsersPage = lazyImportWithRetry(() => import("./pages/admin/AdminUsersPage"), "admin-users");
 const MoonrootDigestPage = lazyImportWithRetry(() => import("./pages/admin/MoonrootDigestPage"), "moonroot-digest");
+const ArtizenReadinessPage = lazyImportWithRetry(() => import("./pages/admin/ArtizenReadinessPage"), "artizen-readiness");
 const InviteStatusPage = lazyImportWithRetry(() => import("./pages/admin/InviteStatusPage"), "invite-status");
 // KingOfBavleuxPage removed — route redirects to /atlas/switzerland
 // DolomitiAmpezzoPage removed — served by BioRegionPage /atlas/bio-regions/dolomites-ampezzo-cadore
@@ -432,6 +433,7 @@ const App = () => {
                 <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/moonroot-digest" element={<MoonrootDigestPage />} />
                 <Route path="/admin/moonroot" element={<MoonrootDigestPage />} />
+                <Route path="/admin/artizen" element={<ArtizenReadinessPage />} />
                 <Route path="/admin/invite-status" element={<InviteStatusPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />
