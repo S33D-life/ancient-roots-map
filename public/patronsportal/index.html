@@ -443,6 +443,36 @@
   .use-text { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: var(--text-mid); line-height: 1.5; }
   @media (max-width: 800px) { .ask .uses { grid-template-columns: 1fr; } }
 
+  /* FOUR LAYERS */
+  .four-layers {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1rem; margin-top: 2rem;
+  }
+  .fl-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2rem 1.8rem;
+    transition: border-color 0.2s;
+  }
+  .fl-card:hover { border-color: var(--gold); }
+  .fl-icon { font-size: 1.6rem; display: block; margin-bottom: 0.8rem; }
+  .fl-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 2.5px;
+    color: var(--gold); text-transform: uppercase;
+    display: block; margin-bottom: 0.8rem;
+  }
+  .fl-body { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: var(--text-mid); line-height: 1.6; margin: 0; }
+  @media (max-width: 800px) { .four-layers { grid-template-columns: 1fr; } }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    font-size: 0.8rem; color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    max-width: 52ch; margin: 0 auto 2rem;
+    line-height: 1.6; font-style: italic;
+  }
+
   /* FOOTER */
   footer {
     background: var(--bg);
@@ -482,8 +512,8 @@
     <a href="#top" class="logo">S33D</a>
     <div class="nav-links">
       <a href="#witness">The Record</a>
-      <a href="#arc">The Arc</a>
       <a href="#system">The System</a>
+      <a href="#offering">The Offering</a>
       <a href="#model">The Model</a>
       <a href="structure.html">Structure</a>
       <a href="#materials">Materials</a>
@@ -503,11 +533,14 @@
     <div class="s33d-mark">S33D</div>
     <h1>S33D</h1>
     <p class="lede">A living library of ancient trees.</p>
-    <div class="divider"><span>For Investors · Seed Round 2026</span></div>
+    <div class="divider"><span>Patrons Portal · Founding Round 2026</span></div>
     <p class="tagline">Presence · Participation · Stewardship</p>
+    <p style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: var(--text-soft); max-width: 44ch; margin: 0 auto 2.5rem; line-height: 1.7;">
+      This portal is for founding investor-patrons exploring the first 144 staffs — root instruments of the Living Library.
+    </p>
     <div class="hero-ctas">
-      <a href="#materials" class="btn btn-solid">View materials</a>
-      <a href="#witness" class="btn">Read the story</a>
+      <a href="#offering" class="btn btn-solid">See the offering</a>
+      <a href="#witness" class="btn">The story</a>
     </div>
   </div>
 </header>
@@ -623,11 +656,53 @@
   </div>
 </section>
 
+<!-- THE FOUR LAYERS -->
+<section id="offering">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">III</div>
+      <div class="sec-title-inline">The Four Layers — What a Staff Carries</div>
+      <div class="sec-line"></div>
+    </div>
+    <h2>Four layers. One staff.</h2>
+    <p style="max-width: 60ch; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.2rem; color: var(--text-mid);">
+      Each founding staff is an anchor into four interlocking layers of the S33D ecosystem — presence, memory, economy, and governance.
+    </p>
+
+    <div class="four-layers">
+      <div class="fl-card">
+        <span class="fl-icon">🌳</span>
+        <span class="fl-title">Ancient Friends</span>
+        <p class="fl-body">Ancient trees mapped, verified, and held in common. The root record of the Living Library — each one a living witness to centuries of history, now publicly documented forever.</p>
+      </div>
+      <div class="fl-card">
+        <span class="fl-icon">📚</span>
+        <span class="fl-title">Heartwood Library</span>
+        <p class="fl-body">Lifetime personal and family archives, anchored to a living ancient tree. Books, music, journals, seed records, memorial archives, encounter history — private memory infrastructure that grows ring by ring.</p>
+      </div>
+      <div class="fl-card">
+        <span class="fl-icon">💛</span>
+        <span class="fl-title">S33D Hearts</span>
+        <p class="fl-body">The planned encounter economy — earned through mapping ancient trees, offerings, and real-world stewardship. Not speculation. Planned for Ethereum; currently stewarded through Papaya Seed Ltd treasury structures.</p>
+      </div>
+      <div class="fl-card">
+        <span class="fl-icon">⭕</span>
+        <span class="fl-title">Staff Circles &amp; Governance</span>
+        <p class="fl-body">Species Circles become the long-term governance bodies of the network — stewarding lineage, protocol, and relationships between people and ancient trees. Founding staffs hold permanent placement in the origin spiral.</p>
+      </div>
+    </div>
+
+    <div class="pull">
+      <p>Not viral growth. Living growth. Ring by ring. Branch by branch. Species by species.</p>
+    </div>
+  </div>
+</section>
+
 <!-- THE MODEL -->
 <section id="model">
   <div class="wrap">
     <div class="sec-head">
-      <div class="sec-num">III</div>
+      <div class="sec-num">IV</div>
       <div class="sec-title-inline">The Model — Compounding Across Generations</div>
       <div class="sec-line"></div>
     </div>
@@ -671,7 +746,7 @@
 <section id="app">
   <div class="wrap">
     <div class="sec-head">
-      <div class="sec-num">IV</div>
+      <div class="sec-num">V</div>
       <div class="sec-title-inline">The Product — Step Inside</div>
       <div class="sec-line"></div>
     </div>
@@ -709,7 +784,7 @@
 <section id="materials" class="downloads">
   <div class="wrap">
     <div class="sec-head">
-      <div class="sec-num">V</div>
+      <div class="sec-num">VI</div>
       <div class="sec-title-inline">Investor Materials</div>
       <div class="sec-line"></div>
     </div>
@@ -750,12 +825,20 @@
 <!-- THE ASK -->
 <section id="ask" class="ask">
   <div class="wrap">
-    <div class="section-label" style="display: block; text-align: center;">The Ask</div>
-    <h2>Seed funding.</h2>
-    <p style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem; color: var(--text-mid); max-width: 50ch; margin: 1rem auto 0;">
-      To build the infrastructure that makes memory permanent and the living world visible.
+    <div class="section-label" style="display: block; text-align: center;">The Founding Offering</div>
+    <h2>The first 144 staffs.</h2>
+    <p style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem; color: var(--text-mid); max-width: 52ch; margin: 1rem auto 2rem;">
+      Stewardship instruments, lineage anchors, and governance branches — the root structure of the Living Library.
     </p>
 
+    <div class="stats" style="max-width: 640px; margin: 0 auto 3rem;">
+      <div class="stat"><span class="stat-n">£3,300</span><span class="stat-l">Per founding staff</span></div>
+      <div class="stat"><span class="stat-n">30</span><span class="stat-l">Spiral seats open</span></div>
+      <div class="stat"><span class="stat-n">£33,000</span><span class="stat-l">Per Species Circle</span></div>
+      <div class="stat"><span class="stat-n">9</span><span class="stat-l">Circles available</span></div>
+    </div>
+
+    <p style="font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 1.2rem;">Proceeds fund</p>
     <div class="uses">
       <div class="use-item"><span class="use-num">01</span><span class="use-text">Map and verify the 144 founding ancient UK trees</span></div>
       <div class="use-item"><span class="use-num">02</span><span class="use-text">Build the Heartwood Library — Personal, Family, and Decade Ring tiers</span></div>
@@ -766,7 +849,11 @@
     </div>
 
     <div class="rule center"></div>
-    <a href="mailto:hello@s33d.life" class="btn btn-solid">hello@s33d.life</a>
+    <p class="disclaimer">Draft only — for exploratory conversation. This is not an offer of equity, a regulated financial product, or a guarantee of financial return. Hearts allocations are subject to final token design, legal structure, and launch readiness. All terms subject to formal agreement.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="mailto:hello@s33d.life" class="btn btn-solid">Book a Patron Conversation</a>
+      <a href="structure.html" class="btn">Read the structure</a>
+    </div>
   </div>
 </section>
 
