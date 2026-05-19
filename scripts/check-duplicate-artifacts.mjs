@@ -3,8 +3,8 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const SKIP_DIRS = new Set([".git", "node_modules", "dist", "coverage"]);
-const DUPLICATE_NAME_RE = / 2(\.[^/]+)?$/;
+const SKIP_DIRS = new Set([".git", ".claude", "node_modules", "dist", "coverage"]);
+const DUPLICATE_NAME_RE = / [2-9]\d*(\.[^/]+)?$/;
 
 /**
  * @param {string} dir
@@ -51,7 +51,7 @@ console.error("Blocked: duplicate artifacts detected.");
 console.error(
   `Found ${offenders.length} offender(s): ${fileCount} file(s), ${directoryCount} director${directoryCount === 1 ? "y" : "ies"}.`,
 );
-console.error("Rename or remove files/directories ending with \" 2\" before merging.");
+console.error("Rename or remove files/directories ending with numbered duplicate suffixes like \" 2\" before merging.");
 for (const offender of offenders) {
   console.error(` - [${offender.kind}] ${offender.path}`);
 }
