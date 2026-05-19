@@ -194,6 +194,30 @@ export default function AdminRoomPage() {
           </Card>
         </Link>
 
+        {/* Artizen Campaign Readiness — time-bound campaign briefing */}
+        <Link
+          to="/admin/artizen"
+          onClick={() => track("artizen_readiness_opened")}
+          className="block mt-3"
+        >
+          <Card className="group border-primary/15 bg-gradient-to-br from-amber-50/40 via-card to-orange-50/20 dark:from-amber-950/20 dark:to-orange-950/10 hover:border-primary/30 breathe-card breathe-glow overflow-hidden">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-2xl bg-primary/8 border border-primary/15 shrink-0">
+                  <Flame className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-serif text-foreground">Artizen Campaign Readiness</h2>
+                  <p className="text-sm text-muted-foreground font-serif italic mt-0.5">
+                    What S33D is, what exists now, what funding unlocks.
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all hidden sm:block" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
         {/* Section grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
           {sections.map((s) => (
