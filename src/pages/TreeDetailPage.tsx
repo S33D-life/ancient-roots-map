@@ -1584,9 +1584,11 @@ const TreeDetailPage = () => {
             const typeMap: Record<string, OfferingType> = {
               photo: "photo", song: "song", book: "book", story: "story",
               poem: "poem", voice: "voice", nft: "nft",
-              quote: "story", wish: "poem", gratitude: "story", intention: "story",
+              art: "art", prayer: "prayer",
+              quote: "story", wish: "poem", gratitude: "prayer", intention: "story",
               seasonal_observation: "story", encounter: "story", data: "story",
             };
+
             const offeringType = typeMap[type] || "story";
             setSelectedType(offeringType);
             // Open flow immediately, then close gateway — eliminates flash
