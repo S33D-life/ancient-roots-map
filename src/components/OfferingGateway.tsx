@@ -10,8 +10,10 @@ import { cn } from "@/lib/utils";
 export type GatewayOfferingType =
   | "photo" | "song" | "book" | "story"
   | "poem" | "quote" | "voice" | "wish"
+  | "art" | "prayer"
   | "seasonal_observation" | "encounter" | "gratitude" | "intention"
   | "data" | "nft";
+
 
 interface OfferingOption {
   type: GatewayOfferingType;
