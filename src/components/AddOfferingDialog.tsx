@@ -59,6 +59,8 @@ const typeConfig: Record<
   nft: { singular: "NFT", contentLabel: "Description", placeholder: "Describe this NFT...", emoji: "✨" },
   voice: { singular: "Voice", contentLabel: "Reflection", placeholder: "What inspired this offering?", emoji: "🎙️" },
   book: { singular: "Book", contentLabel: "Reflection", placeholder: "Why are you offering this story?", emoji: "📖" },
+  art: { singular: "Art", contentLabel: "About this piece", placeholder: "A drawing, painting, or creative gift for this tree…", emoji: "🎨" },
+  prayer: { singular: "Prayer", contentLabel: "Your prayer or blessing", placeholder: "Leave a prayer, blessing, or dedication…", emoji: "🙏" },
 };
 
 /** Quick-select offering types — primary first, then secondary */
@@ -70,10 +72,13 @@ const PRIMARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
 ];
 
 const SECONDARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
+  { value: "art", emoji: "🎨", label: "Art" },
+  { value: "prayer", emoji: "🙏", label: "Prayer" },
   { value: "voice", emoji: "🎙️", label: "Voice" },
   { value: "book", emoji: "📖", label: "Book" },
   { value: "nft", emoji: "✨", label: "NFT" },
 ];
+
 
 const QUICK_TYPES = [...PRIMARY_TYPES, ...SECONDARY_TYPES];
 
