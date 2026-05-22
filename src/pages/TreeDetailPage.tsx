@@ -137,7 +137,10 @@ const offeringIcons: Record<OfferingType, React.ReactNode> = {
   nft: <Sparkles className="h-4 w-4" />,
   voice: <Mic className="h-4 w-4" />,
   book: <BookOpen className="h-4 w-4" />,
+  art: <Palette className="h-4 w-4" />,
+  prayer: <HandHeart className="h-4 w-4" />,
 };
+
 
 const TreeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
