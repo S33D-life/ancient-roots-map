@@ -5,7 +5,7 @@
  */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2, ChevronLeft, ChevronRight, Pencil, Palette, HandHeart } from "lucide-react";
 import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,10 @@ const typeIcons: Record<OfferingType, React.ReactNode> = {
   nft: <Sparkles className="h-3.5 w-3.5" />,
   voice: <Mic className="h-3.5 w-3.5" />,
   book: <BookOpen className="h-3.5 w-3.5" />,
+  art: <Palette className="h-3.5 w-3.5" />,
+  prayer: <HandHeart className="h-3.5 w-3.5" />,
 };
+
 
 const visibilityIcons: Record<string, React.ReactNode> = {
   private: <EyeOff className="h-2.5 w-2.5" />,
