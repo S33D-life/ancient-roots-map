@@ -23,8 +23,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2, Palette, HandHeart, Link2, Check,
 } from "lucide-react";
+
 import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
