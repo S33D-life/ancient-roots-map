@@ -25,6 +25,8 @@ interface OfferingOption {
 const PRIMARY: OfferingOption[] = [
   { type: "photo", emoji: "📸", label: "Memory", subtitle: "Capture a moment" },
   { type: "song", emoji: "🎵", label: "Song", subtitle: "Offer a sound" },
+  { type: "art", emoji: "🎨", label: "Art", subtitle: "Share a drawing, painting, or creative gift" },
+  { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "Leave a prayer or blessing" },
   { type: "book", emoji: "📚", label: "Book", subtitle: "Share a passage" },
   { type: "story", emoji: "✍️", label: "Musing", subtitle: "Write a thought" },
 ];
@@ -35,6 +37,7 @@ const SECONDARY: OfferingOption[] = [
   { type: "voice", emoji: "🎙️", label: "Voice", subtitle: "Speak your offering" },
   { type: "wish", emoji: "💫", label: "Wish", subtitle: "Send a wish" },
 ];
+
 
 const LIVING: OfferingOption[] = [
   { type: "seasonal_observation", emoji: "🌱", label: "Seasonal Observation", subtitle: "What is changing here?" },
