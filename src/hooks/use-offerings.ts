@@ -26,6 +26,8 @@ export const offeringIcons = {
   nft: "Sparkles",
   voice: "Mic",
   book: "BookOpen",
+  art: "Palette",
+  prayer: "HandHeart",
 } as const;
 
 export const offeringLabels: Record<OfferingType, string> = {
@@ -36,7 +38,10 @@ export const offeringLabels: Record<OfferingType, string> = {
   nft: "NFTs",
   voice: "Voices",
   book: "Books",
+  art: "Art",
+  prayer: "Prayers",
 };
+
 
 interface UseOfferingsOptions {
   /** Tree ID to fetch offerings for */

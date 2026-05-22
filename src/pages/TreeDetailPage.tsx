@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -23,8 +23,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2, Palette, HandHeart, Link2, Check,
 } from "lucide-react";
+
 import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
@@ -136,7 +137,10 @@ const offeringIcons: Record<OfferingType, React.ReactNode> = {
   nft: <Sparkles className="h-4 w-4" />,
   voice: <Mic className="h-4 w-4" />,
   book: <BookOpen className="h-4 w-4" />,
+  art: <Palette className="h-4 w-4" />,
+  prayer: <HandHeart className="h-4 w-4" />,
 };
+
 
 const TreeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -607,6 +611,30 @@ const TreeDetailPage = () => {
     setGatewayOpen(true);
   };
 
+  /** Calm canonical tree-link share — native sheet if available, else clipboard copy. */
+  const [treeLinkCopied, setTreeLinkCopied] = useState(false);
+  const handleShareTreeLink = useCallback(async () => {
+    if (!tree) return;
+    const url = `https://www.s33d.life/tree/${tree.id}`;
+    const title = tree.name || "An Ancient Friend";
+    const text = `Meet ${title} on S33D`;
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ title, text, url });
+        return;
+      }
+    } catch { /* user dismissed — fall through to clipboard */ }
+    try {
+      await navigator.clipboard.writeText(url);
+      setTreeLinkCopied(true);
+      accessibilityToast({ title: "Tree link copied", description: url });
+      setTimeout(() => setTreeLinkCopied(false), 2200);
+    } catch {
+      accessibilityToast({ title: "Could not copy link", description: url });
+    }
+  }, [tree, accessibilityToast]);
+
+
   // photoOfferings + deep-link sync are declared above (before early returns)
   // to keep hook order stable across loading/error states.
 
@@ -740,6 +768,22 @@ const TreeDetailPage = () => {
             if (freshTree) setTree(freshTree);
           }}
         />
+
+        {/* ══════ Calm canonical share link — sits gently beneath the hero ══════ */}
+        <div className="flex justify-center -mt-2 mb-4">
+          <button
+            type="button"
+            onClick={handleShareTreeLink}
+            aria-label="Copy or share this tree's link"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border/30 bg-background/60 backdrop-blur-sm text-xs font-serif text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors"
+          >
+            {treeLinkCopied
+              ? <Check className="h-3.5 w-3.5 text-primary" />
+              : <Link2 className="h-3.5 w-3.5" />}
+            <span>{treeLinkCopied ? "Tree link copied" : "Share this tree"}</span>
+          </button>
+        </div>
+
 
         {/* ══════ Shared offering hero — appears when ?offering=<id> is present ══════ */}
         {(() => {
@@ -1580,9 +1624,11 @@ const TreeDetailPage = () => {
             const typeMap: Record<string, OfferingType> = {
               photo: "photo", song: "song", book: "book", story: "story",
               poem: "poem", voice: "voice", nft: "nft",
-              quote: "story", wish: "poem", gratitude: "story", intention: "story",
+              art: "art", prayer: "prayer",
+              quote: "story", wish: "poem", gratitude: "prayer", intention: "story",
               seasonal_observation: "story", encounter: "story", data: "story",
             };
+
             const offeringType = typeMap[type] || "story";
             setSelectedType(offeringType);
             // Open flow immediately, then close gateway — eliminates flash

@@ -11725,6 +11725,8 @@ export type Database = {
         | "nft"
         | "voice"
         | "book"
+        | "art"
+        | "prayer"
       propagation_type: "seed" | "graft" | "cutting" | "unknown"
       tree_accessibility_tier: "public" | "visible" | "garden" | "private"
     }
@@ -11867,7 +11869,17 @@ export const Constants = {
       market_scope: ["tree", "grove", "species", "region"],
       market_status: ["draft", "open", "closed", "resolved", "cancelled"],
       market_type: ["binary", "date_range", "numeric", "protocol_parameter"],
-      offering_type: ["photo", "poem", "song", "story", "nft", "voice", "book"],
+      offering_type: [
+        "photo",
+        "poem",
+        "song",
+        "story",
+        "nft",
+        "voice",
+        "book",
+        "art",
+        "prayer",
+      ],
       propagation_type: ["seed", "graft", "cutting", "unknown"],
       tree_accessibility_tier: ["public", "visible", "garden", "private"],
     },

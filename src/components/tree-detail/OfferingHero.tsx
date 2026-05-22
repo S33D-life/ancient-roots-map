@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Flower2, Share2, Heart, MapPin } from "lucide-react";
+import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Flower2, Share2, Heart, MapPin, Palette, HandHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Offering, OfferingType } from "@/hooks/use-offerings";
@@ -22,6 +22,8 @@ const typeIcons: Record<OfferingType, JSX.Element> = {
   nft: <Sparkles className="w-3.5 h-3.5" />,
   voice: <Mic className="w-3.5 h-3.5" />,
   book: <BookOpen className="w-3.5 h-3.5" />,
+  art: <Palette className="w-3.5 h-3.5" />,
+  prayer: <HandHeart className="w-3.5 h-3.5" />,
 };
 
 const typeLabels: Record<OfferingType, string> = {
@@ -32,7 +34,10 @@ const typeLabels: Record<OfferingType, string> = {
   nft: "NFT",
   voice: "Whisper",
   book: "Book",
+  art: "Art",
+  prayer: "Prayer",
 };
+
 
 interface OfferingHeroProps {
   offering: Offering;
