@@ -1486,7 +1486,7 @@ const TreeDetailPage = () => {
                                 className="font-serif tracking-wider text-xs gap-1.5"
                               >
                                 <Sparkles className="h-3 w-3" />
-                                Add {offeringLabels[type].slice(0, -1)}
+                                Add {offeringLabels[type]}
                               </Button>
                             ) : (
                               <span className="text-[10px] text-muted-foreground/60 font-serif italic">

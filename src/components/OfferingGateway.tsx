@@ -22,25 +22,24 @@ interface OfferingOption {
   subtitle: string;
 }
 
-const PRIMARY: OfferingOption[] = [
+/** Canonical offering types — shown as one unified grid so no single
+ *  type (Art, Prayer, etc.) feels elevated above the others. Order
+ *  mirrors the Offerings tab grid on the Ancient Friend page. */
+const OFFERING_TYPES: OfferingOption[] = [
   { type: "photo", emoji: "📸", label: "Memory", subtitle: "Capture a moment" },
   { type: "song", emoji: "🎵", label: "Song", subtitle: "Offer a sound" },
-  { type: "art", emoji: "🎨", label: "Art", subtitle: "Share a drawing, painting, or creative gift" },
-  { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "Leave a prayer or blessing" },
   { type: "book", emoji: "📚", label: "Book", subtitle: "Share a passage" },
   { type: "story", emoji: "✍️", label: "Musing", subtitle: "Write a thought" },
-];
-
-const SECONDARY: OfferingOption[] = [
-  { type: "poem", emoji: "📜", label: "Poem", subtitle: "Offer something timeless" },
+  { type: "poem", emoji: "📜", label: "Poem", subtitle: "Something timeless" },
   { type: "quote", emoji: "💬", label: "Quote", subtitle: "Share a line" },
   { type: "voice", emoji: "🎙️", label: "Voice", subtitle: "Speak your offering" },
   { type: "wish", emoji: "💫", label: "Wish", subtitle: "Send a wish" },
+  { type: "art", emoji: "🎨", label: "Art", subtitle: "A drawing or creative gift" },
+  { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "A prayer or blessing" },
 ];
 
-
 const LIVING: OfferingOption[] = [
-  { type: "seasonal_observation", emoji: "🌱", label: "Seasonal Observation", subtitle: "What is changing here?" },
+  { type: "seasonal_observation", emoji: "🌱", label: "Bloom", subtitle: "What is changing here?" },
   { type: "encounter", emoji: "🧭", label: "Encounter Log", subtitle: "What happened here?" },
   { type: "gratitude", emoji: "💓", label: "Gratitude", subtitle: "What are you thankful for?" },
   { type: "intention", emoji: "🔥", label: "Intention", subtitle: "What are you planting forward?" },
@@ -130,12 +129,13 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-8 pt-2 space-y-3">
-            {/* Primary offerings */}
-            <div className="grid grid-cols-1 gap-2.5">
-              {PRIMARY.map((opt) => renderCard(opt, "lg"))}
+            {/* Unified offering grid — every type sits at the same visual weight */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {OFFERING_TYPES.map((opt) => renderCard(opt, "sm"))}
             </div>
 
-            {/* Secondary + Living + Data */}
+            {/* Living observations + Data live behind a soft expander
+                so the main grid stays calm on iPhone widths. */}
             <button
               onClick={() => setShowMore(!showMore)}
               className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
@@ -154,15 +154,11 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden space-y-2"
                 >
-                  {SECONDARY.map((opt) => renderCard(opt, "sm"))}
-
-                  {/* Living / contextual */}
-                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
+                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-1 px-1">
                     Living observations
                   </p>
                   {LIVING.map((opt) => renderCard(opt, "sm"))}
 
-                  {/* Data / contribution */}
                   <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
                     Data & contribution
                   </p>
