@@ -22,25 +22,24 @@ interface OfferingOption {
   subtitle: string;
 }
 
-const PRIMARY: OfferingOption[] = [
+/** Canonical offering types — shown as one unified grid so no single
+ *  type (Art, Prayer, etc.) feels elevated above the others. Order
+ *  mirrors the Offerings tab grid on the Ancient Friend page. */
+const OFFERING_TYPES: OfferingOption[] = [
   { type: "photo", emoji: "📸", label: "Memory", subtitle: "Capture a moment" },
   { type: "song", emoji: "🎵", label: "Song", subtitle: "Offer a sound" },
-  { type: "art", emoji: "🎨", label: "Art", subtitle: "Share a drawing, painting, or creative gift" },
-  { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "Leave a prayer or blessing" },
   { type: "book", emoji: "📚", label: "Book", subtitle: "Share a passage" },
   { type: "story", emoji: "✍️", label: "Musing", subtitle: "Write a thought" },
-];
-
-const SECONDARY: OfferingOption[] = [
-  { type: "poem", emoji: "📜", label: "Poem", subtitle: "Offer something timeless" },
+  { type: "poem", emoji: "📜", label: "Poem", subtitle: "Something timeless" },
   { type: "quote", emoji: "💬", label: "Quote", subtitle: "Share a line" },
   { type: "voice", emoji: "🎙️", label: "Voice", subtitle: "Speak your offering" },
   { type: "wish", emoji: "💫", label: "Wish", subtitle: "Send a wish" },
+  { type: "art", emoji: "🎨", label: "Art", subtitle: "A drawing or creative gift" },
+  { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "A prayer or blessing" },
 ];
 
-
 const LIVING: OfferingOption[] = [
-  { type: "seasonal_observation", emoji: "🌱", label: "Seasonal Observation", subtitle: "What is changing here?" },
+  { type: "seasonal_observation", emoji: "🌱", label: "Bloom", subtitle: "What is changing here?" },
   { type: "encounter", emoji: "🧭", label: "Encounter Log", subtitle: "What happened here?" },
   { type: "gratitude", emoji: "💓", label: "Gratitude", subtitle: "What are you thankful for?" },
   { type: "intention", emoji: "🔥", label: "Intention", subtitle: "What are you planting forward?" },
