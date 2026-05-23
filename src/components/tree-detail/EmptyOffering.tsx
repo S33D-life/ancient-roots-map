@@ -1,6 +1,11 @@
 /**
  * EmptyOffering — Empty state for offering type tabs.
  * Guides users with clear next action instead of a bare placeholder.
+ *
+ * Labels are singular ("Memory", "Song", "Art", "Prayer", …) — see
+ * `offeringLabels` in `src/hooks/use-offerings.ts`. Do NOT trim the
+ * label with slice(0, -1); that produced things like "Leave the first
+ * memor" once we moved away from plural labels.
  */
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
@@ -36,10 +41,19 @@ const emptyMessages: Record<string, { primary: string; secondary: string }> = {
     primary: "Create the first digital artifact for this tree.",
     secondary: "Artifacts anchor this tree's story on-chain.",
   },
+  art: {
+    primary: "Leave the first piece of art beneath this tree.",
+    secondary: "Drawings and creative gifts join the living archive.",
+  },
+  prayer: {
+    primary: "Offer the first prayer or blessing here.",
+    secondary: "Prayers are held quietly within the tree's presence.",
+  },
 };
 
 const emojis: Record<string, string> = {
-  photo: "📷", song: "🎵", poem: "📜", story: "✍️", book: "📖", voice: "🎙️", nft: "✨",
+  photo: "📷", song: "🎵", poem: "📜", story: "✍️", book: "📖",
+  voice: "🎙️", nft: "✨", art: "🎨", prayer: "🙏",
 };
 
 const EmptyOffering = ({ type, label, onAdd }: { type: OfferingType; label: string; onAdd: () => void }) => {
@@ -60,7 +74,7 @@ const EmptyOffering = ({ type, label, onAdd }: { type: OfferingType; label: stri
       )}
       <Button variant="outline" size="sm" onClick={onAdd} className="font-serif tracking-wider text-xs gap-1.5">
         <Sparkles className="h-3 w-3" />
-        Leave the first {label.slice(0, -1).toLowerCase()}
+        Leave the first {label.toLowerCase()}
       </Button>
     </motion.div>
   );
