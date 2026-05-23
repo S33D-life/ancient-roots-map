@@ -30,16 +30,20 @@ export const offeringIcons = {
   prayer: "HandHeart",
 } as const;
 
+/** Canonical singular labels. Used everywhere offerings are listed,
+ *  tabbed, counted, or created. Older plural names ("Memories", "Songs")
+ *  are intentionally replaced — stored enum values are unchanged so
+ *  existing offerings continue to resolve. */
 export const offeringLabels: Record<OfferingType, string> = {
-  photo: "Memories",
-  song: "Songs",
-  poem: "Poems",
-  story: "Musings",
-  nft: "NFTs",
-  voice: "Voices",
-  book: "Books",
+  photo: "Memory",
+  song: "Song",
+  poem: "Poem",
+  story: "Musing",
+  nft: "NFT",
+  voice: "Voice",
+  book: "Book",
   art: "Art",
-  prayer: "Prayers",
+  prayer: "Prayer",
 };
 
 
