@@ -129,12 +129,13 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
 
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-8 pt-2 space-y-3">
-            {/* Primary offerings */}
-            <div className="grid grid-cols-1 gap-2.5">
-              {PRIMARY.map((opt) => renderCard(opt, "lg"))}
+            {/* Unified offering grid — every type sits at the same visual weight */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {OFFERING_TYPES.map((opt) => renderCard(opt, "sm"))}
             </div>
 
-            {/* Secondary + Living + Data */}
+            {/* Living observations + Data live behind a soft expander
+                so the main grid stays calm on iPhone widths. */}
             <button
               onClick={() => setShowMore(!showMore)}
               className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
@@ -153,15 +154,11 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden space-y-2"
                 >
-                  {SECONDARY.map((opt) => renderCard(opt, "sm"))}
-
-                  {/* Living / contextual */}
-                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
+                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-1 px-1">
                     Living observations
                   </p>
                   {LIVING.map((opt) => renderCard(opt, "sm"))}
 
-                  {/* Data / contribution */}
                   <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
                     Data & contribution
                   </p>
