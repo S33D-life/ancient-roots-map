@@ -1620,7 +1620,29 @@ const TreeDetailPage = () => {
           open={gatewayOpen}
           onClose={() => setGatewayOpen(false)}
           onSelect={(type) => {
-            // Map gateway types to offering types (gratitude/intention → story)
+            // Gateway → canonical offering enum alias map.
+            //
+            // The DB enum `offering_type` has exactly 9 values:
+            //   photo, song, book, story, poem, voice, nft, art, prayer
+            //
+            // The gateway surfaces a few extra "living" shortcuts that do NOT
+            // exist in the enum (quote, wish, gratitude, intention,
+            // seasonal_observation / Bloom, encounter, data). Each one is
+            // aliased onto the closest canonical type so saved records stay
+            // valid and deep links keep working. Update both here AND in
+            // OfferingGateway if you add a new shortcut.
+            //
+            //   Art            → art           (direct)
+            //   Prayer         → prayer        (direct)
+            //   Gratitude      → prayer        (legacy alias)
+            //   Wish           → poem
+            //   Quote          → story
+            //   Intention      → story
+            //   Bloom (seasonal_observation) → story  ← see Blooms tab for the
+            //     dedicated phenology surface; this alias keeps the gateway
+            //     shortcut functional without a schema change.
+            //   Encounter Log  → story
+            //   Tree Notes / Data → story
             const typeMap: Record<string, OfferingType> = {
               photo: "photo", song: "song", book: "book", story: "story",
               poem: "poem", voice: "voice", nft: "nft",
