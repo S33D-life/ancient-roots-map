@@ -757,6 +757,8 @@ const TreeDetailPage = () => {
             setWhisperModalOpen(true);
           }}
           onShare={() => setShareCardOpen(true)}
+          onShareLink={handleShareTreeLink}
+          treeLinkCopied={treeLinkCopied}
           onGreetingCard={() => setGreetingCardOpen(true)}
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
