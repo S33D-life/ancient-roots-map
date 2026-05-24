@@ -775,20 +775,10 @@ const TreeDetailPage = () => {
           }}
         />
 
-        {/* ══════ Calm canonical share link — sits gently beneath the hero ══════ */}
-        <div className="flex justify-center -mt-2 mb-4">
-          <button
-            type="button"
-            onClick={handleShareTreeLink}
-            aria-label="Copy or share this tree's link"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border/30 bg-background/60 backdrop-blur-sm text-xs font-serif text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors"
-          >
-            {treeLinkCopied
-              ? <Check className="h-3.5 w-3.5 text-primary" />
-              : <Link2 className="h-3.5 w-3.5" />}
-            <span>{treeLinkCopied ? "Tree link copied" : "Share this tree"}</span>
-          </button>
-        </div>
+        {/* Canonical share-link action now lives in the hero title row (TreePageHero → onShareLink).
+            Kept here as a comment so future edits don't reintroduce a duplicate pill beneath the hero. */}
+
+
 
 
         {/* ══════ Shared offering hero — appears when ?offering=<id> is present ══════ */}
