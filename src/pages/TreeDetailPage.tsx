@@ -295,6 +295,30 @@ const TreeDetailPage = () => {
   });
   const { toast: accessibilityToast } = useToast();
 
+  /** Calm canonical tree-link share — native sheet if available, else clipboard copy.
+   *  Declared before any conditional returns to keep hook order stable. */
+  const handleShareTreeLink = useCallback(async () => {
+    if (!tree) return;
+    const url = `https://www.s33d.life/tree/${tree.id}`;
+    const title = tree.name || "An Ancient Friend";
+    const text = `Meet ${title} on S33D`;
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ title, text, url });
+        return;
+      }
+    } catch { /* user dismissed — fall through to clipboard */ }
+    try {
+      await navigator.clipboard.writeText(url);
+      setTreeLinkCopied(true);
+      accessibilityToast({ title: "Tree link copied", description: url });
+      setTimeout(() => setTreeLinkCopied(false), 2200);
+    } catch {
+      accessibilityToast({ title: "Could not copy link", description: url });
+    }
+  }, [tree, accessibilityToast]);
+
+
   // Brief haptic when the page opens on a closed (red) tree.
   // Communicates "this is closed to you" physically, not just visually.
   useEffect(() => {
