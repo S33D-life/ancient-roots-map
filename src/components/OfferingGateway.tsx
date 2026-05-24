@@ -38,8 +38,15 @@ const OFFERING_TYPES: OfferingOption[] = [
   { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "A prayer or blessing" },
 ];
 
+/** "Living observations" — feelings/observations rather than artefacts.
+ *  ⚠️ Bloom (Seasonal Observation) is currently aliased to the `story`
+ *  enum at write-time (see TreeDetailPage gateway→enum alias map). The
+ *  separate Blooms system exists for ecology pulses; the gateway item
+ *  below is a lightweight "what is changing here?" offering, NOT the
+ *  full Blooms feature. Promoting Bloom to a first-class offering enum
+ *  is a future schema change — not done in this pass. */
 const LIVING: OfferingOption[] = [
-  { type: "seasonal_observation", emoji: "🌱", label: "Bloom", subtitle: "What is changing here?" },
+  { type: "seasonal_observation", emoji: "🌱", label: "Bloom", subtitle: "A living observation — what is changing here?" },
   { type: "encounter", emoji: "🧭", label: "Encounter Log", subtitle: "What happened here?" },
   { type: "gratitude", emoji: "💓", label: "Gratitude", subtitle: "What are you thankful for?" },
   { type: "intention", emoji: "🔥", label: "Intention", subtitle: "What are you planting forward?" },
