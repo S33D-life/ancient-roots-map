@@ -73,6 +73,8 @@ const TreePageHero = ({
   onAddWish,
   onViewMap,
   onShare,
+  onShareLink,
+  treeLinkCopied = false,
   onGreetingCard,
   onWhisper,
   ecoBelonging,
