@@ -208,13 +208,26 @@ const TreePageHero = ({
           className="max-w-2xl mx-auto text-center"
         >
           {/* Name */}
-          <div className="flex items-center justify-center gap-3 mb-2">
+          <div className="flex items-center justify-center gap-2 mb-2">
             <h1
               className="text-3xl md:text-5xl font-serif tracking-wide leading-tight"
               style={{ textShadow: "0 2px 12px hsl(var(--background) / 0.7), 0 1px 3px hsl(var(--background) / 0.5)" }}
             >
               {tree.name}
             </h1>
+            {onShareLink && (
+              <button
+                type="button"
+                onClick={onShareLink}
+                aria-label={treeLinkCopied ? "Tree link copied" : "Share this tree"}
+                title={treeLinkCopied ? "Tree link copied" : "Share this tree"}
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-border/30 bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors shrink-0"
+              >
+                {treeLinkCopied
+                  ? <Check className="h-4 w-4 text-primary" />
+                  : <Link2 className="h-4 w-4" />}
+              </button>
+            )}
           </div>
 
           {/* Accessibility strip — how can wanderers reach this tree? */}
