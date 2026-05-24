@@ -146,7 +146,7 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-8 pt-2 space-y-3">
             {/* Unified offering grid — every type sits at the same visual weight */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 min-[390px]:grid-cols-3 gap-2">
               {OFFERING_TYPES.map((opt) => renderCard(opt, "sm"))}
             </div>
 
