@@ -71,22 +71,31 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
       key={opt.type}
       whileTap={{ scale: 0.97 }}
       onClick={() => onSelect(opt.type)}
+      title={opt.subtitle}
       className={cn(
-        "relative flex items-center gap-3 w-full rounded-2xl text-left transition-all",
-        "border border-border/20 hover:border-primary/30",
-        "active:bg-primary/10",
-        size === "lg" ? "p-4" : "p-3",
+        "relative w-full rounded-2xl text-left transition-all",
+        "border border-border/20 hover:border-primary/30 active:bg-primary/10",
+        size === "lg"
+          ? "flex items-center gap-3 p-4"
+          // Compact tile: stacked icon+label so the unified grid can fit
+          // 3 columns on iPhone widths (≥390px) without crowding.
+          : "flex flex-col items-center justify-center gap-1 p-2.5 min-h-[88px]",
       )}
       style={{
         background: "radial-gradient(ellipse at 30% 50%, hsl(var(--primary) / 0.04), transparent 70%)",
       }}
     >
       <span className={cn("shrink-0", size === "lg" ? "text-3xl" : "text-2xl")}>{opt.emoji}</span>
-      <div className="min-w-0">
-        <p className={cn("font-serif font-medium text-foreground/90", size === "lg" ? "text-base" : "text-sm")}>
+      <div className={cn("min-w-0", size === "sm" && "text-center")}>
+        <p className={cn(
+          "font-serif font-medium text-foreground/90 leading-tight",
+          size === "lg" ? "text-base" : "text-[13px]",
+        )}>
           {opt.label}
         </p>
-        <p className="text-xs text-muted-foreground/60 font-serif">{opt.subtitle}</p>
+        {size === "lg" && (
+          <p className="text-xs text-muted-foreground/60 font-serif">{opt.subtitle}</p>
+        )}
       </div>
     </motion.button>
   );
