@@ -41,6 +41,10 @@ interface TreePageHeroProps {
   onAddWish: () => void;
   onViewMap: () => void;
   onShare: () => void;
+  /** Canonical "copy/share this tree link" — native share sheet if available, clipboard fallback. */
+  onShareLink?: () => void;
+  /** True for ~2s after a successful clipboard copy, swaps the link icon for a check. */
+  treeLinkCopied?: boolean;
   onGreetingCard?: () => void;
   onWhisper?: () => void;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
