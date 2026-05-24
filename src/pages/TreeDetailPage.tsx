@@ -183,6 +183,7 @@ const TreeDetailPage = () => {
   const [showLoreWhisper, setShowLoreWhisper] = useState(true);
   const [refinementOpen, setRefinementOpen] = useState(searchParams.get("refine") === "1");
   const [witnessCount, setWitnessCount] = useState(0);
+  const [treeLinkCopied, setTreeLinkCopied] = useState(false);
   const witnessSessionId = searchParams.get("witness") || undefined;
 
   // Capture arrival context from shared links
