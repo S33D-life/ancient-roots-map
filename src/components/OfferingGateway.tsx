@@ -173,12 +173,16 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
                   <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-1 px-1">
                     Living observations
                   </p>
-                  {LIVING.map((opt) => renderCard(opt, "sm"))}
+                  <div className="grid grid-cols-2 min-[390px]:grid-cols-3 gap-2">
+                    {LIVING.map((opt) => renderCard(opt, "sm"))}
+                  </div>
 
                   <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
                     Data & contribution
                   </p>
-                  {DATA.map((opt) => renderCard(opt, "sm"))}
+                  <div className="grid grid-cols-2 min-[390px]:grid-cols-3 gap-2">
+                    {DATA.map((opt) => renderCard(opt, "sm"))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
