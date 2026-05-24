@@ -38,8 +38,15 @@ const OFFERING_TYPES: OfferingOption[] = [
   { type: "prayer", emoji: "🙏", label: "Prayer", subtitle: "A prayer or blessing" },
 ];
 
+/** "Living observations" — feelings/observations rather than artefacts.
+ *  ⚠️ Bloom (Seasonal Observation) is currently aliased to the `story`
+ *  enum at write-time (see TreeDetailPage gateway→enum alias map). The
+ *  separate Blooms system exists for ecology pulses; the gateway item
+ *  below is a lightweight "what is changing here?" offering, NOT the
+ *  full Blooms feature. Promoting Bloom to a first-class offering enum
+ *  is a future schema change — not done in this pass. */
 const LIVING: OfferingOption[] = [
-  { type: "seasonal_observation", emoji: "🌱", label: "Bloom", subtitle: "What is changing here?" },
+  { type: "seasonal_observation", emoji: "🌱", label: "Bloom", subtitle: "A living observation — what is changing here?" },
   { type: "encounter", emoji: "🧭", label: "Encounter Log", subtitle: "What happened here?" },
   { type: "gratitude", emoji: "💓", label: "Gratitude", subtitle: "What are you thankful for?" },
   { type: "intention", emoji: "🔥", label: "Intention", subtitle: "What are you planting forward?" },
@@ -64,22 +71,31 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
       key={opt.type}
       whileTap={{ scale: 0.97 }}
       onClick={() => onSelect(opt.type)}
+      title={opt.subtitle}
       className={cn(
-        "relative flex items-center gap-3 w-full rounded-2xl text-left transition-all",
-        "border border-border/20 hover:border-primary/30",
-        "active:bg-primary/10",
-        size === "lg" ? "p-4" : "p-3",
+        "relative w-full rounded-2xl text-left transition-all",
+        "border border-border/20 hover:border-primary/30 active:bg-primary/10",
+        size === "lg"
+          ? "flex items-center gap-3 p-4"
+          // Compact tile: stacked icon+label so the unified grid can fit
+          // 3 columns on iPhone widths (≥390px) without crowding.
+          : "flex flex-col items-center justify-center gap-1 p-2.5 min-h-[88px]",
       )}
       style={{
         background: "radial-gradient(ellipse at 30% 50%, hsl(var(--primary) / 0.04), transparent 70%)",
       }}
     >
       <span className={cn("shrink-0", size === "lg" ? "text-3xl" : "text-2xl")}>{opt.emoji}</span>
-      <div className="min-w-0">
-        <p className={cn("font-serif font-medium text-foreground/90", size === "lg" ? "text-base" : "text-sm")}>
+      <div className={cn("min-w-0", size === "sm" && "text-center")}>
+        <p className={cn(
+          "font-serif font-medium text-foreground/90 leading-tight",
+          size === "lg" ? "text-base" : "text-[13px]",
+        )}>
           {opt.label}
         </p>
-        <p className="text-xs text-muted-foreground/60 font-serif">{opt.subtitle}</p>
+        {size === "lg" && (
+          <p className="text-xs text-muted-foreground/60 font-serif">{opt.subtitle}</p>
+        )}
       </div>
     </motion.button>
   );
@@ -130,7 +146,7 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-8 pt-2 space-y-3">
             {/* Unified offering grid — every type sits at the same visual weight */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 min-[390px]:grid-cols-3 gap-2">
               {OFFERING_TYPES.map((opt) => renderCard(opt, "sm"))}
             </div>
 
@@ -157,12 +173,16 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
                   <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-1 px-1">
                     Living observations
                   </p>
-                  {LIVING.map((opt) => renderCard(opt, "sm"))}
+                  <div className="grid grid-cols-2 min-[390px]:grid-cols-3 gap-2">
+                    {LIVING.map((opt) => renderCard(opt, "sm"))}
+                  </div>
 
                   <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
                     Data & contribution
                   </p>
-                  {DATA.map((opt) => renderCard(opt, "sm"))}
+                  <div className="grid grid-cols-2 min-[390px]:grid-cols-3 gap-2">
+                    {DATA.map((opt) => renderCard(opt, "sm"))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -14,39 +14,39 @@ import type { OfferingType } from "@/hooks/use-offerings";
 
 const emptyMessages: Record<string, { primary: string; secondary: string }> = {
   photo: {
-    primary: "Leave the first memory beneath this tree.",
+    primary: "The branches are bare. Hang the first memory.",
     secondary: "Photos become part of this tree's living story.",
   },
   song: {
-    primary: "Be the first to offer a song to this Ancient Friend.",
+    primary: "No song has found this tree yet. Offer the first sound.",
     secondary: "Songs weave into the tree's presence on Earth Radio.",
   },
   poem: {
-    primary: "Write the first poem for this tree's story.",
+    primary: "No poem has rooted here yet. Write the first verse.",
     secondary: "Poems are preserved in the tree's heartwood forever.",
   },
   story: {
-    primary: "Share the first musing about this Ancient Friend.",
+    primary: "No musing has been left beneath these branches. Share the first thought.",
     secondary: "Stories give context and meaning to the living ledger.",
   },
   voice: {
-    primary: "Record the first voice offering for this tree.",
+    primary: "No voice has yet spoken here. Record the first whisper.",
     secondary: "Your voice becomes a whisper in the canopy.",
   },
   book: {
-    primary: "Offer the first book to this tree's library.",
+    primary: "No book has been laid at the roots. Offer the first reading.",
     secondary: "Books connect human knowledge to ancient roots.",
   },
   nft: {
-    primary: "Create the first digital artifact for this tree.",
+    primary: "No digital artifact has been minted for this tree. Create the first.",
     secondary: "Artifacts anchor this tree's story on-chain.",
   },
   art: {
-    primary: "Leave the first piece of art beneath this tree.",
+    primary: "No art has been hung in these branches. Leave the first drawing.",
     secondary: "Drawings and creative gifts join the living archive.",
   },
   prayer: {
-    primary: "Offer the first prayer or blessing here.",
+    primary: "No prayer has been left here yet. Speak the first blessing.",
     secondary: "Prayers are held quietly within the tree's presence.",
   },
 };
