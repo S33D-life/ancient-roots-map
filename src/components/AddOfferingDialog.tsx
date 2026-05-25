@@ -920,8 +920,36 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             </>
           )}
 
-          {/* MUSING / POEM / NFT: content-first hero */}
+          {/* ART: optional photo tray of the artwork, then content-first hero below */}
+          {activeType === "art" && (
+            <div
+              onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={handleDrop}
+              className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
+            >
+              <Label className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase block mb-1.5">
+                Photograph the artwork (optional)
+              </Label>
+              <OfferingPhotoTray
+                photos={photoSlots}
+                onAdd={addPhoto}
+                onRemove={removePhoto}
+                onReorder={(next) => setPhotoSlots(next)}
+                uploadingIds={uploadingPhotoIds}
+                failedIds={failedPhotoIds}
+                successIds={new Set(Object.keys(uploadedUrlsById))}
+                onRetry={retryPhotoUpload}
+                uploadProgress={uploadBatch ?? undefined}
+                offline={!online}
+                disabled={loading && failedPhotoIds.size === 0}
+              />
+            </div>
+          )}
+
+          {/* MUSING / POEM / NFT / ART text hero: content-first */}
           {activeType !== "photo" && (
+
             <>
               {/* The writing area is the hero — big, inviting, immediate */}
               <Textarea
