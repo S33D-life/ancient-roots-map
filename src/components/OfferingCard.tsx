@@ -464,18 +464,31 @@ const CompactRow = ({
         {(() => {
           const cover = getOfferingCover(offering);
           const extra = getOfferingPhotos(offering).length - 1;
-          // Show cover thumb for any offering type that carries imagery (photo or art).
           const hasImagery = offering.type === "photo" || offering.type === "art";
-          return cover && hasImagery ? (
-            <div className="relative shrink-0">
-              <img src={cover} alt={offering.title} className="w-12 h-12 rounded object-cover" loading="lazy" />
-              {extra > 0 && (
-                <span className="absolute -bottom-1 -right-1 px-1 py-0 min-w-[16px] h-4 rounded-full bg-primary/80 text-primary-foreground text-[9px] font-serif text-center leading-4">
-                  +{extra}
-                </span>
-              )}
-            </div>
-          ) : null;
+          if (!hasImagery) return null;
+          const usableImage = cover && (offering.type !== "art" || isLikelyImageUrl(cover));
+          if (usableImage) {
+            return (
+              <div className="relative shrink-0">
+                <img
+                  src={cover!}
+                  alt={offering.title}
+                  className="w-12 h-12 rounded object-cover"
+                  loading="lazy"
+                />
+                {extra > 0 && (
+                  <span className="absolute -bottom-1 -right-1 px-1 py-0 min-w-[16px] h-4 rounded-full bg-primary/80 text-primary-foreground text-[9px] font-serif text-center leading-4">
+                    +{extra}
+                  </span>
+                )}
+              </div>
+            );
+          }
+          // Art with no inline image → poetic palette placeholder
+          if (offering.type === "art") {
+            return <ArtPlaceholder title={offering.title} mediaUrl={offering.media_url} size="thumb" />;
+          }
+          return null;
         })()}
 
         <span className="text-primary/70 shrink-0">{typeIcons[offering.type]}</span>
