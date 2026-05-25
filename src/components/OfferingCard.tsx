@@ -413,7 +413,9 @@ const CompactRow = ({
         {(() => {
           const cover = getOfferingCover(offering);
           const extra = getOfferingPhotos(offering).length - 1;
-          return cover && offering.type === "photo" ? (
+          // Show cover thumb for any offering type that carries imagery (photo or art).
+          const hasImagery = offering.type === "photo" || offering.type === "art";
+          return cover && hasImagery ? (
             <div className="relative shrink-0">
               <img src={cover} alt={offering.title} className="w-12 h-12 rounded object-cover" loading="lazy" />
               {extra > 0 && (
@@ -424,6 +426,7 @@ const CompactRow = ({
             </div>
           ) : null;
         })()}
+
         <span className="text-primary/70 shrink-0">{typeIcons[offering.type]}</span>
         <div className="flex-1 min-w-0">
           <p className="font-serif text-sm text-foreground truncate">{offering.title}</p>
@@ -510,7 +513,9 @@ const OfferingCard = (props: OfferingCardProps) => {
     case "nft":
       return <NftFull {...props} />;
     case "photo":
+    case "art":
       return <PhotoFull {...props} />;
+
     default:
       return <GenericFull {...props} />;
   }
