@@ -464,7 +464,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
           // Full-batch failure while offline → fall back to the offline queue
           // (existing behavior).
-          if (newlyFailed.size === pending.length && activeType === "photo" && !isOnline()) {
+          if (newlyFailed.size === pending.length && (activeType === "photo" || activeType === "art") && !isOnline()) {
             try {
               const dataUrls = await Promise.all(photoSlots.map((p) => fileToDataUrl(p.file)));
               const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
