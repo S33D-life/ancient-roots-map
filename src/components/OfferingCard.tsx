@@ -513,7 +513,9 @@ const OfferingCard = (props: OfferingCardProps) => {
     case "nft":
       return <NftFull {...props} />;
     case "photo":
+    case "art":
       return <PhotoFull {...props} />;
+
     default:
       return <GenericFull {...props} />;
   }
