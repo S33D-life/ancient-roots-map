@@ -20,6 +20,52 @@ import { getPublicAppUrl } from "@/utils/ogMeta";
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
 type OfferingType = Database["public"]["Enums"]["offering_type"];
 
+/** Heuristic: does this URL point at an inline-renderable image? */
+const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|avif|svg|bmp)(\?.*)?$/i;
+const isLikelyImageUrl = (url?: string | null) =>
+  !!url && (IMAGE_EXT_RE.test(url) || /^data:image\//i.test(url) || /\/storage\/v1\/object\/.+\/offerings\//i.test(url));
+
+/** Try to extract a host label from a media_url for the placeholder caption. */
+const hostLabel = (url?: string | null) => {
+  if (!url) return null;
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return null; }
+};
+
+/** Decorative placeholder shown for Art offerings that have no uploaded image. */
+const ArtPlaceholder = ({
+  title,
+  mediaUrl,
+  size = "hero",
+}: { title?: string | null; mediaUrl?: string | null; size?: "hero" | "thumb" }) => {
+  const host = hostLabel(mediaUrl);
+  if (size === "thumb") {
+    return (
+      <div
+        className="w-12 h-12 rounded shrink-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-accent/20 to-primary/10 border border-primary/20"
+        aria-label="Art offering preview"
+      >
+        <Palette className="w-5 h-5 text-primary/70" />
+      </div>
+    );
+  }
+  return (
+    <div
+      className="relative w-full h-44 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/10 via-accent/15 to-primary/5 border-b border-primary/10"
+      aria-label="Art offering preview"
+    >
+      <Palette className="w-10 h-10 text-primary/60" />
+      <p className="font-serif text-xs text-foreground/60 tracking-wide px-4 text-center">
+        {host ? `Artwork linked from ${host}` : "Artwork awaiting an image"}
+      </p>
+      {mediaUrl && (
+        <span className="text-[10px] font-serif text-foreground/50 inline-flex items-center gap-1">
+          <ExternalLink className="w-3 h-3" /> tap link below to view
+        </span>
+      )}
+    </div>
+  );
+};
+
 const typeIcons: Record<OfferingType, React.ReactNode> = {
   photo: <Camera className="h-3.5 w-3.5" />,
   song: <Music className="h-3.5 w-3.5" />,
@@ -306,19 +352,22 @@ const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: 
 const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
   const photos = getOfferingPhotos(offering);
   const [idx, setIdx] = useState(0);
+  const [imgBroken, setImgBroken] = useState(false);
   const total = photos.length;
   const current = photos[idx] || null;
-  const next = () => setIdx((i) => (i + 1) % total);
-  const prev = () => setIdx((i) => (i - 1 + total) % total);
+  const showImage = !!current && !imgBroken && (offering.type !== "art" || isLikelyImageUrl(current));
+  const next = () => { setImgBroken(false); setIdx((i) => (i + 1) % total); };
+  const prev = () => { setImgBroken(false); setIdx((i) => (i - 1 + total) % total); };
   return (
     <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/20 transition-all">
-      {current && (
+      {showImage ? (
         <div className="relative overflow-hidden">
           <img
-            src={current}
+            src={current!}
             alt={offering.title}
             className="w-full max-h-64 object-cover group-hover:scale-[1.02] transition-transform duration-700"
             loading="lazy"
+            onError={() => setImgBroken(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
           {total > 1 && (
@@ -355,7 +404,9 @@ const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }
             </>
           )}
         </div>
-      )}
+      ) : offering.type === "art" ? (
+        <ArtPlaceholder title={offering.title} mediaUrl={offering.media_url} size="hero" />
+      ) : null}
       <CardContent className="p-5">
         <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
         {offering.content && (
@@ -413,18 +464,31 @@ const CompactRow = ({
         {(() => {
           const cover = getOfferingCover(offering);
           const extra = getOfferingPhotos(offering).length - 1;
-          // Show cover thumb for any offering type that carries imagery (photo or art).
           const hasImagery = offering.type === "photo" || offering.type === "art";
-          return cover && hasImagery ? (
-            <div className="relative shrink-0">
-              <img src={cover} alt={offering.title} className="w-12 h-12 rounded object-cover" loading="lazy" />
-              {extra > 0 && (
-                <span className="absolute -bottom-1 -right-1 px-1 py-0 min-w-[16px] h-4 rounded-full bg-primary/80 text-primary-foreground text-[9px] font-serif text-center leading-4">
-                  +{extra}
-                </span>
-              )}
-            </div>
-          ) : null;
+          if (!hasImagery) return null;
+          const usableImage = cover && (offering.type !== "art" || isLikelyImageUrl(cover));
+          if (usableImage) {
+            return (
+              <div className="relative shrink-0">
+                <img
+                  src={cover!}
+                  alt={offering.title}
+                  className="w-12 h-12 rounded object-cover"
+                  loading="lazy"
+                />
+                {extra > 0 && (
+                  <span className="absolute -bottom-1 -right-1 px-1 py-0 min-w-[16px] h-4 rounded-full bg-primary/80 text-primary-foreground text-[9px] font-serif text-center leading-4">
+                    +{extra}
+                  </span>
+                )}
+              </div>
+            );
+          }
+          // Art with no inline image → poetic palette placeholder
+          if (offering.type === "art") {
+            return <ArtPlaceholder title={offering.title} mediaUrl={offering.media_url} size="thumb" />;
+          }
+          return null;
         })()}
 
         <span className="text-primary/70 shrink-0">{typeIcons[offering.type]}</span>
