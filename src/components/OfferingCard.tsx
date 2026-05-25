@@ -352,19 +352,22 @@ const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: 
 const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }: OfferingCardProps) => {
   const photos = getOfferingPhotos(offering);
   const [idx, setIdx] = useState(0);
+  const [imgBroken, setImgBroken] = useState(false);
   const total = photos.length;
   const current = photos[idx] || null;
-  const next = () => setIdx((i) => (i + 1) % total);
-  const prev = () => setIdx((i) => (i - 1 + total) % total);
+  const showImage = !!current && !imgBroken && (offering.type !== "art" || isLikelyImageUrl(current));
+  const next = () => { setImgBroken(false); setIdx((i) => (i + 1) % total); };
+  const prev = () => { setImgBroken(false); setIdx((i) => (i - 1 + total) % total); };
   return (
     <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/20 transition-all">
-      {current && (
+      {showImage ? (
         <div className="relative overflow-hidden">
           <img
-            src={current}
+            src={current!}
             alt={offering.title}
             className="w-full max-h-64 object-cover group-hover:scale-[1.02] transition-transform duration-700"
             loading="lazy"
+            onError={() => setImgBroken(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent pointer-events-none" />
           {total > 1 && (
