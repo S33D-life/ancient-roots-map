@@ -357,8 +357,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
       // ── Offline branch: queue the whole offering (record + photo blobs) in
       // IndexedDB. The sync engine will upload photos and create the row when
-      // connectivity returns. Currently scoped to photo offerings.
-      if (!isOnline() && activeType === "photo" && photoSlots.length > 0) {
+      // connectivity returns. Applies to any image-bearing offering (Memory + Art).
+      if (!isOnline() && (activeType === "photo" || activeType === "art") && photoSlots.length > 0) {
         try {
           const dataUrls = await Promise.all(photoSlots.map((p) => fileToDataUrl(p.file)));
           const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
