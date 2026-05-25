@@ -404,7 +404,9 @@ const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }
             </>
           )}
         </div>
-      )}
+      ) : offering.type === "art" ? (
+        <ArtPlaceholder title={offering.title} mediaUrl={offering.media_url} size="hero" />
+      ) : null}
       <CardContent className="p-5">
         <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
         {offering.content && (
