@@ -20,6 +20,52 @@ import { getPublicAppUrl } from "@/utils/ogMeta";
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
 type OfferingType = Database["public"]["Enums"]["offering_type"];
 
+/** Heuristic: does this URL point at an inline-renderable image? */
+const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|avif|svg|bmp)(\?.*)?$/i;
+const isLikelyImageUrl = (url?: string | null) =>
+  !!url && (IMAGE_EXT_RE.test(url) || /^data:image\//i.test(url) || /\/storage\/v1\/object\/.+\/offerings\//i.test(url));
+
+/** Try to extract a host label from a media_url for the placeholder caption. */
+const hostLabel = (url?: string | null) => {
+  if (!url) return null;
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return null; }
+};
+
+/** Decorative placeholder shown for Art offerings that have no uploaded image. */
+const ArtPlaceholder = ({
+  title,
+  mediaUrl,
+  size = "hero",
+}: { title?: string | null; mediaUrl?: string | null; size?: "hero" | "thumb" }) => {
+  const host = hostLabel(mediaUrl);
+  if (size === "thumb") {
+    return (
+      <div
+        className="w-12 h-12 rounded shrink-0 flex items-center justify-center bg-gradient-to-br from-primary/15 via-accent/20 to-primary/10 border border-primary/20"
+        aria-label="Art offering preview"
+      >
+        <Palette className="w-5 h-5 text-primary/70" />
+      </div>
+    );
+  }
+  return (
+    <div
+      className="relative w-full h-44 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/10 via-accent/15 to-primary/5 border-b border-primary/10"
+      aria-label="Art offering preview"
+    >
+      <Palette className="w-10 h-10 text-primary/60" />
+      <p className="font-serif text-xs text-foreground/60 tracking-wide px-4 text-center">
+        {host ? `Artwork linked from ${host}` : "Artwork awaiting an image"}
+      </p>
+      {mediaUrl && (
+        <span className="text-[10px] font-serif text-foreground/50 inline-flex items-center gap-1">
+          <ExternalLink className="w-3 h-3" /> tap link below to view
+        </span>
+      )}
+    </div>
+  );
+};
+
 const typeIcons: Record<OfferingType, React.ReactNode> = {
   photo: <Camera className="h-3.5 w-3.5" />,
   song: <Music className="h-3.5 w-3.5" />,
