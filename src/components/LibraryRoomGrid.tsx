@@ -16,6 +16,7 @@ const PRIMARY: Room[] = [
   { key: "atlas",           label: "🗺 Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
   { key: "life-groves",     label: "🌿 Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
   { key: "quest-cave",      label: "🕯 Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+  { key: "arborium",        label: "🌿 The Arborium",    desc: "Living field guide of the forest",         accentH: 95,  particle: "leaf"    },
 ];
 
 const LIVING_LIBRARY: Room[] = [
