@@ -23,6 +23,7 @@ const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
 
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 const DevRoom = lazy(() => import("@/components/library/DevRoom"));
+const ArboriumRoom = lazy(() => import("@/components/library/ArboriumRoom"));
 const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
 
 // Room aliases for backward compatibility
