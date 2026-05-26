@@ -84,4 +84,6 @@ export const ROUTES = {
   TELEGRAM_HANDOFF: "/telegram-handoff",
   /** My Sovereign Data — personal data export */
   SOVEREIGN_DATA: "/living-archive",
+  /** The Arborium — living field guide */
+  ARBORIUM: "/library/arborium",
 } as const;
