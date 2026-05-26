@@ -205,6 +205,7 @@ const HeartwoodRoomPage = () => {
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
         {resolvedRoom === "quest-cave" && <QuestCaveRoom />}
+        {resolvedRoom === "arborium" && <ArboriumRoom />}
         {resolvedRoom === "music-room" && <MusicRoom />}
         {resolvedRoom === "greenhouse" && <Greenhouse />}
         {resolvedRoom === "wishlist" && <WishingTreeUnified />}
