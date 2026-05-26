@@ -66,6 +66,7 @@ const ROOM_SEQUENCE = [
   "gallery",
   "staff-room",
   "quest-cave",
+  "arborium",
   "bookshelf",
   "seed-cellar",
   "music-room",
