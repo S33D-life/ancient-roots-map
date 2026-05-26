@@ -47,6 +47,7 @@ const ROOM_ALIASES: Record<string, string> = {
 const ROOM_LABELS: Record<string, string> = {
   "staff-room": "Staff Room",
   "quest-cave": "Quest Cave",
+  "arborium": "The Arborium",
   "gallery": "Ancient Friends",
   "music-room": "Music Room",
   "greenhouse": "Greenhouse",
