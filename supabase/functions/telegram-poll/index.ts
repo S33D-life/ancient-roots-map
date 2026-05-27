@@ -272,7 +272,7 @@ Deno.serve(async () => {
     .single();
 
   if (stateErr) {
-    return new Response(JSON.stringify({ error: stateErr.message }), { status: 500 });
+    { console.error("[telegram-poll] state error:", stateErr); return new Response(JSON.stringify({ error: "Internal error" }), { status: 500 }); }
   }
 
   currentOffset = state.update_offset;
@@ -594,7 +594,7 @@ Deno.serve(async () => {
         .upsert(rows, { onConflict: "update_id" });
 
       if (insertErr) {
-        return new Response(JSON.stringify({ error: insertErr.message }), { status: 500 });
+        { console.error("[telegram-poll] insert error:", insertErr); return new Response(JSON.stringify({ error: "Internal error" }), { status: 500 }); }
       }
       totalProcessed += rows.length;
     }
@@ -607,7 +607,7 @@ Deno.serve(async () => {
       .eq("id", 1);
 
     if (offsetErr) {
-      return new Response(JSON.stringify({ error: offsetErr.message }), { status: 500 });
+      { console.error("[telegram-poll] offset error:", offsetErr); return new Response(JSON.stringify({ error: "Internal error" }), { status: 500 }); }
     }
 
     currentOffset = newOffset;

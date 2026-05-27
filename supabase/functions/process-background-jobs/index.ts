@@ -70,7 +70,8 @@ serve(async (req: Request) => {
       .limit(10);
 
     if (fetchError) {
-      return new Response(JSON.stringify({ error: fetchError.message }), {
+      console.error("[process-background-jobs] fetch error:", fetchError);
+      return new Response(JSON.stringify({ error: "Unable to fetch jobs" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -141,8 +142,9 @@ serve(async (req: Request) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    console.error("[process-background-jobs] unexpected:", err);
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
+      JSON.stringify({ error: "Unexpected error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

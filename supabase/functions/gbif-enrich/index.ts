@@ -42,6 +42,42 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  // Require authenticated curator/keeper before allowing any writes
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: claims, error: claimsErr } = await userClient.auth.getClaims(
+    authHeader.slice(7),
+  );
+  if (claimsErr || !claims?.claims?.sub) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const userId = claims.claims.sub as string;
+  const [{ data: isCurator }, { data: isKeeper }] = await Promise.all([
+    userClient.rpc("has_role", { _user_id: userId, _role: "curator" }),
+    userClient.rpc("has_role", { _user_id: userId, _role: "keeper" }),
+  ]);
+  if (!isCurator && !isKeeper) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { species_strings } = (await req.json()) as EnrichRequest;
     if (!species_strings || !Array.isArray(species_strings) || species_strings.length === 0) {
@@ -51,9 +87,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
+
 
     const results: Array<{
       original: string;
@@ -167,7 +202,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("GBIF enrich error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "Enrichment failed" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

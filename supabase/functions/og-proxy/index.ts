@@ -464,8 +464,9 @@ async function fetchOfferingMeta(treeId: string, offeringId: string): Promise<Me
     const [offeringRes, treeRes] = await Promise.all([
       supabase
         .from("offerings")
-        .select("id, title, content, type, media_url, photos, thumbnail_url, tree_id, created_at, updated_at")
+        .select("id, title, content, type, media_url, photos, thumbnail_url, tree_id, created_at, updated_at, visibility")
         .eq("id", offeringId)
+        .eq("visibility", "public")
         .maybeSingle(),
       supabase
         .from("trees")
