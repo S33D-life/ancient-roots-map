@@ -51,65 +51,102 @@ export default function SpeciesCard({
       />
 
       {/* specimen plate */}
-      <div className="relative h-20 flex items-center justify-center border-b border-amber-900/12 bg-[hsl(45_40%_94%)]/55 dark:bg-card/30">
-        <span className="text-4xl select-none" aria-hidden>{species.emoji}</span>
+      <div
+        className={`relative flex items-center justify-center border-b border-amber-900/12 bg-[hsl(45_40%_94%)]/55 dark:bg-card/30 ${
+          familyMode ? "h-28" : "h-20"
+        }`}
+      >
+        <span
+          className={`select-none ${familyMode ? "text-6xl" : "text-4xl"}`}
+          aria-hidden
+        >
+          {species.emoji}
+        </span>
         <span className="absolute top-2 left-2.5 text-[9px] font-serif uppercase tracking-[0.18em] text-amber-900/42 dark:text-amber-200/38">
           Specimen
         </span>
-        <span className="absolute bottom-2 right-2.5 text-[10px] font-serif italic text-amber-900/48 dark:text-amber-200/42">
-          {species.latin}
-        </span>
+        {!familyMode && (
+          <span className="absolute bottom-2 right-2.5 text-[10px] font-serif italic text-amber-900/48 dark:text-amber-200/42">
+            {species.latin}
+          </span>
+        )}
       </div>
 
-      <div className="relative p-4 space-y-2.5">
+      <div className={`relative ${familyMode ? "p-5 space-y-3" : "p-4 space-y-2.5"}`}>
 
         {/* name + tagline */}
         <header>
-          <h3 className="font-serif text-base text-foreground leading-tight">{species.common}</h3>
-          <p className="text-[11px] font-serif text-muted-foreground/72 mt-0.5 leading-relaxed">
-            {species.tagline}
+          <h3
+            className={`font-serif text-foreground leading-tight ${
+              familyMode ? "text-lg" : "text-base"
+            }`}
+          >
+            {species.common}
+          </h3>
+          <p
+            className={`font-serif text-muted-foreground/78 mt-1 leading-relaxed ${
+              familyMode ? "text-[13px]" : "text-[11px]"
+            }`}
+          >
+            {tagline}
           </p>
         </header>
 
         {/* Identify by — primary clue, most prominent */}
         <div
-          className="rounded-xl border border-amber-900/15 p-2.5 space-y-1"
+          className={`rounded-xl border border-amber-900/15 space-y-1 ${
+            familyMode ? "p-3" : "p-2.5"
+          }`}
           style={{ background: "hsl(45 38% 97% / 0.85)" }}
         >
           <div className="flex items-center gap-1.5">
             <Eye className="w-3 h-3 text-amber-900/48 dark:text-amber-200/48 shrink-0" />
             <span className="text-[9px] font-serif uppercase tracking-[0.15em] text-amber-900/52 dark:text-amber-200/48">
-              Identify by
+              {familyMode ? "Look for" : "Identify by"}
             </span>
           </div>
-          <p className="text-[12px] font-serif text-foreground/88 leading-snug">{species.idClue}</p>
-        </div>
-
-        {/* Seasonal clue */}
-        <div className="flex items-start gap-2">
-          <Sun className="w-3 h-3 mt-0.5 shrink-0 text-amber-600/55 dark:text-amber-400/55" />
-          <p className="text-[11px] font-serif text-muted-foreground/78 leading-snug">
-            {species.seasonalClue}
+          <p
+            className={`font-serif text-foreground/88 leading-snug ${
+              familyMode ? "text-[13px]" : "text-[12px]"
+            }`}
+          >
+            {idClue}
           </p>
         </div>
 
-        {/* Look for */}
-        <div className="flex items-start gap-2">
-          <Search className="w-3 h-3 mt-0.5 shrink-0 text-emerald-700/45 dark:text-emerald-400/45" />
-          <p className="text-[11px] font-serif text-muted-foreground/78 leading-snug">
-            {species.lookFor}
-          </p>
-        </div>
+        {/* Density: hide extra detail rows in Family Mode */}
+        {!familyMode && (
+          <>
+            {/* Seasonal clue */}
+            <div className="flex items-start gap-2">
+              <Sun className="w-3 h-3 mt-0.5 shrink-0 text-amber-600/55 dark:text-amber-400/55" />
+              <p className="text-[11px] font-serif text-muted-foreground/78 leading-snug">
+                {species.seasonalClue}
+              </p>
+            </div>
+
+            {/* Look for */}
+            <div className="flex items-start gap-2">
+              <Search className="w-3 h-3 mt-0.5 shrink-0 text-emerald-700/45 dark:text-emerald-400/45" />
+              <p className="text-[11px] font-serif text-muted-foreground/78 leading-snug">
+                {species.lookFor}
+              </p>
+            </div>
+          </>
+        )}
 
         {/* Quest placeholder link */}
         <Link
           to={`/library/arborium?species=${species.slug}`}
-          className="inline-flex items-center gap-1 text-[11px] font-serif text-primary/72 hover:text-primary transition-colors pt-0.5"
+          className={`inline-flex items-center gap-1 font-serif text-primary/72 hover:text-primary transition-colors pt-0.5 ${
+            familyMode ? "text-[12px]" : "text-[11px]"
+          }`}
         >
-          {species.questHint ?? "Related quests"}
+          {familyMode ? "Go find one" : species.questHint ?? "Related quests"}
           <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
     </motion.article>
   );
 }
+
