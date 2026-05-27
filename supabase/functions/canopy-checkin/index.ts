@@ -163,7 +163,8 @@ Deno.serve(async (req) => {
       });
 
       if (witnessError) {
-        return new Response(JSON.stringify({ error: witnessError.message }), {
+        console.error("[canopy-checkin] witness insert error:", witnessError);
+        return new Response(JSON.stringify({ error: "Unable to record witness" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
