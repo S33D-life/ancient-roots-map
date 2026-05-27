@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("GBIF enrich error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "Enrichment failed" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
