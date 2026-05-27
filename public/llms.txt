@@ -1,0 +1,35 @@
+# S33D.life
+
+> Living Atlas of Ancient Trees — a participatory, locally curated map of the world's ancient friends, gathering wisdom, stories, and ecological observations from wanderers around the planet.
+
+S33D.life is a community-run library that combines an interactive global map of remarkable ancient trees ("Ancient Friends"), a stewardship economy of Hearts and offerings (memories, songs, art, prayer, blooms), and a botanical study room called the Arborium. Wanderers check in at trees, leave offerings and whispers, follow seasonal rhythms, and join a Council of Life that gathers around lunar phases.
+
+## Pages
+
+- [Home](/): Project introduction and entry into the living atlas.
+- [The Map](/map): Interactive global map of ancient trees, groves, and bioregions.
+- [World Atlas](/atlas): Country-by-country atlas of ancient trees.
+- [Countries Index](/atlas/countries): All countries with mapped ancient friends.
+- [Bio-regions Index](/atlas/bio-regions): Ecological regions and their living archives.
+- [Heartwood Library](/library): Rooms of knowledge — Arborium, Ancient Friends, Quest Cave, Rhythms, and more.
+- [The Arborium](/library/arborium): Botanical field guide — recognise, understand, and build relationship with trees.
+- [Ancient Friends](/library/ancient-friends): The permanent archive of verified ancient trees.
+- [Groves](/groves): Living groves formed by clusters of nearby trees.
+- [Forest Pulse](/pulse): Real-time ecosystem activity across the atlas.
+- [Pilgrimage Pathways](/pathways): Curated routes between ancient friends.
+- [Species Hives](/hives): Botanical lineages and species councils.
+- [Council of Life](/council-of-life): Bi-weekly gatherings at new and full moons.
+- [Council Records](/council/records): Archive of past council sessions.
+- [Living Archive](/living-archive): Cross-grove memory and story archive.
+- [Discovery](/discovery): New offerings, whispers, and tree encounters.
+- [Tree Ledger](/ledger): Public economy and provenance ledger.
+- [Value Tree](/value-tree): How the stewardship economy works.
+- [Golden Dream](/golden-dream): Long-horizon vision for the atlas.
+- [Radio](/radio): Community audio offerings and ambient field recordings.
+- [Welcome](/welcome): First steps for new wanderers.
+- [Install](/install): Install S33D as a mobile/desktop app.
+
+## Optional
+
+- [Docs](/docs): Public documentation for stewards and contributors.
+- [S33D Gateway](/s33d): Lore and origin of the S33D project.
