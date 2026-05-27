@@ -17,3 +17,5 @@ Disallow: /patronsportal/
 User-agent: *
 Allow: /
 Disallow: /patronsportal/
+
+Sitemap: https://www.s33d.life/sitemap.xml
