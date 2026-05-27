@@ -70,7 +70,8 @@ serve(async (req: Request) => {
       .limit(10);
 
     if (fetchError) {
-      return new Response(JSON.stringify({ error: fetchError.message }), {
+      console.error("[process-background-jobs] fetch error:", fetchError);
+      return new Response(JSON.stringify({ error: "Unable to fetch jobs" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
