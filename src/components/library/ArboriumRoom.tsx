@@ -29,10 +29,14 @@ import QuestPathStrip from "@/components/arborium/QuestPathStrip";
 import IDStarterCard, { ID_STARTER_CLUES } from "@/components/arborium/IDStarterCard";
 import TreeFamiliesStrip from "@/components/arborium/TreeFamiliesStrip";
 import { STARTER_SPECIES } from "@/components/arborium/starterSpecies";
+import FamilyModeToggle from "@/components/arborium/FamilyModeToggle";
+import { useFamilyMode } from "@/components/arborium/useFamilyMode";
 
 const ID_CHIPS = ["Leaf", "Bark", "Bud", "Seed", "Flower", "Silhouette", "Season"];
 
 export default function ArboriumRoom() {
+  const { familyMode, toggle } = useFamilyMode();
+
   return (
     <div className="space-y-10 pb-16">
 
@@ -67,18 +71,22 @@ export default function ArboriumRoom() {
         />
 
         <div className="relative max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-900/20 bg-[hsl(48_55%_96%)]/70 text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/68">
-            <Sun className="w-3 h-3" /> The Arborium
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-900/20 bg-[hsl(48_55%_96%)]/70 text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/68">
+              <Sun className="w-3 h-3" /> The Arborium
+            </div>
+            <FamilyModeToggle active={familyMode} onToggle={toggle} />
           </div>
           <h1 className="mt-3 font-serif text-2xl md:text-3xl leading-tight text-[hsl(95_30%_17%)]">
-            Learn to read the forest
+            {familyMode ? "Meet the trees" : "Learn to read the forest"}
           </h1>
           <p className="mt-2.5 font-serif text-sm md:text-base leading-relaxed text-[hsl(95_15%_28%)]/82 max-w-lg">
-            Begin with what you can see — a leaf, bark, a bud, a seed.
-            The Arborium is the living field guide of the forest:
-            botanical atlas, woodland apprenticeship, shared ecological memory.
+            {familyMode
+              ? "Look at a leaf. Touch the bark. Find a seed. Each tree has clues — and you can learn to spot them."
+              : "Begin with what you can see — a leaf, bark, a bud, a seed. The Arborium is the living field guide of the forest: botanical atlas, woodland apprenticeship, shared ecological memory."}
           </p>
         </div>
+
       </motion.section>
 
       {/* ── 2. Tree ID Starter ── */}
@@ -174,11 +182,18 @@ export default function ArboriumRoom() {
           </span>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          className={`grid gap-4 ${
+            familyMode
+              ? "grid-cols-1 sm:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          }`}
+        >
           {STARTER_SPECIES.map((s, i) => (
-            <SpeciesCard key={s.slug} species={s} index={i} />
+            <SpeciesCard key={s.slug} species={s} index={i} familyMode={familyMode} />
           ))}
         </div>
+
       </section>
 
       {/* ── 5. Tree Families ── */}
