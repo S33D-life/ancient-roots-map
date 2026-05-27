@@ -128,7 +128,7 @@ export async function registerAgent(_req: Request, auth: AuthResult, body: any) 
     tier: "seedling",
   }).select("id, status").single();
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
   return { data: { agentId: data.id, status: data.status, message: "Agent registered and awaiting activation" }, status: 201 };
 }
 
@@ -201,7 +201,7 @@ export async function updateCapabilities(_req: Request, _auth: AuthResult, param
   });
 
   const { error } = await db.from("agent_capabilities").insert(rows);
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
   return { data: { updated: rows.length }, status: 200 };
 }
 
@@ -229,7 +229,7 @@ export async function submitSource(_req: Request, _auth: AuthResult, body: any) 
     discovered_by_agent_id: agentId,
   }).select("id").single();
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   const contrib = await createContribution({
     agentId,
@@ -264,7 +264,7 @@ export async function submitDataset(_req: Request, _auth: AuthResult, body: any)
     created_by_agent_id: agentId,
   }).select("id").single();
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId,
@@ -352,7 +352,7 @@ export async function submitResearchTreesBulk(_req: Request, _auth: AuthResult, 
   if (validRows.length > 0) {
     const { data: inserted, error } = await db.from("research_trees").insert(validRows).select("id");
     if (error) {
-      return { error: `Batch insert failed: ${error.message}`, status: 500 };
+      { console.error("[agentGarden] batch insert error:", error.message); return { error: "Batch insert failed.", status: 500 }; }
     }
     accepted = (inserted ?? []).length;
 
@@ -392,7 +392,7 @@ export async function submitSpeciesClassification(_req: Request, _auth: AuthResu
     confidence_score: body.confidenceScore ?? null,
   }).eq("id", params.recordId);
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId: body.agentId,
@@ -422,7 +422,7 @@ export async function submitGeocode(_req: Request, _auth: AuthResult, params: Re
     geo_precision: "exact",
   }).eq("id", params.recordId);
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId: body.agentId,
@@ -450,7 +450,7 @@ export async function submitEnrichment(_req: Request, _auth: AuthResult, params:
   if (Object.keys(updates).length === 0) return { error: "No enrichment fields provided", status: 400 };
 
   const { error } = await db.from("research_trees").update(updates).eq("id", params.recordId);
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId: body.agentId,
@@ -474,7 +474,7 @@ export async function submitDuplicateCheck(_req: Request, _auth: AuthResult, par
     duplicate_of_record_id: body.possibleDuplicateRecordId,
   }).eq("id", params.recordId);
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId: body.agentId,
@@ -498,7 +498,7 @@ export async function submitCandidate(_req: Request, _auth: AuthResult, params: 
     record_status: "ancient_friend_candidate",
   }).eq("id", params.recordId).in("record_status", ["research", "verified"]);
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId: body.agentId,
@@ -537,7 +537,7 @@ export async function submitSpark(_req: Request, _auth: AuthResult, body: any) {
     status: "open",
   }).select("id").single();
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   await createContribution({
     agentId: body.agentId,
@@ -571,7 +571,7 @@ export async function getTasks(_req: Request, _auth: AuthResult, _params: Record
 
   query = query.order("created_at", { ascending: false }).range(cursor, cursor + limit - 1);
   const { data, error, count } = await query;
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   return {
     data: {
@@ -594,7 +594,7 @@ export async function getContributions(_req: Request, _auth: AuthResult, params:
     .order("created_at", { ascending: false })
     .range(cursor, cursor + limit - 1);
 
-  if (error) return { error: error.message, status: 500 };
+  if (error) { console.error("[agentGarden] DB error:", error.message); return { error: "A database error occurred.", status: 500 }; }
 
   return {
     data: {
