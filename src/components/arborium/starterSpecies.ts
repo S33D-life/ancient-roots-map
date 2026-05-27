@@ -19,6 +19,11 @@ export interface SpeciesSeed {
   lookFor: string;
   emoji: string;
   questHint?: string;
+  /** Optional simpler copy used when Family Mode is on. */
+  family?: {
+    tagline?: string;
+    idClue?: string;
+  };
 }
 
 export const STARTER_SPECIES: SpeciesSeed[] = [
