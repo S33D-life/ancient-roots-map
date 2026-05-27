@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Package manager lockfiles
+bun.lock
+bun.lockb
+deno.lock
+
 # Environment files (never commit secrets)
 .env
 .env.*

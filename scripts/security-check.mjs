@@ -6,6 +6,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const TEXT_MAX_BYTES = 1_000_000;
 const SKIP_DIRS = new Set([".git", "node_modules", "dist", "coverage"]);
+const ALLOW_PRAGMA_RE = /security-check:\s*allow\s+\S+/i;
 
 const decodeTracked = (raw) =>
   raw
@@ -74,16 +75,33 @@ const secretPatterns = [
   {
     label: "Supabase service role key assignment",
     regex: /SUPABASE_SERVICE_ROLE_KEY\s*=\s*[A-Za-z0-9._-]{20,}/i,
+    allowPragma: false,
   },
   {
     label: "Supabase publishable key assignment",
     regex: /VITE_SUPABASE_PUBLISHABLE_KEY\s*=\s*[A-Za-z0-9._-]{20,}/i,
+    allowPragma: false,
   },
   {
     label: "JWT-like token",
     regex: /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/,
+    allowPragma: true,
   },
 ];
+
+const hasAllowPragma = (text, matchIndex) => {
+  const lineStart = text.lastIndexOf("\n", matchIndex) + 1;
+  const lineEnd = text.indexOf("\n", matchIndex);
+  const currentLine = text.slice(lineStart, lineEnd === -1 ? text.length : lineEnd);
+
+  const previousLineEnd = lineStart > 0 ? lineStart - 1 : -1;
+  const previousLineStart =
+    previousLineEnd > 0 ? text.lastIndexOf("\n", previousLineEnd - 1) + 1 : 0;
+  const previousLine =
+    previousLineEnd >= 0 ? text.slice(previousLineStart, previousLineEnd) : "";
+
+  return ALLOW_PRAGMA_RE.test(currentLine) || ALLOW_PRAGMA_RE.test(previousLine);
+};
 
 const allowList = new Set([".env.example"]);
 const findings = [];
@@ -104,9 +122,12 @@ for (const file of tracked) {
 
   const text = buf.toString("utf8");
   for (const pattern of secretPatterns) {
-    if (pattern.regex.test(text)) {
-      findings.push({ file, label: pattern.label });
+    const match = pattern.regex.exec(text);
+    if (!match) continue;
+    if (pattern.allowPragma && hasAllowPragma(text, match.index)) {
+      continue;
     }
+    findings.push({ file, label: pattern.label });
   }
 }
 
