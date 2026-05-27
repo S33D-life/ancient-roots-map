@@ -111,6 +111,21 @@ Deno.serve(async (req) => {
     );
   }
 
+  // Only accept invocations from pg_cron (which is configured with the
+  // service-role key) or callers presenting a matching CRON_SECRET header.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const presentedSecret = req.headers.get("x-cron-secret");
+  const isServiceRole = authHeader === `Bearer ${SERVICE_KEY}`;
+  const isCronSecret = !!cronSecret && presentedSecret === cronSecret;
+  if (!isServiceRole && !isCronSecret) {
+    return new Response(
+      JSON.stringify({ ok: false, error: "Forbidden" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { persistSession: false },
   });
