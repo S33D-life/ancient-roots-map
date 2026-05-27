@@ -585,7 +585,8 @@ serve(async (req) => {
     return await match.handler(req, auth, match.params, url);
   } catch (e) {
     console.error("api-gateway error:", e);
-    return err("INTERNAL", e instanceof Error ? e.message : "Unknown error", 500);
+    console.error("[api-gateway] internal error:", e);
+    return err("INTERNAL", "An internal error occurred.", 500);
   }
 });
 
