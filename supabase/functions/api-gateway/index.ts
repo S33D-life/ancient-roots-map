@@ -270,7 +270,7 @@ route("GET", "/api/v1/trees", async (_req, auth, _params, url) => {
 
   query = query.order("name").range(offset, offset + limit - 1);
   const { data, error, count } = await query;
-  if (error) return err("DB_ERROR", error.message, 500);
+  if (error) { console.error("[api-gateway] DB error:", error.message); return err("DB_ERROR", "A database error occurred.", 500); }
 
   return json({
     data,
@@ -301,7 +301,7 @@ route("GET", "/api/v1/trees/:id/offerings", async (_req, _auth, params, url) => 
 
   query = query.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
   const { data, error, count } = await query;
-  if (error) return err("DB_ERROR", error.message, 500);
+  if (error) { console.error("[api-gateway] DB error:", error.message); return err("DB_ERROR", "A database error occurred.", 500); }
 
   return json({ data, pagination: { limit, offset, total: count, next_cursor: (offset + limit < (count ?? 0)) ? offset + limit : null } });
 });
@@ -321,7 +321,7 @@ route("GET", "/api/v1/trees/:id/whispers", async (_req, auth, params, url) => {
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) return err("DB_ERROR", error.message, 500);
+  if (error) { console.error("[api-gateway] DB error:", error.message); return err("DB_ERROR", "A database error occurred.", 500); }
   return json({ data, pagination: { limit, offset, total: count, next_cursor: (offset + limit < (count ?? 0)) ? offset + limit : null } });
 });
 
@@ -349,7 +349,7 @@ route("GET", "/api/v1/offerings", async (_req, auth, _params, url) => {
 
   query = query.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
   const { data, error, count } = await query;
-  if (error) return err("DB_ERROR", error.message, 500);
+  if (error) { console.error("[api-gateway] DB error:", error.message); return err("DB_ERROR", "A database error occurred.", 500); }
 
   return json({ data, pagination: { limit, offset, total: count, next_cursor: (offset + limit < (count ?? 0)) ? offset + limit : null } });
 });
