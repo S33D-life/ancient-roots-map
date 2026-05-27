@@ -16,7 +16,18 @@ import { motion } from "framer-motion";
 import { Eye, Sun, Search, ArrowRight } from "lucide-react";
 import type { SpeciesSeed } from "./starterSpecies";
 
-export default function SpeciesCard({ species, index = 0 }: { species: SpeciesSeed; index?: number }) {
+export default function SpeciesCard({
+  species,
+  index = 0,
+  familyMode = false,
+}: {
+  species: SpeciesSeed;
+  index?: number;
+  familyMode?: boolean;
+}) {
+  const tagline = familyMode ? species.family?.tagline ?? species.tagline : species.tagline;
+  const idClue = familyMode ? species.family?.idClue ?? species.idClue : species.idClue;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 10 }}

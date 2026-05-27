@@ -37,6 +37,10 @@ export const STARTER_SPECIES: SpeciesSeed[] = [
     lookFor: "Deeply furrowed, rugged bark on older trees. Look for oak galls — small round growths — on summer leaves.",
     emoji: "🌳",
     questHint: "Find your first oak",
+    family: {
+      tagline: "A big, strong tree that drops acorns.",
+      idClue: "Wavy leaves with round bumps. Little acorns in tiny cups.",
+    },
   },
   {
     slug: "yew",
@@ -48,6 +52,10 @@ export const STARTER_SPECIES: SpeciesSeed[] = [
     lookFor: "Twisted, ancient trunks in churchyards. Very old yews hollow from the inside out.",
     emoji: "🌲",
     questHint: "Visit an ancient yew",
+    family: {
+      tagline: "A very old tree with dark green needles.",
+      idClue: "Flat needles like tiny green combs. Red berries — don't eat the seed.",
+    },
   },
   {
     slug: "willow",
@@ -59,6 +67,10 @@ export const STARTER_SPECIES: SpeciesSeed[] = [
     lookFor: "Near streams, rivers, and wet meadows. The low sweep of branches close to the water's edge.",
     emoji: "🌿",
     questHint: "Walk a willow's water",
+    family: {
+      tagline: "A bendy tree that loves rivers.",
+      idClue: "Long thin leaves and droopy branches near water.",
+    },
   },
   {
     slug: "beech",
@@ -70,6 +82,10 @@ export const STARTER_SPECIES: SpeciesSeed[] = [
     lookFor: "A clean, un-textured trunk almost like pale skin, rising through dense woodland.",
     emoji: "🍂",
     questHint: "Sit beneath a beech",
+    family: {
+      tagline: "A tall tree with smooth silver skin.",
+      idClue: "Smooth grey bark, like a giant's leg. Wavy oval leaves.",
+    },
   },
   {
     slug: "hawthorn",
@@ -81,5 +97,9 @@ export const STARTER_SPECIES: SpeciesSeed[] = [
     lookFor: "Hedgerows, field edges, and old boundaries. Often one of the oldest trees in a landscape.",
     emoji: "🌸",
     questHint: "Greet a hedgerow hawthorn",
+    family: {
+      tagline: "A spiky tree with white flowers and red berries.",
+      idClue: "Sharp thorns, white blossom in spring, red berries later.",
+    },
   },
 ];
