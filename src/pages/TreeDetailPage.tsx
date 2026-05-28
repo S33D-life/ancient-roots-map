@@ -1350,32 +1350,35 @@ const TreeDetailPage = () => {
 
             {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
-            {/* Whispers (moved from Encounters) */}
+            {/* Unified Offer ↔ Whisper card */}
             {userId && tree && (
-              <Button
-                onClick={() => setWhisperModalOpen(true)}
-                variant="outline"
-                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Send a Whisper Through This Tree
-              </Button>
-            )}
-
-            {/* Memory Seed — unified Offering ↔ Whisper composer (prototype) */}
-            {userId && tree && (
-              <div className="rounded-2xl border border-primary/20 bg-card/40 p-3">
-                <Button
-                  onClick={() => setMemorySeedOpen(true)}
-                  variant="ghost"
-                  className="w-full font-serif justify-between text-left"
-                >
-                  <span>Share an Offering or Whisper</span>
-                  <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">New</span>
-                </Button>
-                <p className="font-serif text-[11px] italic text-muted-foreground/70 px-3 pb-1">
-                  Offerings hang in the branches. Whispers travel through the roots.
-                </p>
+              <div className="rounded-2xl border border-primary/25 bg-card/50 backdrop-blur-sm overflow-hidden">
+                <div className="px-4 pt-4 pb-2">
+                  <h4 className="text-sm font-serif tracking-[0.18em] uppercase text-foreground/85">
+                    Offer or Whisper
+                  </h4>
+                  <p className="text-[11px] font-serif italic text-muted-foreground/70 mt-1 leading-relaxed">
+                    Offerings hang in the branches. Whispers travel through the roots.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 p-3 pt-2">
+                  <Button
+                    onClick={() => setMemorySeedOpen(true)}
+                    variant="outline"
+                    className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Make Offering
+                  </Button>
+                  <Button
+                    onClick={() => setWhisperModalOpen(true)}
+                    variant="outline"
+                    className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Send Whisper
+                  </Button>
+                </div>
               </div>
             )}
 
