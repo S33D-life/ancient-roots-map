@@ -22,7 +22,7 @@ const PRIMARY: Room[] = [
 const LIVING_LIBRARY: Room[] = [
   { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",                    accentH: 260, particle: "wave"    },
   { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
-  { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
+  { key: "scrolls",       label: "📜 Scrolls & Records", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
   { key: "press",         label: "🪶 Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
   { key: "vault",         label: "🔐 Vault",            desc: "Staff, Tokens & Treasures",     accentH: 270, particle: "shimmer" },
 ];

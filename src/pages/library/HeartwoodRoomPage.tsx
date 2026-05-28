@@ -8,6 +8,7 @@ import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
+import { ROOM_LABEL_MAP, ROOM_KEYS, JOURNEY_ROOM_SEQUENCE } from "@/config/heartwoodRooms";
 
 // Lazy room components — each loads independently
 const StaffRoomGallery = lazy(() => import("@/components/StaffRoomGallery"));
@@ -24,8 +25,7 @@ const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 const ArboriumRoom = lazy(() => import("@/components/library/ArboriumRoom"));
-// QuestCaveRoom superseded by QuestCavePage (/heartwood/quest-room) — see ROOM_ALIASES redirect
-// const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
+const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
 
 // Room aliases for backward compatibility
 const ROOM_ALIASES: Record<string, string> = {
@@ -41,46 +41,12 @@ const ROOM_ALIASES: Record<string, string> = {
   "markets": "rhythms",
   "cycle-market": "rhythms",
   "cycle-markets": "rhythms",
-  "quest-cave": "redirect:/heartwood/quest-room",
-  "quest-room": "redirect:/heartwood/quest-room",
 };
 
-const ROOM_LABELS: Record<string, string> = {
-  "staff-room": "Staff Room",
-  "quest-cave": "Quest Cave",
-  "arborium": "The Arborium",
-  "gallery": "Ancient Friends",
-  "music-room": "Music Room",
-  "greenhouse": "Greenhouse",
-  "wishlist": "Wishing Tree",
-  "seed-cellar": "Seed Cellar",
-  "star-trail": "Star Trail",
-  "scrolls": "Scrolls & Records",
-  "vault": "Vaults",
-  "bookshelf": "Bookshelf",
-  "rhythms": "Rhythms",
-  "tap-root": "Dev Room",
-};
+const ROOM_LABELS = ROOM_LABEL_MAP;
 
-/** Ordered room sequence for swipe navigation */
-const ROOM_SEQUENCE = [
-  "gallery",
-  "staff-room",
-  "quest-cave",
-  "arborium",
-  "bookshelf",
-  "seed-cellar",
-  "music-room",
-  "greenhouse",
-  "wishlist",
-  "scrolls",
-  "vault",
-  "star-trail",
-  "rhythms",
-  "tap-root",
-];
-
-const VALID_ROOMS = Object.keys(ROOM_LABELS);
+const ROOM_SEQUENCE = JOURNEY_ROOM_SEQUENCE;
+const VALID_ROOMS = ROOM_KEYS;
 
 /**
  * AncientFriendsWrapper — self-contained wrapper that fetches its own data.
@@ -205,7 +171,7 @@ const HeartwoodRoomPage = () => {
     >
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
-        {/* quest-cave redirects to /heartwood/quest-room via ROOM_ALIASES — this line is unreachable */}
+        {resolvedRoom === "quest-cave" && <QuestCaveRoom />}
         {resolvedRoom === "arborium" && <ArboriumRoom />}
         {resolvedRoom === "music-room" && <MusicRoom />}
         {resolvedRoom === "greenhouse" && <Greenhouse />}
