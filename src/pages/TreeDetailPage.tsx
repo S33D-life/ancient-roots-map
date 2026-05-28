@@ -895,10 +895,13 @@ const TreeDetailPage = () => {
             <Suspense fallback={null}>
               <TreeSeedsHeartsSection
                 treeId={id}
+                treeName={tree.name}
                 treeLat={tree.latitude}
                 treeLng={tree.longitude}
                 treeSpecies={tree.species}
                 userId={userId}
+                isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
+                isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
               />
             </Suspense>
             {userId && (
@@ -911,6 +914,7 @@ const TreeDetailPage = () => {
                   isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
                   onCheckIn={tryOpenCheckin}
+                  hideHeartsAndRoots
                   onWhisperCollected={() => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }}
