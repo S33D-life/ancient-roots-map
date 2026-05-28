@@ -15,36 +15,25 @@ import TetolBridge from "@/components/TetolBridge";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
+import { ROOM_ROUTE_MAP } from "@/config/heartwoodRooms";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
+
+// Non-Heartwood routes that can appear in the landing grid but are not
+// canonical library rooms — supplemented on top of ROOM_ROUTE_MAP.
+const NON_ROOM_ROUTES: Record<string, string> = {
+  "life-groves":       "/heartwood/life-groves",
+  "atlas":             "/atlas",
+  "press":             "/press",
+  "tree-data-commons": "/tree-data-commons",
+};
 
 const HeartwoodLanding = () => {
   const navigate = useNavigate();
 
   const handleRoomSelect = (key: string) => {
-    const routeMap: Record<string, string> = {
-      "staff-room": "/library/staff-room",
-      "life-groves": "/heartwood/life-groves",
-      "quest-cave": "/library/quest-cave",
-      "quest-room": "/library/quest-cave",
-      "ancient-friends": "/library/gallery",
-      "atlas": "/atlas",
-      "music-room": "/library/music-room",
-      "greenhouse": "/library/greenhouse",
-      "wishlist": "/library/wishlist",
-      "seed-cellar": "/library/seed-cellar",
-      "star-trail": "/library/star-trail",
-      "creators-path": "/library/star-trail",
-      "ledger": "/library/scrolls",
-      "scrolls": "/library/scrolls",
-      "rhythms": "/library/rhythms",
-      "vault": "/library/vault",
-      "bookshelf": "/library/bookshelf",
-      "press": "/press",
-      "tap-root": "/library/tap-root",
-      "tree-data-commons": "/tree-data-commons",
-    };
-    navigate(routeMap[key] || `/library/${key}`);
+    const route = ROOM_ROUTE_MAP[key] ?? NON_ROOM_ROUTES[key] ?? `/library/${key}`;
+    navigate(route);
   };
 
   return (

@@ -314,3 +314,79 @@ export const ROOM_LABEL_MAP: Record<string, string> = Object.fromEntries(
 
 /** Journey-ordered room sequence (stage order, rooms within stage in order) */
 export const JOURNEY_ROOM_SEQUENCE: string[] = JOURNEY_STAGES.flatMap((s) => s.rooms);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Access level config
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface AccessLevelConfig {
+  key: AccessLevel;
+  /** Short user-facing label */
+  label: string;
+  /** One-line description of who qualifies */
+  description: string;
+}
+
+export const ACCESS_LEVEL_CONFIGS: AccessLevelConfig[] = [
+  { key: "visitor",  label: "Visitor",  description: "Public — no sign-in required" },
+  { key: "member",   label: "Member",   description: "Sign-in required" },
+  { key: "steward",  label: "Steward",  description: "Curator or keeper role" },
+  { key: "advanced", label: "Advanced", description: "Admin or developer access" },
+];
+
+/** Fast access-level config lookup */
+export const ACCESS_LEVEL_BY_KEY: Record<AccessLevel, AccessLevelConfig> = Object.fromEntries(
+  ACCESS_LEVEL_CONFIGS.map((a) => [a.key, a])
+) as Record<AccessLevel, AccessLevelConfig>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Derived groupings
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Rooms grouped by journey stage */
+export const ROOMS_BY_STAGE: Record<JourneyStage, HeartwoodRoom[]> = Object.fromEntries(
+  JOURNEY_STAGES.map((s) => [s.key, s.rooms.map((k) => ROOM_BY_KEY[k]).filter(Boolean)])
+) as Record<JourneyStage, HeartwoodRoom[]>;
+
+/** Rooms grouped by access level */
+export const ROOMS_BY_ACCESS: Record<AccessLevel, HeartwoodRoom[]> = {
+  visitor:  HEARTWOOD_ROOMS.filter((r) => r.access === "visitor"),
+  member:   HEARTWOOD_ROOMS.filter((r) => r.access === "member"),
+  steward:  HEARTWOOD_ROOMS.filter((r) => r.access === "steward"),
+  advanced: HEARTWOOD_ROOMS.filter((r) => r.access === "advanced"),
+};
+
+/** Rooms visible without sign-in */
+export const PUBLIC_ROOMS: HeartwoodRoom[] = HEARTWOOD_ROOMS.filter((r) => r.access === "visitor");
+
+/** Rooms gated behind the advanced / dev role */
+export const ADVANCED_ROOMS: HeartwoodRoom[] = HEARTWOOD_ROOMS.filter((r) => r.access === "advanced");
+
+/** Rooms shown at the given mobile priority or above (lower = higher priority) */
+export function getMobileRooms(maxPriority: MobilePriority): HeartwoodRoom[] {
+  return HEARTWOOD_ROOMS.filter((r) => r.mobilePriority <= maxPriority);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Canonical route map  (key | alias-slug → canonical route)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Maps any room key or alias slug to its canonical /library/:key route.
+ * Built from HEARTWOOD_ROOMS so it stays in sync automatically.
+ *
+ * Non-Heartwood routes (atlas, life-groves, press, …) are NOT included here —
+ * keep those in the call-site route map so this file stays library-only.
+ */
+export const ROOM_ROUTE_MAP: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const room of HEARTWOOD_ROOMS) {
+    map[room.key] = room.route;
+    for (const alias of room.aliases ?? []) {
+      // Extract the last path segment as the slug key
+      const slug = alias.split("/").pop() ?? "";
+      if (slug) map[slug] = room.route;
+    }
+  }
+  return map;
+})();
