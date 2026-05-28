@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Wind, TreePine, Globe, User, Sparkles, Loader2, EyeOff, Eye } from "lucide-react";
+import { X, Wind, TreePine, User, Sparkles, Loader2, EyeOff, Eye } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -36,30 +36,25 @@ interface ScopeOption {
   hint: string;
 }
 
+// v1 scopes — FOREST_WIDE reserved for future when collection logic is ready
 const SCOPE_OPTIONS: ScopeOption[] = [
+  {
+    value: "SPECIFIC_WANDERER",
+    icon: <User className="w-4 h-4" />,
+    label: "Someone I was thinking of",
+    hint: "Send directly to a wanderer who came to mind while you were here.",
+  },
   {
     value: "SPECIFIC_TREE",
     icon: <TreePine className="w-4 h-4" />,
-    label: "Anyone who visits this tree",
-    hint: "Delivered when a wanderer next encounters this Ancient Friend.",
+    label: "Whoever meets this tree",
+    hint: "Held here until the next wanderer encounters this Ancient Friend.",
   },
   {
     value: "SPECIES_MATCH",
     icon: <Wind className="w-4 h-4" />,
-    label: "Anyone who encounters this species",
-    hint: "Travels through the mycelium to anyone who meets this same kind of tree.",
-  },
-  {
-    value: "SPECIFIC_WANDERER",
-    icon: <User className="w-4 h-4" />,
-    label: "A specific Wanderer",
-    hint: "Send directly to someone you know.",
-  },
-  {
-    value: "FOREST_WIDE",
-    icon: <Globe className="w-4 h-4" />,
-    label: "Anyone in the forest",
-    hint: "An open offering — awaiting whoever it finds.",
+    label: "Whoever meets this species",
+    hint: "Travels the mycelium — finds whoever next encounters this kind of tree.",
   },
 ];
 
@@ -90,7 +85,7 @@ export default function OfferingWhisperDrawer({
   onSent,
 }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
-  const [scope, setScope] = useState<OfferingWhisperScope>("SPECIFIC_TREE");
+  const [scope, setScope] = useState<OfferingWhisperScope>("SPECIFIC_WANDERER");
   const [personalMessage, setPersonalMessage] = useState("");
   const [senderVisibility, setSenderVisibility] = useState<SenderVisibility>("signed");
   const [recipientSearch, setRecipientSearch] = useState("");
@@ -116,7 +111,7 @@ export default function OfferingWhisperDrawer({
   // Reset on close
   useEffect(() => {
     if (!open) {
-      setScope("SPECIFIC_TREE");
+      setScope("SPECIFIC_WANDERER");
       setPersonalMessage("");
       setSenderVisibility("signed");
       setRecipient(null);
@@ -143,7 +138,7 @@ export default function OfferingWhisperDrawer({
         senderVisibility,
       });
       if (error) throw error;
-      toast.success("Your offering travels through the roots 🌿");
+      toast.success("Your resonance is on its way 🌿");
       onSent?.();
       onClose();
     } catch (err: any) {
@@ -181,10 +176,10 @@ export default function OfferingWhisperDrawer({
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-[10px] font-serif uppercase tracking-widest text-muted-foreground/60 mb-0.5">
-                    Share as Whisper
+                    Pass a Resonance
                   </p>
                   <h3 className="font-serif text-lg text-foreground leading-tight">
-                    Send through{treeName ? ` ${treeName}` : " the roots"}
+                    {treeName ? `From ${treeName}` : "From this Ancient Friend"}
                   </h3>
                 </div>
                 <button
@@ -200,7 +195,7 @@ export default function OfferingWhisperDrawer({
               {/* Offering preview */}
               <div className="space-y-1">
                 <p className="text-[10px] font-serif uppercase tracking-widest text-muted-foreground/60">
-                  Offering being shared
+                  The offering
                 </p>
                 <OfferingWhisperPreview offeringId={offeringId} linkToTree={false} />
               </div>
@@ -208,7 +203,7 @@ export default function OfferingWhisperDrawer({
               {/* Scope selector */}
               <div className="space-y-2">
                 <p className="text-[10px] font-serif uppercase tracking-widest text-muted-foreground/60">
-                  Who receives this?
+                  Who were you thinking of?
                 </p>
                 <div className="grid grid-cols-1 gap-2">
                   {SCOPE_OPTIONS.map((opt) => (
@@ -244,7 +239,7 @@ export default function OfferingWhisperDrawer({
                     className="overflow-hidden space-y-2"
                   >
                     <Label className="text-[10px] font-serif uppercase tracking-widest text-muted-foreground/60">
-                      Search for a Wanderer
+                      Find them
                     </Label>
                     {recipient ? (
                       <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2">
@@ -292,13 +287,13 @@ export default function OfferingWhisperDrawer({
               {/* Personal message */}
               <div className="space-y-2">
                 <Label className="text-[10px] font-serif uppercase tracking-widest text-muted-foreground/60">
-                  Personal message <span className="normal-case tracking-normal">(optional)</span>
+                  A word for them <span className="normal-case tracking-normal">(optional)</span>
                 </Label>
                 <Textarea
                   value={personalMessage}
                   onChange={(e) => setPersonalMessage(e.target.value)}
                   rows={3}
-                  placeholder="A word from you to accompany this offering…"
+                  placeholder="I offered something to an Ancient Friend and thought of you."
                   className="font-serif text-sm resize-none rounded-xl"
                   maxLength={500}
                 />
@@ -345,7 +340,7 @@ export default function OfferingWhisperDrawer({
                 {sending ? (
                   <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Sending through the roots…</>
                 ) : (
-                  <><Wind className="w-4 h-4 mr-2" /> Send offering as whisper</>
+                  <><Wind className="w-4 h-4 mr-2" /> Send this resonance</>
                 )}
               </Button>
 

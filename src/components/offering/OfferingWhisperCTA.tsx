@@ -74,10 +74,10 @@ export default function OfferingWhisperCTA({
               {/* Copy */}
               <div className="pr-6">
                 <p className="font-serif text-sm text-foreground leading-snug">
-                  Your offering is sealed beneath the roots.
+                  Your offering lives in this tree now.
                 </p>
                 <p className="text-[11px] font-serif text-muted-foreground/70 mt-0.5 leading-relaxed">
-                  Would you like to send it as a whisper — to another wanderer, or anyone who visits this tree?
+                  Was there someone who came to mind while you were here?
                 </p>
               </div>
 
@@ -91,7 +91,7 @@ export default function OfferingWhisperCTA({
                   className="flex-1 rounded-xl font-serif text-sm gap-1.5"
                 >
                   <Wind className="w-3.5 h-3.5" />
-                  Share as Whisper
+                  Send a Resonance
                 </Button>
                 <Button
                   type="button"
