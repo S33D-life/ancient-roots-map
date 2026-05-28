@@ -86,4 +86,6 @@ export const ROUTES = {
   SOVEREIGN_DATA: "/living-archive",
   /** The Arborium — living field guide */
   ARBORIUM: "/library/arborium",
+  /** Research Room — admin review of staged agent research */
+  RESEARCH_ROOM: "/admin/research-room",
 } as const;
