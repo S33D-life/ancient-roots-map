@@ -93,11 +93,11 @@ export default function TreeArrivalPanel({
   );
   const currentWhisper = uncollectedWhispers[whisperIndex] || uncollectedWhispers[0];
 
-  const hasHearts = heartCollection.pool && heartCollection.pool.totalHearts > 0;
+  const hasHearts = !hideHeartsAndRoots && heartCollection.pool && heartCollection.pool.totalHearts > 0;
   const isHeartCollectable = canCollect(heartCollection.state);
   const heartGuidance = getHeartPoolGuidance(heartCollection.state, heartCollection.pool?.totalHearts ?? 0);
   const hasWhispers = uncollectedWhispers.length > 0;
-  const hasRooting = rooting.root || rooting.canPlant;
+  const hasRooting = !hideHeartsAndRoots && (rooting.root || rooting.canPlant);
   const hasAnything = hasHearts || hasWhispers || hasRooting;
 
   const handleGatherHearts = useCallback(async () => {
