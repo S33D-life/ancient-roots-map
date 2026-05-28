@@ -29,6 +29,11 @@ interface TreeArrivalPanelProps {
   isCheckedIn: boolean;
   onCheckIn?: () => void;
   onWhisperCollected?: () => void;
+  /**
+   * When true, hides hearts + rooting blocks (now owned by the unified
+   * TreeSeedsHeartsSection). The panel then renders whispers only.
+   */
+  hideHeartsAndRoots?: boolean;
 }
 
 export default function TreeArrivalPanel({
@@ -40,6 +45,7 @@ export default function TreeArrivalPanel({
   isCheckedIn,
   onCheckIn,
   onWhisperCollected,
+  hideHeartsAndRoots = false,
 }: TreeArrivalPanelProps) {
   const [whispers, setWhispers] = useState<TreeWhisper[]>([]);
   const [whisperRevealed, setWhisperRevealed] = useState(false);
