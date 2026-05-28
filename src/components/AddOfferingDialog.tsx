@@ -32,6 +32,7 @@ import { MAX_OFFERING_PHOTOS } from "@/utils/offeringPhotos";
 import { isOnline } from "@/utils/offlineSync";
 import { queueMultiPhotoOffering } from "@/utils/offlineActions";
 import { useConnectivity } from "@/hooks/use-connectivity";
+import OfferingWhisperCTA from "@/components/offering/OfferingWhisperCTA";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -160,16 +161,25 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   /**
    * Centralised post-success handoff:
    * 1) close the offering dialog so it isn't trapped behind the receipt
-   * 2) show the heart reward receipt (or just close, if no reward)
-   * 3) on receipt close, ensure the user lands on the tree detail page
+   * 2) show "Share as Whisper" CTA (optional, non-blocking)
+   * 3) show the heart reward receipt (if hearts earned)
+   * 4) on receipt close, ensure the user lands on the tree detail page
+   *
+   * offeringId is optional — older callers (song/voice/book sub-flows)
+   * may not yet pass it; the CTA is silently skipped when absent.
    */
-  const finishOfferingFlow = useCallback((earnedReward: boolean) => {
+  const finishOfferingFlow = useCallback((earnedReward: boolean, offeringId?: string | null) => {
     track("offering_made", { treeId, meta: { reward: earnedReward, type: activeType } });
     setShowCelebration(false);
     onOpenChange(false);
+    // Show whisper CTA if we have the offering id
+    if (offeringId) {
+      setWhisperCTAOfferingId(offeringId);
+    }
     if (earnedReward) {
       setShowRewardReceipt(true);
-    } else {
+    } else if (!offeringId) {
+      // Only auto-route if no CTA is going to appear
       routeBackToTree();
     }
   }, [onOpenChange, routeBackToTree, treeId, activeType]);
@@ -181,6 +191,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [celebrationMsg, setCelebrationMsg] = useState({ emoji: "✨", message: "", subtitle: "" });
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showRewardReceipt, setShowRewardReceipt] = useState(false);
+  // Offering-as-whisper CTA — shown after successful offering creation
+  const [whisperCTAOfferingId, setWhisperCTAOfferingId] = useState<string | null>(null);
   const [visibility, setVisibility] = useState<OfferingVisibility>(initialType === "photo" ? "public" : "tribe");
   const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
   const [quote, setQuote] = useState<QuoteData>({ text: "", author: "", source: "" });
@@ -593,7 +605,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const treePart = treeName ? ` to ${treeName}` : "";
       setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed${treePart}`, subtitle: "Your offering is now part of this tree's story" });
       setShowCelebration(true);
-      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2400);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward, insertedOffering?.id); }, 2400);
       resetForm();
       return;
     } catch (err: any) {
@@ -648,7 +660,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
       setShowCelebration(true);
       resetForm();
-      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward, insertedOffering?.id); }, 2000);
     } catch (err: any) {
       track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your selection is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
@@ -685,7 +697,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       setCelebrationMsg({ emoji: "🎙️", message: "Voice offering sealed!", subtitle: "Your voice has been offered" });
       setShowCelebration(true);
       resetForm();
-      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward, insertedOffering?.id); }, 2000);
     } catch (err: any) {
       track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your recording is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
@@ -738,7 +750,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       setCelebrationMsg({ emoji: "📖", message: "Your book has been placed", subtitle: `"${data.title}" is now in the Library` });
       setShowCelebration(true);
       resetForm();
-      setTimeout(() => { finishOfferingFlow(!!earnedReward); }, 2000);
+      setTimeout(() => { finishOfferingFlow(!!earnedReward, insertedOffering?.id); }, 2000);
     } catch (err: any) {
       track("offering_failed", { treeId, meta: { type: activeType, stage: "submit" } }); toast({ title: "This offering didn’t take root yet", description: "Your entry is still here — try again in a moment." });
     } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
@@ -749,79 +761,109 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   // Delegated flows for song/voice/book
   if (activeType === "song") {
     return (
-      <ResponsiveDialog
-        open={open}
-        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
-        overlay={celebrationOverlay}
-        title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
-        subtitle={<>{treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
-        fullscreenMobile
-      >
-        {/* Type pre-selected from gateway — no switcher */}
-        <div className="mt-2 relative">
-          {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+      <>
+        <ResponsiveDialog
+          open={open}
+          onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
+          overlay={celebrationOverlay}
+          title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
+          subtitle={<>{treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
+          fullscreenMobile
+        >
+          {/* Type pre-selected from gateway — no switcher */}
+          <div className="mt-2 relative">
+            {loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+                </div>
               </div>
-            </div>
-          )}
-          <MusicOfferingFlow treeId={treeId} treeName={treeName} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
-        </div>
-      </ResponsiveDialog>
+            )}
+            <MusicOfferingFlow treeId={treeId} treeName={treeName} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
+          </div>
+        </ResponsiveDialog>
+        <OfferingWhisperCTA
+          visible={!!whisperCTAOfferingId}
+          offeringId={whisperCTAOfferingId ?? ""}
+          treeId={treeId}
+          treeName={treeName}
+          treeSpecies={treeSpecies}
+          onDismiss={() => { setWhisperCTAOfferingId(null); routeBackToTree(); }}
+        />
+      </>
     );
   }
 
   if (activeType === "voice") {
     return (
-      <ResponsiveDialog
-        open={open}
-        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
-        overlay={celebrationOverlay}
-        title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
-        subtitle={<>Speak into the canopy — your voice becomes part of this tree{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
-        fullscreenMobile
-      >
-        {/* Type pre-selected from gateway — no switcher */}
-        <div className="mt-2 relative">
-          {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+      <>
+        <ResponsiveDialog
+          open={open}
+          onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
+          overlay={celebrationOverlay}
+          title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
+          subtitle={<>Speak into the canopy — your voice becomes part of this tree{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
+          fullscreenMobile
+        >
+          {/* Type pre-selected from gateway — no switcher */}
+          <div className="mt-2 relative">
+            {loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+                </div>
               </div>
-            </div>
-          )}
-          <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
-        </div>
-      </ResponsiveDialog>
+            )}
+            <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+          </div>
+        </ResponsiveDialog>
+        <OfferingWhisperCTA
+          visible={!!whisperCTAOfferingId}
+          offeringId={whisperCTAOfferingId ?? ""}
+          treeId={treeId}
+          treeName={treeName}
+          treeSpecies={treeSpecies}
+          onDismiss={() => { setWhisperCTAOfferingId(null); routeBackToTree(); }}
+        />
+      </>
     );
   }
 
   if (activeType === "book") {
     return (
-      <ResponsiveDialog
-        open={open}
-        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
-        overlay={celebrationOverlay}
-        title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
-        subtitle={<>Place a story in this Ancient Friend's living archive{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
-        fullscreenMobile
-      >
-        {/* Type pre-selected from gateway — no switcher */}
-        <div className="mt-2 relative">
-          {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+      <>
+        <ResponsiveDialog
+          open={open}
+          onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
+          overlay={celebrationOverlay}
+          title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
+          subtitle={<>Place a story in this Ancient Friend's living archive{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
+          fullscreenMobile
+        >
+          {/* Type pre-selected from gateway — no switcher */}
+          <div className="mt-2 relative">
+            {loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+                </div>
               </div>
-            </div>
-          )}
-          <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
-        </div>
-      </ResponsiveDialog>
+            )}
+            <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
+          </div>
+        </ResponsiveDialog>
+        <OfferingWhisperCTA
+          visible={!!whisperCTAOfferingId}
+          offeringId={whisperCTAOfferingId ?? ""}
+          treeId={treeId}
+          treeName={treeName}
+          treeSpecies={treeSpecies}
+          onDismiss={() => { setWhisperCTAOfferingId(null); routeBackToTree(); }}
+        />
+      </>
     );
   }
 
@@ -1113,6 +1155,14 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         speciesFamily={rewardResult?.speciesFamily}
         influence={rewardResult?.influence}
         actionLabel="Offering"
+      />
+      <OfferingWhisperCTA
+        visible={!!whisperCTAOfferingId}
+        offeringId={whisperCTAOfferingId ?? ""}
+        treeId={treeId}
+        treeName={treeName}
+        treeSpecies={treeSpecies}
+        onDismiss={() => { setWhisperCTAOfferingId(null); routeBackToTree(); }}
       />
     </>
   );
