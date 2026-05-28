@@ -10,6 +10,11 @@
  *   6. Quest link placeholder
  *
  * Reusable structure for future per-species detail pages.
+ *
+ * Props merged from two branches:
+ *   familyMode  — simplified copy + larger display (from main)
+ *   highlighted — amber ring when matched by ID flow (from ux/arborium-next)
+ *   dimmed      — opacity reduction when another species is matched
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -20,23 +25,33 @@ export default function SpeciesCard({
   species,
   index = 0,
   familyMode = false,
+  highlighted = false,
+  dimmed = false,
 }: {
   species: SpeciesSeed;
   index?: number;
   familyMode?: boolean;
+  highlighted?: boolean;
+  dimmed?: boolean;
 }) {
   const tagline = familyMode ? species.family?.tagline ?? species.tagline : species.tagline;
   const idClue = familyMode ? species.family?.idClue ?? species.idClue : species.idClue;
 
   return (
     <motion.article
+      id={`specimen-${species.slug}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
-      className="group relative rounded-2xl overflow-hidden border border-amber-900/15 bg-gradient-to-br from-[hsl(45_45%_96%)] via-[hsl(40_35%_93%)] to-[hsl(80_25%_92%)] dark:from-amber-950/15 dark:via-card/40 dark:to-emerald-950/10"
+      className={[
+        "group relative rounded-2xl overflow-hidden border bg-gradient-to-br from-[hsl(45_45%_96%)] via-[hsl(40_35%_93%)] to-[hsl(80_25%_92%)] dark:from-amber-950/15 dark:via-card/40 dark:to-emerald-950/10 transition-all duration-300",
+        highlighted ? "border-amber-500/55 ring-2 ring-amber-500/30" : "border-amber-900/15",
+        dimmed ? "opacity-40" : "opacity-100",
+      ].join(" ")}
       style={{
-        boxShadow:
-          "inset 0 1px 0 hsl(40 32% 86% / 0.6), 0 8px 24px -12px hsl(40 30% 28% / 0.22)",
+        boxShadow: highlighted
+          ? "inset 0 1px 0 hsl(40 32% 86% / 0.6), 0 8px 24px -12px hsl(40 30% 28% / 0.22), 0 0 0 3px hsl(40 55% 60% / 0.14)"
+          : "inset 0 1px 0 hsl(40 32% 86% / 0.6), 0 8px 24px -12px hsl(40 30% 28% / 0.22)",
       }}
     >
       {/* parchment fibres */}
@@ -84,7 +99,7 @@ export default function SpeciesCard({
             {species.common}
           </h3>
           <p
-            className={`font-serif text-muted-foreground/78 mt-1 leading-relaxed ${
+            className={`font-serif text-muted-foreground/72 mt-0.5 leading-relaxed ${
               familyMode ? "text-[13px]" : "text-[11px]"
             }`}
           >
@@ -149,4 +164,3 @@ export default function SpeciesCard({
     </motion.article>
   );
 }
-

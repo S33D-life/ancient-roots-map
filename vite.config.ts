@@ -206,7 +206,7 @@ export default defineConfig(async ({ mode }) => {
   return ({
   server: {
     host: "::",
-    port: 8080,
+    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 8080,
     headers: {
       "Content-Security-Policy": DEV_CSP,
     },

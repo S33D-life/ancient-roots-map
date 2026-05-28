@@ -4,17 +4,19 @@
  * A daylight, botanical, study-oriented chamber of the Heartwood Library.
  * Built around a single principle: teach people how to look before they name.
  *
- * Page order (v2 — ID-first):
- *   1. Hero              — brief, grounded
+ * Page order (v3 — ID-first + Family Mode):
+ *   1. Hero              — brief, grounded + Family Mode toggle
  *   2. Tree ID Starter   — "what clue can you see?" (immediately practical)
- *   3. Pathways          — Learn to Identify (primary) + three secondary
- *   4. Specimen Shelf    — five starter species, ID-first cards
- *   5. Tree Families     — lightweight visual grouping
- *   6. Quest seeds       — bridge to the Quest Cave
- *   7. Photo ID          — coming-soon placeholder
- *   8. Footer note
+ *   3. ID Panel          — opens below the starter cards on clue selection
+ *   4. Pathways          — Learn to Identify (primary) + three secondary
+ *   5. Specimen Shelf    — five starter species, ID-first cards (highlighted by ID flow)
+ *   6. Tree Families     — lightweight visual grouping
+ *   7. Quest seeds       — bridge to the Quest Cave
+ *   8. Photo ID          — coming-soon placeholder
+ *   9. Footer note
  */
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Compass,
   TreeDeciduous,
@@ -27,15 +29,60 @@ import PathwayCard from "@/components/arborium/PathwayCard";
 import SpeciesCard from "@/components/arborium/SpeciesCard";
 import QuestPathStrip from "@/components/arborium/QuestPathStrip";
 import IDStarterCard, { ID_STARTER_CLUES } from "@/components/arborium/IDStarterCard";
+import IDPanel from "@/components/arborium/IDPanel";
 import TreeFamiliesStrip from "@/components/arborium/TreeFamiliesStrip";
 import { STARTER_SPECIES } from "@/components/arborium/starterSpecies";
+import { ID_BRANCHES } from "@/components/arborium/idBranches";
 import FamilyModeToggle from "@/components/arborium/FamilyModeToggle";
 import { useFamilyMode } from "@/components/arborium/useFamilyMode";
 
 const ID_CHIPS = ["Leaf", "Bark", "Bud", "Seed", "Flower", "Silhouette", "Season"];
 
 export default function ArboriumRoom() {
+  const [activeClueKey, setActiveClueKey] = useState<string | null>(null);
+  const [activeAnswerId, setActiveAnswerId] = useState<string | null>(null);
+  const [matchedSlugs, setMatchedSlugs] = useState<string[]>([]);
   const { familyMode, toggle } = useFamilyMode();
+
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Scroll the ID panel into view whenever a new clue is selected
+  useEffect(() => {
+    if (activeClueKey && panelRef.current) {
+      const timer = setTimeout(() => {
+        panelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [activeClueKey]);
+
+  function handleClueSelect(clueKey: string) {
+    if (activeClueKey === clueKey) {
+      // Tapping the active card a second time closes the panel
+      handleClear();
+    } else {
+      setActiveClueKey(clueKey);
+      setActiveAnswerId(null);
+      setMatchedSlugs([]);
+    }
+  }
+
+  function handleAnswerSelect(answerId: string) {
+    const branch = activeClueKey ? ID_BRANCHES[activeClueKey] : null;
+    if (!branch) return;
+    const answer = branch.answers.find((a) => a.id === answerId);
+    setActiveAnswerId(answerId);
+    setMatchedSlugs(answer?.species ?? []);
+  }
+
+  function handleClear() {
+    setActiveClueKey(null);
+    setActiveAnswerId(null);
+    setMatchedSlugs([]);
+  }
+
+  // Derived highlighting state for specimen cards
+  const identificationActive = activeAnswerId !== null && matchedSlugs.length > 0;
 
   return (
     <div className="space-y-10 pb-16">
@@ -86,7 +133,6 @@ export default function ArboriumRoom() {
               : "Begin with what you can see — a leaf, bark, a bud, a seed. The Arborium is the living field guide of the forest: botanical atlas, woodland apprenticeship, shared ecological memory."}
           </p>
         </div>
-
       </motion.section>
 
       {/* ── 2. Tree ID Starter ── */}
@@ -104,12 +150,34 @@ export default function ArboriumRoom() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {ID_STARTER_CLUES.map((clue, i) => (
-            <IDStarterCard key={clue.title} {...clue} index={i} />
+            <IDStarterCard
+              key={clue.clueKey}
+              {...clue}
+              index={i}
+              isActive={activeClueKey === clue.clueKey}
+              onClick={() => handleClueSelect(clue.clueKey)}
+            />
           ))}
         </div>
       </section>
 
-      {/* ── 3. Pathways ── */}
+      {/* ── 3. ID Panel — opens when a clue card is active ── */}
+      <div ref={panelRef}>
+        <AnimatePresence>
+          {activeClueKey && (
+            <IDPanel
+              key={activeClueKey}
+              clueKey={activeClueKey}
+              activeAnswerId={activeAnswerId}
+              matchedSlugs={matchedSlugs}
+              onAnswerSelect={handleAnswerSelect}
+              onClear={handleClear}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── 4. Pathways ── */}
       <section className="space-y-4">
         <header>
           <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55 dark:text-amber-200/55">
@@ -165,7 +233,7 @@ export default function ArboriumRoom() {
         </div>
       </section>
 
-      {/* ── 4. Specimen Shelf ── */}
+      {/* ── 5. Specimen Shelf ── */}
       <section className="space-y-4">
         <header className="flex items-end justify-between gap-3">
           <div>
@@ -174,7 +242,9 @@ export default function ArboriumRoom() {
             </p>
             <h2 className="font-serif text-xl text-foreground mt-1">Your first five trees</h2>
             <p className="text-xs font-serif text-muted-foreground/78 mt-1 max-w-xl leading-relaxed">
-              Five trees to meet over five weeks. Greet each one where it grows.
+              {identificationActive
+                ? 'Matching species are highlighted below. Tap "Learn this species" to read their card.'
+                : 'Five trees to meet over five weeks. Greet each one where it grows.'}
             </p>
           </div>
           <span className="hidden sm:block text-[10px] font-serif uppercase tracking-[0.18em] text-amber-900/42 shrink-0">
@@ -190,19 +260,25 @@ export default function ArboriumRoom() {
           }`}
         >
           {STARTER_SPECIES.map((s, i) => (
-            <SpeciesCard key={s.slug} species={s} index={i} familyMode={familyMode} />
+            <SpeciesCard
+              key={s.slug}
+              species={s}
+              index={i}
+              familyMode={familyMode}
+              highlighted={identificationActive && matchedSlugs.includes(s.slug)}
+              dimmed={identificationActive && !matchedSlugs.includes(s.slug)}
+            />
           ))}
         </div>
-
       </section>
 
-      {/* ── 5. Tree Families ── */}
+      {/* ── 6. Tree Families ── */}
       <TreeFamiliesStrip />
 
-      {/* ── 6. Quest seeds ── */}
+      {/* ── 7. Quest seeds ── */}
       <QuestPathStrip />
 
-      {/* ── 7. Photo ID — coming soon ── */}
+      {/* ── 8. Photo ID — coming soon ── */}
       <section>
         <div
           className="relative rounded-2xl border border-dashed border-amber-900/20 dark:border-amber-200/15 p-5 flex items-start gap-4"
@@ -226,7 +302,7 @@ export default function ArboriumRoom() {
         </div>
       </section>
 
-      {/* ── 8. Footer ── */}
+      {/* ── 9. Footer ── */}
       <p className="text-center text-[11px] font-serif italic text-muted-foreground/52">
         The Arborium grows slowly, like its trees. Species pages, family chambers,
         and seasonal observations will open over time.
