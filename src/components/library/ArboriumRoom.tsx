@@ -4,8 +4,8 @@
  * A daylight, botanical, study-oriented chamber of the Heartwood Library.
  * Built around a single principle: teach people how to look before they name.
  *
- * Page order (v2 — ID-first):
- *   1. Hero              — brief, grounded
+ * Page order (v3 — ID-first + Family Mode):
+ *   1. Hero              — brief, grounded + Family Mode toggle
  *   2. Tree ID Starter   — "what clue can you see?" (immediately practical)
  *   3. ID Panel          — opens below the starter cards on clue selection
  *   4. Pathways          — Learn to Identify (primary) + three secondary
@@ -33,6 +33,8 @@ import IDPanel from "@/components/arborium/IDPanel";
 import TreeFamiliesStrip from "@/components/arborium/TreeFamiliesStrip";
 import { STARTER_SPECIES } from "@/components/arborium/starterSpecies";
 import { ID_BRANCHES } from "@/components/arborium/idBranches";
+import FamilyModeToggle from "@/components/arborium/FamilyModeToggle";
+import { useFamilyMode } from "@/components/arborium/useFamilyMode";
 
 const ID_CHIPS = ["Leaf", "Bark", "Bud", "Seed", "Flower", "Silhouette", "Season"];
 
@@ -40,6 +42,7 @@ export default function ArboriumRoom() {
   const [activeClueKey, setActiveClueKey] = useState<string | null>(null);
   const [activeAnswerId, setActiveAnswerId] = useState<string | null>(null);
   const [matchedSlugs, setMatchedSlugs] = useState<string[]>([]);
+  const { familyMode, toggle } = useFamilyMode();
 
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -115,16 +118,19 @@ export default function ArboriumRoom() {
         />
 
         <div className="relative max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-900/20 bg-[hsl(48_55%_96%)]/70 text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/68">
-            <Sun className="w-3 h-3" /> The Arborium
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-900/20 bg-[hsl(48_55%_96%)]/70 text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/68">
+              <Sun className="w-3 h-3" /> The Arborium
+            </div>
+            <FamilyModeToggle active={familyMode} onToggle={toggle} />
           </div>
           <h1 className="mt-3 font-serif text-2xl md:text-3xl leading-tight text-[hsl(95_30%_17%)]">
-            Learn to read the forest
+            {familyMode ? "Meet the trees" : "Learn to read the forest"}
           </h1>
           <p className="mt-2.5 font-serif text-sm md:text-base leading-relaxed text-[hsl(95_15%_28%)]/82 max-w-lg">
-            Begin with what you can see — a leaf, bark, a bud, a seed.
-            The Arborium is the living field guide of the forest:
-            botanical atlas, woodland apprenticeship, shared ecological memory.
+            {familyMode
+              ? "Look at a leaf. Touch the bark. Find a seed. Each tree has clues — and you can learn to spot them."
+              : "Begin with what you can see — a leaf, bark, a bud, a seed. The Arborium is the living field guide of the forest: botanical atlas, woodland apprenticeship, shared ecological memory."}
           </p>
         </div>
       </motion.section>
@@ -237,7 +243,7 @@ export default function ArboriumRoom() {
             <h2 className="font-serif text-xl text-foreground mt-1">Your first five trees</h2>
             <p className="text-xs font-serif text-muted-foreground/78 mt-1 max-w-xl leading-relaxed">
               {identificationActive
-                ? 'Matching species are highlighted below. Tap “Learn this species” to read their card.'
+                ? 'Matching species are highlighted below. Tap "Learn this species" to read their card.'
                 : 'Five trees to meet over five weeks. Greet each one where it grows.'}
             </p>
           </div>
@@ -246,12 +252,19 @@ export default function ArboriumRoom() {
           </span>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          className={`grid gap-4 ${
+            familyMode
+              ? "grid-cols-1 sm:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          }`}
+        >
           {STARTER_SPECIES.map((s, i) => (
             <SpeciesCard
               key={s.slug}
               species={s}
               index={i}
+              familyMode={familyMode}
               highlighted={identificationActive && matchedSlugs.includes(s.slug)}
               dimmed={identificationActive && !matchedSlugs.includes(s.slug)}
             />

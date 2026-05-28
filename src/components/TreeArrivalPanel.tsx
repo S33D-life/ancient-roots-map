@@ -29,6 +29,11 @@ interface TreeArrivalPanelProps {
   isCheckedIn: boolean;
   onCheckIn?: () => void;
   onWhisperCollected?: () => void;
+  /**
+   * When true, hides hearts + rooting blocks (now owned by the unified
+   * TreeSeedsHeartsSection). The panel then renders whispers only.
+   */
+  hideHeartsAndRoots?: boolean;
 }
 
 export default function TreeArrivalPanel({
@@ -40,6 +45,7 @@ export default function TreeArrivalPanel({
   isCheckedIn,
   onCheckIn,
   onWhisperCollected,
+  hideHeartsAndRoots = false,
 }: TreeArrivalPanelProps) {
   const [whispers, setWhispers] = useState<TreeWhisper[]>([]);
   const [whisperRevealed, setWhisperRevealed] = useState(false);
@@ -87,11 +93,11 @@ export default function TreeArrivalPanel({
   );
   const currentWhisper = uncollectedWhispers[whisperIndex] || uncollectedWhispers[0];
 
-  const hasHearts = heartCollection.pool && heartCollection.pool.totalHearts > 0;
+  const hasHearts = !hideHeartsAndRoots && heartCollection.pool && heartCollection.pool.totalHearts > 0;
   const isHeartCollectable = canCollect(heartCollection.state);
   const heartGuidance = getHeartPoolGuidance(heartCollection.state, heartCollection.pool?.totalHearts ?? 0);
   const hasWhispers = uncollectedWhispers.length > 0;
-  const hasRooting = rooting.root || rooting.canPlant;
+  const hasRooting = !hideHeartsAndRoots && (rooting.root || rooting.canPlant);
   const hasAnything = hasHearts || hasWhispers || hasRooting;
 
   const handleGatherHearts = useCallback(async () => {

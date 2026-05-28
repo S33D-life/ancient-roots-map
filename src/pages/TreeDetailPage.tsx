@@ -895,10 +895,13 @@ const TreeDetailPage = () => {
             <Suspense fallback={null}>
               <TreeSeedsHeartsSection
                 treeId={id}
+                treeName={tree.name}
                 treeLat={tree.latitude}
                 treeLng={tree.longitude}
                 treeSpecies={tree.species}
                 userId={userId}
+                isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
+                isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
               />
             </Suspense>
             {userId && (
@@ -911,6 +914,7 @@ const TreeDetailPage = () => {
                   isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
                   onCheckIn={tryOpenCheckin}
+                  hideHeartsAndRoots
                   onWhisperCollected={() => {
                     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
                   }}
@@ -1346,32 +1350,35 @@ const TreeDetailPage = () => {
 
             {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
-            {/* Whispers (moved from Encounters) */}
+            {/* Unified Offer ↔ Whisper card */}
             {userId && tree && (
-              <Button
-                onClick={() => setWhisperModalOpen(true)}
-                variant="outline"
-                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Send a Whisper Through This Tree
-              </Button>
-            )}
-
-            {/* Memory Seed — unified Offering ↔ Whisper composer (prototype) */}
-            {userId && tree && (
-              <div className="rounded-2xl border border-primary/20 bg-card/40 p-3">
-                <Button
-                  onClick={() => setMemorySeedOpen(true)}
-                  variant="ghost"
-                  className="w-full font-serif justify-between text-left"
-                >
-                  <span>Share an Offering or Whisper</span>
-                  <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">New</span>
-                </Button>
-                <p className="font-serif text-[11px] italic text-muted-foreground/70 px-3 pb-1">
-                  Offerings hang in the branches. Whispers travel through the roots.
-                </p>
+              <div className="rounded-2xl border border-primary/25 bg-card/50 backdrop-blur-sm overflow-hidden">
+                <div className="px-4 pt-4 pb-2">
+                  <h4 className="text-sm font-serif tracking-[0.18em] uppercase text-foreground/85">
+                    Offer or Whisper
+                  </h4>
+                  <p className="text-[11px] font-serif italic text-muted-foreground/70 mt-1 leading-relaxed">
+                    Offerings hang in the branches. Whispers travel through the roots.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 p-3 pt-2">
+                  <Button
+                    onClick={() => setMemorySeedOpen(true)}
+                    variant="outline"
+                    className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Make Offering
+                  </Button>
+                  <Button
+                    onClick={() => setWhisperModalOpen(true)}
+                    variant="outline"
+                    className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Send Whisper
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -1420,18 +1427,10 @@ const TreeDetailPage = () => {
             )}
 
             <>
-                {/* Birdsong Button */}
-                <Button
-                  onClick={() => setBirdsongOpen(true)}
-                  variant="outline"
-                  className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-                >
-                  <Bird className="h-4 w-4" />
-                  Offer a Birdsong
-                  {birdsongCount > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
-                  )}
-                </Button>
+                {/* Birdsong lives as a category tab below — its own "Add Birdsong"
+                    button is rendered inside the Birdsong tab to avoid duplication. */}
+
+
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">

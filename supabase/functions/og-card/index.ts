@@ -325,6 +325,7 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
       supabase
         .from("offerings").select("media_url")
         .eq("tree_id", id).eq("type", "photo")
+        .eq("visibility", "public")
         .not("media_url", "is", null)
         .order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase

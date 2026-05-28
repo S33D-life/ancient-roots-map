@@ -163,7 +163,8 @@ Deno.serve(async (req) => {
       });
 
       if (witnessError) {
-        return new Response(JSON.stringify({ error: witnessError.message }), {
+        console.error("[canopy-checkin] witness insert error:", witnessError);
+        return new Response(JSON.stringify({ error: "Unable to record witness" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -386,8 +387,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unexpected error";
-    return new Response(JSON.stringify({ error: message }), {
+    console.error("[canopy-checkin] unexpected error:", err);
+    return new Response(JSON.stringify({ error: "Unexpected error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
