@@ -16,16 +16,32 @@ import { motion } from "framer-motion";
 import { Eye, Sun, Search, ArrowRight } from "lucide-react";
 import type { SpeciesSeed } from "./starterSpecies";
 
-export default function SpeciesCard({ species, index = 0 }: { species: SpeciesSeed; index?: number }) {
+export default function SpeciesCard({
+  species,
+  index = 0,
+  highlighted = false,
+  dimmed = false,
+}: {
+  species: SpeciesSeed;
+  index?: number;
+  highlighted?: boolean;
+  dimmed?: boolean;
+}) {
   return (
     <motion.article
+      id={`specimen-${species.slug}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
-      className="group relative rounded-2xl overflow-hidden border border-amber-900/15 bg-gradient-to-br from-[hsl(45_45%_96%)] via-[hsl(40_35%_93%)] to-[hsl(80_25%_92%)] dark:from-amber-950/15 dark:via-card/40 dark:to-emerald-950/10"
+      className={[
+        "group relative rounded-2xl overflow-hidden border bg-gradient-to-br from-[hsl(45_45%_96%)] via-[hsl(40_35%_93%)] to-[hsl(80_25%_92%)] dark:from-amber-950/15 dark:via-card/40 dark:to-emerald-950/10 transition-all duration-300",
+        highlighted ? "border-amber-500/55 ring-2 ring-amber-500/30" : "border-amber-900/15",
+        dimmed ? "opacity-40" : "opacity-100",
+      ].join(" ")}
       style={{
-        boxShadow:
-          "inset 0 1px 0 hsl(40 32% 86% / 0.6), 0 8px 24px -12px hsl(40 30% 28% / 0.22)",
+        boxShadow: highlighted
+          ? "inset 0 1px 0 hsl(40 32% 86% / 0.6), 0 8px 24px -12px hsl(40 30% 28% / 0.22), 0 0 0 3px hsl(40 55% 60% / 0.14)"
+          : "inset 0 1px 0 hsl(40 32% 86% / 0.6), 0 8px 24px -12px hsl(40 30% 28% / 0.22)",
       }}
     >
       {/* parchment fibres */}
