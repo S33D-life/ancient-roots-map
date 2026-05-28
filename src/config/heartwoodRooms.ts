@@ -204,7 +204,7 @@ export const HEARTWOOD_ROOMS: HeartwoodRoom[] = [
     mobilePriority: 3,
     emotionalRole: "Archivist",
     primaryAction: "Open records",
-    aliases: ["/library/ledger", "/library/volumes", "/library/archive", "/ledger"],
+    aliases: ["/library/ledger", "/library/volumes", "/library/archive"],
   },
   // ── Steward ─────────────────────────────────────────────────────────────────
   {
