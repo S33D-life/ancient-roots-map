@@ -78,7 +78,7 @@ const SYSTEM_NODES: SystemNode[] = [
 
 /* ── Contract definitions ── */
 const CONTRACTS = [
-  { id: "agent-protocol", title: "Agent Garden Protocol", version: "v1", status: "live" as const, description: "REST API contract for agent registration, contributions, and rewards.", route: "/api-docs", endpoints: 15 },
+  { id: "agent-protocol", title: "Agent Garden Protocol", version: "v1", status: "live" as const, description: "REST API contract for agent registration, contributions, and rewards.", route: "/api/docs", endpoints: 15 },
   { id: "heart-ledger", title: "Heart Ledger Schema", version: "v1", status: "live" as const, description: "Transaction types, chain anchoring, claim flows.", route: "/library/scrolls", endpoints: 8 },
   { id: "tree-record", title: "Research Tree Record", version: "v1", status: "live" as const, description: "Data model for research forest entries with validation pipeline.", route: "/tree-data-commons", endpoints: 6 },
   { id: "promotion-flow", title: "Promotion Protocol", version: "v1", status: "building" as const, description: "Research → Candidate → Ancient Friend. Human verification gate.", route: "#", endpoints: 3 },
@@ -174,7 +174,7 @@ const DevRoom = () => {
             }`}
           >
             {s.icon}
-            <span className="hidden sm:inline">{s.label}</span>
+            <span className="text-[10px] sm:text-xs leading-none">{s.label}</span>
           </button>
         ))}
       </div>
@@ -296,13 +296,13 @@ function OverviewSection({ stats }: { stats: Record<string, number> }) {
       <div className="grid grid-cols-2 gap-2">
         {[
           { label: "Ecosystem Map", route: "/ecosystem", icon: <Globe className="w-3.5 h-3.5" /> },
-          { label: "API Docs", route: "/api-docs", icon: <FileCode className="w-3.5 h-3.5" /> },
+          { label: "API Docs", route: "/api/docs", icon: <FileCode className="w-3.5 h-3.5" /> },
           { label: "Roadmap", route: "/roadmap", icon: <Sprout className="w-3.5 h-3.5" /> },
-          { label: "Bug Garden", route: "/bug-garden", icon: <Bug className="w-3.5 h-3.5" /> },
+          { label: "Council Sparks", route: "/bug-garden", icon: <Bug className="w-3.5 h-3.5" /> },
           { label: "Sync Dashboard", route: "/sync", icon: <RefreshCw className="w-3.5 h-3.5" /> },
           { label: "Test Lab", route: "/test-lab", icon: <Wrench className="w-3.5 h-3.5" /> },
           { label: "Curator Tools", route: "/curator", icon: <Crown className="w-3.5 h-3.5" /> },
-          { label: "Admin Evolution", route: "/admin-evolution", icon: <Settings className="w-3.5 h-3.5" /> },
+          { label: "Admin Evolution", route: "/evolution", icon: <Settings className="w-3.5 h-3.5" /> },
         ].map(l => (
           <Link key={l.label} to={l.route}>
             <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-card/20 border-border/20 text-xs">
@@ -817,7 +817,7 @@ function ToolshedSection() {
       category: "Quality & Testing",
       items: [
         { label: "Test Lab", desc: "Feature checklists, edge case testing, smoke tests", route: "/test-lab", icon: <Wrench className="w-4 h-4" />, status: "live" },
-        { label: "Bug Garden", desc: "Bug reports, triage, community upvotes", route: "/bug-garden", icon: <Bug className="w-4 h-4" />, status: "live" },
+        { label: "Council Sparks", desc: "Community sparks, bug reports, triage, and upvotes", route: "/bug-garden", icon: <Bug className="w-4 h-4" />, status: "live" },
         { label: "Share Simulator", desc: "Test sharing flows and incoming share parsing", route: "/share-simulator", icon: <Share2 className="w-4 h-4" />, status: "live" },
       ],
     },
@@ -832,14 +832,14 @@ function ToolshedSection() {
     {
       category: "API & Contracts",
       items: [
-        { label: "API Docs", desc: "REST endpoint reference, health checks, auth info", route: "/api-docs", icon: <FileCode className="w-4 h-4" />, status: "live" },
+        { label: "API Docs", desc: "REST endpoint reference, health checks, auth info", route: "/api/docs", icon: <FileCode className="w-4 h-4" />, status: "live" },
         { label: "Agent Garden Portal", desc: "Agent registration, capabilities, contribution tracking", route: "/agent-garden", icon: <Bot className="w-4 h-4" />, status: "live" },
       ],
     },
     {
       category: "Administration",
       items: [
-        { label: "Admin Evolution", desc: "Growth panels, system evolution controls", route: "/admin-evolution", icon: <Settings className="w-4 h-4" />, status: "live" },
+        { label: "Admin Evolution", desc: "Growth panels, system evolution controls", route: "/evolution", icon: <Settings className="w-4 h-4" />, status: "live" },
         { label: "Calendar Settings", desc: "Seasonal lens configuration, calendar markers", route: "/calendar-settings", icon: <Clock className="w-4 h-4" />, status: "live" },
         { label: "Install Guide", desc: "PWA installation instructions for all platforms", route: "/install", icon: <Package className="w-4 h-4" />, status: "live" },
       ],

@@ -353,7 +353,7 @@ export function StewardConsole() {
           { label: "Wanderers", route: "/agent-garden?tab=wanderers", icon: <Footprints className="w-3 h-3" /> },
           { label: "Research Bridge", route: "/agent-garden?tab=bridge", icon: <TreeDeciduous className="w-3 h-3" /> },
           { label: "Verification Queue", route: "/agent-garden?tab=bridge", icon: <ClipboardCheck className="w-3 h-3" /> },
-          { label: "Bug Garden", route: "/bug-garden", icon: <Bug className="w-3 h-3" /> },
+          { label: "Council Sparks", route: "/bug-garden", icon: <Bug className="w-3 h-3" /> },
           { label: "Tree Data Commons", route: "/tree-data-commons", icon: <Database className="w-3 h-3" /> },
           { label: "Contributions", route: "/agent-garden?tab=contributions", icon: <Sprout className="w-3 h-3" /> },
         ].map(l => (

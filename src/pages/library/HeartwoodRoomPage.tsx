@@ -24,7 +24,8 @@ const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 const ArboriumRoom = lazy(() => import("@/components/library/ArboriumRoom"));
-const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
+// QuestCaveRoom superseded by QuestCavePage (/heartwood/quest-room) — see ROOM_ALIASES redirect
+// const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
 
 // Room aliases for backward compatibility
 const ROOM_ALIASES: Record<string, string> = {
@@ -204,7 +205,7 @@ const HeartwoodRoomPage = () => {
     >
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
-        {resolvedRoom === "quest-cave" && <QuestCaveRoom />}
+        {/* quest-cave redirects to /heartwood/quest-room via ROOM_ALIASES — this line is unreachable */}
         {resolvedRoom === "arborium" && <ArboriumRoom />}
         {resolvedRoom === "music-room" && <MusicRoom />}
         {resolvedRoom === "greenhouse" && <Greenhouse />}

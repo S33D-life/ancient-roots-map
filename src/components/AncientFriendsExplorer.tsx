@@ -516,10 +516,10 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
         setTimeout(() => setHeartBurst(false), 900);
         toast({
           title: `💛 ${tree.name} dreamed`,
-          description: "Added to your Dream Tree",
+          description: "Added to your Wishing Tree",
           action: (
-            <ToastAction altText="View Dream Tree" onClick={() => navigate("/library/wishing-tree")}>
-              View Dream Tree
+            <ToastAction altText="View Wishing Tree" onClick={() => navigate("/library/wishing-tree")}>
+              View Wishing Tree
             </ToastAction>
           ),
           duration: 3000,
