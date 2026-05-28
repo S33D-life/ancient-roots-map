@@ -1427,18 +1427,10 @@ const TreeDetailPage = () => {
             )}
 
             <>
-                {/* Birdsong Button */}
-                <Button
-                  onClick={() => setBirdsongOpen(true)}
-                  variant="outline"
-                  className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-                >
-                  <Bird className="h-4 w-4" />
-                  Offer a Birdsong
-                  {birdsongCount > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
-                  )}
-                </Button>
+                {/* Birdsong lives as a category tab below — its own "Add Birdsong"
+                    button is rendered inside the Birdsong tab to avoid duplication. */}
+
+
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
