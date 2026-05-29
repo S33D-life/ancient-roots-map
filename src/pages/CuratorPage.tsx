@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRole } from "@/hooks/use-role";
+import { ROUTES } from "@/lib/routes";
 import Header from "@/components/Header";
 import OptimizedImage from "@/components/OptimizedImage";
 import { Input } from "@/components/ui/input";
@@ -349,7 +350,7 @@ export default function CuratorPage() {
             <Shield className="w-4 h-4" />
             Evolution Dashboard →
           </a>
-          <a href="/edit-review" className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2">
+          <a href={ROUTES.EDIT_REVIEW} className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2">
             <Shield className="w-4 h-4" />
             Tree Edit Proposals →
           </a>
