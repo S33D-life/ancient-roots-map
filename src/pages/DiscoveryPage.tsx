@@ -94,7 +94,7 @@ const DiscoveryPage = () => {
   const handleWishlist = async (treeId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      toast.error("Sign in to add to your Dream Tree");
+      toast.error("Sign in to add to your Wishing Tree");
       navigate("/auth");
       return;
     }
@@ -102,10 +102,10 @@ const DiscoveryPage = () => {
     const isWished = wishlistIds.includes(treeId);
     if (isWished) {
       await supabase.from("tree_wishlist").delete().eq("tree_id", treeId).eq("user_id", user.id);
-      toast.success("Removed from Dream Tree");
+      toast.success("Removed from Wishing Tree");
     } else {
       await supabase.from("tree_wishlist").insert({ tree_id: treeId, user_id: user.id, status: "dreamed" } as any);
-      toast.success("Added to your Dream Tree 🌟");
+      toast.success("Added to your Wishing Tree 🌟");
     }
     refetchWishlist();
   };
