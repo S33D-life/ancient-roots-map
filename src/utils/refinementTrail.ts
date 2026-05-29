@@ -90,12 +90,30 @@ export interface EditHistoryRow {
 }
 
 /**
+ * Edit-history rows whose `edit_type` is *also* recorded in a dedicated table
+ * (and surfaced by that table's mapper below). These are cross-written to
+ * `tree_edit_history` so it is the one canonical provenance log, but we skip them
+ * here so the trail does not display the same event twice — the richer dedicated
+ * row (change_log / merge_history / location_history) is the display source.
+ */
+const MIRRORED_EDIT_TYPES = new Set([
+  "proposal_accepted",            // → tree_change_log
+  "merge",                        // → tree_merge_history
+  "location_refined",             // → tree_location_history
+  "location_update_applied",      // (synonym, defensive)
+  "checkin_location_refinement",  // (synonym, defensive)
+]);
+
+/**
  * Direct edits are one row per field. We coalesce rows sharing the same actor +
- * timestamp + reason (a single multi-field save) into one entry.
+ * timestamp + reason (a single multi-field save) into one entry. Rows whose
+ * edit_type is mirrored by a dedicated table are skipped (see above) to avoid
+ * double-display.
  */
 export function fromEditHistory(rows: EditHistoryRow[]): RefinementTrailEntry[] {
   const groups = new Map<string, RefinementTrailEntry>();
   for (const r of rows) {
+    if (MIRRORED_EDIT_TYPES.has(r.edit_type)) continue;
     const key = `${r.user_id}|${r.created_at}|${r.edit_reason ?? ""}|${r.edit_type}`;
     const existing = groups.get(key);
     const diff: FieldDiff = { field: r.field_name, from: str(r.old_value), to: str(r.new_value) };
@@ -104,7 +122,7 @@ export function fromEditHistory(rows: EditHistoryRow[]): RefinementTrailEntry[] 
     } else {
       groups.set(key, {
         id: `edit:${r.id}`,
-        kind: r.edit_type === "direct" ? "direct_edit" : "direct_edit",
+        kind: "direct_edit",
         at: r.created_at,
         actorId: r.user_id,
         fields: [diff],

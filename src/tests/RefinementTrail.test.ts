@@ -35,6 +35,21 @@ describe("refinementTrail normalisers", () => {
     expect(fromEditHistory(rows)).toHaveLength(2);
   });
 
+  it("skips mirrored edit_types (proposal_accepted/merge/location_refined) to avoid double-display", () => {
+    const rows: EditHistoryRow[] = [
+      { id: "1", field_name: "name", old_value: "A", new_value: "B", edit_reason: null, edit_type: "direct", user_id: "u1", created_at: "2026-05-01T10:00:00Z" },
+      { id: "2", field_name: "species", old_value: "Oak", new_value: "Beech", edit_reason: "accepted", edit_type: "proposal_accepted", user_id: "c1", created_at: "2026-05-02T10:00:00Z" },
+      { id: "3", field_name: "merge", old_value: null, new_value: "tB", edit_reason: null, edit_type: "merge", user_id: "c1", created_at: "2026-05-03T10:00:00Z" },
+      { id: "4", field_name: "location", old_value: "1,1", new_value: "2,2", edit_reason: null, edit_type: "location_refined", user_id: "c1", created_at: "2026-05-04T10:00:00Z" },
+    ];
+    const entries = fromEditHistory(rows);
+    // Only the "direct" row survives; the three mirrored rows are surfaced by their
+    // dedicated-table mappers instead.
+    expect(entries).toHaveLength(1);
+    expect(entries[0].id).toBe("edit:1");
+    expect(entries[0].kind).toBe("direct_edit");
+  });
+
   it("maps an accepted change_log row to a proposal_accepted entry with from/to diffs", () => {
     const rows: ChangeLogRow[] = [
       {
