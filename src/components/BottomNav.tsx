@@ -1,16 +1,16 @@
 import { memo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Plus } from "lucide-react";
 import { Z, SAFE_ZONES } from "@/lib/z-index";
 import { ROUTES } from "@/lib/routes";
 
 const NAV_ITEMS = [
-  { to: ROUTES.MAP, icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree"] },
-  { to: ROUTES.VALUE_TREE, icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/harvest", "/cosmic", "/how-hearts-work", "/patron-offering"] },
+  { to: ROUTES.MAP, icon: TreeDeciduous, label: "Atlas", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree", "/harvest", "/cosmic"] },
+  { to: ROUTES.VALUE_TREE, icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/how-hearts-work", "/patron-offering"] },
   // Center slot reserved for Add button
   { to: ROUTES.LIBRARY, icon: BookOpen, label: "Heartwood", matchPrefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger"] },
-  { to: ROUTES.COUNCIL, icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas", "/support", "/press", "/groves", "/pulse", "/pathways"] },
+  { to: ROUTES.COUNCIL, icon: Leaf, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/support", "/press", "/groves", "/pulse", "/pathways"] },
 ] as const;
 
 const BottomNav = () => {
