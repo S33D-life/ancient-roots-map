@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
+import { useAtlasCountryStats } from "@/hooks/use-atlas-country-stats";
 import { useCountrySpeciesActivity } from "@/hooks/useCountrySpeciesActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -273,6 +274,8 @@ const CountryPortalPage = () => {
 
   // Species activity for the spiral
   const { data: speciesActivity, isLoading: speciesLoading } = useCountrySpeciesActivity(config.country);
+  const { data: atlasCountryStats = [] } = useAtlasCountryStats(config.country, !!entry);
+  const atlasCountryStat = atlasCountryStats[0] || null;
   const countryRootstones = useMemo(
     () => getRootstonesByCountrySlug(countrySlug || ""),
     [countrySlug],
@@ -317,15 +320,29 @@ const CountryPortalPage = () => {
     return trees.filter(t => t.province === selectedProvince);
   }, [trees, selectedProvince]);
 
-  const totalCount = trees.length;
-  const speciesCount = new Set(trees.map(t => t.species_scientific)).size;
-  const withCoords = trees.filter(t => t.latitude != null).length;
-  const verifiedCount = trees.filter(t => t.status === "verified_linked").length;
+  const totalCount = atlasCountryStat?.total_research_records ?? trees.length;
+  const speciesCount = atlasCountryStat?.distinct_species_count ?? new Set(trees.map(t => t.species_scientific)).size;
+  const withCoords = atlasCountryStat?.research_records_with_coordinates ?? trees.filter(t => t.latitude != null && t.longitude != null).length;
+  const missingCoords = atlasCountryStat?.research_records_missing_coordinates ?? trees.filter(t => t.latitude == null || t.longitude == null).length;
+  const verifiedCount = atlasCountryStat?.linked_ancient_friends_count ?? trees.filter(t => t.status === "verified_linked").length;
+  const openVerificationCount = atlasCountryStat?.verification_task_open_count ?? 0;
+  const dataConfidenceScore = atlasCountryStat?.data_confidence_score ?? 0;
   const precisionCounts = useMemo(() => {
+    if (atlasCountryStat) {
+      return {
+        exact: atlasCountryStat.exact_precision_count,
+        approx: atlasCountryStat.approximate_precision_count,
+        unknown: atlasCountryStat.unknown_precision_count,
+      };
+    }
     const c = { exact: 0, approx: 0, unknown: 0 };
-    trees.forEach(t => { c[t.geo_precision as keyof typeof c] = (c[t.geo_precision as keyof typeof c] || 0) + 1; });
+    trees.forEach(t => {
+      if (t.geo_precision === "exact" || t.geo_precision === "precise") c.exact++;
+      else if (t.geo_precision === "approx" || t.geo_precision === "approximate" || t.geo_precision === "estimated") c.approx++;
+      else c.unknown++;
+    });
     return c;
-  }, [trees]);
+  }, [trees, atlasCountryStat]);
 
   /* Species ranking */
   const speciesRanking = useMemo(() => {
@@ -690,9 +707,12 @@ const CountryPortalPage = () => {
             <StatTile label="Records" value={totalCount} icon={TreeDeciduous} />
             <StatTile label="Distinct Species" value={speciesCount} icon={BarChart3} />
             <StatTile label="With Coordinates" value={withCoords} icon={MapPin} />
+            <StatTile label="Missing Coordinates" value={missingCoords} icon={Compass} />
             <StatTile label="Exact Precision" value={precisionCounts.exact} icon={Compass} />
             <StatTile label="Approx Precision" value={precisionCounts.approx} icon={Eye} />
             <StatTile label="Verified Linked" value={verifiedCount} icon={Heart} />
+            <StatTile label="Open Verification" value={openVerificationCount} icon={Shield} />
+            <StatTile label="Data Confidence" value={`${dataConfidenceScore}%`} icon={Sparkles} />
           </div>
         </section>
 

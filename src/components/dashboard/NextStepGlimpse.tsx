@@ -20,7 +20,7 @@ export default function NextStepGlimpse({ userId }: Props) {
 
   return (
     <Link
-      to="/heartwood/quest-room"
+      to="/library/quest-cave"
       className="block rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 transition-all hover:border-primary/40 hover:bg-card/60 group"
     >
       <div className="flex items-start gap-3">
