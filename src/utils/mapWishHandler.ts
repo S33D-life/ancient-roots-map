@@ -5,6 +5,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getPublicAppUrl } from "@/utils/ogMeta";
+import { seasonStage } from "@/lib/encounters/encounterSeason";
 
 /** Set up event delegation for popup buttons (wish + share + plant seed) */
 export function setupPopupActions(container: HTMLElement): () => void {
@@ -80,13 +81,10 @@ export function setupPopupActions(container: HTMLElement): () => void {
       checkinBtn.textContent = "⏳ Checking in...";
 
       try {
-        const month = new Date().getMonth();
-        const seasonMap: Record<number, string> = { 0: "bare", 1: "bare", 2: "bud", 3: "bud", 4: "leaf", 5: "blossom", 6: "leaf", 7: "leaf", 8: "fruit", 9: "fruit", 10: "bare", 11: "bare" };
-
         const { error } = await supabase.from("tree_checkins").insert({
           tree_id: treeId,
           user_id: user.id,
-          season_stage: seasonMap[month] || "other",
+          season_stage: seasonStage(),
           checkin_method: "manual",
           privacy: "public",
           canopy_proof: false,
