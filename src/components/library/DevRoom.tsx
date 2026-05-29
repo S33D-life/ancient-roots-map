@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useHasRole } from "@/hooks/use-role";
 import { isDevHost } from "@/lib/env";
+import { ROUTES } from "@/lib/routes";
 import { SkillViewer } from "@/components/library/SkillViewer";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -826,7 +827,7 @@ function ToolshedSection() {
       items: [
         { label: "Curator Tools", desc: "Staff management, tree verification, moderation", route: "/curator", icon: <Crown className="w-4 h-4" />, status: "live" },
         { label: "Rootstone Importer", desc: "Bulk CSV/JSON import for tree records", route: "/curator/rootstones-import", icon: <Import className="w-4 h-4" />, status: "live" },
-        { label: "Edit Review", desc: "Review pending community edits and contributions", route: "/edit-review", icon: <PenTool className="w-4 h-4" />, status: "live" },
+        { label: "Edit Review", desc: "Review pending community edits and contributions", route: ROUTES.EDIT_REVIEW, icon: <PenTool className="w-4 h-4" />, status: "live" },
       ],
     },
     {
