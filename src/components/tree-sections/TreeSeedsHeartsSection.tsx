@@ -12,7 +12,7 @@
  * When one action is expanded, the sibling actions dim softly to bring
  * focus to the active gesture.
  */
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sprout, Heart, Sparkles, Loader2, ChevronDown, Moon, X } from "lucide-react";
