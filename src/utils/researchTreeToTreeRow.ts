@@ -139,14 +139,3 @@ function parseGirthToCm(girth: string): number | null {
   if (cmMatch) return Math.round(parseFloat(cmMatch[1]));
   return null;
 }
-
-/** Generate a URL-safe slug from a research tree */
-export function researchTreeSlug(rt: ResearchTreeRow): string {
-  const name = rt.tree_name || rt.species_common || rt.species_scientific;
-  return name
-    .toLowerCase()
-    .replace(/[''ʻ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .substring(0, 60);
-}
