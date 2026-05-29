@@ -274,6 +274,7 @@ const TreeSeedsHeartsSection = ({
 
         {openAction === "hang" && userId && (
           <motion.div
+            ref={drawerRef}
             key="hang-drawer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
