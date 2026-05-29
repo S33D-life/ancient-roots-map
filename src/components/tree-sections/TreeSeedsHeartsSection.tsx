@@ -250,6 +250,7 @@ const TreeSeedsHeartsSection = ({
       <AnimatePresence initial={false} mode="wait">
         {openAction === "seed" && canSeed && (
           <motion.div
+            ref={drawerRef}
             key="seed-drawer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
