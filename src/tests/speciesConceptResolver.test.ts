@@ -17,11 +17,11 @@ describe("species concept resolver", () => {
     expect(resolved.confidence).toBe("broad");
   });
 
-  it("maps broad labels to concepts without fabricating exact species keys", () => {
+  it("uses concept_exact for concept IDs without fabricating exact species keys", () => {
     const resolved = resolveSpeciesConcept("oak");
 
     expect(resolved.concept_id).toBe("oak");
-    expect(resolved.confidence).toBe("exact");
+    expect(resolved.confidence).toBe("concept_exact");
     expect(resolved.match_kind).toBe("concept_id");
     expect(resolved.exact_species_key).toBeNull();
     expect(resolved.concept?.concept_type).toBe("genus");

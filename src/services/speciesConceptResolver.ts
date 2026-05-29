@@ -34,6 +34,10 @@ export interface SpeciesConceptResolution {
   normalized_label: string;
   concept_id: SpeciesConceptId | null;
   concept: SpeciesConcept | null;
+  /**
+   * Concept-layer confidence only. `concept_exact` means the label matched a
+   * concept ID exactly; it does not mean exact taxonomic species confidence.
+   */
   confidence: SpeciesConceptResolutionConfidence;
   match_kind: SpeciesConceptMatchKind;
   exact_species_key: string | null;
@@ -83,7 +87,7 @@ function buildAliasIndex(): Map<string, IndexEntry> {
   for (const concept of SPECIES_CONCEPTS) {
     addIndexEntry(index, concept.concept_id, {
       concept,
-      confidence: "exact",
+      confidence: "concept_exact",
       match_kind: "concept_id",
     });
     addIndexEntry(index, concept.label, {
@@ -241,4 +245,3 @@ export function resolveArboriumStarterConcept(slug: string | null | undefined): 
 
   return resolveSpeciesConcept(ARBORIUM_STARTER_CONCEPTS[slug as ArboriumStarterSlug]);
 }
-

@@ -13,7 +13,12 @@ export type SpeciesConceptType =
   | "learning_group"
   | "mythic_group";
 
-export type SpeciesConceptConfidence = "exact" | "representative" | "broad" | "mythic";
+/**
+ * Describes confidence in a human-facing concept match only.
+ * `concept_exact` means the input matched a known concept identifier, not an
+ * exact taxonomic species. Exact species confidence still belongs to Treeasurus.
+ */
+export type SpeciesConceptConfidence = "concept_exact" | "representative" | "broad" | "mythic";
 
 export type SpeciesConceptSourceLayer =
   | "treeasurus"
@@ -182,4 +187,3 @@ export const ARBORIUM_STARTER_CONCEPTS = {
   beech: "beech",
   hawthorn: "hawthorn",
 } as const satisfies Record<ArboriumStarterSlug, SpeciesConceptId>;
-
