@@ -8,7 +8,7 @@ import { test, expect, type Page } from "@playwright/test";
  *   • HTTP 200 from the dev/preview server
  *   • No `GlobalErrorBoundary` fallback visible
  *   • No uncaught console errors above a low-noise threshold
- *   • Page-specific landmark element present
+ *   • Page-specific shell / landmark element present
  *
  * Total target wall-time: < 2 minutes on CI.
  */
@@ -77,7 +77,7 @@ test.describe("Smoke — public routes render", () => {
     const response = await page.goto("/map", { waitUntil: "domcontentloaded" });
     expect(response?.ok(), "map returned non-200").toBeTruthy();
 
-    await expect(page.locator("header").first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("map-shell")).toBeVisible({ timeout: 10_000 });
     await assertNoCrashFallback(page);
 
     // Either the leaflet container OR the map-error fallback should mount.
@@ -120,7 +120,7 @@ test.describe("Smoke — public routes render", () => {
     // What we're proving: the page does not crash from hook-order
     // bugs (React #310) on the loading → loaded transition.
     const healthyState = page.locator(
-      "main, [data-testid='tree-hero'], [data-testid='tree-not-found'], [data-testid='tree-loading']"
+      "main, [data-testid='tree-detail'], [data-testid='tree-hero'], [data-testid='tree-not-found'], [data-testid='tree-loading']"
     );
     await expect(healthyState.first()).toBeVisible({ timeout: 15_000 });
 

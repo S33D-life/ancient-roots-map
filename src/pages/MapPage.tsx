@@ -76,7 +76,11 @@ const MapPageFull = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[10] bg-background">
+    <main
+      className="fixed inset-0 z-[10] bg-background"
+      aria-label="Ancient Friends Atlas map"
+      data-testid="map-shell"
+    >
       {/* Map renders immediately — preloads while blessing is visible */}
       <MapErrorBoundary>
         <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
@@ -144,7 +148,7 @@ const MapPageFull = () => {
           />
         </Suspense>
       )}
-    </div>
+    </main>
   );
 };
 

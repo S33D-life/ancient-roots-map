@@ -562,9 +562,13 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="flex items-center justify-center h-[60vh]">
+        <main
+          className="flex items-center justify-center h-[60vh]"
+          data-testid="tree-loading"
+          aria-label="Loading tree"
+        >
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        </main>
       </div>
     );
   }
@@ -574,7 +578,8 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <motion.div
+        <motion.main
+          data-testid="tree-merged"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -596,7 +601,7 @@ const TreeDetailPage = () => {
             <TreeDeciduous className="h-4 w-4" />
             Visit the unified record →
           </Link>
-        </motion.div>
+        </motion.main>
       </div>
     );
   }
@@ -605,7 +610,8 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <motion.div
+        <motion.main
+          data-testid="tree-not-found"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="container mx-auto px-4 py-16 text-center space-y-4 max-w-md"
@@ -618,7 +624,7 @@ const TreeDetailPage = () => {
             <Map className="h-4 w-4" />
             Return to the Map
           </Link>
-        </motion.div>
+        </motion.main>
       </div>
     );
   }
@@ -719,7 +725,11 @@ const TreeDetailPage = () => {
         )}
       </AnimatePresence>
 
-      <div className="container mx-auto px-4 pb-20 max-w-4xl overflow-x-hidden" style={{ paddingTop: 'var(--content-top)' }}>
+      <main
+        className="container mx-auto px-4 pb-20 max-w-4xl overflow-x-hidden"
+        style={{ paddingTop: 'var(--content-top)' }}
+        data-testid="tree-detail"
+      >
         <button
           onClick={() => {
             if (window.history.length > 1) {
@@ -1597,7 +1607,7 @@ const TreeDetailPage = () => {
           </TabsContent>
         </Tabs>
 
-      </div>
+      </main>
 
       {/* Lightbox */}
       {lightboxIndex !== null && photoOfferings.length > 0 && (
