@@ -70,20 +70,29 @@ if (forbiddenEnv.length > 0) {
   process.exit(1);
 }
 
+// `exemptable: true` patterns can be silenced with a pragma comment on the same
+// line or the line immediately above: `// security-check: allow <reason>`.
+// Service-role and publishable-key assignment patterns are intentionally NOT
+// exemptable — those must always fail loudly even with a pragma.
 const secretPatterns = [
   {
     label: "Supabase service role key assignment",
     regex: /SUPABASE_SERVICE_ROLE_KEY\s*=\s*[A-Za-z0-9._-]{20,}/i,
+    exemptable: false,
   },
   {
     label: "Supabase publishable key assignment",
     regex: /VITE_SUPABASE_PUBLISHABLE_KEY\s*=\s*[A-Za-z0-9._-]{20,}/i,
+    exemptable: false,
   },
   {
     label: "JWT-like token",
     regex: /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/,
+    exemptable: true,
   },
 ];
+
+const PRAGMA = /\/\/\s*security-check:\s*allow\s+\S/;
 
 const allowList = new Set([".env.example"]);
 const findings = [];
@@ -103,16 +112,26 @@ for (const file of tracked) {
   if (!st.isFile()) continue;
 
   const text = buf.toString("utf8");
+  const lines = text.split("\n");
   for (const pattern of secretPatterns) {
-    if (pattern.regex.test(text)) {
-      findings.push({ file, label: pattern.label });
+    for (let i = 0; i < lines.length; i += 1) {
+      if (!pattern.regex.test(lines[i])) continue;
+      if (pattern.exemptable) {
+        const sameLinePragma = PRAGMA.test(lines[i]);
+        const prevLinePragma = i > 0 && PRAGMA.test(lines[i - 1]);
+        if (sameLinePragma || prevLinePragma) continue;
+      }
+      findings.push({ file, label: pattern.label, line: i + 1 });
+      break;
     }
   }
 }
 
 if (findings.length > 0) {
   console.error("Blocked: potential committed secrets detected:");
-  findings.forEach(({ file, label }) => console.error(` - ${file}: ${label}`));
+  findings.forEach(({ file, label, line }) =>
+    console.error(` - ${file}:${line}: ${label}`),
+  );
   process.exit(1);
 }
 
