@@ -8,6 +8,7 @@ import { MapPin, Check, Loader2, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { notify } from "@/lib/notify";
+import { seasonStage } from "@/lib/encounters/encounterSeason";
 import PostCheckinReflection from "@/components/PostCheckinReflection";
 import type { CheckinLight } from "@/hooks/use-tree-checkin-status";
 
@@ -50,12 +51,6 @@ export default function QuickCheckinButton({
     setSubmitting(true);
 
     try {
-      const month = new Date().getMonth();
-      const seasonMap: Record<number, string> = {
-        0: "bare", 1: "bare", 2: "bud", 3: "bud", 4: "leaf",
-        5: "blossom", 6: "leaf", 7: "leaf", 8: "fruit", 9: "fruit",
-        10: "bare", 11: "bare",
-      };
 
       let lat: number | null = null;
       let lng: number | null = null;
@@ -85,7 +80,7 @@ export default function QuickCheckinButton({
         latitude: lat,
         longitude: lng,
         accuracy_m: accuracy,
-        season_stage: seasonMap[month] || "other",
+        season_stage: seasonStage(),
         checkin_method: lat ? "gps" : "manual",
         privacy: "public",
         canopy_proof: !!(lat && accuracy && accuracy < 100),

@@ -17,6 +17,7 @@ import { useWeather, weatherSummary } from "@/hooks/use-weather";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import { useUIFlow } from "@/contexts/UIFlowContext";
 import { notify } from "@/lib/notify";
+import { seasonStage } from "@/lib/encounters/encounterSeason";
 
 interface TreeCheckinButtonProps {
   treeId: string;
@@ -74,11 +75,6 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
         } catch { /* GPS optional */ }
       }
 
-      // Get season stage based on month
-      const month = new Date().getMonth();
-      const seasonMap: Record<number, string> = { 0: "bare", 1: "bare", 2: "bud", 3: "bud", 4: "leaf", 5: "blossom", 6: "leaf", 7: "leaf", 8: "fruit", 9: "fruit", 10: "bare", 11: "bare" };
-      const seasonStage = seasonMap[month] || "other";
-
       const weatherStr = attachWeather && weather ? weatherSummary(weather) : null;
 
       const { data: checkinData, error } = await supabase.from("tree_checkins").insert({
@@ -86,7 +82,7 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
         user_id: userId,
         latitude: lat,
         longitude: lng,
-        season_stage: seasonStage,
+        season_stage: seasonStage(),
         weather: weatherStr,
         reflection: note.trim() || null,
         checkin_method: useGps ? "gps" : "manual",
