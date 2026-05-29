@@ -169,7 +169,7 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
     if (error) {
       toast.error("Failed to remove: " + error.message);
     } else {
-      toast.success("Removed from Dream Tree");
+      toast.success("Removed from Wishing Tree");
       fetchData();
     }
   };
@@ -242,10 +242,10 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
               className="relative w-32 h-40 shrink-0 rounded-md overflow-hidden border border-border shadow"
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}
             >
-              <img src={wishingTreeImage} alt="Dream Tree" className="w-full h-full object-cover" />
+              <img src={wishingTreeImage} alt="Wishing Tree" className="w-full h-full object-cover" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg md:text-xl font-serif text-primary">Dream Tree</h2>
+              <h2 className="text-lg md:text-xl font-serif text-primary">Wishing Tree</h2>
               <p className="text-xs font-serif text-muted-foreground">
                 Trees you dream of visiting — your personal map of intention
               </p>
@@ -384,7 +384,7 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
         >
           <Sparkles className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
           <p className="text-muted-foreground font-serif mb-2">
-            {viewMode === "individual" ? "Your Dream Tree is empty" : "No dreams found"}
+            {viewMode === "individual" ? "Your Wishing Tree is empty" : "No dreams found"}
           </p>
           <p className="text-xs text-muted-foreground">
             {viewMode === "individual"

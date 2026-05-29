@@ -93,7 +93,6 @@ const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplore
 const PathwaysPage = lazyImportWithRetry(() => import("./pages/PathwaysPage"), "pathways");
 const GalleryPage = lazyImportWithRetry(() => import("./pages/GalleryPage"), "gallery");
 const HeartwoodRoomPage = lazyImportWithRetry(() => import("./pages/library/HeartwoodRoomPage"), "heartwood-room");
-const QuestCavePage = lazyImportWithRetry(() => import("./pages/QuestCavePage"), "quest-cave");
 const LifeGrovesLandingPage = lazyImportWithRetry(() => import("./pages/heartwood/LifeGrovesLandingPage"), "life-groves-landing");
 const LifeGroveCreatePage = lazyImportWithRetry(() => import("./pages/heartwood/LifeGroveCreatePage"), "life-groves-create");
 const LifeGrovePage = lazyImportWithRetry(() => import("./pages/heartwood/LifeGrovePage"), "life-groves-detail");
@@ -338,8 +337,8 @@ const App = () => {
                 <Route path="/s33d" element={realm(<S33dGatewayPage />, "seed")} />
                 <Route path="/ancient-friends" element={<Navigate to="/library/ancient-friends" replace />} />
                 <Route path="/arborium" element={<Navigate to="/library/arborium" replace />} />
-                <Route path="/heartwood/quest-room" element={realm(<QuestCavePage />, "trunk")} />
-                <Route path="/heartwood/quest-cave" element={<Navigate to="/heartwood/quest-room" replace />} />
+                <Route path="/heartwood/quest-room" element={<Navigate to="/library/quest-cave" replace />} />
+                <Route path="/heartwood/quest-cave" element={<Navigate to="/library/quest-cave" replace />} />
                 <Route path="/heartwood/life-groves" element={realm(<LifeGrovesLandingPage />, "trunk")} />
                 <Route path="/heartwood/life-groves/new" element={realm(<LifeGroveCreatePage />, "trunk")} />
                 <Route path="/heartwood/life-groves/:id" element={realm(<LifeGrovePage />, "trunk")} />

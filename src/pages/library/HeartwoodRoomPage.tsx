@@ -8,6 +8,7 @@ import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
+import { HEARTWOOD_ROOMS, ROOM_LABEL_MAP, ROOM_KEYS, JOURNEY_ROOM_SEQUENCE } from "@/config/heartwoodRooms";
 
 // Lazy room components — each loads independently
 const StaffRoomGallery = lazy(() => import("@/components/StaffRoomGallery"));
@@ -26,60 +27,28 @@ const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 const ArboriumRoom = lazy(() => import("@/components/library/ArboriumRoom"));
 const QuestCaveRoom = lazy(() => import("@/components/library/QuestCaveRoom"));
 
-// Room aliases for backward compatibility
-const ROOM_ALIASES: Record<string, string> = {
-  "ancient-friends": "gallery",
-  "resources": "star-trail",
-  "tree-resources": "star-trail",
-  "creators-path": "star-trail",        // legacy alias — Creator's Path → Star Trail
-  "tree-data-commons": "redirect:/tree-data-commons",
-  "wishing-tree": "wishlist",
-  "ledger": "scrolls",
-  "volumes": "scrolls",
-  "archive": "scrolls",
-  "markets": "rhythms",
-  "cycle-market": "rhythms",
-  "cycle-markets": "rhythms",
-  "quest-cave": "redirect:/heartwood/quest-room",
-  "quest-room": "redirect:/heartwood/quest-room",
-};
+// Derived from heartwoodRooms config: /library/<slug> aliases → canonical room key.
+// Non-/library/ aliases (e.g. /heartwood/*) are handled by App.tsx Navigate redirects.
+// tree-data-commons is a special redirect to a non-library route — stays manual.
+const ROOM_ALIASES: Record<string, string> = (() => {
+  const map: Record<string, string> = {
+    "tree-data-commons": "redirect:/tree-data-commons",
+  };
+  for (const room of HEARTWOOD_ROOMS) {
+    for (const alias of room.aliases ?? []) {
+      if (alias.startsWith("/library/")) {
+        const slug = alias.slice("/library/".length);
+        if (slug && slug !== room.key) map[slug] = room.key;
+      }
+    }
+  }
+  return map;
+})();
 
-const ROOM_LABELS: Record<string, string> = {
-  "staff-room": "Staff Room",
-  "quest-cave": "Quest Cave",
-  "arborium": "The Arborium",
-  "gallery": "Ancient Friends",
-  "music-room": "Music Room",
-  "greenhouse": "Greenhouse",
-  "wishlist": "Wishing Tree",
-  "seed-cellar": "Seed Cellar",
-  "star-trail": "Star Trail",
-  "scrolls": "Scrolls & Records",
-  "vault": "Vaults",
-  "bookshelf": "Bookshelf",
-  "rhythms": "Rhythms",
-  "tap-root": "Dev Room",
-};
+const ROOM_LABELS = ROOM_LABEL_MAP;
 
-/** Ordered room sequence for swipe navigation */
-const ROOM_SEQUENCE = [
-  "gallery",
-  "staff-room",
-  "quest-cave",
-  "arborium",
-  "bookshelf",
-  "seed-cellar",
-  "music-room",
-  "greenhouse",
-  "wishlist",
-  "scrolls",
-  "vault",
-  "star-trail",
-  "rhythms",
-  "tap-root",
-];
-
-const VALID_ROOMS = Object.keys(ROOM_LABELS);
+const ROOM_SEQUENCE = JOURNEY_ROOM_SEQUENCE;
+const VALID_ROOMS = ROOM_KEYS;
 
 /**
  * AncientFriendsWrapper — self-contained wrapper that fetches its own data.

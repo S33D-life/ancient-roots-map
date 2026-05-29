@@ -68,7 +68,7 @@ const PAGE_CONTEXT: { prefix: string; label: string }[] = [
   { prefix: "/council", label: "Council" },
   { prefix: "/golden-dream", label: "Golden Dream" },
   { prefix: "/roadmap", label: "Roadmap" },
-  { prefix: "/bug-garden", label: "Bug Garden" },
+  { prefix: "/bug-garden", label: "Council Sparks" },
   { prefix: "/discovery", label: "Discovery" },
   { prefix: "/support", label: "Support" },
   { prefix: "/groves", label: "Groves" },
