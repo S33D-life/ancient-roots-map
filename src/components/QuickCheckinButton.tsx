@@ -8,7 +8,7 @@ import { MapPin, Check, Loader2, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { notify } from "@/lib/notify";
-import { seasonStage } from "@/lib/encounters/encounterSeason";
+import { buildCheckinPayload } from "@/lib/encounters/buildCheckinPayload";
 import PostCheckinReflection from "@/components/PostCheckinReflection";
 import type { CheckinLight } from "@/hooks/use-tree-checkin-status";
 
@@ -74,17 +74,9 @@ export default function QuickCheckinButton({
         // GPS optional
       }
 
-      const { data, error } = await supabase.from("tree_checkins").insert({
-        tree_id: treeId,
-        user_id: userId,
-        latitude: lat,
-        longitude: lng,
-        accuracy_m: accuracy,
-        season_stage: seasonStage(),
-        checkin_method: lat ? "gps" : "manual",
-        privacy: "public",
-        canopy_proof: !!(lat && accuracy && accuracy < 100),
-      }).select("id").single();
+      const { data, error } = await supabase.from("tree_checkins").insert(
+        buildCheckinPayload({ treeId, userId, lat, lng, accuracyM: accuracy }),
+      ).select("id").single();
 
       if (error) throw error;
 
