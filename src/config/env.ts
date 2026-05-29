@@ -10,6 +10,7 @@
 
 const FALLBACK_SUPABASE_URL = "https://mwzcuczfedrjplndggiv.supabase.co";
 const FALLBACK_SUPABASE_KEY =
+  // security-check: allow — public Supabase anon/publishable key, safe to embed client-side
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13emN1Y3pmZWRyanBsbmRnZ2l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NTAyMTEsImV4cCI6MjA3ODQyNjIxMX0.2DMqC3Sh1BSCkeH39GLO9vMqDRKrNTYvk44QnaryWE4";
 
 const envValue = (name: string): string | undefined => {
