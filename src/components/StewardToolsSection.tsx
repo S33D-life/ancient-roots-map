@@ -13,7 +13,7 @@ import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge } from "luc
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
 
 const TreeDirectEditPanel = lazy(() => import("@/components/TreeDirectEditPanel"));
-const TreeEditHistory = lazy(() => import("@/components/TreeEditHistory"));
+const RefinementTrail = lazy(() => import("@/components/RefinementTrail"));
 const DuplicateReviewQueue = lazy(() => import("@/components/DuplicateReviewQueue"));
 const TreeMergeDialog = lazy(() => import("@/components/TreeMergeDialog"));
 const ReportDuplicateButton = lazy(() => import("@/components/ReportDuplicateButton"));
@@ -158,7 +158,7 @@ export default function StewardToolsSection({
 
           {showHistory && (
             <Suspense fallback={<div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary/40" /></div>}>
-              <TreeEditHistory treeId={treeId} />
+              <RefinementTrail treeId={treeId} />
             </Suspense>
           )}
 
