@@ -5,38 +5,64 @@
  */
 import { useMemo } from "react";
 import { motion } from "framer-motion";
+import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 
-/* ── Room definitions with theme colors — grouped ── */
-type Room = { key: string; label: string; desc: string; accentH: number; particle: string };
+/* ── Canonical label resolver ──
+ * Structural room *names* derive from the Heartwood registry (single source of
+ * truth), keyed by room key and by alias slug (e.g. "ancient-friends" → gallery).
+ * Visual accents — emoji, accentH, particle, atmospheric `desc` — stay local.
+ * Tiles that are not Heartwood rooms (atlas, life-groves, press, tree-data-commons)
+ * fall back to their local `label`. */
+const REGISTRY_LABEL: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const room of HEARTWOOD_ROOMS) {
+    map[room.key] = room.label;
+    for (const alias of room.aliases ?? []) {
+      const slug = alias.split("/").pop();
+      if (slug) map[slug] = room.label;
+    }
+  }
+  return map;
+})();
+
+/** Display name for a tile: registry label if it's a Heartwood room, else the local fallback. */
+function roomLabel(key: string, fallback: string): string {
+  return REGISTRY_LABEL[key] ?? fallback;
+}
+
+/* ── Room definitions — visual accents local, names derive from the registry ──
+ * `emoji` + `desc` + `accentH` + `particle` are local visual/atmospheric accents.
+ * `label` is a fallback name only; the displayed name comes from `roomLabel()`. */
+type Room = { key: string; emoji: string; label: string; desc: string; accentH: number; particle: string };
 
 const PRIMARY: Room[] = [
-  { key: "staff-room",      label: "🪵 Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
-  { key: "star-trail",      label: "✨ Star Trail",      desc: "Your Journey",                             accentH: 340, particle: "spark"   },
-  { key: "ancient-friends", label: "🌳 Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
-  { key: "atlas",           label: "🗺 Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
-  { key: "life-groves",     label: "🌿 Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
-  { key: "quest-cave",      label: "🕯 Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
-  { key: "arborium",        label: "🌿 The Arborium",    desc: "Living field guide of the forest",         accentH: 95,  particle: "leaf"    },
+  { key: "staff-room",      emoji: "🪵", label: "Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
+  { key: "star-trail",      emoji: "✨", label: "Star Trail",      desc: "Your Journey",                             accentH: 340, particle: "spark"   },
+  { key: "ancient-friends", emoji: "🌳", label: "Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
+  { key: "atlas",           emoji: "🗺", label: "Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
+  { key: "life-groves",     emoji: "🌿", label: "Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
+  { key: "quest-cave",      emoji: "🕯", label: "Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+  { key: "arborium",        emoji: "🌿", label: "The Arborium",    desc: "Living field guide of the forest",         accentH: 95,  particle: "leaf"    },
 ];
 
 const LIVING_LIBRARY: Room[] = [
-  { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",                    accentH: 260, particle: "wave"    },
-  { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
-  { key: "scrolls",       label: "📜 Scrolls & Records", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
-  { key: "press",         label: "🪶 Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
-  { key: "vault",         label: "🔐 Vault",            desc: "Staff, Tokens & Treasures",     accentH: 270, particle: "shimmer" },
+  { key: "music-room",    emoji: "🎵", label: "Music Room",       desc: "Tree Radio",                    accentH: 260, particle: "wave"    },
+  { key: "bookshelf",     emoji: "📚", label: "Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
+  { key: "scrolls",       emoji: "📜", label: "Scrolls & Records", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
+  { key: "press",         emoji: "🪶", label: "Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
+  { key: "vault",         emoji: "🔐", label: "Vault",            desc: "Staff, Tokens & Treasures",     accentH: 270, particle: "shimmer" },
 ];
 
 const GROWING_SPACES: Room[] = [
-  { key: "seed-cellar", label: "📦 Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
-  { key: "greenhouse",  label: "🌱 Greenhouse",  desc: "Houseplants & Saplings",      accentH: 130, particle: "leaf" },
-  { key: "wishlist",    label: "⭐ Wishing Tree",  desc: "Trees you dream to visit",    accentH: 45,  particle: "star" },
+  { key: "seed-cellar", emoji: "📦", label: "Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
+  { key: "greenhouse",  emoji: "🌱", label: "Greenhouse",  desc: "Houseplants & Saplings",      accentH: 130, particle: "leaf" },
+  { key: "wishlist",    emoji: "⭐", label: "Wishing Tree", desc: "Trees you dream to visit",    accentH: 45,  particle: "star" },
 ];
 
 const COMMUNITY_ATLAS: Room[] = [
-  { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory",     accentH: 160, particle: "page"  },
-  { key: "rhythms",           label: "🌿 Rhythms",           desc: "Seasonal Cycle Markets",    accentH: 150, particle: "leaf"  },
-  { key: "tap-root",          label: "⚙️ Dev Room",           desc: "Tap Root · Infrastructure", accentH: 210, particle: "spark" },
+  { key: "tree-data-commons", emoji: "🔭", label: "Tree Data Commons", desc: "Knowledge Observatory",     accentH: 160, particle: "page"  },
+  { key: "rhythms",           emoji: "🌿", label: "Rhythms",           desc: "Seasonal Cycle Markets",    accentH: 150, particle: "leaf"  },
+  { key: "tap-root",          emoji: "⚙️", label: "Dev Room",           desc: "Tap Root · Infrastructure", accentH: 210, particle: "spark" },
 ];
 
 /* ── Seasonal ambient hue offset (subtle) ── */
@@ -212,7 +238,7 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
         className="font-serif text-sm md:text-base mb-1 relative z-10 transition-colors duration-300"
         style={{ color: `hsl(${h} 55% 72% / 0.9)` }}
       >
-        {room.label}
+        {room.emoji} {roomLabel(room.key, room.label)}
       </h3>
       <p
         className="text-xs relative z-10 transition-colors duration-300"

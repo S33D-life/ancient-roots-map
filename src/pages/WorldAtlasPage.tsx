@@ -13,6 +13,7 @@ import {
   Columns, Filter, Network, Earth,
 } from "lucide-react";
 import { useMapFocus } from "@/hooks/use-map-focus";
+import { useAtlasCountryStats } from "@/hooks/use-atlas-country-stats";
 import { motion, AnimatePresence } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
@@ -35,6 +36,11 @@ interface CountryStats {
   treeCount: number;
   verifiedCount: number;
   sourceCount: number;
+  withCoordinates: number;
+  missingCoordinates: number;
+  openVerificationTasks: number;
+  completedVerificationTasks: number;
+  dataConfidenceScore: number;
   status: "active" | "growing" | "proposed";
   groveCount: number;
   dominantSpecies?: string;
@@ -277,8 +283,9 @@ type FilterType = "all" | "active" | "with-groves" | "pulse";
 
 /* ─── Main Page ─── */
 const WorldAtlasPage = () => {
-  const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: atlasStats = [], isLoading: atlasStatsLoading } = useAtlasCountryStats();
+  const [groveCountMap, setGroveCountMap] = useState<Map<string, number>>(new Map());
+  const [groveLoading, setGroveLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [treeResults, setTreeResults] = useState<{ id: string; name: string; species: string; country: string }[]>([]);
   const [treeSearching, setTreeSearching] = useState(false);
@@ -290,118 +297,109 @@ const WorldAtlasPage = () => {
   const { focusMap } = useMapFocus();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      // Fetch research tree stats
-      const { data } = await supabase
-        .from("research_trees")
-        .select("country, status, source_program, species_common");
-
-      const countryMap = new Map<string, {
-        treeCount: number; verifiedCount: number; sources: Set<string>;
-        speciesCounts: Map<string, number>;
-      }>();
-      (data || []).forEach((row: any) => {
-        const c = row.country;
-        if (!countryMap.has(c)) countryMap.set(c, { treeCount: 0, verifiedCount: 0, sources: new Set(), speciesCounts: new Map() });
-        const entry = countryMap.get(c)!;
-        entry.treeCount++;
-        if (row.status === "verified_linked") entry.verifiedCount++;
-        entry.sources.add(row.source_program);
-        if (row.species_common) {
-          entry.speciesCounts.set(row.species_common, (entry.speciesCounts.get(row.species_common) || 0) + 1);
-        }
-      });
-
-      // Fetch grove counts by country
+    let cancelled = false;
+    const fetchGroves = async () => {
       const { data: groveData } = await supabase
         .from("groves")
         .select("country");
-      const groveCountMap = new Map<string, number>();
+      if (cancelled) return;
+      const next = new Map<string, number>();
       (groveData || []).forEach((g: any) => {
-        if (g.country) groveCountMap.set(g.country, (groveCountMap.get(g.country) || 0) + 1);
+        if (g.country) next.set(g.country, (next.get(g.country) || 0) + 1);
       });
-
-      const stats: CountryStats[] = [];
-
-      // Active countries
-      countryMap.forEach((val, country) => {
-        const reg = getEntryByCountry(country);
-        const slug = reg?.slug || country.toLowerCase().replace(/\s+/g, "-");
-        const datasets = getDatasetsByCountry(slug);
-
-        // Find dominant species
-        let dominantSpecies: string | undefined;
-        let maxCount = 0;
-        val.speciesCounts.forEach((count, species) => {
-          if (count > maxCount) { maxCount = count; dominantSpecies = species; }
-        });
-
-        // Compute simple pulse level from tree count + verified
-        const velocity = val.verifiedCount + (groveCountMap.get(country) || 0) * 3;
-        let pulseLevel: CountryStats["pulseLevel"] = "quiet";
-        if (velocity >= 20) pulseLevel = "vibrant";
-        else if (velocity >= 10) pulseLevel = "growing";
-        else if (velocity >= 3) pulseLevel = "stirring";
-
-        stats.push({
-          country, slug,
-          flag: reg?.flag || "🌍",
-          descriptor: reg?.descriptor || "Notable Trees",
-          treeCount: val.treeCount,
-          verifiedCount: val.verifiedCount,
-          sourceCount: val.sources.size,
-          status: "active",
-          groveCount: groveCountMap.get(country) || 0,
-          dominantSpecies,
-          datasets,
-          pulseLevel,
-          portalSubtitle: reg?.portalSubtitle || datasets[0]?.portalSubtitle,
-        });
-      });
-
-      // Dedicated page slugs
-      const DEDICATED_PAGE_SLUGS = new Set([
-        "south-africa", "united-kingdom", "ireland", "australia", "new-zealand",
-        "japan", "india", "united-states", "brazil", "zimbabwe", "italy",
-        "colombia", "greece", "canada", "china", "russia", "france",
-        "nigeria", "kenya", "ethiopia", "tanzania", "dr-congo",
-        "costa-rica", "peru", "indonesia", "hong-kong", "singapore",
-        "taiwan", "spain", "mexico",
-      ]);
-
-      // Proposed/growing countries
-      COUNTRY_REGISTRY.forEach((reg) => {
-        if (!countryMap.has(reg.country)) {
-          const hasPage = DEDICATED_PAGE_SLUGS.has(reg.slug);
-          const datasets = getDatasetsByCountry(reg.slug);
-          stats.push({
-            country: reg.country, slug: reg.slug, flag: reg.flag,
-            descriptor: reg.descriptor,
-            treeCount: 0, verifiedCount: 0, sourceCount: 0,
-            status: hasPage ? "growing" : "proposed",
-            groveCount: 0, datasets,
-            portalSubtitle: reg.portalSubtitle || datasets[0]?.portalSubtitle,
-          });
-        }
-      });
-
-      stats.sort((a, b) => {
-        if (a.status === "active" && b.status !== "active") return -1;
-        if (b.status === "active" && a.status !== "active") return 1;
-        if (a.status === "growing" && b.status === "proposed") return -1;
-        if (b.status === "growing" && a.status === "proposed") return 1;
-        return b.treeCount - a.treeCount;
-      });
-
-      setCountryStats(stats);
-      setLoading(false);
+      setGroveCountMap(next);
+      setGroveLoading(false);
     };
-    fetchStats();
+    fetchGroves();
+    return () => { cancelled = true; };
   }, []);
+
+  const countryStats = useMemo(() => {
+    const stats: CountryStats[] = [];
+    const activeCountries = new Set<string>();
+
+    atlasStats.forEach((row) => {
+      const country = row.country;
+      activeCountries.add(country);
+      const reg = getEntryByCountry(country);
+      const slug = reg?.slug || country.toLowerCase().replace(/\s+/g, "-");
+      const datasets = getDatasetsByCountry(slug);
+
+      // Compute simple pulse level from tree count + verified
+      const velocity = row.linked_ancient_friends_count + (groveCountMap.get(country) || 0) * 3;
+      let pulseLevel: CountryStats["pulseLevel"] = "quiet";
+      if (velocity >= 20) pulseLevel = "vibrant";
+      else if (velocity >= 10) pulseLevel = "growing";
+      else if (velocity >= 3) pulseLevel = "stirring";
+
+      stats.push({
+        country, slug,
+        flag: reg?.flag || "🌍",
+        descriptor: reg?.descriptor || "Notable Trees",
+        treeCount: row.total_research_records,
+        verifiedCount: row.linked_ancient_friends_count,
+        sourceCount: row.source_count,
+        withCoordinates: row.research_records_with_coordinates,
+        missingCoordinates: row.research_records_missing_coordinates,
+        openVerificationTasks: row.verification_task_open_count,
+        completedVerificationTasks: row.verification_task_completed_count,
+        dataConfidenceScore: row.data_confidence_score,
+        status: "active",
+        groveCount: groveCountMap.get(country) || 0,
+        datasets,
+        pulseLevel,
+        portalSubtitle: reg?.portalSubtitle || datasets[0]?.portalSubtitle,
+      });
+    });
+
+    // Dedicated page slugs
+    const DEDICATED_PAGE_SLUGS = new Set([
+      "south-africa", "united-kingdom", "ireland", "australia", "new-zealand",
+      "japan", "india", "united-states", "brazil", "zimbabwe", "italy",
+      "colombia", "greece", "canada", "china", "russia", "france",
+      "nigeria", "kenya", "ethiopia", "tanzania", "dr-congo",
+      "costa-rica", "peru", "indonesia", "hong-kong", "singapore",
+      "taiwan", "spain", "mexico",
+    ]);
+
+    // Proposed/growing countries
+    COUNTRY_REGISTRY.forEach((reg) => {
+      if (!activeCountries.has(reg.country)) {
+        const hasPage = DEDICATED_PAGE_SLUGS.has(reg.slug);
+        const datasets = getDatasetsByCountry(reg.slug);
+        stats.push({
+          country: reg.country, slug: reg.slug, flag: reg.flag,
+          descriptor: reg.descriptor,
+          treeCount: 0, verifiedCount: 0, sourceCount: 0,
+          withCoordinates: 0, missingCoordinates: 0,
+          openVerificationTasks: 0, completedVerificationTasks: 0,
+          dataConfidenceScore: 0,
+          status: hasPage ? "growing" : "proposed",
+          groveCount: 0, datasets,
+          portalSubtitle: reg.portalSubtitle || datasets[0]?.portalSubtitle,
+        });
+      }
+    });
+
+    stats.sort((a, b) => {
+      if (a.status === "active" && b.status !== "active") return -1;
+      if (b.status === "active" && a.status !== "active") return 1;
+      if (a.status === "growing" && b.status === "proposed") return -1;
+      if (b.status === "growing" && a.status === "proposed") return 1;
+      return b.treeCount - a.treeCount;
+    });
+
+    return stats;
+  }, [atlasStats, groveCountMap]);
+
+  const loading = atlasStatsLoading || groveLoading;
 
   const activeCount = countryStats.filter(c => c.status === "active").length;
   const totalRecords = countryStats.reduce((s, c) => s + c.treeCount, 0);
+  const totalVerified = countryStats.reduce((s, c) => s + c.verifiedCount, 0);
+  const totalWithCoordinates = countryStats.reduce((s, c) => s + c.withCoordinates, 0);
   const totalGroves = countryStats.reduce((s, c) => s + c.groveCount, 0);
+  const coordinateCoverage = totalRecords > 0 ? Math.round((totalWithCoordinates / totalRecords) * 100) : 0;
 
   /* ─── Search logic ─── */
   const q = searchQuery.trim().toLowerCase();
@@ -475,6 +473,8 @@ const WorldAtlasPage = () => {
             <div className="flex flex-wrap justify-center gap-3 mb-3 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1"><Globe className="w-3 h-3 text-primary/60" /> {activeCount} countries</span>
               <span className="flex items-center gap-1"><TreeDeciduous className="w-3 h-3 text-primary/60" /> {totalRecords.toLocaleString()} records</span>
+              {totalVerified > 0 && <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-primary/60" /> {totalVerified.toLocaleString()} linked</span>}
+              {totalRecords > 0 && <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" /> {coordinateCoverage}% mapped</span>}
               {totalGroves > 0 && <span className="flex items-center gap-1"><Network className="w-3 h-3 text-emerald-500/60" /> {totalGroves} groves</span>}
             </div>
 
