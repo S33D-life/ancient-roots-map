@@ -34,6 +34,11 @@ dist-ssr
 vite.config.ts.timestamp-*.mjs
 .vite/
 
+# Build-generated version metadata — written by `node generate-version.mjs`
+# at build time (see package.json "build"). Regenerated every build; runtime
+# fetch + vite resolveBuildId() both degrade gracefully when absent in dev.
+public/version.json
+
 # Playwright
 /test-results/
 /playwright-report/
