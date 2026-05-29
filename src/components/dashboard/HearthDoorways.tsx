@@ -25,7 +25,7 @@ interface Doorway {
 
 const DOORWAYS: Doorway[] = [
   {
-    to: "/heartwood/quest-room",
+    to: "/library/quest-cave",
     icon: Flame,
     label: "Quest Cave",
     whisper: "An adventure waits below",
