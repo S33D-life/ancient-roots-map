@@ -56,6 +56,24 @@ const TreeSeedsHeartsSection = ({
 }: Props) => {
   const [openAction, setOpenAction] = useState<ActionKey>(null);
   const [hangAmount, setHangAmount] = useState(3);
+  const drawerRef = useRef<HTMLDivElement | null>(null);
+
+  // When a drawer expands, gently scroll it fully into view so its contents
+  // don't get clipped by surrounding UI on small screens.
+  useEffect(() => {
+    if (!openAction) return;
+    const id = window.setTimeout(() => {
+      const el = drawerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const bottomPad = 96; // leave room for bottom nav / safe area
+      if (rect.bottom > vh - bottomPad || rect.top < 64) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 320); // wait for height animation (280ms) to settle
+    return () => window.clearTimeout(id);
+  }, [openAction]);
 
   const heartCollection = useHeartCollection(treeId, userId, isNearby || isCheckedIn);
   const rooting = useTreeRooting(userId, treeId, {
