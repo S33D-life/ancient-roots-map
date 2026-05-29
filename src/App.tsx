@@ -37,6 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ROUTES } from "@/lib/routes";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
@@ -394,7 +395,8 @@ const App = () => {
                 <Route path="/curator/refinements" element={<CuratorRefinementReviewPage />} />
                 <Route path="/curator/species" element={<CuratorSpeciesPage />} />
                 {ShowDevPanel && <Route path="/sync" element={<SyncDashboardPage />} />}
-                {ShowDevPanel && <Route path="/edit-review" element={<EditReviewPage />} />}
+                {/* Reachable in production; EditReviewPage enforces the curator role internally */}
+                <Route path={ROUTES.EDIT_REVIEW} element={<EditReviewPage />} />
                 <Route path="/hives" element={<HivesIndexPage />} />
                 <Route path="/hive/:family" element={<HivePage />} />
                 <Route path="/hive/:family/treasury" element={<HiveTreasuryPage />} />
