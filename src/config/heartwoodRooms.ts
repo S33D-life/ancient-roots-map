@@ -209,7 +209,7 @@ export const HEARTWOOD_ROOMS: HeartwoodRoom[] = [
   // ── Steward ─────────────────────────────────────────────────────────────────
   {
     key: "vault",
-    label: "Vaults",
+    label: "Vault",
     subtitle: "Hold value safely",
     route: "/library/vault",
     stage: "steward",
