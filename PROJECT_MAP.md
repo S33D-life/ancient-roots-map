@@ -99,11 +99,52 @@ Key public surfaces:
 
 ---
 
+## Heartwood Trunk Map (canonical room registry)
+
+`src/config/heartwoodRooms.ts` is the **single source of truth** for Heartwood library rooms — metadata, journey grouping, access levels, and canonical routes. All Heartwood room navigation should derive from this file, not hardcode labels or paths.
+
+**Canonical route shape:** every room lives at `/library/:key`. The `aliases` field lists stale full-path routes (e.g. `/heartwood/quest-cave`, `/library/wishing-tree`) that redirect to the canonical route; `ROOM_ROUTE_MAP` is built from these so redirects stay in sync.
+
+### The Journey Spine
+
+Seven ordered stages — **Meet → Learn → Walk → Offer → Remember → Steward → Evolve** — defined in `JOURNEY_STAGES`. Each room declares the `stage` it belongs to:
+
+| Stage | Meaning | Rooms |
+|-------|---------|-------|
+| **Meet** | Encounter the living forest | Ancient Friends (`gallery`), Staff Room |
+| **Learn** | Read the forest deeply | The Arborium |
+| **Walk** | Move through the land | Quest Cave, Music Room, Greenhouse |
+| **Offer** | Name what you wish to give | Wishing Tree (`wishlist`) |
+| **Remember** | Preserve what has mattered | Bookshelf, Seed Cellar, Star Trail, Scrolls & Records |
+| **Steward** | Guard the living economy | Vaults, Rhythms |
+| **Evolve** | Tend the system itself | Dev Room (`tap-root`) |
+
+### Access levels
+
+`visitor` (public) → `member` (signed-in) → `steward` (curator/keeper) → `advanced` (admin/dev). Defined in `ACCESS_LEVEL_CONFIGS`; rooms grouped by `ROOMS_BY_ACCESS`, `PUBLIC_ROOMS`, `ADVANCED_ROOMS`.
+
+### Derived exports (use these — don't recompute)
+
+| Export | Purpose |
+|--------|---------|
+| `HEARTWOOD_ROOMS` | The room array (ordered) |
+| `ROOM_BY_KEY` | Fast lookup by key |
+| `ROOM_KEYS` | All valid `/library/:key` segments |
+| `ROOM_LABEL_MAP` | `key → label` (matches `HeartwoodRoomPage` shape) |
+| `ROOM_ROUTE_MAP` | Any key or alias slug → canonical route |
+| `JOURNEY_STAGES` / `JOURNEY_ROOM_SEQUENCE` | Spine config + flattened room order |
+| `ROOMS_BY_STAGE` / `ROOMS_BY_ACCESS` | Grouped views |
+| `getMobileRooms(maxPriority)` | Mobile-priority filtered rooms |
+
+> **Rule:** new rooms require a corresponding component in `HeartwoodRoomPage`. Never rename a `key` — it is the URL segment. This file is Claude's lane (see `AGENTS.md`); coordinate before co-editing.
+
+---
+
 ## Data layer (Supabase boundaries)
 
 - Client singleton: `src/integrations/supabase/client.ts` — generated
 - Types: `src/integrations/supabase/types.ts` — generated
-- Env resolution + fallback: `src/config/env.ts` *(holds the public Supabase anon fallback — see security-check note in `CURRENT_TASKS.md`)*
+- Env resolution + fallback: `src/config/env.ts` *(holds the public Supabase anon fallback, annotated with the `security-check: allow` pragma)*
 - Edge Functions: `supabase/functions/` — import, vision (`birdsong-identify`, `extract-what3words-from-image`), link resolution, etc.
 - Static datasets sit in `src/data/`.
 
@@ -114,6 +155,7 @@ Key public surfaces:
 | Concern | File |
 |---------|------|
 | Routes | `src/lib/routes.ts` |
+| **Heartwood rooms (canonical)** | **`src/config/heartwoodRooms.ts`** |
 | Countries | `src/config/countryRegistry.ts` |
 | Cities | `src/config/cityRegistry.ts` |
 | Sub-regions | `src/config/subRegionRegistry.ts` |
@@ -144,7 +186,7 @@ Runs in this order — and CI runs the same:
 
 1. `typecheck` — `tsc --noEmit`
 2. `lint` — eslint
-3. `security:check` — `scripts/security-check.mjs` *(currently blocked — see `CURRENT_TASKS.md`)*
+3. `security:check` — `scripts/security-check.mjs` *(supports `// security-check: allow <reason>` pragma for the generic JWT pattern; service-role/publishable-key patterns stay unexemptable)*
 4. `check:duplicates` — `scripts/check-duplicate-artifacts.mjs`
 5. `guard:assets` — `scripts/asset-budget.mjs`
 6. `test` — vitest
