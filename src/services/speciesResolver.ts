@@ -9,7 +9,7 @@
  * Returns a SpeciesResolution containing canonical data + hive info.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { matchSpecies, enrichSpecies } from "@/data/treeSpecies";
+import { enrichSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies, getHiveInfo, type HiveInfo } from "@/utils/hiveUtils";
 
 export type MatchConfidence = "exact" | "fuzzy" | "unresolved";
@@ -157,82 +157,4 @@ export async function resolveSpecies(
 
   // Fallback to sync/hardcoded
   return resolveSpeciesSync(speciesString, speciesKey);
-}
-
-/**
- * Batch resolve for map/list views — resolves multiple species strings at once.
- */
-export async function resolveSpeciesBatch(
-  entries: Array<{ species: string; speciesKey?: string | null }>
-): Promise<Map<string, SpeciesResolution>> {
-  const results = new Map<string, SpeciesResolution>();
-  const toResolve: string[] = [];
-
-  for (const e of entries) {
-    const key = e.speciesKey || e.species.toLowerCase().trim();
-    const cached = cache.get(key);
-    if (cached) {
-      results.set(key, cached);
-    } else {
-      toResolve.push(e.species.toLowerCase().trim());
-    }
-  }
-
-  if (toResolve.length > 0) {
-    const { data } = await supabase
-      .from("species_index")
-      .select("species_key, common_name, scientific_name, family, genus, normalized_name")
-      .in("normalized_name", toResolve);
-
-    const dbMap = new Map<string, typeof data extends Array<infer T> ? T : never>();
-    data?.forEach((d) => dbMap.set(d.normalized_name!, d));
-
-    for (const e of entries) {
-      const norm = e.species.toLowerCase().trim();
-      const key = e.speciesKey || norm;
-      if (results.has(key)) continue;
-
-      const dbEntry = dbMap.get(norm);
-      if (dbEntry) {
-        const hive = dbEntry.family ? getHiveInfo(dbEntry.family) : null;
-        const resolution: SpeciesResolution = {
-          speciesKey: dbEntry.species_key,
-          displayName: dbEntry.common_name,
-          scientificName: dbEntry.scientific_name,
-          family: dbEntry.family,
-          genus: dbEntry.genus,
-          hive,
-          source: "db",
-          confidence: "exact",
-        };
-        cache.set(key, resolution);
-        results.set(key, resolution);
-      } else {
-        const resolution = resolveSpeciesSync(e.species, e.speciesKey);
-        results.set(key, resolution);
-      }
-    }
-  }
-
-  return results;
-}
-
-/**
- * Get hive by species_key — preferred over getHiveForSpecies(string).
- * Falls back to string matching if key is not available.
- */
-export function getHiveForSpeciesKey(speciesKey: string | null, speciesString?: string): HiveInfo | null {
-  if (speciesKey) {
-    const cached = cache.get(speciesKey);
-    if (cached?.hive) return cached.hive;
-  }
-  if (speciesString) {
-    return getHiveForSpecies(speciesString);
-  }
-  return null;
-}
-
-/** Clear cache (e.g. on logout or data refresh) */
-export function clearSpeciesCache(): void {
-  cache.clear();
 }
