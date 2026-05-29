@@ -283,7 +283,7 @@ const CouncilOfLifePage = () => {
               </button>
               <button onClick={() => navigate(ROUTES.LIBRARY)} className="loop-card font-serif">
                 <span className="text-primary">📚 Heartwood</span>
-                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Dream Tree & offerings</p>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Wishing Tree & offerings</p>
               </button>
             </div>
           </div>
