@@ -167,6 +167,20 @@ export default function CuratorRefinementReview() {
             })
             .eq("id", treeId);
 
+          // Cross-write tree_edit_history for one canonical provenance chain.
+          // The richer tree_location_history row above remains the display source
+          // in the Refinement Trail (this "location_refined" row is deduped by
+          // refinementTrail.fromEditHistory). Best-effort: never blocks the update.
+          await supabase.from("tree_edit_history" as any).insert({
+            tree_id: treeId,
+            user_id: user.id,
+            field_name: "location",
+            old_value: `${tree.tree_lat}, ${tree.tree_lng} (${tree.location_confidence || "approximate"})`,
+            new_value: `${cluster.centroidLat}, ${cluster.centroidLng} (${cluster.confidence})`,
+            edit_reason: reviewNote[treeId] || `Accepted ${ids.length} refinement(s)`,
+            edit_type: "location_refined",
+          } as any);
+
           toast({ title: `✅ ${tree.tree_name} location updated` });
         } else {
           toast({ title: `Refinements rejected for ${tree.tree_name}` });

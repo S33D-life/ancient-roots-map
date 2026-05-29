@@ -171,7 +171,7 @@ export default function EditReviewPage() {
         }
       }
 
-      // 2. Write change log
+      // 2. Write change log (rich merge record — keeps previous_values + proposal link)
       await supabase.from("tree_change_log" as any).insert({
         tree_id: proposal.tree_id,
         change_set: proposal.proposed_changes,
@@ -179,6 +179,25 @@ export default function EditReviewPage() {
         merged_from_proposal_id: proposal.id,
         merged_by: curatorId,
       } as any);
+
+      // 2b. Cross-write tree_edit_history for one canonical provenance chain.
+      //     One row per changed field, linked to the proposal. Best-effort: a
+      //     logging failure must not roll back the accepted change. The Refinement
+      //     Trail dedups these against the change_log entry above (see
+      //     refinementTrail.fromEditHistory), so this does not double-display.
+      const historyRows = Object.entries(updateFields).map(([field, value]) => ({
+        tree_id: proposal.tree_id,
+        user_id: curatorId,
+        field_name: field,
+        old_value: prevValues[field] != null ? String(prevValues[field]) : null,
+        new_value: value != null ? String(value) : null,
+        edit_reason: reviewNote || proposal.reason || null,
+        edit_type: "proposal_accepted",
+        proposal_id: proposal.id,
+      }));
+      if (historyRows.length > 0) {
+        await supabase.from("tree_edit_history" as any).insert(historyRows as any);
+      }
 
       // 3. Update proposal status
       await supabase
