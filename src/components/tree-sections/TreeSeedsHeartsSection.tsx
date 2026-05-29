@@ -12,7 +12,7 @@
  * When one action is expanded, the sibling actions dim softly to bring
  * focus to the active gesture.
  */
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sprout, Heart, Sparkles, Loader2, ChevronDown, Moon, X } from "lucide-react";
@@ -56,6 +56,24 @@ const TreeSeedsHeartsSection = ({
 }: Props) => {
   const [openAction, setOpenAction] = useState<ActionKey>(null);
   const [hangAmount, setHangAmount] = useState(3);
+  const drawerRef = useRef<HTMLDivElement | null>(null);
+
+  // When a drawer expands, gently scroll it fully into view so its contents
+  // don't get clipped by surrounding UI on small screens.
+  useEffect(() => {
+    if (!openAction) return;
+    const id = window.setTimeout(() => {
+      const el = drawerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const bottomPad = 96; // leave room for bottom nav / safe area
+      if (rect.bottom > vh - bottomPad || rect.top < 64) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 320); // wait for height animation (280ms) to settle
+    return () => window.clearTimeout(id);
+  }, [openAction]);
 
   const heartCollection = useHeartCollection(treeId, userId, isNearby || isCheckedIn);
   const rooting = useTreeRooting(userId, treeId, {
@@ -232,6 +250,7 @@ const TreeSeedsHeartsSection = ({
       <AnimatePresence initial={false} mode="wait">
         {openAction === "seed" && canSeed && (
           <motion.div
+            ref={drawerRef}
             key="seed-drawer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -255,6 +274,7 @@ const TreeSeedsHeartsSection = ({
 
         {openAction === "hang" && userId && (
           <motion.div
+            ref={drawerRef}
             key="hang-drawer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
