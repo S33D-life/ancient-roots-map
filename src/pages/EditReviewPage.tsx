@@ -61,8 +61,15 @@ function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number)
 }
 
 export default function EditReviewPage() {
-  const { hasRole, loading: roleLoading } = useHasRole("curator");
+  // "Steward-level" review access = curator OR keeper (matches the app-wide
+  // convention; see heartwoodRooms steward = "Curator or keeper role"). The route
+  // is otherwise public-mountable, so this page is the access boundary.
+  const { hasRole: isCurator, loading: curatorLoading } = useHasRole("curator");
+  const { hasRole: isKeeper, loading: keeperLoading } = useHasRole("keeper");
+  const hasRole = isCurator || isKeeper;
+  const roleLoading = curatorLoading || keeperLoading;
   const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [trees, setTrees] = useState<Record<string, TreeInfo>>({});
   const [proposers, setProposers] = useState<Record<string, ProposerInfo>>({});
   const [loading, setLoading] = useState(true);
@@ -80,10 +87,17 @@ export default function EditReviewPage() {
     if (!hasRole) return;
     const load = async () => {
       setLoading(true);
-      const { data: propData } = await supabase
+      setLoadError(null);
+      const { data: propData, error: propErr } = await supabase
         .from("tree_edit_proposals" as any)
         .select("*")
         .order("created_at", { ascending: false });
+
+      if (propErr) {
+        setLoadError(propErr.message);
+        setLoading(false);
+        return;
+      }
 
       const props = (propData || []) as unknown as Proposal[];
       setProposals(props);
@@ -216,8 +230,8 @@ export default function EditReviewPage() {
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="text-2xl font-serif text-foreground mb-2">Curator Access Required</h1>
-          <p className="text-muted-foreground font-serif">This area is reserved for Heartwood Curators.</p>
+          <h1 className="text-2xl font-serif text-foreground mb-2">Steward Access Required</h1>
+          <p className="text-muted-foreground font-serif">This area is tended by Heartwood Curators and Keepers.</p>
         </div>
       </div>
     );
@@ -231,6 +245,16 @@ export default function EditReviewPage() {
           <Shield className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-serif text-primary tracking-wide">Tree Edit Review</h1>
         </div>
+
+        {loadError && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
+            <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+            <div className="text-sm font-serif">
+              <p className="text-destructive">Couldn't load the review queue.</p>
+              <p className="text-muted-foreground text-xs mt-0.5">{loadError}</p>
+            </div>
+          </div>
+        )}
 
         <Tabs value={statusFilter} onValueChange={setStatusFilter}>
           <TabsList className="mb-6 font-serif">
