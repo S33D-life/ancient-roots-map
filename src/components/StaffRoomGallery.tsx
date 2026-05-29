@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } fro
 import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
 import JourneyBridge from "@/components/JourneyBridge";
-import { useNavigate as useRouterNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate as useRouterNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -1201,7 +1201,7 @@ export default function StaffRoomGallery() {
             size="sm"
             className="mt-3 font-serif text-xs"
           >
-            <a href="/heartwood/quest-room">Cross the threshold →</a>
+            <Link to="/library/quest-cave">Cross the threshold →</Link>
           </Button>
         </div>
       </div>
