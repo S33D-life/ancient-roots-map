@@ -17,7 +17,7 @@ import { useWeather, weatherSummary } from "@/hooks/use-weather";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import { useUIFlow } from "@/contexts/UIFlowContext";
 import { notify } from "@/lib/notify";
-import { seasonStage } from "@/lib/encounters/encounterSeason";
+import { buildCheckinPayload } from "@/lib/encounters/buildCheckinPayload";
 
 interface TreeCheckinButtonProps {
   treeId: string;
@@ -78,16 +78,17 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
       const weatherStr = attachWeather && weather ? weatherSummary(weather) : null;
 
       const { data: checkinData, error } = await supabase.from("tree_checkins").insert({
-        tree_id: treeId,
-        user_id: userId,
-        latitude: lat,
-        longitude: lng,
-        season_stage: seasonStage(),
+        ...buildCheckinPayload({
+          treeId,
+          userId,
+          lat,
+          lng,
+          accuracyM: accuracy,
+          privacy,
+          checkinMethod: useGps ? "gps" : "manual",
+        }),
         weather: weatherStr,
         reflection: note.trim() || null,
-        checkin_method: useGps ? "gps" : "manual",
-        privacy,
-        canopy_proof: !!lat,
       }).select("id").single();
 
       if (error) throw error;

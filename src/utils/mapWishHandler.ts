@@ -5,7 +5,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getPublicAppUrl } from "@/utils/ogMeta";
-import { seasonStage } from "@/lib/encounters/encounterSeason";
+import { buildCheckinPayload } from "@/lib/encounters/buildCheckinPayload";
 
 /** Set up event delegation for popup buttons (wish + share + plant seed) */
 export function setupPopupActions(container: HTMLElement): () => void {
@@ -81,14 +81,11 @@ export function setupPopupActions(container: HTMLElement): () => void {
       checkinBtn.textContent = "⏳ Checking in...";
 
       try {
-        const { error } = await supabase.from("tree_checkins").insert({
-          tree_id: treeId,
-          user_id: user.id,
-          season_stage: seasonStage(),
-          checkin_method: "manual",
-          privacy: "public",
-          canopy_proof: false,
-        });
+        const { error } = await supabase.from("tree_checkins").insert(
+          // No GPS in the map popup → manual, public, canopy_proof false, null
+          // lat/lng/accuracy_m (the explicit nulls equal the prior omission).
+          buildCheckinPayload({ treeId, userId: user.id }),
+        );
 
         if (error) throw error;
 
