@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, Leaf, Search } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Crown, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag-small.webp";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLongPress } from "@/hooks/use-long-press";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
+import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";
@@ -18,7 +19,9 @@ import NotificationsBadge from "./NotificationsBadge";
 const TetolMenu = lazy(() => import("./TetolMenu"));
 const TeotagGuide = lazy(() => import("./TeotagGuide"));
 
-/** Desktop nav: 3 clear destinations matching the TETOL tree metaphor */
+/** Desktop nav: 4 clear destinations matching the TETOL tree metaphor
+ *  Roots → Trunk → Canopy → Crown. The Crown (Golden Dream) is wired to the
+ *  "crown" realm in App.tsx, so it completes the metaphor here. */
 const DESKTOP_NAV = [
   {
     to: "/map",
@@ -39,20 +42,32 @@ const DESKTOP_NAV = [
     label: "Council",
     subtitle: "The Canopy",
     icon: Leaf,
-    prefixes: ["/council", "/bug-garden", "/roadmap", "/support", "/golden-dream", "/press"],
+    prefixes: ["/council", "/bug-garden", "/roadmap", "/support", "/press"],
+  },
+  {
+    to: "/golden-dream",
+    label: "Golden Dream",
+    subtitle: "The Crown",
+    icon: Crown,
+    prefixes: ["/golden-dream", "/your-golden-dream"],
   },
 ] as const;
+
+/** Library room page-context labels, derived from the canonical Heartwood
+ *  registry so mobile context names stay in sync with the room labels.
+ *  Each room contributes `{ prefix: /library/:key, label }`. These are more
+ *  specific than the `/library` catch-all, so they must precede it below. */
+const LIBRARY_PAGE_CONTEXT: { prefix: string; label: string }[] = HEARTWOOD_ROOMS.map(
+  (room) => ({ prefix: room.route, label: room.label })
+);
 
 /** Page-context labels — maps route prefixes to a subtle place name shown on mobile */
 const PAGE_CONTEXT: { prefix: string; label: string }[] = [
   { prefix: "/map", label: "Arboreal Atlas" },
   { prefix: "/tree/", label: "Ancient Friend" },
   { prefix: "/add-tree", label: "Add Tree" },
-  { prefix: "/library/staff-room", label: "Staff Room" },
+  ...LIBRARY_PAGE_CONTEXT,
   { prefix: "/staff/", label: "Staff Room" },
-  { prefix: "/library/music-room", label: "Tree Radio" },
-  { prefix: "/library/greenhouse", label: "Greenhouse" },
-  { prefix: "/library/bookshelf", label: "Bookshelf" },
   { prefix: "/library", label: "Heartwood" },
   { prefix: "/vault", label: "Heartwood Vault" },
   { prefix: "/dashboard", label: "Hearth" },
