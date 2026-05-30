@@ -406,6 +406,7 @@ const TreeCard = ({
           ) : (
             /* Mapped tree actions (unchanged) */
             <>
+              {/* Primary action anchors the card */}
               <QuickSeedButton
                 treeId={tree.id}
                 treeLat={tree.latitude ?? null}
@@ -414,7 +415,14 @@ const TreeCard = ({
                 variant="button"
                 className="flex-1"
               />
-              <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
+              {/* Secondary — Wish demoted to icon-only ghost */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleWishlist}
+                title="Wish to meet"
+                className="h-8 w-8 p-0 text-muted-foreground/60 hover:text-primary"
+              >
                 <Heart
                   className="w-3.5 h-3.5 transition-all duration-300"
                   style={wishlistPulseActive ? {
@@ -423,8 +431,8 @@ const TreeCard = ({
                     filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))",
                   } : undefined}
                 />
-                Wish
               </Button>
+
               {(tree.latitude || tree.what3words) && (
                 <Button variant="ghost" size="sm" onClick={handleMapNav} title="View on Map" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
                   <Map className="w-3.5 h-3.5" />
