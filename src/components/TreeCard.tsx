@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind, Eye, Scroll, ExternalLink } from "lucide-react";
 import { useSpeciesResolution } from "@/hooks/use-species-resolution";
+import SpeciesConfidenceBadge from "@/components/species/SpeciesConfidenceBadge";
 import { type TreeCardData, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 import SendWhisperModal from "@/components/SendWhisperModal";
@@ -294,6 +295,14 @@ const TreeCard = ({
         </p>
         {scientificName && scientificName !== speciesDisplayName && (
           <p className="text-[9px] text-muted-foreground/50 font-serif italic">{scientificName}</p>
+        )}
+        {tree.species && (
+          <SpeciesConfidenceBadge
+            confidence={resolution?.confidence}
+            speciesKey={resolution?.speciesKey}
+            speciesLabel={tree.species}
+            className="mt-1"
+          />
         )}
       </CardHeader>
 
