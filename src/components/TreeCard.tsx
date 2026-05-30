@@ -295,26 +295,33 @@ const TreeCard = ({
         <CardTitle className="font-serif text-primary line-clamp-1 text-base leading-snug tracking-wide">
           {tree.name}
         </CardTitle>
-        <p className="text-[11px] italic mt-0.5 font-serif" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
+        {/* Identity cluster: species → certainty → ecology */}
+        <p className="text-[11px] italic mt-0.5 font-serif leading-snug" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
           {speciesDisplayName}
         </p>
         {scientificName && scientificName !== speciesDisplayName && (
-          <p className="text-[9px] text-muted-foreground/50 font-serif italic">{scientificName}</p>
+          <p className="text-[10px] text-muted-foreground/60 font-serif italic leading-snug">{scientificName}</p>
         )}
+        <div className="mt-1 flex items-center gap-1.5 flex-wrap text-[10px] font-serif text-muted-foreground/70">
+          {age > 0 && <span>~{age}y</span>}
+          {age > 0 && hive && <span className="text-muted-foreground/40">·</span>}
+          {hive && <span>{hive.icon} {hive.displayName}</span>}
+        </div>
         {tree.species && (
           <SpeciesConfidenceBadge
             confidence={resolution?.confidence}
             speciesKey={resolution?.speciesKey}
             speciesLabel={tree.species}
-            className="mt-1"
+            className="mt-1.5"
           />
         )}
         {speciesPresence && (
-          <p className="text-[10px] leading-snug italic text-muted-foreground/55 font-serif mt-1.5 line-clamp-2">
+          <p className="text-[10px] leading-snug italic text-muted-foreground/65 font-serif mt-1.5 line-clamp-2">
             {speciesPresence}
           </p>
         )}
       </CardHeader>
+
 
       <CardContent className="pt-0">
         <div className="cursor-pointer" onClick={handleClick}>
