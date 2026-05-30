@@ -185,9 +185,15 @@ const TreeCard = ({
           {/* Info */}
           <div className="flex-1 min-w-0 space-y-1">
             <h4 className="font-serif text-sm text-primary truncate leading-tight">{tree.name}</h4>
-            <p className="text-[11px] italic truncate" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
+            {/* Identity: species · age · hive in one quiet line */}
+            <p className="text-[11px] italic truncate leading-snug" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
               {speciesDisplayName}
             </p>
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/65 font-serif truncate">
+              {age > 0 && <span>~{age}y</span>}
+              {age > 0 && hive && <span className="text-muted-foreground/40">·</span>}
+              {hive && <span className="truncate">{hive.icon} {hive.displayName}</span>}
+            </div>
             <div className="flex flex-col gap-1 mt-0.5">
               {/* Presence signal */}
               {presence && (
@@ -202,8 +208,8 @@ const TreeCard = ({
                     : presence.presence_count > 1 ? `${presence.presence_count} wanderers here recently` : "Recently met"}
                 </div>
               )}
-              {/* Line 1: activity */}
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/80">
+              {/* Activity tallies */}
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
                 {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
                 {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
                 {whisperCount > 0 && (
@@ -212,14 +218,10 @@ const TreeCard = ({
                   </span>
                 )}
               </div>
-              {/* Line 2: identity */}
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50">
-                {hive && <span>{hive.icon} {hive.displayName}</span>}
-                {age > 0 && <span>🌿 ~{age}y</span>}
-              </div>
             </div>
             {isResearch && <ResearchBadges tree={tree} />}
           </div>
+
           {/* Seed + Tier badges */}
           <div className="self-start flex items-center gap-1.5">
             <QuickSeedButton
