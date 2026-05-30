@@ -24,7 +24,7 @@ export default function TreeFamiliesStrip() {
   return (
     <section className="space-y-3">
       <header>
-        <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
+        <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/65 dark:text-amber-300/70">
           Tree Families
         </p>
         <h2 className="font-serif text-xl text-foreground mt-1">Some trees reveal themselves through family</h2>
