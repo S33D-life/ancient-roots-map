@@ -138,7 +138,7 @@ export default function ArboriumRoom() {
       {/* ── 2. Tree ID Starter ── */}
       <section id="identify" className="space-y-4 scroll-mt-20">
         <header>
-          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
+          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/65 dark:text-amber-300/70">
             Tree ID Starter
           </p>
           <h2 className="font-serif text-xl text-foreground mt-1">Look closely. Choose the clue you can see.</h2>
@@ -180,7 +180,7 @@ export default function ArboriumRoom() {
       {/* ── 4. Pathways ── */}
       <section className="space-y-4">
         <header>
-          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
+          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/65 dark:text-amber-300/70">
             Pathways
           </p>
           <h2 className="font-serif text-xl text-foreground mt-1">Choose a way in</h2>
@@ -237,7 +237,7 @@ export default function ArboriumRoom() {
       <section className="space-y-4">
         <header className="flex items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
+            <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/65 dark:text-amber-300/70">
               Field Guide · Beginning
             </p>
             <h2 className="font-serif text-xl text-foreground mt-1">Your first five trees</h2>
@@ -247,7 +247,7 @@ export default function ArboriumRoom() {
                 : 'Five trees to meet over five weeks. Greet each one where it grows.'}
             </p>
           </div>
-          <span className="hidden sm:block text-[10px] font-serif uppercase tracking-[0.18em] text-amber-900/42 shrink-0">
+          <span className="hidden sm:block text-[10px] font-serif uppercase tracking-[0.18em] text-amber-900/55 dark:text-amber-300/50 shrink-0">
             Specimen shelf
           </span>
         </header>
