@@ -185,9 +185,15 @@ const TreeCard = ({
           {/* Info */}
           <div className="flex-1 min-w-0 space-y-1">
             <h4 className="font-serif text-sm text-primary truncate leading-tight">{tree.name}</h4>
-            <p className="text-[11px] italic truncate" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
+            {/* Identity: species · age · hive in one quiet line */}
+            <p className="text-[11px] italic truncate leading-snug" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
               {speciesDisplayName}
             </p>
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/65 font-serif truncate">
+              {age > 0 && <span>~{age}y</span>}
+              {age > 0 && hive && <span className="text-muted-foreground/40">·</span>}
+              {hive && <span className="truncate">{hive.icon} {hive.displayName}</span>}
+            </div>
             <div className="flex flex-col gap-1 mt-0.5">
               {/* Presence signal */}
               {presence && (
@@ -202,8 +208,8 @@ const TreeCard = ({
                     : presence.presence_count > 1 ? `${presence.presence_count} wanderers here recently` : "Recently met"}
                 </div>
               )}
-              {/* Line 1: activity */}
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/80">
+              {/* Activity tallies */}
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
                 {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
                 {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
                 {whisperCount > 0 && (
@@ -212,14 +218,10 @@ const TreeCard = ({
                   </span>
                 )}
               </div>
-              {/* Line 2: identity */}
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50">
-                {hive && <span>{hive.icon} {hive.displayName}</span>}
-                {age > 0 && <span>🌿 ~{age}y</span>}
-              </div>
             </div>
             {isResearch && <ResearchBadges tree={tree} />}
           </div>
+
           {/* Seed + Tier badges */}
           <div className="self-start flex items-center gap-1.5">
             <QuickSeedButton
@@ -293,26 +295,33 @@ const TreeCard = ({
         <CardTitle className="font-serif text-primary line-clamp-1 text-base leading-snug tracking-wide">
           {tree.name}
         </CardTitle>
-        <p className="text-[11px] italic mt-0.5 font-serif" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
+        {/* Identity cluster: species → certainty → ecology */}
+        <p className="text-[11px] italic mt-0.5 font-serif leading-snug" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
           {speciesDisplayName}
         </p>
         {scientificName && scientificName !== speciesDisplayName && (
-          <p className="text-[9px] text-muted-foreground/50 font-serif italic">{scientificName}</p>
+          <p className="text-[10px] text-muted-foreground/60 font-serif italic leading-snug">{scientificName}</p>
         )}
+        <div className="mt-1 flex items-center gap-1.5 flex-wrap text-[10px] font-serif text-muted-foreground/70">
+          {age > 0 && <span>~{age}y</span>}
+          {age > 0 && hive && <span className="text-muted-foreground/40">·</span>}
+          {hive && <span>{hive.icon} {hive.displayName}</span>}
+        </div>
         {tree.species && (
           <SpeciesConfidenceBadge
             confidence={resolution?.confidence}
             speciesKey={resolution?.speciesKey}
             speciesLabel={tree.species}
-            className="mt-1"
+            className="mt-1.5"
           />
         )}
         {speciesPresence && (
-          <p className="text-[10px] leading-snug italic text-muted-foreground/55 font-serif mt-1.5 line-clamp-2">
+          <p className="text-[10px] leading-snug italic text-muted-foreground/65 font-serif mt-1.5 line-clamp-2">
             {speciesPresence}
           </p>
         )}
       </CardHeader>
+
 
       <CardContent className="pt-0">
         <div className="cursor-pointer" onClick={handleClick}>
@@ -356,25 +365,15 @@ const TreeCard = ({
               )}
             </div>
 
-            {/* Line 2: Identity / Grounding — softer */}
-            <div className="flex items-center gap-2 flex-wrap text-[11px]">
-              {hive && (
-                <Badge
-                  variant="outline"
-                  className="text-[10px] h-5 px-2 font-serif border-border/25 bg-muted/15 text-muted-foreground/60"
-                >
-                  {hive.icon} {hive.displayName}
-                </Badge>
-              )}
-              {age > 0 && (
-                <span className="text-muted-foreground/50 font-serif">🌿 ~{age}y</span>
-              )}
-              {tree.what3words && (
-                <span className="flex items-center gap-1 text-muted-foreground/40 font-serif truncate max-w-[140px]">
+            {/* Line 2: Grounding — w3w only (hive + age moved to identity cluster) */}
+            {tree.what3words && (
+              <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                <span className="flex items-center gap-1 text-muted-foreground/55 font-serif truncate max-w-[200px]">
                   <MapPin className="w-3 h-3 shrink-0" />/{tree.what3words}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
+
           </div>
 
           {/* Research source badges */}
@@ -407,6 +406,7 @@ const TreeCard = ({
           ) : (
             /* Mapped tree actions (unchanged) */
             <>
+              {/* Primary action anchors the card */}
               <QuickSeedButton
                 treeId={tree.id}
                 treeLat={tree.latitude ?? null}
@@ -415,7 +415,14 @@ const TreeCard = ({
                 variant="button"
                 className="flex-1"
               />
-              <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
+              {/* Secondary — Wish demoted to icon-only ghost */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleWishlist}
+                title="Wish to meet"
+                className="h-8 w-8 p-0 text-muted-foreground/60 hover:text-primary"
+              >
                 <Heart
                   className="w-3.5 h-3.5 transition-all duration-300"
                   style={wishlistPulseActive ? {
@@ -424,8 +431,8 @@ const TreeCard = ({
                     filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))",
                   } : undefined}
                 />
-                Wish
               </Button>
+
               {(tree.latitude || tree.what3words) && (
                 <Button variant="ghost" size="sm" onClick={handleMapNav} title="View on Map" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
                   <Map className="w-3.5 h-3.5" />
