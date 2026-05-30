@@ -36,7 +36,7 @@ All colors MUST be HSL.
     
     /* Muted earth tones */
     --muted: 75 15% 20%;
-    --muted-foreground: 45 40% 60%;
+    --muted-foreground: 45 35% 66%;
     
     /* Golden accent */
     --accent: 45 100% 60%;
@@ -176,7 +176,7 @@ All colors MUST be HSL.
     --secondary: 78 18% 18%;
     --secondary-foreground: 45 100% 75%;
     --muted: 75 15% 20%;
-    --muted-foreground: 45 40% 60%;
+    --muted-foreground: 45 35% 66%;
     --accent: 45 100% 60%;
     --accent-foreground: 80 20% 8%;
     --destructive: 0 72% 51%;
