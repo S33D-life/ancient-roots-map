@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import LeafAtmosphere from "@/components/LeafAtmosphere";
 import PhenologyBadge from "@/components/PhenologyBadge";
+import SpeciesConfidenceBadge from "@/components/species/SpeciesConfidenceBadge";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import type { SpeciesResolution } from "@/services/speciesResolver";
 import type { Database } from "@/integrations/supabase/types";
@@ -263,6 +264,13 @@ const TreePageHero = ({
                 </span>
               )}
             </span>
+            {tree.species && (
+              <SpeciesConfidenceBadge
+                confidence={speciesResolution?.confidence}
+                speciesKey={speciesResolution?.speciesKey}
+                speciesLabel={tree.species}
+              />
+            )}
             {speciesResolution?.family && (
               <span className="bg-secondary/30 px-2.5 py-0.5 rounded-full text-[10px] text-muted-foreground/60">
                 {speciesResolution.family}
