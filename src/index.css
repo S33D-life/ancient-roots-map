@@ -98,7 +98,9 @@ All colors MUST be HSL.
 
   .light .tetol-roots { --level-accent: 120 35% 32%; }
   .light .tetol-heartwood { --level-accent: 30 50% 38%; }
-  .light .tetol-canopy { --level-accent: 150 35% 35%; }
+  /* Canopy keeps its sky-blue hue (195) across modes, like every other realm;
+     light is darker + less saturated to sit calmly on parchment. */
+  .light .tetol-canopy { --level-accent: 195 40% 36%; }
   .light .tetol-crown { --level-accent: 42 65% 42%; }
   .light .tetol-hearth { --level-accent: 18 55% 42%; }
 
