@@ -19,6 +19,7 @@ import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import LeafAtmosphere from "@/components/LeafAtmosphere";
 import PhenologyBadge from "@/components/PhenologyBadge";
 import SpeciesConfidenceBadge from "@/components/species/SpeciesConfidenceBadge";
+import { useSpeciesPresence } from "@/hooks/use-species-presence";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import type { SpeciesResolution } from "@/services/speciesResolver";
 import type { Database } from "@/integrations/supabase/types";
@@ -117,6 +118,8 @@ const TreePageHero = ({
   }, []);
 
   const hive = speciesResolution?.hive ?? getHiveForSpecies(tree.species);
+  // Same quiet species whisper as the browsing card (#54) — reused hook/helper, no duplication.
+  const speciesPresence = useSpeciesPresence(speciesResolution?.speciesKey);
   const location = [tree.state, tree.nation].filter(Boolean).join(", ");
   const accessVisual = ACCESSIBILITY_VISUALS[accessibilityTier];
   const isGoldFrame = accessibilityTier === "granted";
@@ -318,6 +321,13 @@ const TreePageHero = ({
               </button>
             )}
           </div>
+
+          {/* Species whisper — a quiet field-guide murmur from tree_species_lore (read-only). */}
+          {speciesPresence && (
+            <p className="text-[11px] md:text-xs italic font-serif text-muted-foreground/55 max-w-md mx-auto -mt-3 mb-6 leading-relaxed line-clamp-2">
+              {speciesPresence}
+            </p>
+          )}
 
           {/* Staff patron badge if mapped by patron */}
           <div className="flex justify-center mb-4">
