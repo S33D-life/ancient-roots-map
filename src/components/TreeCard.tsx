@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind, Eye, Scroll, ExternalLink } from "lucide-react";
 import { useSpeciesResolution } from "@/hooks/use-species-resolution";
+import { useSpeciesPresence } from "@/hooks/use-species-presence";
 import SpeciesConfidenceBadge from "@/components/species/SpeciesConfidenceBadge";
 import { type TreeCardData, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
@@ -106,6 +107,8 @@ const TreeCard = ({
   const hive = resolution?.hive ?? null;
   const speciesDisplayName = resolution?.displayName || tree.species;
   const scientificName = resolution?.scientificName;
+  // Full variant only — skip the lore lookup entirely in the compact (sidebar/search) variant.
+  const speciesPresence = useSpeciesPresence(variant === "compact" ? undefined : resolution?.speciesKey);
   const { tier: accessTier } = useTreeAccessibility({
     treeId: tree.id,
     tier: tree.accessibility_tier ?? "public",
@@ -303,6 +306,11 @@ const TreeCard = ({
             speciesLabel={tree.species}
             className="mt-1"
           />
+        )}
+        {speciesPresence && (
+          <p className="text-[10px] leading-snug italic text-muted-foreground/55 font-serif mt-1.5 line-clamp-2">
+            {speciesPresence}
+          </p>
         )}
       </CardHeader>
 
