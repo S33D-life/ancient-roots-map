@@ -365,25 +365,15 @@ const TreeCard = ({
               )}
             </div>
 
-            {/* Line 2: Identity / Grounding — softer */}
-            <div className="flex items-center gap-2 flex-wrap text-[11px]">
-              {hive && (
-                <Badge
-                  variant="outline"
-                  className="text-[10px] h-5 px-2 font-serif border-border/25 bg-muted/15 text-muted-foreground/60"
-                >
-                  {hive.icon} {hive.displayName}
-                </Badge>
-              )}
-              {age > 0 && (
-                <span className="text-muted-foreground/50 font-serif">🌿 ~{age}y</span>
-              )}
-              {tree.what3words && (
-                <span className="flex items-center gap-1 text-muted-foreground/40 font-serif truncate max-w-[140px]">
+            {/* Line 2: Grounding — w3w only (hive + age moved to identity cluster) */}
+            {tree.what3words && (
+              <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                <span className="flex items-center gap-1 text-muted-foreground/55 font-serif truncate max-w-[200px]">
                   <MapPin className="w-3 h-3 shrink-0" />/{tree.what3words}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
+
           </div>
 
           {/* Research source badges */}
