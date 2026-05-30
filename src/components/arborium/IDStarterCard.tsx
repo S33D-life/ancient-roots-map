@@ -59,7 +59,7 @@ export default function IDStarterCard({
     "relative rounded-2xl border p-4 flex items-start gap-3 w-full text-left transition-all duration-200",
     isActive
       ? "border-amber-600/45 bg-[hsl(45_50%_94%)]/90 shadow-[inset_0_1px_0_hsl(48_40%_98%/0.85),0_0_0_3px_hsl(40_55%_60%/0.2)]"
-      : "border-amber-900/15 bg-[hsl(45_40%_96%)]/80 dark:bg-card/40",
+      : "border-amber-900/15 bg-[hsl(45_40%_96%)]/80",
   ].join(" ");
 
   const style = {

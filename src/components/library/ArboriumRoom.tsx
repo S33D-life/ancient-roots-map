@@ -138,7 +138,7 @@ export default function ArboriumRoom() {
       {/* ── 2. Tree ID Starter ── */}
       <section id="identify" className="space-y-4 scroll-mt-20">
         <header>
-          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55 dark:text-amber-200/55">
+          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
             Tree ID Starter
           </p>
           <h2 className="font-serif text-xl text-foreground mt-1">Look closely. Choose the clue you can see.</h2>
@@ -180,7 +180,7 @@ export default function ArboriumRoom() {
       {/* ── 4. Pathways ── */}
       <section className="space-y-4">
         <header>
-          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55 dark:text-amber-200/55">
+          <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
             Pathways
           </p>
           <h2 className="font-serif text-xl text-foreground mt-1">Choose a way in</h2>
@@ -237,7 +237,7 @@ export default function ArboriumRoom() {
       <section className="space-y-4">
         <header className="flex items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55 dark:text-amber-200/55">
+            <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55">
               Field Guide · Beginning
             </p>
             <h2 className="font-serif text-xl text-foreground mt-1">Your first five trees</h2>
@@ -281,16 +281,16 @@ export default function ArboriumRoom() {
       {/* ── 8. Photo ID — coming soon ── */}
       <section>
         <div
-          className="relative rounded-2xl border border-dashed border-amber-900/20 dark:border-amber-200/15 p-5 flex items-start gap-4"
+          className="relative rounded-2xl border border-dashed border-amber-900/20 p-5 flex items-start gap-4"
           style={{ background: "hsl(45 30% 96% / 0.5)" }}
         >
           <div className="shrink-0 p-2.5 rounded-xl border border-amber-900/15 bg-[hsl(45_40%_95%)]/70">
-            <Camera className="w-5 h-5 text-amber-900/45 dark:text-amber-200/45" />
+            <Camera className="w-5 h-5 text-amber-900/45" />
           </div>
           <div>
             <div className="inline-flex items-center gap-2 mb-1">
               <p className="font-serif text-sm text-foreground/80">Photo ID</p>
-              <span className="text-[9px] font-serif uppercase tracking-[0.18em] text-amber-900/50 dark:text-amber-200/50 border border-amber-900/20 rounded-full px-2 py-0.5">
+              <span className="text-[9px] font-serif uppercase tracking-[0.18em] text-amber-900/50 border border-amber-900/20 rounded-full px-2 py-0.5">
                 Coming soon
               </span>
             </div>
