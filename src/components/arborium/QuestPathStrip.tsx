@@ -27,7 +27,7 @@ export default function QuestPathStrip() {
     >
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-serif uppercase tracking-[0.18em] text-amber-900/52 dark:text-amber-200/52">
+          <p className="text-[10px] font-serif uppercase tracking-[0.18em] text-amber-900/52">
             Learn the clue · Walk the quest
           </p>
           <h3 className="font-serif text-lg text-foreground mt-0.5">Quest seeds</h3>
@@ -47,7 +47,7 @@ export default function QuestPathStrip() {
         {QUEST_SEEDS.map((q) => (
           <li
             key={q.title}
-            className="flex items-start gap-2.5 rounded-xl border border-amber-900/10 bg-card/45 dark:bg-card/30 p-3"
+            className="flex items-start gap-2.5 rounded-xl border border-amber-900/10 bg-card/45 p-3"
           >
             <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/18 shrink-0">
               <Compass className="w-3.5 h-3.5 text-primary/70" />

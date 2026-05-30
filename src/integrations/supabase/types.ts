@@ -11424,24 +11424,6 @@ export type Database = {
           tree_id: string
         }[]
       }
-      public_atlas_country_stats: {
-        Args: { country_filter?: string | null }
-        Returns: {
-          approximate_precision_count: number
-          country: string
-          data_confidence_score: number
-          distinct_species_count: number
-          exact_precision_count: number
-          linked_ancient_friends_count: number
-          research_records_missing_coordinates: number
-          research_records_with_coordinates: number
-          source_count: number
-          total_research_records: number
-          unknown_precision_count: number
-          verification_task_completed_count: number
-          verification_task_open_count: number
-        }[]
-      }
       get_recent_tree_songs: {
         Args: { p_tree_id: string; result_limit?: number }
         Returns: {

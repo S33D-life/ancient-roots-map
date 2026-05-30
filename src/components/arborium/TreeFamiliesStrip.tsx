@@ -24,7 +24,7 @@ export default function TreeFamiliesStrip() {
   return (
     <section className="space-y-3">
       <header>
-        <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/55 dark:text-amber-200/55">
+        <p className="text-[10px] font-serif uppercase tracking-[0.2em] text-amber-900/65 dark:text-amber-300/70">
           Tree Families
         </p>
         <h2 className="font-serif text-xl text-foreground mt-1">Some trees reveal themselves through family</h2>
@@ -37,7 +37,7 @@ export default function TreeFamiliesStrip() {
         {FAMILIES.map((f) => (
           <div
             key={f.name}
-            className="relative rounded-2xl border border-amber-900/15 bg-[hsl(45_35%_96%)]/70 dark:bg-card/35 p-3.5 flex flex-col gap-1.5"
+            className="relative rounded-2xl border border-amber-900/15 bg-[hsl(45_35%_96%)]/70 p-3.5 flex flex-col gap-1.5"
             style={{
               boxShadow: "inset 0 1px 0 hsl(48 40% 98% / 0.7), 0 3px 12px -6px hsl(40 30% 25% / 0.1)",
             }}
