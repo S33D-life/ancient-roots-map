@@ -107,8 +107,8 @@ const TreeCard = ({
   const hive = resolution?.hive ?? null;
   const speciesDisplayName = resolution?.displayName || tree.species;
   const scientificName = resolution?.scientificName;
-  // Full variant only — skip the lore lookup entirely in the compact (sidebar/search) variant.
-  const speciesPresence = useSpeciesPresence(variant === "compact" ? undefined : resolution?.speciesKey);
+  // Compact (sidebar/search) gets a shorter whisper; gallery uses the default length.
+  const speciesPresence = useSpeciesPresence(resolution?.speciesKey, variant === "compact" ? 80 : undefined);
   const { tier: accessTier } = useTreeAccessibility({
     treeId: tree.id,
     tier: tree.accessibility_tier ?? "public",
@@ -189,6 +189,11 @@ const TreeCard = ({
             <p className="text-[11px] italic truncate leading-snug" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
               {speciesDisplayName}
             </p>
+            {speciesPresence && (
+              <p className="text-[10px] italic text-muted-foreground/50 font-serif truncate leading-snug">
+                {speciesPresence}
+              </p>
+            )}
             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/65 font-serif truncate">
               {age > 0 && <span>~{age}y</span>}
               {age > 0 && hive && <span className="text-muted-foreground/40">·</span>}
