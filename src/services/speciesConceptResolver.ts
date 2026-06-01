@@ -161,13 +161,14 @@ function findConceptByGenus(genus: string | null | undefined): SpeciesConcept | 
   const normalizedGenus = normalizeSpeciesConceptAlias(genus);
   if (!normalizedGenus) return null;
 
-  const nonHive = SPECIES_CONCEPTS.find((concept) =>
+  const concepts = SPECIES_CONCEPTS as readonly SpeciesConcept[];
+  const nonHive = concepts.find((concept) =>
     concept.concept_type !== "hive" &&
     (concept.genus_names || []).some((name) => normalizeSpeciesConceptAlias(name) === normalizedGenus),
   );
   if (nonHive) return nonHive;
 
-  return SPECIES_CONCEPTS.find((concept) =>
+  return concepts.find((concept) =>
     (concept.genus_names || []).some((name) => normalizeSpeciesConceptAlias(name) === normalizedGenus),
   ) || null;
 }
