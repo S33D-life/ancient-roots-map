@@ -182,7 +182,7 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
       {stats.totalVisits > 0 && (
         <div className="mb-4 p-3 rounded-lg border border-border/30 bg-card/40">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-serif text-muted-foreground">Seasonal Coverage</span>
+            <span className="text-xs font-serif text-muted-foreground">Seasons witnessed</span>
             <span className="text-xs font-mono text-primary">{stats.seasonPercent}%</span>
           </div>
           <div className="flex gap-1.5">
@@ -227,7 +227,7 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
       {uniqueVisitors.length > 0 && (
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[10px] font-serif uppercase tracking-wider text-muted-foreground/70">
-            Others who met this tree
+            Wanderers who have been here
           </span>
           <div className="flex -space-x-2">
             {uniqueVisitors.map((v) => (
