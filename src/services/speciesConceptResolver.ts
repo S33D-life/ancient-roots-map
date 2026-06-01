@@ -84,7 +84,7 @@ function addIndexEntry(
 function buildAliasIndex(): Map<string, IndexEntry> {
   const index = new Map<string, IndexEntry>();
 
-  for (const concept of SPECIES_CONCEPTS) {
+  for (const concept of SPECIES_CONCEPTS as readonly SpeciesConcept[]) {
     addIndexEntry(index, concept.concept_id, {
       concept,
       confidence: "concept_exact",
