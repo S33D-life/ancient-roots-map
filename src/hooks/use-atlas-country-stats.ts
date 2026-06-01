@@ -25,11 +25,14 @@ export function useAtlasCountryStats(country?: string | null, enabled = true) {
     enabled,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("public_atlas_country_stats", {
+      const { data, error } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: unknown }>)("public_atlas_country_stats", {
         country_filter: countryFilter,
       });
       if (error) throw error;
-      return (data || []) as AtlasCountryStats[];
+      return ((data || []) as unknown) as AtlasCountryStats[];
     },
   });
 }
