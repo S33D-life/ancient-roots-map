@@ -44,6 +44,7 @@ import { useSingleTreePresence } from "@/hooks/use-single-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
 import { useTreeProximityGate } from "@/hooks/use-tree-proximity-gate";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
+import { getPublicAppUrl } from "@/utils/ogMeta";
 import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering, findFlatPhotoIndex, flattenOfferingPhotos } from "@/components/tree-detail/TreeDetailSubComponents";
@@ -303,7 +304,7 @@ const TreeDetailPage = () => {
    *  Declared before any conditional returns to keep hook order stable. */
   const handleShareTreeLink = useCallback(async () => {
     if (!tree) return;
-    const url = `https://www.s33d.life/tree/${tree.id}`;
+    const url = getPublicAppUrl(`/tree/${tree.id}`);
     const title = tree.name || "An Ancient Friend";
     const text = `Meet ${title} on S33D`;
     try {
