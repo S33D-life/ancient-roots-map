@@ -153,6 +153,8 @@ const TreeDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
   const [gatewayOpen, setGatewayOpen] = useState(false);
+  const [bloomDialogOpen, setBloomDialogOpen] = useState(false);
+
   const [selectedType, setSelectedType] = useState<OfferingType>("photo");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
