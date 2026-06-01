@@ -1629,6 +1629,14 @@ const TreeDetailPage = () => {
           open={gatewayOpen}
           onClose={() => setGatewayOpen(false)}
           onSelect={(type) => {
+            // Bloom is a first-class shortcut into the dedicated Blooms
+            // system (bloom_offerings) — NOT aliased to the story enum.
+            if (type === "bloom") {
+              setBloomDialogOpen(true);
+              requestAnimationFrame(() => setGatewayOpen(false));
+              return;
+            }
+
             // Gateway → canonical offering enum alias map.
             //
             // The DB enum `offering_type` has exactly 9 values:
@@ -1636,22 +1644,8 @@ const TreeDetailPage = () => {
             //
             // The gateway surfaces a few extra "living" shortcuts that do NOT
             // exist in the enum (quote, wish, gratitude, intention,
-            // seasonal_observation / Bloom, encounter, data). Each one is
-            // aliased onto the closest canonical type so saved records stay
-            // valid and deep links keep working. Update both here AND in
-            // OfferingGateway if you add a new shortcut.
-            //
-            //   Art            → art           (direct)
-            //   Prayer         → prayer        (direct)
-            //   Gratitude      → prayer        (legacy alias)
-            //   Wish           → poem
-            //   Quote          → story
-            //   Intention      → story
-            //   Bloom (seasonal_observation) → story  ← see Blooms tab for the
-            //     dedicated phenology surface; this alias keeps the gateway
-            //     shortcut functional without a schema change.
-            //   Encounter Log  → story
-            //   Tree Notes / Data → story
+            // seasonal_observation, encounter, data). Each one is aliased
+            // onto the closest canonical type so saved records stay valid.
             const typeMap: Record<string, OfferingType> = {
               photo: "photo", song: "song", book: "book", story: "story",
               poem: "poem", voice: "voice", nft: "nft",
@@ -1669,6 +1663,15 @@ const TreeDetailPage = () => {
           treeName={tree?.name}
         />
       </Suspense>
+
+      <Suspense fallback={null}>
+        <AddBloomOfferingDialog
+          treeId={id!}
+          open={bloomDialogOpen}
+          onOpenChange={setBloomDialogOpen}
+        />
+      </Suspense>
+
 
       <AddOfferingDialog
         open={addOfferingOpen}
