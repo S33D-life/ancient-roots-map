@@ -154,9 +154,9 @@ export default function AddTreeChooser({
             className="w-10 h-1 rounded-full mx-auto mb-4"
             style={{ background: "hsl(var(--muted-foreground) / 0.2)" }}
           />
-          <h2 className="text-lg font-serif text-foreground">What would you like to do?</h2>
+          <h2 className="text-lg font-serif text-foreground">You have arrived.</h2>
           <p className="text-xs text-muted-foreground font-serif mt-1">
-            See if an Ancient Friend is already nearby before planting a new record.
+            This tree may already have a home within the Atlas.
           </p>
         </div>
 
@@ -240,6 +240,9 @@ export default function AddTreeChooser({
                         </span>
                       )}
                     </div>
+                    <p className="text-[9px] font-serif text-muted-foreground/50 mt-0.5">
+                      Tap to record your visit
+                    </p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1 shrink-0">
@@ -292,7 +295,7 @@ export default function AddTreeChooser({
                 }}
               >
                 <CheckCircle2 className="w-4.5 h-4.5" />
-                Check in to Existing Tree
+                I have visited this tree →
               </Button>
               <Button
                 variant="outline"
@@ -304,7 +307,7 @@ export default function AddTreeChooser({
                 }}
               >
                 <Plus className="w-4.5 h-4.5" />
-                Add New Tree
+                This tree is not here yet — add it
               </Button>
             </>
           ) : (
@@ -319,7 +322,7 @@ export default function AddTreeChooser({
                 }}
               >
                 <Plus className="w-4.5 h-4.5" />
-                Add New Tree
+                Place this tree on the Atlas
               </Button>
               <Button
                 variant="outline"
@@ -331,7 +334,7 @@ export default function AddTreeChooser({
                 }}
               >
                 <CheckCircle2 className="w-4.5 h-4.5" />
-                Check in to Existing Tree
+                Search the Atlas →
               </Button>
             </>
           )}
