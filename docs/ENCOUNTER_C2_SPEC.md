@@ -1,88 +1,31 @@
-# Encounter C2 — `buildCheckinPayload()` Before/After Spec
+# Encounter C2 - `buildCheckinPayload()` Decision Reference
 
-> **Spec only — not implemented.** Approval artifact for convergence step C2 from
-> [`ENCOUNTER_CONVERGENCE_PLAN.md`](./ENCOUNTER_CONVERGENCE_PLAN.md). C2 is the first
-> step that changes *stored data semantics* (`canopy_proof`, `accuracy_m`), so it is
-> approval-gated and documented here before any code.
+Status: implemented in PR `#44`.
 
-Against `main` @ `71f3e3ed` (post-C1: `season_stage` already comes from `seasonStage()`).
+This document records the accepted Encounter C2 decision and the current
+`buildCheckinPayload()` contract. Code comments in
+`src/lib/encounters/buildCheckinPayload.ts` reference this file, so it should be
+kept as the human-readable reference for the check-in payload core.
 
-Goal: one shared composer for the **spatial/method/proof core** of a `tree_checkins`
-insert — so the four write paths stop diverging — while each surface keeps its own
-emotional extras (weather, reflection, Skystamp, refinement nudge). *One encounter
-trunk, many emotional surfaces.*
+C2 follows C1 from [`ENCOUNTER_CONVERGENCE_PLAN.md`](./ENCOUNTER_CONVERGENCE_PLAN.md):
 
----
+- C1 extracted shared `seasonStage()` logic.
+- C2 extracted the shared spatial / method / proof core for `tree_checkins`.
 
-## 1. Current insert payloads (post-C1)
+The goal is one encounter trunk for the canonical insert fields, while each UI
+surface keeps its own emotional extras such as reflection, weather, Skystamp,
+offline media, or refinement nudges.
 
-### `TreeCheckinButton` (ceremonial arrival)
-```ts
-{ tree_id, user_id, latitude: lat, longitude: lng,
-  season_stage: seasonStage(), weather: weatherStr,
-  reflection: note.trim() || null,
-  checkin_method: useGps ? "gps" : "manual",
-  privacy,                       // user-chosen (Select)
-  canopy_proof: !!lat }          // ← true for ANY GPS fix
-// captures `accuracy` from geolocation but DOES NOT write accuracy_m
-// + async follow-up: update sky_stamp_id
-```
+## Implemented Helper
 
-### `QuickCheckinButton` (quick presence) — the reference formula
-```ts
-{ tree_id, user_id, latitude: lat, longitude: lng,
-  accuracy_m: accuracy,
-  season_stage: seasonStage(),
-  checkin_method: lat ? "gps" : "manual",
-  privacy: "public",             // hardcoded
-  canopy_proof: !!(lat && accuracy && accuracy < 100) }  // ← accuracy-gated
-```
-
-### `mapWishHandler` (map-popup drive-by)
-```ts
-{ tree_id, user_id,
-  season_stage: seasonStage(),
-  checkin_method: "manual",
-  privacy: "public",             // hardcoded
-  canopy_proof: false }          // no GPS
-```
-
-### `offlineActions.createCheckinOfflineAware` (resilience layer)
-```ts
-// inserts the caller-supplied OfflineCheckinInput (minus photoDataUrl):
-{ tree_id, user_id, season_stage, mood_score?, reflection?, canopy_proof?, photo_url? }
-// no GPS/season logic of its own — caller composes the payload
-```
-
-### Fields each path writes today
-
-| field | TreeCheckin | QuickCheckin | mapWish | offline |
-|---|:--:|:--:|:--:|:--:|
-| `tree_id`, `user_id` | ✅ | ✅ | ✅ | ✅ |
-| `latitude` / `longitude` | ✅ | ✅ | ❌ | (caller) |
-| `accuracy_m` | ❌ **dropped** | ✅ | ❌ | (caller) |
-| `season_stage` | ✅ | ✅ | ✅ | (caller) |
-| `checkin_method` | gps/manual | gps/manual | "manual" | (caller) |
-| `canopy_proof` | `!!lat` | `acc<100` | `false` | (caller) |
-| `privacy` | user-chosen | "public" | "public" | (caller) |
-| `weather` | ✅ | ❌ | ❌ | ❌ |
-| `reflection` | ✅ inline | ⏳ deferred | ❌ | (caller) |
-| `sky_stamp_id` | ✅ async | ❌ | ❌ | ❌ |
-
----
-
-## 2. Proposed `buildCheckinPayload()` shape
-
-A pure function in `src/lib/encounters/buildCheckinPayload.ts` that composes **only the
-spatial/method/proof core**. Surfaces spread its result and add their own extras.
+File: `src/lib/encounters/buildCheckinPayload.ts`
 
 ```ts
 import { seasonStage } from "@/lib/encounters/encounterSeason";
 
-/** Accuracy (m) at/under which a GPS fix counts as canopy proof. */
 export const CANOPY_PROOF_MAX_ACCURACY_M = 100;
 
-export type CheckinPrivacy = "public" | "private"; // mirror existing column values
+export type CheckinMethod = "gps" | "manual";
 
 export interface CheckinCoreInput {
   treeId: string;
@@ -90,8 +33,9 @@ export interface CheckinCoreInput {
   lat?: number | null;
   lng?: number | null;
   accuracyM?: number | null;
-  privacy?: CheckinPrivacy;   // default "public"
-  at?: Date;                  // for season_stage; default now
+  privacy?: string;
+  checkinMethod?: CheckinMethod;
+  at?: Date;
 }
 
 export interface CheckinCorePayload {
@@ -101,115 +45,186 @@ export interface CheckinCorePayload {
   longitude: number | null;
   accuracy_m: number | null;
   season_stage: string;
-  checkin_method: "gps" | "manual";
+  checkin_method: CheckinMethod;
   canopy_proof: boolean;
-  privacy: CheckinPrivacy;
+  privacy: string;
 }
 
 export function buildCheckinPayload(input: CheckinCoreInput): CheckinCorePayload {
-  const lat = input.lat ?? null;
-  const lng = input.lng ?? null;
-  const accuracyM = input.accuracyM ?? null;
-  const hasFix = lat != null && lng != null;
+  const latitude = input.lat ?? null;
+  const longitude = input.lng ?? null;
+  const accuracy_m = input.accuracyM ?? null;
+  const hasFix = latitude !== null && longitude !== null;
+
   return {
     tree_id: input.treeId,
     user_id: input.userId,
-    latitude: lat,
-    longitude: lng,
-    accuracy_m: accuracyM,
+    latitude,
+    longitude,
+    accuracy_m,
     season_stage: seasonStage(input.at),
-    checkin_method: hasFix ? "gps" : "manual",
+    checkin_method: input.checkinMethod ?? (hasFix ? "gps" : "manual"),
     canopy_proof:
-      hasFix && accuracyM != null && accuracyM < CANOPY_PROOF_MAX_ACCURACY_M,
+      hasFix && accuracy_m !== null && accuracy_m < CANOPY_PROOF_MAX_ACCURACY_M,
     privacy: input.privacy ?? "public",
   };
 }
 ```
 
-Surfaces then do, e.g. `TreeCheckinButton`:
+## Accepted C2 Decisions
+
+### `accuracy_m`
+
+`accuracy_m` is now part of the shared payload core and is written whenever a
+caller supplies a measured GPS accuracy.
+
+| Path | C2 behavior |
+| --- | --- |
+| `TreeCheckinButton` | now stores the GPS accuracy it already captured |
+| `QuickCheckinButton` | continues storing GPS accuracy |
+| `mapWishHandler` | writes `null`, because map-popup check-ins have no GPS fix |
+| offline paths | remain caller-supplied; future convergence can route queued check-ins through the helper |
+
+No schema change was needed. `accuracy_m` already existed on `tree_checkins`.
+
+### `canopy_proof`
+
+C2 adopted one stricter formula:
+
 ```ts
-.insert({
-  ...buildCheckinPayload({ treeId, userId, lat, lng, accuracyM: accuracy, privacy }),
+hasFix && accuracy_m !== null && accuracy_m < 100
+```
+
+This means `canopy_proof` now means "GPS fix near enough to count as proof",
+not merely "some GPS value existed".
+
+| Path | Before C2 | After C2 |
+| --- | --- | --- |
+| `TreeCheckinButton` | any latitude made `canopy_proof: true` | only a fix with accuracy under 100 m is proof |
+| `QuickCheckinButton` | already accuracy-gated | unchanged in meaning |
+| `mapWishHandler` | `false` | `false` |
+| offline paths | caller-supplied | caller-supplied |
+
+Existing rows were not backfilled. The change affects new rows only.
+
+### `checkin_method`
+
+By default, the helper derives:
+
+- `"gps"` when both latitude and longitude are present
+- `"manual"` when no fix is present
+
+The helper also accepts `checkinMethod?: "gps" | "manual"`.
+`TreeCheckinButton` uses this override to preserve its existing behavior: if the
+user chose the GPS path but the optional GPS lookup failed, the row can still
+record the user's selected method as `"gps"`.
+
+### `privacy`
+
+`privacy` is intentionally typed as `string` in the helper, matching the current
+application call sites and generated Supabase types. The helper defaults to
+`"public"` for surfaces that did not previously expose a privacy choice.
+
+`TreeCheckinButton` passes through its user-selected privacy value, so C2 does
+not change Tree check-in privacy behavior.
+
+### `season_stage`
+
+The helper delegates to the C1 `seasonStage()` helper. Tests pass an optional
+`at?: Date` so seasonal output can be verified deterministically.
+
+## Current Call Sites
+
+### `TreeCheckinButton`
+
+`TreeCheckinButton` spreads the shared core and keeps its surface-specific
+fields:
+
+```ts
+{
+  ...buildCheckinPayload({
+    treeId,
+    userId,
+    lat,
+    lng,
+    accuracyM: accuracy,
+    privacy,
+    checkinMethod: useGps ? "gps" : "manual",
+  }),
   weather: weatherStr,
   reflection: note.trim() || null,
-})
+}
 ```
-`mapWishHandler`: `buildCheckinPayload({ treeId, userId })` (no fix → manual, canopy_proof false — identical to today). `offlineActions`: callers compose via the helper, then queue.
 
----
+The async Skystamp update remains outside the core helper.
 
-## 3. How `accuracy_m` would change
+### `QuickCheckinButton`
 
-| Path | Before | After | Delta |
-|---|---|---|---|
-| TreeCheckinButton | captured, **not written** (null/absent) | **written** (the value it already measured) | 🟡 **CHANGE** — Tree check-ins now store GPS accuracy |
-| QuickCheckinButton | written | written | none |
-| mapWishHandler | absent (no GPS) | `null` (explicit) | 🟢 effectively none |
-| offlineActions | caller | caller-via-helper | none if caller adopts |
+`QuickCheckinButton` now inserts the shared core directly:
 
-`accuracy_m` on `tree_checkins` is **not** consumed by the location-refinement
-clustering (that reads `tree_location_refinements`). Readers of `tree_checkins.accuracy_m`
-are display/typing only (`use-tree-checkins`, canopy timeline). So this is additive
-provenance with negligible downstream effect.
+```ts
+buildCheckinPayload({ treeId, userId, lat, lng, accuracyM: accuracy })
+```
 
-## 4. How `canopy_proof` would change
+This preserves its previous public/privacy behavior and its accuracy-gated
+`canopy_proof` semantics.
 
-Adopt the **single, stricter, more honest formula** (QuickCheckinButton's):
-`hasFix && accuracy_m != null && accuracy_m < 100`.
+### `mapWishHandler`
 
-| Path | Before | After | Delta |
-|---|---|---|---|
-| TreeCheckinButton | `!!lat` (any fix → true) | accuracy-gated (<100 m) | 🟡 **CHANGE** — a Tree check-in with **no/poor GPS (≥100 m)** now records `canopy_proof:false` (was `true`) |
-| QuickCheckinButton | `acc<100` | `acc<100` | none (reference) |
-| mapWishHandler | `false` | `false` (no fix) | none |
-| offlineActions | caller | caller-via-helper | none if caller adopts |
+Map-popup check-ins have no GPS fix, so they call:
 
-**Read blast radius:** `CanopyVisitsTimeline` renders a 🌳 "canopy proof" badge from
-`canopy_proof`; `use-tree-checkins` exposes it. After C2, some *future* TreeCheckinButton
-check-ins (poor GPS) won't show that badge. **No backfill** — existing rows are untouched.
-This is a correctness fix: `canopy_proof` should mean "demonstrably near," not "had any GPS."
+```ts
+buildCheckinPayload({ treeId, userId: user.id })
+```
 
-## 5. What remains identical
-- `season_stage` (already shared via C1), `latitude`/`longitude`, `checkin_method`
-  derivation (`fix ? gps : manual` — same as today for all paths).
-- `privacy`: helper takes it as input (default `"public"`); **TreeCheckinButton keeps its
-  user-chosen value**; Quick/map keep `"public"`. No privacy behaviour change.
-- Surface-only fields untouched: `weather`, `reflection`, `sky_stamp_id` (Tree),
-  deferred reflection + refinement nudge (Quick), photo/offline queue (offline).
-- Notifications, refinement-offer logic, offline replay, Hearts — all untouched.
-- **No schema change** — every field already exists on `tree_checkins`.
+That yields explicit `null` coordinates and accuracy, `checkin_method: "manual"`,
+`privacy: "public"`, and `canopy_proof: false`.
 
-## 6. Risks
+### Offline / queued check-ins
 
-| Risk | Sev | Mitigation |
-|---|---|---|
-| `canopy_proof` flips to `false` for poor-GPS Tree check-ins → fewer badges in `CanopyVisitsTimeline` | 🟡 | Intended/honest; no backfill; document in PR; it only affects *new* rows |
-| A surface forgets to pass `privacy` → helper defaults `"public"`, regressing Tree's user choice | 🟡 | `privacy` is an explicit input; Tree passes its `privacy` var; unit test asserts pass-through |
-| Storing `accuracy_m` on Tree subtly shifts any consumer that aggregates accuracy | 🟢 | clustering uses a different table; readers are display-only |
-| Editing 4 insert sites introduces a typo / dropped field | 🟡 | helper returns the full core object; before/after snapshot tests + e2e smoke |
-| `offlineActions` payload shape vs helper output mismatch | 🟢 | adopt helper at call sites that compose offline payloads; keep `OfflineCheckinInput` superset |
-| Reduced-motion/UX feel | 🟢 | none — payload only, no UX |
+`offlineActions` still accepts caller-composed payload fields. C2 did not rewrite
+offline replay or create a single `recordEncounter()` service. That remains a
+later, approval-gated convergence step because it crosses write-path behavior,
+queue semantics, notification timing, and user record handling.
 
-## 7. Test plan
-- **Unit (`buildCheckinPayload`):**
-  - `checkin_method`: fix → `"gps"`; no fix → `"manual"`.
-  - `canopy_proof` boundary: acc 99 → true; **100 → false**; 101 → false; accuracy null → false; no lat/lng → false.
-  - `accuracy_m` passthrough (incl. null).
-  - `privacy`: default `"public"`; explicit `"private"` preserved.
-  - `season_stage`: via injected `at` date (reuses C1 helper).
-- **Parity snapshots:** for QuickCheckinButton-equivalent inputs, output is **byte-identical** to today's Quick payload (Quick is the reference). For TreeCheckinButton inputs, assert the **documented deltas only** (`accuracy_m` now present; `canopy_proof` now accuracy-gated) and everything else identical.
-- **Suite + e2e:** `npm run typecheck / lint / test / build / e2e -- e2e/smoke.spec.ts`.
+## What C2 Did Not Change
 
-## 8. Rollback plan
-- C2 is **additive + call-site edits**, no schema/migration. Rollback = single `git revert`
-  of the C2 merge commit, which restores the four inline payloads exactly (they remain
-  independent literals; the helper is a new file). No data migration to undo; existing
-  rows were never modified. Safe and immediate.
+- No schema migration.
+- No route or UI redesign.
+- No backfill of existing `tree_checkins`.
+- No notification behavior changes.
+- No Skystamp behavior changes.
+- No offline replay behavior changes.
+- No refinement-offer behavior changes.
+- No Hearts/economy behavior changes.
 
----
+## Tests
 
-## Decision requested
-Approve C2 to implement with the **stricter canopy_proof** (recommended — honest proof
-semantics) and **accuracy_m stored on TreeCheckinButton**. If you'd prefer to preserve
-TreeCheckinButton's current `canopy_proof: !!lat` semantics, say so and the helper will
-take a `canopyProofMode` flag instead — but that perpetuates the divergence C2 exists to remove.
+File: `src/tests/buildCheckinPayload.test.ts`
+
+Coverage includes:
+
+- `canopy_proof` boundary: 99 m is true, 100 m is false.
+- `canopy_proof` false when accuracy is missing or no fix exists.
+- `accuracy_m` passthrough and `null` default.
+- default `checkin_method` derivation.
+- explicit `checkinMethod` override.
+- default and pass-through privacy.
+- `season_stage` via injected date.
+- parity snapshots for `QuickCheckinButton` and `mapWishHandler` behavior.
+
+## Risk Posture
+
+| Risk | Status |
+| --- | --- |
+| Fewer future Tree check-ins receive a canopy-proof badge when GPS accuracy is poor | Accepted correctness change |
+| `TreeCheckinButton` now stores measured `accuracy_m` | Accepted provenance improvement |
+| Privacy regression | Mitigated by explicit pass-through test and call-site usage |
+| Offline convergence | Deferred; still approval-gated |
+
+## Rollback
+
+C2 can be rolled back with a normal revert of PR `#44`. There is no data
+migration to undo and no backfill to reverse. New rows written during C2 may
+contain more accurate `accuracy_m` and stricter `canopy_proof` values; those rows
+should generally be left intact because they are more honest provenance.
