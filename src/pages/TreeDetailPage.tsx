@@ -77,6 +77,8 @@ const SeasonalMomentPanel = lazy(() => import("@/components/SeasonalMomentPanel"
 const AddOfferingDialog = lazy(() => import("@/components/AddOfferingDialog"));
 const MemorySeedComposer = lazy(() => import("@/components/memory-seed/MemorySeedComposer"));
 const OfferingGateway = lazy(() => import("@/components/OfferingGateway"));
+const AddBloomOfferingDialog = lazy(() => import("@/components/blooms/AddBloomOfferingDialog"));
+
 const ProposeEditDrawer = lazy(() => import("@/components/ProposeEditDrawer"));
 const MeetingTimer = lazy(() => import("@/components/MeetingTimer"));
 const OfferingHistory = lazy(() => import("@/components/OfferingHistory"));
