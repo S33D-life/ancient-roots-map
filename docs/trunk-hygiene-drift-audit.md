@@ -2,7 +2,7 @@
 
 Date: 2026-05-29
 Base: `main` at `3fccd536` (`Merge pull request #35 from S33D-life/chore/refinement-orphan-cleanup`)
-Updated: 2026-05-29 after `#40` and `#42`, with `main` at `c4de3dc` (`Merge pull request #42 from S33D-life/codex/prune-unused-resolver-exports`)
+Updated: 2026-06-01 after `#40`, `#42`, `#44`, `#45`, and `#46`, with `main` at `9d74779a`.
 
 Scope: audit-only. No behavior changes, DB changes, route edits, Atlas edits, Quest Cave edits, Heartwood edits, or refinement write-path edits.
 
@@ -32,12 +32,18 @@ After cleanup, `npm run check:duplicates` passes.
 
 ## Current Status
 
-The first two cleanup steps from this audit have landed on `main`.
+The first two cleanup steps from this audit have landed on `main`. Since then,
+the Encounter C2 payload helper and the TETOL theme audit/elevation-token work
+have also landed, so this audit should now be read as a drift record rather than
+a pending zero-risk cleanup queue.
 
-| PR | Cleanup | Status |
+| PR | Cleanup / context | Status |
 | --- | --- | --- |
 | `#40` | Removed `src/pages/CycleMarketsPage.tsx` and `src/pages/ValaisPortalPage.tsx` | Complete |
 | `#42` | Removed unused internal resolver exports/imports: `resolveSpeciesBatch`, `getHiveForSpeciesKey`, `clearSpeciesCache`, `researchTreeSlug`, and the unused `matchSpecies` import from `speciesResolver.ts` | Complete |
+| `#44` | Landed Encounter C2 `buildCheckinPayload()` convergence for the check-in payload core | Complete |
+| `#45` | Landed TETOL light/dark colour and typography audit | Complete |
+| `#46` | Landed dark-mode elevation/surface tokens | Complete |
 
 No further zero-risk tracked code deletion is recommended right now. Remaining items are consolidation, review-first classification, or approval-gated architecture work.
 
@@ -68,7 +74,7 @@ These are live or intentionally staged systems. They are not zero-risk deletion 
 | Companion room labels | `src/components/companion/CompanionController.tsx`, `src/config/heartwoodRooms.ts` | `ROOM_LABELS` is still a local label map rather than derived from `ROOM_LABEL_MAP` | low-risk |
 | Species alias normalization | `src/data/treeSpecies.ts`, `src/services/speciesResolver.ts`, `src/hooks/useCountrySpeciesActivity.ts`, `src/config/speciesConcepts.ts`, `src/lib/quest-cave/livingPaths.ts`, `src/utils/hiveUtils.ts` | exact taxonomy, broad concepts, Atlas aliases, Quest Cave matchers, and hive family lookup are parallel but not yet unified | approval-gated |
 | Research tree species conversion | `src/utils/researchTreeToTreeRow.ts`, `src/utils/researchConversion.ts`, `src/services/speciesResolver.ts` | research tree detail adapter still sets `species_key: null`; conversion has a separate `parseGirthToCm` copy | low-risk |
-| Encounter/check-in creation | `src/components/QuickCheckinButton.tsx`, `src/components/TreeCheckinButton.tsx`, `src/utils/mapWishHandler.ts`, `src/utils/offlineActions.ts`, `src/components/CanopyCheckinModal.tsx` | multiple write paths calculate season/check-in payloads independently | approval-gated |
+| Encounter/check-in creation | `src/components/QuickCheckinButton.tsx`, `src/components/TreeCheckinButton.tsx`, `src/utils/mapWishHandler.ts`, `src/utils/offlineActions.ts`, `src/components/CanopyCheckinModal.tsx`, `src/lib/encounters/encounterSeason.ts`, `src/lib/encounters/buildCheckinPayload.ts` | C1 and C2 reduced drift by sharing `seasonStage()` and the spatial/method/proof payload core. Deeper convergence around offline routing, notifications, and one `recordEncounter()` service remains approval-gated. | approval-gated |
 | Tracked lockfiles | `package-lock.json`, `bun.lock`, `bun.lockb`, `deno.lock` | npm is canonical, but alternate lockfiles remain tracked | approval-gated |
 
 ### Needs Review First
@@ -220,7 +226,7 @@ No additional zero-risk tracked code deletion is recommended from this audit at 
 | Search index | consolidation | `src/services/unified-search.ts` overlaps `src/config/heartwoodRooms.ts`, but both are live conceptual surfaces. |
 | Companion labels | consolidation | Local labels can likely derive from room registry later, but this is behavior-adjacent copy. |
 | Species aliases | approval-gated | Crosses Treeasurus, Species Concept Layer, Atlas, Quest Cave, and hive lookup semantics. |
-| Encounter write paths | approval-gated | Multiple live write paths; changes can affect user records. |
+| Encounter write paths | approval-gated | C1/C2 now share season and payload-core logic, but deeper convergence still touches multiple live write paths and can affect user records. |
 | Alternate lockfiles | approval-gated | Requires repository policy decision on package manager canonicality. |
 | Unimported component prototypes | review-first | Many are prototypes or visual surfaces; classify by owner/theme before deletion. |
 | shadcn primitives | review-first | Harmless design-system inventory; delete only with design-system approval. |
@@ -229,4 +235,4 @@ No additional zero-risk tracked code deletion is recommended from this audit at 
 
 - Refinement Trail helpers are live through `src/hooks/use-refinement-trail.ts` and `src/components/RefinementTrail.tsx`; no unused refinement helper was confirmed.
 - `src/components/arborium/starterSpeciesConcepts.ts` is test-imported only by design. It should become production-used in the next Arborium consumer PR rather than deleted.
-- Check-in/encounter utilities are duplicated enough to deserve a design pass, but they are write paths and should remain approval-gated.
+- C1/C2 have reduced check-in/encounter utility duplication, but remaining convergence is still write-path work and should stay approval-gated.
