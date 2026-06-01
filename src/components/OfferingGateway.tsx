@@ -11,8 +11,10 @@ export type GatewayOfferingType =
   | "photo" | "song" | "book" | "story"
   | "poem" | "quote" | "voice" | "wish"
   | "art" | "prayer"
+  | "bloom"
   | "seasonal_observation" | "encounter" | "gratitude" | "intention"
   | "data" | "nft";
+
 
 
 interface OfferingOption {
