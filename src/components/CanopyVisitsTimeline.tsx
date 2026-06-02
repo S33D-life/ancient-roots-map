@@ -155,22 +155,21 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
     );
   }
 
+  const firstVisitLabel = stats.firstVisit
+    ? new Date(stats.firstVisit).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    : null;
+
   return (
     <div className="mt-8">
-      {/* Section header */}
-      <div className="flex items-center gap-3 mb-4">
+      {/* Section header — Memory of this tree */}
+      <div className="flex items-center gap-3 mb-5">
         <div
           className="h-px flex-1"
           style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent)" }}
         />
         <div className="flex items-center gap-2">
           <TreeDeciduous className="h-4 w-4 text-primary/70" />
-          <h3 className="text-lg font-serif text-primary tracking-widest uppercase">Canopy Visits</h3>
-          {stats.totalVisits > 0 && (
-            <Badge variant="outline" className="text-[10px] font-mono px-1.5">
-              {stats.totalVisits} visit{stats.totalVisits !== 1 ? "s" : ""}
-            </Badge>
-          )}
+          <h3 className="text-lg font-serif text-primary tracking-widest uppercase">This Tree Remembers</h3>
         </div>
         <div
           className="h-px flex-1"
@@ -178,12 +177,12 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
         />
       </div>
 
-      {/* Season coverage bar */}
+      {/* A. Seasons witnessed */}
       {stats.totalVisits > 0 && (
         <div className="mb-4 p-3 rounded-lg border border-border/30 bg-card/40">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-serif text-muted-foreground">Seasons witnessed</span>
-            <span className="text-xs font-mono text-primary">{stats.seasonPercent}%</span>
+            <span className="text-[10px] font-serif text-muted-foreground/70">{stats.seasonsCovered.length} of 5</span>
           </div>
           <div className="flex gap-1.5">
             {["bud", "leaf", "blossom", "fruit", "bare"].map((s) => (
@@ -205,25 +204,37 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
             </div>
           )}
         </div>
-        )}
+      )}
 
-        {/* Streak counter */}
-        {(stats.currentStreak > 0 || stats.longestStreak > 1) && (
-          <div className="flex items-center gap-3 mb-4">
-            {stats.currentStreak > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <Flame className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-serif text-primary">{stats.currentStreak} day streak</span>
-              </div>
-            )}
-            {stats.longestStreak > 1 && (
-              <span className="text-[10px] text-muted-foreground font-serif">
-                Best: {stats.longestStreak} days
-              </span>
-            )}
-          </div>
-        )}
-      {/* Others who met this tree */}
+      {/* B. First arrival — quiet, memory-toned */}
+      {firstVisitLabel && stats.totalVisits > 0 && (
+        <p className="text-center text-xs font-serif italic text-muted-foreground/80 mb-4">
+          You first came here in {firstVisitLabel}.
+        </p>
+      )}
+
+      {/* C. Visit rhythm — total · current · best */}
+      {stats.totalVisits > 0 && (
+        <div className="flex items-center justify-center gap-5 mb-5 text-[11px] font-serif text-muted-foreground">
+          <span>
+            <strong className="text-foreground/85 tabular-nums">{stats.totalVisits}</strong>{" "}
+            {stats.totalVisits === 1 ? "visit" : "visits"}
+          </span>
+          {stats.currentStreak > 0 && (
+            <span className="flex items-center gap-1">
+              <Flame className="w-3 h-3 text-primary/70" />
+              <strong className="text-foreground/85 tabular-nums">{stats.currentStreak}</strong> day streak
+            </span>
+          )}
+          {stats.longestStreak > 1 && (
+            <span className="text-muted-foreground/70">
+              best <strong className="text-foreground/75 tabular-nums">{stats.longestStreak}</strong>
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* D. Wanderers who have been here */}
       {uniqueVisitors.length > 0 && (
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[10px] font-serif uppercase tracking-wider text-muted-foreground/70">
@@ -248,6 +259,7 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
           </div>
         </div>
       )}
+
 
       {/* Timeline */}
       {displayCheckins.length > 0 && (
@@ -299,20 +311,20 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
                     <span className="text-xs">{WEATHER_ICONS[c.weather] || c.weather}</span>
                   )}
                   {c.canopy_proof && (
-                    <Badge variant="outline" className="text-[8px] px-1 py-0 text-primary/60 border-primary/20">
-                      <MapPin className="w-2.5 h-2.5 mr-0.5" /> GPS
-                    </Badge>
-                  )}
-                  {(c.confidence_score ?? 0) > 0 && (
-                    <Badge variant="outline" className="text-[8px] px-1 py-0 border-primary/20">
-                      Confidence {c.confidence_score}
-                    </Badge>
+                    <span
+                      className="inline-flex items-center text-primary/40"
+                      title="Visit confirmed on-site"
+                      aria-label="Visit confirmed on-site"
+                    >
+                      <MapPin className="w-2.5 h-2.5" />
+                    </span>
                   )}
                   {c.mood_score && (
                     <span className="text-[10px] text-muted-foreground/60 font-serif">
                       {MOOD_LABELS[c.mood_score - 1]}
                     </span>
                   )}
+
                 </div>
                 {c.reflection && (
                   <p className="text-xs text-muted-foreground font-serif leading-relaxed line-clamp-2">
