@@ -1365,33 +1365,28 @@ const TreeDetailPage = () => {
 
             {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
-            {/* Unified Offer ↔ Whisper card */}
+            {/* Canonical encounter gateway — one entrypoint.
+                Every encounter begins anchored to this tree, then chooses how it
+                travels (branches / roots / both) inside the gateway's travel modal.
+                Whispers are the "roots" propagation mode — not a separate system. */}
             {userId && tree && (
               <div className="rounded-2xl border border-primary/25 bg-card/50 backdrop-blur-sm overflow-hidden">
                 <div className="px-4 pt-4 pb-2">
                   <h4 className="text-sm font-serif tracking-[0.18em] uppercase text-foreground/85">
-                    Offer or Whisper
+                    Leave Something Here
                   </h4>
                   <p className="text-[11px] font-serif italic text-muted-foreground/70 mt-1 leading-relaxed">
                     Offerings hang in the branches. Whispers travel through the roots.
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 p-3 pt-2">
+                <div className="p-3 pt-2">
                   <Button
-                    onClick={() => setMemorySeedOpen(true)}
+                    onClick={openOfferingGateway}
                     variant="outline"
-                    className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                    className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
                   >
                     <Sparkles className="h-4 w-4" />
-                    Make Offering
-                  </Button>
-                  <Button
-                    onClick={() => setWhisperModalOpen(true)}
-                    variant="outline"
-                    className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    Send Whisper
+                    Begin Encounter
                   </Button>
                 </div>
               </div>
