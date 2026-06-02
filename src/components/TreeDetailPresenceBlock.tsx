@@ -18,6 +18,8 @@ interface Props {
   availableWhispers: TreeWhisper[];
   hasHearts: boolean;
   onGoToEncounters: () => void;
+  /** ISO date string of the user's first visit to this tree — used to show "Known since {Month Year}" */
+  firstVisit?: string | null;
 }
 
 export default function TreeDetailPresenceBlock({
@@ -30,7 +32,11 @@ export default function TreeDetailPresenceBlock({
   availableWhispers,
   hasHearts,
   onGoToEncounters,
+  firstVisit,
 }: Props) {
+  const firstVisitLabel = firstVisit
+    ? new Date(firstVisit).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    : null;
   const canCheckin = proximityGate.canCheckin ?? (proximityGate.status === "unlocked_present");
   const isNearby = proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace";
   const isActive = meetingStatus === "active" || meetingStatus === "expiring";
@@ -129,6 +135,11 @@ export default function TreeDetailPresenceBlock({
                   ? `Visited ${checkinStats!.totalVisits} time${checkinStats!.totalVisits !== 1 ? "s" : ""} — this tree remembers you`
                   : "This tree is waiting — find it to begin your meeting"}
             </p>
+            {hasCheckedIn && firstVisitLabel && (
+              <p className="text-[10px] font-serif text-muted-foreground/50 mt-0.5">
+                Known since {firstVisitLabel}
+              </p>
+            )}
           </div>
         </div>
       )}
