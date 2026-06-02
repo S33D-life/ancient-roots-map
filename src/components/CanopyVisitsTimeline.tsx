@@ -44,10 +44,27 @@ interface Props {
   onRefresh?: () => void;
 }
 
+const SEASON_CAPTION_LABELS: Record<string, string> = {
+  bud: "bud", leaf: "leaf", blossom: "blossom", fruit: "fruit", bare: "winter",
+};
+const ALL_TRACKED_SEASONS = ["bud", "leaf", "blossom", "fruit", "bare"];
+
 export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheckin, showCheckinButton = true, userId, onRefresh }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [witnessingId, setWitnessingId] = useState<string | null>(null);
   const displayCheckins = expanded ? checkins : checkins.slice(0, 3);
+
+  // Seasonal narrative caption — derived from existing stats, no new data
+  const missingSeasonsForCaption = ALL_TRACKED_SEASONS.filter(s => !stats.seasonsCovered.includes(s));
+  let seasonalCaption: string | null = null;
+  if (stats.seasonPercent < 100 && stats.totalVisits > 0) {
+    if (missingSeasonsForCaption.length === 1) {
+      seasonalCaption = `You have not yet seen this tree in ${SEASON_CAPTION_LABELS[missingSeasonsForCaption[0]]}.`;
+    } else if (missingSeasonsForCaption.length === 2) {
+      const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
+      seasonalCaption = `${cap(SEASON_CAPTION_LABELS[missingSeasonsForCaption[0]])} and ${SEASON_CAPTION_LABELS[missingSeasonsForCaption[1]]} remain.`;
+    }
+  }
 
   // Fetch visitor profiles for all check-ins (deduped by user_id)
   const visitorIds = useMemo(() => {
@@ -202,6 +219,11 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
             <div className="text-[10px] text-center font-serif text-primary mt-2">
               ✨ Four Seasons Witness — you have seen this tree in every season.
             </div>
+          )}
+          {seasonalCaption && (
+            <p className="text-[10px] font-serif text-muted-foreground/50 text-center mt-2">
+              {seasonalCaption}
+            </p>
           )}
         </div>
       )}

@@ -181,7 +181,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
             {encounters.length} other wanderer{encounters.length > 1 ? "s" : ""} encountered this tree
           </p>
           <p className="text-xs text-muted-foreground font-serif">
-            {uniqueWanderers.size} unique visitor{uniqueWanderers.size > 1 ? "s" : ""} · {encounters.reduce((sum, e) => sum + e.photoCount, 0)} shared photos
+            {uniqueWanderers.size} wanderer{uniqueWanderers.size > 1 ? "s" : ""} · {encounters.reduce((sum, e) => sum + e.photoCount, 0)} shared photos
           </p>
         </div>
 
@@ -263,7 +263,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
                         {enc.profile?.full_name || "Anonymous Wanderer"}
                       </p>
                       <p className="text-xs text-muted-foreground font-serif">
-                        Mapped as "{enc.tree.name}" · {new Date(enc.tree.created_at).toLocaleDateString()}
+                        Called "{enc.tree.name}" · {new Date(enc.tree.created_at).toLocaleDateString()}
                       </p>
                     </div>
 
