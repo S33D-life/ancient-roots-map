@@ -311,20 +311,20 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
                     <span className="text-xs">{WEATHER_ICONS[c.weather] || c.weather}</span>
                   )}
                   {c.canopy_proof && (
-                    <Badge variant="outline" className="text-[8px] px-1 py-0 text-primary/60 border-primary/20">
-                      <MapPin className="w-2.5 h-2.5 mr-0.5" /> GPS
-                    </Badge>
-                  )}
-                  {(c.confidence_score ?? 0) > 0 && (
-                    <Badge variant="outline" className="text-[8px] px-1 py-0 border-primary/20">
-                      Confidence {c.confidence_score}
-                    </Badge>
+                    <span
+                      className="inline-flex items-center text-primary/40"
+                      title="Visit confirmed on-site"
+                      aria-label="Visit confirmed on-site"
+                    >
+                      <MapPin className="w-2.5 h-2.5" />
+                    </span>
                   )}
                   {c.mood_score && (
                     <span className="text-[10px] text-muted-foreground/60 font-serif">
                       {MOOD_LABELS[c.mood_score - 1]}
                     </span>
                   )}
+
                 </div>
                 {c.reflection && (
                   <p className="text-xs text-muted-foreground font-serif leading-relaxed line-clamp-2">
