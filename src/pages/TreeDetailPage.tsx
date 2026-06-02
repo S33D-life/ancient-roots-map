@@ -1234,7 +1234,7 @@ const TreeDetailPage = () => {
                       <p className="font-serif text-sm text-foreground">Deepen your presence</p>
                       <p className="text-xs text-muted-foreground font-serif">
                         {presenceCompleted
-                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
+                          ? completedToday ? `✓ Presence completed today` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
                           : "333 seconds of stillness — be fully here with this tree"}
                       </p>
                     </div>
