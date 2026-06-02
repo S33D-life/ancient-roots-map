@@ -887,6 +887,7 @@ const TreeDetailPage = () => {
                 availableWhispers={availableWhispers}
                 hasHearts={false}
                 onGoToEncounters={() => setSectionTab("encounters")}
+                firstVisit={checkinStats?.firstVisit}
               />
             </Suspense>
           </div>
