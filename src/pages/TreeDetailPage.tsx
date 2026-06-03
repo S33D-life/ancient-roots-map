@@ -1691,6 +1691,10 @@ const TreeDetailPage = () => {
           </TabsContent>
         </Tabs>
 
+        {/* ── Closing rhythm whisper — anchors this tree to the current lunation ── */}
+        <div className="mt-10 mb-2 flex justify-center">
+          <MoonGlyph variant="whisper" />
+        </div>
 
       </main>
 
