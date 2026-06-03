@@ -205,6 +205,15 @@ const queryClient = new QueryClient({
 
 const RefCapture = () => { useCaptureRef(); return null; };
 
+/* External redirect: anyone who navigates to /patronsportal/* inside the SPA
+   gets forwarded to the live portal. Keeps bookmarks and typed URLs graceful. */
+const PatronsPortalRedirect = () => {
+  useEffect(() => {
+    window.location.href = "https://www.s33d.life/patronsportal/";
+  }, []);
+  return <PageLoader />;
+};
+
 const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
@@ -460,6 +469,9 @@ const App = () => {
                 <Route path="/telegram-handoff" element={<TelegramHandoffPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
+                {/* External portal redirects — keep direct links graceful */}
+                <Route path="/patronsportal" element={<PatronsPortalRedirect />} />
+                <Route path="/patronsportal/*" element={<PatronsPortalRedirect />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

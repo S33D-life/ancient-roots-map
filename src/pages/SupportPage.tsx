@@ -411,7 +411,7 @@ const SupportPage = () => {
         </Link>
 
         <a
-          href="/patronsportal/"
+          href="https://www.s33d.life/patronsportal/"
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-3 p-4 rounded-xl border border-border/20 bg-card/30 hover:border-primary/20 transition-all"
