@@ -205,6 +205,15 @@ const queryClient = new QueryClient({
 
 const RefCapture = () => { useCaptureRef(); return null; };
 
+/* External redirect: anyone who navigates to /patronsportal/* inside the SPA
+   gets forwarded to the live portal. Keeps bookmarks and typed URLs graceful. */
+const PatronsPortalRedirect = () => {
+  useEffect(() => {
+    window.location.href = "https://www.s33d.life/patronsportal/";
+  }, []);
+  return <PageLoader />;
+};
+
 const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
