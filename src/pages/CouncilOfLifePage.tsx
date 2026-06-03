@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin, Video } from "lucide-react";
+import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -27,10 +27,10 @@ import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides"
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
 
-/* Grid cards — reordered per spec:
-   Row 1: Join Council, Council Chamber
+/* Grid cards:
+   Row 1: Council Chamber
    Row 2: Council Records, Cycle Markets
-   Row 3: Host a Pod, (space)
+   Row 3: Host a Pod
 */
 const councilRooms = [
   {
