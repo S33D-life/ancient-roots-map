@@ -29,7 +29,7 @@ interface PathwayCardProps {
 
 function ClueChip({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-amber-900/20 bg-[hsl(48_45%_97%)]/80 text-[10px] font-serif uppercase tracking-[0.14em] text-amber-900/65 select-none">
+    <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-amber-900/20 dark:border-amber-200/20 bg-[hsl(48_45%_97%)]/80 dark:bg-[hsl(80_16%_15%)]/75 text-[10px] font-serif uppercase tracking-[0.14em] text-amber-900/65 dark:text-amber-200/75 select-none">
       {label}
     </span>
   );
