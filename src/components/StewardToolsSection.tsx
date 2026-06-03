@@ -113,8 +113,8 @@ export default function StewardToolsSection({
                 className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40"
                 onClick={() => setEditOpen(true)}
               >
-                <Pencil className="h-3 w-3" />
-                Edit Details
+                <Leaf className="h-3 w-3" />
+                Refine This Placement
               </Button>
             )}
 
@@ -126,7 +126,7 @@ export default function StewardToolsSection({
                 onClick={onProposeEdit}
               >
                 <MessageSquarePlus className="h-3 w-3" />
-                Suggest Edit
+                Offer a Refinement
               </Button>
             )}
 
