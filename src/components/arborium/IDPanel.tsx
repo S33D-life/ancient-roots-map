@@ -102,8 +102,8 @@ export default function IDPanel({
                   "group relative text-left rounded-xl border px-3.5 py-3 transition-all duration-200",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   selected
-                    ? "border-amber-600/45 bg-[hsl(45_50%_92%)]/90 shadow-[inset_0_1px_0_hsl(48_40%_98%/0.8),0_0_0_3px_hsl(40_55%_60%/0.18)]"
-                    : "border-amber-900/15 bg-[hsl(48_38%_97%)]/70 hover:border-amber-700/28 hover:bg-[hsl(46_44%_95%)]/80",
+                    ? "border-amber-600/45 dark:border-amber-400/45 bg-[hsl(45_50%_92%)]/90 dark:bg-[hsl(80_18%_16%)]/90 shadow-[inset_0_1px_0_hsl(48_40%_98%/0.8),0_0_0_3px_hsl(40_55%_60%/0.18)] dark:shadow-[inset_0_1px_0_hsl(48_28%_22%/0.35),0_0_0_3px_hsl(40_55%_50%/0.22)]"
+                    : "border-amber-900/15 dark:border-amber-200/12 bg-[hsl(48_38%_97%)]/70 dark:bg-[hsl(95_18%_14%)]/70 hover:border-amber-700/28 dark:hover:border-amber-400/25 hover:bg-[hsl(46_44%_95%)]/80 dark:hover:bg-[hsl(80_18%_16%)]/80",
                 ].join(" ")}
               >
                 <div className="flex items-start gap-2.5">
