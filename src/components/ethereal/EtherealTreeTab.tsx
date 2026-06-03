@@ -19,7 +19,7 @@
  *   - No drag, no edit, no persistence. Reversible: delete this folder + the
  *     <TabsTrigger value="ethereal"> in TreeDetailPage.tsx.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -122,6 +122,11 @@ interface Props {
 export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewInOfferings }: Props) {
   const [filter, setFilter] = useState("all");
   const [activeNode, setActiveNode] = useState<NodeDatum | null>(null);
+  // After the sheet closes via "View in Offerings", keep the chosen node
+  // glowing briefly so the eye can follow it into the next view.
+  const [lingerNodeId, setLingerNodeId] = useState<string | null>(null);
+  const lingerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (lingerTimer.current) clearTimeout(lingerTimer.current); }, []);
 
   const nodes: NodeDatum[] = useMemo(() => {
     const offeringNodes: NodeDatum[] = offerings
@@ -339,7 +344,9 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             const isWhisper = n.kind === "whisper";
             const baseRadius = isWhisper ? 2.2 : 3;
             const isSelected = activeNode?.id === n.id;
-            const quieted = !!activeNode && !isSelected;
+            const isLingering = !activeNode && lingerNodeId === n.id;
+            const highlighted = isSelected || isLingering;
+            const quieted = (!!activeNode && !isSelected) || (!!lingerNodeId && !isLingering && !activeNode);
             return (
               <g
                 key={n.id}
@@ -358,7 +365,7 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
               >
                 {/* Selected anchor — ceremonial ring that keeps the memory
                     visibly rooted in place while the sheet is open. */}
-                {isSelected && (
+                {highlighted && (
                   <>
                     <circle
                       cx={pos.x}
@@ -367,17 +374,17 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                       fill="none"
                       stroke={isWhisper ? "hsl(160 60% 70%)" : "hsl(45 85% 72%)"}
                       strokeWidth="0.6"
-                      opacity="0.7"
-                      className="et-anchor-ring"
+                      opacity={isLingering ? 0.9 : 0.7}
+                      className={cn("et-anchor-ring", isLingering && "et-anchor-ring-linger")}
                     />
                     <circle
                       cx={pos.x}
                       cy={pos.y}
-                      r={22}
+                      r={isLingering ? 26 : 22}
                       fill={isWhisper ? "url(#et-whisper)" : "url(#et-glow)"}
-                      opacity="0.55"
+                      opacity={isLingering ? 0.75 : 0.55}
                       filter="url(#et-soft)"
-                      className="et-anchor-halo"
+                      className={cn("et-anchor-halo", isLingering && "et-anchor-halo-linger")}
                     />
                   </>
                 )}
@@ -394,7 +401,7 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={isSelected ? baseRadius + 0.6 : baseRadius}
+                  r={highlighted ? baseRadius + 0.6 : baseRadius}
                   fill={isWhisper ? "hsl(160 70% 75%)" : "hsl(45 90% 78%)"}
                   className="et-node-core"
                 />
@@ -505,13 +512,29 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           50%      { opacity: 0.75; transform: scale(1.08); }
         }
 
+        /* Linger handoff — faster, brighter pulse that fades as the
+           Offerings tab pulls focus. */
+        .et-anchor-ring-linger { animation: et-anchor-linger-ring 1.4s ease-out 1 forwards; }
+        .et-anchor-halo-linger { animation: et-anchor-linger-halo 1.4s ease-out 1 forwards; }
+        @keyframes et-anchor-linger-ring {
+          0%   { transform: scale(0.85); opacity: 0.95; }
+          60%  { transform: scale(1.6);  opacity: 0.5;  }
+          100% { transform: scale(2.1);  opacity: 0;    }
+        }
+        @keyframes et-anchor-linger-halo {
+          0%   { transform: scale(1);    opacity: 0.9; }
+          100% { transform: scale(1.35); opacity: 0;   }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .et-breath,
           .et-node-glow,
           .et-node-core,
           .et-root-pulse circle,
           .et-anchor-ring,
-          .et-anchor-halo { animation: none !important; }
+          .et-anchor-halo,
+          .et-anchor-ring-linger,
+          .et-anchor-halo-linger { animation: none !important; }
           .et-root-pulse { display: none; }
         }
       `}</style>
@@ -547,8 +570,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                       activeNode.kind === "whisper"
                         ? (activeNode.payload as TreeWhisper).id
                         : (activeNode.payload as Offering).id;
+                    const node = activeNode;
+                    // Keep the node glowing briefly as the sheet closes and
+                    // the Offerings tab takes over — a spatial handoff.
+                    setLingerNodeId(node.id);
                     setActiveNode(null);
-                    onViewInOfferings?.(activeNode.kind, payloadId);
+                    if (lingerTimer.current) clearTimeout(lingerTimer.current);
+                    lingerTimer.current = setTimeout(() => setLingerNodeId(null), 1400);
+                    onViewInOfferings?.(node.kind, payloadId);
                   }}
                 >
                   View in Offerings

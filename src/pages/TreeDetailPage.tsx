@@ -5,6 +5,7 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { ChevronDown, Layers } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import {
   TreePageHero,
@@ -227,6 +228,8 @@ const TreeDetailPage = () => {
   const stewardshipOfferings = useMemo(() => getByRole("stewardship"), [getByRole]);
   const anchoredOfferings = useMemo(() => getByRole("anchored"), [getByRole]);
   const [showAnchored, setShowAnchored] = useState(false);
+  // Brief highlight ring on an offering card when arriving from the Ethereal Tree.
+  const [highlightedOfferingId, setHighlightedOfferingId] = useState<string | null>(null);
   // Derived: photo offerings (memoized so deep-link effect deps stay stable)
   const photoOfferings = useMemo(
     () => getOfferingsByType("photo").filter((o) => o.media_url),
@@ -979,10 +982,22 @@ const TreeDetailPage = () => {
               treeName={tree.name}
               offerings={offerings}
               whispers={availableWhispers}
-              onViewInOfferings={(kind) => {
+              onViewInOfferings={(kind, offeringId) => {
                 setSectionTab("offerings");
                 if (kind !== "whisper") {
                   setActiveTab(kind as OfferingType);
+                }
+                if (offeringId && kind !== "whisper") {
+                  setHighlightedOfferingId(offeringId);
+                  // Wait for tab switch + render, then ride the node's
+                  // linger glow into the offering card.
+                  window.setTimeout(() => {
+                    const el = document.querySelector(
+                      `[data-offering-id="${offeringId}"]`
+                    ) as HTMLElement | null;
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }, 380);
+                  window.setTimeout(() => setHighlightedOfferingId(null), 2600);
                 }
               }}
             />
@@ -1528,11 +1543,24 @@ const TreeDetailPage = () => {
                           <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
                         ) : (
                           <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                            {sortOfferings(getOfferingsByType(type)).map((offering) => (
-                              <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                                <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
-                              </motion.div>
-                            ))}
+                            {sortOfferings(getOfferingsByType(type)).map((offering) => {
+                              const isHighlighted = highlightedOfferingId === offering.id;
+                              return (
+                                <motion.div
+                                  key={offering.id}
+                                  data-offering-id={offering.id}
+                                  variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+                                  transition={{ duration: 0.35, ease: "easeOut" }}
+                                  className={cn(
+                                    "rounded-xl transition-shadow duration-700",
+                                    isHighlighted &&
+                                      "ring-2 ring-primary/60 shadow-[0_0_28px_-4px_hsl(45_85%_60%/0.55)] animate-fade-in"
+                                  )}
+                                >
+                                  <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
+                                </motion.div>
+                              );
+                            })}
                           </motion.div>
                         )}
                       </TabsContent>
