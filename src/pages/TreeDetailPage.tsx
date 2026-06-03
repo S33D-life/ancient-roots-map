@@ -1432,10 +1432,10 @@ const TreeDetailPage = () => {
                       onDismiss={() => setRefinementOpen(false)}
                     />
                   ) : (
-                    <Card className={`bg-card/60 backdrop-blur border-border/40 transition-all duration-700 ${searchParams.get("refine") === "1" ? "ring-2 ring-primary/40 animate-pulse" : ""}`}>
-                      <CardContent className="p-4 flex items-center justify-between gap-3">
+                    <Card className={`bg-card/40 backdrop-blur border-border/20 transition-all duration-700 ${searchParams.get("refine") === "1" ? "ring-2 ring-primary/40 animate-pulse" : ""}`}>
+                      <CardContent className="p-3 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <MapPin className="w-4 h-4 text-primary/60 shrink-0" />
+                          <MapPin className="w-4 h-4 text-primary/40 shrink-0" />
                           <div className="min-w-0">
                             <p className="font-serif text-sm text-foreground">Refine location</p>
                             <p className="text-xs text-muted-foreground font-serif truncate">
