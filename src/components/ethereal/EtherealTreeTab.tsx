@@ -365,7 +365,7 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
               >
                 {/* Selected anchor — ceremonial ring that keeps the memory
                     visibly rooted in place while the sheet is open. */}
-                {isSelected && (
+                {highlighted && (
                   <>
                     <circle
                       cx={pos.x}
@@ -374,17 +374,17 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                       fill="none"
                       stroke={isWhisper ? "hsl(160 60% 70%)" : "hsl(45 85% 72%)"}
                       strokeWidth="0.6"
-                      opacity="0.7"
-                      className="et-anchor-ring"
+                      opacity={isLingering ? 0.9 : 0.7}
+                      className={cn("et-anchor-ring", isLingering && "et-anchor-ring-linger")}
                     />
                     <circle
                       cx={pos.x}
                       cy={pos.y}
-                      r={22}
+                      r={isLingering ? 26 : 22}
                       fill={isWhisper ? "url(#et-whisper)" : "url(#et-glow)"}
-                      opacity="0.55"
+                      opacity={isLingering ? 0.75 : 0.55}
                       filter="url(#et-soft)"
-                      className="et-anchor-halo"
+                      className={cn("et-anchor-halo", isLingering && "et-anchor-halo-linger")}
                     />
                   </>
                 )}
