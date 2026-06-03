@@ -411,9 +411,17 @@ const SupportPage = () => {
         </Link>
 
         <a
-          href="/patronsportal/"
+          href="https://www.s33d.life/patronsportal/"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => {
+            // Graceful fallback: if the portal is unreachable, show a toast instead of a blank tab
+            const link = e.currentTarget.href;
+            fetch(link, { method: 'HEAD', mode: 'no-cors' })
+              .catch(() => {
+                toast('The Patrons Portal will be available shortly.', { icon: '🌱' });
+              });
+          }}
           className="group flex items-center gap-3 p-4 rounded-xl border border-border/20 bg-card/30 hover:border-primary/20 transition-all"
         >
           <div className="w-10 h-10 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
