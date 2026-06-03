@@ -36,6 +36,7 @@ const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
 const ForestInteractionLayers = lazy(() => import("@/components/ForestInteractionLayers"));
 const TreeDepthBackground = lazy(() => import("@/components/TreeDepthBackground"));
+const MobileSectionWhisper = lazy(() => import("@/components/MobileSectionWhisper"));
 
 /** Minimal loading shimmer for lazy sections */
 const SectionShimmer = () => (
