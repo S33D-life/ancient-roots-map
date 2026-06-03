@@ -100,7 +100,7 @@ interface Props {
   onViewInOfferings?: (kind: OfferingType | "whisper", offeringId?: string) => void;
 }
 
-export function EtherealTreeTab({ treeId, treeName, offerings, whispers }: Props) {
+export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewInOfferings }: Props) {
   const [filter, setFilter] = useState("all");
   const [activeNode, setActiveNode] = useState<NodeDatum | null>(null);
 
