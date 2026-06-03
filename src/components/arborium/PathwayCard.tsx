@@ -54,16 +54,25 @@ export default function PathwayCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.06 }}
       whileHover={{ y: -1 }}
-      className="group relative w-full rounded-2xl overflow-hidden border transition-all"
+      className="group relative w-full rounded-2xl overflow-hidden border transition-all dark:!border-amber-200/12"
       style={{
         background: `linear-gradient(150deg, hsl(${hue} 45% 94%) 0%, hsl(${hue - 8} 35% 91%) 55%, hsl(${hue + 12} 40% 93%) 100%)`,
         borderColor: `hsl(${hue} 35% 68% / 0.35)`,
         boxShadow: `inset 0 1px 0 hsl(${hue} 40% 80% / 0.7), 0 10px 30px -18px hsl(${hue} 40% 22% / 0.3)`,
       }}
     >
+      {/* dark-mode forest parchment overlay */}
+      <div
+        className="hidden dark:block absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(150deg, hsl(${hue} 22% 12%) 0%, hsl(${hue - 8} 18% 14%) 55%, hsl(${hue + 12} 22% 11%) 100%)`,
+          boxShadow: "inset 0 1px 0 hsl(48 28% 22% / 0.3), 0 10px 30px -16px hsl(0 0% 0% / 0.6)",
+        }}
+        aria-hidden
+      />
       {/* glow bloom */}
       <div
-        className="absolute -right-12 -top-12 w-48 h-48 rounded-full opacity-35 blur-3xl pointer-events-none"
+        className="absolute -right-12 -top-12 w-48 h-48 rounded-full opacity-35 dark:opacity-25 blur-3xl pointer-events-none"
         style={{ background: `hsl(${hue} 55% 68% / 0.5)` }}
         aria-hidden
       />
@@ -80,14 +89,14 @@ export default function PathwayCard({
           </div>
           <div className="min-w-0">
             <div className="inline-flex items-center gap-1.5 mb-1">
-              <p className="text-[9px] font-serif uppercase tracking-[0.2em] text-[hsl(95_25%_25%)]/60">
+              <p className="text-[9px] font-serif uppercase tracking-[0.2em] text-[hsl(95_25%_25%)]/60 dark:text-[hsl(45_45%_78%)]/65">
                 Primary pathway
               </p>
             </div>
-            <h3 className="font-serif text-xl md:text-2xl text-[hsl(95_30%_16%)] leading-tight">
+            <h3 className="font-serif text-xl md:text-2xl text-[hsl(95_30%_16%)] dark:text-[hsl(45_55%_88%)] leading-tight">
               {title}
             </h3>
-            <p className="text-xs font-serif text-[hsl(95_15%_28%)]/80 mt-1.5 leading-relaxed max-w-sm">
+            <p className="text-xs font-serif text-[hsl(95_15%_28%)]/80 dark:text-[hsl(45_25%_78%)]/80 mt-1.5 leading-relaxed max-w-sm">
               {description}
             </p>
 
@@ -104,7 +113,7 @@ export default function PathwayCard({
 
         {/* right: CTA */}
         <div className="shrink-0 self-end sm:self-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-amber-900/20 bg-[hsl(48_40%_97%)]/60 text-[11px] font-serif text-[hsl(95_30%_18%)] group-hover:bg-[hsl(48_40%_94%)]/80 transition-colors">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-amber-900/20 dark:border-amber-200/20 bg-[hsl(48_40%_97%)]/60 dark:bg-[hsl(80_18%_15%)]/70 text-[11px] font-serif text-[hsl(95_30%_18%)] dark:text-[hsl(45_55%_85%)] group-hover:bg-[hsl(48_40%_94%)]/80 dark:group-hover:bg-[hsl(80_18%_18%)]/85 transition-colors">
             Begin here
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </div>
