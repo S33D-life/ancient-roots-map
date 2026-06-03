@@ -979,6 +979,12 @@ const TreeDetailPage = () => {
               treeName={tree.name}
               offerings={offerings}
               whispers={availableWhispers}
+              onViewInOfferings={(kind) => {
+                setSectionTab("offerings");
+                if (kind !== "whisper") {
+                  setActiveTab(kind as OfferingType);
+                }
+              }}
             />
           </TabsContent>
 
