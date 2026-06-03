@@ -353,30 +353,38 @@ const TreeCard = ({
                   : presence.presence_count > 1 ? `${presence.presence_count} wanderers here recently` : "Recently met"}
               </div>
             )}
-            {/* Line 1: Activity / Presence — brighter */}
+            {/* Line 1: Relationship memory — warm, not analytical */}
             <div className="flex items-center gap-2 flex-wrap text-[11px]">
               {isClustered && encounterCount > 0 && (
                 <span className="font-serif text-muted-foreground/80">
-                  🌿 Visited {encounterCount} time{encounterCount !== 1 ? "s" : ""}
+                  🌿 Met {encounterCount} time{encounterCount !== 1 ? "s" : ""}
                 </span>
               )}
-              {isClustered && wandererCount > 1 && (
+              {/* Only show wanderer count here if presence pill isn't already saying it */}
+              {isClustered && wandererCount > 1 && !presence && (
                 <span className="font-serif text-muted-foreground/70">
-                  · {wandererCount} wanderers
+                  · with {wandererCount} other wanderers
                 </span>
               )}
               {offeringCount > 0 && (
-                <span className="text-primary/70">✦ {offeringCount}</span>
+                <span className="text-primary/70" title={`${offeringCount} offering${offeringCount !== 1 ? "s" : ""} left here`}>✦ {offeringCount}</span>
               )}
               {birdsongCount > 0 && (
-                <span className="text-muted-foreground/70">🐦 {birdsongCount}</span>
+                <span className="text-muted-foreground/70" title="Birdsong heard here">🐦 {birdsongCount}</span>
               )}
               {whisperCount > 0 && (
-                <span className="flex items-center gap-0.5 text-muted-foreground/60" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
+                <span className="flex items-center gap-0.5 text-muted-foreground/60" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""} carried through the roots`}>
                   <Wind className="w-3 h-3" /> {whisperCount}
                 </span>
               )}
             </div>
+
+            {/* Known since — quiet memory cue */}
+            {knownSince && (
+              <p className="text-[10px] italic font-serif text-muted-foreground/60 leading-snug">
+                Known since {knownSince}
+              </p>
+            )}
 
             {/* Line 2: Grounding — w3w only (hive + age moved to identity cluster) */}
             {tree.what3words && (
@@ -388,6 +396,7 @@ const TreeCard = ({
             )}
 
           </div>
+
 
           {/* Research source badges */}
           {isResearch && <div className="mt-1.5"><ResearchBadges tree={tree} /></div>}
