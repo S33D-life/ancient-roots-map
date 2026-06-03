@@ -282,6 +282,21 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
               />
             </div>
 
+            {/* Story & Lore */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-serif text-muted-foreground">The Tree's Story</Label>
+              <Textarea
+                value={loreText}
+                onChange={(e) => setLoreText(e.target.value)}
+                className="font-serif text-sm min-h-[120px] leading-relaxed"
+                maxLength={5000}
+                placeholder="What is known, remembered, or felt about this tree…"
+              />
+              <p className="text-[11px] text-muted-foreground/70 font-serif italic leading-relaxed">
+                Share the story, history, or memory that helps this tree be known.
+              </p>
+            </div>
+
             {/* Estimated Age */}
             <div className="space-y-1.5">
               <Label className="text-xs font-serif text-muted-foreground">Estimated Age (years)</Label>
