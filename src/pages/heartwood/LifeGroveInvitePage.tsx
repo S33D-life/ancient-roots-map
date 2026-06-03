@@ -190,16 +190,7 @@ export default function LifeGroveInvitePage() {
                   placeholder={user?.email ?? "How shall the tree know you?"}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cEmail" className="font-serif text-sm">Email (optional)</Label>
-                <Input
-                  id="cEmail"
-                  type="email"
-                  value={contributorEmail}
-                  onChange={(e) => setContributorEmail(e.target.value)}
-                  placeholder="Only if you wish"
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
