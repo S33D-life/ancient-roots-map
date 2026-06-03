@@ -168,16 +168,7 @@ const CouncilOfLifePage = () => {
 
           {/* ── Quick View — agenda glimpse + single Council Scroll ── */}
           <div className="mt-6">
-            <HeartwoodChamber
-              title="Quick View"
-              caption="A glimpse of the agenda and current scroll."
-              icon={<Users className="w-4 h-4 text-primary" />}
-              collapsible
-              defaultOpen
-              tone="warm"
-            >
-              <CouncilQuickView invitation={invitation} />
-            </HeartwoodChamber>
+            <CouncilQuickView invitation={invitation} />
           </div>
 
           {/* ── Room Grid ── */}
