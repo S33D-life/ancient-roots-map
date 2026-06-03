@@ -368,8 +368,8 @@ export default function SendWhisperModal({
 
   if (sent) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
+      <TreeAnchoredSheet open={open} onOpenChange={onOpenChange}>
+        <div className="sm:max-w-md mx-auto">
           <div className="flex flex-col items-center gap-4 py-8 text-center">
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
