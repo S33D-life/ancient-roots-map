@@ -209,7 +209,7 @@ const RefCapture = () => { useCaptureRef(); return null; };
    gets forwarded to the live portal. Keeps bookmarks and typed URLs graceful. */
 const PatronsPortalRedirect = () => {
   useEffect(() => {
-    window.location.href = "https://www.s33d.life/patronsportal/";
+    window.location.href = "https://www.s33d.life/patronsportal/index.html";
   }, []);
   return <PageLoader />;
 };
