@@ -268,6 +268,7 @@ const TreeDetailPage = () => {
   const speciesResolution = useSpeciesResolution(tree?.species, (tree as any)?.species_key);
   const { data: treeContributions = [] } = useTreeContributions(id);
   const { role: editRole, canDirectEdit, loading: editPermLoading, userId: editUserId } = useTreeEditPermission(id);
+  const [tendPanelOpen, setTendPanelOpen] = useState(false);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
     treeId: id,
     treeSpecies: tree?.species || "",
@@ -883,6 +884,10 @@ const TreeDetailPage = () => {
                 setWhisperModalOpen(true);
               }}
               onTendTree={() => {
+                if (canDirectEdit) {
+                  setTendPanelOpen(true);
+                  return;
+                }
                 const el = document.getElementById("seeds-hearts-section");
                 if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
@@ -1166,6 +1171,8 @@ const TreeDetailPage = () => {
                       loading={editPermLoading}
                       onProposeEdit={() => setProposeEditOpen(true)}
                       onTreeUpdated={(updated) => setTree(updated)}
+                      editOpen={tendPanelOpen}
+                      onEditOpenChange={setTendPanelOpen}
                     />
                   </Suspense>
 

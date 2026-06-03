@@ -9,7 +9,7 @@ import { lazy, Suspense, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge } from "lucide-react";
+import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf } from "lucide-react";
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
 
 const TreeDirectEditPanel = lazy(() => import("@/components/TreeDirectEditPanel"));
@@ -39,6 +39,9 @@ interface Props {
   loading: boolean;
   onProposeEdit: () => void;
   onTreeUpdated: (updated: any) => void;
+  /** Optional controlled open state for the Tend This Tree panel */
+  editOpen?: boolean;
+  onEditOpenChange?: (open: boolean) => void;
 }
 
 const ROLE_LABELS: Record<TreeEditRole, { label: string; icon: React.ReactNode }> = {
@@ -57,8 +60,15 @@ export default function StewardToolsSection({
   loading,
   onProposeEdit,
   onTreeUpdated,
+  editOpen: editOpenProp,
+  onEditOpenChange,
 }: Props) {
-  const [editOpen, setEditOpen] = useState(false);
+  const [editOpenInternal, setEditOpenInternal] = useState(false);
+  const editOpen = editOpenProp ?? editOpenInternal;
+  const setEditOpen = (open: boolean) => {
+    if (onEditOpenChange) onEditOpenChange(open);
+    else setEditOpenInternal(open);
+  };
   const [showHistory, setShowHistory] = useState(false);
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
@@ -81,8 +91,8 @@ export default function StewardToolsSection({
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-sm tracking-wide text-foreground/80 flex items-center gap-2">
-              <Shield className="h-3.5 w-3.5 text-primary/60" />
-              Steward Tools
+              <Leaf className="h-3.5 w-3.5 text-primary/60" />
+              Tend This Tree
             </h3>
             {roleInfo.label && (
               <Badge
@@ -103,8 +113,8 @@ export default function StewardToolsSection({
                 className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40"
                 onClick={() => setEditOpen(true)}
               >
-                <Pencil className="h-3 w-3" />
-                Edit Details
+                <Leaf className="h-3 w-3" />
+                Refine This Placement
               </Button>
             )}
 
@@ -116,7 +126,7 @@ export default function StewardToolsSection({
                 onClick={onProposeEdit}
               >
                 <MessageSquarePlus className="h-3 w-3" />
-                Suggest Edit
+                Offer a Refinement
               </Button>
             )}
 
