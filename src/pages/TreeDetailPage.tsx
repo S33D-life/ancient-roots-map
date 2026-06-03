@@ -3,6 +3,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown, Layers } from "lucide-react";
+import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -1690,6 +1691,10 @@ const TreeDetailPage = () => {
           </TabsContent>
         </Tabs>
 
+        {/* ── Closing rhythm whisper — anchors this tree to the current lunation ── */}
+        <div className="mt-10 mb-2 flex justify-center">
+          <MoonGlyph variant="whisper" />
+        </div>
 
       </main>
 

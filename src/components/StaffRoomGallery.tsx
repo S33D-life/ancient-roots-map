@@ -1004,6 +1004,11 @@ export default function StaffRoomGallery() {
 
           {/* ─── PATRONAGE TAB ─── */}
           <TabsContent value="patronage" className="space-y-5 mt-4">
+            <div className="text-center">
+              <span className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
+                · Tend ·
+              </span>
+            </div>
             {/* Founding Spiral — the 36 handcrafted Origin Staffs */}
             <motion.section
               initial={{ opacity: 0, y: 12 }}
