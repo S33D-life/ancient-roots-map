@@ -1617,6 +1617,7 @@ export type Database = {
           ceremony_type: string
           cid: string | null
           created_at: string
+          cycle_id: string | null
           id: string
           staff_code: string
           staff_name: string | null
@@ -1628,6 +1629,7 @@ export type Database = {
           ceremony_type?: string
           cid?: string | null
           created_at?: string
+          cycle_id?: string | null
           id?: string
           staff_code: string
           staff_name?: string | null
@@ -1639,13 +1641,22 @@ export type Database = {
           ceremony_type?: string
           cid?: string | null
           created_at?: string
+          cycle_id?: string | null
           id?: string
           staff_code?: string
           staff_name?: string | null
           staff_species?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ceremony_logs_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "lunation_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chain_anchors: {
         Row: {
@@ -2335,6 +2346,7 @@ export type Database = {
       councils: {
         Row: {
           created_at: string
+          cycle_id: string | null
           description: string | null
           id: string
           meeting_cadence: string | null
@@ -2350,6 +2362,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          cycle_id?: string | null
           description?: string | null
           id?: string
           meeting_cadence?: string | null
@@ -2365,6 +2378,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          cycle_id?: string | null
           description?: string | null
           id?: string
           meeting_cadence?: string | null
@@ -2378,7 +2392,15 @@ export type Database = {
           telegram_link?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "councils_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "lunation_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_reward_caps: {
         Row: {
@@ -4398,6 +4420,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lunation_cycles: {
+        Row: {
+          created_at: string
+          cycle_number: number
+          full_moon_at: string
+          id: string
+          label: string | null
+          new_moon_at: string
+          next_new_moon_at: string
+          season_note: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_number: number
+          full_moon_at: string
+          id?: string
+          label?: string | null
+          new_moon_at: string
+          next_new_moon_at: string
+          season_note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_number?: number
+          full_moon_at?: string
+          id?: string
+          label?: string | null
+          new_moon_at?: string
+          next_new_moon_at?: string
+          season_note?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       market_funds_ledger: {
         Row: {
@@ -7184,6 +7242,7 @@ export type Database = {
       spark_reports: {
         Row: {
           created_at: string
+          cycle_id: string | null
           dataset_id: string | null
           description: string
           hearts_rewarded: number | null
@@ -7204,6 +7263,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          cycle_id?: string | null
           dataset_id?: string | null
           description: string
           hearts_rewarded?: number | null
@@ -7224,6 +7284,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          cycle_id?: string | null
           dataset_id?: string | null
           description?: string
           hearts_rewarded?: number | null
@@ -7243,6 +7304,13 @@ export type Database = {
           verification_status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "spark_reports_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "lunation_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "spark_reports_dataset_id_fkey"
             columns: ["dataset_id"]
@@ -11377,6 +11445,7 @@ export type Database = {
         }
         Returns: Json
       }
+      current_lunation: { Args: never; Returns: string }
       execute_lottery_draw: { Args: { p_draw_id: string }; Returns: Json }
       get_bio_region_trees: {
         Args: { p_bio_region_id: string }
