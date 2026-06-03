@@ -338,18 +338,49 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             const dim = !FILTERS.find((f) => f.id === filter)!.match(n);
             const isWhisper = n.kind === "whisper";
             const baseRadius = isWhisper ? 2.2 : 3;
+            const isSelected = activeNode?.id === n.id;
+            const quieted = !!activeNode && !isSelected;
             return (
               <g
                 key={n.id}
                 onClick={() => setActiveNode(n)}
                 className={cn(
                   "cursor-pointer transition-opacity duration-700",
-                  dim ? "opacity-[0.12]" : "opacity-100"
+                  dim
+                    ? "opacity-[0.10]"
+                    : quieted
+                    ? "opacity-[0.32]"
+                    : "opacity-100"
                 )}
                 tabIndex={0}
                 role="button"
                 aria-label={`${n.kind}: ${n.title}`}
               >
+                {/* Selected anchor — ceremonial ring that keeps the memory
+                    visibly rooted in place while the sheet is open. */}
+                {isSelected && (
+                  <>
+                    <circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={16}
+                      fill="none"
+                      stroke={isWhisper ? "hsl(160 60% 70%)" : "hsl(45 85% 72%)"}
+                      strokeWidth="0.6"
+                      opacity="0.7"
+                      className="et-anchor-ring"
+                    />
+                    <circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={22}
+                      fill={isWhisper ? "url(#et-whisper)" : "url(#et-glow)"}
+                      opacity="0.55"
+                      filter="url(#et-soft)"
+                      className="et-anchor-halo"
+                    />
+                  </>
+                )}
                 {/* outer glow */}
                 <circle
                   cx={pos.x}
@@ -363,7 +394,7 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={baseRadius}
+                  r={isSelected ? baseRadius + 0.6 : baseRadius}
                   fill={isWhisper ? "hsl(160 70% 75%)" : "hsl(45 90% 78%)"}
                   className="et-node-core"
                 />
@@ -375,7 +406,13 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           {Object.entries(overflowByZone).map(([zone, count]) => {
             const rect = ZONE_RECTS[zone as Zone];
             return (
-              <g key={`ov-${zone}`}>
+              <g
+                key={`ov-${zone}`}
+                className={cn(
+                  "transition-opacity duration-700",
+                  activeNode ? "opacity-[0.25]" : "opacity-100"
+                )}
+              >
                 <circle cx={rect.cx} cy={rect.cy} r="14" fill="url(#et-glow)" opacity="0.6" />
                 <text
                   x={rect.cx}
