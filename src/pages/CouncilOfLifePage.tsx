@@ -34,12 +34,6 @@ import CouncilRoom from "@/components/CouncilRoom";
 */
 const councilRooms = [
   {
-    id: "chamber",
-    title: "Join Council",
-    description: "Step into this moon's gathering",
-    icon: Video,
-  },
-  {
     id: "chamber-live",
     title: "Council Chamber",
     description: "Enter the live council room",
