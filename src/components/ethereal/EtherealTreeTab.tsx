@@ -75,6 +75,15 @@ function placeInZone(zone: Zone, seed: string): { x: number; y: number } {
   };
 }
 
+// Local moon-phase approximation (0 = new, 0.5 = full, 1 = new). No API.
+function moonFullness(date = new Date()): number {
+  const synodic = 29.530588853;
+  const ref = Date.UTC(2000, 0, 6, 18, 14); // known new moon
+  const days = (date.getTime() - ref) / 86400000;
+  const phase = ((days % synodic) + synodic) % synodic / synodic; // 0..1
+  return 1 - Math.abs(0.5 - phase) * 2; // 0 at new, 1 at full
+}
+
 interface NodeDatum {
   id: string;
   zone: Zone;
@@ -163,6 +172,20 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
   // Opacity helpers — "awake" zones brighten, others recede without disappearing.
   const awake = (z: Zone, on = 1, off = 0.28) => (zoneAwake(z) ? on : off);
 
+  // Moon ambience — derived locally, recomputed once per mount.
+  const moon = useMemo(() => moonFullness(), []);
+  // Halo gets quietly stronger near full moon; tone shifts a touch cooler.
+  const haloBoost = 0.35 + moon * 0.25; // 0.35..0.60
+  const haloHue = 45 - moon * 8; // 45 (gold) → 37 (cooler amber-ivory)
+
+  // Whisper root pulses — only when whispers exist, kept sparse.
+  const hasWhispers = whispers.length > 0;
+  const rootPulsePaths = [
+    "M200 420 Q 160 470 80 540",
+    "M200 420 Q 240 470 320 540",
+    "M200 420 Q 200 490 200 580",
+  ];
+
   return (
     <div className="space-y-3">
       {/* Filter ribbon */}
@@ -219,69 +242,95 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             </filter>
           </defs>
 
-          {/* Ambient ground glow */}
-          <ellipse
-            cx="200" cy="455" rx="180" ry="30"
-            fill="url(#et-ground)"
-            style={{ opacity: awake("ground", 1, 0.4), transition: "opacity 900ms ease" }}
-          />
+          {/* Breathing wrapper — extremely slow inhale/exhale that all of the
+              tree's still elements share. Subconscious, never overt. */}
+          <g className="et-breath">
+            {/* Ambient ground glow */}
+            <ellipse
+              cx="200" cy="455" rx="180" ry="30"
+              fill="url(#et-ground)"
+              style={{ opacity: awake("ground", 1, 0.4), transition: "opacity 900ms ease" }}
+            />
 
-          {/* Roots — awaken with whispers */}
-          <g
-            stroke="hsl(160 35% 40%)"
-            strokeWidth={zoneAwake("roots") ? 1.4 : 1.1}
-            fill="none"
-            style={{
-              opacity: awake("roots", 0.75, 0.32),
-              transition: "opacity 900ms ease, stroke-width 900ms ease",
-            }}
-          >
-            <path d="M200 420 Q 160 470 80 540" />
-            <path d="M200 420 Q 240 470 320 540" />
-            <path d="M200 420 Q 200 490 200 580" />
-            <path d="M200 420 Q 130 460 60 490" />
-            <path d="M200 420 Q 270 460 340 490" />
-            <path d="M200 420 Q 180 480 120 575" />
-            <path d="M200 420 Q 220 480 280 575" />
+            {/* Roots — awaken with whispers */}
+            <g
+              stroke="hsl(160 35% 40%)"
+              strokeWidth={zoneAwake("roots") ? 1.4 : 1.1}
+              fill="none"
+              style={{
+                opacity: awake("roots", 0.75, 0.32),
+                transition: "opacity 900ms ease, stroke-width 900ms ease",
+              }}
+            >
+              <path d="M200 420 Q 160 470 80 540" />
+              <path d="M200 420 Q 240 470 320 540" />
+              <path d="M200 420 Q 200 490 200 580" />
+              <path d="M200 420 Q 130 460 60 490" />
+              <path d="M200 420 Q 270 460 340 490" />
+              <path d="M200 420 Q 180 480 120 575" />
+              <path d="M200 420 Q 220 480 280 575" />
+            </g>
+
+            {/* Whisper root pulses — sparse travelling glows along major roots.
+                Only rendered when whispers exist. SMIL animateMotion keeps
+                this CSS-free and reduced-motion is handled below by halting
+                the keyTimes via the .et-no-motion override. */}
+            {hasWhispers &&
+              rootPulsePaths.map((d, i) => (
+                <g key={`pulse-${i}`} className="et-root-pulse">
+                  <circle r="2.2" fill="hsl(160 70% 78%)" opacity="0.85" filter="url(#et-soft)">
+                    <animateMotion
+                      dur={`${14 + i * 3}s`}
+                      begin={`${i * 4.5}s`}
+                      repeatCount="indefinite"
+                      path={d}
+                      rotate="auto"
+                    />
+                  </circle>
+                </g>
+              ))}
+
+            {/* Trunk — awakens with stories */}
+            <path
+              d="M180 420 Q 175 350 185 290 Q 195 240 200 210 Q 205 240 215 290 Q 225 350 220 420 Z"
+              fill="hsl(35 22% 16%)"
+              stroke="hsl(40 30% 25%)"
+              strokeWidth="0.8"
+              style={{ opacity: awake("trunk", 1, 0.55), transition: "opacity 900ms ease" }}
+            />
+
+            {/* Branches — awaken with canopy / upper / mid filters */}
+            <g
+              stroke="hsl(40 28% 22%)"
+              strokeWidth="2"
+              fill="none"
+              style={{
+                opacity: awake("canopy", 0.85, zoneAwake("upper") || zoneAwake("mid") ? 0.6 : 0.3),
+                transition: "opacity 900ms ease",
+              }}
+            >
+              <path d="M200 240 Q 170 215 110 180" />
+              <path d="M200 240 Q 230 215 290 180" />
+              <path d="M200 215 Q 165 190 95 145" />
+              <path d="M200 215 Q 235 190 305 145" />
+              <path d="M200 200 Q 200 170 200 100" />
+              <path d="M200 220 Q 150 200 75 200" />
+              <path d="M200 220 Q 250 200 325 200" />
+            </g>
+
+            {/* Canopy halo — brightens for photos / prayers / poems, and
+                quietly responds to the local moon phase. */}
+            <ellipse
+              cx="200" cy="140" rx="160" ry="80"
+              fill={`hsl(${haloHue.toFixed(1)} 80% 65% / 0.9)`}
+              style={{
+                opacity: zoneAwake("canopy") ? haloBoost : haloBoost * 0.36,
+                transition: "opacity 1200ms ease",
+                mixBlendMode: "screen",
+                filter: "url(#et-soft)",
+              }}
+            />
           </g>
-
-          {/* Trunk — awakens with stories */}
-          <path
-            d="M180 420 Q 175 350 185 290 Q 195 240 200 210 Q 205 240 215 290 Q 225 350 220 420 Z"
-            fill="hsl(35 22% 16%)"
-            stroke="hsl(40 30% 25%)"
-            strokeWidth="0.8"
-            style={{ opacity: awake("trunk", 1, 0.55), transition: "opacity 900ms ease" }}
-          />
-
-          {/* Branches — awaken with canopy / upper / mid filters */}
-          <g
-            stroke="hsl(40 28% 22%)"
-            strokeWidth="2"
-            fill="none"
-            style={{
-              opacity: awake("canopy", 0.85, zoneAwake("upper") || zoneAwake("mid") ? 0.6 : 0.3),
-              transition: "opacity 900ms ease",
-            }}
-          >
-            <path d="M200 240 Q 170 215 110 180" />
-            <path d="M200 240 Q 230 215 290 180" />
-            <path d="M200 215 Q 165 190 95 145" />
-            <path d="M200 215 Q 235 190 305 145" />
-            <path d="M200 200 Q 200 170 200 100" />
-            <path d="M200 220 Q 150 200 75 200" />
-            <path d="M200 220 Q 250 200 325 200" />
-          </g>
-
-          {/* Canopy halo — brightens for photos / prayers / poems */}
-          <ellipse
-            cx="200" cy="140" rx="160" ry="80"
-            fill="url(#et-glow)"
-            style={{
-              opacity: zoneAwake("canopy") ? 0.5 : 0.18,
-              transition: "opacity 900ms ease",
-            }}
-          />
 
           {/* Nodes */}
           {visible.map((n) => {
@@ -351,24 +400,58 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
 
       {/* Inline motion styles — scoped to ethereal nodes */}
       <style>{`
+        /* Subconscious tree breathing — opacity only, no transform, so
+           layout stays absolutely still. ~16s inhale/exhale. */
+        .et-breath { animation: et-breathe 16s ease-in-out infinite; }
+        @keyframes et-breathe {
+          0%, 100% { opacity: 0.92; }
+          50%      { opacity: 1; }
+        }
+
+        /* Per-node ambient pulse */
         .et-node-glow { animation: et-pulse 6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-        .et-zone-canopy .et-node-core, .et-zone-canopy.et-node-glow { animation-name: et-drift; animation-duration: 7s; }
-        .et-zone-roots .et-node-glow { animation-name: et-travel; animation-duration: 9s; }
+
+        /* Hanging memory motion — gentle sway in branches/canopy/upper/mid */
+        .et-zone-canopy .et-node-core,
+        .et-zone-canopy.et-node-glow,
+        .et-zone-upper  .et-node-core,
+        .et-zone-upper.et-node-glow,
+        .et-zone-mid    .et-node-core,
+        .et-zone-mid.et-node-glow {
+          animation-name: et-sway;
+          animation-duration: 11s;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+          transform-origin: center;
+          transform-box: fill-box;
+        }
+        .et-zone-upper .et-node-core, .et-zone-upper.et-node-glow { animation-duration: 13s; }
+        .et-zone-mid   .et-node-core, .et-zone-mid.et-node-glow   { animation-duration: 9s; }
+
+        /* Whisper traveller glow — fade in/out so pulses appear and dissolve. */
+        .et-root-pulse circle { animation: et-pulse-fade 14s ease-in-out infinite; }
+
         @keyframes et-pulse {
           0%, 100% { opacity: 0.55; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.25); }
+          50%      { opacity: 1;    transform: scale(1.18); }
         }
-        @keyframes et-drift {
-          0%, 100% { transform: translateY(0); opacity: 0.6; }
-          50% { transform: translateY(-3px); opacity: 1; }
+        @keyframes et-sway {
+          0%, 100% { transform: translate(0, 0); }
+          25%      { transform: translate(0.8px, -1.2px); }
+          50%      { transform: translate(0, -2px); }
+          75%      { transform: translate(-0.8px, -1.2px); }
         }
-        @keyframes et-travel {
-          0% { opacity: 0.2; transform: translateX(-4px); }
-          50% { opacity: 0.9; transform: translateX(0); }
-          100% { opacity: 0.2; transform: translateX(4px); }
+        @keyframes et-pulse-fade {
+          0%, 100% { opacity: 0; }
+          10%, 90% { opacity: 0.85; }
         }
+
         @media (prefers-reduced-motion: reduce) {
-          .et-node-glow, .et-node-core { animation: none !important; }
+          .et-breath,
+          .et-node-glow,
+          .et-node-core,
+          .et-root-pulse circle { animation: none !important; }
+          .et-root-pulse { display: none; }
         }
       `}</style>
 
