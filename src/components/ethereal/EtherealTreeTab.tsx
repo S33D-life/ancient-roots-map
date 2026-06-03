@@ -554,8 +554,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                       activeNode.kind === "whisper"
                         ? (activeNode.payload as TreeWhisper).id
                         : (activeNode.payload as Offering).id;
+                    const node = activeNode;
+                    // Keep the node glowing briefly as the sheet closes and
+                    // the Offerings tab takes over — a spatial handoff.
+                    setLingerNodeId(node.id);
                     setActiveNode(null);
-                    onViewInOfferings?.(activeNode.kind, payloadId);
+                    if (lingerTimer.current) clearTimeout(lingerTimer.current);
+                    lingerTimer.current = setTimeout(() => setLingerNodeId(null), 1400);
+                    onViewInOfferings?.(node.kind, payloadId);
                   }}
                 >
                   View in Offerings
