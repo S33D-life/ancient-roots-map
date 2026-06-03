@@ -9,7 +9,7 @@ import { lazy, Suspense, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge } from "lucide-react";
+import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf } from "lucide-react";
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
 
 const TreeDirectEditPanel = lazy(() => import("@/components/TreeDirectEditPanel"));
