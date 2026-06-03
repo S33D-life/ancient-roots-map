@@ -1364,32 +1364,8 @@ const TreeDetailPage = () => {
 
             {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
-            {/* Canonical encounter gateway — one entrypoint.
-                Every encounter begins anchored to this tree, then chooses how it
-                travels (branches / roots / both) inside the gateway's travel modal.
-                Whispers are the "roots" propagation mode — not a separate system. */}
-            {userId && tree && (
-              <div className="rounded-2xl border border-primary/25 bg-card/50 backdrop-blur-sm overflow-hidden">
-                <div className="px-4 pt-4 pb-2">
-                  <h4 className="text-sm font-serif tracking-[0.18em] uppercase text-foreground/85">
-                    Leave Something Here
-                  </h4>
-                  <p className="text-[11px] font-serif italic text-muted-foreground/70 mt-1 leading-relaxed">
-                    Offerings hang in the branches. Whispers travel through the roots.
-                  </p>
-                </div>
-                <div className="p-3 pt-2">
-                  <Button
-                    onClick={openOfferingGateway}
-                    variant="outline"
-                    className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Begin Encounter
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* "Leave Something Here" entrypoint now lives in the unified
+                Be With This Tree canopy above the tabs — no duplicate CTA here. */}
 
             {availableWhispers.length > 0 && userId && tree && (
               <WhisperCollector
