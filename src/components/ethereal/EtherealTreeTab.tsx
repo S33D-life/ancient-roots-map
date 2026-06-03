@@ -343,9 +343,27 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                   </SheetDescription>
                 )}
               </SheetHeader>
-              <p className="mt-4 text-xs text-muted-foreground font-serif">
-                Held inside {treeName}. Open the Offerings tab to tend or witness in full.
-              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-serif text-xs tracking-wider gap-1.5 w-fit"
+                  onClick={() => {
+                    const payloadId =
+                      activeNode.kind === "whisper"
+                        ? (activeNode.payload as TreeWhisper).id
+                        : (activeNode.payload as Offering).id;
+                    setActiveNode(null);
+                    onViewInOfferings?.(activeNode.kind, payloadId);
+                  }}
+                >
+                  View in Offerings
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+                <p className="text-xs text-muted-foreground font-serif">
+                  Held inside {treeName}. Open the Offerings tab to tend or witness in full.
+                </p>
+              </div>
             </>
           )}
         </SheetContent>
