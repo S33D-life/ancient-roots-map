@@ -1115,6 +1115,16 @@ export default function StaffRoomGallery() {
                   Support the Grove
                   <ChevronRight className="w-3 h-3 opacity-40 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
+                <a
+                  href="https://www.s33d.life/patronsportal/index.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-1 text-[10px] font-serif text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Shield className="w-3 h-3 text-primary/60" />
+                  Patrons Portal
+                  <ExternalLink className="w-3 h-3 opacity-40 group-hover:translate-x-0.5 transition-transform" />
+                </a>
               </div>
             </div>
 
