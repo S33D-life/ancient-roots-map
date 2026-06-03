@@ -9,7 +9,7 @@ import { lazy, Suspense, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf } from "lucide-react";
+import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf, Camera } from "lucide-react";
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
 
 const TreeDirectEditPanel = lazy(() => import("@/components/TreeDirectEditPanel"));
@@ -42,6 +42,10 @@ interface Props {
   /** Optional controlled open state for the Tend This Tree panel */
   editOpen?: boolean;
   onEditOpenChange?: (open: boolean) => void;
+  /** Stewardship entry point for the existing photo offering flow */
+  onTendPhotos?: () => void;
+  /** Number of photo offerings already remembered at this tree */
+  photoCount?: number;
 }
 
 const ROLE_LABELS: Record<TreeEditRole, { label: string; icon: React.ReactNode }> = {
@@ -62,6 +66,8 @@ export default function StewardToolsSection({
   onTreeUpdated,
   editOpen: editOpenProp,
   onEditOpenChange,
+  onTendPhotos,
+  photoCount = 0,
 }: Props) {
   const [editOpenInternal, setEditOpenInternal] = useState(false);
   const editOpen = editOpenProp ?? editOpenInternal;
@@ -118,6 +124,18 @@ export default function StewardToolsSection({
               </Button>
             )}
 
+            {canDirectEdit && onTendPhotos && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40"
+                onClick={onTendPhotos}
+              >
+                <Camera className="h-3 w-3" />
+                Tend Photos
+              </Button>
+            )}
+
             {!canDirectEdit && (
               <Button
                 variant="outline"
@@ -165,6 +183,18 @@ export default function StewardToolsSection({
               </Suspense>
             )}
           </div>
+
+          {/* Photo memory context — visible to all authenticated users */}
+          <p className="text-[11px] text-muted-foreground/60 font-serif italic">
+            {photoCount === 0
+              ? "No photos remembered here yet."
+              : photoCount === 1
+                ? "1 photo remembered here."
+                : `${photoCount} photos remembered here.`}
+            {canDirectEdit && photoCount === 0 && (
+              <> Add a photo to the tree's living memory.</>
+            )}
+          </p>
 
           {showHistory && (
             <Suspense fallback={<div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary/40" /></div>}>
