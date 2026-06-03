@@ -183,7 +183,7 @@ const TreeDetailPage = () => {
   // like one place with two ways of looking.
   const [memoryMode, setMemoryMode] = useState<string>(() => {
     const tabParam = searchParams.get("tab");
-    return tabParam === "offerings" ? "list" : "living";
+    return tabParam === "living" ? "living" : "list";
   });
   const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
