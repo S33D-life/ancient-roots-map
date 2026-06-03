@@ -268,6 +268,7 @@ const TreeDetailPage = () => {
   const speciesResolution = useSpeciesResolution(tree?.species, (tree as any)?.species_key);
   const { data: treeContributions = [] } = useTreeContributions(id);
   const { role: editRole, canDirectEdit, loading: editPermLoading, userId: editUserId } = useTreeEditPermission(id);
+  const [tendPanelOpen, setTendPanelOpen] = useState(false);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
     treeId: id,
     treeSpecies: tree?.species || "",
