@@ -109,10 +109,9 @@ export default function SpeciesCard({
 
         {/* Identify by — primary clue, most prominent */}
         <div
-          className={`rounded-xl border border-amber-900/15 space-y-1 ${
+          className={`rounded-xl border border-amber-900/15 dark:border-amber-200/12 space-y-1 bg-[hsl(45_38%_97%/0.85)] dark:bg-[hsl(95_18%_15%/0.7)] ${
             familyMode ? "p-3" : "p-2.5"
           }`}
-          style={{ background: "hsl(45 38% 97% / 0.85)" }}
         >
           <div className="flex items-center gap-1.5">
             <Eye className="w-3 h-3 text-amber-900/48 dark:text-amber-200/48 shrink-0" />
