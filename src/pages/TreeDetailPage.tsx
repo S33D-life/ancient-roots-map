@@ -173,7 +173,16 @@ const TreeDetailPage = () => {
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>(() => {
     const tabParam = searchParams.get("tab");
-    return tabParam === "encounters" || tabParam === "offerings" ? tabParam : "overview";
+    if (tabParam === "encounters") return "encounters";
+    if (tabParam === "offerings" || tabParam === "ethereal" || tabParam === "memory") return "memory";
+    return "overview";
+  });
+  // Memory sub-mode: "living" = Ethereal canopy, "list" = catalogued offerings.
+  // Both belong to the single "Memory" tab so the tree's remembering feels
+  // like one place with two ways of looking.
+  const [memoryMode, setMemoryMode] = useState<string>(() => {
+    const tabParam = searchParams.get("tab");
+    return tabParam === "offerings" ? "list" : "living";
   });
   const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
