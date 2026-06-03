@@ -19,11 +19,8 @@ const QUEST_SEEDS = [
 export default function QuestPathStrip() {
   return (
     <section
-      className="rounded-2xl border border-amber-900/14 p-5 space-y-4"
-      style={{
-        background: "hsl(45 35% 95% / 0.75)",
-        boxShadow: "inset 0 1px 0 hsl(48 40% 98% / 0.6)",
-      }}
+      className="rounded-2xl border border-amber-900/14 dark:border-amber-200/12 p-5 space-y-4 bg-[hsl(45_35%_95%/0.75)] dark:bg-[hsl(80_16%_13%/0.75)]
+        shadow-[inset_0_1px_0_hsl(48_40%_98%/0.6)] dark:shadow-[inset_0_1px_0_hsl(48_25%_22%/0.25)]"
     >
       <header className="flex items-start justify-between gap-3">
         <div>
@@ -47,7 +44,7 @@ export default function QuestPathStrip() {
         {QUEST_SEEDS.map((q) => (
           <li
             key={q.title}
-            className="flex items-start gap-2.5 rounded-xl border border-amber-900/10 bg-card/45 p-3"
+            className="flex items-start gap-2.5 rounded-xl border border-amber-900/10 dark:border-amber-200/10 bg-card/45 dark:bg-[hsl(95_18%_15%)]/55 p-3"
           >
             <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/18 shrink-0">
               <Compass className="w-3.5 h-3.5 text-primary/70" />

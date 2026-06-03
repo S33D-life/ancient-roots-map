@@ -44,8 +44,8 @@ export default function SpeciesCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
       className={[
-        "group relative rounded-2xl overflow-hidden border bg-gradient-to-br from-[hsl(45_45%_96%)] via-[hsl(40_35%_93%)] to-[hsl(80_25%_92%)] dark:from-amber-950/15 dark:via-card/40 dark:to-emerald-950/10 transition-all duration-300",
-        highlighted ? "border-amber-500/55 ring-2 ring-amber-500/30" : "border-amber-900/15",
+        "group relative rounded-2xl overflow-hidden border bg-gradient-to-br from-[hsl(45_45%_96%)] via-[hsl(40_35%_93%)] to-[hsl(80_25%_92%)] dark:from-[hsl(95_18%_12%)] dark:via-[hsl(80_16%_14%)] dark:to-[hsl(95_20%_11%)] transition-all duration-300",
+        highlighted ? "border-amber-500/55 ring-2 ring-amber-500/30" : "border-amber-900/15 dark:border-amber-200/12",
         dimmed ? "opacity-40" : "opacity-100",
       ].join(" ")}
       style={{
@@ -67,7 +67,7 @@ export default function SpeciesCard({
 
       {/* specimen plate */}
       <div
-        className={`relative flex items-center justify-center border-b border-amber-900/12 bg-[hsl(45_40%_94%)]/55 dark:bg-card/30 ${
+        className={`relative flex items-center justify-center border-b border-amber-900/12 dark:border-amber-200/10 bg-[hsl(45_40%_94%)]/55 dark:bg-[hsl(95_18%_10%)]/55 ${
           familyMode ? "h-28" : "h-20"
         }`}
       >
@@ -109,10 +109,9 @@ export default function SpeciesCard({
 
         {/* Identify by — primary clue, most prominent */}
         <div
-          className={`rounded-xl border border-amber-900/15 space-y-1 ${
+          className={`rounded-xl border border-amber-900/15 dark:border-amber-200/12 space-y-1 bg-[hsl(45_38%_97%/0.85)] dark:bg-[hsl(95_18%_15%/0.7)] ${
             familyMode ? "p-3" : "p-2.5"
           }`}
-          style={{ background: "hsl(45 38% 97% / 0.85)" }}
         >
           <div className="flex items-center gap-1.5">
             <Eye className="w-3 h-3 text-amber-900/48 dark:text-amber-200/48 shrink-0" />

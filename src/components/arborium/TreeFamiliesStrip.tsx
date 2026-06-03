@@ -37,10 +37,9 @@ export default function TreeFamiliesStrip() {
         {FAMILIES.map((f) => (
           <div
             key={f.name}
-            className="relative rounded-2xl border border-amber-900/15 bg-[hsl(45_35%_96%)]/70 p-3.5 flex flex-col gap-1.5"
-            style={{
-              boxShadow: "inset 0 1px 0 hsl(48 40% 98% / 0.7), 0 3px 12px -6px hsl(40 30% 25% / 0.1)",
-            }}
+            className="relative rounded-2xl border border-amber-900/15 dark:border-amber-200/12 bg-[hsl(45_35%_96%)]/70 dark:bg-[hsl(80_16%_13%)]/75 p-3.5 flex flex-col gap-1.5
+              shadow-[inset_0_1px_0_hsl(48_40%_98%/0.7),0_3px_12px_-6px_hsl(40_30%_25%/0.1)]
+              dark:shadow-[inset_0_1px_0_hsl(48_25%_22%/0.25),0_4px_14px_-8px_hsl(0_0%_0%/0.55)]"
           >
             <span className="text-2xl leading-none select-none" aria-hidden>{f.emoji}</span>
             <div>
