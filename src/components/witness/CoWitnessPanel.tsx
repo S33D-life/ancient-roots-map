@@ -143,20 +143,22 @@ export default function CoWitnessPanel({
         Co-Witness
       </Button>
 
-      <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-lg tracking-wide flex items-center gap-2">
-              <Eye className="w-5 h-5 text-primary" />
-              {isWitnessed
-                ? "Witnessed! 🌿"
-                : isJoined
-                  ? "Confirm Together"
-                  : isWaiting
-                    ? "Awaiting Second Warden"
-                    : "Co-Witness Scan"}
-            </DialogTitle>
-          </DialogHeader>
+      <TreeAnchoredSheet
+        open={open}
+        onOpenChange={(v) => !v && handleClose()}
+        title={
+          <span className="font-serif text-lg tracking-wide flex items-center gap-2">
+            <Eye className="w-5 h-5 text-primary" />
+            {isWitnessed
+              ? "Witnessed! 🌿"
+              : isJoined
+                ? "Confirm Together"
+                : isWaiting
+                  ? "Awaiting Second Warden"
+                  : "Co-Witness Scan"}
+          </span>
+        }
+      >
 
           <AnimatePresence mode="wait">
             {/* Error state */}
