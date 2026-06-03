@@ -44,7 +44,7 @@ export default function QuestPathStrip() {
         {QUEST_SEEDS.map((q) => (
           <li
             key={q.title}
-            className="flex items-start gap-2.5 rounded-xl border border-amber-900/10 bg-card/45 p-3"
+            className="flex items-start gap-2.5 rounded-xl border border-amber-900/10 dark:border-amber-200/10 bg-card/45 dark:bg-[hsl(95_18%_15%)]/55 p-3"
           >
             <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/18 shrink-0">
               <Compass className="w-3.5 h-3.5 text-primary/70" />
