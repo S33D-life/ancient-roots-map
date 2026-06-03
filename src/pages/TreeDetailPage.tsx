@@ -1171,6 +1171,8 @@ const TreeDetailPage = () => {
                       loading={editPermLoading}
                       onProposeEdit={() => setProposeEditOpen(true)}
                       onTreeUpdated={(updated) => setTree(updated)}
+                      editOpen={tendPanelOpen}
+                      onEditOpenChange={setTendPanelOpen}
                     />
                   </Suspense>
 
