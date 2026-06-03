@@ -1036,6 +1036,8 @@ const TreeDetailPage = () => {
                   }}
                 />
               </TabsContent>
+            </Tabs>
+          </TabsContent>
 
 
           {/* ── OVERVIEW TAB ── */}
