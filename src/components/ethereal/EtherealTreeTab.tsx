@@ -509,7 +509,9 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           .et-breath,
           .et-node-glow,
           .et-node-core,
-          .et-root-pulse circle { animation: none !important; }
+          .et-root-pulse circle,
+          .et-anchor-ring,
+          .et-anchor-halo { animation: none !important; }
           .et-root-pulse { display: none; }
         }
       `}</style>
