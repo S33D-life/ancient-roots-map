@@ -316,8 +316,26 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
         {activeFilter.hint}
       </p>
 
+      {/* Onboarding whisper — first visit only, dismissible */}
+      {showOnboarding && (
+        <button
+          type="button"
+          onClick={dismissOnboarding}
+          className="w-full text-left rounded-lg border border-primary/25 bg-primary/5 px-3 py-2.5 animate-fade-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          aria-label="Dismiss introduction"
+        >
+          <p className="text-[12px] font-serif italic text-primary/85 leading-snug">
+            The archive remembers. The Ethereal Tree lives.
+          </p>
+          <p className="mt-1 text-[10.5px] font-serif italic text-muted-foreground/80 leading-snug">
+            Offerings rest in the branches. Whispers travel through the roots.
+          </p>
+        </button>
+      )}
+
       {/* Canvas */}
       <div className="relative w-full rounded-xl overflow-hidden border border-border/40 bg-gradient-to-b from-[hsl(80_15%_8%)] via-[hsl(70_12%_11%)] to-[hsl(40_18%_8%)]">
+
         <svg
           viewBox="0 0 400 600"
           className="w-full h-auto block"
