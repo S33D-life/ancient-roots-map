@@ -1542,11 +1542,24 @@ const TreeDetailPage = () => {
                           <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
                         ) : (
                           <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                            {sortOfferings(getOfferingsByType(type)).map((offering) => (
-                              <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                                <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
-                              </motion.div>
-                            ))}
+                            {sortOfferings(getOfferingsByType(type)).map((offering) => {
+                              const isHighlighted = highlightedOfferingId === offering.id;
+                              return (
+                                <motion.div
+                                  key={offering.id}
+                                  data-offering-id={offering.id}
+                                  variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+                                  transition={{ duration: 0.35, ease: "easeOut" }}
+                                  className={cn(
+                                    "rounded-xl transition-shadow duration-700",
+                                    isHighlighted &&
+                                      "ring-2 ring-primary/60 shadow-[0_0_28px_-4px_hsl(45_85%_60%/0.55)] animate-fade-in"
+                                  )}
+                                >
+                                  <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
+                                </motion.div>
+                              );
+                            })}
                           </motion.div>
                         )}
                       </TabsContent>
