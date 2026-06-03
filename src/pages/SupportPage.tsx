@@ -445,7 +445,7 @@ const SupportPage = () => {
           <TabsList className="w-full grid grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl">
             <TabsTrigger value="give" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
               <Heart className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Support</span>
+              <span className="hidden sm:inline">Give</span>
               <span className="sm:hidden">Give</span>
             </TabsTrigger>
             <TabsTrigger value="partners" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
