@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TreeDeciduous, BookOpen, Leaf, Crown, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag-small.webp";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
+import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
 import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -208,6 +209,9 @@ const Header = () => {
                   }}
                 />
               </button>
+
+              {/* MoonGlyph — the shared rhythm seal. Tap → Cycle Trunk. */}
+              <MoonGlyph variant="seal" />
 
               {/* Mobile page-context label — visible only on mobile when not on home */}
               {pageContext && (

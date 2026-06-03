@@ -16,6 +16,7 @@ import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 import { ROOM_ROUTE_MAP } from "@/config/heartwoodRooms";
+import MoonGlyph from "@/components/rhythm/MoonGlyph";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
@@ -68,12 +69,13 @@ const HeartwoodLanding = () => {
             The living centre. All rooms branch from the Heart.
           </p>
           <p
-            className="relative font-serif text-sm leading-relaxed max-w-md mb-8"
+            className="relative font-serif text-sm leading-relaxed max-w-md mb-4"
             style={{ color: 'hsl(38 35% 65% / 0.55)' }}
           >
             This is where the fire burns quietly — where your journey is remembered,
             your offerings are kept, and the grove grows from every heart that visits.
           </p>
+          <MoonGlyph variant="whisper" className="relative mb-8" />
         </div>
 
         <style>{`
