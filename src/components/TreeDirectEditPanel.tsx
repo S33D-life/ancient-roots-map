@@ -78,6 +78,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
   const [name, setName] = useState(tree.name);
   const [species, setSpecies] = useState(tree.species);
   const [description, setDescription] = useState(tree.description || "");
+  const [loreText, setLoreText] = useState(tree.lore_text || "");
   const [estimatedAge, setEstimatedAge] = useState(tree.estimated_age?.toString() || "");
   const [lat, setLat] = useState(tree.latitude?.toString() || "");
   const [lng, setLng] = useState(tree.longitude?.toString() || "");
@@ -95,6 +96,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
       setName(tree.name);
       setSpecies(tree.species);
       setDescription(tree.description || "");
+      setLoreText(tree.lore_text || "");
       setEstimatedAge(tree.estimated_age?.toString() || "");
       setLat(tree.latitude?.toString() || "");
       setLng(tree.longitude?.toString() || "");
@@ -110,6 +112,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
     if (name.trim() !== tree.name) changes.name = { old: tree.name, new: name.trim() };
     if (species.trim() !== tree.species) changes.species = { old: tree.species, new: species.trim() };
     if (description.trim() !== (tree.description || "")) changes.description = { old: tree.description, new: description.trim() || null };
+    if (loreText.trim() !== (tree.lore_text || "")) changes.lore_text = { old: tree.lore_text ?? null, new: loreText.trim() || null };
     const ageNum = estimatedAge ? parseInt(estimatedAge) : null;
     if (ageNum !== tree.estimated_age) changes.estimated_age = { old: tree.estimated_age, new: ageNum };
     const newLat = lat ? parseFloat(lat) : null;
@@ -117,7 +120,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
     if (newLat !== tree.latitude) changes.latitude = { old: tree.latitude, new: newLat };
     if (newLng !== tree.longitude) changes.longitude = { old: tree.longitude, new: newLng };
     return changes;
-  }, [name, species, description, estimatedAge, lat, lng, tree]);
+  }, [name, species, description, loreText, estimatedAge, lat, lng, tree]);
 
   const changes = buildChanges();
   const hasChanges = Object.keys(changes).length > 0;
@@ -277,6 +280,21 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
                 className="font-serif text-sm min-h-[80px]"
                 maxLength={2000}
               />
+            </div>
+
+            {/* Story & Lore */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-serif text-muted-foreground">The Tree's Story</Label>
+              <Textarea
+                value={loreText}
+                onChange={(e) => setLoreText(e.target.value)}
+                className="font-serif text-sm min-h-[120px] leading-relaxed"
+                maxLength={5000}
+                placeholder="What is known, remembered, or felt about this tree…"
+              />
+              <p className="text-[11px] text-muted-foreground/70 font-serif italic leading-relaxed">
+                Share the story, history, or memory that helps this tree be known.
+              </p>
             </div>
 
             {/* Estimated Age */}
