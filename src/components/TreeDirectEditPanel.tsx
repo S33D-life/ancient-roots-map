@@ -120,7 +120,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
     if (newLat !== tree.latitude) changes.latitude = { old: tree.latitude, new: newLat };
     if (newLng !== tree.longitude) changes.longitude = { old: tree.longitude, new: newLng };
     return changes;
-  }, [name, species, description, estimatedAge, lat, lng, tree]);
+  }, [name, species, description, loreText, estimatedAge, lat, lng, tree]);
 
   const changes = buildChanges();
   const hasChanges = Object.keys(changes).length > 0;
