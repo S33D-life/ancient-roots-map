@@ -463,26 +463,23 @@ export default function SendWhisperModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 flex flex-col h-[100dvh] sm:h-auto max-h-[100dvh] sm:max-h-[90vh]">
-        <DialogHeader className="px-6 pt-6 pb-3 shrink-0 border-b border-border/30">
-          <div className="flex items-center gap-2">
-            <TreeDeciduous className="h-5 w-5 text-primary" />
-            <DialogTitle className="font-serif text-primary tracking-wide">
-              Send a Whisper Through This Tree
-            </DialogTitle>
-          </div>
-          <p className="text-sm text-muted-foreground font-serif mt-1">
-            Leave a message within <strong>{treeName}</strong>.
-          </p>
-          {contextLabel && (
-            <p className="text-xs text-muted-foreground/80 font-serif mt-1">
-              Context: {contextLabel}
-            </p>
-          )}
-        </DialogHeader>
-
-        <div className="space-y-5 px-6 py-4 flex-1 overflow-y-auto overscroll-contain">
+    <TreeAnchoredSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={
+        <span className="font-serif text-primary tracking-wide flex items-center gap-2">
+          <TreeDeciduous className="h-5 w-5 text-primary" />
+          Send a Whisper Through This Tree
+        </span>
+      }
+      subtitle={
+        <>
+          Leave a message within <strong>{treeName}</strong>.
+          {contextLabel && <span className="block mt-0.5 text-muted-foreground/80">Context: {contextLabel}</span>}
+        </>
+      }
+    >
+      <div className="space-y-5">
           {/* Step 1: Recipient */}
           <div className="space-y-3">
             <Label className="font-serif text-sm">Who can collect this whisper?</Label>
