@@ -29,6 +29,8 @@ const WisdomOfTheGrove = lazy(() => import("@/components/WisdomOfTheGrove").then
 const TetolBridge = lazy(() => import("@/components/TetolBridge"));
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 
+const BreathingChamber = lazy(() => import("@/components/BreathingChamber"));
+
 const ParticipationSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.ParticipationSection })));
 const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
@@ -87,11 +89,17 @@ const Index = () => {
           {/* ── CROWN — yOur Golden Dream ── */}
           <CrownSection />
 
+          {/* breath — seed beneath earth */}
+          <BreathingChamber whisper="Every root begins in silence." tone="soil" drift={-4} />
+
           {/* ── CANOPY — Council of Life ── */}
           <CanopySection />
 
           {/* ── TRUNK — HeARTwood Library ── */}
           <TrunkSection />
+
+          {/* breath — heartwood remembers */}
+          <BreathingChamber whisper="The forest remembers slowly." tone="wood" drift={6} />
         </Suspense>
 
         {/* ── SEED — S33D Gateway Hero (the central seed layer) ── */}
@@ -101,6 +109,11 @@ const Index = () => {
         {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
         <Suspense fallback={<SectionShimmer />}>
           <ForestInteractionLayers />
+        </Suspense>
+
+        {/* breath — light gathers */}
+        <Suspense fallback={null}>
+          <BreathingChamber whisper="Light gathers patiently in the canopy." tone="light" drift={-3} />
         </Suspense>
 
         {/* ── Discovery shortcuts — Countries & Hives ── */}

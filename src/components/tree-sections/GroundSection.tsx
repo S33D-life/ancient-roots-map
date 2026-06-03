@@ -70,13 +70,23 @@ const GroundSection = () => {
             The forest opens in two directions
           </DepthRevealText>
 
-          {/* Two pathways */}
+          {/* Two pathways — wrapped in a soft lantern halo (Arborium threshold) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 3.4, duration: 1 }}
-            className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mt-1"
+            className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mt-1 px-6 py-5"
           >
+            {/* warm lantern halo */}
+            <div
+              className="absolute inset-0 -inset-x-4 rounded-[2rem] pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(ellipse 70% 90% at 50% 50%, hsl(38 55% 60% / 0.10), hsl(32 40% 35% / 0.05) 55%, transparent 80%)",
+                filter: "blur(14px)",
+              }}
+              aria-hidden
+            />
             {/* DOWN — Explore the Roots */}
             <button
               onClick={scrollToRoots}
@@ -143,9 +153,9 @@ const GroundSection = () => {
       </div>
 
       {/* ── Identity statement — below TEOTAG, grounding the user ── */}
-      <div className="relative z-20 py-10 md:py-14">
+      <div className="relative z-20 py-14 md:py-20">
         <div
-          className="container mx-auto px-4 text-center max-w-3xl space-y-5"
+          className="container mx-auto px-5 text-center max-w-3xl space-y-7 md:space-y-8"
           style={{ letterSpacing: depth.letterSpacing }}
         >
           <DepthRevealText

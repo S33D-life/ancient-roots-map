@@ -167,14 +167,14 @@ const GRADIENTS: Record<SectionTheme, string> = {
   `,
 };
 
-/** Vignette intensity per zone */
+/** Vignette intensity per zone — deeper at the top (soil), softer toward the crown (light) */
 const VIGNETTE: Record<SectionTheme, string> = {
-  roots: "inset 0 0 200px 80px hsl(20 15% 4% / 0.5)",
-  ground: "inset 0 0 150px 60px hsl(var(--background) / 0.3)",
-  threshold: "inset 0 0 180px 70px hsl(var(--background) / 0.4)",
-  trunk: "inset 0 0 150px 60px hsl(var(--background) / 0.35)",
-  canopy: "inset 0 0 120px 50px hsl(var(--background) / 0.25)",
-  crown: "inset 0 0 100px 40px hsl(var(--background) / 0.2)",
+  roots:     "inset 0 0 220px 90px hsl(20 15% 4% / 0.55), inset 80px 0 120px -40px hsl(28 18% 8% / 0.18), inset -80px 0 120px -40px hsl(28 18% 8% / 0.18)",
+  ground:    "inset 0 0 170px 70px hsl(var(--background) / 0.35), inset 60px 0 100px -40px hsl(28 20% 14% / 0.10), inset -60px 0 100px -40px hsl(28 20% 14% / 0.10)",
+  threshold: "inset 0 0 200px 80px hsl(var(--background) / 0.45)",
+  trunk:     "inset 0 0 170px 70px hsl(var(--background) / 0.40), inset 70px 0 110px -40px hsl(32 22% 12% / 0.12), inset -70px 0 110px -40px hsl(32 22% 12% / 0.12)",
+  canopy:    "inset 0 0 140px 60px hsl(var(--background) / 0.28), inset 60px 0 100px -40px hsl(150 18% 14% / 0.10), inset -60px 0 100px -40px hsl(150 18% 14% / 0.10)",
+  crown:     "inset 0 0 110px 45px hsl(var(--background) / 0.22), inset 50px 0 90px -40px hsl(45 25% 18% / 0.08), inset -50px 0 90px -40px hsl(45 25% 18% / 0.08)",
 };
 
 /** CSS animation class per zone (mapped to keyframes in App.css) */
