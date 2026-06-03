@@ -112,6 +112,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
     if (name.trim() !== tree.name) changes.name = { old: tree.name, new: name.trim() };
     if (species.trim() !== tree.species) changes.species = { old: tree.species, new: species.trim() };
     if (description.trim() !== (tree.description || "")) changes.description = { old: tree.description, new: description.trim() || null };
+    if (loreText.trim() !== (tree.lore_text || "")) changes.lore_text = { old: tree.lore_text ?? null, new: loreText.trim() || null };
     const ageNum = estimatedAge ? parseInt(estimatedAge) : null;
     if (ageNum !== tree.estimated_age) changes.estimated_age = { old: tree.estimated_age, new: ageNum };
     const newLat = lat ? parseFloat(lat) : null;
