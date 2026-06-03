@@ -60,8 +60,15 @@ export default function StewardToolsSection({
   loading,
   onProposeEdit,
   onTreeUpdated,
+  editOpen: editOpenProp,
+  onEditOpenChange,
 }: Props) {
-  const [editOpen, setEditOpen] = useState(false);
+  const [editOpenInternal, setEditOpenInternal] = useState(false);
+  const editOpen = editOpenProp ?? editOpenInternal;
+  const setEditOpen = (open: boolean) => {
+    if (onEditOpenChange) onEditOpenChange(open);
+    else setEditOpenInternal(open);
+  };
   const [showHistory, setShowHistory] = useState(false);
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
