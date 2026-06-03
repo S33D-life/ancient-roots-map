@@ -17,9 +17,7 @@ import {
 } from "@/hooks/use-mycelial-whispers";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import { emitMycelialThread } from "@/lib/mycelial-network";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
+import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
