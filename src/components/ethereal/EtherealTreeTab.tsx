@@ -400,24 +400,58 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
 
       {/* Inline motion styles — scoped to ethereal nodes */}
       <style>{`
+        /* Subconscious tree breathing — opacity only, no transform, so
+           layout stays absolutely still. ~16s inhale/exhale. */
+        .et-breath { animation: et-breathe 16s ease-in-out infinite; }
+        @keyframes et-breathe {
+          0%, 100% { opacity: 0.92; }
+          50%      { opacity: 1; }
+        }
+
+        /* Per-node ambient pulse */
         .et-node-glow { animation: et-pulse 6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-        .et-zone-canopy .et-node-core, .et-zone-canopy.et-node-glow { animation-name: et-drift; animation-duration: 7s; }
-        .et-zone-roots .et-node-glow { animation-name: et-travel; animation-duration: 9s; }
+
+        /* Hanging memory motion — gentle sway in branches/canopy/upper/mid */
+        .et-zone-canopy .et-node-core,
+        .et-zone-canopy.et-node-glow,
+        .et-zone-upper  .et-node-core,
+        .et-zone-upper.et-node-glow,
+        .et-zone-mid    .et-node-core,
+        .et-zone-mid.et-node-glow {
+          animation-name: et-sway;
+          animation-duration: 11s;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+          transform-origin: center;
+          transform-box: fill-box;
+        }
+        .et-zone-upper .et-node-core, .et-zone-upper.et-node-glow { animation-duration: 13s; }
+        .et-zone-mid   .et-node-core, .et-zone-mid.et-node-glow   { animation-duration: 9s; }
+
+        /* Whisper traveller glow — fade in/out so pulses appear and dissolve. */
+        .et-root-pulse circle { animation: et-pulse-fade 14s ease-in-out infinite; }
+
         @keyframes et-pulse {
           0%, 100% { opacity: 0.55; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.25); }
+          50%      { opacity: 1;    transform: scale(1.18); }
         }
-        @keyframes et-drift {
-          0%, 100% { transform: translateY(0); opacity: 0.6; }
-          50% { transform: translateY(-3px); opacity: 1; }
+        @keyframes et-sway {
+          0%, 100% { transform: translate(0, 0); }
+          25%      { transform: translate(0.8px, -1.2px); }
+          50%      { transform: translate(0, -2px); }
+          75%      { transform: translate(-0.8px, -1.2px); }
         }
-        @keyframes et-travel {
-          0% { opacity: 0.2; transform: translateX(-4px); }
-          50% { opacity: 0.9; transform: translateX(0); }
-          100% { opacity: 0.2; transform: translateX(4px); }
+        @keyframes et-pulse-fade {
+          0%, 100% { opacity: 0; }
+          10%, 90% { opacity: 0.85; }
         }
+
         @media (prefers-reduced-motion: reduce) {
-          .et-node-glow, .et-node-core { animation: none !important; }
+          .et-breath,
+          .et-node-glow,
+          .et-node-core,
+          .et-root-pulse circle { animation: none !important; }
+          .et-root-pulse { display: none; }
         }
       `}</style>
 
