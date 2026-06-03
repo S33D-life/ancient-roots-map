@@ -89,7 +89,7 @@ const faqs = [
   { q: "What are Offerings?", a: "Offerings are contributions you make to a tree — photos, notes, birdsong recordings, or seasonal observations. They enrich the living record of each tree." },
   { q: "Do I need to sign in?", a: "Browsing the map and atlas is open to everyone. To add trees, make offerings, or earn Hearts you'll need a free account." },
   { q: "What are Hearts?", a: "S33D Hearts are the commons currency of the ecosystem. You earn them by mapping ancient trees, making offerings, attending Council of Life gatherings, and other stewardship actions." },
-  { q: "Where can I see my contributions?", a: "Visit your Hearth (dashboard) to see your trees, offerings, Hearts balance, and activity history." },
+  { q: "Where can I see my contributions?", a: "Visit your Hearth to see your trees, offerings, Hearts balance, and activity history." },
 ];
 
 /* ── Animation helpers ──────────────────────────────────────── */
