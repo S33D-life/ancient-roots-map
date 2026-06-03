@@ -42,7 +42,7 @@ export default function LifeGroveInvitePage() {
   });
 
   const [contributorName, setContributorName] = useState("");
-  const [contributorEmail, setContributorEmail] = useState("");
+
   const [offeringType, setOfferingType] = useState<OfferingType>("story");
   const [title, setTitle] = useState("");
   const [bodyText, setBodyText] = useState("");
