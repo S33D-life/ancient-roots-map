@@ -119,6 +119,19 @@ const TreeCard = ({
   const encounterCount = cluster?.encounters?.length ?? 0;
   const wandererCount = cluster?.wandererCount ?? 0;
 
+  // Earliest encounter date — used for the "Known since…" memory line.
+  const knownSince = useMemo(() => {
+    const dates = cluster?.encounters
+      ?.map((e) => e.created_at)
+      .filter(Boolean)
+      .sort();
+    if (!dates || dates.length === 0) return null;
+    const d = new Date(dates[0]);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  }, [cluster]);
+
+
   const handleClick = () => onSelect?.(tree);
 
   const handleMapNav = (e: React.MouseEvent) => {
