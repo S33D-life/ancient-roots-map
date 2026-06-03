@@ -123,21 +123,17 @@ export default function TreeRelationshipCard({
             />
           </div>
 
-          {/* Requirements */}
+          {/* Requirements — reflective readout only; actions live in the canopy above */}
           {progress.nextRequirements && progress.nextRequirements.length > 0 && (
             <div className="space-y-1 pt-1">
               {progress.nextRequirements.map((req, i) => (
-                <button
+                <div
                   key={i}
-                  className="flex items-center gap-1.5 text-[10px] font-serif text-muted-foreground hover:text-primary/70 transition-colors w-full text-left"
-                  onClick={() => {
-                    if (req.includes("Co-witness") && onCoWitness) onCoWitness();
-                    else if (req.includes("offering") && onMakeOffering) onMakeOffering();
-                  }}
+                  className="flex items-center gap-1.5 text-[10px] font-serif text-muted-foreground/80 w-full text-left"
                 >
-                  <ChevronRight className="w-2.5 h-2.5 shrink-0" />
+                  <ChevronRight className="w-2.5 h-2.5 shrink-0 opacity-60" />
                   {req}
-                </button>
+                </div>
               ))}
             </div>
           )}
