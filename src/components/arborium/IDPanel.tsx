@@ -190,7 +190,7 @@ export default function IDPanel({
                 <div className="flex flex-wrap gap-2 pt-0.5">
                   <Link
                     to={ROUTES.MAP}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-serif border border-amber-900/22 hover:border-amber-900/38 bg-[hsl(48_40%_96%)]/80 hover:bg-[hsl(46_44%_93%)]/90 rounded-xl px-3.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-serif border border-amber-900/22 dark:border-amber-200/20 hover:border-amber-900/38 dark:hover:border-amber-200/35 bg-[hsl(48_40%_96%)]/80 dark:bg-[hsl(95_18%_14%)]/75 hover:bg-[hsl(46_44%_93%)]/90 dark:hover:bg-[hsl(80_18%_16%)]/85 rounded-xl px-3.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <MapPin className="w-3 h-3 text-amber-700/60" aria-hidden />
                     View nearby trees
