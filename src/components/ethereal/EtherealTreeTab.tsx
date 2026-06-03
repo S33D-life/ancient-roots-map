@@ -483,6 +483,28 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           10%, 90% { opacity: 0.85; }
         }
 
+        /* Ceremonial anchor — slow ring expansion + halo breath. Marks the
+           selected memory as visibly rooted in place while the sheet reads. */
+        .et-anchor-ring {
+          transform-origin: center;
+          transform-box: fill-box;
+          animation: et-anchor-ring 4.5s ease-out infinite;
+        }
+        .et-anchor-halo {
+          transform-origin: center;
+          transform-box: fill-box;
+          animation: et-anchor-halo 5s ease-in-out infinite;
+        }
+        @keyframes et-anchor-ring {
+          0%   { transform: scale(0.6); opacity: 0.9; }
+          70%  { transform: scale(1.4); opacity: 0;   }
+          100% { transform: scale(1.4); opacity: 0;   }
+        }
+        @keyframes et-anchor-halo {
+          0%, 100% { opacity: 0.45; transform: scale(0.95); }
+          50%      { opacity: 0.75; transform: scale(1.08); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .et-breath,
           .et-node-glow,
