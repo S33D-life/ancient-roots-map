@@ -50,7 +50,7 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "overview",        label: "Overview",    icon: <Eye className="w-3.5 h-3.5" /> },
   { key: "steward",         label: "Steward",     icon: <Telescope className="w-3.5 h-3.5" /> },
   { key: "system-map",      label: "System Map",  icon: <Network className="w-3.5 h-3.5" /> },
-  { key: "data-roots",      label: "Data Roots",  icon: <Database className="w-3.5 h-3.5" /> },
+  { key: "data-roots",      label: "Tap Roots",   icon: <Database className="w-3.5 h-3.5" /> },
   { key: "agent-garden",    label: "Agent Garden", icon: <Bot className="w-3.5 h-3.5" /> },
   { key: "code-grove",      label: "Code Grove",  icon: <Code className="w-3.5 h-3.5" /> },
   { key: "contract-shelf",  label: "Contracts",   icon: <FileText className="w-3.5 h-3.5" /> },
@@ -74,7 +74,7 @@ const ALTAR_GROUPS: {
 }[] = [
   {
     key: "pulse",
-    label: "System Pulse",
+    label: "Living Pulse",
     whisper: "How the forest breathes today",
     sections: ["overview"],
   },

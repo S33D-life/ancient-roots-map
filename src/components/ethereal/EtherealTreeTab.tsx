@@ -30,6 +30,32 @@ import type { TreeWhisper } from "@/hooks/use-whispers";
 
 type Zone = "canopy" | "upper" | "mid" | "trunk" | "roots" | "ground";
 
+/** Ceremonial label for a node — replaces the old monospace "kind" badge. */
+function ceremonialNodeLabel(kind: OfferingType | "whisper", zone: Zone): string {
+  if (kind === "whisper") return "Root Whisper";
+  if (kind === "song") return "Song in the Canopy";
+  if (kind === "story") return "Story Held in the Trunk";
+  if (kind === "book") return "Story Held in the Trunk";
+  if (kind === "photo") return "Photo Offering";
+  if (kind === "art") return "Art Offering";
+  if (kind === "poem") return "Poem in the Branches";
+  if (kind === "voice") return "Voice in the Branches";
+  if (kind === "prayer") return "Prayer in the Leaves";
+  return "Offering";
+}
+
+/** Ceremonial label for a zone — replaces the old monospace "zone" badge. */
+function zoneLabel(zone: Zone): string {
+  switch (zone) {
+    case "canopy": return "In the canopy";
+    case "upper": return "Upper branches";
+    case "mid": return "Middle branches";
+    case "trunk": return "In the trunk";
+    case "roots": return "In the roots";
+    case "ground": return "On the ground";
+  }
+}
+
 const ZONE_FOR_TYPE: Record<OfferingType, Zone> = {
   photo: "canopy",
   art: "canopy",
@@ -325,9 +351,6 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           aria-label="Dismiss introduction"
         >
           <p className="text-[12px] font-serif italic text-primary/85 leading-snug">
-            The archive remembers. The Ethereal Tree lives.
-          </p>
-          <p className="mt-1 text-[10.5px] font-serif italic text-muted-foreground/80 leading-snug">
             Offerings rest in the branches. Whispers travel through the roots.
           </p>
         </button>
@@ -665,14 +688,11 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           {activeNode && (
             <>
               <SheetHeader className="text-left">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="secondary" className="text-[10px] font-mono tracking-wider">
-                    {activeNode.kind}
-                  </Badge>
-                  <Badge variant="outline" className="text-[10px] font-mono tracking-wider opacity-60">
-                    {activeNode.zone}
-                  </Badge>
-                </div>
+                <p className="text-[10px] font-serif uppercase tracking-[0.22em] text-muted-foreground/70 mb-1">
+                  {ceremonialNodeLabel(activeNode.kind, activeNode.zone)}
+                  <span className="mx-1.5 text-muted-foreground/40">·</span>
+                  <span className="text-muted-foreground/55">{zoneLabel(activeNode.zone)}</span>
+                </p>
                 <SheetTitle className="font-serif">{activeNode.title}</SheetTitle>
                 {activeNode.subtitle && (
                   <SheetDescription className="font-serif italic">

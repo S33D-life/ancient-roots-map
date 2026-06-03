@@ -197,7 +197,7 @@ export const HEARTWOOD_ROOMS: HeartwoodRoom[] = [
   {
     key: "scrolls",
     label: "Scrolls & Records",
-    subtitle: "Institutional memory",
+    subtitle: "The remembered rings of the grove",
     route: "/library/scrolls",
     stage: "remember",
     access: "steward",
