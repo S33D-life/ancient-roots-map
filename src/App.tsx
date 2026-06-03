@@ -469,6 +469,9 @@ const App = () => {
                 <Route path="/telegram-handoff" element={<TelegramHandoffPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
+                {/* External portal redirects — keep direct links graceful */}
+                <Route path="/patronsportal" element={<PatronsPortalRedirect />} />
+                <Route path="/patronsportal/*" element={<PatronsPortalRedirect />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
