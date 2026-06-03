@@ -29,6 +29,8 @@ const WisdomOfTheGrove = lazy(() => import("@/components/WisdomOfTheGrove").then
 const TetolBridge = lazy(() => import("@/components/TetolBridge"));
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 
+const BreathingChamber = lazy(() => import("@/components/BreathingChamber"));
+
 const ParticipationSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.ParticipationSection })));
 const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
