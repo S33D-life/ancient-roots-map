@@ -19,7 +19,7 @@
  *   - No drag, no edit, no persistence. Reversible: delete this folder + the
  *     <TabsTrigger value="ethereal"> in TreeDetailPage.tsx.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
