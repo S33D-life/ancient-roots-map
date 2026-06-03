@@ -157,8 +157,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
       ? "Full of remembering."
       : "Brimming with lives.";
 
+  const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0];
+  const isAll = filter === "all";
+  const zoneAwake = (z: Zone) => isAll || activeFilter.zones.includes(z);
+  // Opacity helpers — "awake" zones brighten, others recede without disappearing.
+  const awake = (z: Zone, on = 1, off = 0.28) => (zoneAwake(z) ? on : off);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Filter ribbon */}
       <div className="flex flex-wrap gap-1.5 px-1">
         {FILTERS.map((f) => (
@@ -176,6 +182,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           </button>
         ))}
       </div>
+
+      {/* Metaphor hint — teaches the spatial language in one quiet line */}
+      <p
+        key={activeFilter.id}
+        className="px-2 text-[11px] font-serif italic text-primary/60 tracking-wide animate-fade-in"
+      >
+        {activeFilter.hint}
+      </p>
 
       {/* Canvas */}
       <div className="relative w-full rounded-xl overflow-hidden border border-border/40 bg-gradient-to-b from-[hsl(80_15%_8%)] via-[hsl(70_12%_11%)] to-[hsl(40_18%_8%)]">
@@ -206,10 +220,22 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           </defs>
 
           {/* Ambient ground glow */}
-          <ellipse cx="200" cy="455" rx="180" ry="30" fill="url(#et-ground)" />
+          <ellipse
+            cx="200" cy="455" rx="180" ry="30"
+            fill="url(#et-ground)"
+            style={{ opacity: awake("ground", 1, 0.4), transition: "opacity 900ms ease" }}
+          />
 
-          {/* Roots — gentle curves */}
-          <g stroke="hsl(40 25% 28%)" strokeWidth="1.2" fill="none" opacity="0.55">
+          {/* Roots — awaken with whispers */}
+          <g
+            stroke="hsl(160 35% 40%)"
+            strokeWidth={zoneAwake("roots") ? 1.4 : 1.1}
+            fill="none"
+            style={{
+              opacity: awake("roots", 0.75, 0.32),
+              transition: "opacity 900ms ease, stroke-width 900ms ease",
+            }}
+          >
             <path d="M200 420 Q 160 470 80 540" />
             <path d="M200 420 Q 240 470 320 540" />
             <path d="M200 420 Q 200 490 200 580" />
@@ -219,16 +245,25 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             <path d="M200 420 Q 220 480 280 575" />
           </g>
 
-          {/* Trunk */}
+          {/* Trunk — awakens with stories */}
           <path
             d="M180 420 Q 175 350 185 290 Q 195 240 200 210 Q 205 240 215 290 Q 225 350 220 420 Z"
             fill="hsl(35 22% 16%)"
             stroke="hsl(40 30% 25%)"
             strokeWidth="0.8"
+            style={{ opacity: awake("trunk", 1, 0.55), transition: "opacity 900ms ease" }}
           />
 
-          {/* Branches */}
-          <g stroke="hsl(40 28% 22%)" strokeWidth="2" fill="none" opacity="0.85">
+          {/* Branches — awaken with canopy / upper / mid filters */}
+          <g
+            stroke="hsl(40 28% 22%)"
+            strokeWidth="2"
+            fill="none"
+            style={{
+              opacity: awake("canopy", 0.85, zoneAwake("upper") || zoneAwake("mid") ? 0.6 : 0.3),
+              transition: "opacity 900ms ease",
+            }}
+          >
             <path d="M200 240 Q 170 215 110 180" />
             <path d="M200 240 Q 230 215 290 180" />
             <path d="M200 215 Q 165 190 95 145" />
@@ -238,8 +273,15 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             <path d="M200 220 Q 250 200 325 200" />
           </g>
 
-          {/* Canopy halo */}
-          <ellipse cx="200" cy="140" rx="160" ry="80" fill="url(#et-glow)" opacity="0.35" />
+          {/* Canopy halo — brightens for photos / prayers / poems */}
+          <ellipse
+            cx="200" cy="140" rx="160" ry="80"
+            fill="url(#et-glow)"
+            style={{
+              opacity: zoneAwake("canopy") ? 0.5 : 0.18,
+              transition: "opacity 900ms ease",
+            }}
+          />
 
           {/* Nodes */}
           {visible.map((n) => {
