@@ -409,8 +409,8 @@ export default function CanopyCheckinModal({
                 </Button>
               </motion.div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </TreeAnchoredSheet>
 
         {rewardResult && !rewardResult.capped && (
           <RewardReceipt
