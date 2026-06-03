@@ -21,12 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
 import { useWitnessSession } from "@/hooks/use-witness-session";
 import { useToast } from "@/hooks/use-toast";
 import { WITNESS_BONUS_HEARTS } from "@/lib/witness-types";
