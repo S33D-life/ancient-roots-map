@@ -401,7 +401,7 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={isSelected ? baseRadius + 0.6 : baseRadius}
+                  r={highlighted ? baseRadius + 0.6 : baseRadius}
                   fill={isWhisper ? "hsl(160 70% 75%)" : "hsl(45 90% 78%)"}
                   className="et-node-core"
                 />
