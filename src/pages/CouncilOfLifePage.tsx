@@ -159,7 +159,7 @@ const CouncilOfLifePage = () => {
               caption="Upcoming gatherings, marked by moon and season."
               icon={<ScrollText className="w-4 h-4 text-primary" />}
               collapsible
-              defaultOpen
+              defaultOpen={false}
               tone="cool"
             >
               <CouncilCalendar />
