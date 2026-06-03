@@ -895,76 +895,83 @@ const TreeDetailPage = () => {
             · Tend ·
           </span>
         </div>
-        {tree && (
-          <Suspense fallback={null}>
-            <BeWithThisTreeCanopy
-              treeName={tree.name}
-              proximityGate={proximityGate}
-              meetingStatus={meetingStatus}
-              hasMet={Boolean(
-                relationship?.stats &&
-                  ((relationship.stats.totalVisits ?? 0) > 0 ||
-                    (relationship.stats.offeringCount ?? 0) > 0 ||
-                    (relationship.stats.coWitnessCount ?? 0) > 0 ||
-                    (relationship.stats.stewardshipActions ?? 0) > 0),
-              )}
-              treePresence={treeDetailPresence}
-              onMeetAgain={tryOpenCheckin}
-              onLeaveOffering={openOfferingGateway}
-              onSendThroughRoots={() => {
-                if (!userId) return;
-                setWhisperContextLabel(null);
-                setWhisperModalOpen(true);
-              }}
-              onTendTree={() => {
-                if (canDirectEdit) {
-                  setTendPanelOpen(true);
-                  return;
-                }
-                const el = document.getElementById("seeds-hearts-section");
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-            />
-          </Suspense>
-        )}
-
-        {/* ══════ Unified Seeds & Hearts Action Panel (Tend, continued) ══════
-            Lives above the section tabs as the single place to collect,
-            hang, and plant. Pulls TreeSeedsHeartsSection (reservoir + planter)
-            together with TreeArrivalPanel (collect / plant / whispers actions). */}
-        {id && tree && (
-          <section id="seeds-hearts-section" className="space-y-4 scroll-mt-20 mt-6">
-            <Suspense fallback={null}>
-              <TreeSeedsHeartsSection
-                treeId={id}
-                treeName={tree.name}
-                treeLat={tree.latitude}
-                treeLng={tree.longitude}
-                treeSpecies={tree.species}
-                userId={userId}
-                isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
-                isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-              />
-            </Suspense>
-            {userId && (
+        {tree && (() => {
+          const hasMet = Boolean(
+            relationship?.stats &&
+              ((relationship.stats.totalVisits ?? 0) > 0 ||
+                (relationship.stats.offeringCount ?? 0) > 0 ||
+                (relationship.stats.coWitnessCount ?? 0) > 0 ||
+                (relationship.stats.stewardshipActions ?? 0) > 0),
+          );
+          const isActive = meetingStatus === "active" || meetingStatus === "expiring";
+          const presenceRemainingMinutes = isActive && activeMeeting
+            ? Math.max(
+                0,
+                Math.round(
+                  (new Date(activeMeeting.expires_at).getTime() - Date.now()) / 60000,
+                ),
+              )
+            : null;
+          const isNearbyOrPresent =
+            proximityGate.status === "unlocked_present" ||
+            proximityGate.status === "unlocked_nearby" ||
+            proximityGate.status === "unlocked_grace";
+          // Stewardship grove revealed inline beneath "Tend This Tree".
+          // Only attached for users who have met the tree — strangers don't see it.
+          const tendGrove = id ? (
+            <div className="space-y-4">
               <Suspense fallback={null}>
-                <TreeArrivalPanel
-                  treeId={tree.id}
+                <TreeSeedsHeartsSection
+                  treeId={id}
                   treeName={tree.name}
-                  treeSpecies={tree.species || ""}
+                  treeLat={tree.latitude}
+                  treeLng={tree.longitude}
+                  treeSpecies={tree.species}
                   userId={userId}
-                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace"}
-                  isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
-                  onCheckIn={tryOpenCheckin}
-                  hideHeartsAndRoots
-                  onWhisperCollected={() => {
-                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
-                  }}
+                  isNearby={isNearbyOrPresent}
+                  isCheckedIn={isActive}
                 />
               </Suspense>
-            )}
-          </section>
-        )}
+              {userId && (
+                <Suspense fallback={null}>
+                  <TreeArrivalPanel
+                    treeId={tree.id}
+                    treeName={tree.name}
+                    treeSpecies={tree.species || ""}
+                    userId={userId}
+                    isNearby={isNearbyOrPresent}
+                    isCheckedIn={isActive}
+                    onCheckIn={tryOpenCheckin}
+                    hideHeartsAndRoots
+                    onWhisperCollected={() => {
+                      checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                    }}
+                  />
+                </Suspense>
+              )}
+            </div>
+          ) : null;
+          return (
+            <Suspense fallback={null}>
+              <BeWithThisTreeCanopy
+                treeName={tree.name}
+                proximityGate={proximityGate}
+                meetingStatus={meetingStatus}
+                hasMet={hasMet}
+                treePresence={treeDetailPresence}
+                presenceRemainingMinutes={presenceRemainingMinutes}
+                onMeetAgain={tryOpenCheckin}
+                onLeaveOffering={openOfferingGateway}
+                onSendThroughRoots={() => {
+                  if (!userId) return;
+                  setWhisperContextLabel(null);
+                  setWhisperModalOpen(true);
+                }}
+                tendChildren={hasMet ? tendGrove : null}
+              />
+            </Suspense>
+          );
+        })()}
 
         {/* ══════ EXPLORE — overview, encounters, memory ══════ */}
         <div className="mt-12 mb-3 text-center">
