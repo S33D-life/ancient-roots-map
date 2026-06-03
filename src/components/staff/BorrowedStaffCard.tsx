@@ -1,7 +1,9 @@
 /**
- * BorrowedStaffCard — small warm card showing the user's temporary staff
+ * BorrowedStaffCard — compact companion strip showing the user's temporary staff
  * identity assigned from the 144-pool. Anonymous users see a gentle
  * sign-in prompt; on assignment failure a soft fallback with retry.
+ *
+ * Emotional intent: accompaniment, not ownership. Quiet and warm.
  */
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,8 +16,8 @@ interface Props {
   className?: string;
 }
 
-const CARD_BASE =
-  "relative overflow-hidden rounded-2xl border bg-gradient-to-br from-card/70 to-card/40 p-5 backdrop-blur-sm";
+const STRIP_BASE =
+  "relative overflow-hidden rounded-xl border bg-gradient-to-br from-card/60 to-card/30 p-3.5 backdrop-blur-sm";
 
 export default function BorrowedStaffCard({
   staffRoomHref = "/library/staff-room",
@@ -26,17 +28,14 @@ export default function BorrowedStaffCard({
   if (isAnonymous) {
     return (
       <aside
-        className={[CARD_BASE, "border-primary/20", className ?? ""].join(" ")}
-        aria-label="Borrowed Staff — sign in"
+        className={[STRIP_BASE, "border-border/20", className ?? ""].join(" ")}
+        aria-label="Walking With — sign in"
       >
         <Eyebrow />
-        <p className="font-serif text-base text-foreground mt-1">
-          A staff is waiting to walk with you.
+        <p className="font-serif text-sm text-foreground/85 mt-0.5">
+          A companion is waiting to walk with you.
         </p>
-        <p className="font-serif text-xs italic text-muted-foreground/80 mt-1">
-          Sign in to receive your temporary guide for this part of the path.
-        </p>
-        <Button asChild size="sm" className="mt-3">
+        <Button asChild size="sm" variant="ghost" className="mt-2 h-7 text-xs px-2.5">
           <Link to="/auth">Sign in</Link>
         </Button>
       </aside>
@@ -46,18 +45,15 @@ export default function BorrowedStaffCard({
   if (error && !staff) {
     return (
       <aside
-        className={[CARD_BASE, "border-border/40", className ?? ""].join(" ")}
-        aria-label="Borrowed Staff unavailable"
+        className={[STRIP_BASE, "border-border/20", className ?? ""].join(" ")}
+        aria-label="Companion unavailable"
         role="status"
       >
         <Eyebrow />
-        <p className="font-serif text-base text-foreground mt-1">
-          The Staff Room is quiet for a moment.
+        <p className="font-serif text-sm text-foreground/85 mt-0.5">
+          The path is quiet for a moment.
         </p>
-        <p className="font-serif text-xs italic text-muted-foreground/80 mt-1">
-          Try again shortly — your borrowed staff will find you.
-        </p>
-        <Button size="sm" variant="outline" className="mt-3" onClick={() => void retry()}>
+        <Button size="sm" variant="ghost" className="mt-2 h-7 text-xs px-2.5" onClick={() => void retry()}>
           Try again
         </Button>
       </aside>
@@ -67,13 +63,13 @@ export default function BorrowedStaffCard({
   if (isLoading || !staff) {
     return (
       <aside
-        className={[CARD_BASE, "border-border/40", className ?? ""].join(" ")}
+        className={[STRIP_BASE, "border-border/20", className ?? ""].join(" ")}
         aria-busy="true"
-        aria-label="Borrowed Staff loading"
+        aria-label="Companion loading"
       >
         <Eyebrow />
-        <p className="font-serif text-sm italic text-muted-foreground/70 mt-2">
-          Choosing a staff for this part of your path…
+        <p className="font-serif text-xs italic text-muted-foreground/60 mt-1">
+          Choosing a companion for this part of your path…
         </p>
       </aside>
     );
@@ -81,50 +77,51 @@ export default function BorrowedStaffCard({
 
   return (
     <aside
-      className={[CARD_BASE, "border-primary/30", className ?? ""].join(" ")}
-      aria-label={`Borrowed Staff ${staff.staff_number}, ${staff.circle_type} Circle, ${staff.archetype_species}`}
+      className={[STRIP_BASE, "border-primary/15", className ?? ""].join(" ")}
+      aria-label={`Walking With ${staff.staff_number}, ${staff.circle_type} Circle, ${staff.archetype_species}`}
     >
+      {/* Soft moss glow — much smaller than before */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-50"
+        className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-30"
         style={{
           background:
-            "radial-gradient(circle, hsl(38 90% 70% / 0.35), transparent 70%)",
-          filter: "blur(20px)",
+            "radial-gradient(circle, hsl(38 80% 60% / 0.2), transparent 70%)",
+          filter: "blur(16px)",
         }}
       />
+
       <div className="relative">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2.5">
           <CircleSigil type={staff.circle_type} />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Eyebrow />
-              <span className="text-[9px] uppercase tracking-[0.25em] font-serif px-1.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
-                Borrowed
+              <span className="text-[9px] font-serif italic text-muted-foreground/50">
+                Borrowed companion
               </span>
             </div>
-            <h3 className="font-serif text-xl text-foreground mt-1 leading-tight">
-              Staff {staff.staff_number} · {staff.circle_type} Circle
+            <h3 className="font-serif text-base text-foreground mt-0.5 leading-tight">
+              {staff.archetype_species} · {staff.circle_type} Circle
             </h3>
-            <p className="font-serif text-xs uppercase tracking-[0.2em] text-muted-foreground/70 mt-1">
-              Circle {staff.circle_number} · {staff.archetype_species}
+            <p className="font-serif text-[10px] uppercase tracking-[0.18em] text-muted-foreground/50 mt-0.5">
+              Staff {staff.staff_number} · Circle {staff.circle_number}
             </p>
           </div>
         </div>
 
-        <p className="font-serif text-sm italic text-foreground/90 mt-3 leading-relaxed">
-          “Your Borrowed Staff has found you for this part of the path.”
-        </p>
-        <p className="font-serif text-sm italic text-muted-foreground/85 mt-1 leading-relaxed">
+        <p className="font-serif text-xs italic text-foreground/80 mt-2 leading-relaxed">
           “{staff.blessing}”
         </p>
-        <p className="font-serif text-[11px] text-muted-foreground/70 mt-3">
-          This staff walks with you until your permanent staff is earned, gifted,
-          or crafted.
-        </p>
-        <Button asChild variant="outline" size="sm" className="mt-4">
-          <Link to={staffRoomHref}>Enter Staff Room</Link>
-        </Button>
+
+        <div className="flex items-center justify-between mt-2">
+          <p className="font-serif text-[10px] text-muted-foreground/50 leading-snug max-w-[70%]">
+            This companion walks beside you while your deeper path unfolds.
+          </p>
+          <Button asChild variant="ghost" size="sm" className="h-6 text-[11px] px-2 -mr-1.5">
+            <Link to={staffRoomHref}>Staff Room</Link>
+          </Button>
+        </div>
       </div>
     </aside>
   );
@@ -132,26 +129,26 @@ export default function BorrowedStaffCard({
 
 function Eyebrow() {
   return (
-    <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
-      Borrowed Staff
+    <p className="font-serif text-[9px] uppercase tracking-[0.25em] text-muted-foreground/50">
+      Walking With
     </p>
   );
 }
 
 /** Tiny SVG sigil per circle type — yew sprig, oak leaf, mixed bloom. */
 function CircleSigil({ type }: { type: CircleType }) {
-  const ink = "hsl(var(--foreground) / 0.78)";
-  const gold = "hsl(38 90% 62%)";
-  const leaf = "hsl(95 45% 48%)";
-  const leafSoft = "hsl(95 45% 70%)";
-  const yewDark = "hsl(150 30% 32%)";
+  const ink = "hsl(var(--foreground) / 0.65)";
+  const gold = "hsl(38 90% 58%)";
+  const leaf = "hsl(95 40% 45%)";
+  const leafSoft = "hsl(95 40% 65%)";
+  const yewDark = "hsl(150 30% 30%)";
   return (
     <div
       aria-hidden
-      className="shrink-0 grid place-items-center rounded-full border border-primary/30 bg-card/70"
-      style={{ width: 44, height: 44 }}
+      className="shrink-0 grid place-items-center rounded-full border border-primary/20 bg-card/50"
+      style={{ width: 34, height: 34 }}
     >
-      <svg viewBox="0 0 32 32" width="30" height="30">
+      <svg viewBox="0 0 32 32" width="22" height="22">
         {type === "Yew" && (
           <g>
             <path d="M16 5 L 16 27" stroke={ink} strokeWidth="1.2" strokeLinecap="round" />
