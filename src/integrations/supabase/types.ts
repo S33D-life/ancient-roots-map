@@ -4084,7 +4084,6 @@ export type Database = {
       life_grove_offerings: {
         Row: {
           body_text: string | null
-          contributor_email: string | null
           contributor_name: string
           contributor_user_id: string | null
           created_at: string
@@ -4098,7 +4097,6 @@ export type Database = {
         }
         Insert: {
           body_text?: string | null
-          contributor_email?: string | null
           contributor_name: string
           contributor_user_id?: string | null
           created_at?: string
@@ -4112,7 +4110,6 @@ export type Database = {
         }
         Update: {
           body_text?: string | null
-          contributor_email?: string | null
           contributor_name?: string
           contributor_user_id?: string | null
           created_at?: string

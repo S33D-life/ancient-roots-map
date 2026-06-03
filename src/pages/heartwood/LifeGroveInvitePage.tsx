@@ -42,7 +42,7 @@ export default function LifeGroveInvitePage() {
   });
 
   const [contributorName, setContributorName] = useState("");
-  const [contributorEmail, setContributorEmail] = useState("");
+
   const [offeringType, setOfferingType] = useState<OfferingType>("story");
   const [title, setTitle] = useState("");
   const [bodyText, setBodyText] = useState("");
@@ -56,6 +56,7 @@ export default function LifeGroveInvitePage() {
   const submit = useMutation({
     mutationFn: async () => {
       if (!grove) throw new Error("This invitation could not be found.");
+      if (!user) throw new Error("Please sign in to leave an offering.");
       if (!consent) throw new Error("Please confirm you understand the offering will be added.");
       if (!contributorName.trim() && !user) throw new Error("Please share your name.");
       if (!bodyText.trim() && !mediaUrl.trim() && !title.trim()) {
@@ -71,9 +72,8 @@ export default function LifeGroveInvitePage() {
       }
       await createOffering({
         life_grove_id: grove.id,
-        contributor_user_id: user?.id ?? null,
-        contributor_name: contributorName.trim() || (user?.email ?? "A Wanderer"),
-        contributor_email: contributorEmail.trim() || user?.email || null,
+        contributor_user_id: user.id,
+        contributor_name: contributorName.trim() || (user.email ?? "A Wanderer"),
         offering_type: offeringType,
         title: title.trim() || null,
         body_text: bodyText.trim() || null,
@@ -94,6 +94,7 @@ export default function LifeGroveInvitePage() {
       toast(msg);
     },
   });
+
 
   const offeringMeta = useMemo(
     () => OFFERING_TYPES.find((o) => o.value === offeringType),
@@ -189,16 +190,7 @@ export default function LifeGroveInvitePage() {
                   placeholder={user?.email ?? "How shall the tree know you?"}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cEmail" className="font-serif text-sm">Email (optional)</Label>
-                <Input
-                  id="cEmail"
-                  type="email"
-                  value={contributorEmail}
-                  onChange={(e) => setContributorEmail(e.target.value)}
-                  placeholder="Only if you wish"
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
