@@ -1173,6 +1173,8 @@ const TreeDetailPage = () => {
                       onTreeUpdated={(updated) => setTree(updated)}
                       editOpen={tendPanelOpen}
                       onEditOpenChange={setTendPanelOpen}
+                      onTendPhotos={() => handleAddOffering("photo")}
+                      photoCount={photoOfferings.length}
                     />
                   </Suspense>
 
