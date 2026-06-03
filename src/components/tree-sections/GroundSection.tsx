@@ -153,9 +153,9 @@ const GroundSection = () => {
       </div>
 
       {/* ── Identity statement — below TEOTAG, grounding the user ── */}
-      <div className="relative z-20 py-10 md:py-14">
+      <div className="relative z-20 py-14 md:py-20">
         <div
-          className="container mx-auto px-4 text-center max-w-3xl space-y-5"
+          className="container mx-auto px-5 text-center max-w-3xl space-y-7 md:space-y-8"
           style={{ letterSpacing: depth.letterSpacing }}
         >
           <DepthRevealText
