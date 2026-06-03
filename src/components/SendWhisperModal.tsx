@@ -457,8 +457,8 @@ export default function SendWhisperModal({
               </Button>
             </motion.div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </TreeAnchoredSheet>
     );
   }
 
