@@ -512,13 +512,29 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           50%      { opacity: 0.75; transform: scale(1.08); }
         }
 
+        /* Linger handoff — faster, brighter pulse that fades as the
+           Offerings tab pulls focus. */
+        .et-anchor-ring-linger { animation: et-anchor-linger-ring 1.4s ease-out 1 forwards; }
+        .et-anchor-halo-linger { animation: et-anchor-linger-halo 1.4s ease-out 1 forwards; }
+        @keyframes et-anchor-linger-ring {
+          0%   { transform: scale(0.85); opacity: 0.95; }
+          60%  { transform: scale(1.6);  opacity: 0.5;  }
+          100% { transform: scale(2.1);  opacity: 0;    }
+        }
+        @keyframes et-anchor-linger-halo {
+          0%   { transform: scale(1);    opacity: 0.9; }
+          100% { transform: scale(1.35); opacity: 0;   }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .et-breath,
           .et-node-glow,
           .et-node-core,
           .et-root-pulse circle,
           .et-anchor-ring,
-          .et-anchor-halo { animation: none !important; }
+          .et-anchor-halo,
+          .et-anchor-ring-linger,
+          .et-anchor-halo-linger { animation: none !important; }
           .et-root-pulse { display: none; }
         }
       `}</style>
