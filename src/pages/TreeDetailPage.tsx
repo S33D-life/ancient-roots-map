@@ -227,6 +227,8 @@ const TreeDetailPage = () => {
   const stewardshipOfferings = useMemo(() => getByRole("stewardship"), [getByRole]);
   const anchoredOfferings = useMemo(() => getByRole("anchored"), [getByRole]);
   const [showAnchored, setShowAnchored] = useState(false);
+  // Brief highlight ring on an offering card when arriving from the Ethereal Tree.
+  const [highlightedOfferingId, setHighlightedOfferingId] = useState<string | null>(null);
   // Derived: photo offerings (memoized so deep-link effect deps stay stable)
   const photoOfferings = useMemo(
     () => getOfferingsByType("photo").filter((o) => o.media_url),
