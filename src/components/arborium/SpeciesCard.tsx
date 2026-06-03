@@ -67,7 +67,7 @@ export default function SpeciesCard({
 
       {/* specimen plate */}
       <div
-        className={`relative flex items-center justify-center border-b border-amber-900/12 bg-[hsl(45_40%_94%)]/55 dark:bg-card/30 ${
+        className={`relative flex items-center justify-center border-b border-amber-900/12 dark:border-amber-200/10 bg-[hsl(45_40%_94%)]/55 dark:bg-[hsl(95_18%_10%)]/55 ${
           familyMode ? "h-28" : "h-20"
         }`}
       >
