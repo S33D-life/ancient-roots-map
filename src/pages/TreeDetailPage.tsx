@@ -905,7 +905,7 @@ const TreeDetailPage = () => {
             hang, and plant. Pulls TreeSeedsHeartsSection (reservoir + planter)
             together with TreeArrivalPanel (collect / plant / whispers actions). */}
         {id && tree && (
-          <section className="space-y-4">
+          <section id="seeds-hearts-section" className="space-y-4 scroll-mt-20">
             <Suspense fallback={null}>
               <TreeSeedsHeartsSection
                 treeId={id}
