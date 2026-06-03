@@ -34,7 +34,9 @@ function useLunarNow(intervalMs = 60 * 60 * 1000) {
 
 export default function MoonGlyph({ variant = "seal", className }: MoonGlyphProps) {
   const now = useLunarNow();
-  const framing = deriveLunarFraming("full_moon", now);
+  // "weekly" routes through the dynamic illumination branch so the glyph
+  // reflects the *current* phase rather than a hardcoded full moon.
+  const framing = deriveLunarFraming("weekly", now);
   const illum = Math.round(moonIllumination(now) * 100);
   const moonName = POETIC_MOON_NAMES[now.getMonth()];
   const title = `${framing.glyph} ${moonName} · ${illum}% — ${framing.whisper}`;

@@ -139,9 +139,6 @@ export default function BeWithThisTreeCanopy({
           <p className="text-[10px] font-serif tracking-[0.22em] uppercase text-muted-foreground/60">
             Be with this tree
           </p>
-          <p className="text-[11px] font-serif italic text-muted-foreground/70 mt-0.5 leading-snug truncate">
-            Four ways to be present with {treeName}
-          </p>
         </div>
         {treePresence && treePresence.count > 0 && (
           <div className="flex items-center gap-1.5 shrink-0">

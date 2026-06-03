@@ -1008,7 +1008,7 @@ const TreeDetailPage = () => {
                   Living
                 </TabsTrigger>
                 <TabsTrigger value="list" className="font-serif text-[11px] tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
-                  List
+                  Archive
                 </TabsTrigger>
               </TabsList>
 

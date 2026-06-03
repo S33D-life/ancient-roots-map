@@ -325,9 +325,6 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           aria-label="Dismiss introduction"
         >
           <p className="text-[12px] font-serif italic text-primary/85 leading-snug">
-            The archive remembers. The Ethereal Tree lives.
-          </p>
-          <p className="mt-1 text-[10.5px] font-serif italic text-muted-foreground/80 leading-snug">
             Offerings rest in the branches. Whispers travel through the roots.
           </p>
         </button>
@@ -665,14 +662,11 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           {activeNode && (
             <>
               <SheetHeader className="text-left">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="secondary" className="text-[10px] font-mono tracking-wider">
-                    {activeNode.kind}
-                  </Badge>
-                  <Badge variant="outline" className="text-[10px] font-mono tracking-wider opacity-60">
-                    {activeNode.zone}
-                  </Badge>
-                </div>
+                <p className="text-[10px] font-serif uppercase tracking-[0.22em] text-muted-foreground/70 mb-1">
+                  {ceremonialNodeLabel(activeNode.kind, activeNode.zone)}
+                  <span className="mx-1.5 text-muted-foreground/40">·</span>
+                  <span className="text-muted-foreground/55">{zoneLabel(activeNode.zone)}</span>
+                </p>
                 <SheetTitle className="font-serif">{activeNode.title}</SheetTitle>
                 {activeNode.subtitle && (
                   <SheetDescription className="font-serif italic">
