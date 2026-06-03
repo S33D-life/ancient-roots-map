@@ -78,6 +78,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
   const [name, setName] = useState(tree.name);
   const [species, setSpecies] = useState(tree.species);
   const [description, setDescription] = useState(tree.description || "");
+  const [loreText, setLoreText] = useState(tree.lore_text || "");
   const [estimatedAge, setEstimatedAge] = useState(tree.estimated_age?.toString() || "");
   const [lat, setLat] = useState(tree.latitude?.toString() || "");
   const [lng, setLng] = useState(tree.longitude?.toString() || "");
