@@ -29,6 +29,7 @@ import {
 import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
+import { EtherealTreeTab } from "@/components/ethereal/EtherealTreeTab";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
 import { useTreeSources } from "@/hooks/use-tree-sources";
 import { useTreeCheckins, useCheckinStats } from "@/hooks/use-tree-checkins";
@@ -944,7 +945,7 @@ const TreeDetailPage = () => {
 
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
-          <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
+          <TabsList className="w-full grid grid-cols-4 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               Overview
             </TabsTrigger>
@@ -960,7 +961,26 @@ const TreeDetailPage = () => {
                 <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{offerings.length + birdsongCount}</Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="ethereal" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Ethereal
+            </TabsTrigger>
           </TabsList>
+
+          {/* ── ETHEREAL TREE TAB ── */}
+          <TabsContent value="ethereal" className="space-y-4">
+            <div className="text-center mb-2">
+              <h2 className="font-serif text-lg text-primary tracking-wide">The Ethereal Tree</h2>
+              <p className="text-[11px] text-muted-foreground font-serif italic mt-1">
+                A living spatial memory — offerings drift in the canopy, whispers travel through the roots.
+              </p>
+            </div>
+            <EtherealTreeTab
+              treeId={id!}
+              treeName={tree.name}
+              offerings={offerings}
+              whispers={availableWhispers}
+            />
+          </TabsContent>
 
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-8">
