@@ -353,7 +353,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
               className="w-full font-serif tracking-wide"
             >
               {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-              Save Changes
+              Tend the Memory
             </Button>
           </div>
         </SheetContent>
