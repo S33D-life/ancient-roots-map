@@ -75,6 +75,15 @@ function placeInZone(zone: Zone, seed: string): { x: number; y: number } {
   };
 }
 
+// Local moon-phase approximation (0 = new, 0.5 = full, 1 = new). No API.
+function moonFullness(date = new Date()): number {
+  const synodic = 29.530588853;
+  const ref = Date.UTC(2000, 0, 6, 18, 14); // known new moon
+  const days = (date.getTime() - ref) / 86400000;
+  const phase = ((days % synodic) + synodic) % synodic / synodic; // 0..1
+  return 1 - Math.abs(0.5 - phase) * 2; // 0 at new, 1 at full
+}
+
 interface NodeDatum {
   id: string;
   zone: Zone;
