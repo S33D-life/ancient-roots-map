@@ -24,8 +24,8 @@
     <link rel="dns-prefetch" href="https://mwzcuczfedrjplndggiv.supabase.co">
     <link rel="preconnect" href="https://mwzcuczfedrjplndggiv.supabase.co">
 
-    <!-- Preload LCP image so the browser discovers it before JS executes -->
-    <link rel="preload" href="/src/assets/header-moss-wood.jpg" as="image" fetchpriority="high">
+    <!-- Header texture is bundled by Vite with a hashed URL; preloading the
+         /src/ path 404s in production, so we let CSS discover it instead. -->
 
     <!-- Open Graph -->
     <meta property="og:title" content="S33D.life — Living Atlas of Ancient Trees" />
