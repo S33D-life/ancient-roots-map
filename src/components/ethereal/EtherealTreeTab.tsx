@@ -242,69 +242,95 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             </filter>
           </defs>
 
-          {/* Ambient ground glow */}
-          <ellipse
-            cx="200" cy="455" rx="180" ry="30"
-            fill="url(#et-ground)"
-            style={{ opacity: awake("ground", 1, 0.4), transition: "opacity 900ms ease" }}
-          />
+          {/* Breathing wrapper — extremely slow inhale/exhale that all of the
+              tree's still elements share. Subconscious, never overt. */}
+          <g className="et-breath">
+            {/* Ambient ground glow */}
+            <ellipse
+              cx="200" cy="455" rx="180" ry="30"
+              fill="url(#et-ground)"
+              style={{ opacity: awake("ground", 1, 0.4), transition: "opacity 900ms ease" }}
+            />
 
-          {/* Roots — awaken with whispers */}
-          <g
-            stroke="hsl(160 35% 40%)"
-            strokeWidth={zoneAwake("roots") ? 1.4 : 1.1}
-            fill="none"
-            style={{
-              opacity: awake("roots", 0.75, 0.32),
-              transition: "opacity 900ms ease, stroke-width 900ms ease",
-            }}
-          >
-            <path d="M200 420 Q 160 470 80 540" />
-            <path d="M200 420 Q 240 470 320 540" />
-            <path d="M200 420 Q 200 490 200 580" />
-            <path d="M200 420 Q 130 460 60 490" />
-            <path d="M200 420 Q 270 460 340 490" />
-            <path d="M200 420 Q 180 480 120 575" />
-            <path d="M200 420 Q 220 480 280 575" />
+            {/* Roots — awaken with whispers */}
+            <g
+              stroke="hsl(160 35% 40%)"
+              strokeWidth={zoneAwake("roots") ? 1.4 : 1.1}
+              fill="none"
+              style={{
+                opacity: awake("roots", 0.75, 0.32),
+                transition: "opacity 900ms ease, stroke-width 900ms ease",
+              }}
+            >
+              <path d="M200 420 Q 160 470 80 540" />
+              <path d="M200 420 Q 240 470 320 540" />
+              <path d="M200 420 Q 200 490 200 580" />
+              <path d="M200 420 Q 130 460 60 490" />
+              <path d="M200 420 Q 270 460 340 490" />
+              <path d="M200 420 Q 180 480 120 575" />
+              <path d="M200 420 Q 220 480 280 575" />
+            </g>
+
+            {/* Whisper root pulses — sparse travelling glows along major roots.
+                Only rendered when whispers exist. SMIL animateMotion keeps
+                this CSS-free and reduced-motion is handled below by halting
+                the keyTimes via the .et-no-motion override. */}
+            {hasWhispers &&
+              rootPulsePaths.map((d, i) => (
+                <g key={`pulse-${i}`} className="et-root-pulse">
+                  <circle r="2.2" fill="hsl(160 70% 78%)" opacity="0.85" filter="url(#et-soft)">
+                    <animateMotion
+                      dur={`${14 + i * 3}s`}
+                      begin={`${i * 4.5}s`}
+                      repeatCount="indefinite"
+                      path={d}
+                      rotate="auto"
+                    />
+                  </circle>
+                </g>
+              ))}
+
+            {/* Trunk — awakens with stories */}
+            <path
+              d="M180 420 Q 175 350 185 290 Q 195 240 200 210 Q 205 240 215 290 Q 225 350 220 420 Z"
+              fill="hsl(35 22% 16%)"
+              stroke="hsl(40 30% 25%)"
+              strokeWidth="0.8"
+              style={{ opacity: awake("trunk", 1, 0.55), transition: "opacity 900ms ease" }}
+            />
+
+            {/* Branches — awaken with canopy / upper / mid filters */}
+            <g
+              stroke="hsl(40 28% 22%)"
+              strokeWidth="2"
+              fill="none"
+              style={{
+                opacity: awake("canopy", 0.85, zoneAwake("upper") || zoneAwake("mid") ? 0.6 : 0.3),
+                transition: "opacity 900ms ease",
+              }}
+            >
+              <path d="M200 240 Q 170 215 110 180" />
+              <path d="M200 240 Q 230 215 290 180" />
+              <path d="M200 215 Q 165 190 95 145" />
+              <path d="M200 215 Q 235 190 305 145" />
+              <path d="M200 200 Q 200 170 200 100" />
+              <path d="M200 220 Q 150 200 75 200" />
+              <path d="M200 220 Q 250 200 325 200" />
+            </g>
+
+            {/* Canopy halo — brightens for photos / prayers / poems, and
+                quietly responds to the local moon phase. */}
+            <ellipse
+              cx="200" cy="140" rx="160" ry="80"
+              fill={`hsl(${haloHue.toFixed(1)} 80% 65% / 0.9)`}
+              style={{
+                opacity: zoneAwake("canopy") ? haloBoost : haloBoost * 0.36,
+                transition: "opacity 1200ms ease",
+                mixBlendMode: "screen",
+                filter: "url(#et-soft)",
+              }}
+            />
           </g>
-
-          {/* Trunk — awakens with stories */}
-          <path
-            d="M180 420 Q 175 350 185 290 Q 195 240 200 210 Q 205 240 215 290 Q 225 350 220 420 Z"
-            fill="hsl(35 22% 16%)"
-            stroke="hsl(40 30% 25%)"
-            strokeWidth="0.8"
-            style={{ opacity: awake("trunk", 1, 0.55), transition: "opacity 900ms ease" }}
-          />
-
-          {/* Branches — awaken with canopy / upper / mid filters */}
-          <g
-            stroke="hsl(40 28% 22%)"
-            strokeWidth="2"
-            fill="none"
-            style={{
-              opacity: awake("canopy", 0.85, zoneAwake("upper") || zoneAwake("mid") ? 0.6 : 0.3),
-              transition: "opacity 900ms ease",
-            }}
-          >
-            <path d="M200 240 Q 170 215 110 180" />
-            <path d="M200 240 Q 230 215 290 180" />
-            <path d="M200 215 Q 165 190 95 145" />
-            <path d="M200 215 Q 235 190 305 145" />
-            <path d="M200 200 Q 200 170 200 100" />
-            <path d="M200 220 Q 150 200 75 200" />
-            <path d="M200 220 Q 250 200 325 200" />
-          </g>
-
-          {/* Canopy halo — brightens for photos / prayers / poems */}
-          <ellipse
-            cx="200" cy="140" rx="160" ry="80"
-            fill="url(#et-glow)"
-            style={{
-              opacity: zoneAwake("canopy") ? 0.5 : 0.18,
-              transition: "opacity 900ms ease",
-            }}
-          />
 
           {/* Nodes */}
           {visible.map((n) => {
