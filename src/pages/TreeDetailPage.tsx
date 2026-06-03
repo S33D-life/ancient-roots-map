@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from "react
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ChevronDown, Layers } from "lucide-react";
+import { ChevronDown, Layers, Leaf } from "lucide-react";
 import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
