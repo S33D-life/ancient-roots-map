@@ -830,8 +830,7 @@ const TreeDetailPage = () => {
           );
         })()}
 
-        {/* Witness CTA — surfaces resonance gesture impossible-to-miss */}
-        <TreeWitnessStrip offerings={offerings} userId={userId} />
+        {/* Witness invitation removed — the canopy ("Leave Something Here") is the sole voice. */}
 
         {/* Inviter arrival context */}
         {arrivalRef && (
