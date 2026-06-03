@@ -39,6 +39,9 @@ interface Props {
   loading: boolean;
   onProposeEdit: () => void;
   onTreeUpdated: (updated: any) => void;
+  /** Optional controlled open state for the Tend This Tree panel */
+  editOpen?: boolean;
+  onEditOpenChange?: (open: boolean) => void;
 }
 
 const ROLE_LABELS: Record<TreeEditRole, { label: string; icon: React.ReactNode }> = {
