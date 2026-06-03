@@ -871,10 +871,29 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ BE WITH THIS TREE — unified action canopy ══════
+        {/* ══════ FEEL — atmospheric presence before utility ══════ */}
+        <div className="mt-8 mb-2 text-center">
+          <span className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
+            · Feel ·
+          </span>
+        </div>
+        <Suspense fallback={null}>
+          <TreeAliveness
+            checkinCount={checkins?.length ?? 0}
+            offeringCount={offerings.length}
+            treeName={tree.name}
+          />
+        </Suspense>
+
+        {/* ══════ TEND — be with this tree ══════
             One ceremonial 4-mode grid replaces the previously fragmented
             CTAs (Witness, Visit Again, Make Offering, Begin Encounter,
             Whisper, Seeds & Hearts). Logic + routes preserved. */}
+        <div className="mt-10 mb-3 text-center">
+          <span className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
+            · Tend ·
+          </span>
+        </div>
         {tree && (
           <Suspense fallback={null}>
             <BeWithThisTreeCanopy
@@ -908,21 +927,12 @@ const TreeDetailPage = () => {
           </Suspense>
         )}
 
-        {/* Aliveness signal — visible to all visitors, above tabs */}
-        <Suspense fallback={null}>
-          <TreeAliveness
-            checkinCount={checkins?.length ?? 0}
-            offeringCount={offerings.length}
-            treeName={tree.name}
-          />
-        </Suspense>
-
-        {/* ══════ Unified Seeds & Hearts Action Panel ══════
+        {/* ══════ Unified Seeds & Hearts Action Panel (Tend, continued) ══════
             Lives above the section tabs as the single place to collect,
             hang, and plant. Pulls TreeSeedsHeartsSection (reservoir + planter)
             together with TreeArrivalPanel (collect / plant / whispers actions). */}
         {id && tree && (
-          <section id="seeds-hearts-section" className="space-y-4 scroll-mt-20">
+          <section id="seeds-hearts-section" className="space-y-4 scroll-mt-20 mt-6">
             <Suspense fallback={null}>
               <TreeSeedsHeartsSection
                 treeId={id}
@@ -954,6 +964,14 @@ const TreeDetailPage = () => {
             )}
           </section>
         )}
+
+        {/* ══════ EXPLORE — overview, encounters, memory ══════ */}
+        <div className="mt-12 mb-3 text-center">
+          <span className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
+            · Explore ·
+          </span>
+        </div>
+
 
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
