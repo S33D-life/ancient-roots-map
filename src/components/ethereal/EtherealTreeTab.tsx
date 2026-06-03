@@ -30,6 +30,32 @@ import type { TreeWhisper } from "@/hooks/use-whispers";
 
 type Zone = "canopy" | "upper" | "mid" | "trunk" | "roots" | "ground";
 
+/** Ceremonial label for a node — replaces the old monospace "kind" badge. */
+function ceremonialNodeLabel(kind: OfferingType | "whisper", zone: Zone): string {
+  if (kind === "whisper") return "Root Whisper";
+  if (kind === "song") return "Song in the Canopy";
+  if (kind === "story") return "Story Held in the Trunk";
+  if (kind === "book") return "Story Held in the Trunk";
+  if (kind === "photo") return "Photo Offering";
+  if (kind === "art") return "Art Offering";
+  if (kind === "poem") return "Poem in the Branches";
+  if (kind === "voice") return "Voice in the Branches";
+  if (kind === "prayer") return "Prayer in the Leaves";
+  return "Offering";
+}
+
+/** Ceremonial label for a zone — replaces the old monospace "zone" badge. */
+function zoneLabel(zone: Zone): string {
+  switch (zone) {
+    case "canopy": return "In the canopy";
+    case "upper": return "Upper branches";
+    case "mid": return "Middle branches";
+    case "trunk": return "In the trunk";
+    case "roots": return "In the roots";
+    case "ground": return "On the ground";
+  }
+}
+
 const ZONE_FOR_TYPE: Record<OfferingType, Zone> = {
   photo: "canopy",
   art: "canopy",
