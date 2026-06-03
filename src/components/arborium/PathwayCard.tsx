@@ -127,15 +127,24 @@ export default function PathwayCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
       whileHover={{ y: -2 }}
-      className="group relative h-full rounded-2xl p-5 overflow-hidden border transition-all"
+      className="group relative h-full rounded-2xl p-5 overflow-hidden border transition-all dark:!border-amber-200/12"
       style={{
         background: `linear-gradient(150deg, hsl(${hue} 38% 95%) 0%, hsl(${hue - 10} 28% 92%) 60%, hsl(${hue + 10} 33% 94%) 100%)`,
         borderColor: `hsl(${hue} 28% 70% / 0.32)`,
         boxShadow: `inset 0 1px 0 hsl(${hue} 32% 82% / 0.55), 0 6px 20px -14px hsl(${hue} 38% 25% / 0.22)`,
       }}
     >
+      {/* dark-mode forest parchment overlay */}
       <div
-        className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full opacity-35 blur-2xl pointer-events-none"
+        className="hidden dark:block absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(150deg, hsl(${hue} 20% 12%) 0%, hsl(${hue - 10} 16% 14%) 60%, hsl(${hue + 10} 22% 11%) 100%)`,
+          boxShadow: "inset 0 1px 0 hsl(48 28% 22% / 0.28), 0 6px 20px -12px hsl(0 0% 0% / 0.55)",
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full opacity-35 dark:opacity-22 blur-2xl pointer-events-none"
         style={{ background: `hsl(${hue} 48% 72% / 0.45)` }}
         aria-hidden
       />
@@ -150,20 +159,20 @@ export default function PathwayCard({
             {emoji}
           </div>
           <div className="min-w-0">
-            <h3 className="font-serif text-base text-[hsl(95_28%_18%)] leading-tight">{title}</h3>
-            <p className="text-xs font-serif text-[hsl(95_14%_30%)]/72 mt-1.5 leading-relaxed">
+            <h3 className="font-serif text-base text-[hsl(95_28%_18%)] dark:text-[hsl(45_55%_86%)] leading-tight">{title}</h3>
+            <p className="text-xs font-serif text-[hsl(95_14%_30%)]/72 dark:text-[hsl(45_25%_78%)]/78 mt-1.5 leading-relaxed">
               {description}
             </p>
           </div>
         </div>
-        <Icon className="w-4 h-4 mt-1 shrink-0 text-[hsl(95_28%_30%)]/45 group-hover:text-[hsl(95_42%_30%)] transition-colors" />
+        <Icon className="w-4 h-4 mt-1 shrink-0 text-[hsl(95_28%_30%)]/45 dark:text-[hsl(45_45%_75%)]/55 group-hover:text-[hsl(95_42%_30%)] dark:group-hover:text-[hsl(45_55%_85%)] transition-colors" />
       </div>
 
       <div className="relative mt-4 flex items-center justify-between">
-        <span className="text-[10px] font-serif uppercase tracking-[0.18em] text-[hsl(95_18%_30%)]/52">
+        <span className="text-[10px] font-serif uppercase tracking-[0.18em] text-[hsl(95_18%_30%)]/52 dark:text-[hsl(45_35%_75%)]/55">
           {comingSoon ? "Opening soon" : "Enter"}
         </span>
-        <ArrowRight className="w-3.5 h-3.5 text-[hsl(95_28%_30%)]/55 group-hover:translate-x-0.5 transition-transform" />
+        <ArrowRight className="w-3.5 h-3.5 text-[hsl(95_28%_30%)]/55 dark:text-[hsl(45_45%_75%)]/60 group-hover:translate-x-0.5 transition-transform" />
       </div>
     </motion.div>
   );
