@@ -52,7 +52,7 @@ import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering, findFlatPhotoIndex, flattenOfferingPhotos } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
-import TreeWitnessStrip from "@/components/tree-detail/TreeWitnessStrip";
+
 import BloomsNearbySection from "@/components/blooms/BloomsNearbySection";
 const OfferingHero = lazy(() => import("@/components/tree-detail/OfferingHero"));
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
