@@ -1092,6 +1092,25 @@ export default function StaffRoomGallery() {
                   {hasLinkedStaff ? "View Your Vault" : "Claim a Staff"}
                 </Button>
               </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1">
+                <Link
+                  to="/patron-offering"
+                  className="group inline-flex items-center gap-1 text-[10px] font-serif text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Crown className="w-3 h-3 text-primary/60" />
+                  Read the full Patron Offering
+                  <ChevronRight className="w-3 h-3 opacity-40 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+                <Link
+                  to="/support"
+                  className="group inline-flex items-center gap-1 text-[10px] font-serif text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Heart className="w-3 h-3 text-primary/60" />
+                  Support the Grove
+                  <ChevronRight className="w-3 h-3 opacity-40 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
             </div>
 
             {/* Stewardship Recognition */}
