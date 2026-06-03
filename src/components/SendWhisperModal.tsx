@@ -809,7 +809,6 @@ export default function SendWhisperModal({
             </div>
           );
         })()}
-      </div>
     </TreeAnchoredSheet>
   );
 }
