@@ -45,17 +45,15 @@ export default function IDPanel({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.35 }}
-      className="relative rounded-2xl border border-amber-900/20 overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(160deg, hsl(48 52% 96%) 0%, hsl(72 30% 94%) 55%, hsl(48 45% 95%) 100%)",
-        boxShadow:
-          "inset 0 1px 0 hsl(48 40% 98% / 0.9), 0 8px 28px -12px hsl(40 28% 22% / 0.18)",
-      }}
+      className="relative rounded-2xl border border-amber-900/20 dark:border-amber-200/15 overflow-hidden
+        bg-[linear-gradient(160deg,hsl(48_52%_96%)_0%,hsl(72_30%_94%)_55%,hsl(48_45%_95%)_100%)]
+        dark:bg-[linear-gradient(160deg,hsl(95_18%_12%)_0%,hsl(80_16%_14%)_55%,hsl(95_20%_11%)_100%)]
+        shadow-[inset_0_1px_0_hsl(48_40%_98%/0.9),0_8px_28px_-12px_hsl(40_28%_22%/0.18)]
+        dark:shadow-[inset_0_1px_0_hsl(48_28%_22%/0.3),0_10px_30px_-14px_hsl(0_0%_0%/0.6)]"
     >
       {/* faint pressed-leaf texture */}
       <div
-        className="absolute inset-0 opacity-[0.045] pointer-events-none"
+        className="absolute inset-0 opacity-[0.045] dark:opacity-[0.07] pointer-events-none"
         style={{
           backgroundImage:
             "radial-gradient(ellipse at 20% 30%, hsl(95 40% 22%) 0 1px, transparent 3px), radial-gradient(ellipse at 78% 68%, hsl(35 45% 22%) 0 1px, transparent 3px)",
