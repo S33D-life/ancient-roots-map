@@ -97,6 +97,7 @@ interface Props {
   treeName: string;
   offerings: Offering[];
   whispers: TreeWhisper[];
+  onViewInOfferings?: (kind: OfferingType | "whisper", offeringId?: string) => void;
 }
 
 export function EtherealTreeTab({ treeId, treeName, offerings, whispers }: Props) {
