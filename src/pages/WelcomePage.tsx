@@ -112,7 +112,7 @@ const WelcomePage = () => {
                     onClick={() => navigate("/dashboard")}
                     className="text-muted-foreground"
                   >
-                    Or visit your dashboard
+                    Or visit your hearth
                   </Button>
                 </div>
               </>
