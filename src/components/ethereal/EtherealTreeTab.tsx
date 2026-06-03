@@ -520,9 +520,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           })}
         </svg>
 
-        {/* Bottom aliveness line */}
+        {/* Qualitative aliveness — the tree quietly describing itself */}
         <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
-          <p className="text-[11px] font-serif italic text-primary/70 tracking-wide">{aliveness}</p>
+          <p
+            key={atmosphericState}
+            className="text-[11px] font-serif italic text-primary/70 tracking-wide animate-fade-in"
+          >
+            {atmosphericState}
+          </p>
         </div>
       </div>
 
