@@ -295,6 +295,14 @@ const PatronOfferingPage = () => (
             <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
           </Link>
           <Link
+            to="/support"
+            className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/15 transition-all"
+          >
+            <Heart className="w-4 h-4 text-primary" />
+            <span className="text-xs font-serif text-foreground">Support the Grove</span>
+            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+          </Link>
+          <Link
             to={ROUTES.VALUE_TREE}
             className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border/30 bg-card/20 hover:border-primary/20 transition-all"
           >
