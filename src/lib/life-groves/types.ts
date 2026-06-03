@@ -179,7 +179,6 @@ export interface LifeGroveOffering {
   life_grove_id: string;
   contributor_user_id: string | null;
   contributor_name: string;
-  contributor_email: string | null;
   offering_type: OfferingType;
   title: string | null;
   body_text: string | null;
@@ -188,6 +187,7 @@ export interface LifeGroveOffering {
   memory_position_data: unknown | null;
   created_at: string;
 }
+
 
 /** Hearts → discount maths. 1 heart = £0.01, capped at 33% of package. */
 export function calcHeartsDiscount(packagePence: number, heartsApplied: number) {
