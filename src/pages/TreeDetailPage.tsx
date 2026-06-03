@@ -858,40 +858,37 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ Mobile Above-the-Fold Action Bar ══════ */}
+        {/* ══════ BE WITH THIS TREE — unified action canopy ══════
+            One ceremonial 4-mode grid replaces the previously fragmented
+            CTAs (Witness, Visit Again, Make Offering, Begin Encounter,
+            Whisper, Seeds & Hearts). Logic + routes preserved. */}
         {tree && (
           <Suspense fallback={null}>
-            <TreeMobileActionBar
-              treeId={tree.id}
+            <BeWithThisTreeCanopy
               treeName={tree.name}
-              userId={userId}
               proximityGate={proximityGate}
               meetingStatus={meetingStatus}
-              relationship={relationship}
-              onCheckin={tryOpenCheckin}
-              onMakeOffering={openOfferingGateway}
+              hasMet={Boolean(
+                relationship?.stats &&
+                  ((relationship.stats.totalVisits ?? 0) > 0 ||
+                    (relationship.stats.offeringCount ?? 0) > 0 ||
+                    (relationship.stats.coWitnessCount ?? 0) > 0 ||
+                    (relationship.stats.stewardshipActions ?? 0) > 0),
+              )}
+              treePresence={treeDetailPresence}
+              onMeetAgain={tryOpenCheckin}
+              onLeaveOffering={openOfferingGateway}
+              onSendThroughRoots={() => {
+                if (!userId) return;
+                setWhisperContextLabel(null);
+                setWhisperModalOpen(true);
+              }}
+              onTendTree={() => {
+                const el = document.getElementById("seeds-hearts-section");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
             />
           </Suspense>
-        )}
-
-        {/* ══════ Presence Signal + Encounter nudge — desktop only on tree page; mobile uses TreeMobileActionBar ══════ */}
-        {userId && tree && (
-          <div className="hidden md:block">
-            <Suspense fallback={null}>
-              <TreeDetailPresenceBlock
-                tree={tree}
-                proximityGate={proximityGate}
-                meetingStatus={meetingStatus}
-                checkinStats={checkinStats}
-                onCheckin={tryOpenCheckin}
-                treePresence={treeDetailPresence}
-                availableWhispers={availableWhispers}
-                hasHearts={false}
-                onGoToEncounters={() => setSectionTab("encounters")}
-                firstVisit={checkinStats?.firstVisit}
-              />
-            </Suspense>
-          </div>
         )}
 
         {/* Aliveness signal — visible to all visitors, above tabs */}
