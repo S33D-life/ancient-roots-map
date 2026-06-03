@@ -84,14 +84,22 @@ interface NodeDatum {
   payload: Offering | TreeWhisper;
 }
 
-const FILTERS: Array<{ id: string; label: string; match: (n: NodeDatum) => boolean }> = [
-  { id: "all", label: "All", match: () => true },
-  { id: "photo", label: "Photos", match: (n) => n.kind === "photo" },
-  { id: "song", label: "Songs", match: (n) => n.kind === "song" },
-  { id: "poem", label: "Poems", match: (n) => n.kind === "poem" || n.kind === "voice" },
-  { id: "story", label: "Stories", match: (n) => n.kind === "story" || n.kind === "book" },
-  { id: "whisper", label: "Whispers", match: (n) => n.kind === "whisper" },
-  { id: "prayer", label: "Prayers", match: (n) => n.kind === "prayer" || n.kind === "art" },
+type FilterDef = {
+  id: string;
+  label: string;
+  match: (n: NodeDatum) => boolean;
+  zones: Zone[]; // which zones "awaken" when this filter is active
+  hint: string; // poetic metaphor anchor
+};
+
+const FILTERS: FilterDef[] = [
+  { id: "all", label: "All", match: () => true, zones: ["canopy", "upper", "mid", "trunk", "roots", "ground"], hint: "Every memory, held at once." },
+  { id: "photo", label: "Photos", match: (n) => n.kind === "photo", zones: ["canopy"], hint: "Photos hang in the canopy like light." },
+  { id: "song", label: "Songs", match: (n) => n.kind === "song", zones: ["mid"], hint: "Songs ring through the middle branches." },
+  { id: "poem", label: "Poems", match: (n) => n.kind === "poem" || n.kind === "voice", zones: ["upper"], hint: "Poems bloom in the high branches." },
+  { id: "story", label: "Stories", match: (n) => n.kind === "story" || n.kind === "book", zones: ["trunk"], hint: "Stories live deep inside the trunk." },
+  { id: "whisper", label: "Whispers", match: (n) => n.kind === "whisper", zones: ["roots"], hint: "Whispers travel through the roots." },
+  { id: "prayer", label: "Prayers", match: (n) => n.kind === "prayer" || n.kind === "art", zones: ["canopy"], hint: "Prayers drift among the leaves." },
 ];
 
 interface Props {
