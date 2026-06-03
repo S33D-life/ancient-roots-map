@@ -173,7 +173,16 @@ const TreeDetailPage = () => {
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>(() => {
     const tabParam = searchParams.get("tab");
-    return tabParam === "encounters" || tabParam === "offerings" ? tabParam : "overview";
+    if (tabParam === "encounters") return "encounters";
+    if (tabParam === "offerings" || tabParam === "ethereal" || tabParam === "memory") return "memory";
+    return "overview";
+  });
+  // Memory sub-mode: "living" = Ethereal canopy, "list" = catalogued offerings.
+  // Both belong to the single "Memory" tab so the tree's remembering feels
+  // like one place with two ways of looking.
+  const [memoryMode, setMemoryMode] = useState<string>(() => {
+    const tabParam = searchParams.get("tab");
+    return tabParam === "offerings" ? "list" : "living";
   });
   const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
@@ -948,7 +957,7 @@ const TreeDetailPage = () => {
 
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
-          <TabsList className="w-full grid grid-cols-4 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
+          <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               Overview
             </TabsTrigger>
@@ -958,50 +967,57 @@ const TreeDetailPage = () => {
                 <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{checkinStats.totalVisits}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
-              Offerings
+            <TabsTrigger value="memory" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
+              Memory
               {(offerings.length + birdsongCount) > 0 && (
                 <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{offerings.length + birdsongCount}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="ethereal" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
-              Ethereal
-            </TabsTrigger>
           </TabsList>
 
-          {/* ── ETHEREAL TREE TAB ── */}
-          <TabsContent value="ethereal" className="space-y-4">
+          {/* ── MEMORY TAB — one place, two ways of looking ── */}
+          <TabsContent value="memory" className="space-y-4">
             <div className="text-center mb-2">
-              <h2 className="font-serif text-lg text-primary tracking-wide">The Ethereal Tree</h2>
+              <h2 className="font-serif text-lg text-primary tracking-wide">Memory of this Tree</h2>
               <p className="text-[11px] text-muted-foreground font-serif italic mt-1">
-                A living spatial memory — offerings drift in the canopy, whispers travel through the roots.
+                Two ways of looking at the same remembering — drifting in the canopy, or set down in rows.
               </p>
             </div>
-            <EtherealTreeTab
-              treeId={id!}
-              treeName={tree.name}
-              offerings={offerings}
-              whispers={availableWhispers}
-              onViewInOfferings={(kind, offeringId) => {
-                setSectionTab("offerings");
-                if (kind !== "whisper") {
-                  setActiveTab(kind as OfferingType);
-                }
-                if (offeringId && kind !== "whisper") {
-                  setHighlightedOfferingId(offeringId);
-                  // Wait for tab switch + render, then ride the node's
-                  // linger glow into the offering card.
-                  window.setTimeout(() => {
-                    const el = document.querySelector(
-                      `[data-offering-id="${offeringId}"]`
-                    ) as HTMLElement | null;
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }, 380);
-                  window.setTimeout(() => setHighlightedOfferingId(null), 2600);
-                }
-              }}
-            />
-          </TabsContent>
+            <Tabs value={memoryMode} onValueChange={setMemoryMode} className="w-full">
+              <TabsList className="w-full max-w-xs mx-auto grid grid-cols-2 bg-secondary/20 border border-border/30 mb-4 h-8 rounded-md">
+                <TabsTrigger value="living" className="font-serif text-[11px] tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+                  Living
+                </TabsTrigger>
+                <TabsTrigger value="list" className="font-serif text-[11px] tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+                  List
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="living" className="space-y-4">
+                <EtherealTreeTab
+                  treeId={id!}
+                  treeName={tree.name}
+                  offerings={offerings}
+                  whispers={availableWhispers}
+                  onViewInOfferings={(kind, offeringId) => {
+                    setMemoryMode("list");
+                    if (kind !== "whisper") {
+                      setActiveTab(kind as OfferingType);
+                    }
+                    if (offeringId && kind !== "whisper") {
+                      setHighlightedOfferingId(offeringId);
+                      window.setTimeout(() => {
+                        const el = document.querySelector(
+                          `[data-offering-id="${offeringId}"]`
+                        ) as HTMLElement | null;
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }, 380);
+                      window.setTimeout(() => setHighlightedOfferingId(null), 2600);
+                    }
+                  }}
+                />
+              </TabsContent>
+
 
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-8">
@@ -1402,7 +1418,7 @@ const TreeDetailPage = () => {
           </TabsContent>
 
           {/* ── OFFERINGS TAB ── */}
-          <TabsContent value="offerings" className="space-y-6">
+          <TabsContent value="list" className="space-y-6">
             <TabErrorBoundary tabName="Offerings">
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
 
@@ -1652,7 +1668,10 @@ const TreeDetailPage = () => {
             </Suspense>
             </TabErrorBoundary>
           </TabsContent>
+            </Tabs>
+          </TabsContent>
         </Tabs>
+
 
       </main>
 
