@@ -67,6 +67,7 @@ const Index = () => {
       {/* Scroll-driven tree depth background */}
       <Suspense fallback={null}>
         <TreeDepthBackground />
+        <MobileSectionWhisper />
       </Suspense>
 
       {/* Network Pulse — the tree's nervous system */}
