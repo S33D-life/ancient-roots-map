@@ -1668,7 +1668,10 @@ const TreeDetailPage = () => {
             </Suspense>
             </TabErrorBoundary>
           </TabsContent>
+            </Tabs>
+          </TabsContent>
         </Tabs>
+
 
       </main>
 
