@@ -14,7 +14,7 @@
  * Type cannot be changed in this first phase.
  */
 import { useEffect, useMemo, useState } from "react";
-import ResponsiveDialog from "@/components/ui/responsive-dialog";
+import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -231,7 +231,7 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
   };
 
   return (
-    <ResponsiveDialog
+    <TreeAnchoredSheet
       open={open}
       onOpenChange={onOpenChange}
       title="Tend your offering"
@@ -373,7 +373,7 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
           Tending the truth of your offering · the moment of placing it remains.
         </p>
       </div>
-    </ResponsiveDialog>
+    </TreeAnchoredSheet>
   );
 };
 
