@@ -324,33 +324,39 @@ function ThresholdPanel({
         </div>
       </div>
 
-      <div className="relative grid grid-cols-3 gap-2">
-        <div className="rounded-lg border border-border/30 bg-card/40 p-2.5 text-center">
-          <div className="text-lg font-serif text-primary">{active}</div>
-          <div className="text-[9px] font-serif text-muted-foreground uppercase tracking-wider mt-0.5">Active quests</div>
-        </div>
-        <div className="rounded-lg border border-border/30 bg-card/40 p-2.5 text-center">
-          <div className="text-lg font-serif text-primary">{earned}</div>
-          <div className="text-[9px] font-serif text-muted-foreground uppercase tracking-wider mt-0.5">Hearts earned</div>
-        </div>
-        <div className="rounded-lg border border-border/30 bg-card/40 p-2.5 text-center">
-          <div className="text-lg font-serif text-primary">{nextMilestone ? `${nextMilestone.goal - nextMilestone.progress}` : "—"}</div>
-          <div className="text-[9px] font-serif text-muted-foreground uppercase tracking-wider mt-0.5">To next milestone</div>
-        </div>
+      {/* Quest Cave keeps a single axis — Active quests.
+          Hearts earned lives in the Vault; the milestone narrative lives in the Star Trail.
+          Quiet sibling links point each axis to its true home. */}
+      <div className="relative rounded-lg border border-primary/15 bg-card/40 p-3 text-center">
+        <div className="text-2xl font-serif text-primary leading-none">{active}</div>
+        <div className="text-[10px] font-serif text-muted-foreground uppercase tracking-wider mt-1">Active quests</div>
       </div>
 
-      {nextMilestone && (
-        <div className="relative rounded-lg border border-primary/20 bg-primary/5 p-3">
-          <div className="flex items-center gap-2 text-[10px] font-serif uppercase tracking-wider text-muted-foreground">
-            <Trophy className="w-3 h-3 text-primary" /> Next milestone
-          </div>
-          <div className="font-serif text-sm text-foreground mt-1">{nextMilestone.title}</div>
-          <Progress
-            value={Math.min(100, Math.round((nextMilestone.progress / nextMilestone.goal) * 100))}
-            className="h-1.5 mt-2 bg-muted/40"
-          />
-        </div>
-      )}
+      <div className="relative grid grid-cols-2 gap-2 text-[11px] font-serif">
+        <Link
+          to="/library/vault"
+          className="group flex items-center justify-between gap-2 rounded-lg border border-border/25 bg-card/30 px-3 py-2 hover:border-primary/30 transition-colors"
+        >
+          <span className="flex items-center gap-1.5 text-muted-foreground/85">
+            <Heart className="w-3 h-3 text-primary/60" />
+            <span className="text-foreground/80">{earned}</span> earned
+          </span>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 group-hover:text-primary/70">In Vault →</span>
+        </Link>
+        <Link
+          to="/library/star-trail"
+          className="group flex items-center justify-between gap-2 rounded-lg border border-border/25 bg-card/30 px-3 py-2 hover:border-primary/30 transition-colors"
+        >
+          <span className="flex items-center gap-1.5 text-muted-foreground/85 truncate">
+            <Trophy className="w-3 h-3 text-primary/60 shrink-0" />
+            <span className="truncate text-foreground/80">
+              {nextMilestone ? nextMilestone.title : "Path unfolds"}
+            </span>
+          </span>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 group-hover:text-primary/70 shrink-0">In Star Trail →</span>
+        </Link>
+      </div>
+
 
       {recent.length > 0 && (
         <div className="relative space-y-1.5">
