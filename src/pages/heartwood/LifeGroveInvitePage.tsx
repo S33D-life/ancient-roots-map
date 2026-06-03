@@ -56,6 +56,7 @@ export default function LifeGroveInvitePage() {
   const submit = useMutation({
     mutationFn: async () => {
       if (!grove) throw new Error("This invitation could not be found.");
+      if (!user) throw new Error("Please sign in to leave an offering.");
       if (!consent) throw new Error("Please confirm you understand the offering will be added.");
       if (!contributorName.trim() && !user) throw new Error("Please share your name.");
       if (!bodyText.trim() && !mediaUrl.trim() && !title.trim()) {
@@ -71,9 +72,8 @@ export default function LifeGroveInvitePage() {
       }
       await createOffering({
         life_grove_id: grove.id,
-        contributor_user_id: user?.id ?? null,
-        contributor_name: contributorName.trim() || (user?.email ?? "A Wanderer"),
-        contributor_email: contributorEmail.trim() || user?.email || null,
+        contributor_user_id: user.id,
+        contributor_name: contributorName.trim() || (user.email ?? "A Wanderer"),
         offering_type: offeringType,
         title: title.trim() || null,
         body_text: bodyText.trim() || null,
@@ -94,6 +94,7 @@ export default function LifeGroveInvitePage() {
       toast(msg);
     },
   });
+
 
   const offeringMeta = useMemo(
     () => OFFERING_TYPES.find((o) => o.value === offeringType),
