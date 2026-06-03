@@ -979,10 +979,22 @@ const TreeDetailPage = () => {
               treeName={tree.name}
               offerings={offerings}
               whispers={availableWhispers}
-              onViewInOfferings={(kind) => {
+              onViewInOfferings={(kind, offeringId) => {
                 setSectionTab("offerings");
                 if (kind !== "whisper") {
                   setActiveTab(kind as OfferingType);
+                }
+                if (offeringId && kind !== "whisper") {
+                  setHighlightedOfferingId(offeringId);
+                  // Wait for tab switch + render, then ride the node's
+                  // linger glow into the offering card.
+                  window.setTimeout(() => {
+                    const el = document.querySelector(
+                      `[data-offering-id="${offeringId}"]`
+                    ) as HTMLElement | null;
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }, 380);
+                  window.setTimeout(() => setHighlightedOfferingId(null), 2600);
                 }
               }}
             />
