@@ -426,8 +426,7 @@ export default function CoWitnessPanel({
               </motion.div>
             )}
           </AnimatePresence>
-        </DialogContent>
-      </Dialog>
+      </TreeAnchoredSheet>
     </>
   );
 }
