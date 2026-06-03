@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin, Video } from "lucide-react";
+import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -27,18 +27,12 @@ import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides"
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
 
-/* Grid cards — reordered per spec:
-   Row 1: Join Council, Council Chamber
+/* Grid cards:
+   Row 1: Council Chamber
    Row 2: Council Records, Cycle Markets
-   Row 3: Host a Pod, (space)
+   Row 3: Host a Pod
 */
 const councilRooms = [
-  {
-    id: "chamber",
-    title: "Join Council",
-    description: "Step into this moon's gathering",
-    icon: Video,
-  },
   {
     id: "chamber-live",
     title: "Council Chamber",
@@ -159,7 +153,7 @@ const CouncilOfLifePage = () => {
               caption="Upcoming gatherings, marked by moon and season."
               icon={<ScrollText className="w-4 h-4 text-primary" />}
               collapsible
-              defaultOpen
+              defaultOpen={false}
               tone="cool"
             >
               <CouncilCalendar />
@@ -168,16 +162,7 @@ const CouncilOfLifePage = () => {
 
           {/* ── Quick View — agenda glimpse + single Council Scroll ── */}
           <div className="mt-6">
-            <HeartwoodChamber
-              title="Quick View"
-              caption="A glimpse of the agenda and current scroll."
-              icon={<Users className="w-4 h-4 text-primary" />}
-              collapsible
-              defaultOpen
-              tone="warm"
-            >
-              <CouncilQuickView invitation={invitation} />
-            </HeartwoodChamber>
+            <CouncilQuickView invitation={invitation} />
           </div>
 
           {/* ── Room Grid ── */}
