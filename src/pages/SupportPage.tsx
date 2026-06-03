@@ -414,6 +414,7 @@ const SupportPage = () => {
           href="https://www.s33d.life/patronsportalindex.html"
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Patrons Portal (opens in new tab)"
           className="group flex items-center gap-3 p-4 rounded-xl border border-border/20 bg-card/30 hover:border-primary/20 transition-all"
         >
           <div className="w-10 h-10 rounded-full bg-muted/40 flex items-center justify-center shrink-0">

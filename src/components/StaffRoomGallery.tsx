@@ -1119,6 +1119,7 @@ export default function StaffRoomGallery() {
                   href="https://www.s33d.life/patronsportalindex.html"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Patrons Portal (opens in new tab)"
                   className="group inline-flex items-center gap-1 text-[10px] font-serif text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Shield className="w-3 h-3 text-primary/60" />
