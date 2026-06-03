@@ -96,6 +96,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
       setName(tree.name);
       setSpecies(tree.species);
       setDescription(tree.description || "");
+      setLoreText(tree.lore_text || "");
       setEstimatedAge(tree.estimated_age?.toString() || "");
       setLat(tree.latitude?.toString() || "");
       setLng(tree.longitude?.toString() || "");
