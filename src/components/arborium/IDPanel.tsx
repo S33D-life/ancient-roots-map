@@ -176,7 +176,7 @@ export default function IDPanel({
                         <button
                           type="button"
                           onClick={() => scrollToSpecimen(s.slug)}
-                          className="shrink-0 inline-flex items-center gap-1 text-[11px] font-serif text-amber-900/65 hover:text-amber-900 border border-amber-900/18 hover:border-amber-900/32 rounded-lg px-2.5 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="shrink-0 inline-flex items-center gap-1 text-[11px] font-serif text-amber-900/65 dark:text-amber-200/75 hover:text-amber-900 dark:hover:text-amber-100 border border-amber-900/18 dark:border-amber-200/20 hover:border-amber-900/32 dark:hover:border-amber-200/35 rounded-lg px-2.5 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           <BookOpen className="w-3 h-3" aria-hidden />
                           Learn this species
