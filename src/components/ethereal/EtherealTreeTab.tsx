@@ -122,6 +122,11 @@ interface Props {
 export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewInOfferings }: Props) {
   const [filter, setFilter] = useState("all");
   const [activeNode, setActiveNode] = useState<NodeDatum | null>(null);
+  // After the sheet closes via "View in Offerings", keep the chosen node
+  // glowing briefly so the eye can follow it into the next view.
+  const [lingerNodeId, setLingerNodeId] = useState<string | null>(null);
+  const lingerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (lingerTimer.current) clearTimeout(lingerTimer.current); }, []);
 
   const nodes: NodeDatum[] = useMemo(() => {
     const offeringNodes: NodeDatum[] = offerings
