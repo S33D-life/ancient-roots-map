@@ -21,12 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
 import { useWitnessSession } from "@/hooks/use-witness-session";
 import { useToast } from "@/hooks/use-toast";
 import { WITNESS_BONUS_HEARTS } from "@/lib/witness-types";
@@ -148,20 +143,22 @@ export default function CoWitnessPanel({
         Co-Witness
       </Button>
 
-      <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-lg tracking-wide flex items-center gap-2">
-              <Eye className="w-5 h-5 text-primary" />
-              {isWitnessed
-                ? "Witnessed! 🌿"
-                : isJoined
-                  ? "Confirm Together"
-                  : isWaiting
-                    ? "Awaiting Second Warden"
-                    : "Co-Witness Scan"}
-            </DialogTitle>
-          </DialogHeader>
+      <TreeAnchoredSheet
+        open={open}
+        onOpenChange={(v) => !v && handleClose()}
+        title={
+          <span className="font-serif text-lg tracking-wide flex items-center gap-2">
+            <Eye className="w-5 h-5 text-primary" />
+            {isWitnessed
+              ? "Witnessed! 🌿"
+              : isJoined
+                ? "Confirm Together"
+                : isWaiting
+                  ? "Awaiting Second Warden"
+                  : "Co-Witness Scan"}
+          </span>
+        }
+      >
 
           <AnimatePresence mode="wait">
             {/* Error state */}
@@ -429,8 +426,7 @@ export default function CoWitnessPanel({
               </motion.div>
             )}
           </AnimatePresence>
-        </DialogContent>
-      </Dialog>
+      </TreeAnchoredSheet>
     </>
   );
 }

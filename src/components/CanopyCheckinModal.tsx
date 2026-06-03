@@ -12,9 +12,7 @@ import PostEncounterShare from "@/components/PostEncounterShare";
 import WhisperCollector from "@/components/WhisperCollector";
 import SeasonalBonusBadge, { useSeasonalBonus } from "@/components/SeasonalBonusBadge";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
+import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -273,8 +271,8 @@ export default function CanopyCheckinModal({
   if (submitted) {
     return (
       <>
-        <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="sm:max-w-md overflow-hidden">
+        <TreeAnchoredSheet open={open} onOpenChange={onOpenChange}>
+          <div className="relative sm:max-w-md mx-auto overflow-hidden">
             {/* Leaf animation overlay */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               {[...Array(6)].map((_, i) => (
@@ -411,8 +409,8 @@ export default function CanopyCheckinModal({
                 </Button>
               </motion.div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </TreeAnchoredSheet>
 
         {rewardResult && !rewardResult.capped && (
           <RewardReceipt
@@ -437,19 +435,17 @@ export default function CanopyCheckinModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <TreeDeciduous className="h-5 w-5 text-primary" />
-            <DialogTitle className="font-serif text-primary tracking-wide">
-              Sit Beneath This Canopy
-            </DialogTitle>
-          </div>
-          <p className="text-sm text-muted-foreground font-serif mt-1">
-            Mark your presence with {treeName}.
-          </p>
-        </DialogHeader>
+    <TreeAnchoredSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={
+        <span className="font-serif text-primary tracking-wide flex items-center gap-2">
+          <TreeDeciduous className="h-5 w-5 text-primary" />
+          Sit Beneath This Canopy
+        </span>
+      }
+      subtitle={<>Mark your presence with {treeName}.</>}
+    >
 
         {/* Geo Status */}
         <div className="rounded-lg border border-border/40 p-3 bg-secondary/10">
@@ -619,7 +615,7 @@ export default function CanopyCheckinModal({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-border/30">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="font-serif">
             Cancel
           </Button>
@@ -632,14 +628,13 @@ export default function CanopyCheckinModal({
             <Leaf className="h-4 w-4" />
             Witness This Season
           </Button>
-        </DialogFooter>
+        </div>
 
         {!userId && (
           <p className="text-xs text-center text-muted-foreground font-serif mt-2">
             Please <a href="/auth" className="text-primary underline">sign in</a> to check in.
           </p>
         )}
-      </DialogContent>
-    </Dialog>
+    </TreeAnchoredSheet>
   );
 }
