@@ -144,7 +144,7 @@ export default function PathwayCard({
         aria-hidden
       />
       <div
-        className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full opacity-35 dark:opacity-22 blur-2xl pointer-events-none"
+        className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full opacity-35 dark:opacity-20 blur-2xl pointer-events-none"
         style={{ background: `hsl(${hue} 48% 72% / 0.45)` }}
         aria-hidden
       />
