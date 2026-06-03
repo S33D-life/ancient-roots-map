@@ -22,6 +22,8 @@
 import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Offering, OfferingType } from "@/hooks/use-offerings";
 import type { TreeWhisper } from "@/hooks/use-whispers";
@@ -97,9 +99,10 @@ interface Props {
   treeName: string;
   offerings: Offering[];
   whispers: TreeWhisper[];
+  onViewInOfferings?: (kind: OfferingType | "whisper", offeringId?: string) => void;
 }
 
-export function EtherealTreeTab({ treeId, treeName, offerings, whispers }: Props) {
+export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewInOfferings }: Props) {
   const [filter, setFilter] = useState("all");
   const [activeNode, setActiveNode] = useState<NodeDatum | null>(null);
 
@@ -340,9 +343,27 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers }: Props
                   </SheetDescription>
                 )}
               </SheetHeader>
-              <p className="mt-4 text-xs text-muted-foreground font-serif">
-                Held inside {treeName}. Open the Offerings tab to tend or witness in full.
-              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-serif text-xs tracking-wider gap-1.5 w-fit"
+                  onClick={() => {
+                    const payloadId =
+                      activeNode.kind === "whisper"
+                        ? (activeNode.payload as TreeWhisper).id
+                        : (activeNode.payload as Offering).id;
+                    setActiveNode(null);
+                    onViewInOfferings?.(activeNode.kind, payloadId);
+                  }}
+                >
+                  View in Offerings
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+                <p className="text-xs text-muted-foreground font-serif">
+                  Held inside {treeName}. Open the Offerings tab to tend or witness in full.
+                </p>
+              </div>
             </>
           )}
         </SheetContent>
