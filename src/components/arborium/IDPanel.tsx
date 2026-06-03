@@ -160,7 +160,7 @@ export default function IDPanel({
                     {matchedSpecies.map((s) => (
                       <li
                         key={s.slug}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-amber-900/12 bg-[hsl(48_40%_97%)]/80 px-3.5 py-2.5"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-amber-900/12 dark:border-amber-200/12 bg-[hsl(48_40%_97%)]/80 dark:bg-[hsl(95_18%_14%)]/75 px-3.5 py-2.5"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span className="text-xl leading-none select-none shrink-0" aria-hidden>
