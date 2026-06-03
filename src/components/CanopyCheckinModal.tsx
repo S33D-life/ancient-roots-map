@@ -12,9 +12,7 @@ import PostEncounterShare from "@/components/PostEncounterShare";
 import WhisperCollector from "@/components/WhisperCollector";
 import SeasonalBonusBadge, { useSeasonalBonus } from "@/components/SeasonalBonusBadge";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
+import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
