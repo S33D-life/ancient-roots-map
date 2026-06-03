@@ -105,8 +105,8 @@ const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
 const MycelialWhispersBeneath = lazy(() => import("@/components/MycelialWhispersBeneath"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 import AncientFriendDebugPanel from "@/components/AncientFriendDebugPanel";
-const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
-const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
+// TreeMobileActionBar + TreeDetailPresenceBlock superseded by BeWithThisTreeCanopy.
+const BeWithThisTreeCanopy = lazy(() => import("@/components/tree-detail/BeWithThisTreeCanopy"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
@@ -857,40 +857,37 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ Mobile Above-the-Fold Action Bar ══════ */}
+        {/* ══════ BE WITH THIS TREE — unified action canopy ══════
+            One ceremonial 4-mode grid replaces the previously fragmented
+            CTAs (Witness, Visit Again, Make Offering, Begin Encounter,
+            Whisper, Seeds & Hearts). Logic + routes preserved. */}
         {tree && (
           <Suspense fallback={null}>
-            <TreeMobileActionBar
-              treeId={tree.id}
+            <BeWithThisTreeCanopy
               treeName={tree.name}
-              userId={userId}
               proximityGate={proximityGate}
               meetingStatus={meetingStatus}
-              relationship={relationship}
-              onCheckin={tryOpenCheckin}
-              onMakeOffering={openOfferingGateway}
+              hasMet={Boolean(
+                relationship?.stats &&
+                  ((relationship.stats.totalVisits ?? 0) > 0 ||
+                    (relationship.stats.offeringCount ?? 0) > 0 ||
+                    (relationship.stats.coWitnessCount ?? 0) > 0 ||
+                    (relationship.stats.stewardshipActions ?? 0) > 0),
+              )}
+              treePresence={treeDetailPresence}
+              onMeetAgain={tryOpenCheckin}
+              onLeaveOffering={openOfferingGateway}
+              onSendThroughRoots={() => {
+                if (!userId) return;
+                setWhisperContextLabel(null);
+                setWhisperModalOpen(true);
+              }}
+              onTendTree={() => {
+                const el = document.getElementById("seeds-hearts-section");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
             />
           </Suspense>
-        )}
-
-        {/* ══════ Presence Signal + Encounter nudge — desktop only on tree page; mobile uses TreeMobileActionBar ══════ */}
-        {userId && tree && (
-          <div className="hidden md:block">
-            <Suspense fallback={null}>
-              <TreeDetailPresenceBlock
-                tree={tree}
-                proximityGate={proximityGate}
-                meetingStatus={meetingStatus}
-                checkinStats={checkinStats}
-                onCheckin={tryOpenCheckin}
-                treePresence={treeDetailPresence}
-                availableWhispers={availableWhispers}
-                hasHearts={false}
-                onGoToEncounters={() => setSectionTab("encounters")}
-                firstVisit={checkinStats?.firstVisit}
-              />
-            </Suspense>
-          </div>
         )}
 
         {/* Aliveness signal — visible to all visitors, above tabs */}
@@ -907,7 +904,7 @@ const TreeDetailPage = () => {
             hang, and plant. Pulls TreeSeedsHeartsSection (reservoir + planter)
             together with TreeArrivalPanel (collect / plant / whispers actions). */}
         {id && tree && (
-          <section className="space-y-4">
+          <section id="seeds-hearts-section" className="space-y-4 scroll-mt-20">
             <Suspense fallback={null}>
               <TreeSeedsHeartsSection
                 treeId={id}
@@ -1224,46 +1221,7 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* Deepen Your Presence — 333s ritual */}
-            {userId && (
-              <Card className="bg-card/60 backdrop-blur border-primary/20">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <TreeDeciduous className="w-5 h-5 text-primary/60" />
-                    <div>
-                      <p className="font-serif text-sm text-foreground">Deepen your presence</p>
-                      <p className="text-xs text-muted-foreground font-serif">
-                        {presenceCompleted
-                          ? completedToday ? `✓ Presence completed today` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
-                          : "333 seconds of stillness — be fully here with this tree"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={presenceCompleted ? "outline" : "mystical"}
-                    size="sm"
-                    className="font-serif text-xs shrink-0"
-                    onClick={() => setPresenceOpen(true)}
-                    disabled={completedToday}
-                  >
-                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin"}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Co-Witness — shared presence */}
-            {userId && tree && (
-              <Suspense fallback={null}>
-                <CoWitnessPanel
-                  treeId={id!}
-                  treeName={tree.name}
-                  userId={userId}
-                />
-              </Suspense>
-            )}
-
-            {/* Canopy Visits Timeline — visits & streaks */}
+            {/* ── A · This Tree Remembers ── */}
             <CanopyVisitsTimeline
               checkins={checkins}
               stats={checkinStats}
@@ -1273,18 +1231,67 @@ const TreeDetailPage = () => {
               onRefresh={refetchCheckins}
             />
 
-            {/* Meeting Timer — current encounter window */}
-            <MeetingTimer
-              treeId={id!}
-              treeName={tree.name}
-              treeSpecies={tree.species}
-              userId={userId}
-              onMeetingChange={setActiveMeeting}
-              onStatusChange={setMeetingStatus}
-            />
-
-            {/* Other wanderers who met this tree */}
+            {/* Other wanderers who met this tree — part of remembrance */}
             <EncounterClusterPanel tree={tree} />
+
+            {/* ── B · Presence ── */}
+            {userId && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-serif tracking-[0.22em] uppercase text-muted-foreground/50 px-1">
+                  Presence
+                </p>
+                <Card className="bg-card/60 backdrop-blur border-primary/20">
+                  <CardContent className="p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <TreeDeciduous className="w-5 h-5 text-primary/60" />
+                      <div>
+                        <p className="font-serif text-sm text-foreground">Deepen your presence</p>
+                        <p className="text-xs text-muted-foreground font-serif">
+                          {presenceCompleted
+                            ? completedToday ? `✓ Presence completed today` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
+                            : "333 seconds of stillness — be fully here with this tree"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant={presenceCompleted ? "outline" : "mystical"}
+                      size="sm"
+                      className="font-serif text-xs shrink-0"
+                      onClick={() => setPresenceOpen(true)}
+                      disabled={completedToday}
+                    >
+                      {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* ── C · Shared Presence ── */}
+            {userId && tree && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-serif tracking-[0.22em] uppercase text-muted-foreground/50 px-1">
+                  Shared Presence
+                </p>
+                <Suspense fallback={null}>
+                  <CoWitnessPanel
+                    treeId={id!}
+                    treeName={tree.name}
+                    userId={userId}
+                  />
+                </Suspense>
+                <MeetingTimer
+                  treeId={id!}
+                  treeName={tree.name}
+                  treeSpecies={tree.species}
+                  userId={userId}
+                  onMeetingChange={setActiveMeeting}
+                  onStatusChange={setMeetingStatus}
+                />
+              </div>
+            )}
+
+            {/* ── D · Stewardship ── */}
 
             {/* Location Refinement */}
             {userId && tree && tree.latitude != null && tree.longitude != null && (
@@ -1366,32 +1373,8 @@ const TreeDetailPage = () => {
 
             {/* Seeds & Hearts moved to Overview tab — see TreeSeedsHeartsSection */}
 
-            {/* Canonical encounter gateway — one entrypoint.
-                Every encounter begins anchored to this tree, then chooses how it
-                travels (branches / roots / both) inside the gateway's travel modal.
-                Whispers are the "roots" propagation mode — not a separate system. */}
-            {userId && tree && (
-              <div className="rounded-2xl border border-primary/25 bg-card/50 backdrop-blur-sm overflow-hidden">
-                <div className="px-4 pt-4 pb-2">
-                  <h4 className="text-sm font-serif tracking-[0.18em] uppercase text-foreground/85">
-                    Leave Something Here
-                  </h4>
-                  <p className="text-[11px] font-serif italic text-muted-foreground/70 mt-1 leading-relaxed">
-                    Offerings hang in the branches. Whispers travel through the roots.
-                  </p>
-                </div>
-                <div className="p-3 pt-2">
-                  <Button
-                    onClick={openOfferingGateway}
-                    variant="outline"
-                    className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Begin Encounter
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* "Leave Something Here" entrypoint now lives in the unified
+                Be With This Tree canopy above the tabs — no duplicate CTA here. */}
 
             {availableWhispers.length > 0 && userId && tree && (
               <WhisperCollector
