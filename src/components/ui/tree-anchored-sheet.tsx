@@ -119,7 +119,7 @@ const TreeAnchoredSheet = ({
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             {(title || subtitle) && (
-              <div className="px-5 pt-2 pb-0">
+              <div className="px-5 pt-2 pb-0 pr-12 relative">
                 {title && (
                   <DrawerPrimitive.Title className="text-primary font-serif text-xl tracking-wide">
                     {title}
@@ -132,8 +132,20 @@ const TreeAnchoredSheet = ({
                 )}
               </div>
             )}
-            <div className="px-5 pt-3 pb-5">{children}</div>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              aria-label="Close"
+              className="absolute top-3 right-3 z-10 inline-flex items-center justify-center min-h-11 min-w-11 rounded-full text-muted-foreground/60 hover:text-foreground hover:bg-muted/40 transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <div className="px-5 pt-3 pb-8">{children}</div>
           </div>
+
         </DrawerPrimitive.Content>
       </DrawerPrimitive.Portal>
     </DrawerPrimitive.Root>
