@@ -209,11 +209,13 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
           <SheetHeader>
             <SheetTitle className="font-serif text-primary tracking-wide flex items-center gap-2">
               <Pencil className="h-4 w-4" />
-              Edit Details
+              Tend This Tree
             </SheetTitle>
-            <p className="text-xs text-muted-foreground font-serif">
-              {role === "creator" ? "You created this Ancient Friend" : "Steward editing"}
-              {" — changes are recorded in the tree's history."}
+            <p className="text-xs text-muted-foreground font-serif italic leading-relaxed">
+              {role === "creator"
+                ? "You brought this Ancient Friend into the Atlas. Refine the memory as it grows."
+                : "Tending as a steward of this tree."}
+              {" Every change is quietly noted in the tree's living record."}
             </p>
           </SheetHeader>
 
