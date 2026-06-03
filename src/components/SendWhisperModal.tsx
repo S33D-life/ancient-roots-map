@@ -788,9 +788,8 @@ export default function SendWhisperModal({
           }
 
           return (
-            <DialogFooter
-              className="flex-col gap-2 sm:flex-col sm:items-stretch sm:space-x-0 shrink-0 border-t border-border/30 bg-background px-6 py-3"
-              style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+            <div
+              className="flex flex-col gap-2 mt-4 pt-3 border-t border-border/30"
             >
               <Button
                 onClick={handleSend}
@@ -807,10 +806,10 @@ export default function SendWhisperModal({
                   {disabledReason}
                 </p>
               )}
-            </DialogFooter>
+            </div>
           );
         })()}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </TreeAnchoredSheet>
   );
 }
