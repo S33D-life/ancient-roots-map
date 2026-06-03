@@ -615,7 +615,7 @@ export default function CanopyCheckinModal({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-border/30">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="font-serif">
             Cancel
           </Button>
@@ -628,14 +628,13 @@ export default function CanopyCheckinModal({
             <Leaf className="h-4 w-4" />
             Witness This Season
           </Button>
-        </DialogFooter>
+        </div>
 
         {!userId && (
           <p className="text-xs text-center text-muted-foreground font-serif mt-2">
             Please <a href="/auth" className="text-primary underline">sign in</a> to check in.
           </p>
         )}
-      </DialogContent>
-    </Dialog>
+    </TreeAnchoredSheet>
   );
 }
