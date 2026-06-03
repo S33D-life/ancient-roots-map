@@ -1418,7 +1418,7 @@ const TreeDetailPage = () => {
           </TabsContent>
 
           {/* ── OFFERINGS TAB ── */}
-          <TabsContent value="offerings" className="space-y-6">
+          <TabsContent value="list" className="space-y-6">
             <TabErrorBoundary tabName="Offerings">
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
 
