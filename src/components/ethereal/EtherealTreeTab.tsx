@@ -250,16 +250,10 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
   }
 
   const totalMemories = nodes.length;
-  const aliveness =
-    totalMemories === 0
-      ? "Newly rooted."
-      : totalMemories < 6
-      ? "Quietly listening."
-      : totalMemories < 24
-      ? "Half-remembering."
-      : totalMemories < 72
-      ? "Full of remembering."
-      : "Brimming with lives.";
+  const atmosphericState = useMemo(
+    () => deriveAtmosphericState(nodes, filter),
+    [nodes, filter]
+  );
 
   const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0];
   const isAll = filter === "all";
