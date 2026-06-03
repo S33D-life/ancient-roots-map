@@ -61,6 +61,53 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "telegram",        label: "Telegram",    icon: <Send className="w-3.5 h-3.5" /> },
 ];
 
+/* ── Stewardship Altar groupings (Movement 6) ────────────────────────────
+   The Tap Root is reframed as five ceremonial groupings rather than a flat
+   row of twelve technical pills. Each grouping carries a quiet whisper that
+   names what kind of stewardship lives there. Underlying sections and logic
+   are unchanged — only the navigation pacing is reorganised. */
+const ALTAR_GROUPS: {
+  key: string;
+  label: string;
+  whisper: string;
+  sections: Section[];
+}[] = [
+  {
+    key: "pulse",
+    label: "System Pulse",
+    whisper: "How the forest breathes today",
+    sections: ["overview"],
+  },
+  {
+    key: "rings",
+    label: "Recent Rings",
+    whisper: "What stewardship laid down this cycle",
+    sections: ["steward"],
+  },
+  {
+    key: "branches",
+    label: "Growth Branches",
+    whisper: "Where the system is reaching",
+    sections: ["system-map", "roadmap"],
+  },
+  {
+    key: "memory",
+    label: "Stewardship Memory",
+    whisper: "Contracts, code, and accumulated craft",
+    sections: ["contract-shelf", "code-grove", "skills", "data-roots", "agent-garden"],
+  },
+  {
+    key: "tending",
+    label: "Active Tending",
+    whisper: "Hands at work right now",
+    sections: ["toolshed", "settings", "telegram"],
+  },
+];
+
+const SECTION_BY_KEY: Record<Section, { key: Section; label: string; icon: React.ReactNode }> =
+  Object.fromEntries(SECTIONS.map((s) => [s.key, s])) as Record<Section, typeof SECTIONS[number]>;
+
+
 /* ── System Map Nodes ── */
 const SYSTEM_NODES: SystemNode[] = [
   { id: "ancient-friends", label: "Ancient Friends", icon: <TreeDeciduous className="w-5 h-5" />, description: "Human-verified ceremonial tree records. Immutable layer.", route: "/library/gallery", status: "live", connections: ["research-forest", "ledger"] },
@@ -151,34 +198,56 @@ const DevRoom = () => {
 
   return (
     <div className="space-y-6">
-      {/* Tap Root header */}
+      {/* Stewardship Altar header — softer ceremonial framing */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-          <Terminal className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-xs font-mono text-amber-300/80">TAP ROOT</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+          <Terminal className="w-3.5 h-3.5 text-primary/80" />
+          <span className="text-[10px] font-serif uppercase tracking-[0.3em] text-primary/80">
+            Stewardship Altar
+          </span>
         </div>
-        <p className="text-xs text-muted-foreground/60 max-w-md mx-auto font-serif">
-          The deep technical root feeding the entire S33D ecosystem.
+        <p className="text-xs text-muted-foreground/70 max-w-md mx-auto font-serif italic leading-relaxed">
+          The tap root of the forest — where the system itself is tended.
         </p>
       </div>
 
-      {/* Section Nav */}
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {SECTIONS.map(s => (
-          <button
-            key={s.key}
-            onClick={() => setSection(s.key)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              section === s.key
-                ? "bg-primary/20 text-primary border border-primary/30"
-                : "bg-card/40 text-muted-foreground/70 border border-border/30 hover:bg-card/60 hover:text-foreground/80"
-            }`}
-          >
-            {s.icon}
-            <span className="text-[10px] sm:text-xs leading-none">{s.label}</span>
-          </button>
+      {/* Altar groupings — five quiet bands instead of one flat row of twelve */}
+      <div className="space-y-4">
+        {ALTAR_GROUPS.map((group) => (
+          <div key={group.key} className="space-y-1.5">
+            <div className="flex items-baseline gap-2 px-1">
+              <span className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
+                · {group.label} ·
+              </span>
+              <span className="font-serif text-[10px] italic text-muted-foreground/40 truncate">
+                {group.whisper}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {group.sections.map((key) => {
+                const s = SECTION_BY_KEY[key];
+                if (!s) return null;
+                const active = section === s.key;
+                return (
+                  <button
+                    key={s.key}
+                    onClick={() => setSection(s.key)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      active
+                        ? "bg-primary/20 text-primary border border-primary/30"
+                        : "bg-card/40 text-muted-foreground/70 border border-border/30 hover:bg-card/60 hover:text-foreground/80"
+                    }`}
+                  >
+                    {s.icon}
+                    <span className="text-[10px] sm:text-xs leading-none">{s.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </div>
+
 
       <Separator className="opacity-30" />
 
