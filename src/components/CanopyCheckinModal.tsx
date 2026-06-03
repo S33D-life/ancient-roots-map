@@ -435,19 +435,17 @@ export default function CanopyCheckinModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <TreeDeciduous className="h-5 w-5 text-primary" />
-            <DialogTitle className="font-serif text-primary tracking-wide">
-              Sit Beneath This Canopy
-            </DialogTitle>
-          </div>
-          <p className="text-sm text-muted-foreground font-serif mt-1">
-            Mark your presence with {treeName}.
-          </p>
-        </DialogHeader>
+    <TreeAnchoredSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={
+        <span className="font-serif text-primary tracking-wide flex items-center gap-2">
+          <TreeDeciduous className="h-5 w-5 text-primary" />
+          Sit Beneath This Canopy
+        </span>
+      }
+      subtitle={<>Mark your presence with {treeName}.</>}
+    >
 
         {/* Geo Status */}
         <div className="rounded-lg border border-border/40 p-3 bg-secondary/10">
