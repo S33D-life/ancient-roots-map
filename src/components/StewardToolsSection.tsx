@@ -91,8 +91,8 @@ export default function StewardToolsSection({
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-sm tracking-wide text-foreground/80 flex items-center gap-2">
-              <Shield className="h-3.5 w-3.5 text-primary/60" />
-              Steward Tools
+              <Leaf className="h-3.5 w-3.5 text-primary/60" />
+              Tend This Tree
             </h3>
             {roleInfo.label && (
               <Badge
