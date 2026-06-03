@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from "react
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ChevronDown, Layers } from "lucide-react";
+import { ChevronDown, Layers, Leaf } from "lucide-react";
 import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
@@ -1322,67 +1322,91 @@ const TreeDetailPage = () => {
               onCheckin={tryOpenCheckin}
               userId={userId}
               onRefresh={refetchCheckins}
+              showCheckinButton={false}
             />
 
             {/* Other wanderers who met this tree — part of remembrance */}
             <EncounterClusterPanel tree={tree} />
 
-            {/* ── B · Presence ── */}
-            {userId && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-serif tracking-[0.22em] uppercase text-muted-foreground/50 px-1">
-                  Presence
-                </p>
-                <Card className="bg-card/60 backdrop-blur border-primary/20">
-                  <CardContent className="p-4 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <TreeDeciduous className="w-5 h-5 text-primary/60" />
-                      <div>
-                        <p className="font-serif text-sm text-foreground">Deepen your presence</p>
-                        <p className="text-xs text-muted-foreground font-serif">
-                          {presenceCompleted
-                            ? completedToday ? `✓ Presence completed today` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
-                            : "333 seconds of stillness — be fully here with this tree"}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant={presenceCompleted ? "outline" : "mystical"}
-                      size="sm"
-                      className="font-serif text-xs shrink-0"
-                      onClick={() => setPresenceOpen(true)}
-                      disabled={completedToday}
-                    >
-                      {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+            {/* ── B · Presence (state-gated: one relationship state visible at a time) ── */}
+            {userId && tree && (() => {
+              const isPresent = meetingStatus === "active" || meetingStatus === "expiring";
+              return (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-serif tracking-[0.22em] uppercase text-muted-foreground/50 px-1">
+                    Presence
+                  </p>
 
-            {/* ── C · Shared Presence ── */}
-            {userId && tree && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-serif tracking-[0.22em] uppercase text-muted-foreground/50 px-1">
-                  Shared Presence
-                </p>
-                <Suspense fallback={null}>
-                  <CoWitnessPanel
-                    treeId={id!}
-                    treeName={tree.name}
-                    userId={userId}
-                  />
-                </Suspense>
-                <MeetingTimer
-                  treeId={id!}
-                  treeName={tree.name}
-                  treeSpecies={tree.species}
-                  userId={userId}
-                  onMeetingChange={setActiveMeeting}
-                  onStatusChange={setMeetingStatus}
-                />
-              </div>
-            )}
+                  {/* PRESENT: CoWitness leads, active timer, Deepen as quiet secondary */}
+                  {isPresent ? (
+                    <>
+                      <Suspense fallback={null}>
+                        <CoWitnessPanel
+                          treeId={id!}
+                          treeName={tree.name}
+                          userId={userId}
+                        />
+                      </Suspense>
+                      <MeetingTimer
+                        treeId={id!}
+                        treeName={tree.name}
+                        treeSpecies={tree.species}
+                        userId={userId}
+                        onMeetingChange={setActiveMeeting}
+                        onStatusChange={setMeetingStatus}
+                      />
+                      <Card className="bg-card/40 backdrop-blur border-border/30">
+                        <CardContent className="p-4 flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <TreeDeciduous className="w-5 h-5 text-primary/50" />
+                            <div>
+                              <p className="font-serif text-sm text-foreground/90">Deepen your presence</p>
+                              <p className="text-xs text-muted-foreground font-serif">
+                                {presenceCompleted
+                                  ? completedToday ? `✓ Presence completed today` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
+                                  : "333 seconds of stillness — be fully here with this tree"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="font-serif text-xs shrink-0"
+                            onClick={() => setPresenceOpen(true)}
+                            disabled={completedToday}
+                          >
+                            {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin"}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </>
+                  ) : (
+                    /* NOT PRESENT: only the Meet invitation + quiet Sit Beneath secondary */
+                    <>
+                      <MeetingTimer
+                        treeId={id!}
+                        treeName={tree.name}
+                        treeSpecies={tree.species}
+                        userId={userId}
+                        onMeetingChange={setActiveMeeting}
+                        onStatusChange={setMeetingStatus}
+                      />
+                      <div className="pt-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={tryOpenCheckin}
+                          className="font-serif text-xs tracking-wider gap-1.5 border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+                        >
+                          <Leaf className="h-3.5 w-3.5" />
+                          Sit Beneath This Canopy
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* ── D · Stewardship ── */}
 
