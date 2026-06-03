@@ -172,6 +172,20 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
   // Opacity helpers — "awake" zones brighten, others recede without disappearing.
   const awake = (z: Zone, on = 1, off = 0.28) => (zoneAwake(z) ? on : off);
 
+  // Moon ambience — derived locally, recomputed once per mount.
+  const moon = useMemo(() => moonFullness(), []);
+  // Halo gets quietly stronger near full moon; tone shifts a touch cooler.
+  const haloBoost = 0.35 + moon * 0.25; // 0.35..0.60
+  const haloHue = 45 - moon * 8; // 45 (gold) → 37 (cooler amber-ivory)
+
+  // Whisper root pulses — only when whispers exist, kept sparse.
+  const hasWhispers = whispers.length > 0;
+  const rootPulsePaths = [
+    "M200 420 Q 160 470 80 540",
+    "M200 420 Q 240 470 320 540",
+    "M200 420 Q 200 490 200 580",
+  ];
+
   return (
     <div className="space-y-3">
       {/* Filter ribbon */}
