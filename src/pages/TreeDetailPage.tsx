@@ -884,6 +884,10 @@ const TreeDetailPage = () => {
                 setWhisperModalOpen(true);
               }}
               onTendTree={() => {
+                if (canDirectEdit) {
+                  setTendPanelOpen(true);
+                  return;
+                }
                 const el = document.getElementById("seeds-hearts-section");
                 if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
