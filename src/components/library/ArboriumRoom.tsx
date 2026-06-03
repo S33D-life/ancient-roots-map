@@ -279,16 +279,15 @@ export default function ArboriumRoom() {
       {/* ── 8. Photo ID — coming soon ── */}
       <section>
         <div
-          className="relative rounded-2xl border border-dashed border-amber-900/20 p-5 flex items-start gap-4"
-          style={{ background: "hsl(45 30% 96% / 0.5)" }}
+          className="relative rounded-2xl border border-dashed border-amber-900/20 dark:border-amber-200/15 p-5 flex items-start gap-4 bg-[hsl(45_30%_96%/0.5)] dark:bg-[hsl(80_16%_13%/0.55)]"
         >
-          <div className="shrink-0 p-2.5 rounded-xl border border-amber-900/15 bg-[hsl(45_40%_95%)]/70">
-            <Camera className="w-5 h-5 text-amber-900/45" />
+          <div className="shrink-0 p-2.5 rounded-xl border border-amber-900/15 dark:border-amber-200/15 bg-[hsl(45_40%_95%)]/70 dark:bg-[hsl(95_16%_15%)]/70">
+            <Camera className="w-5 h-5 text-amber-900/45 dark:text-amber-200/55" />
           </div>
           <div>
             <div className="inline-flex items-center gap-2 mb-1">
               <p className="font-serif text-sm text-foreground/80">Photo ID</p>
-              <span className="text-[9px] font-serif uppercase tracking-[0.18em] text-amber-900/50 border border-amber-900/20 rounded-full px-2 py-0.5">
+              <span className="text-[9px] font-serif uppercase tracking-[0.18em] text-amber-900/50 dark:text-amber-200/55 border border-amber-900/20 dark:border-amber-200/20 rounded-full px-2 py-0.5">
                 Coming soon
               </span>
             </div>
