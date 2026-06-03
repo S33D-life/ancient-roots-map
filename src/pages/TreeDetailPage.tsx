@@ -1036,6 +1036,8 @@ const TreeDetailPage = () => {
                   }}
                 />
               </TabsContent>
+            </Tabs>
+          </TabsContent>
 
 
           {/* ── OVERVIEW TAB ── */}
@@ -1436,8 +1438,10 @@ const TreeDetailPage = () => {
             </TabErrorBoundary>
           </TabsContent>
 
-          {/* ── OFFERINGS TAB ── */}
-          <TabsContent value="list" className="space-y-6">
+          {/* ── ARCHIVE — second half of Memory tab ── */}
+          <TabsContent value="memory">
+            <Tabs value={memoryMode} onValueChange={setMemoryMode}>
+              <TabsContent value="list" className="space-y-6">
             <TabErrorBoundary tabName="Offerings">
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
 
