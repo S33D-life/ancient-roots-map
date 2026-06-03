@@ -107,6 +107,7 @@ const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 import AncientFriendDebugPanel from "@/components/AncientFriendDebugPanel";
 const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
 const TreeMobileActionBar = lazy(() => import("@/components/tree-detail/TreeMobileActionBar"));
+const BeWithThisTreeCanopy = lazy(() => import("@/components/tree-detail/BeWithThisTreeCanopy"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
