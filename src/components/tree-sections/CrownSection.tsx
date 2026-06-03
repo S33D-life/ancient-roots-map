@@ -120,6 +120,14 @@ const CrownSection = () => {
           The dream grows with the tree.
         </DepthRevealText>
 
+        {/* Threshold whisper — a single quiet invitation into the wood */}
+        <DepthRevealText
+          delay={550}
+          className="font-serif italic text-[12px] md:text-[13px] text-muted-foreground/45 max-w-xs mx-auto pt-1"
+        >
+          Find a tree. Leave something living behind.
+        </DepthRevealText>
+
         {/* Doorway cards — embedded, not floating */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-4">
           {ROOMS.map((room, i) => {
