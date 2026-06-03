@@ -275,6 +275,19 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
     "M200 420 Q 200 490 200 580",
   ];
 
+  // First-visit onboarding whisper — shown once, then quietly dismissed.
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("et-onboarded-v1")) setShowOnboarding(true);
+    } catch { /* ignore */ }
+  }, []);
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    try { localStorage.setItem("et-onboarded-v1", "1"); } catch { /* ignore */ }
+  };
+
+
   return (
     <div className="space-y-3">
       {/* Filter ribbon */}
