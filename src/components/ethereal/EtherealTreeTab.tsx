@@ -344,7 +344,9 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             const isWhisper = n.kind === "whisper";
             const baseRadius = isWhisper ? 2.2 : 3;
             const isSelected = activeNode?.id === n.id;
-            const quieted = !!activeNode && !isSelected;
+            const isLingering = !activeNode && lingerNodeId === n.id;
+            const highlighted = isSelected || isLingering;
+            const quieted = (!!activeNode && !isSelected) || (!!lingerNodeId && !isLingering && !activeNode);
             return (
               <g
                 key={n.id}
