@@ -93,6 +93,96 @@ interface NodeDatum {
   payload: Offering | TreeWhisper;
 }
 
+/** Derive a poetic atmospheric state from the living memory ecology.
+ *  No counts exposed. No formulas visible. Pure qualitative feeling. */
+function deriveAtmosphericState(nodes: NodeDatum[], activeFilterId: string): string {
+  const total = nodes.length;
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+  const tsOf = (n: NodeDatum): number | null => {
+    const p = n.payload as any;
+    const raw = p?.created_at || p?.createdAt || null;
+    if (!raw) return null;
+    const t = new Date(raw).getTime();
+    return isNaN(t) ? null : t;
+  };
+
+  const recentCount = nodes.filter((n) => {
+    const t = tsOf(n);
+    return t !== null && now - t < thirtyDays;
+  }).length;
+
+  const kinds = new Set(nodes.map((n) => n.kind));
+  const kindCount = kinds.size;
+
+  const countKinds = (kindsToCount: (OfferingType | "whisper")[]) =>
+    nodes.filter((n) => kindsToCount.includes(n.kind)).length;
+
+  const whisperN = countKinds(["whisper"]);
+  const songN = countKinds(["song", "voice"]);
+  const storyN = countKinds(["story", "book"]);
+  const prayerN = countKinds(["prayer", "art"]);
+  const photoN = countKinds(["photo"]);
+  const poemN = countKinds(["poem", "voice"]);
+
+  // Filter-aware: the tree describes itself through the chosen lens
+  if (activeFilterId !== "all") {
+    if (activeFilterId === "whisper" && whisperN > 0)
+      return whisperN > 4 ? "Whispers move through these roots often." : "Whispers move through these roots.";
+    if (activeFilterId === "song" && songN > 0) return "Heavy with song.";
+    if (activeFilterId === "poem" && poemN > 0) return "Poems bloom in the high branches.";
+    if (activeFilterId === "story" && storyN > 0)
+      return storyN > 4 ? "Seasoned with many stories." : "Seasoned with stories.";
+    if (activeFilterId === "prayer" && prayerN > 0) return "The branches glow with devotion.";
+    if (activeFilterId === "photo" && photoN > 0) return "Light has been caught here many times.";
+  }
+
+  // Empty
+  if (total === 0) return "This tree waits quietly.";
+
+  // Single-kind ecology
+  if (kindCount === 1) {
+    const sole = Array.from(kinds)[0];
+    if (sole === "whisper") return "Whispers move beneath the bark.";
+    if (sole === "song" || sole === "voice") return "Heavy with song.";
+    if (sole === "prayer" || sole === "art") return "The branches glow with devotion.";
+    if (sole === "story" || sole === "book") return "Seasoned with stories.";
+    if (sole === "photo") return "Light has been caught here.";
+    if (sole === "poem") return "Poems bloom in the high branches.";
+    return "A single kind of memory lives here.";
+  }
+
+  // Recent burst
+  const recentRatio = total > 0 ? recentCount / total : 0;
+  if (recentCount >= 3 && recentRatio >= 0.3) return "Bright with fresh offerings.";
+
+  // High diversity
+  if (kindCount >= 5 && total >= 8) return "Full of remembering.";
+
+  // Dominant ecology (kind must be > 40% and at least 3)
+  if (whisperN >= total * 0.5 && whisperN >= 3) return "Whispers move through these roots.";
+  if (songN >= total * 0.4 && songN >= 3) return "Heavy with song.";
+  if (storyN >= total * 0.4 && storyN >= 3) return "Seasoned with stories.";
+  if (prayerN >= total * 0.4 && prayerN >= 3) return "The branches glow with devotion.";
+
+  // Density bands
+  if (total < 6) {
+    if (recentCount > 0) return "New memories are taking root.";
+    return "Resting between encounters.";
+  }
+  if (total < 20) {
+    if (recentCount > 0) return "New memories are taking root.";
+    return "Quietly rooted in memory.";
+  }
+  if (total < 50) {
+    if (recentCount > 0) return "Branches full of light.";
+    return "Seasoned with many stories.";
+  }
+
+  return "Brimming with lives.";
+}
+
 type FilterDef = {
   id: string;
   label: string;
@@ -160,16 +250,10 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
   }
 
   const totalMemories = nodes.length;
-  const aliveness =
-    totalMemories === 0
-      ? "Newly rooted."
-      : totalMemories < 6
-      ? "Quietly listening."
-      : totalMemories < 24
-      ? "Half-remembering."
-      : totalMemories < 72
-      ? "Full of remembering."
-      : "Brimming with lives.";
+  const atmosphericState = useMemo(
+    () => deriveAtmosphericState(nodes, filter),
+    [nodes, filter]
+  );
 
   const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0];
   const isAll = filter === "all";
@@ -436,9 +520,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
           })}
         </svg>
 
-        {/* Bottom aliveness line */}
+        {/* Qualitative aliveness — the tree quietly describing itself */}
         <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
-          <p className="text-[11px] font-serif italic text-primary/70 tracking-wide">{aliveness}</p>
+          <p
+            key={atmosphericState}
+            className="text-[11px] font-serif italic text-primary/70 tracking-wide animate-fade-in"
+          >
+            {atmosphericState}
+          </p>
         </div>
       </div>
 
