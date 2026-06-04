@@ -961,7 +961,7 @@ const TreeDetailPage = () => {
                 presenceRemainingMinutes={presenceRemainingMinutes}
                 onMeetAgain={tryOpenCheckin}
                 onLeaveOffering={openOfferingGateway}
-                onSendThroughRoots={() => {
+                onWhisperThroughRoots={() => {
                   if (!userId) return;
                   setWhisperContextLabel(null);
                   setWhisperModalOpen(true);
