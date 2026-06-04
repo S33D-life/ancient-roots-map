@@ -11,11 +11,11 @@
  *     (Check In Again is NEVER shown while presence is active.)
  *
  *   STATE C — Steward   (returning, not currently present)
- *     "Meet Again" + inline collapsible "Tend This Tree" stewardship grove.
+ *     "Meet Again" + inline collapsible "Seeds & Hearts" stewardship grove.
  *     The grove (Seeds & Hearts, stewardship, ecology) is revealed in place
  *     instead of duplicated below the page.
  *
- * Whisper ("Send Through the Roots") demoted to a tertiary link so it no
+ * Whisper ("Whisper Through the Roots") demoted to a tertiary link so it no
  * longer competes with the primary presence action.
  */
 import { lazy, Suspense, useState, type ReactNode } from "react";
@@ -34,8 +34,8 @@ interface Props {
   presenceRemainingMinutes?: number | null;
   onMeetAgain: () => void;
   onLeaveOffering: () => void;
-  onSendThroughRoots: () => void;
-  /** Optional stewardship surface revealed inline under "Tend This Tree". */
+  onWhisperThroughRoots: () => void;
+  /** Optional stewardship surface revealed inline under "Seeds & Hearts". */
   tendChildren?: ReactNode;
 }
 
@@ -57,7 +57,7 @@ export default function BeWithThisTreeCanopy({
   presenceRemainingMinutes,
   onMeetAgain,
   onLeaveOffering,
-  onSendThroughRoots,
+  onWhisperThroughRoots,
   tendChildren,
 }: Props) {
   const isActive = meetingStatus === "active" || meetingStatus === "expiring";
@@ -237,7 +237,7 @@ export default function BeWithThisTreeCanopy({
         </motion.button>
       </div>
 
-      {/* ── Tend This Tree — inline stewardship disclosure (steward & present only) ── */}
+      {/* ── Seeds & Hearts — inline stewardship disclosure (steward & present only) ── */}
       {tendChildren && state !== "stranger" && (
         <div className="border-t border-border/20">
           <button
@@ -249,7 +249,7 @@ export default function BeWithThisTreeCanopy({
             <div className="flex items-center gap-2">
               <span className="text-sm leading-none" aria-hidden>🌱</span>
               <span className="text-[11px] font-serif tracking-[0.22em] uppercase text-muted-foreground/75">
-                Tend this tree
+                Seeds & Hearts
               </span>
             </div>
             <ChevronDown
@@ -280,7 +280,7 @@ export default function BeWithThisTreeCanopy({
       <div className="px-5 pb-3 pt-1 text-center">
         <button
           type="button"
-          onClick={rootsOpen ? onSendThroughRoots : undefined}
+          onClick={rootsOpen ? onWhisperThroughRoots : undefined}
           disabled={!rootsOpen}
           className={cn(
             "text-[10.5px] font-serif tracking-[0.18em] uppercase transition-colors",
@@ -289,7 +289,7 @@ export default function BeWithThisTreeCanopy({
               : "text-muted-foreground/30 cursor-not-allowed",
           )}
         >
-          🫧 Send through the roots
+          🌬️ Whisper Through the Roots
         </button>
       </div>
     </motion.section>
