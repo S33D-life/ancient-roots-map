@@ -283,7 +283,7 @@ export default function BeWithThisTreeCanopy({
           onClick={rootsOpen ? onWhisperThroughRoots : undefined}
           disabled={!rootsOpen}
           className={cn(
-            "text-[10.5px] font-serif tracking-[0.18em] uppercase transition-colors",
+            "whisper-roots-btn text-[10.5px] font-serif tracking-[0.18em] uppercase transition-colors",
             rootsOpen
               ? "text-muted-foreground/60 hover:text-primary/80"
               : "text-muted-foreground/30 cursor-not-allowed",

@@ -643,6 +643,70 @@ All colors MUST be HSL.
     border-radius: 50%;
   }
 
+  /* Whisper Through the Roots — root pulse + airflow shimmer on hover/active */
+  @keyframes whisperRootPulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsla(200, 35%, 55%, 0); }
+    50%      { box-shadow: 0 0 10px 2px hsla(200, 40%, 60%, 0.18); }
+  }
+  @keyframes whisperAirflow {
+    0%   { transform: translateX(-120%); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateX(120%); opacity: 0; }
+  }
+  .whisper-roots-btn {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    isolation: isolate;
+  }
+  .whisper-roots-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 600ms ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .whisper-roots-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsla(200, 60%, 80%, 0.18) 50%,
+      transparent 100%
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+    opacity: 0;
+  }
+  .whisper-roots-btn:hover:not(:disabled)::before,
+  .whisper-roots-btn:focus-visible:not(:disabled)::before,
+  .whisper-roots-btn:active:not(:disabled)::before {
+    opacity: 1;
+    animation: whisperRootPulse 2.8s ease-in-out infinite;
+  }
+  .whisper-roots-btn:hover:not(:disabled)::after,
+  .whisper-roots-btn:focus-visible:not(:disabled)::after,
+  .whisper-roots-btn:active:not(:disabled)::after {
+    animation: whisperAirflow 2.4s ease-in-out infinite;
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .whisper-roots-btn::before,
+    .whisper-roots-btn::after {
+      animation: none !important;
+    }
+  }
+
   /* Heart Pool visual system — tree-centric root glow */
   @keyframes heartPoolBreath {
     0%, 100% { box-shadow: 0 0 0 0 hsla(140, 40%, 40%, 0); }
