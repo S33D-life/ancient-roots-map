@@ -700,9 +700,62 @@ All colors MUST be HSL.
     animation: whisperAirflow 2.4s ease-in-out infinite;
     opacity: 1;
   }
+  /* Whisper panel — ambient root pulse + airflow shimmer while open */
+  @keyframes whisperPanelRootPulse {
+    0%, 100% {
+      background: radial-gradient(
+        ellipse at 50% 100%,
+        hsla(200, 35%, 55%, 0.04),
+        transparent 70%
+      );
+    }
+    50% {
+      background: radial-gradient(
+        ellipse at 50% 100%,
+        hsla(200, 45%, 60%, 0.10),
+        transparent 75%
+      );
+    }
+  }
+  @keyframes whisperPanelAirflow {
+    0%   { transform: translateX(-30%); opacity: 0; }
+    25%  { opacity: 1; }
+    75%  { opacity: 1; }
+    100% { transform: translateX(30%); opacity: 0; }
+  }
+  .whisper-roots-panel {
+    position: relative;
+    isolation: isolate;
+  }
+  .whisper-roots-panel::before {
+    content: "";
+    position: absolute;
+    inset: -1rem;
+    pointer-events: none;
+    z-index: -1;
+    animation: whisperPanelRootPulse 6s ease-in-out infinite;
+    border-radius: inherit;
+  }
+  .whisper-roots-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsla(200, 55%, 78%, 0.07) 50%,
+      transparent 100%
+    );
+    animation: whisperPanelAirflow 9s ease-in-out infinite;
+    border-radius: inherit;
+  }
   @media (prefers-reduced-motion: reduce) {
     .whisper-roots-btn::before,
-    .whisper-roots-btn::after {
+    .whisper-roots-btn::after,
+    .whisper-roots-panel::before,
+    .whisper-roots-panel::after {
       animation: none !important;
     }
   }
