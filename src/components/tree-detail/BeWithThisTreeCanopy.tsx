@@ -235,6 +235,30 @@ export default function BeWithThisTreeCanopy({
             Photo · poem · song · bloom
           </p>
         </motion.button>
+
+        {/* Whisper Through the Roots — peer card, quieter tone via icon/copy */}
+        <motion.button
+          type="button"
+          onClick={rootsOpen ? onWhisperThroughRoots : undefined}
+          disabled={!rootsOpen}
+          whileTap={rootsOpen ? { scale: 0.985 } : undefined}
+          className={cn(
+            "whisper-roots-btn w-full text-left rounded-xl px-4 py-3 transition-all border",
+            rootsOpen
+              ? "border-border/30 bg-card/30 hover:border-primary/30 hover:bg-primary/5 active:bg-primary/10"
+              : "border-border/20 bg-secondary/10 opacity-60 cursor-not-allowed",
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base leading-none" aria-hidden>🌬️</span>
+            <p className="text-sm font-serif text-foreground/90 leading-tight">
+              Whisper Through the Roots
+            </p>
+          </div>
+          <p className="text-[11px] font-serif text-muted-foreground/70 mt-0.5 leading-snug pl-6">
+            Mycelial message · carried beneath
+          </p>
+        </motion.button>
       </div>
 
       {/* ── Seeds & Hearts — inline stewardship disclosure (steward & present only) ── */}
@@ -276,22 +300,6 @@ export default function BeWithThisTreeCanopy({
         </div>
       )}
 
-      {/* ── Tertiary: whisper through the roots (quiet link) ── */}
-      <div className="px-5 pb-3 pt-1 text-center">
-        <button
-          type="button"
-          onClick={rootsOpen ? onWhisperThroughRoots : undefined}
-          disabled={!rootsOpen}
-          className={cn(
-            "whisper-roots-btn text-[10.5px] font-serif tracking-[0.18em] uppercase transition-colors",
-            rootsOpen
-              ? "text-muted-foreground/60 hover:text-primary/80"
-              : "text-muted-foreground/30 cursor-not-allowed",
-          )}
-        >
-          🌬️ Whisper Through the Roots
-        </button>
-      </div>
     </motion.section>
   );
 }
