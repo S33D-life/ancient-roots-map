@@ -479,7 +479,7 @@ export default function SendWhisperModal({
         </>
       }
     >
-      <div className="space-y-5">
+      <div className="whisper-roots-panel space-y-5">
           {/* Step 1: Recipient */}
           <div className="space-y-3">
             <Label className="font-serif text-sm">Who can collect this whisper?</Label>
