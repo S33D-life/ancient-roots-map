@@ -615,20 +615,25 @@ export default function CanopyCheckinModal({
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-border/30">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="font-serif">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4 pt-3 border-t border-border/30">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="font-serif w-full sm:w-auto min-h-11"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting || !canCheckIn || !userId}
-            className="font-serif gap-2"
+            className="font-serif gap-2 w-full sm:w-auto min-h-11 justify-center whitespace-normal text-center"
           >
-            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            <Leaf className="h-4 w-4" />
-            Witness This Season
+            {submitting && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
+            <Leaf className="h-4 w-4 shrink-0" />
+            <span>Witness This Season</span>
           </Button>
         </div>
+
 
         {!userId && (
           <p className="text-xs text-center text-muted-foreground font-serif mt-2">
