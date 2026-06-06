@@ -13,7 +13,7 @@ import WhisperCollector from "@/components/WhisperCollector";
 import SeasonalBonusBadge, { useSeasonalBonus } from "@/components/SeasonalBonusBadge";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import TreeAnchoredSheet from "@/components/ui/tree-anchored-sheet";
-import { Input } from "@/components/ui/input";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -445,7 +445,28 @@ export default function CanopyCheckinModal({
         </span>
       }
       subtitle={<>Mark your presence with {treeName}.</>}
+      footer={
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="font-serif w-full sm:w-auto min-h-11"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting || !canCheckIn || !userId}
+            className="font-serif gap-2 w-full sm:w-auto min-h-11 justify-center whitespace-normal text-center"
+          >
+            {submitting && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
+            <Leaf className="h-4 w-4 shrink-0" />
+            <span>Witness This Season</span>
+          </Button>
+        </div>
+      }
     >
+
 
         {/* Geo Status */}
         <div className="rounded-lg border border-border/40 p-3 bg-secondary/10">
@@ -553,15 +574,15 @@ export default function CanopyCheckinModal({
             </div>
           </div>
 
-          {/* Reflection */}
+          {/* Reflection + Tree Notes (merged) */}
           <div className="space-y-1.5">
-            <Label htmlFor="reflection" className="font-serif text-sm">Reflection (optional)</Label>
+            <Label htmlFor="reflection" className="font-serif text-sm">Reflection &amp; Tree Notes (optional)</Label>
             <Textarea
               id="reflection"
-              placeholder="What did you notice today?"
+              placeholder="What did you notice? Signs of stress, growth, birdsong, fungi, weather, or change…"
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
-              className="font-serif text-sm min-h-[80px] resize-none"
+              className="font-serif text-sm min-h-[88px] resize-none"
               maxLength={2000}
             />
           </div>
@@ -600,40 +621,7 @@ export default function CanopyCheckinModal({
               I left an offering with this visit (adds confidence)
             </Label>
           </div>
-
-          {/* Health Notes */}
-          <div className="space-y-1.5">
-            <Label htmlFor="health" className="font-serif text-sm">Health observations (optional)</Label>
-            <Input
-              id="health"
-              placeholder="Signs of stress, growth, or change…"
-              value={healthNotes}
-              onChange={(e) => setHealthNotes(e.target.value)}
-              className="font-serif text-sm"
-              maxLength={500}
-            />
-          </div>
         </div>
-
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4 pt-3 border-t border-border/30">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="font-serif w-full sm:w-auto min-h-11"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting || !canCheckIn || !userId}
-            className="font-serif gap-2 w-full sm:w-auto min-h-11 justify-center whitespace-normal text-center"
-          >
-            {submitting && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
-            <Leaf className="h-4 w-4 shrink-0" />
-            <span>Witness This Season</span>
-          </Button>
-        </div>
-
 
         {!userId && (
           <p className="text-xs text-center text-muted-foreground font-serif mt-2">
@@ -643,3 +631,4 @@ export default function CanopyCheckinModal({
     </TreeAnchoredSheet>
   );
 }
+
