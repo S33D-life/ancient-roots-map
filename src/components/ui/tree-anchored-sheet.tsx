@@ -24,6 +24,8 @@ interface TreeAnchoredSheetProps {
   children: React.ReactNode;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
+  /** Sticky footer rendered outside the scrolling content — always visible above safe-area / BottomNav. */
+  footer?: React.ReactNode;
   contentClassName?: string;
   /** Snap points for the sheet. Defaults to [0.6, 0.95] so tree stays visible at rest. */
   snapPoints?: number[];
