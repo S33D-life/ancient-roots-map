@@ -104,7 +104,7 @@ const TreeAnchoredSheet = ({
             contentClassName,
           )}
           style={{
-            paddingBottom: keyboardOpen ? "8px" : "env(safe-area-inset-bottom, 0px)",
+            // Sheet itself sits flush to viewport bottom; inner footer handles safe-area + BottomNav clearance.
             transition: "padding-bottom 200ms ease",
           }}
         >
@@ -118,7 +118,7 @@ const TreeAnchoredSheet = ({
             }}
           />
           <div
-            className="overflow-y-auto flex-1 overscroll-contain"
+            className="overflow-y-auto flex-1 overscroll-contain relative"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             {(title || subtitle) && (
@@ -146,8 +146,21 @@ const TreeAnchoredSheet = ({
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
-            <div className="px-5 pt-3 pb-8">{children}</div>
+            <div className="px-5 pt-3 pb-4">{children}</div>
           </div>
+
+          {footer && (
+            <div
+              className="shrink-0 border-t border-border/30 bg-background/95 backdrop-blur-sm px-5 pt-3"
+              style={{
+                paddingBottom: keyboardOpen
+                  ? "8px"
+                  : "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+              }}
+            >
+              {footer}
+            </div>
+          )}
 
         </DrawerPrimitive.Content>
       </DrawerPrimitive.Portal>
