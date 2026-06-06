@@ -462,6 +462,22 @@ export default function SendWhisperModal({
     );
   }
 
+  const missingMessage = !message.trim();
+  const missingRecipient = recipientScope === "PRIVATE" && !recipientUserId;
+  const missingGroup = audienceType === "group" && !groupId;
+  const isDisabled =
+    sending || !userId || missingMessage ||
+    missingRecipient || missingGroup || insufficientHearts;
+
+  let disabledReason: string | null = null;
+  if (!userId) disabledReason = "Sign in to send a whisper.";
+  else if (missingMessage) disabledReason = "Write a message first.";
+  else if (missingRecipient) disabledReason = "Choose a wanderer to whisper to.";
+  else if (missingGroup) disabledReason = "Choose a circle to whisper into.";
+  else if (insufficientHearts) {
+    disabledReason = `Needs ${heartCost} hearts — you have ${heartBalance.totalHearts} (short by ${heartCost - heartBalance.totalHearts}).`;
+  }
+
   return (
     <TreeAnchoredSheet
       open={open}
@@ -478,7 +494,27 @@ export default function SendWhisperModal({
           {contextLabel && <span className="block mt-0.5 text-muted-foreground/80">Context: {contextLabel}</span>}
         </>
       }
+      footer={
+        <div className="flex flex-col gap-2">
+          <Button
+            onClick={handleSend}
+            disabled={isDisabled}
+            className="font-serif tracking-wider gap-2 w-full min-h-11 justify-center whitespace-normal"
+          >
+            {sending ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Send className="w-4 h-4 shrink-0" />}
+            {audienceType === "group"
+              ? <>Send Whisper <span className="inline-flex items-center gap-0.5 opacity-80"><Heart className="w-3 h-3" />{heartCost}</span></>
+              : "Send Whisper"}
+          </Button>
+          {isDisabled && disabledReason && !sending && (
+            <p className="text-[11px] font-serif text-muted-foreground text-center">
+              {disabledReason}
+            </p>
+          )}
+        </div>
+      }
     >
+
       <div className="whisper-roots-panel space-y-5">
           {/* Step 1: Recipient */}
           <div className="space-y-3">
