@@ -806,45 +806,6 @@ export default function SendWhisperModal({
           )}
         </div>
 
-        {(() => {
-          const missingMessage = !message.trim();
-          const missingRecipient = recipientScope === "PRIVATE" && !recipientUserId;
-          const missingGroup = audienceType === "group" && !groupId;
-          const isDisabled =
-            sending || !userId || missingMessage ||
-            missingRecipient || missingGroup || insufficientHearts;
-
-          let disabledReason: string | null = null;
-          if (!userId) disabledReason = "Sign in to send a whisper.";
-          else if (missingMessage) disabledReason = "Write a message first.";
-          else if (missingRecipient) disabledReason = "Choose a wanderer to whisper to.";
-          else if (missingGroup) disabledReason = "Choose a circle to whisper into.";
-          else if (insufficientHearts) {
-            disabledReason = `Needs ${heartCost} hearts — you have ${heartBalance.totalHearts} (short by ${heartCost - heartBalance.totalHearts}).`;
-          }
-
-          return (
-            <div
-              className="flex flex-col gap-2 mt-4 pt-3 border-t border-border/30"
-            >
-              <Button
-                onClick={handleSend}
-                disabled={isDisabled}
-                className="font-serif tracking-wider gap-2 w-full sm:w-auto sm:self-end"
-              >
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                {audienceType === "group"
-                  ? <>Send Whisper <span className="inline-flex items-center gap-0.5 opacity-80"><Heart className="w-3 h-3" />{heartCost}</span></>
-                  : "Send Whisper"}
-              </Button>
-              {isDisabled && disabledReason && !sending && (
-                <p className="text-[11px] font-serif text-muted-foreground text-center sm:text-right">
-                  {disabledReason}
-                </p>
-              )}
-            </div>
-          );
-        })()}
     </TreeAnchoredSheet>
   );
 }
