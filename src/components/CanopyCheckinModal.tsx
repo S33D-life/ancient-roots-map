@@ -445,7 +445,28 @@ export default function CanopyCheckinModal({
         </span>
       }
       subtitle={<>Mark your presence with {treeName}.</>}
+      footer={
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="font-serif w-full sm:w-auto min-h-11"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting || !canCheckIn || !userId}
+            className="font-serif gap-2 w-full sm:w-auto min-h-11 justify-center whitespace-normal text-center"
+          >
+            {submitting && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
+            <Leaf className="h-4 w-4 shrink-0" />
+            <span>Witness This Season</span>
+          </Button>
+        </div>
+      }
     >
+
 
         {/* Geo Status */}
         <div className="rounded-lg border border-border/40 p-3 bg-secondary/10">
