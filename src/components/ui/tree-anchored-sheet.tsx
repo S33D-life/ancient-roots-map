@@ -9,9 +9,7 @@
  *   • Uses a faint overlay so the tree imagery / page above remains visible
  *   • Defaults to ~60% viewport height — the tree breathes above the sheet
  *   • Expands to ~95% only when the user drags up or the keyboard opens
- *
- * API is intentionally compatible with ResponsiveDialog so flows can migrate
- * with a single import change.
+ *   • Optional sticky `footer` slot stays visible above safe-area + BottomNav
  */
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
@@ -66,19 +64,16 @@ const TreeAnchoredSheet = ({
   const initialSnap = defaultSnapPoint ?? snapPoints[0];
   const [snap, setSnap] = React.useState<number | string | null>(initialSnap);
 
-  // Reset to default snap when reopened
   React.useEffect(() => {
     if (open) setSnap(initialSnap);
   }, [open, initialSnap]);
 
-  // Force highest snap when keyboard opens
   React.useEffect(() => {
     if (keyboardOpen && snapPoints.length) {
       setSnap(snapPoints[snapPoints.length - 1]);
     }
   }, [keyboardOpen, snapPoints]);
 
-  // Desktop uses a tighter sheet anchored to bottom-right; mobile full-width
   return (
     <DrawerPrimitive.Root
       open={open}
@@ -89,7 +84,6 @@ const TreeAnchoredSheet = ({
       shouldScaleBackground={false}
     >
       <DrawerPrimitive.Portal>
-        {/* Faint overlay — tree page remains visible through it */}
         <DrawerPrimitive.Overlay
           className="fixed inset-0 z-50 bg-black/25 backdrop-blur-[2px]"
         />
@@ -103,12 +97,8 @@ const TreeAnchoredSheet = ({
               : "left-1/2 -translate-x-1/2 bottom-0 w-full max-w-xl",
             contentClassName,
           )}
-          style={{
-            // Sheet itself sits flush to viewport bottom; inner footer handles safe-area + BottomNav clearance.
-            transition: "padding-bottom 200ms ease",
-          }}
         >
-          {/* Breathing anchor handle — a hint of root/trunk connection */}
+          {/* Breathing anchor handle */}
           <div
             className="mx-auto mt-2.5 mb-1 h-1 w-12 shrink-0 rounded-full"
             style={{
@@ -117,12 +107,26 @@ const TreeAnchoredSheet = ({
               boxShadow: "0 0 10px hsl(var(--primary) / 0.18)",
             }}
           />
+
+          {/* Close button — pinned to sheet, never scrolls */}
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            aria-label="Close"
+            className="absolute top-3 right-3 z-20 inline-flex items-center justify-center min-h-11 min-w-11 rounded-full text-muted-foreground/60 hover:text-foreground hover:bg-muted/40 transition-colors"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
           <div
-            className="overflow-y-auto flex-1 overscroll-contain relative"
+            className="overflow-y-auto flex-1 overscroll-contain"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             {(title || subtitle) && (
-              <div className="px-5 pt-2 pb-0 pr-12 relative">
+              <div className="px-5 pt-2 pb-0 pr-12">
                 {title && (
                   <DrawerPrimitive.Title className="text-primary font-serif text-xl tracking-wide">
                     {title}
@@ -135,33 +139,30 @@ const TreeAnchoredSheet = ({
                 )}
               </div>
             )}
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              aria-label="Close"
-              className="absolute top-3 right-3 z-10 inline-flex items-center justify-center min-h-11 min-w-11 rounded-full text-muted-foreground/60 hover:text-foreground hover:bg-muted/40 transition-colors"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
             <div className="px-5 pt-3 pb-4">{children}</div>
           </div>
 
-          {footer && (
+          {footer ? (
             <div
               className="shrink-0 border-t border-border/30 bg-background/95 backdrop-blur-sm px-5 pt-3"
               style={{
                 paddingBottom: keyboardOpen
-                  ? "8px"
-                  : "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+                  ? "10px"
+                  : "calc(env(safe-area-inset-bottom, 0px) + 14px)",
               }}
             >
               {footer}
             </div>
+          ) : (
+            <div
+              className="shrink-0"
+              style={{
+                paddingBottom: keyboardOpen
+                  ? "8px"
+                  : "env(safe-area-inset-bottom, 0px)",
+              }}
+            />
           )}
-
         </DrawerPrimitive.Content>
       </DrawerPrimitive.Portal>
     </DrawerPrimitive.Root>
