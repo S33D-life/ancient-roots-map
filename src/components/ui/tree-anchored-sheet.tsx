@@ -56,6 +56,7 @@ const TreeAnchoredSheet = ({
   children,
   title,
   subtitle,
+  footer,
   contentClassName,
   snapPoints = [0.6, 0.95],
   defaultSnapPoint,
