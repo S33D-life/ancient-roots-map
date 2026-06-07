@@ -202,47 +202,192 @@ export function EmberDrift() {
   );
 }
 
-/* ── Room Tile ── */
+/* ── Room interior glyph — symbolic silhouette behind the doorway ── */
+function RoomInterior({ roomKey, h }: { roomKey: string; h: number }) {
+  const chamber = `radial-gradient(ellipse at 50% 75%, hsl(${h} 55% 38% / 0.55), hsl(${h} 30% 14% / 0.95) 75%)`;
+
+  const silhouette: Record<string, JSX.Element> = {
+    "staff-room": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        <rect x="18" y="34" width="4" height="48" fill={`hsl(${h} 45% 38% / 0.55)`} />
+        <rect x="32" y="28" width="4" height="54" fill={`hsl(${h} 45% 42% / 0.6)`} />
+        <rect x="46" y="32" width="4" height="50" fill={`hsl(${h} 45% 40% / 0.55)`} />
+        <rect x="60" y="26" width="4" height="56" fill={`hsl(${h} 45% 44% / 0.6)`} />
+        <rect x="74" y="30" width="4" height="52" fill={`hsl(${h} 45% 40% / 0.55)`} />
+      </svg>
+    ),
+    "star-trail": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-70">
+        {[[25,70],[40,55],[55,40],[70,30],[82,22]].map(([x,y],i)=>(
+          <circle key={i} cx={x} cy={y} r={1.2} fill={`hsl(45 80% 70% / ${0.4 + i*0.1})`} />
+        ))}
+      </svg>
+    ),
+    "ancient-friends": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        <ellipse cx="50" cy="48" rx="26" ry="22" fill={`hsl(${h} 40% 35% / 0.6)`} />
+        <rect x="47" y="60" width="6" height="28" fill={`hsl(25 40% 25% / 0.7)`} />
+      </svg>
+    ),
+    "atlas": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-50">
+        <path d="M15 55 Q35 40 50 55 T85 50" stroke={`hsl(${h} 50% 55% / 0.6)`} strokeWidth="1" fill="none" />
+        <path d="M20 70 Q45 60 70 72" stroke={`hsl(${h} 40% 50% / 0.4)`} strokeWidth="1" fill="none" />
+        <circle cx="58" cy="48" r="2" fill={`hsl(${h} 70% 65% / 0.8)`} />
+      </svg>
+    ),
+    "life-groves": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-55">
+        {[30,50,70].map((x,i)=>(
+          <g key={i}>
+            <circle cx={x} cy={50-i%2*4} r={10} fill={`hsl(${h+i*8} 45% 38% / 0.55)`} />
+            <rect x={x-1} y={56} width={2} height={20} fill={`hsl(25 35% 22% / 0.6)`} />
+          </g>
+        ))}
+      </svg>
+    ),
+    "quest-cave": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-70">
+        <circle cx="50" cy="52" r="6" fill={`hsl(35 90% 60% / 0.5)`} />
+        <circle cx="50" cy="52" r="2.5" fill={`hsl(45 95% 75% / 0.95)`} />
+        <path d="M50 56 L50 78" stroke={`hsl(25 40% 28% / 0.7)`} strokeWidth="1.5" />
+      </svg>
+    ),
+    "arborium": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-55">
+        {[25,45,65,85].map((y,i)=>(
+          <rect key={i} x="25" y={y-3} width="50" height="2" fill={`hsl(${h} 35% 35% / 0.6)`} />
+        ))}
+        {[35,55,75].map((x,i)=>(
+          <circle key={i} cx={x} cy={25} r={3} fill={`hsl(${h+10} 50% 45% / 0.5)`} />
+        ))}
+      </svg>
+    ),
+    "music-room": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-65">
+        <circle cx="50" cy="46" r="4" fill={`hsl(35 85% 60% / 0.7)`} />
+        <rect x="48" y="50" width="4" height="18" fill={`hsl(25 30% 25% / 0.6)`} />
+        {[20,30,40,55,70,80].map((x,i)=>(
+          <rect key={i} x={x} y={78-(i%3)*4} width={2} height={(i%3)*4+4} fill={`hsl(${h} 50% 55% / 0.5)`} />
+        ))}
+      </svg>
+    ),
+    "bookshelf": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        {[22,32,42,52,62,72].map((x,i)=>(
+          <rect key={i} x={x} y={30+(i%2)*3} width={6} height={45-(i%2)*3} fill={`hsl(${h+i*4} 40% 38% / 0.6)`} />
+        ))}
+      </svg>
+    ),
+    "scrolls": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        {[40,55,70].map((y,i)=>(
+          <g key={i}>
+            <circle cx="32" cy={y} r="3" fill={`hsl(${h} 40% 50% / 0.6)`} />
+            <rect x="32" y={y-2} width="36" height="4" fill={`hsl(${h} 35% 45% / 0.5)`} />
+            <circle cx="68" cy={y} r="3" fill={`hsl(${h} 40% 50% / 0.6)`} />
+          </g>
+        ))}
+      </svg>
+    ),
+    "press": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-55">
+        <path d="M50 28 L52 60 L48 60 Z" fill={`hsl(${h} 50% 55% / 0.6)`} />
+        <rect x="35" y="62" width="30" height="14" fill={`hsl(${h} 30% 35% / 0.5)`} />
+      </svg>
+    ),
+    "vault": (
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
+        <circle cx="50" cy="50" r="18" fill="none" stroke={`hsl(${h} 50% 50% / 0.55)`} strokeWidth="2" />
+        <circle cx="50" cy="50" r="3" fill={`hsl(${h} 60% 60% / 0.7)`} />
+      </svg>
+    ),
+  };
+
+  return (
+    <div className="absolute inset-0" style={{ background: chamber }}>
+      {silhouette[roomKey] ?? null}
+    </div>
+  );
+}
+
+/* ── Room Tile — round doorway portal carved into the trunk ── */
 function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: number; seasonShift: number; onSelect: (key: string) => void }) {
   const h = room.accentH + seasonShift;
+  // Warm golden ring — unifies the threshold language across the library.
+  const goldH = 38 + seasonShift;
   return (
     <motion.button
       key={room.key}
       onClick={() => onSelect(room.key)}
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: idx * 0.05, duration: 0.35, ease: "easeOut" }}
-      whileHover={{ scale: 1.03, y: -2 }}
-      whileTap={{ scale: 0.97 }}
-      className="group relative rounded-xl text-left transition-shadow duration-300 overflow-hidden"
+      transition={{ delay: idx * 0.04, duration: 0.4, ease: "easeOut" }}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.98 }}
+      className="group relative flex flex-col items-center text-center px-3 pt-4 pb-4 rounded-2xl transition-all duration-500 overflow-hidden"
       style={{
-        background: `linear-gradient(145deg, hsl(${h} 18% 12% / 0.9), hsl(${h} 14% 8% / 0.95))`,
-        border: `1px solid hsl(${h} 30% 25% / 0.3)`,
-        boxShadow: `0 2px 8px hsl(${h} 20% 8% / 0.4), inset 0 1px 0 hsl(${h} 30% 30% / 0.08)`,
-        padding: "1.25rem 1.5rem",
+        background: `radial-gradient(ellipse at 50% 0%, hsl(${goldH} 25% 12% / 0.55), hsl(${h} 14% 7% / 0.85))`,
+        border: `1px solid hsl(${goldH} 30% 22% / 0.25)`,
       }}
     >
+      {/* Portal */}
       <div
-        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        className="relative aspect-square w-[78%] max-w-[140px] rounded-full mb-3 transition-all duration-700"
         style={{
-          background: `radial-gradient(ellipse at 50% 80%, hsl(${h} 60% 40% / 0.12), transparent 70%)`,
-          boxShadow: `inset 0 -1px 0 hsl(${h} 50% 45% / 0.1)`,
+          background: `
+            radial-gradient(circle at 50% 35%, hsl(${goldH} 55% 45% / 0.35), transparent 62%),
+            conic-gradient(from 210deg, hsl(${goldH} 45% 32%), hsl(${goldH} 60% 48%), hsl(${goldH} 35% 25%), hsl(${goldH} 55% 42%), hsl(${goldH} 45% 32%))
+          `,
+          padding: 6,
+          boxShadow: `
+            0 0 0 1px hsl(${goldH} 50% 35% / 0.35),
+            0 6px 18px hsl(${goldH} 40% 6% / 0.55),
+            inset 0 1px 0 hsl(${goldH} 70% 70% / 0.18)
+          `,
         }}
-      />
-      <div
-        className="absolute bottom-0 left-[15%] right-[15%] h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: `linear-gradient(90deg, transparent, hsl(${h} 55% 50% / 0.3), transparent)` }}
-      />
-      <RoomParticles type={room.particle} accentH={h} />
-      <h3
-        className="font-serif text-sm md:text-base mb-1 relative z-10 transition-colors duration-300"
-        style={{ color: `hsl(${h} 55% 72% / 0.9)` }}
       >
-        {room.emoji} {roomLabel(room.key, room.label)}
+        <div
+          className="relative w-full h-full rounded-full overflow-hidden"
+          style={{
+            boxShadow: `inset 0 0 18px hsl(${h} 30% 4% / 0.85), inset 0 0 0 1px hsl(${goldH} 50% 30% / 0.4)`,
+          }}
+        >
+          <RoomInterior roomKey={room.key} h={h} />
+          {/* Sigil glyph centered over chamber */}
+          <div
+            className="absolute inset-0 flex items-center justify-center text-2xl md:text-3xl transition-transform duration-700 group-hover:scale-105"
+            style={{
+              filter: `drop-shadow(0 0 6px hsl(${goldH} 70% 55% / 0.35))`,
+              opacity: 0.85,
+            }}
+            aria-hidden="true"
+          >
+            {room.emoji}
+          </div>
+          {/* Threshold illumination on hover/tap */}
+          <div
+            className="absolute inset-0 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-active:opacity-100 transition-opacity duration-700"
+            style={{
+              background: `radial-gradient(circle at 50% 100%, hsl(${goldH} 80% 55% / 0.22), transparent 65%)`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Engraved title */}
+      <h3
+        className="font-serif text-[13px] md:text-sm leading-tight tracking-wide relative z-10"
+        style={{
+          color: `hsl(${goldH} 55% 70% / 0.92)`,
+          textShadow: `0 0 8px hsl(${goldH} 60% 40% / 0.25)`,
+        }}
+      >
+        {roomLabel(room.key, room.label)}
       </h3>
       <p
-        className="text-xs relative z-10 transition-colors duration-300"
-        style={{ color: `hsl(${h} 25% 55% / 0.5)` }}
+        className="text-[10.5px] md:text-[11px] mt-1 relative z-10 leading-snug"
+        style={{ color: `hsl(${goldH} 20% 60% / 0.4)` }}
       >
         {room.desc}
       </p>
@@ -254,8 +399,8 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
 function SectionHeader({ label, seasonShift }: { label: string; seasonShift: number }) {
   return (
     <p
-      className="font-serif text-[11px] tracking-[0.15em] uppercase col-span-2 md:col-span-3 mt-2 mb--1"
-      style={{ color: `hsl(${38 + seasonShift} 30% 50% / 0.45)` }}
+      className="font-serif text-[10px] tracking-[0.25em] uppercase col-span-2 md:col-span-3 mt-4 mb-1"
+      style={{ color: `hsl(${38 + seasonShift} 25% 50% / 0.35)` }}
     >
       {label}
     </p>
@@ -288,7 +433,7 @@ export default function LibraryRoomGrid({ onRoomSelect }: Props) {
         Rooms of the Library
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6 md:gap-x-5 md:gap-y-7">
         {groups.map((g) => (
           <div key={g.label} className="contents">
             <SectionHeader label={g.label} seasonShift={seasonShift} />
