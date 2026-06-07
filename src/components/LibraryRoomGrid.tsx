@@ -202,119 +202,182 @@ export function EmberDrift() {
   );
 }
 
-/* ── Room interior glyph — symbolic silhouette behind the doorway ── */
-function RoomInterior({ roomKey, h }: { roomKey: string; h: number }) {
-  const chamber = `radial-gradient(ellipse at 50% 75%, hsl(${h} 55% 38% / 0.55), hsl(${h} 30% 14% / 0.95) 75%)`;
+/* ── Wooden door face with a hanging carved sign (symbol + room name) ── */
+function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
+  roomKey: string; label: string; emoji: string; h: number; goldH: number;
+}) {
+  // Warm oak palette — independent of room hue so all doors feel like one trunk.
+  const wood1 = `hsl(28 38% 22%)`;
+  const wood2 = `hsl(26 42% 16%)`;
+  const wood3 = `hsl(30 36% 28%)`;
+  const grainDark = `hsl(24 40% 12% / 0.55)`;
+  const grainLight = `hsl(32 45% 35% / 0.35)`;
 
-  const silhouette: Record<string, JSX.Element> = {
-    "staff-room": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        <rect x="18" y="34" width="4" height="48" fill={`hsl(${h} 45% 38% / 0.55)`} />
-        <rect x="32" y="28" width="4" height="54" fill={`hsl(${h} 45% 42% / 0.6)`} />
-        <rect x="46" y="32" width="4" height="50" fill={`hsl(${h} 45% 40% / 0.55)`} />
-        <rect x="60" y="26" width="4" height="56" fill={`hsl(${h} 45% 44% / 0.6)`} />
-        <rect x="74" y="30" width="4" height="52" fill={`hsl(${h} 45% 40% / 0.55)`} />
-      </svg>
-    ),
-    "star-trail": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-70">
-        {[[25,70],[40,55],[55,40],[70,30],[82,22]].map(([x,y],i)=>(
-          <circle key={i} cx={x} cy={y} r={1.2} fill={`hsl(45 80% 70% / ${0.4 + i*0.1})`} />
-        ))}
-      </svg>
-    ),
-    "ancient-friends": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        <ellipse cx="50" cy="48" rx="26" ry="22" fill={`hsl(${h} 40% 35% / 0.6)`} />
-        <rect x="47" y="60" width="6" height="28" fill={`hsl(25 40% 25% / 0.7)`} />
-      </svg>
-    ),
-    "atlas": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-50">
-        <path d="M15 55 Q35 40 50 55 T85 50" stroke={`hsl(${h} 50% 55% / 0.6)`} strokeWidth="1" fill="none" />
-        <path d="M20 70 Q45 60 70 72" stroke={`hsl(${h} 40% 50% / 0.4)`} strokeWidth="1" fill="none" />
-        <circle cx="58" cy="48" r="2" fill={`hsl(${h} 70% 65% / 0.8)`} />
-      </svg>
-    ),
-    "life-groves": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-55">
-        {[30,50,70].map((x,i)=>(
-          <g key={i}>
-            <circle cx={x} cy={50-i%2*4} r={10} fill={`hsl(${h+i*8} 45% 38% / 0.55)`} />
-            <rect x={x-1} y={56} width={2} height={20} fill={`hsl(25 35% 22% / 0.6)`} />
-          </g>
-        ))}
-      </svg>
-    ),
-    "quest-cave": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-70">
-        <circle cx="50" cy="52" r="6" fill={`hsl(35 90% 60% / 0.5)`} />
-        <circle cx="50" cy="52" r="2.5" fill={`hsl(45 95% 75% / 0.95)`} />
-        <path d="M50 56 L50 78" stroke={`hsl(25 40% 28% / 0.7)`} strokeWidth="1.5" />
-      </svg>
-    ),
-    "arborium": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-55">
-        {[25,45,65,85].map((y,i)=>(
-          <rect key={i} x="25" y={y-3} width="50" height="2" fill={`hsl(${h} 35% 35% / 0.6)`} />
-        ))}
-        {[35,55,75].map((x,i)=>(
-          <circle key={i} cx={x} cy={25} r={3} fill={`hsl(${h+10} 50% 45% / 0.5)`} />
-        ))}
-      </svg>
-    ),
-    "music-room": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-65">
-        <circle cx="50" cy="46" r="4" fill={`hsl(35 85% 60% / 0.7)`} />
-        <rect x="48" y="50" width="4" height="18" fill={`hsl(25 30% 25% / 0.6)`} />
-        {[20,30,40,55,70,80].map((x,i)=>(
-          <rect key={i} x={x} y={78-(i%3)*4} width={2} height={(i%3)*4+4} fill={`hsl(${h} 50% 55% / 0.5)`} />
-        ))}
-      </svg>
-    ),
-    "bookshelf": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        {[22,32,42,52,62,72].map((x,i)=>(
-          <rect key={i} x={x} y={30+(i%2)*3} width={6} height={45-(i%2)*3} fill={`hsl(${h+i*4} 40% 38% / 0.6)`} />
-        ))}
-      </svg>
-    ),
-    "scrolls": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        {[40,55,70].map((y,i)=>(
-          <g key={i}>
-            <circle cx="32" cy={y} r="3" fill={`hsl(${h} 40% 50% / 0.6)`} />
-            <rect x="32" y={y-2} width="36" height="4" fill={`hsl(${h} 35% 45% / 0.5)`} />
-            <circle cx="68" cy={y} r="3" fill={`hsl(${h} 40% 50% / 0.6)`} />
-          </g>
-        ))}
-      </svg>
-    ),
-    "press": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-55">
-        <path d="M50 28 L52 60 L48 60 Z" fill={`hsl(${h} 50% 55% / 0.6)`} />
-        <rect x="35" y="62" width="30" height="14" fill={`hsl(${h} 30% 35% / 0.5)`} />
-      </svg>
-    ),
-    "vault": (
-      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60">
-        <circle cx="50" cy="50" r="18" fill="none" stroke={`hsl(${h} 50% 50% / 0.55)`} strokeWidth="2" />
-        <circle cx="50" cy="50" r="3" fill={`hsl(${h} 60% 60% / 0.7)`} />
-      </svg>
-    ),
-  };
+  // Plank count varies by door for subtle individuality.
+  const plankCount = 5;
+  const planks = Array.from({ length: plankCount }, (_, i) => i);
+
+  // Sign tint shifts very slightly with room hue so it feels related to its chamber.
+  const signWood1 = `hsl(${28} 40% 30%)`;
+  const signWood2 = `hsl(${28} 45% 22%)`;
+  const signText = `hsl(${goldH} 70% 78%)`;
+  const signGlow = `hsl(${goldH} 80% 55% / 0.5)`;
+
+  // Short title — split into up to 2 lines for the sign.
+  const words = label.replace(/&/g, "and").split(" ").filter(Boolean);
+  let line1 = words[0] ?? label;
+  let line2 = words.slice(1).join(" ");
+  if (!line2 && line1.length > 9) {
+    // single long word — keep on one line, shrink will handle it
+  }
 
   return (
-    <div className="absolute inset-0" style={{ background: chamber }}>
-      {silhouette[roomKey] ?? null}
-    </div>
+    <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id={`door-light-${roomKey}`} cx="50%" cy="35%" r="65%">
+          <stop offset="0%" stopColor={wood3} />
+          <stop offset="60%" stopColor={wood1} />
+          <stop offset="100%" stopColor={wood2} />
+        </radialGradient>
+        <linearGradient id={`sign-wood-${roomKey}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={signWood1} />
+          <stop offset="100%" stopColor={signWood2} />
+        </linearGradient>
+      </defs>
+
+      {/* Door face fills the circular chamber */}
+      <rect x="0" y="0" width="100" height="100" fill={`url(#door-light-${roomKey})`} />
+
+      {/* Vertical planks with grain */}
+      {planks.map((i) => {
+        const plankW = 100 / plankCount;
+        const x = i * plankW;
+        return (
+          <g key={i}>
+            {/* plank seam shadow */}
+            <line x1={x} y1="0" x2={x} y2="100" stroke={grainDark} strokeWidth="0.8" />
+            {/* faint grain streaks */}
+            <path
+              d={`M${x + plankW * 0.2} 0 Q${x + plankW * 0.5} 50 ${x + plankW * 0.3} 100`}
+              stroke={grainLight}
+              strokeWidth="0.4"
+              fill="none"
+              opacity="0.5"
+            />
+            <path
+              d={`M${x + plankW * 0.7} 0 Q${x + plankW * 0.4} 50 ${x + plankW * 0.6} 100`}
+              stroke={grainDark}
+              strokeWidth="0.35"
+              fill="none"
+              opacity="0.5"
+            />
+          </g>
+        );
+      })}
+
+      {/* Horizontal cross-beam (hobbit-door bar) */}
+      <rect x="2" y="56" width="96" height="6" fill={wood2} opacity="0.85" />
+      <rect x="2" y="56" width="96" height="1" fill={grainDark} />
+      <rect x="2" y="61" width="96" height="1" fill={grainDark} />
+
+      {/* Round iron knob on the bar */}
+      <circle cx="68" cy="59" r="2.4" fill={`hsl(35 25% 18%)`} />
+      <circle cx="68" cy="58.4" r="1" fill={`hsl(45 35% 45% / 0.7)`} />
+
+      {/* Hanging sign — rope + carved wooden plaque with symbol + name */}
+      {/* rope */}
+      <line x1="38" y1="6" x2="42" y2="20" stroke={`hsl(30 30% 22%)`} strokeWidth="0.6" />
+      <line x1="62" y1="6" x2="58" y2="20" stroke={`hsl(30 30% 22%)`} strokeWidth="0.6" />
+
+      {/* plaque */}
+      <g>
+        <rect
+          x="20"
+          y="18"
+          width="60"
+          height="32"
+          rx="3"
+          fill={`url(#sign-wood-${roomKey})`}
+          stroke={`hsl(${goldH} 50% 30% / 0.8)`}
+          strokeWidth="0.6"
+        />
+        {/* inner engraved bevel */}
+        <rect
+          x="22"
+          y="20"
+          width="56"
+          height="28"
+          rx="2"
+          fill="none"
+          stroke={`hsl(${goldH} 60% 50% / 0.35)`}
+          strokeWidth="0.4"
+        />
+
+        {/* symbol */}
+        <text
+          x="32"
+          y="36"
+          fontSize="11"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          style={{ filter: `drop-shadow(0 0 1.5px ${signGlow})` }}
+        >
+          {emoji}
+        </text>
+
+        {/* room name — engraved gold */}
+        {line2 ? (
+          <>
+            <text
+              x="56"
+              y="31"
+              fontSize="5.2"
+              textAnchor="middle"
+              fontFamily="ui-serif, Georgia, serif"
+              fill={signText}
+              style={{ letterSpacing: "0.05em" }}
+            >
+              {line1.toUpperCase()}
+            </text>
+            <text
+              x="56"
+              y="40"
+              fontSize="5.2"
+              textAnchor="middle"
+              fontFamily="ui-serif, Georgia, serif"
+              fill={signText}
+              style={{ letterSpacing: "0.05em" }}
+            >
+              {line2.toUpperCase()}
+            </text>
+          </>
+        ) : (
+          <text
+            x="56"
+            y="37"
+            fontSize="5.4"
+            textAnchor="middle"
+            fontFamily="ui-serif, Georgia, serif"
+            fill={signText}
+            style={{ letterSpacing: "0.05em" }}
+          >
+            {line1.toUpperCase()}
+          </text>
+        )}
+      </g>
+
+      {/* Floor shadow under door */}
+      <rect x="0" y="92" width="100" height="8" fill={`hsl(20 30% 6% / 0.55)`} />
+
+      {/* Warm threshold light spilling under the door */}
+      <ellipse cx="50" cy="95" rx="36" ry="3" fill={`hsl(${goldH} 80% 55% / 0.35)`} />
+    </svg>
   );
 }
 
-/* ── Room Tile — round doorway portal carved into the trunk ── */
+/* ── Room Tile — round doorway carved into the trunk ── */
 function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: number; seasonShift: number; onSelect: (key: string) => void }) {
   const h = room.accentH + seasonShift;
-  // Warm golden ring — unifies the threshold language across the library.
   const goldH = 38 + seasonShift;
   return (
     <motion.button
@@ -331,7 +394,7 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
         border: `1px solid hsl(${goldH} 30% 22% / 0.25)`,
       }}
     >
-      {/* Portal */}
+      {/* Portal ring */}
       <div
         className="relative aspect-square w-[78%] max-w-[140px] rounded-full mb-3 transition-all duration-700"
         style={{
@@ -350,32 +413,28 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
         <div
           className="relative w-full h-full rounded-full overflow-hidden"
           style={{
-            boxShadow: `inset 0 0 18px hsl(${h} 30% 4% / 0.85), inset 0 0 0 1px hsl(${goldH} 50% 30% / 0.4)`,
+            boxShadow: `inset 0 0 18px hsl(20 40% 4% / 0.85), inset 0 0 0 1px hsl(${goldH} 50% 30% / 0.4)`,
           }}
         >
-          <RoomInterior roomKey={room.key} h={h} />
-          {/* Sigil glyph centered over chamber */}
-          <div
-            className="absolute inset-0 flex items-center justify-center text-2xl md:text-3xl transition-transform duration-700 group-hover:scale-105"
-            style={{
-              filter: `drop-shadow(0 0 6px hsl(${goldH} 70% 55% / 0.35))`,
-              opacity: 0.85,
-            }}
-            aria-hidden="true"
-          >
-            {room.emoji}
-          </div>
+          <WoodenDoor
+            roomKey={room.key}
+            label={roomLabel(room.key, room.label)}
+            emoji={room.emoji}
+            h={h}
+            goldH={goldH}
+          />
+
           {/* Threshold illumination on hover/tap */}
           <div
             className="absolute inset-0 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-active:opacity-100 transition-opacity duration-700"
             style={{
-              background: `radial-gradient(circle at 50% 100%, hsl(${goldH} 80% 55% / 0.22), transparent 65%)`,
+              background: `radial-gradient(circle at 50% 100%, hsl(${goldH} 80% 55% / 0.28), transparent 65%)`,
             }}
           />
         </div>
       </div>
 
-      {/* Engraved title */}
+      {/* Engraved title beneath the portal */}
       <h3
         className="font-serif text-[13px] md:text-sm leading-tight tracking-wide relative z-10"
         style={{
@@ -394,6 +453,7 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
     </motion.button>
   );
 }
+
 
 /* ── Section Header ── */
 function SectionHeader({ label, seasonShift }: { label: string; seasonShift: number }) {
