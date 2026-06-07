@@ -433,7 +433,7 @@ export default function LibraryRoomGrid({ onRoomSelect }: Props) {
         Rooms of the Library
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6 md:gap-x-5 md:gap-y-7">
         {groups.map((g) => (
           <div key={g.label} className="contents">
             <SectionHeader label={g.label} seasonShift={seasonShift} />
