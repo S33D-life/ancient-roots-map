@@ -3,8 +3,8 @@
  * Each room has a unique micro-animation, themed hover glow, and seasonal ambient shift.
  * "Every room in the library breathes differently."
  */
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 
 /* ── Canonical label resolver ──
@@ -379,15 +379,29 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
 function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: number; seasonShift: number; onSelect: (key: string) => void }) {
   const h = room.accentH + seasonShift;
   const goldH = 38 + seasonShift;
+  const prefersReduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+
+  const handleSelect = () => {
+    if (opening) return;
+    if (prefersReduced) {
+      onSelect(room.key);
+      return;
+    }
+    setOpening(true);
+    // Let the door swing open before navigating
+    window.setTimeout(() => onSelect(room.key), 460);
+  };
+
   return (
     <motion.button
       key={room.key}
-      onClick={() => onSelect(room.key)}
+      onClick={handleSelect}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.04, duration: 0.4, ease: "easeOut" }}
-      whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={opening ? undefined : { y: -1 }}
+      whileTap={opening ? undefined : { scale: 0.98 }}
       className="group relative flex flex-col items-center text-center px-3 pt-4 pb-4 rounded-2xl transition-all duration-500 overflow-hidden"
       style={{
         background: `radial-gradient(ellipse at 50% 0%, hsl(${goldH} 25% 12% / 0.55), hsl(${h} 14% 7% / 0.85))`,
@@ -395,8 +409,19 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
       }}
     >
       {/* Portal ring */}
-      <div
-        className="relative aspect-square w-[78%] max-w-[140px] rounded-full mb-3 transition-all duration-700"
+      <motion.div
+        className="relative aspect-square w-[78%] max-w-[140px] rounded-full mb-3"
+        animate={
+          opening
+            ? {
+                boxShadow: [
+                  `0 0 0 1px hsl(${goldH} 50% 35% / 0.35), 0 6px 18px hsl(${goldH} 40% 6% / 0.55), inset 0 1px 0 hsl(${goldH} 70% 70% / 0.18)`,
+                  `0 0 0 2px hsl(${goldH} 80% 60% / 0.7), 0 0 38px hsl(${goldH} 80% 55% / 0.7), inset 0 1px 0 hsl(${goldH} 90% 85% / 0.5)`,
+                ],
+              }
+            : undefined
+        }
+        transition={{ duration: 0.45, ease: "easeOut" }}
         style={{
           background: `
             radial-gradient(circle at 50% 35%, hsl(${goldH} 55% 45% / 0.35), transparent 62%),
@@ -408,42 +433,96 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
             0 6px 18px hsl(${goldH} 40% 6% / 0.55),
             inset 0 1px 0 hsl(${goldH} 70% 70% / 0.18)
           `,
+          transition: "box-shadow 700ms ease",
         }}
       >
         <div
           className="relative w-full h-full rounded-full overflow-hidden"
           style={{
             boxShadow: `inset 0 0 18px hsl(20 40% 4% / 0.85), inset 0 0 0 1px hsl(${goldH} 50% 30% / 0.4)`,
+            perspective: 600,
           }}
         >
-          <WoodenDoor
-            roomKey={room.key}
-            label={roomLabel(room.key, room.label)}
-            emoji={room.emoji}
-            h={h}
-            goldH={goldH}
-          />
+          {/* Door splits into two halves that swing open on tap */}
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              clipPath: "inset(0 50% 0 0)",
+              transformOrigin: "left center",
+              transformStyle: "preserve-3d",
+              backfaceVisibility: "hidden",
+            }}
+            animate={opening ? { rotateY: -82, x: -2 } : { rotateY: 0, x: 0 }}
+            transition={{ duration: 0.55, ease: [0.6, 0.05, 0.3, 0.95] }}
+          >
+            <WoodenDoor
+              roomKey={room.key + "-l"}
+              label={roomLabel(room.key, room.label)}
+              emoji={room.emoji}
+              h={h}
+              goldH={goldH}
+            />
+          </motion.div>
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              clipPath: "inset(0 0 0 50%)",
+              transformOrigin: "right center",
+              transformStyle: "preserve-3d",
+              backfaceVisibility: "hidden",
+            }}
+            animate={opening ? { rotateY: 82, x: 2 } : { rotateY: 0, x: 0 }}
+            transition={{ duration: 0.55, ease: [0.6, 0.05, 0.3, 0.95] }}
+          >
+            <WoodenDoor
+              roomKey={room.key + "-r"}
+              label={roomLabel(room.key, room.label)}
+              emoji={room.emoji}
+              h={h}
+              goldH={goldH}
+            />
+          </motion.div>
 
-          {/* Threshold illumination on hover/tap */}
+          {/* Warm interior light revealed as the door opens */}
+          <AnimatePresence>
+            {opening && (
+              <motion.div
+                key="interior-glow"
+                className="absolute inset-0 rounded-full pointer-events-none"
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1.05 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                style={{
+                  background: `radial-gradient(circle at 50% 50%, hsl(${goldH} 90% 70% / 0.85), hsl(${goldH} 75% 50% / 0.45) 45%, transparent 75%)`,
+                  mixBlendMode: "screen",
+                }}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Threshold illumination on hover/tap (kept for non-opening hover) */}
           <div
-            className="absolute inset-0 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-active:opacity-100 transition-opacity duration-700"
+            className="absolute inset-0 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-700"
             style={{
               background: `radial-gradient(circle at 50% 100%, hsl(${goldH} 80% 55% / 0.28), transparent 65%)`,
             }}
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Engraved title beneath the portal */}
-      <h3
+      <motion.h3
         className="font-serif text-[13px] md:text-sm leading-tight tracking-wide relative z-10"
+        animate={opening ? { color: `hsl(${goldH} 80% 85% / 1)` } : {}}
+        transition={{ duration: 0.45 }}
         style={{
           color: `hsl(${goldH} 55% 70% / 0.92)`,
           textShadow: `0 0 8px hsl(${goldH} 60% 40% / 0.25)`,
         }}
       >
         {roomLabel(room.key, room.label)}
-      </h3>
+      </motion.h3>
       <p
         className="text-[10.5px] md:text-[11px] mt-1 relative z-10 leading-snug"
         style={{ color: `hsl(${goldH} 20% 60% / 0.4)` }}
