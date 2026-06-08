@@ -782,15 +782,28 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
 }
 
 
-/* ── Section Header ── */
+/* ── Section Header — engraved into the trunk with thin root-rule dividers ── */
 function SectionHeader({ label, seasonShift }: { label: string; seasonShift: number }) {
+  const h = 38 + seasonShift;
   return (
-    <p
-      className="font-serif text-[10px] tracking-[0.25em] uppercase col-span-2 md:col-span-3 mt-4 mb-1"
-      style={{ color: `hsl(${38 + seasonShift} 25% 50% / 0.35)` }}
-    >
-      {label}
-    </p>
+    <div className="col-span-2 md:col-span-3 mt-5 mb-1 flex items-center gap-3">
+      <span
+        aria-hidden
+        className="flex-1 h-px"
+        style={{ background: `linear-gradient(to right, transparent, hsl(${h} 40% 35% / 0.35), transparent)` }}
+      />
+      <span
+        className="font-serif text-[10px] tracking-[0.3em] uppercase whitespace-nowrap"
+        style={{ color: `hsl(${h} 25% 55% / 0.5)`, textShadow: `0 0 6px hsl(${h} 40% 25% / 0.4)` }}
+      >
+        {label}
+      </span>
+      <span
+        aria-hidden
+        className="flex-1 h-px"
+        style={{ background: `linear-gradient(to right, transparent, hsl(${h} 40% 35% / 0.35), transparent)` }}
+      />
+    </div>
   );
 }
 
