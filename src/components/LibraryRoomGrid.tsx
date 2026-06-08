@@ -202,9 +202,214 @@ export function EmberDrift() {
   );
 }
 
+/* ── Room temperature families ──
+ * Each room belongs to an ecological tonal family. The oak trunk stays consistent;
+ * only the light beneath the door, the sign glow, and the interior warmth shift. */
+function familyHue(key: string): number {
+  switch (key) {
+    // Golden / Amber
+    case "staff-room":
+    case "bookshelf":
+    case "scrolls":
+    case "press":
+    case "seed-cellar":
+      return 38;
+    // Green living glow
+    case "ancient-friends":
+    case "arborium":
+    case "life-groves":
+    case "greenhouse":
+    case "rhythms":
+      return 128;
+    // Blue cartographic
+    case "atlas":
+    case "tree-data-commons":
+      return 205;
+    // Violet resonant
+    case "music-room":
+    case "star-trail":
+    case "vault":
+      return 268;
+    // Ember cave
+    case "quest-cave":
+    case "tap-root":
+      return 22;
+    // Wishing — soft warm star
+    case "wishlist":
+      return 48;
+    default:
+      return 38;
+  }
+}
+
+/* Deterministic small asymmetry seed from a string key (0..1). */
+function asymSeed(key: string): number {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  const v = ((h >>> 0) % 1000) / 1000;
+  return v;
+}
+
+/* ── Faint interior glimpse — silhouettes seen through the threshold spill ──
+ * Drawn just above the floor, where warm light bleeds beneath the door.
+ * Atmospheric implication, not illustration. */
+function InteriorGlimpse({ roomKey, tempH }: { roomKey: string; tempH: number }) {
+  const stroke = `hsl(${tempH} 60% 70% / 0.22)`;
+  const fill = `hsl(${tempH} 50% 18% / 0.55)`;
+  const warm = `hsl(${tempH} 80% 60% / 0.18)`;
+
+  switch (roomKey.replace(/-(l|r)$/, "")) {
+    case "staff-room":
+      // Three leaning staffs in shadow + ember low glow
+      return (
+        <g opacity="0.9">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          <line x1="40" y1="92" x2="44" y2="68" stroke={fill} strokeWidth="1.2" />
+          <line x1="50" y1="92" x2="49" y2="64" stroke={fill} strokeWidth="1.4" />
+          <line x1="60" y1="92" x2="56" y2="70" stroke={fill} strokeWidth="1.1" />
+          <circle cx="49" cy="64" r="1.1" fill={stroke} />
+        </g>
+      );
+    case "scrolls":
+      // Shelf depth + candle edge
+      return (
+        <g opacity="0.9">
+          <ellipse cx="50" cy="91" rx="24" ry="2" fill={warm} />
+          <line x1="30" y1="88" x2="70" y2="88" stroke={fill} strokeWidth="0.6" />
+          <rect x="34" y="82" width="3" height="6" fill={fill} />
+          <rect x="38.5" y="80" width="3" height="8" fill={fill} />
+          <rect x="43" y="83" width="3" height="5" fill={fill} />
+          <rect x="58" y="81" width="3" height="7" fill={fill} />
+          <rect x="62.5" y="84" width="3" height="4" fill={fill} />
+          <circle cx="52" cy="84" r="1" fill={`hsl(38 90% 65% / 0.65)`} />
+        </g>
+      );
+    case "music-room":
+      // Dim equalizer bars + violet resonance
+      return (
+        <g opacity="0.9">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          {[36, 41, 46, 51, 56, 61].map((x, i) => (
+            <rect
+              key={i}
+              x={x}
+              y={88 - (3 + ((i * 7) % 6))}
+              width="2"
+              height={3 + ((i * 7) % 6)}
+              fill={fill}
+              opacity="0.85"
+            />
+          ))}
+        </g>
+      );
+    case "arborium":
+      // Herbarium leaf silhouettes on shelf
+      return (
+        <g opacity="0.9">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          <line x1="32" y1="88" x2="68" y2="88" stroke={fill} strokeWidth="0.5" />
+          <ellipse cx="38" cy="85" rx="3" ry="1.6" fill={fill} />
+          <ellipse cx="46" cy="84" rx="2.6" ry="1.4" fill={fill} />
+          <ellipse cx="55" cy="85" rx="3.2" ry="1.6" fill={fill} />
+          <ellipse cx="63" cy="84" rx="2.4" ry="1.3" fill={fill} />
+        </g>
+      );
+    case "ancient-friends":
+    case "life-groves":
+    case "greenhouse":
+    case "rhythms":
+      // Distant grove silhouettes
+      return (
+        <g opacity="0.85">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          <path d="M34 88 Q36 78 40 88 Z" fill={fill} />
+          <path d="M44 88 Q47 74 51 88 Z" fill={fill} />
+          <path d="M55 88 Q58 80 62 88 Z" fill={fill} />
+        </g>
+      );
+    case "atlas":
+    case "tree-data-commons":
+      // Faint map lines + brass compass dot
+      return (
+        <g opacity="0.85">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          <path d="M32 87 Q45 82 68 88" stroke={stroke} strokeWidth="0.5" fill="none" />
+          <path d="M34 90 Q52 86 66 90" stroke={stroke} strokeWidth="0.4" fill="none" />
+          <circle cx="50" cy="86" r="1.4" fill="none" stroke={`hsl(40 50% 55% / 0.55)`} strokeWidth="0.4" />
+          <line x1="50" y1="84.6" x2="50" y2="87.4" stroke={`hsl(40 60% 60% / 0.6)`} strokeWidth="0.3" />
+        </g>
+      );
+    case "bookshelf":
+      // Stacked books + a reading chair silhouette
+      return (
+        <g opacity="0.9">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          <rect x="35" y="82" width="2.5" height="6" fill={fill} />
+          <rect x="38" y="80" width="2.5" height="8" fill={fill} />
+          <rect x="41" y="83" width="2.5" height="5" fill={fill} />
+          <path d="M55 88 Q55 82 60 82 L62 82 Q62 88 62 88 Z" fill={fill} />
+          <rect x="56" y="86" width="6" height="2" fill={fill} />
+        </g>
+      );
+    case "star-trail":
+      // Faint star points
+      return (
+        <g opacity="0.9">
+          <ellipse cx="50" cy="91" rx="20" ry="2" fill={warm} />
+          {[
+            [36, 84], [44, 80], [52, 85], [58, 79], [64, 83],
+          ].map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r="0.6" fill={`hsl(${tempH} 80% 80% / 0.7)`} />
+          ))}
+        </g>
+      );
+    case "quest-cave":
+    case "tap-root":
+      // Ember low glow + cave wall hint
+      return (
+        <g opacity="0.95">
+          <ellipse cx="50" cy="91" rx="22" ry="2.2" fill={`hsl(20 90% 55% / 0.28)`} />
+          <circle cx="50" cy="89" r="2" fill={`hsl(22 95% 60% / 0.6)`} />
+        </g>
+      );
+    case "seed-cellar":
+    case "wishlist":
+      return (
+        <g opacity="0.85">
+          <ellipse cx="50" cy="91" rx="22" ry="2" fill={warm} />
+          {[40, 46, 52, 58, 64].map((x, i) => (
+            <circle key={i} cx={x} cy={87 - (i % 2)} r="0.9" fill={fill} />
+          ))}
+        </g>
+      );
+    case "vault":
+      return (
+        <g opacity="0.85">
+          <ellipse cx="50" cy="91" rx="20" ry="2" fill={warm} />
+          <rect x="44" y="82" width="12" height="7" fill={fill} />
+          <circle cx="50" cy="85.5" r="1" fill={`hsl(${tempH} 60% 60% / 0.6)`} />
+        </g>
+      );
+    case "press":
+      return (
+        <g opacity="0.85">
+          <ellipse cx="50" cy="91" rx="20" ry="2" fill={warm} />
+          <rect x="40" y="82" width="20" height="6" fill={fill} />
+          <line x1="40" y1="85" x2="60" y2="85" stroke={stroke} strokeWidth="0.4" />
+        </g>
+      );
+    default:
+      return (
+        <g opacity="0.6">
+          <ellipse cx="50" cy="91" rx="20" ry="2" fill={warm} />
+        </g>
+      );
+  }
+}
+
 /* ── Wooden door face with a hanging carved sign (symbol + room name) ── */
-function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
-  roomKey: string; label: string; emoji: string; h: number; goldH: number;
+function WoodenDoor({ roomKey, label, emoji, h, goldH, tempH, seed }: {
+  roomKey: string; label: string; emoji: string; h: number; goldH: number; tempH: number; seed: number;
 }) {
   // Warm oak palette — independent of room hue so all doors feel like one trunk.
   const wood1 = `hsl(28 38% 22%)`;
@@ -213,23 +418,25 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
   const grainDark = `hsl(24 40% 12% / 0.55)`;
   const grainLight = `hsl(32 45% 35% / 0.35)`;
 
-  // Plank count varies by door for subtle individuality.
   const plankCount = 5;
   const planks = Array.from({ length: plankCount }, (_, i) => i);
 
-  // Sign tint shifts very slightly with room hue so it feels related to its chamber.
-  const signWood1 = `hsl(${28} 40% 30%)`;
-  const signWood2 = `hsl(${28} 45% 22%)`;
-  const signText = `hsl(${goldH} 70% 78%)`;
-  const signGlow = `hsl(${goldH} 80% 55% / 0.5)`;
+  // Sign warmth follows the room's temperature family (subtle).
+  const signWood1 = `hsl(28 40% 30%)`;
+  const signWood2 = `hsl(28 45% 22%)`;
+  const signText = `hsl(${tempH} 55% 78%)`;
+  const signGlow = `hsl(${tempH} 80% 55% / 0.5)`;
+  const thresholdSpill = `hsl(${tempH} 80% 55% / 0.32)`;
 
-  // Short title — split into up to 2 lines for the sign.
+  // Asymmetry: tiny plaque tilt and knob/light offsets seeded by the room key.
+  const plaqueTilt = (seed - 0.5) * 2.4;            // ±1.2°
+  const plaqueDx = (seed - 0.5) * 1.2;              // ±0.6
+  const knobDx = (seed - 0.5) * 6;                  // ±3
+  const spillDx = (seed - 0.5) * 6;                 // ±3
+
   const words = label.replace(/&/g, "and").split(" ").filter(Boolean);
-  let line1 = words[0] ?? label;
-  let line2 = words.slice(1).join(" ");
-  if (!line2 && line1.length > 9) {
-    // single long word — keep on one line, shrink will handle it
-  }
+  const line1 = words[0] ?? label;
+  const line2 = words.slice(1).join(" ");
 
   return (
     <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
@@ -245,18 +452,14 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
         </linearGradient>
       </defs>
 
-      {/* Door face fills the circular chamber */}
       <rect x="0" y="0" width="100" height="100" fill={`url(#door-light-${roomKey})`} />
 
-      {/* Vertical planks with grain */}
       {planks.map((i) => {
         const plankW = 100 / plankCount;
         const x = i * plankW;
         return (
           <g key={i}>
-            {/* plank seam shadow */}
             <line x1={x} y1="0" x2={x} y2="100" stroke={grainDark} strokeWidth="0.8" />
-            {/* faint grain streaks */}
             <path
               d={`M${x + plankW * 0.2} 0 Q${x + plankW * 0.5} 50 ${x + plankW * 0.3} 100`}
               stroke={grainLight}
@@ -275,22 +478,20 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
         );
       })}
 
-      {/* Horizontal cross-beam (hobbit-door bar) */}
+      {/* Horizontal cross-beam */}
       <rect x="2" y="56" width="96" height="6" fill={wood2} opacity="0.85" />
       <rect x="2" y="56" width="96" height="1" fill={grainDark} />
       <rect x="2" y="61" width="96" height="1" fill={grainDark} />
 
-      {/* Round iron knob on the bar */}
-      <circle cx="68" cy="59" r="2.4" fill={`hsl(35 25% 18%)`} />
-      <circle cx="68" cy="58.4" r="1" fill={`hsl(45 35% 45% / 0.7)`} />
+      {/* Iron knob (slightly offset per door) */}
+      <circle cx={68 + knobDx} cy="59" r="2.4" fill={`hsl(35 25% 18%)`} />
+      <circle cx={68 + knobDx} cy="58.4" r="1" fill={`hsl(45 35% 45% / 0.7)`} />
 
-      {/* Hanging sign — rope + carved wooden plaque with symbol + name */}
-      {/* rope */}
-      <line x1="38" y1="6" x2="42" y2="20" stroke={`hsl(30 30% 22%)`} strokeWidth="0.6" />
-      <line x1="62" y1="6" x2="58" y2="20" stroke={`hsl(30 30% 22%)`} strokeWidth="0.6" />
+      {/* Hanging sign — rope + carved plaque (slightly tilted) */}
+      <line x1={38 + plaqueDx} y1="6" x2={42 + plaqueDx} y2="20" stroke={`hsl(30 30% 22%)`} strokeWidth="0.6" />
+      <line x1={62 + plaqueDx} y1="6" x2={58 + plaqueDx} y2="20" stroke={`hsl(30 30% 22%)`} strokeWidth="0.6" />
 
-      {/* plaque */}
-      <g>
+      <g transform={`rotate(${plaqueTilt} 50 34) translate(${plaqueDx} 0)`}>
         <rect
           x="20"
           y="18"
@@ -298,10 +499,9 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
           height="32"
           rx="3"
           fill={`url(#sign-wood-${roomKey})`}
-          stroke={`hsl(${goldH} 50% 30% / 0.8)`}
+          stroke={`hsl(${tempH} 50% 30% / 0.8)`}
           strokeWidth="0.6"
         />
-        {/* inner engraved bevel */}
         <rect
           x="22"
           y="20"
@@ -309,11 +509,10 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
           height="28"
           rx="2"
           fill="none"
-          stroke={`hsl(${goldH} 60% 50% / 0.35)`}
+          stroke={`hsl(${tempH} 60% 50% / 0.35)`}
           strokeWidth="0.4"
         />
 
-        {/* symbol */}
         <text
           x="32"
           y="36"
@@ -325,27 +524,18 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
           {emoji}
         </text>
 
-        {/* room name — engraved gold */}
         {line2 ? (
           <>
             <text
-              x="56"
-              y="31"
-              fontSize="5.2"
-              textAnchor="middle"
-              fontFamily="ui-serif, Georgia, serif"
-              fill={signText}
+              x="56" y="31" fontSize="5.2" textAnchor="middle"
+              fontFamily="ui-serif, Georgia, serif" fill={signText}
               style={{ letterSpacing: "0.05em" }}
             >
               {line1.toUpperCase()}
             </text>
             <text
-              x="56"
-              y="40"
-              fontSize="5.2"
-              textAnchor="middle"
-              fontFamily="ui-serif, Georgia, serif"
-              fill={signText}
+              x="56" y="40" fontSize="5.2" textAnchor="middle"
+              fontFamily="ui-serif, Georgia, serif" fill={signText}
               style={{ letterSpacing: "0.05em" }}
             >
               {line2.toUpperCase()}
@@ -353,12 +543,8 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
           </>
         ) : (
           <text
-            x="56"
-            y="37"
-            fontSize="5.4"
-            textAnchor="middle"
-            fontFamily="ui-serif, Georgia, serif"
-            fill={signText}
+            x="56" y="37" fontSize="5.4" textAnchor="middle"
+            fontFamily="ui-serif, Georgia, serif" fill={signText}
             style={{ letterSpacing: "0.05em" }}
           >
             {line1.toUpperCase()}
@@ -366,11 +552,14 @@ function WoodenDoor({ roomKey, label, emoji, h, goldH }: {
         )}
       </g>
 
-      {/* Floor shadow under door */}
-      <rect x="0" y="92" width="100" height="8" fill={`hsl(20 30% 6% / 0.55)`} />
+      {/* Faint interior glimpse beneath the door */}
+      <InteriorGlimpse roomKey={roomKey} tempH={tempH} />
 
-      {/* Warm threshold light spilling under the door */}
-      <ellipse cx="50" cy="95" rx="36" ry="3" fill={`hsl(${goldH} 80% 55% / 0.35)`} />
+      {/* Floor shadow */}
+      <rect x="0" y="92" width="100" height="8" fill={`hsl(20 30% 6% / 0.6)`} />
+
+      {/* Warm threshold light spilling under the door (offset by seed) */}
+      <ellipse cx={50 + spillDx} cy="95" rx="36" ry="3" fill={thresholdSpill} />
     </svg>
   );
 }
