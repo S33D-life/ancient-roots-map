@@ -33,37 +33,75 @@ function roomLabel(key: string, fallback: string): string {
 /* ── Room definitions — visual accents local, names derive from the registry ──
  * `emoji` + `desc` + `accentH` + `particle` are local visual/atmospheric accents.
  * `label` is a fallback name only; the displayed name comes from `roomLabel()`. */
+type LayerKey = "upper" | "central" | "deep";
 type Room = { key: string; emoji: string; label: string; desc: string; accentH: number; particle: string };
 
-const PRIMARY: Room[] = [
-  { key: "staff-room",      emoji: "🪵", label: "Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
-  { key: "star-trail",      emoji: "✨", label: "Star Trail",      desc: "Your Journey",                             accentH: 340, particle: "spark"   },
-  { key: "ancient-friends", emoji: "🌳", label: "Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
-  { key: "atlas",           emoji: "🗺", label: "Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
-  { key: "life-groves",     emoji: "🌿", label: "Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
-  { key: "quest-cave",      emoji: "🕯", label: "Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+/* ── Heartwood chamber layers ──
+ * Heartwood is the trunk. These groupings only describe which energy each
+ * chamber leans toward — light & rhythm above, hearth-warmth at the centre,
+ * quiet stewardship below. Not literal floors. */
+const UPPER_CHAMBERS: Room[] = [
+  { key: "star-trail",  emoji: "✨", label: "Star Trail",       desc: "Your journey through seasons",       accentH: 340, particle: "spark"   },
+  { key: "scrolls",     emoji: "📜", label: "Scrolls & Records", desc: "Council records & long memory",      accentH: 42,  particle: "shimmer" },
+  { key: "music-room",  emoji: "🎵", label: "Music Room",        desc: "Songs offered to the trees",         accentH: 260, particle: "wave"    },
+  { key: "bookshelf",   emoji: "📚", label: "Bookshelf",         desc: "Pages you carry with you",           accentH: 25,  particle: "shimmer" },
+  { key: "press",       emoji: "🪶", label: "Print Press",       desc: "Where reading becomes writing",      accentH: 35,  particle: "shimmer" },
+  { key: "rhythms",     emoji: "🌿", label: "Rhythms",           desc: "Seasonal cycles & cambium time",     accentH: 150, particle: "leaf"    },
+  { key: "wishlist",    emoji: "⭐", label: "Wishing Tree",      desc: "Trees you dream to visit",           accentH: 45,  particle: "star"    },
+];
+
+const CENTRAL_CHAMBERS: Room[] = [
+  { key: "ancient-friends", emoji: "🌳", label: "Ancient Friends", desc: "Gallery of ancient trees",                 accentH: 140, particle: "leaf"    },
   { key: "arborium",        emoji: "🌿", label: "The Arborium",    desc: "Living field guide of the forest",         accentH: 95,  particle: "leaf"    },
+  { key: "staff-room",      emoji: "🪵", label: "Staff Room",      desc: "144 sacred staffs",                        accentH: 280, particle: "wand"    },
+  { key: "atlas",           emoji: "🗺", label: "Map Room",        desc: "Atlas · countries · bio-regions",          accentH: 200, particle: "compass" },
+  { key: "life-groves",     emoji: "🌿", label: "Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
+  { key: "greenhouse",      emoji: "🌱", label: "Greenhouse",      desc: "Houseplants & saplings in your care",      accentH: 130, particle: "leaf"    },
 ];
 
-const LIVING_LIBRARY: Room[] = [
-  { key: "music-room",    emoji: "🎵", label: "Music Room",       desc: "Tree Radio",                    accentH: 260, particle: "wave"    },
-  { key: "bookshelf",     emoji: "📚", label: "Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
-  { key: "scrolls",       emoji: "📜", label: "Scrolls & Records", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
-  { key: "press",         emoji: "🪶", label: "Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
-  { key: "vault",         emoji: "🔐", label: "Vault",            desc: "Staff, Tokens & Treasures",     accentH: 270, particle: "shimmer" },
+const DEEP_CHAMBERS: Room[] = [
+  { key: "seed-cellar",       emoji: "📦", label: "Seed Cellar",       desc: "Living data archive",            accentH: 30,  particle: "seed"  },
+  { key: "vault",             emoji: "🔐", label: "Vault",             desc: "Staff, tokens & treasures",      accentH: 270, particle: "shimmer" },
+  { key: "tree-data-commons", emoji: "🔭", label: "Tree Data Commons", desc: "Quiet knowledge observatory",    accentH: 160, particle: "page"  },
+  { key: "quest-cave",        emoji: "🕯", label: "Quest Cave",        desc: "Species paths & ancient ways",   accentH: 35,  particle: "spark" },
+  { key: "tap-root",          emoji: "⚙️", label: "Dev Room",          desc: "Tap root · hidden infrastructure", accentH: 210, particle: "spark" },
 ];
 
-const GROWING_SPACES: Room[] = [
-  { key: "seed-cellar", emoji: "📦", label: "Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
-  { key: "greenhouse",  emoji: "🌱", label: "Greenhouse",  desc: "Houseplants & Saplings",      accentH: 130, particle: "leaf" },
-  { key: "wishlist",    emoji: "⭐", label: "Wishing Tree", desc: "Trees you dream to visit",    accentH: 45,  particle: "star" },
-];
-
-const COMMUNITY_ATLAS: Room[] = [
-  { key: "tree-data-commons", emoji: "🔭", label: "Tree Data Commons", desc: "Knowledge Observatory",     accentH: 160, particle: "page"  },
-  { key: "rhythms",           emoji: "🌿", label: "Rhythms",           desc: "Seasonal Cycle Markets",    accentH: 150, particle: "leaf"  },
-  { key: "tap-root",          emoji: "⚙️", label: "Dev Room",           desc: "Tap Root · Infrastructure", accentH: 210, particle: "spark" },
-];
+/* Per-layer atmosphere — slight, never decorative. */
+function layerAtmosphere(layer: LayerKey) {
+  switch (layer) {
+    case "upper":
+      return {
+        title: "Upper Chambers",
+        whisper: "The songs ascend toward light.",
+        bgFromL: 16,  // lighter
+        bgToL: 7,
+        haloAlpha: 0.55,  // softer luminous bloom
+        borderAlpha: 0.22,
+        ringExtra: `0 0 22px hsl(48 60% 55% / 0.10)`,
+      };
+    case "central":
+      return {
+        title: "Central Hearth",
+        whisper: "These chambers hold living memory.",
+        bgFromL: 13,
+        bgToL: 6,
+        haloAlpha: 0.7,   // warmest ember
+        borderAlpha: 0.3,
+        ringExtra: `0 0 28px hsl(28 70% 45% / 0.14)`,
+      };
+    case "deep":
+      return {
+        title: "Deeper Rings",
+        whisper: "Some chambers remember slowly.",
+        bgFromL: 9,       // denser
+        bgToL: 3,
+        haloAlpha: 0.45,
+        borderAlpha: 0.18,
+        ringExtra: `0 0 18px hsl(20 50% 25% / 0.18)`,
+      };
+  }
+}
 
 /* ── Seasonal ambient hue offset (subtle) ── */
 function getSeasonalShift(): number {
