@@ -3,7 +3,7 @@
  * Each room has a unique micro-animation, themed hover glow, and seasonal ambient shift.
  * "Every room in the library breathes differently."
  */
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 
