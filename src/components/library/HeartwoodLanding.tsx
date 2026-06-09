@@ -85,35 +85,6 @@ const HeartwoodLanding = () => {
           }
         `}</style>
 
-        {/* ── Hearth Mantle ── */}
-        <div className="relative w-full max-w-md mx-auto mb-8">
-          <div
-            className="relative flex flex-col items-center pt-4 pb-6 rounded-2xl"
-            style={{
-              background: 'linear-gradient(180deg, hsl(var(--card) / 0.6), hsl(var(--card) / 0.3))',
-              borderBottom: '1px solid hsl(var(--border) / 0.2)',
-              boxShadow: '0 8px 32px hsl(var(--background) / 0.4), inset 0 1px 0 hsl(var(--border) / 0.06)',
-            }}
-          >
-            <EmberDrift />
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, hsl(30 60% 30% / 0.12), transparent 70%)' }}
-            />
-            <Suspense fallback={
-              <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsl(42 30% 15% / 0.3)' }} />
-            }>
-              <MantleClock />
-            </Suspense>
-            <p
-              className="font-serif text-[10px] tracking-[0.3em] uppercase mt-3 select-none"
-              style={{ color: 'hsl(42 30% 45% / 0.3)' }}
-            >
-              seasonal time
-            </p>
-          </div>
-        </div>
-
         {/* First-time Companion hint — desktop only */}
         <CompanionHint />
 
@@ -167,10 +138,38 @@ const HeartwoodLanding = () => {
           <LibraryVaultPreview />
         </div>
 
-        {/* Life Groves & Quest Cave now live as standard tiles in the room grid below. */}
-
-        {/* Room Grid */}
-        <LibraryRoomGrid onRoomSelect={handleRoomSelect} />
+        {/* Room Grid — Blooming Clock is now woven into the journey between the
+            Central Hearth and the Deeper Rings (seasonal sap-flow, not utility widget). */}
+        <LibraryRoomGrid
+          onRoomSelect={handleRoomSelect}
+          centerSlot={
+            <div
+              className="relative flex flex-col items-center pt-4 pb-6 px-6 rounded-2xl w-full max-w-sm mx-auto"
+              style={{
+                background: 'linear-gradient(180deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.25))',
+                borderBottom: '1px solid hsl(var(--border) / 0.2)',
+                boxShadow: '0 8px 32px hsl(var(--background) / 0.4), inset 0 1px 0 hsl(var(--border) / 0.06)',
+              }}
+            >
+              <EmberDrift />
+              <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(circle, hsl(30 60% 30% / 0.12), transparent 70%)' }}
+              />
+              <Suspense fallback={
+                <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsl(42 30% 15% / 0.3)' }} />
+              }>
+                <MantleClock />
+              </Suspense>
+              <p
+                className="font-serif text-[10px] tracking-[0.3em] uppercase mt-3 select-none"
+                style={{ color: 'hsl(42 30% 45% / 0.4)' }}
+              >
+                blooming clock
+              </p>
+            </div>
+          }
+        />
       </div>
 
       <TetolBridge />
