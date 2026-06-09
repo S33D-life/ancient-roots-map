@@ -823,7 +823,7 @@ interface Props {
   onRoomSelect: (key: string) => void;
   /** Slot rendered between the Central and Deep chambers — used for the Blooming Clock,
    *  positioned where seasonal sap-flow lives between hearth and roots. */
-  centerSlot?: React.ReactNode;
+  centerSlot?: ReactNode;
 }
 
 export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
