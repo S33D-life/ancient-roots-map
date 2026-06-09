@@ -900,37 +900,3 @@ export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
     </div>
   );
 }
-
-  let runningIdx = 0;
-
-  return (
-    <div className="w-full max-w-2xl pb-32">
-      <p
-        className="font-serif text-xs tracking-[0.2em] uppercase text-center mb-5"
-        style={{ color: `hsl(${38 + seasonShift} 30% 50% / 0.5)` }}
-      >
-        Rooms of the Library
-      </p>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6 md:gap-x-5 md:gap-y-7">
-        {groups.map((g) => (
-          <div key={g.label} className="contents">
-            <SectionHeader label={g.label} seasonShift={seasonShift} />
-            {g.rooms.map((room) => {
-              const idx = runningIdx++;
-              return (
-                <RoomTile
-                  key={room.key}
-                  room={room}
-                  idx={idx}
-                  seasonShift={seasonShift}
-                  onSelect={onRoomSelect}
-                />
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
