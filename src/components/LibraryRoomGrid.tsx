@@ -3,7 +3,7 @@
  * Each room has a unique micro-animation, themed hover glow, and seasonal ambient shift.
  * "Every room in the library breathes differently."
  */
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 
@@ -33,37 +33,75 @@ function roomLabel(key: string, fallback: string): string {
 /* ── Room definitions — visual accents local, names derive from the registry ──
  * `emoji` + `desc` + `accentH` + `particle` are local visual/atmospheric accents.
  * `label` is a fallback name only; the displayed name comes from `roomLabel()`. */
+type LayerKey = "upper" | "central" | "deep";
 type Room = { key: string; emoji: string; label: string; desc: string; accentH: number; particle: string };
 
-const PRIMARY: Room[] = [
-  { key: "staff-room",      emoji: "🪵", label: "Staff Room",      desc: "144 Sacred Staffs",                        accentH: 280, particle: "wand"    },
-  { key: "star-trail",      emoji: "✨", label: "Star Trail",      desc: "Your Journey",                             accentH: 340, particle: "spark"   },
-  { key: "ancient-friends", emoji: "🌳", label: "Ancient Friends", desc: "Gallery of Ancient Trees",                 accentH: 140, particle: "leaf"    },
-  { key: "atlas",           emoji: "🗺", label: "Map Room",        desc: "Atlas · Countries · Bio Regions",          accentH: 200, particle: "compass" },
-  { key: "life-groves",     emoji: "🌿", label: "Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
-  { key: "quest-cave",      emoji: "🕯", label: "Quest Cave",      desc: "Species paths, hives & ancient ways",      accentH: 35,  particle: "spark"   },
+/* ── Heartwood chamber layers ──
+ * Heartwood is the trunk. These groupings only describe which energy each
+ * chamber leans toward — light & rhythm above, hearth-warmth at the centre,
+ * quiet stewardship below. Not literal floors. */
+const UPPER_CHAMBERS: Room[] = [
+  { key: "star-trail",  emoji: "✨", label: "Star Trail",       desc: "Your journey through seasons",       accentH: 340, particle: "spark"   },
+  { key: "scrolls",     emoji: "📜", label: "Scrolls & Records", desc: "Council records & long memory",      accentH: 42,  particle: "shimmer" },
+  { key: "music-room",  emoji: "🎵", label: "Music Room",        desc: "Songs offered to the trees",         accentH: 260, particle: "wave"    },
+  { key: "bookshelf",   emoji: "📚", label: "Bookshelf",         desc: "Pages you carry with you",           accentH: 25,  particle: "shimmer" },
+  { key: "press",       emoji: "🪶", label: "Print Press",       desc: "Where reading becomes writing",      accentH: 35,  particle: "shimmer" },
+  { key: "rhythms",     emoji: "🌿", label: "Rhythms",           desc: "Seasonal cycles & cambium time",     accentH: 150, particle: "leaf"    },
+  { key: "wishlist",    emoji: "⭐", label: "Wishing Tree",      desc: "Trees you dream to visit",           accentH: 45,  particle: "star"    },
+];
+
+const CENTRAL_CHAMBERS: Room[] = [
+  { key: "ancient-friends", emoji: "🌳", label: "Ancient Friends", desc: "Gallery of ancient trees",                 accentH: 140, particle: "leaf"    },
   { key: "arborium",        emoji: "🌿", label: "The Arborium",    desc: "Living field guide of the forest",         accentH: 95,  particle: "leaf"    },
+  { key: "staff-room",      emoji: "🪵", label: "Staff Room",      desc: "144 sacred staffs",                        accentH: 280, particle: "wand"    },
+  { key: "atlas",           emoji: "🗺", label: "Map Room",        desc: "Atlas · countries · bio-regions",          accentH: 200, particle: "compass" },
+  { key: "life-groves",     emoji: "🌿", label: "Life Groves",     desc: "Births, memorials, unions & family trees", accentH: 105, particle: "leaf"    },
+  { key: "greenhouse",      emoji: "🌱", label: "Greenhouse",      desc: "Houseplants & saplings in your care",      accentH: 130, particle: "leaf"    },
 ];
 
-const LIVING_LIBRARY: Room[] = [
-  { key: "music-room",    emoji: "🎵", label: "Music Room",       desc: "Tree Radio",                    accentH: 260, particle: "wave"    },
-  { key: "bookshelf",     emoji: "📚", label: "Bookshelf",        desc: "Your Reading Journey",          accentH: 25,  particle: "shimmer" },
-  { key: "scrolls",       emoji: "📜", label: "Scrolls & Records", desc: "Council Records",               accentH: 42,  particle: "shimmer" },
-  { key: "press",         emoji: "🪶", label: "Print Press",      desc: "Where reading becomes writing", accentH: 35,  particle: "shimmer" },
-  { key: "vault",         emoji: "🔐", label: "Vault",            desc: "Staff, Tokens & Treasures",     accentH: 270, particle: "shimmer" },
+const DEEP_CHAMBERS: Room[] = [
+  { key: "seed-cellar",       emoji: "📦", label: "Seed Cellar",       desc: "Living data archive",            accentH: 30,  particle: "seed"  },
+  { key: "vault",             emoji: "🔐", label: "Vault",             desc: "Staff, tokens & treasures",      accentH: 270, particle: "shimmer" },
+  { key: "tree-data-commons", emoji: "🔭", label: "Tree Data Commons", desc: "Quiet knowledge observatory",    accentH: 160, particle: "page"  },
+  { key: "quest-cave",        emoji: "🕯", label: "Quest Cave",        desc: "Species paths & ancient ways",   accentH: 35,  particle: "spark" },
+  { key: "tap-root",          emoji: "⚙️", label: "Dev Room",          desc: "Tap root · hidden infrastructure", accentH: 210, particle: "spark" },
 ];
 
-const GROWING_SPACES: Room[] = [
-  { key: "seed-cellar", emoji: "📦", label: "Seed Cellar", desc: "Living Data Archive",         accentH: 30,  particle: "seed" },
-  { key: "greenhouse",  emoji: "🌱", label: "Greenhouse",  desc: "Houseplants & Saplings",      accentH: 130, particle: "leaf" },
-  { key: "wishlist",    emoji: "⭐", label: "Wishing Tree", desc: "Trees you dream to visit",    accentH: 45,  particle: "star" },
-];
-
-const COMMUNITY_ATLAS: Room[] = [
-  { key: "tree-data-commons", emoji: "🔭", label: "Tree Data Commons", desc: "Knowledge Observatory",     accentH: 160, particle: "page"  },
-  { key: "rhythms",           emoji: "🌿", label: "Rhythms",           desc: "Seasonal Cycle Markets",    accentH: 150, particle: "leaf"  },
-  { key: "tap-root",          emoji: "⚙️", label: "Dev Room",           desc: "Tap Root · Infrastructure", accentH: 210, particle: "spark" },
-];
+/* Per-layer atmosphere — slight, never decorative. */
+function layerAtmosphere(layer: LayerKey) {
+  switch (layer) {
+    case "upper":
+      return {
+        title: "Upper Chambers",
+        whisper: "The songs ascend toward light.",
+        bgFromL: 16,  // lighter
+        bgToL: 7,
+        haloAlpha: 0.55,  // softer luminous bloom
+        borderAlpha: 0.22,
+        ringExtra: `0 0 22px hsl(48 60% 55% / 0.10)`,
+      };
+    case "central":
+      return {
+        title: "Central Hearth",
+        whisper: "These chambers hold living memory.",
+        bgFromL: 13,
+        bgToL: 6,
+        haloAlpha: 0.7,   // warmest ember
+        borderAlpha: 0.3,
+        ringExtra: `0 0 28px hsl(28 70% 45% / 0.14)`,
+      };
+    case "deep":
+      return {
+        title: "Deeper Rings",
+        whisper: "Some chambers remember slowly.",
+        bgFromL: 9,       // denser
+        bgToL: 3,
+        haloAlpha: 0.45,
+        borderAlpha: 0.18,
+        ringExtra: `0 0 18px hsl(20 50% 25% / 0.18)`,
+      };
+  }
+}
 
 /* ── Seasonal ambient hue offset (subtle) ── */
 function getSeasonalShift(): number {
@@ -608,11 +646,14 @@ function TileFireflies({ tempH, seed }: { tempH: number; seed: number }) {
 }
 
 /* ── Room Tile — round doorway carved into the trunk ── */
-function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: number; seasonShift: number; onSelect: (key: string) => void }) {
+function RoomTile({ room, idx, seasonShift, layer, onSelect }: {
+  room: Room; idx: number; seasonShift: number; layer: LayerKey; onSelect: (key: string) => void;
+}) {
   const h = room.accentH + seasonShift;
   const goldH = 38 + seasonShift;
   const tempH = familyHue(room.key) + Math.round(seasonShift * 0.4);
   const seed = asymSeed(room.key);
+  const atmos = layerAtmosphere(layer);
   const prefersReduced = useReducedMotion();
   const [opening, setOpening] = useState(false);
 
@@ -635,11 +676,13 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
       transition={{ delay: idx * 0.04, duration: 0.4, ease: "easeOut" }}
       whileHover={opening ? undefined : { y: -1 }}
       whileTap={opening ? undefined : { scale: 0.98 }}
-      className="group relative flex flex-col items-center text-center px-3 pt-4 pb-4 rounded-2xl transition-all duration-500 overflow-hidden"
+      className="group relative flex flex-col items-center text-center px-3 pt-4 pb-3 rounded-2xl transition-all duration-500 overflow-hidden"
       style={{
-        background: `radial-gradient(ellipse at 50% 0%, hsl(${goldH} 25% 12% / 0.55), hsl(${tempH} 18% 6% / 0.88))`,
-        border: `1px solid hsl(${goldH} 30% 22% / 0.25)`,
+        background: `radial-gradient(ellipse at 50% 0%, hsl(${goldH} 25% ${atmos.bgFromL}% / ${atmos.haloAlpha}), hsl(${tempH} 18% ${atmos.bgToL}% / 0.92))`,
+        border: `1px solid hsl(${goldH} 30% 22% / ${atmos.borderAlpha})`,
+        boxShadow: atmos.ringExtra,
       }}
+      aria-label={roomLabel(room.key, room.label)}
     >
       <TileFireflies tempH={tempH} seed={seed} />
 
@@ -674,12 +717,10 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
         <div
           className="relative w-full h-full rounded-full overflow-hidden"
           style={{
-            // Deeper recess: stronger inner shadow + a faint chamber darkness toward the back.
             boxShadow: `inset 0 0 22px hsl(20 50% 3% / 0.95), inset 0 -6px 14px hsl(20 60% 2% / 0.7), inset 0 0 0 1px hsl(${goldH} 50% 30% / 0.45)`,
             perspective: 700,
           }}
         >
-          {/* Door splits into two halves that swing open on tap */}
           <motion.div
             className="absolute inset-0"
             style={{
@@ -691,15 +732,7 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
             animate={opening ? { rotateY: -82, x: -2 } : { rotateY: 0, x: 0 }}
             transition={{ duration: 0.55, ease: [0.6, 0.05, 0.3, 0.95] }}
           >
-            <WoodenDoor
-              roomKey={room.key + "-l"}
-              label={roomLabel(room.key, room.label)}
-              emoji={room.emoji}
-              h={h}
-              goldH={goldH}
-              tempH={tempH}
-              seed={seed}
-            />
+            <WoodenDoor roomKey={room.key + "-l"} label={roomLabel(room.key, room.label)} emoji={room.emoji} h={h} goldH={goldH} tempH={tempH} seed={seed} />
           </motion.div>
           <motion.div
             className="absolute inset-0"
@@ -712,26 +745,14 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
             animate={opening ? { rotateY: 82, x: 2 } : { rotateY: 0, x: 0 }}
             transition={{ duration: 0.55, ease: [0.6, 0.05, 0.3, 0.95] }}
           >
-            <WoodenDoor
-              roomKey={room.key + "-r"}
-              label={roomLabel(room.key, room.label)}
-              emoji={room.emoji}
-              h={h}
-              goldH={goldH}
-              tempH={tempH}
-              seed={seed}
-            />
+            <WoodenDoor roomKey={room.key + "-r"} label={roomLabel(room.key, room.label)} emoji={room.emoji} h={h} goldH={goldH} tempH={tempH} seed={seed} />
           </motion.div>
 
-          {/* Floor curvature — subtle vignette at the bottom for recession */}
           <div
             className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse at 50% 100%, hsl(20 40% 4% / 0.55), transparent 70%)`,
-            }}
+            style={{ background: `radial-gradient(ellipse at 50% 100%, hsl(20 40% 4% / 0.55), transparent 70%)` }}
           />
 
-          {/* Warm interior light revealed as the door opens */}
           <AnimatePresence>
             {opening && (
               <motion.div
@@ -749,30 +770,19 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
             )}
           </AnimatePresence>
 
-          {/* Threshold illumination on hover/tap (kept for non-opening hover) */}
           <div
             className="absolute inset-0 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-700"
-            style={{
-              background: `radial-gradient(circle at 50% 100%, hsl(${tempH} 80% 55% / 0.3), transparent 65%)`,
-            }}
+            style={{ background: `radial-gradient(circle at 50% 100%, hsl(${tempH} 80% 55% / 0.3), transparent 65%)` }}
           />
         </div>
       </motion.div>
 
-      {/* Title tucked close to the threshold */}
-      <motion.h3
-        className="font-serif text-[13px] md:text-sm leading-tight tracking-wide relative z-10 -mt-0.5"
-        animate={opening ? { color: `hsl(${tempH} 80% 85% / 1)` } : {}}
-        transition={{ duration: 0.45 }}
-        style={{
-          color: `hsl(${tempH} 45% 72% / 0.92)`,
-          textShadow: `0 0 8px hsl(${tempH} 60% 40% / 0.25)`,
-        }}
-      >
-        {roomLabel(room.key, room.label)}
-      </motion.h3>
+      {/* Door plaque carries the name. Sr-only h3 keeps it accessible without visual repetition. */}
+      <h3 className="sr-only">{roomLabel(room.key, room.label)}</h3>
+
+      {/* Soft contextual whisper — guidance, not a second title. */}
       <p
-        className="text-[10px] md:text-[10.5px] mt-0.5 relative z-10 leading-snug max-w-[90%]"
+        className="text-[10px] md:text-[10.5px] mt-1 relative z-10 leading-snug max-w-[88%] font-serif italic"
         style={{ color: `hsl(${tempH} 18% 60% / 0.42)` }}
       >
         {room.desc}
@@ -782,27 +792,28 @@ function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: numbe
 }
 
 
-/* ── Section Header — engraved into the trunk with thin root-rule dividers ── */
-function SectionHeader({ label, seasonShift }: { label: string; seasonShift: number }) {
+/* ── Layer transition — a quiet breath between chamber groups ── */
+function LayerTransition({ atmos, seasonShift }: { atmos: ReturnType<typeof layerAtmosphere>; seasonShift: number }) {
   const h = 38 + seasonShift;
   return (
-    <div className="col-span-2 md:col-span-3 mt-5 mb-1 flex items-center gap-3">
+    <div className="col-span-2 md:col-span-3 mt-6 mb-2 flex flex-col items-center gap-2">
       <span
         aria-hidden
-        className="flex-1 h-px"
-        style={{ background: `linear-gradient(to right, transparent, hsl(${h} 40% 35% / 0.35), transparent)` }}
+        className="block w-10 h-px"
+        style={{ background: `linear-gradient(to right, transparent, hsl(${h} 40% 40% / 0.45), transparent)` }}
       />
       <span
-        className="font-serif text-[10px] tracking-[0.3em] uppercase whitespace-nowrap"
-        style={{ color: `hsl(${h} 25% 55% / 0.5)`, textShadow: `0 0 6px hsl(${h} 40% 25% / 0.4)` }}
+        className="font-serif text-[10px] tracking-[0.32em] uppercase whitespace-nowrap"
+        style={{ color: `hsl(${h} 25% 58% / 0.55)`, textShadow: `0 0 6px hsl(${h} 40% 25% / 0.4)` }}
       >
-        {label}
+        {atmos.title}
       </span>
       <span
-        aria-hidden
-        className="flex-1 h-px"
-        style={{ background: `linear-gradient(to right, transparent, hsl(${h} 40% 35% / 0.35), transparent)` }}
-      />
+        className="font-serif text-[11px] italic mt-0.5"
+        style={{ color: `hsl(${h} 20% 55% / 0.38)` }}
+      >
+        {atmos.whisper}
+      </span>
     </div>
   );
 }
@@ -810,16 +821,18 @@ function SectionHeader({ label, seasonShift }: { label: string; seasonShift: num
 /* ── Main Grid ── */
 interface Props {
   onRoomSelect: (key: string) => void;
+  /** Slot rendered between the Central and Deep chambers — used for the Blooming Clock,
+   *  positioned where seasonal sap-flow lives between hearth and roots. */
+  centerSlot?: ReactNode;
 }
 
-export default function LibraryRoomGrid({ onRoomSelect }: Props) {
+export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
   const seasonShift = useMemo(() => getSeasonalShift(), []);
 
-  const groups: { label: string; rooms: Room[] }[] = [
-    { label: "Primary Rooms", rooms: PRIMARY },
-    { label: "Living Library", rooms: LIVING_LIBRARY },
-    { label: "Growing Spaces", rooms: GROWING_SPACES },
-    { label: "Community & Atlas", rooms: COMMUNITY_ATLAS },
+  const layers: { layer: LayerKey; rooms: Room[] }[] = [
+    { layer: "upper",   rooms: UPPER_CHAMBERS },
+    { layer: "central", rooms: CENTRAL_CHAMBERS },
+    { layer: "deep",    rooms: DEEP_CHAMBERS },
   ];
 
   let runningIdx = 0;
@@ -827,31 +840,63 @@ export default function LibraryRoomGrid({ onRoomSelect }: Props) {
   return (
     <div className="w-full max-w-2xl pb-32">
       <p
-        className="font-serif text-xs tracking-[0.2em] uppercase text-center mb-5"
+        className="font-serif text-xs tracking-[0.24em] uppercase text-center mb-2"
         style={{ color: `hsl(${38 + seasonShift} 30% 50% / 0.5)` }}
       >
-        Rooms of the Library
+        Chambers of the Heartwood
+      </p>
+      <p
+        className="font-serif text-[11px] italic text-center mb-8"
+        style={{ color: `hsl(${38 + seasonShift} 25% 55% / 0.38)` }}
+      >
+        Move upward toward light, inward toward hearth, downward toward roots.
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6 md:gap-x-5 md:gap-y-7">
-        {groups.map((g) => (
-          <div key={g.label} className="contents">
-            <SectionHeader label={g.label} seasonShift={seasonShift} />
-            {g.rooms.map((room) => {
-              const idx = runningIdx++;
-              return (
-                <RoomTile
-                  key={room.key}
-                  room={room}
-                  idx={idx}
-                  seasonShift={seasonShift}
-                  onSelect={onRoomSelect}
+      {layers.map((g, gi) => {
+        const atmos = layerAtmosphere(g.layer);
+        return (
+          <div key={g.layer}>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-6 md:gap-x-5 md:gap-y-7">
+              <LayerTransition atmos={atmos} seasonShift={seasonShift} />
+              {g.rooms.map((room) => {
+                const idx = runningIdx++;
+                return (
+                  <RoomTile
+                    key={room.key}
+                    room={room}
+                    idx={idx}
+                    seasonShift={seasonShift}
+                    layer={g.layer}
+                    onSelect={onRoomSelect}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Blooming Clock sits between the central hearth and the deeper rings —
+                seasonal sap-flow beneath the library, not a utility widget on top. */}
+            {centerSlot && g.layer === "central" && (
+              <div className="mt-10 mb-2 flex flex-col items-center">
+                <span
+                  aria-hidden
+                  className="block w-px h-8 mb-4"
+                  style={{ background: `linear-gradient(to bottom, transparent, hsl(${38 + seasonShift} 40% 35% / 0.4), transparent)` }}
                 />
-              );
-            })}
+                {centerSlot}
+                <p
+                  className="font-serif text-[10px] italic tracking-wide mt-3"
+                  style={{ color: `hsl(${38 + seasonShift} 22% 55% / 0.45)` }}
+                >
+                  Seasonal sap-flow — the pulse beneath the library.
+                </p>
+              </div>
+            )}
+
+            {/* Spacer between layers (except after last) */}
+            {gi < layers.length - 1 && <div aria-hidden className="h-6 md:h-8" />}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
