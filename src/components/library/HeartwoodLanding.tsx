@@ -43,39 +43,61 @@ const HeartwoodLanding = () => {
       <HeartwoodBackground />
 
       <div className="relative z-10 flex flex-col items-center min-h-screen pb-12 px-4" style={{ paddingTop: 'var(--content-top)' }}>
-        {/* ── The Hearth — Opening Section ────────────── */}
-        <div className="relative flex flex-col items-center mb-10 max-w-xl text-center">
+        {/* ── Quiet Threshold — compressed doorway ────────────── */}
+        <div className="relative flex flex-col items-center mb-6 max-w-xl text-center">
           <div
-            className="absolute inset-0 -inset-x-16 -inset-y-8 pointer-events-none motion-safe:animate-[titleBreathe_6s_ease-in-out_infinite]"
+            className="absolute inset-0 -inset-x-12 -inset-y-4 pointer-events-none motion-safe:animate-[titleBreathe_6s_ease-in-out_infinite]"
             aria-hidden="true"
             style={{
-              background: 'radial-gradient(ellipse 70% 60% at 50% 45%, hsl(38 70% 40% / 0.18), hsl(30 60% 25% / 0.06) 55%, transparent 80%)',
-              filter: 'blur(24px)',
+              background: 'radial-gradient(ellipse 60% 50% at 50% 45%, hsl(38 70% 40% / 0.14), hsl(30 60% 25% / 0.04) 55%, transparent 80%)',
+              filter: 'blur(20px)',
             }}
           />
           <h1
-            className="relative text-5xl md:text-7xl font-serif tracking-wider mb-3"
+            className="relative text-3xl md:text-5xl font-serif tracking-wider mb-1.5"
             style={{
               color: 'hsl(38 75% 65%)',
-              textShadow: '0 0 50px hsl(38 80% 35% / 0.5), 0 2px 20px hsl(25 60% 20% / 0.6), 0 0 2px hsl(20 20% 8% / 0.9)',
+              textShadow: '0 0 40px hsl(38 80% 35% / 0.45), 0 2px 16px hsl(25 60% 20% / 0.55), 0 0 2px hsl(20 20% 8% / 0.9)',
             }}
           >
             HEARTWOOD
           </h1>
           <p
-            className="relative font-serif text-base md:text-lg mb-6"
-            style={{ color: 'hsl(38 50% 75% / 0.7)', textShadow: '0 1px 8px hsl(20 20% 8% / 0.8)' }}
+            className="relative font-serif text-xs md:text-sm mb-3 italic"
+            style={{ color: 'hsl(38 45% 72% / 0.65)', textShadow: '0 1px 6px hsl(20 20% 8% / 0.7)' }}
           >
-            The living centre. All rooms branch from the Heart.
+            You have entered the living trunk.
           </p>
-          <p
-            className="relative font-serif text-sm leading-relaxed max-w-md mb-4"
-            style={{ color: 'hsl(38 35% 65% / 0.55)' }}
-          >
-            This is where the fire burns quietly — where your journey is remembered,
-            your offerings are kept, and the grove grows from every heart that visits.
-          </p>
-          <MoonGlyph variant="whisper" className="relative mb-8" />
+          <MoonGlyph variant="whisper" className="relative mb-4" />
+
+          {/* Primary + secondary actions — calmer hierarchy */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              onClick={() => navigate("/map")}
+              className="px-5 py-2 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
+                color: 'hsl(38 80% 85%)',
+                border: '1px solid hsl(38 50% 40% / 0.5)',
+              }}
+            >
+              Enter the Map
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wide transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'hsl(25 20% 12% / 0.7)',
+                color: 'hsl(38 50% 70%)',
+                border: '1px solid hsl(38 40% 30% / 0.35)',
+              }}
+            >
+              Your Hearth
+            </button>
+            <CompanionPairDialog
+              className="px-3 py-1.5 rounded-lg font-serif text-[11px] tracking-wide transition-all duration-300 opacity-70 hover:opacity-100"
+            />
+          </div>
         </div>
 
         <style>{`
@@ -88,58 +110,7 @@ const HeartwoodLanding = () => {
         {/* First-time Companion hint — desktop only */}
         <CompanionHint />
 
-        {/* CTAs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
-          <button
-            onClick={() => navigate("/map")}
-            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
-              color: 'hsl(38 80% 85%)',
-              border: '1px solid hsl(38 50% 40% / 0.5)',
-            }}
-          >
-            Enter the Map
-          </button>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'hsl(25 20% 12% / 0.8)',
-              color: 'hsl(38 50% 70%)',
-              border: '1px solid hsl(38 40% 30% / 0.4)',
-            }}
-          >
-            Your Hearth
-          </button>
-          <CompanionPairDialog
-            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-          />
-          <button
-            onClick={() => navigate("/value-tree?tab=earn")}
-            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'hsl(25 20% 12% / 0.8)',
-              color: 'hsl(38 50% 70%)',
-              border: '1px solid hsl(38 40% 30% / 0.4)',
-            }}
-          >
-            Active Opportunities
-          </button>
-        </div>
-
-        {/* Borrowed Staff */}
-        <div className="w-full max-w-2xl mb-6">
-          <BorrowedStaffCard />
-        </div>
-
-        {/* Vault Preview */}
-        <div className="w-full max-w-2xl mb-10">
-          <LibraryVaultPreview />
-        </div>
-
-        {/* Room Grid — Blooming Clock is now woven into the journey between the
-            Central Hearth and the Deeper Rings (seasonal sap-flow, not utility widget). */}
+        {/* ── Central Chambers — the emotional landing ── */}
         <LibraryRoomGrid
           onRoomSelect={handleRoomSelect}
           centerSlot={
@@ -170,6 +141,38 @@ const HeartwoodLanding = () => {
             </div>
           }
         />
+
+        {/* ── Companion whisper — discovered after arrival ── */}
+        <div className="w-full max-w-2xl mt-12 mb-4">
+          <p
+            className="font-serif text-[10px] uppercase tracking-[0.3em] text-center mb-3 select-none"
+            style={{ color: 'hsl(42 30% 45% / 0.45)' }}
+          >
+            a companion stirs nearby
+          </p>
+          <BorrowedStaffCard />
+        </div>
+
+        {/* ── Deeper ecosystem — vault & metrics ── */}
+        <div className="w-full max-w-2xl mt-8 mb-6">
+          <LibraryVaultPreview />
+        </div>
+
+        {/* ── Active opportunities — moved below immersion ── */}
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => navigate("/value-tree?tab=earn")}
+            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+            style={{
+              background: 'hsl(25 20% 12% / 0.7)',
+              color: 'hsl(38 50% 70%)',
+              border: '1px solid hsl(38 40% 30% / 0.35)',
+            }}
+          >
+            Active Opportunities
+          </button>
+        </div>
+
       </div>
 
       <TetolBridge />
