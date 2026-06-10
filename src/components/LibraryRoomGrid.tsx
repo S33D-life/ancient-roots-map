@@ -671,9 +671,14 @@ function RoomTile({ room, idx, seasonShift, layer, onSelect }: {
     <motion.button
       key={room.key}
       onClick={handleSelect}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: idx * 0.04, duration: 0.4, ease: "easeOut" }}
+      initial={prefersReduced ? false : { opacity: 0, y: 24, scale: 0.94, filter: "blur(6px)" }}
+      whileInView={prefersReduced ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      viewport={{ once: true, amount: 0.35, margin: "0px 0px -10% 0px" }}
+      transition={{
+        delay: Math.min(idx * 0.09, 0.6),
+        duration: 0.9,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       whileHover={opening ? undefined : { y: -1 }}
       whileTap={opening ? undefined : { scale: 0.98 }}
       className="group relative flex flex-col items-center text-center px-3 pt-4 pb-3 rounded-2xl transition-all duration-500 overflow-hidden"
