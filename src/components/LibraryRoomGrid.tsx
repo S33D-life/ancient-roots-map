@@ -646,8 +646,8 @@ function TileFireflies({ tempH, seed }: { tempH: number; seed: number }) {
 }
 
 /* ── Room Tile — round doorway carved into the trunk ── */
-function RoomTile({ room, idx, seasonShift, layer, onSelect }: {
-  room: Room; idx: number; seasonShift: number; layer: LayerKey; onSelect: (key: string) => void;
+function RoomTile({ room, idx, seasonShift, layer, onSelect, onReveal }: {
+  room: Room; idx: number; seasonShift: number; layer: LayerKey; onSelect: (key: string) => void; onReveal?: (key: string) => void;
 }) {
   const h = room.accentH + seasonShift;
   const goldH = 38 + seasonShift;
@@ -673,6 +673,7 @@ function RoomTile({ room, idx, seasonShift, layer, onSelect }: {
       onClick={handleSelect}
       initial={prefersReduced ? false : { opacity: 0, y: 24, scale: 0.94, filter: "blur(6px)" }}
       whileInView={prefersReduced ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      onViewportEnter={() => onReveal?.(room.key)}
       viewport={{ once: true, amount: 0.35, margin: "0px 0px -10% 0px" }}
       transition={{
         delay: Math.min(idx * 0.09, 0.6),
