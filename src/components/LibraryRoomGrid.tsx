@@ -670,6 +670,7 @@ function RoomTile({ room, idx, seasonShift, layer, onSelect, onReveal }: {
   return (
     <motion.button
       key={room.key}
+      id={`heartwood-room-${room.key}`}
       onClick={handleSelect}
       initial={prefersReduced ? false : { opacity: 0, y: 24, scale: 0.94, filter: "blur(6px)" }}
       whileInView={prefersReduced ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
@@ -682,7 +683,7 @@ function RoomTile({ room, idx, seasonShift, layer, onSelect, onReveal }: {
       }}
       whileHover={opening ? undefined : { y: -1 }}
       whileTap={opening ? undefined : { scale: 0.98 }}
-      className="group relative flex flex-col items-center text-center px-3 pt-4 pb-3 rounded-2xl transition-all duration-500 overflow-hidden"
+      className="group relative flex flex-col items-center text-center px-3 pt-4 pb-3 rounded-2xl transition-all duration-500 overflow-hidden scroll-mt-24"
       style={{
         background: `radial-gradient(ellipse at 50% 0%, hsl(${goldH} 25% ${atmos.bgFromL}% / ${atmos.haloAlpha}), hsl(${tempH} 18% ${atmos.bgToL}% / 0.92))`,
         border: `1px solid hsl(${goldH} 30% 22% / ${atmos.borderAlpha})`,
