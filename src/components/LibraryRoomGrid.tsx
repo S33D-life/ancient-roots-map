@@ -967,13 +967,20 @@ function ChamberRevealIndicator({
   seasonShift,
   visible,
   prefersReduced,
+  onJump,
 }: {
-  layers: { layer: LayerKey; total: number; revealed: number }[];
+  layers: {
+    layer: LayerKey;
+    total: number;
+    revealed: number;
+    rooms: { key: string; label: string; revealed: boolean }[];
+  }[];
   totalRooms: number;
   totalRevealed: number;
   seasonShift: number;
   visible: boolean;
   prefersReduced: boolean;
+  onJump: (key: string) => void;
 }) {
   const h = 38 + seasonShift;
   const layerLabel: Record<LayerKey, string> = {
@@ -991,47 +998,57 @@ function ChamberRevealIndicator({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          aria-hidden="true"
-          className="hidden md:flex fixed left-3 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-3 pointer-events-none select-none"
+          className="hidden md:flex fixed left-3 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-3 select-none"
+          aria-label="Revealed chambers"
         >
           <span
-            className="font-serif text-[9px] tracking-[0.32em] uppercase"
+            className="font-serif text-[9px] tracking-[0.32em] uppercase pointer-events-none"
             style={{ color: `hsl(${h} 25% 58% / 0.45)` }}
           >
             chambers
           </span>
-          <div className="flex flex-col gap-2 items-center">
-            {layers.map(({ layer, total, revealed }) => {
-              const pct = total > 0 ? revealed / total : 0;
-              return (
-                <div key={layer} className="flex flex-col items-center gap-1">
-                  <div
-                    className="relative w-[2px] h-16 rounded-full overflow-hidden"
-                    style={{ background: `hsl(${h} 20% 30% / 0.18)` }}
-                  >
-                    <motion.div
-                      className="absolute left-0 right-0 bottom-0 rounded-full"
-                      initial={false}
-                      animate={{ height: `${pct * 100}%` }}
-                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          <div className="flex flex-col gap-3 items-center">
+            {layers.map(({ layer, total, revealed, rooms }) => (
+              <div key={layer} className="flex flex-col items-center gap-1.5">
+                <div
+                  className="relative flex flex-col items-center gap-1.5 px-1 py-1 rounded-full"
+                  style={{ background: `hsl(${h} 20% 14% / 0.18)` }}
+                >
+                  {rooms.map((r) => (
+                    <button
+                      key={r.key}
+                      type="button"
+                      onClick={() => r.revealed && onJump(r.key)}
+                      disabled={!r.revealed}
+                      title={r.revealed ? r.label : `${r.label} — not yet revealed`}
+                      aria-label={r.revealed ? `Jump to ${r.label}` : `${r.label} not yet revealed`}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        r.revealed
+                          ? "cursor-pointer hover:scale-150 focus:scale-150 focus:outline-none"
+                          : "cursor-default"
+                      }`}
                       style={{
-                        background: `linear-gradient(to top, hsl(${h} 60% 50% / 0.7), hsl(${h} 70% 65% / 0.45))`,
-                        boxShadow: `0 0 6px hsl(${h} 70% 55% / 0.35)`,
+                        background: r.revealed
+                          ? `radial-gradient(circle, hsl(${h} 75% 65% / 0.95), hsl(${h} 60% 45% / 0.7))`
+                          : `hsl(${h} 20% 35% / 0.25)`,
+                        boxShadow: r.revealed
+                          ? `0 0 6px hsl(${h} 70% 55% / 0.6)`
+                          : "none",
                       }}
                     />
-                  </div>
-                  <span
-                    className="font-serif text-[8px] tracking-[0.2em] uppercase"
-                    style={{ color: `hsl(${h} 22% 58% / ${revealed === total ? 0.6 : 0.35})` }}
-                  >
-                    {layerLabel[layer]}
-                  </span>
+                  ))}
                 </div>
-              );
-            })}
+                <span
+                  className="font-serif text-[8px] tracking-[0.2em] uppercase pointer-events-none"
+                  style={{ color: `hsl(${h} 22% 58% / ${revealed === total ? 0.6 : 0.35})` }}
+                >
+                  {layerLabel[layer]}
+                </span>
+              </div>
+            ))}
           </div>
           <span
-            className="font-serif text-[10px] italic tabular-nums"
+            className="font-serif text-[10px] italic tabular-nums pointer-events-none"
             style={{ color: `hsl(${h} 22% 60% / 0.5)` }}
           >
             {totalRevealed} / {totalRooms}
@@ -1041,4 +1058,5 @@ function ChamberRevealIndicator({
     </AnimatePresence>
   );
 }
+
 
