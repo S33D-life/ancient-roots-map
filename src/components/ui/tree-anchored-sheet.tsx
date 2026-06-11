@@ -85,13 +85,14 @@ const TreeAnchoredSheet = ({
     >
       <DrawerPrimitive.Portal>
         <DrawerPrimitive.Overlay
-          className="fixed inset-0 z-50 bg-black/25 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[90] bg-black/25 backdrop-blur-[2px]"
         />
         <DrawerPrimitive.Content
           aria-describedby={undefined}
           className={cn(
-            "fixed z-50 flex flex-col border-t border-border/40 bg-background shadow-[0_-12px_40px_-12px_hsl(var(--primary)/0.25)]",
+            "fixed z-[91] flex flex-col border-t border-border/40 bg-background shadow-[0_-12px_40px_-12px_hsl(var(--primary)/0.25)]",
             "rounded-t-[14px] outline-none",
+
             isMobile
               ? "inset-x-0 bottom-0"
               : "left-1/2 -translate-x-1/2 bottom-0 w-full max-w-xl",
