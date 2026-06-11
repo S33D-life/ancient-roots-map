@@ -858,10 +858,24 @@ export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
     layer: g.layer,
     total: g.rooms.length,
     revealed: g.rooms.reduce((n, r) => n + (revealed.has(r.key) ? 1 : 0), 0),
+    rooms: g.rooms.map((r) => ({
+      key: r.key,
+      label: roomLabel(r.key, r.label),
+      revealed: revealed.has(r.key),
+    })),
   }));
   const totalRooms = layerCounts.reduce((n, l) => n + l.total, 0);
   const totalRevealed = layerCounts.reduce((n, l) => n + l.revealed, 0);
   const showIndicator = totalRevealed > 0 && totalRevealed < totalRooms;
+
+  const handleJumpToRoom = (key: string) => {
+    const el = document.getElementById(`heartwood-room-${key}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "center" });
+    // brief focus highlight without stealing keyboard focus persistently
+    el.classList.add("ring-2", "ring-amber-400/40");
+    window.setTimeout(() => el.classList.remove("ring-2", "ring-amber-400/40"), 1200);
+  };
 
   let runningIdx = 0;
 
@@ -875,7 +889,9 @@ export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
         seasonShift={seasonShift}
         visible={showIndicator}
         prefersReduced={!!prefersReduced}
+        onJump={handleJumpToRoom}
       />
+
 
       <p
         className="font-serif text-xs tracking-[0.24em] uppercase text-center mb-2"
