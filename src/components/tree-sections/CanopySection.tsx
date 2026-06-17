@@ -65,18 +65,18 @@ const CanopySection = () => {
       >
         <DepthRevealText
           as="p"
-          className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/30"
+          className="text-[10px] uppercase tracking-[0.35em] font-serif text-foreground/45"
         >
-          The Canopy
+          🍃 The Canopy
         </DepthRevealText>
 
         <motion.div
           className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-          style={{ background: "hsl(150 40% 35% / 0.08)" }}
+          style={{ background: "hsl(150 40% 35% / 0.10)" }}
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Leaf className="w-5 h-5" style={{ color: "hsl(150 40% 45%)" }} />
+          <Leaf className="w-5 h-5" style={{ color: "hsl(145 45% 55%)" }} />
         </motion.div>
 
         <DepthRevealText
@@ -84,7 +84,7 @@ const CanopySection = () => {
           delay={100}
           className="text-3xl md:text-5xl font-serif tracking-wide"
           style={{
-            color: "hsl(150 35% 52%)",
+            color: "hsl(145 40% 60%)",
             lineHeight: depth.lineHeight,
             ...(titleLayout.ready && titleLayout.balancedWidth
               ? { maxWidth: titleLayout.balancedWidth, margin: "0 auto" }
@@ -94,9 +94,18 @@ const CanopySection = () => {
           <span ref={titleLayout.containerRef as any}>Council of Life</span>
         </DepthRevealText>
 
+        {/* Anchor sentence */}
         <DepthRevealText
-          delay={200}
-          className="text-muted-foreground/50 font-serif text-sm md:text-base max-w-sm mx-auto"
+          delay={150}
+          className="font-serif text-base md:text-lg max-w-md mx-auto"
+          style={{ color: "hsl(140 25% 85%)", lineHeight: 1.55 }}
+        >
+          Gather. Listen. Decide what wants to grow.
+        </DepthRevealText>
+
+        <DepthRevealText
+          delay={250}
+          className="text-foreground/65 font-serif text-sm md:text-base max-w-sm mx-auto"
           style={{
             lineHeight: depth.lineHeight,
             ...(descLayout.ready && descLayout.balancedWidth
@@ -114,7 +123,7 @@ const CanopySection = () => {
         <DepthRevealText
           wonder
           delay={400}
-          className="font-serif text-lg md:text-xl mx-auto max-w-xs"
+          className="font-serif italic text-base md:text-lg mx-auto max-w-xs text-foreground/55"
           style={getWonderLineStyle(depth.zone)}
         >
           Every voice shapes the canopy.
