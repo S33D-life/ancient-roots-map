@@ -92,7 +92,7 @@ const CrownSection = () => {
               : {}),
           }}
         >
-          <span ref={titleLayout.containerRef as any}>yOur Golden Dream</span>
+          <span ref={titleLayout.containerRef as any}>Our Vision</span>
         </DepthRevealText>
 
         {/* Anchor sentence — orientation */}
