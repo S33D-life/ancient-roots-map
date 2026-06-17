@@ -24,6 +24,7 @@ const GroundSection = lazy(() => import("@/components/tree-sections/GroundSectio
 const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionAtmosphere"));
 const AnatomicalSeam = lazy(() => import("@/components/tree-sections/AnatomicalSeam"));
 const TreeSpine = lazy(() => import("@/components/tree-sections/TreeSpine"));
+const AmbientZoneBadge = lazy(() => import("@/components/tree-sections/AmbientZoneBadge"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
 const RootPulse = lazy(() => import("@/components/RootPulse"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
@@ -76,6 +77,7 @@ const Index = () => {
           quietly orients the visitor (roots ↔ trunk ↔ branches ↔ crown). */}
       <Suspense fallback={null}>
         <TreeSpine />
+        <AmbientZoneBadge />
       </Suspense>
 
       {/* Network Pulse — the tree's nervous system */}
