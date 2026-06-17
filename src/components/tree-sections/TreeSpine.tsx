@@ -45,9 +45,17 @@ const TreeSpine = ({ opacity = 0.14, className = "" }: Props) => {
       style={{ opacity }}
     >
       <svg
-        className="absolute left-1/2 top-0 h-full -translate-x-1/2"
+        className="absolute left-1/2 top-0 h-full -translate-x-1/2 tree-spine-svg"
         // Narrow column centered on the page, stretching full page height
-        style={{ width: "min(38vw, 520px)" }}
+        style={{
+          width: "min(38vw, 520px)",
+          // Subtle living breath: tiny vertical drift + lateral sway driven by global scroll depth.
+          // Variables --tree-depth (0..1) and --tree-crown/--tree-roots are published by useTreeDepthChannel.
+          transform:
+            "translateX(calc(-50% + (var(--tree-depth, 0) - 0.5) * 6px)) translateY(calc((var(--tree-depth, 0) - 0.5) * -14px))",
+          transition: "transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1)",
+          willChange: "transform",
+        }}
         viewBox="0 0 200 2000"
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"

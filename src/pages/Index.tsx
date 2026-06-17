@@ -27,6 +27,7 @@ const AnatomicalSeam = lazy(() => import("@/components/tree-sections/AnatomicalS
 const TreeSpine = lazy(() => import("@/components/tree-sections/TreeSpine"));
 const AmbientZoneBadge = lazy(() => import("@/components/tree-sections/AmbientZoneBadge"));
 const HabitatAtmosphere = lazy(() => import("@/components/tree-sections/HabitatAtmosphere"));
+const ParallaxTextures = lazy(() => import("@/components/tree-sections/ParallaxTextures"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
 const RootPulse = lazy(() => import("@/components/RootPulse"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
@@ -74,6 +75,7 @@ const Index = () => {
       <Suspense fallback={null}>
         <TreeDepthBackground />
         <HabitatAtmosphere />
+        <ParallaxTextures />
         <MobileSectionWhisper />
       </Suspense>
 
