@@ -60,7 +60,7 @@ export default function ForestInteractionLayers() {
       </motion.p>
 
       {/* Cards — embedded doorways */}
-      <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="depth-reveal-roots max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-3">
         {layers.map((layer, i) => (
           <motion.button
             key={layer.title}
@@ -71,6 +71,7 @@ export default function ForestInteractionLayers() {
             variants={cardVariants}
             whileHover={{ y: -2 }}
             onClick={() => navigate(layer.to)}
+            style={{ ['--i' as any]: i }}
             className="group relative flex flex-col items-start text-left rounded-lg p-5 transition-all duration-500 hover:bg-foreground/[0.03] cursor-pointer"
           >
             {/* Icon */}
