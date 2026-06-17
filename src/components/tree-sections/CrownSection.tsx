@@ -33,7 +33,7 @@ const CrownSection = () => {
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 5, direction: -1 });
 
   const titleLayout = useDepthBalancedText({
-    text: "yOur Golden Dream",
+    text: "Our Vision",
     font: '400 clamp(30px, 5vw, 48px) ui-serif, Georgia, "Times New Roman", serif',
     lineHeight: 52,
     zone: depth.zone,
