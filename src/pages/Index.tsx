@@ -23,6 +23,7 @@ const TrunkSection = lazy(() => import("@/components/tree-sections/TrunkSection"
 const GroundSection = lazy(() => import("@/components/tree-sections/GroundSection"));
 const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionAtmosphere"));
 const AnatomicalSeam = lazy(() => import("@/components/tree-sections/AnatomicalSeam"));
+const TreeSpine = lazy(() => import("@/components/tree-sections/TreeSpine"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
 const RootPulse = lazy(() => import("@/components/RootPulse"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
@@ -71,6 +72,12 @@ const Index = () => {
         <MobileSectionWhisper />
       </Suspense>
 
+      {/* Continuous tree spine running the full page height —
+          quietly orients the visitor (roots ↔ trunk ↔ branches ↔ crown). */}
+      <Suspense fallback={null}>
+        <TreeSpine />
+      </Suspense>
+
       {/* Network Pulse — the tree's nervous system */}
       <Suspense fallback={null}>
         <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
@@ -83,7 +90,7 @@ const Index = () => {
         onNavigate={scrollToSection}
       />
 
-      <main className="flex-1" style={{ paddingTop: 'var(--content-top)' }}>
+      <main className="relative z-[1] flex-1" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Beta garden tone-setter */}
         <BetaGardenBanner />
 
