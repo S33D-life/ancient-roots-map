@@ -168,7 +168,7 @@ const TrunkSection = () => {
         <p className="text-[9px] uppercase tracking-[0.3em] font-serif text-muted-foreground/30 pt-6">
           Personal Chambers · Closer to the Roots
         </p>
-        <div className="grid grid-cols-2 gap-3 max-w-[14rem] mx-auto">
+        <div className="depth-reveal-trunk grid grid-cols-2 gap-3 max-w-[14rem] mx-auto">
           {PERSONAL_SPACES.map((room, i) => (
             <motion.div
               key={room.title}
@@ -177,6 +177,7 @@ const TrunkSection = () => {
               whileInView="visible"
               viewport={{ once: true }}
               variants={cardVariants}
+              style={{ ['--i' as any]: i + LIBRARY_ROOMS.length }}
             >
               <TrunkChamberDoor {...room} />
             </motion.div>
