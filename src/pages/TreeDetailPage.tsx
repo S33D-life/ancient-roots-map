@@ -1731,6 +1731,9 @@ const TreeDetailPage = () => {
           <MoonGlyph variant="whisper" />
         </div>
 
+        {/* Bottom safe-area / BottomNav clearance — keeps inline drawers (Plant a Seed, Hang Hearts) tappable on mobile */}
+        <BottomNavSpacer />
+
       </main>
 
       {/* Lightbox */}
