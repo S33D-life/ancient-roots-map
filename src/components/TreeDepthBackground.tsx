@@ -108,10 +108,10 @@ const RootMycelium = memo(({ opacity, progress }: { opacity: number; progress: n
       <path d="M900 500 Q910 420 890 360 Q920 300 900 250" stroke="hsl(110 22% 28%)" strokeWidth="1.3" fill="none" opacity="0.22" />
       <path d="M1300 500 Q1280 440 1300 390 Q1275 340 1310 290" stroke="hsl(95 20% 27%)" strokeWidth="1" fill="none" opacity="0.18" />
 
-      {/* Mycelium web — horizontal connective threads at depth */}
-      <path d="M0 460 Q120 445 250 455 Q400 440 550 458 Q700 442 850 455 Q1000 440 1150 452 Q1300 445 1400 460" stroke="hsl(120 30% 35%)" strokeWidth="1" fill="none" opacity="0.22" />
-      <path d="M0 480 Q180 470 360 478 Q540 468 720 480 Q900 470 1080 478 Q1260 470 1400 482" stroke="hsl(110 25% 32%)" strokeWidth="0.8" fill="none" opacity="0.18" />
-      <path d="M100 430 Q280 420 460 432 Q640 418 820 430 Q1000 420 1180 435" stroke="hsl(100 28% 33%)" strokeWidth="0.6" fill="none" opacity="0.15" />
+      {/* Mycelium web — horizontal connective threads at depth (softened to feel like soil weave, not ribbons) */}
+      <path d="M0 460 Q120 445 250 455 Q400 440 550 458 Q700 442 850 455 Q1000 440 1150 452 Q1300 445 1400 460" stroke="hsl(120 30% 35%)" strokeWidth="0.6" fill="none" opacity="0.1" />
+      <path d="M0 480 Q180 470 360 478 Q540 468 720 480 Q900 470 1080 478 Q1260 470 1400 482" stroke="hsl(110 25% 32%)" strokeWidth="0.5" fill="none" opacity="0.08" />
+      <path d="M100 430 Q280 420 460 432 Q640 418 820 430 Q1000 420 1180 435" stroke="hsl(100 28% 33%)" strokeWidth="0.4" fill="none" opacity="0.07" />
 
       {/* Mycelial intersection nodes — living network pulse */}
       <circle cx="200" cy="330" r="5" fill="hsl(120 40% 40%)" opacity="0.2">
@@ -207,15 +207,12 @@ const CanopyBranches = memo(({ opacity, progress }: { opacity: number; progress:
       <ellipse cx="1130" cy="140" rx="25" ry="14" fill="hsl(140 28% 28%)" opacity="0.09" />
       <ellipse cx="1090" cy="110" rx="16" ry="9" fill="hsl(148 24% 26%)" opacity="0.07" />
 
-      {/* Light rays filtering through */}
-      <line x1="320" y1="0" x2="340" y2="450" stroke="hsl(45 60% 60%)" strokeWidth="1.5" opacity="0.08" />
-      <line x1="550" y1="0" x2="540" y2="450" stroke="hsl(48 55% 58%)" strokeWidth="1" opacity="0.06" />
-      <line x1="920" y1="0" x2="900" y2="450" stroke="hsl(42 55% 58%)" strokeWidth="1.2" opacity="0.05" />
-      <line x1="1250" y1="0" x2="1270" y2="450" stroke="hsl(50 50% 55%)" strokeWidth="0.8" opacity="0.04" />
-
-      {/* Dappled light patches */}
-      <ellipse cx="350" cy="300" rx="40" ry="20" fill="hsl(45 55% 58%)" opacity="0.04" />
-      <ellipse cx="850" cy="350" rx="50" ry="25" fill="hsl(48 50% 55%)" opacity="0.03" />
+      {/* Light filtering through — soft dappled patches instead of vertical ribbons */}
+      <ellipse cx="340" cy="120" rx="80" ry="40" fill="hsl(45 60% 62%)" opacity="0.05" />
+      <ellipse cx="720" cy="90" rx="110" ry="50" fill="hsl(48 55% 60%)" opacity="0.045" />
+      <ellipse cx="1080" cy="140" rx="90" ry="42" fill="hsl(42 55% 58%)" opacity="0.04" />
+      <ellipse cx="350" cy="300" rx="50" ry="22" fill="hsl(45 55% 58%)" opacity="0.03" />
+      <ellipse cx="850" cy="350" rx="60" ry="26" fill="hsl(48 50% 55%)" opacity="0.025" />
     </svg>
   );
 });
@@ -340,14 +337,26 @@ const TreeDepthBackground = () => {
           `,
         }}
       >
-        {/* Layer 1: Canopy — branches + enchanted light (top-anchored, lingers downward) */}
-        <CanopyBranches opacity={canopyOp * 0.85} progress={progress} />
+        {/* Layer 1: Canopy — branches + dappled light (top-anchored, lingers downward) */}
+        <CanopyBranches opacity={canopyOp * 0.6} progress={progress} />
 
         {/* Layer 2: Bark grain — the tree's living body (centered, fades to edges) */}
-        <BarkGrain opacity={barkOp * 0.7} />
+        <BarkGrain opacity={barkOp * 0.5} />
 
         {/* Layer 3: Root mycelium — ancient network (bottom-anchored, whispers upward) */}
-        <RootMycelium opacity={rootOp * 0.8} progress={progress} />
+        <RootMycelium opacity={rootOp * 0.65} progress={progress} />
+
+        {/* Golden crown glow — sunlight only at the very top of the scroll */}
+        <div
+          className="absolute inset-x-0 top-0 pointer-events-none"
+          style={{
+            height: "45%",
+            opacity: Math.max(0, 1 - progress / 0.2),
+            background:
+              "radial-gradient(ellipse 70% 90% at 50% 0%, hsl(45 75% 62% / 0.10), hsl(42 60% 50% / 0.05) 45%, transparent 75%)",
+            transition: "opacity 1s ease",
+          }}
+        />
 
         {/* Layer 4: Sparse floating motes — always present, color shifts with depth */}
         <FloatingMotes progress={progress} reducedMotion={reducedMotion} />
