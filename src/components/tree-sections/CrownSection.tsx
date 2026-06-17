@@ -1,5 +1,5 @@
 /**
- * CrownSection — "yOur Golden Dream" preview for the tree scroll.
+ * CrownSection — "Our Vision" preview for the tree scroll.
  * Crown = brightest, most luminous section. Golden radiance + solarpunk sky.
  * Feels like looking up into the highest branches where light pours through.
  */
@@ -33,7 +33,7 @@ const CrownSection = () => {
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 5, direction: -1 });
 
   const titleLayout = useDepthBalancedText({
-    text: "yOur Golden Dream",
+    text: "Our Vision",
     font: '400 clamp(30px, 5vw, 48px) ui-serif, Georgia, "Times New Roman", serif',
     lineHeight: 52,
     zone: depth.zone,
@@ -92,7 +92,7 @@ const CrownSection = () => {
               : {}),
           }}
         >
-          <span ref={titleLayout.containerRef as any}>yOur Golden Dream</span>
+          <span ref={titleLayout.containerRef as any}>Our Vision</span>
         </DepthRevealText>
 
         {/* Anchor sentence — orientation */}
