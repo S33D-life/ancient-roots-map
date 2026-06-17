@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
+import { BottomNavSpacer } from "@/components/BottomNav";
 import {
   TreePageHero,
   TreeStorySection,
@@ -1729,6 +1730,9 @@ const TreeDetailPage = () => {
         <div className="mt-10 mb-2 flex justify-center">
           <MoonGlyph variant="whisper" />
         </div>
+
+        {/* Bottom safe-area / BottomNav clearance — keeps inline drawers (Plant a Seed, Hang Hearts) tappable on mobile */}
+        <BottomNavSpacer />
 
       </main>
 
