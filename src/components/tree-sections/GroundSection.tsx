@@ -153,8 +153,29 @@ const GroundSection = () => {
       </div>
 
 
-      {/* ── Identity statement — below TEOTAG, grounding the user ── */}
-      <div className="relative z-20 py-14 md:py-20">
+      {/* ── Ancient Friends anchor — the product, surfaced first ── */}
+      <div className="relative z-20 pt-10 md:pt-14">
+        <div className="container mx-auto px-5 text-center max-w-2xl space-y-5">
+          <p className="text-[10px] uppercase tracking-[0.35em] font-serif text-foreground/45">
+            🌱 The Roots · Ancient Friends
+          </p>
+          <h2
+            className="text-3xl md:text-5xl font-serif tracking-wide"
+            style={{ color: "hsl(140 35% 62%)" }}
+          >
+            Ancient Friends
+          </h2>
+          <p
+            className="font-serif text-lg md:text-2xl max-w-xl mx-auto"
+            style={{ color: "hsl(140 28% 90%)", lineHeight: 1.5 }}
+          >
+            Meet a tree. Leave an offering. Build a relationship that lasts.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Identity statement — explanation comes after the product ── */}
+      <div className="relative z-20 py-12 md:py-16">
         <div
           className="container mx-auto px-5 text-center max-w-3xl space-y-7 md:space-y-8"
           style={{ letterSpacing: depth.letterSpacing }}
