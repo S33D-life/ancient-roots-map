@@ -218,8 +218,6 @@ const CanopyBranches = memo(({ opacity, progress }: { opacity: number; progress:
 });
 CanopyBranches.displayName = "CanopyBranches";
 
-/** Sparse floating motes — very few, zone-tinted, organic drift */
-const FloatingMotes = memo(({ progress, reducedMotion }: { progress: number; reducedMotion: boolean }) => {
 /** Habitat-aware ambient motes — color, count, motion, and glow all evolve with scroll depth */
 type HabitatKey = "crown" | "canopy" | "trunk" | "ground" | "roots";
 
