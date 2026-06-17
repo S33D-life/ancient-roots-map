@@ -22,6 +22,7 @@ const CanopySection = lazy(() => import("@/components/tree-sections/CanopySectio
 const TrunkSection = lazy(() => import("@/components/tree-sections/TrunkSection"));
 const GroundSection = lazy(() => import("@/components/tree-sections/GroundSection"));
 const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionAtmosphere"));
+const AnatomicalSeam = lazy(() => import("@/components/tree-sections/AnatomicalSeam"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
 const RootPulse = lazy(() => import("@/components/RootPulse"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
@@ -91,14 +92,23 @@ const Index = () => {
           {/* ── CROWN — yOur Golden Dream ── */}
           <CrownSection />
 
+          {/* seam — sunlight bleeding into the canopy */}
+          <AnatomicalSeam variant="crown-canopy" label="Descent · Light into Leaf" />
+
           {/* breath — seed beneath earth */}
           <BreathingChamber whisper="Every root begins in silence." tone="soil" drift={-4} />
 
           {/* ── CANOPY — Council of Life ── */}
           <CanopySection />
 
+          {/* seam — branches tapering into bark */}
+          <AnatomicalSeam variant="canopy-trunk" label="Descent · Leaf into Bark" />
+
           {/* ── TRUNK — HeARTwood Library ── */}
           <TrunkSection />
+
+          {/* seam — heartwood flaring into soil */}
+          <AnatomicalSeam variant="trunk-ground" label="Descent · Heartwood into Soil" />
 
           {/* breath — heartwood remembers */}
           <BreathingChamber whisper="The forest remembers slowly." tone="wood" drift={6} />
@@ -107,6 +117,11 @@ const Index = () => {
         {/* ── SEED — S33D Gateway Hero (the central seed layer) ── */}
         <Suspense fallback={<SectionShimmer />}>
           <GroundSection />
+        </Suspense>
+
+        {/* seam — soil dissolving into mycelium */}
+        <Suspense fallback={null}>
+          <AnatomicalSeam variant="ground-roots" label="Descent · Soil into Mycelium" />
         </Suspense>
         {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
         <Suspense fallback={<SectionShimmer />}>
