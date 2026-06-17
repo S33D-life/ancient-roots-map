@@ -92,126 +92,172 @@ const CouncilOfLifePage = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
         </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-12">
+        <div className="relative z-10 max-w-3xl mx-auto px-4 pt-16 pb-12">
           {/* Hero */}
           <h1 className="text-4xl md:text-5xl font-serif text-center mb-3 tracking-wider drop-shadow-lg">
             Council of Life
           </h1>
-          <p className="text-center text-muted-foreground mb-4 text-lg font-serif italic">
-            Gather around the ancient table
-          </p>
-          <p className="text-center text-muted-foreground/60 mb-8 text-xs font-serif max-w-md mx-auto">
-            Stewardship through collective wisdom — where contributions become harvest and harvest guides the commons.
+          <p className="text-center text-muted-foreground mb-10 text-lg font-serif italic">
+            Gather Around The Ancient Fire
           </p>
 
-          {/* ── Next Council — primary entry ── */}
-          <NextCouncilCard
-            onJoinCouncil={() => setActiveRoom("chamber")}
-            refreshKey={curatorRefreshKey}
-            onEditCouncil={() => setCuratorOpen(true)}
-          />
+          {/* ── 1. Next Gathering — primary entry ── */}
+          <section aria-labelledby="next-gathering" className="mb-14">
+            <h2 id="next-gathering" className="font-serif text-[11px] tracking-[0.2em] uppercase text-muted-foreground/60 mb-4 text-center">
+              Next Gathering
+            </h2>
+            <NextCouncilCard
+              onJoinCouncil={() => setActiveRoom("chamber")}
+              refreshKey={curatorRefreshKey}
+              onEditCouncil={() => setCuratorOpen(true)}
+            />
+          </section>
 
-          {/* ── Council Calendar — upcoming gatherings ── */}
-          <div className="mt-6">
+          {/* ── 2. Reflection — heart of the Council experience ── */}
+          <section aria-labelledby="reflection" className="mb-16">
+            <h2 id="reflection" className="font-serif text-[11px] tracking-[0.2em] uppercase text-muted-foreground/60 mb-4 text-center">
+              Reflection
+            </h2>
+            <Card className="relative bg-card/70 backdrop-blur-sm border-primary/30 overflow-hidden shadow-[0_0_32px_-14px_hsl(var(--primary)/0.55)]">
+              <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-primary/15" />
+              <CardContent className="p-7 md:p-10 text-center">
+                <h3 className="font-serif text-[11px] tracking-[0.2em] uppercase text-primary/70 mb-4 flex items-center justify-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" /> The Time Tree
+                </h3>
+                <p className="text-lg md:text-2xl font-serif italic text-foreground/90 leading-[1.55] mb-7 max-w-xl mx-auto">
+                  "{invitation.timeTreeQuestion}"
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs font-serif tracking-wide gap-1.5 border-primary/40"
+                  onClick={() => navigate("/time-tree")}
+                >
+                  <Sparkles className="h-3 w-3" /> Reflect — Offer to the Time Tree
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* ── 3. Everything Else — collapsed by default ── */}
+          <div className="space-y-4">
+            {/* Council Scroll */}
             <HeartwoodChamber
-              title="Council Calendar"
-              caption="Upcoming gatherings, marked by moon and season."
+              title="Council Scroll"
+              caption="The full invitation, focus areas, and context for this cycle."
               icon={<ScrollText className="w-4 h-4 text-primary" />}
+              collapsible
+              defaultOpen={false}
+              tone="warm"
+            >
+              <CouncilQuickView invitation={invitation} />
+            </HeartwoodChamber>
+
+            {/* Council Archive — calendar + linked trees & bio-regions */}
+            <HeartwoodChamber
+              title="Council Archive"
+              caption="Upcoming gatherings, council trees, and bio-regions."
+              icon={<Archive className="w-4 h-4 text-primary" />}
               collapsible
               defaultOpen={false}
               tone="cool"
             >
-              <CouncilCalendar />
+              <div className="space-y-6">
+                <CouncilCalendar />
+                {linkedTrees.length > 0 && (
+                  <div>
+                    <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3 flex items-center gap-1.5">
+                      <TreePine className="h-3 w-3" /> Council Trees
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {linkedTrees.map((t) => (
+                        <button key={t.id} onClick={() => focusMap({ type: "tree", id: t.id, source: "tree" })} className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40">
+                          {t.name} <span className="text-muted-foreground/50">· {t.species}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {linkedRegions.length > 0 && (
+                  <div>
+                    <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3 flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3" /> Bio-Regions
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {linkedRegions.map((r) => (
+                        <button key={r.id} onClick={() => navigate(`/atlas/bio-regions/${r.id}`)} className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40">
+                          {r.name} <span className="text-muted-foreground/50">· {r.type}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </HeartwoodChamber>
+
+            {/* Stewardship Tools */}
+            <HeartwoodChamber
+              title="Stewardship Tools"
+              caption="Host a local circle or shape the rhythm of future gatherings."
+              icon={<Users className="w-4 h-4 text-primary" />}
+              collapsible
+              defaultOpen={false}
+              tone="muted"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setPodModalOpen(true)}
+                  className="relative text-left rounded-lg border border-border/30 bg-card/40 hover:bg-card/60 hover:border-primary/30 transition-colors p-4"
+                >
+                  <Badge variant="secondary" className="absolute top-2 right-2 text-[9px] px-1.5 py-0">Soon</Badge>
+                  <Podcast className="h-5 w-5 text-muted-foreground mb-2" />
+                  <div className="font-serif text-sm tracking-wide">Host a Pod</div>
+                  <div className="text-[11px] text-muted-foreground/70 mt-0.5">Grow a local circle</div>
+                </button>
+                <button
+                  onClick={() => navigate("/library/rhythms")}
+                  className="text-left rounded-lg border border-border/30 bg-card/40 hover:bg-card/60 hover:border-primary/30 transition-colors p-4"
+                >
+                  <BarChart3 className="h-5 w-5 text-primary/70 mb-2" />
+                  <div className="font-serif text-sm tracking-wide">City Markets</div>
+                  <div className="text-[11px] text-muted-foreground/70 mt-0.5">Shape the rhythm of gatherings</div>
+                </button>
+              </div>
+            </HeartwoodChamber>
+
+            {/* Emerging Practices */}
+            <HeartwoodChamber
+              title="Emerging Practices"
+              caption="Digital Fire and Lunar Vote — shape what the Council attends to next."
+              icon={<Flame className="w-4 h-4 text-primary" />}
+              collapsible
+              defaultOpen={false}
+              tone="warm"
+            >
+              <DigitalFireVote />
+            </HeartwoodChamber>
+
+            {/* Past Gatherings */}
+            <HeartwoodChamber
+              title="Past Gatherings"
+              caption="Walk the archives of past circles."
+              icon={<ScrollText className="w-4 h-4 text-primary" />}
+              collapsible
+              defaultOpen={false}
+              tone="muted"
+            >
+              <button
+                onClick={() => navigate("/council/records")}
+                className="w-full text-left rounded-lg border border-border/30 bg-card/40 hover:bg-card/60 hover:border-primary/30 transition-colors p-4"
+              >
+                <div className="font-serif text-sm tracking-wide">Council Records →</div>
+                <div className="text-[11px] text-muted-foreground/70 mt-0.5">Open the full archive of past gatherings</div>
+              </button>
             </HeartwoodChamber>
           </div>
 
-          {/* ── Quick View — agenda glimpse + single Council Scroll ── */}
-          <div className="mt-6">
-            <CouncilQuickView invitation={invitation} />
-          </div>
-
-          {/* ── Room Grid ── */}
-          <div className="grid grid-cols-2 gap-4 md:gap-6 mt-8">
-            {councilRooms.map((room) => {
-              const Icon = room.icon;
-              const isComingSoon = "comingSoon" in room && room.comingSoon;
-              return (
-                <Card
-                  key={room.id}
-                  className={`relative bg-card/60 backdrop-blur-sm border-border/50 transition-all duration-300 group ${
-                    isComingSoon ? "opacity-75 cursor-pointer" : "cursor-pointer hover:bg-card/80 hover:border-primary/40"
-                  }`}
-                  onClick={() => {
-                    if (isComingSoon) {
-                      setPodModalOpen(true);
-                    } else if ("internalUrl" in room && room.internalUrl) {
-                      navigate(room.internalUrl as string);
-                    } else if ("externalUrl" in room && room.externalUrl) {
-                      window.open(room.externalUrl as string, "_blank", "noopener,noreferrer");
-                    } else {
-                      setActiveRoom(room.id);
-                    }
-                  }}
-                >
-                  {isComingSoon && (
-                    <Badge variant="secondary" className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5">
-                      Coming Soon
-                    </Badge>
-                  )}
-                  <CardHeader className="text-center p-4 md:p-6">
-                    <Icon className={`h-8 w-8 mx-auto mb-2 transition-colors ${isComingSoon ? "text-muted-foreground" : "text-primary group-hover:text-accent"}`} />
-                    <CardTitle className="text-base md:text-lg font-serif tracking-wide">{room.title}</CardTitle>
-                    <CardDescription className="text-xs md:text-sm">{room.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Linked Trees & Bio-Regions */}
-          {(linkedTrees.length > 0 || linkedRegions.length > 0) && (
-            <div className="mt-10 space-y-4">
-              {linkedTrees.length > 0 && (
-                <div>
-                  <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3 flex items-center gap-1.5">
-                    <TreePine className="h-3 w-3" /> Council Trees
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {linkedTrees.map((t) => (
-                      <button key={t.id} onClick={() => focusMap({ type: "tree", id: t.id, source: "tree" })} className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40">
-                        {t.name} <span className="text-muted-foreground/50">· {t.species}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {linkedRegions.length > 0 && (
-                <div>
-                  <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3 flex items-center gap-1.5">
-                    <MapPin className="h-3 w-3" /> Bio-Regions
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {linkedRegions.map((r) => (
-                      <button key={r.id} onClick={() => navigate(`/atlas/bio-regions/${r.id}`)} className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40">
-                        {r.name} <span className="text-muted-foreground/50">· {r.type}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Digital Fire — Shape the Next Council */}
-          <div className="mt-10">
-            <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3">
-              🔥 Digital Fire — Shape the Next Council
-            </h3>
-            <DigitalFireVote />
-          </div>
-
           {/* Loop-closure: cross-links */}
-          <div className="mt-10 rounded-xl border border-border/20 bg-card/30 p-4 space-y-3">
+          <div className="mt-12 rounded-xl border border-border/20 bg-card/30 p-4 space-y-3">
             <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">
               Continue the cycle
             </h3>
@@ -238,6 +284,7 @@ const CouncilOfLifePage = () => {
             </div>
           </div>
         </div>
+
         <TetolBridge />
       </main>
       <Footer />
