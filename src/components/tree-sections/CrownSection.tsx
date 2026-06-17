@@ -1,5 +1,5 @@
 /**
- * CrownSection — "yOur Golden Dream" preview for the tree scroll.
+ * CrownSection — "Our Vision" preview for the tree scroll.
  * Crown = brightest, most luminous section. Golden radiance + solarpunk sky.
  * Feels like looking up into the highest branches where light pours through.
  */
