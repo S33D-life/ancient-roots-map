@@ -48,19 +48,33 @@ const AnatomicalSeam = ({ variant, label, className = "" }: Props) => {
   return (
     <div
       className={`relative w-full overflow-hidden pointer-events-none ${className}`}
-      style={{ height: "clamp(96px, 14vw, 160px)" }}
+      // Taller seams so habitat shifts read as gradual drift, not as section breaks
+      style={{ height: "clamp(180px, 28vw, 320px)" }}
       aria-hidden="true"
     >
-      {variant === "crown-canopy" && <CrownCanopy />}
-      {variant === "canopy-trunk" && <CanopyTrunk />}
-      {variant === "trunk-ground" && <TrunkGround />}
-      {variant === "ground-roots" && <GroundRoots />}
+      {/* Anatomy layer — silhouettes softened heavily so they whisper, not announce */}
+      <div className="absolute inset-0 opacity-[0.55]">
+        {variant === "crown-canopy" && <CrownCanopy />}
+        {variant === "canopy-trunk" && <CanopyTrunk />}
+        {variant === "trunk-ground" && <TrunkGround />}
+        {variant === "ground-roots" && <GroundRoots />}
+      </div>
+
+      {/* Top + bottom feather — dissolves the seam into adjacent zones so there are no hard edges */}
+      <div
+        className="absolute inset-x-0 top-0 h-1/4"
+        style={{ background: "linear-gradient(to bottom, hsl(var(--background) / 0.55), transparent)" }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-1/4"
+        style={{ background: "linear-gradient(to top, hsl(var(--background) / 0.55), transparent)" }}
+      />
 
       {label && (
         <div className="absolute inset-0 flex items-center justify-center">
           <span
             className="font-serif text-[10px] md:text-[11px] tracking-[0.35em] uppercase"
-            style={{ color: "hsl(var(--foreground) / 0.35)" }}
+            style={{ color: "hsl(var(--foreground) / 0.3)" }}
           >
             {label}
           </span>
