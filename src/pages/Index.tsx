@@ -8,6 +8,7 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useVineFade } from "@/hooks/use-vine-fade";
 import { DiscoveryRow } from "@/components/HomeSections";
 import { useTreeScroll } from "@/hooks/use-tree-scroll";
+import { useTreeDepthChannel } from "@/hooks/use-tree-depth-channel";
 import TreeScrollIndicator from "@/components/TreeScrollIndicator";
 import CrownSection from "@/components/tree-sections/CrownSection";
 import { useTimeOfDay } from "@/hooks/use-time-of-day";
@@ -25,6 +26,7 @@ const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionA
 const AnatomicalSeam = lazy(() => import("@/components/tree-sections/AnatomicalSeam"));
 const TreeSpine = lazy(() => import("@/components/tree-sections/TreeSpine"));
 const AmbientZoneBadge = lazy(() => import("@/components/tree-sections/AmbientZoneBadge"));
+const HabitatAtmosphere = lazy(() => import("@/components/tree-sections/HabitatAtmosphere"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
 const RootPulse = lazy(() => import("@/components/RootPulse"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
@@ -54,6 +56,7 @@ const Index = () => {
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
   useVineFade();
+  useTreeDepthChannel();
   useTimeOfDay();
   useSeasonalTheme();
   const { latestEvent } = useNetworkPulse();
@@ -70,6 +73,7 @@ const Index = () => {
       {/* Scroll-driven tree depth background */}
       <Suspense fallback={null}>
         <TreeDepthBackground />
+        <HabitatAtmosphere />
         <MobileSectionWhisper />
       </Suspense>
 
