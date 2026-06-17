@@ -181,8 +181,41 @@ body.season-winter .vine-divider { --vine-hue: 200; }
   pointer-events: none;
 }
 
+/* ── Habitat-specific mote behaviors ── */
+/* Crown — sunlit dust drifting slowly upward, gentle twinkle */
+@keyframes mote-crown-sun {
+  0%, 100% { transform: translate(0, 0) scale(1);   opacity: 0.55; }
+  50%      { transform: translate(2px, -14px) scale(1.15); opacity: 0.9;  }
+}
+/* Canopy — leaves swaying on a breeze, lateral drift */
+@keyframes mote-canopy-leaf {
+  0%, 100% { transform: translate(0, 0) scale(1);    opacity: 0.5; }
+  35%      { transform: translate(8px, -3px) scale(1.05); opacity: 0.8; }
+  70%      { transform: translate(-6px, 4px) scale(0.95); opacity: 0.7; }
+}
+/* Trunk — slow amber sap-glow rising and settling */
+@keyframes mote-trunk-sap {
+  0%, 100% { transform: translate(0, 0)  scale(1);   opacity: 0.45; }
+  50%      { transform: translate(1px, -6px) scale(1.1); opacity: 0.85; }
+}
+/* Ground — settled dust, barely moving */
+@keyframes mote-ground-settle {
+  0%, 100% { transform: translate(0, 0) scale(1);   opacity: 0.35; }
+  50%      { transform: translate(0, -2px) scale(1.05); opacity: 0.6;  }
+}
+/* Roots — mycelial network pulse, in place, strong glow swell */
+@keyframes mote-roots-mycelium {
+  0%, 100% { transform: scale(0.7);  opacity: 0.25; }
+  50%      { transform: scale(1.5);  opacity: 1;    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .tree-depth-particle {
+  .tree-depth-particle,
+  [style*="mote-crown-sun"],
+  [style*="mote-canopy-leaf"],
+  [style*="mote-trunk-sap"],
+  [style*="mote-ground-settle"],
+  [style*="mote-roots-mycelium"] {
     animation: none !important;
     opacity: 0.3;
   }
