@@ -75,6 +75,7 @@ const Index = () => {
       <Suspense fallback={null}>
         <TreeDepthBackground />
         <HabitatAtmosphere />
+        <ParallaxTextures />
         <MobileSectionWhisper />
       </Suspense>
 
