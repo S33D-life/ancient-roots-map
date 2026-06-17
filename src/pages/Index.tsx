@@ -93,7 +93,7 @@ const Index = () => {
           <CrownSection />
 
           {/* seam — sunlight bleeding into the canopy */}
-          <AnatomicalSeam variant="crown-canopy" label="Descent · Light into Leaf" />
+          <AnatomicalSeam variant="crown-canopy" />
 
           {/* breath — seed beneath earth */}
           <BreathingChamber whisper="Every root begins in silence." tone="soil" drift={-4} />
@@ -102,13 +102,13 @@ const Index = () => {
           <CanopySection />
 
           {/* seam — branches tapering into bark */}
-          <AnatomicalSeam variant="canopy-trunk" label="Descent · Leaf into Bark" />
+          <AnatomicalSeam variant="canopy-trunk" />
 
           {/* ── TRUNK — HeARTwood Library ── */}
           <TrunkSection />
 
           {/* seam — heartwood flaring into soil */}
-          <AnatomicalSeam variant="trunk-ground" label="Descent · Heartwood into Soil" />
+          <AnatomicalSeam variant="trunk-ground" />
 
           {/* breath — heartwood remembers */}
           <BreathingChamber whisper="The forest remembers slowly." tone="wood" drift={6} />
@@ -121,7 +121,7 @@ const Index = () => {
 
         {/* seam — soil dissolving into mycelium */}
         <Suspense fallback={null}>
-          <AnatomicalSeam variant="ground-roots" label="Descent · Soil into Mycelium" />
+          <AnatomicalSeam variant="ground-roots" />
         </Suspense>
         {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
         <Suspense fallback={<SectionShimmer />}>
