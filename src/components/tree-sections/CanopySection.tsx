@@ -100,7 +100,7 @@ const CanopySection = () => {
           className="font-serif text-base md:text-lg max-w-md mx-auto"
           style={{ color: "hsl(140 25% 85%)", lineHeight: 1.55 }}
         >
-          Gather. Listen. Decide what wants to grow.
+          Where the grove gathers to decide what grows next.
         </DepthRevealText>
 
         <DepthRevealText
