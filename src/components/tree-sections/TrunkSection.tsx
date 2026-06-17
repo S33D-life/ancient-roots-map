@@ -69,18 +69,18 @@ const TrunkSection = () => {
       >
         <DepthRevealText
           as="p"
-          className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/30"
+          className="text-[10px] uppercase tracking-[0.35em] font-serif text-foreground/45"
         >
-          The Trunk
+          🪵 The Trunk
         </DepthRevealText>
 
         <motion.div
           className="w-10 h-10 rounded-full flex items-center justify-center mx-auto"
-          style={{ background: "hsl(28 55% 45% / 0.08)" }}
+          style={{ background: "hsl(28 55% 45% / 0.12)" }}
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <BookOpen className="w-5 h-5" style={{ color: "hsl(28 55% 50%)" }} />
+          <BookOpen className="w-5 h-5" style={{ color: "hsl(28 60% 58%)" }} />
         </motion.div>
 
         <DepthRevealText
@@ -88,7 +88,7 @@ const TrunkSection = () => {
           delay={100}
           className="text-3xl md:text-5xl font-serif tracking-wide"
           style={{
-            color: "hsl(30 50% 55%)",
+            color: "hsl(30 55% 65%)",
             lineHeight: depth.lineHeight,
             ...(titleLayout.ready && titleLayout.balancedWidth
               ? { maxWidth: titleLayout.balancedWidth, margin: "0 auto" }
@@ -98,9 +98,18 @@ const TrunkSection = () => {
           <span ref={titleLayout.containerRef as any}>HeARTwood Library</span>
         </DepthRevealText>
 
+        {/* Anchor sentence */}
         <DepthRevealText
-          delay={200}
-          className="text-muted-foreground/50 font-serif text-sm md:text-base max-w-sm mx-auto"
+          delay={150}
+          className="font-serif text-base md:text-lg max-w-md mx-auto"
+          style={{ color: "hsl(35 30% 88%)", lineHeight: 1.55 }}
+        >
+          Your library of journeys, offerings, and memories.
+        </DepthRevealText>
+
+        <DepthRevealText
+          delay={250}
+          className="text-foreground/65 font-serif text-sm md:text-base max-w-sm mx-auto"
           style={{
             lineHeight: depth.lineHeight,
             ...(descLayout.ready && descLayout.balancedWidth
@@ -118,7 +127,7 @@ const TrunkSection = () => {
         <DepthRevealText
           wonder
           delay={400}
-          className="font-serif text-lg md:text-xl mx-auto max-w-xs"
+          className="font-serif italic text-base md:text-lg mx-auto max-w-xs text-foreground/55"
           style={getWonderLineStyle(depth.zone)}
         >
           Where your journey is remembered.

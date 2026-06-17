@@ -62,12 +62,12 @@ const CrownSection = () => {
         className="relative z-10 max-w-xl text-center space-y-6"
         style={{ letterSpacing: depth.letterSpacing, ...parallaxStyle }}
       >
-        {/* Zone label */}
+        {/* Zone label — ecological marker */}
         <DepthRevealText
           as="p"
-          className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/30"
+          className="text-[10px] uppercase tracking-[0.35em] font-serif text-foreground/45"
         >
-          ↑ The Crown
+          ☀ The Crown
         </DepthRevealText>
 
         {/* Floating icon */}
@@ -95,9 +95,18 @@ const CrownSection = () => {
           <span ref={titleLayout.containerRef as any}>yOur Golden Dream</span>
         </DepthRevealText>
 
+        {/* Anchor sentence — orientation */}
         <DepthRevealText
-          delay={200}
-          className="text-muted-foreground/50 font-serif text-sm md:text-base max-w-sm mx-auto"
+          delay={150}
+          className="font-serif text-base md:text-lg max-w-md mx-auto"
+          style={{ color: "hsl(45 25% 88%)", lineHeight: 1.55 }}
+        >
+          A living dream for people, trees, and future generations.
+        </DepthRevealText>
+
+        <DepthRevealText
+          delay={250}
+          className="text-foreground/65 font-serif text-sm md:text-base max-w-sm mx-auto"
           style={{
             lineHeight: depth.lineHeight,
             ...(descLayout.ready && descLayout.balancedWidth
@@ -114,7 +123,7 @@ const CrownSection = () => {
         <DepthRevealText
           wonder
           delay={400}
-          className="font-serif text-lg md:text-xl mx-auto max-w-xs"
+          className="font-serif italic text-base md:text-lg mx-auto max-w-xs text-foreground/55"
           style={getWonderLineStyle(depth.zone)}
         >
           The dream grows with the tree.

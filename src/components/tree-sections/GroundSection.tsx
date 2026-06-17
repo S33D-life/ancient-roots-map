@@ -87,28 +87,28 @@ const GroundSection = () => {
               }}
               aria-hidden
             />
-            {/* DOWN — Explore the Roots */}
+            {/* DOWN — Primary: Enter the Living Atlas */}
             <button
               onClick={scrollToRoots}
               className="group flex flex-col items-center gap-2 bg-transparent border-none cursor-pointer transition-all duration-300"
             >
               <span
-                className="font-serif text-sm tracking-wide transition-colors duration-300 group-hover:text-primary"
-                style={{ color: "hsl(var(--foreground) / 0.7)" }}
+                className="font-serif text-base md:text-lg tracking-wide transition-colors duration-300 group-hover:text-primary"
+                style={{ color: "hsl(45 70% 70%)" }}
               >
-                Explore the roots
+                Enter the Living Atlas
               </span>
               <span
-                className="font-serif text-[10px] max-w-[180px] text-center leading-relaxed"
-                style={{ color: "hsl(var(--muted-foreground) / 0.4)" }}
+                className="font-serif text-[11px] max-w-[200px] text-center leading-relaxed"
+                style={{ color: "hsl(var(--foreground) / 0.55)" }}
               >
-                Discover Ancient Friends and the Arboreal Atlas
+                Meet Ancient Friends near you
               </span>
               <motion.div
                 animate={reducedMotion ? {} : { y: [0, 4, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <ChevronDown className="w-4 h-4 text-primary/40 group-hover:text-primary/70 transition-colors" />
+                <ChevronDown className="w-5 h-5 text-primary/70 group-hover:text-primary transition-colors" />
               </motion.div>
             </button>
 
@@ -124,7 +124,7 @@ const GroundSection = () => {
               aria-hidden
             />
 
-            {/* UP — Climb into the Tree */}
+            {/* UP — Secondary: Explore Heartwood */}
             <button
               onClick={() => navigate("/library")}
               className="group flex flex-col items-center gap-2 bg-transparent border-none cursor-pointer transition-all duration-300"
@@ -133,24 +133,25 @@ const GroundSection = () => {
                 animate={reducedMotion ? {} : { y: [0, -4, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <ChevronUp className="w-4 h-4 text-primary/30 group-hover:text-primary/60 transition-colors" />
+                <ChevronUp className="w-4 h-4 text-foreground/40 group-hover:text-foreground/70 transition-colors" />
               </motion.div>
               <span
-                className="font-serif text-sm tracking-wide transition-colors duration-300 group-hover:text-primary"
-                style={{ color: "hsl(var(--foreground) / 0.55)" }}
+                className="font-serif text-sm tracking-wide transition-colors duration-300 group-hover:text-foreground/80"
+                style={{ color: "hsl(var(--foreground) / 0.6)" }}
               >
-                Enter the Library &amp; Council
+                Explore Heartwood
               </span>
               <span
                 className="font-serif text-[10px] max-w-[180px] text-center leading-relaxed"
-                style={{ color: "hsl(var(--muted-foreground) / 0.35)" }}
+                style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
               >
-                Step into Heartwood, the Council of Life, and your Hearth
+                Library, Council & your Hearth
               </span>
             </button>
           </motion.div>
         </motion.div>
       </div>
+
 
       {/* ── Identity statement — below TEOTAG, grounding the user ── */}
       <div className="relative z-20 py-14 md:py-20">
