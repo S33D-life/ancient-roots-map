@@ -331,10 +331,12 @@ const TreeDepthBackground = () => {
         style={{
           zIndex: 1,
           background: `
-            radial-gradient(ellipse at 50% ${25 + progress * 50}%, hsl(${c.h} ${c.s}% ${c.l + 6}% / 0.25), transparent 55%),
-            radial-gradient(ellipse at ${25 + progress * 25}% ${40 + progress * 35}%, hsl(${c.h} ${Math.max(12, c.s - 5)}% ${c.l + 3}% / 0.15), transparent 50%),
-            linear-gradient(to bottom, hsl(${c.h} ${c.s}% ${c.l}% / 0.05), hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 2)}% / 0.18))
+            radial-gradient(ellipse at 50% ${20 + progress * 60}%, hsl(${c.h} ${c.s}% ${c.l + 7}% / 0.32), transparent 65%),
+            radial-gradient(ellipse at ${22 + progress * 30}% ${35 + progress * 40}%, hsl(${c.h} ${Math.max(12, c.s - 5)}% ${c.l + 4}% / 0.22), transparent 60%),
+            radial-gradient(ellipse at ${78 - progress * 30}% ${65 - progress * 25}%, hsl(${c.h} ${Math.max(10, c.s - 8)}% ${c.l + 2}% / 0.16), transparent 55%),
+            linear-gradient(to bottom, hsl(${c.h} ${c.s}% ${c.l}% / 0.06), hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 2)}% / 0.22))
           `,
+          transition: "background 1.4s ease",
         }}
       >
         {/* Layer 1: Canopy — branches + dappled light (top-anchored, lingers downward) */}
