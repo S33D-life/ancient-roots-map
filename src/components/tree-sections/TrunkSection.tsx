@@ -148,7 +148,7 @@ const TrunkSection = () => {
         </DepthRevealText>
 
         {/* Chambers carved into the trunk — doorways with warm interior bleed */}
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 pt-6 max-w-xl mx-auto">
+        <div className="depth-reveal-trunk grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 pt-6 max-w-xl mx-auto">
           {LIBRARY_ROOMS.map((room, i) => (
             <motion.div
               key={room.title}
@@ -157,6 +157,7 @@ const TrunkSection = () => {
               whileInView="visible"
               viewport={{ once: true }}
               variants={cardVariants}
+              style={{ ['--i' as any]: i }}
             >
               <TrunkChamberDoor {...room} />
             </motion.div>
