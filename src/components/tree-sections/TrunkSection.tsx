@@ -5,21 +5,35 @@
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Music, Wand2, ScrollText, Sprout, Lock, ArrowRight } from "lucide-react";
+import { BookOpen, Music, Wand2, ScrollText, Sprout, Lock, ArrowRight, Star, Map } from "lucide-react";
 import SectionAtmosphere from "./SectionAtmosphere";
+import TrunkChamberDoor, { type ChamberDepth } from "./TrunkChamberDoor";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
 import { useParallaxDepth } from "@/hooks/use-parallax-depth";
 
-const LIBRARY_ROOMS = [
-  { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
-  { icon: Music, title: "Music Room", description: "Songs offered to trees", to: "/library/music-room" },
-  { icon: ScrollText, title: "Scrolls & Records", description: "Community ledger", to: "/library/ledger" },
+// Chambers carved into the trunk. Order matters: higher up the trunk on the left,
+// deeper toward the roots on the right. Hue + depth define each chamber's interior.
+type Chamber = {
+  icon: typeof BookOpen;
+  title: string;
+  description: string;
+  to: string;
+  tempH: number;          // 38 amber · 128 green · 205 blue · 268 violet · 22 ember · 48 star-gold
+  depth: ChamberDepth;
+};
+
+const LIBRARY_ROOMS: Chamber[] = [
+  { icon: Star,       title: "Star Trail",        description: "High toward the canopy",  to: "/library/star-trail",  tempH: 48,  depth: "canopy-leaning" },
+  { icon: Music,      title: "Music Room",        description: "A resonant chamber",      to: "/library/music-room",  tempH: 268, depth: "heartwood"      },
+  { icon: ScrollText, title: "Scrolls & Records", description: "Shelves in heartwood",    to: "/library/ledger",      tempH: 38,  depth: "heartwood"      },
+  { icon: Map,        title: "Map Room",          description: "Cartographer's alcove",   to: "/library/atlas",       tempH: 205, depth: "heartwood"      },
+  { icon: Wand2,      title: "Staff Room",        description: "144 living staffs",       to: "/library/staff-room",  tempH: 38,  depth: "heartwood"      },
 ];
 
-const PERSONAL_SPACES = [
-  { icon: Sprout, title: "Seed Cellar", description: "Living data archive", to: "/library/seed-cellar" },
-  { icon: Lock, title: "Vault", description: "Your personal archive", to: "/vault" },
+const PERSONAL_SPACES: Chamber[] = [
+  { icon: Sprout, title: "Seed Cellar", description: "Lower, near the roots",  to: "/library/seed-cellar", tempH: 22,  depth: "root-leaning" },
+  { icon: Lock,   title: "Vault",       description: "Behind a heavy door",    to: "/vault",               tempH: 268, depth: "root-leaning" },
 ];
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as const;
@@ -133,59 +147,39 @@ const TrunkSection = () => {
           Where your journey is remembered.
         </DepthRevealText>
 
-        {/* Library rooms — embedded doorways */}
-        <div className="grid grid-cols-3 gap-2 pt-4 max-w-md mx-auto">
-          {LIBRARY_ROOMS.map((room, i) => {
-            const Icon = room.icon;
-            return (
-              <motion.div
-                key={room.title}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={cardVariants}
-              >
-                <Link
-                  to={room.to}
-                  className="group flex flex-col items-center gap-2 px-3 py-4 rounded-lg transition-all duration-500 hover:bg-foreground/[0.03]"
-                >
-                  <Icon className="w-4 h-4 text-foreground/30 group-hover:text-primary/60 transition-colors duration-300" />
-                  <p className="font-serif text-[13px] text-foreground/60 tracking-wide">{room.title}</p>
-                  <p className="text-[9px] text-muted-foreground/35 leading-relaxed">{room.description}</p>
-                </Link>
-              </motion.div>
-            );
-          })}
+        {/* Chambers carved into the trunk — doorways with warm interior bleed */}
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 pt-6 max-w-xl mx-auto">
+          {LIBRARY_ROOMS.map((room, i) => (
+            <motion.div
+              key={room.title}
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={cardVariants}
+            >
+              <TrunkChamberDoor {...room} />
+            </motion.div>
+          ))}
         </div>
 
-        {/* Personal spaces */}
-        <p className="text-[9px] uppercase tracking-[0.3em] font-serif text-muted-foreground/25 pt-4">
-          Personal Spaces
+        {/* Personal spaces — deeper chambers, closer to the roots */}
+        <p className="text-[9px] uppercase tracking-[0.3em] font-serif text-muted-foreground/30 pt-6">
+          Personal Chambers · Closer to the Roots
         </p>
-        <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto">
-          {PERSONAL_SPACES.map((room, i) => {
-            const Icon = room.icon;
-            return (
-              <motion.div
-                key={room.title}
-                custom={i + LIBRARY_ROOMS.length}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={cardVariants}
-              >
-                <Link
-                  to={room.to}
-                  className="group flex flex-col items-center gap-2 px-3 py-4 rounded-lg transition-all duration-500 hover:bg-foreground/[0.03]"
-                >
-                  <Icon className="w-4 h-4 text-foreground/30 group-hover:text-primary/60 transition-colors duration-300" />
-                  <p className="font-serif text-[13px] text-foreground/60 tracking-wide">{room.title}</p>
-                  <p className="text-[9px] text-muted-foreground/35 leading-relaxed">{room.description}</p>
-                </Link>
-              </motion.div>
-            );
-          })}
+        <div className="grid grid-cols-2 gap-3 max-w-[14rem] mx-auto">
+          {PERSONAL_SPACES.map((room, i) => (
+            <motion.div
+              key={room.title}
+              custom={i + LIBRARY_ROOMS.length}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={cardVariants}
+            >
+              <TrunkChamberDoor {...room} />
+            </motion.div>
+          ))}
         </div>
 
         <Link
