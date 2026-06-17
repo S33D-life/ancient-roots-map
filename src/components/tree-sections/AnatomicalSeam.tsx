@@ -1,15 +1,16 @@
 /**
- * AnatomicalSeam — physical hand-off between two zones of the Living Tree.
+ * AnatomicalSeam — tree-ring transitions between zones of the Living Tree.
  *
- * Each seam is a continuous slice of the same organism, not a divider:
- *   • crown-to-canopy  — sunlight bleeding into leafy silhouettes
- *   • canopy-to-trunk  — branches tapering into bark
- *   • trunk-to-ground  — heartwood flaring into buttress roots and soil
- *   • ground-to-roots  — soil dissolving into mycelial filaments
+ * Not section dividers. Each seam is a continuous ecological transition,
+ * carrying the visitor through age, growth and memory:
  *
- * Visual language adapted from the user-selected "Anatomical botanical seams" direction,
- * tuned to the existing warm-earth + forest-green palette of the page (not bright tailwind tones).
- * Respects prefers-reduced-motion. Pointer-events-none. No layout impact beyond its own height.
+ *   • crown-canopy  — branches dissolve into light (motes, halo, fading limb tips)
+ *   • canopy-trunk  — tree rings widen and split into branching structures
+ *   • trunk-ground  — heartwood rings flare downward into root buttresses
+ *   • ground-roots  — concentric rings unravel into root fibres + mycelial threads
+ *
+ * No hard edges. Gradient backbone + top/bottom feather dissolves the seam
+ * into adjacent habitats. Pointer-events-none. Respects prefers-reduced-motion.
  */
 import { memo } from "react";
 
@@ -28,46 +29,49 @@ interface Props {
 
 // Palette anchors — matched to TreeDepthBackground zone colors
 const COLORS = {
-  crown:  "hsl(45 55% 14%)",   // warm gold-earth
+  crown:     "hsl(45 55% 14%)",
   canopyTop: "hsl(45 35% 12%)",
-  canopy: "hsl(140 22% 10%)",  // forest green
-  trunkTop: "hsl(90 14% 9%)",
-  trunk:  "hsl(28 28% 11%)",   // warm amber wood
+  canopy:    "hsl(140 22% 10%)",
+  trunkTop:  "hsl(90 14% 9%)",
+  trunk:     "hsl(28 28% 11%)",
   groundTop: "hsl(28 22% 9%)",
-  ground: "hsl(35 14% 8%)",    // neutral earth
-  rootsTop: "hsl(25 14% 7%)",
-  roots:  "hsl(18 18% 5%)",    // deep loam
-  light:  "hsl(45 75% 60%)",   // sunlight accent
-  leaf:   "hsl(140 28% 22%)",  // leaf silhouette
-  bark:   "hsl(28 22% 8%)",    // bark silhouette
-  buttress: "hsl(20 18% 5%)",
-  mycelium: "hsl(120 35% 50%)",
+  ground:    "hsl(35 14% 8%)",
+  rootsTop:  "hsl(25 14% 7%)",
+  roots:     "hsl(18 18% 5%)",
+  light:     "hsl(45 80% 65%)",
+  lightSoft: "hsl(45 60% 50%)",
+  leaf:      "hsl(140 30% 22%)",
+  branch:    "hsl(32 22% 14%)",
+  ring:      "hsl(30 35% 24%)",
+  ringSoft:  "hsl(30 28% 18%)",
+  heartwood: "hsl(22 38% 18%)",
+  fibre:     "hsl(22 28% 14%)",
+  mycelium:  "hsl(120 35% 50%)",
 } as const;
 
 const AnatomicalSeam = ({ variant, label, className = "" }: Props) => {
   return (
     <div
       className={`relative w-full overflow-hidden pointer-events-none ${className}`}
-      // Taller seams so habitat shifts read as gradual drift, not as section breaks
-      style={{ height: "clamp(180px, 28vw, 320px)" }}
+      // Tall seams so transitions read as drift, not breaks
+      style={{ height: "clamp(200px, 30vw, 360px)" }}
       aria-hidden="true"
     >
-      {/* Anatomy layer — silhouettes softened heavily so they whisper, not announce */}
-      <div className="absolute inset-0 opacity-[0.55]">
+      <div className="absolute inset-0 opacity-[0.7]">
         {variant === "crown-canopy" && <CrownCanopy />}
         {variant === "canopy-trunk" && <CanopyTrunk />}
         {variant === "trunk-ground" && <TrunkGround />}
         {variant === "ground-roots" && <GroundRoots />}
       </div>
 
-      {/* Top + bottom feather — dissolves the seam into adjacent zones so there are no hard edges */}
+      {/* Top + bottom feather — dissolves the seam into adjacent habitats */}
       <div
-        className="absolute inset-x-0 top-0 h-1/4"
-        style={{ background: "linear-gradient(to bottom, hsl(var(--background) / 0.55), transparent)" }}
+        className="absolute inset-x-0 top-0 h-1/3"
+        style={{ background: "linear-gradient(to bottom, hsl(var(--background) / 0.6), transparent)" }}
       />
       <div
-        className="absolute inset-x-0 bottom-0 h-1/4"
-        style={{ background: "linear-gradient(to top, hsl(var(--background) / 0.55), transparent)" }}
+        className="absolute inset-x-0 bottom-0 h-1/3"
+        style={{ background: "linear-gradient(to top, hsl(var(--background) / 0.6), transparent)" }}
       />
 
       {label && (
@@ -84,43 +88,78 @@ const AnatomicalSeam = ({ variant, label, className = "" }: Props) => {
   );
 };
 
-/** Sunlight bleeding into leafy canopy */
+/* ─────────────────────────────────────────────────────────────
+   CROWN ↔ CANOPY — branches dissolve into light
+   (top of page; reading top→down: light → fading branch tips)
+   ───────────────────────────────────────────────────────────── */
 const CrownCanopy = () => (
   <>
     <div
       className="absolute inset-0"
       style={{
-        background: `linear-gradient(to bottom, ${COLORS.crown} 0%, ${COLORS.canopyTop} 55%, ${COLORS.canopy} 100%)`,
+        background: `linear-gradient(to bottom, ${COLORS.crown} 0%, ${COLORS.canopyTop} 60%, ${COLORS.canopy} 100%)`,
       }}
     />
-    {/* Soft sun-glow at top */}
+    {/* High halo — sunlight bleeding down */}
     <div
-      className="absolute inset-0 opacity-60 mix-blend-soft-light"
+      className="absolute inset-0 mix-blend-soft-light"
       style={{
-        background: `radial-gradient(ellipse 60% 90% at 50% -10%, ${COLORS.light}, transparent 65%)`,
+        background: `radial-gradient(ellipse 70% 100% at 50% -20%, ${COLORS.light} 0%, ${COLORS.lightSoft} 30%, transparent 70%)`,
+        opacity: 0.7,
       }}
     />
-    {/* Dappled leaf silhouettes — two layered organic edges */}
+    {/* Branch tips dissolving upward into specks of light */}
     <svg
-      className="absolute bottom-0 left-0 w-full h-[78%]"
-      viewBox="0 0 100 60"
+      className="absolute inset-0 w-full h-full"
+      viewBox="0 0 200 100"
       preserveAspectRatio="none"
     >
-      <path
-        d="M-2,60 C8,48 14,55 22,42 C30,32 40,50 50,38 C60,28 70,46 80,34 C90,24 100,42 102,60 Z"
-        fill={COLORS.leaf}
-        opacity="0.55"
-      />
-      <path
-        d="M-4,60 C6,40 16,52 26,32 C36,20 46,42 56,26 C66,12 76,34 88,20 C96,12 102,30 104,60 Z"
-        fill={COLORS.leaf}
-        opacity="0.35"
-      />
+      <defs>
+        <linearGradient id="branchDissolve" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor={COLORS.branch} stopOpacity="0.85" />
+          <stop offset="55%" stopColor={COLORS.branch} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={COLORS.light} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <g fill="none" stroke="url(#branchDissolve)" strokeLinecap="round">
+        <path d="M40,100 Q44,70 50,40 Q53,22 56,8" strokeWidth="2.2" />
+        <path d="M40,100 Q42,72 38,52 Q34,38 30,22" strokeWidth="1.4" opacity="0.8" />
+        <path d="M100,100 Q100,68 100,32 Q100,18 100,4" strokeWidth="2.8" />
+        <path d="M100,60 Q90,46 80,30 Q72,20 66,10" strokeWidth="1.2" opacity="0.7" />
+        <path d="M100,55 Q112,42 124,28 Q132,18 138,8" strokeWidth="1.2" opacity="0.7" />
+        <path d="M160,100 Q156,70 150,40 Q146,22 142,8" strokeWidth="2.2" />
+        <path d="M160,100 Q162,72 168,52 Q172,38 176,22" strokeWidth="1.4" opacity="0.8" />
+      </g>
+      {/* Light motes where branch tips dissolve */}
+      <g fill={COLORS.light} className="branch-motes">
+        <circle cx="30" cy="18" r="0.6" opacity="0.8" />
+        <circle cx="56" cy="8" r="0.5" opacity="0.7" />
+        <circle cx="66" cy="10" r="0.45" opacity="0.6" />
+        <circle cx="100" cy="4" r="0.7" opacity="0.85" />
+        <circle cx="138" cy="8" r="0.5" opacity="0.7" />
+        <circle cx="142" cy="8" r="0.55" opacity="0.75" />
+        <circle cx="176" cy="22" r="0.5" opacity="0.65" />
+      </g>
     </svg>
+    <style>{`
+      @media (prefers-reduced-motion: no-preference) {
+        .branch-motes circle { animation: light-shimmer 5s ease-in-out infinite; }
+        .branch-motes circle:nth-child(2n) { animation-delay: 1.4s; }
+        .branch-motes circle:nth-child(3n) { animation-delay: 2.6s; }
+        @keyframes light-shimmer {
+          0%, 100% { opacity: 0.3; transform: translateY(0); }
+          50% { opacity: 1; transform: translateY(-1px); }
+        }
+      }
+    `}</style>
   </>
 );
 
-/** Branches tapering into bark */
+/* ─────────────────────────────────────────────────────────────
+   CANOPY ↔ TRUNK — tree rings widen and become branching structures
+   (reading top→down on page: branches above narrow into rings;
+    reading climb-up: rings widen and split into branches)
+   ───────────────────────────────────────────────────────────── */
 const CanopyTrunk = () => (
   <>
     <div
@@ -129,73 +168,109 @@ const CanopyTrunk = () => (
         background: `linear-gradient(to bottom, ${COLORS.canopy} 0%, ${COLORS.trunkTop} 55%, ${COLORS.trunk} 100%)`,
       }}
     />
-    {/* Branch limbs tapering downward and meeting bark */}
     <svg
       className="absolute inset-0 w-full h-full"
-      viewBox="0 0 200 100"
+      viewBox="0 0 200 120"
       preserveAspectRatio="none"
     >
-      <g fill="none" stroke={COLORS.bark} strokeLinecap="round" opacity="0.5">
-        <path d="M30,0 Q50,40 60,100" strokeWidth="6" />
-        <path d="M170,0 Q150,40 140,100" strokeWidth="6" />
-        <path d="M100,0 L100,100" strokeWidth="8" />
-        <path d="M10,0 Q35,30 50,80" strokeWidth="3" opacity="0.7" />
-        <path d="M190,0 Q165,30 150,80" strokeWidth="3" opacity="0.7" />
-        <path d="M70,0 Q80,40 85,100" strokeWidth="2" opacity="0.5" />
-        <path d="M130,0 Q120,40 115,100" strokeWidth="2" opacity="0.5" />
+      <defs>
+        <radialGradient id="ringGlow" cx="50%" cy="100%" r="80%">
+          <stop offset="0%" stopColor={COLORS.heartwood} stopOpacity="0.55" />
+          <stop offset="100%" stopColor={COLORS.heartwood} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      {/* Heartwood glow rising from bottom (trunk side) */}
+      <rect width="200" height="120" fill="url(#ringGlow)" />
+
+      {/* Tree rings — concentric arcs growing from trunk, widening upward,
+          then splitting into branches that reach into the canopy */}
+      <g fill="none" stroke={COLORS.ring} strokeLinecap="round">
+        {/* tight rings near trunk (bottom) */}
+        <ellipse cx="100" cy="118" rx="18" ry="6" strokeWidth="0.5" opacity="0.55" />
+        <ellipse cx="100" cy="118" rx="32" ry="11" strokeWidth="0.5" opacity="0.5" />
+        <ellipse cx="100" cy="118" rx="48" ry="17" strokeWidth="0.55" opacity="0.45" />
+        <ellipse cx="100" cy="118" rx="68" ry="25" strokeWidth="0.6" opacity="0.4" />
+        <ellipse cx="100" cy="118" rx="92" ry="36" strokeWidth="0.6" opacity="0.32" stroke={COLORS.ringSoft} />
+        <ellipse cx="100" cy="118" rx="120" ry="50" strokeWidth="0.55" opacity="0.22" stroke={COLORS.ringSoft} />
+      </g>
+
+      {/* Rings tearing open into branches — vertical limbs rising from the widest arcs */}
+      <g fill="none" stroke={COLORS.branch} strokeLinecap="round" opacity="0.7">
+        {/* central trunk-into-branch */}
+        <path d="M100,118 Q100,80 100,46 Q100,28 100,4" strokeWidth="3" />
+        {/* primary limbs splitting outward */}
+        <path d="M100,72 Q86,56 70,38 Q58,22 50,6" strokeWidth="1.8" />
+        <path d="M100,72 Q114,56 130,38 Q142,22 150,6" strokeWidth="1.8" />
+        {/* secondary limbs from outer rings */}
+        <path d="M68,92 Q56,72 44,52 Q34,34 28,16" strokeWidth="1.2" opacity="0.8" />
+        <path d="M132,92 Q144,72 156,52 Q166,34 172,16" strokeWidth="1.2" opacity="0.8" />
+        {/* fine twigs */}
+        <path d="M50,6 Q44,2 38,0" strokeWidth="0.6" opacity="0.6" />
+        <path d="M70,38 Q64,30 60,22" strokeWidth="0.6" opacity="0.6" />
+        <path d="M130,38 Q136,30 140,22" strokeWidth="0.6" opacity="0.6" />
+        <path d="M150,6 Q156,2 162,0" strokeWidth="0.6" opacity="0.6" />
       </g>
     </svg>
-    {/* Soft fade to bark at bottom */}
-    <div
-      className="absolute inset-x-0 bottom-0 h-1/2"
-      style={{
-        background: `linear-gradient(to top, ${COLORS.trunk}, transparent)`,
-      }}
-    />
   </>
 );
 
-/** Heartwood flaring into buttress roots and soil */
+/* ─────────────────────────────────────────────────────────────
+   TRUNK ↔ GROUND — heartwood rings flare into root buttresses
+   (reading climb-up: roots/buttresses expand into heartwood rings)
+   ───────────────────────────────────────────────────────────── */
 const TrunkGround = () => (
   <>
     <div
       className="absolute inset-0"
       style={{
-        background: `linear-gradient(to bottom, ${COLORS.trunk} 0%, ${COLORS.groundTop} 55%, ${COLORS.ground} 100%)`,
+        background: `linear-gradient(to bottom, ${COLORS.trunk} 0%, ${COLORS.groundTop} 60%, ${COLORS.ground} 100%)`,
       }}
     />
-    {/* Buttress flare silhouette */}
     <svg
-      className="absolute bottom-0 left-0 w-full h-full"
-      viewBox="0 0 100 100"
+      className="absolute inset-0 w-full h-full"
+      viewBox="0 0 200 120"
       preserveAspectRatio="none"
     >
-      <path
-        d="M0,100 C18,100 28,28 34,0 L66,0 C72,28 82,100 100,100 Z"
-        fill={COLORS.buttress}
-        opacity="0.75"
-      />
-      <path
-        d="M28,100 C34,55 40,30 40,0 L60,0 C60,30 66,55 72,100 Z"
-        fill={COLORS.bark}
-        opacity="0.6"
-      />
-      {/* Faint heartwood rings showing through */}
-      <ellipse cx="50" cy="0" rx="22" ry="10" fill="none" stroke={COLORS.trunk} strokeWidth="0.4" opacity="0.5" />
-      <ellipse cx="50" cy="0" rx="14" ry="6" fill="none" stroke={COLORS.trunk} strokeWidth="0.3" opacity="0.4" />
+      <defs>
+        <radialGradient id="heartGlow" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stopColor={COLORS.heartwood} stopOpacity="0.6" />
+          <stop offset="100%" stopColor={COLORS.heartwood} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="100" cy="48" rx="120" ry="50" fill="url(#heartGlow)" />
+
+      {/* Heartwood rings — concentric, centered in upper half */}
+      <g fill="none" stroke={COLORS.ring} strokeLinecap="round">
+        <ellipse cx="100" cy="44" rx="10" ry="5" strokeWidth="0.5" opacity="0.7" />
+        <ellipse cx="100" cy="44" rx="20" ry="9" strokeWidth="0.5" opacity="0.6" />
+        <ellipse cx="100" cy="44" rx="34" ry="15" strokeWidth="0.55" opacity="0.5" />
+        <ellipse cx="100" cy="44" rx="52" ry="22" strokeWidth="0.55" opacity="0.42" stroke={COLORS.ringSoft} />
+        <ellipse cx="100" cy="44" rx="74" ry="30" strokeWidth="0.5" opacity="0.32" stroke={COLORS.ringSoft} />
+        <ellipse cx="100" cy="44" rx="100" ry="40" strokeWidth="0.5" opacity="0.22" stroke={COLORS.ringSoft} />
+      </g>
+
+      {/* Rings flaring downward into buttress fibres — root structures expanding from heartwood */}
+      <g fill="none" stroke={COLORS.fibre} strokeLinecap="round" opacity="0.8">
+        <path d="M100,44 Q100,80 100,120" strokeWidth="2.6" />
+        <path d="M86,50 Q72,80 56,120" strokeWidth="1.6" />
+        <path d="M114,50 Q128,80 144,120" strokeWidth="1.6" />
+        <path d="M70,58 Q52,84 30,120" strokeWidth="1.2" opacity="0.75" />
+        <path d="M130,58 Q148,84 170,120" strokeWidth="1.2" opacity="0.75" />
+        <path d="M52,68 Q38,90 18,120" strokeWidth="0.8" opacity="0.6" />
+        <path d="M148,68 Q162,90 182,120" strokeWidth="0.8" opacity="0.6" />
+        {/* tiny fibre branches */}
+        <path d="M56,120 Q50,110 44,104" strokeWidth="0.5" opacity="0.55" />
+        <path d="M144,120 Q150,110 156,104" strokeWidth="0.5" opacity="0.55" />
+        <path d="M30,120 Q24,112 16,108" strokeWidth="0.5" opacity="0.5" />
+        <path d="M170,120 Q176,112 184,108" strokeWidth="0.5" opacity="0.5" />
+      </g>
     </svg>
-    {/* Soil shadow line */}
-    <div
-      className="absolute inset-x-0 bottom-0 h-3"
-      style={{
-        background: `linear-gradient(to top, ${COLORS.roots}, transparent)`,
-        opacity: 0.7,
-      }}
-    />
   </>
 );
 
-/** Soil dissolving into mycelial filaments */
+/* ─────────────────────────────────────────────────────────────
+   GROUND ↔ ROOTS — rings unravel into root fibres + mycelium
+   ───────────────────────────────────────────────────────────── */
 const GroundRoots = () => (
   <>
     <div
@@ -208,37 +283,53 @@ const GroundRoots = () => (
     <div
       className="absolute inset-0 opacity-25"
       style={{
-        backgroundImage: `radial-gradient(${COLORS.bark} 0.6px, transparent 0)`,
+        backgroundImage: `radial-gradient(${COLORS.fibre} 0.6px, transparent 0)`,
         backgroundSize: "9px 9px",
       }}
     />
-    {/* Mycelial filaments + pulsing nodes */}
     <svg
       className="absolute inset-0 w-full h-full"
-      viewBox="0 0 100 100"
+      viewBox="0 0 200 120"
       preserveAspectRatio="none"
     >
-      <g stroke={COLORS.mycelium} strokeWidth="0.35" fill="none" opacity="0.35">
-        <path d="M20,0 Q22,30 12,60 T6,100" />
-        <path d="M40,0 Q44,30 38,55 T46,100" />
-        <path d="M60,0 Q56,28 64,55 T58,100" />
-        <path d="M82,0 Q78,30 88,60 T84,100" />
-        <path d="M0,40 Q30,46 50,42 T100,46" opacity="0.5" />
-        <path d="M0,70 Q35,76 55,72 T100,76" opacity="0.4" />
+      {/* Faint last rings near the top — heartwood fading into earth */}
+      <g fill="none" stroke={COLORS.ringSoft} strokeLinecap="round">
+        <ellipse cx="100" cy="10" rx="40" ry="10" strokeWidth="0.4" opacity="0.35" />
+        <ellipse cx="100" cy="10" rx="70" ry="16" strokeWidth="0.4" opacity="0.25" />
+        <ellipse cx="100" cy="10" rx="110" ry="24" strokeWidth="0.4" opacity="0.18" />
+      </g>
+
+      {/* Root fibres descending and branching */}
+      <g fill="none" stroke={COLORS.fibre} strokeLinecap="round" opacity="0.8">
+        <path d="M100,0 Q100,40 96,80 Q92,100 88,120" strokeWidth="1.6" />
+        <path d="M80,4 Q72,40 60,72 Q50,98 42,120" strokeWidth="1.2" />
+        <path d="M120,4 Q128,40 140,72 Q150,98 158,120" strokeWidth="1.2" />
+        <path d="M60,8 Q50,44 36,76 Q24,102 14,120" strokeWidth="0.9" opacity="0.7" />
+        <path d="M140,8 Q150,44 164,76 Q176,102 186,120" strokeWidth="0.9" opacity="0.7" />
+        <path d="M30,16 Q22,52 12,88 Q6,108 2,120" strokeWidth="0.6" opacity="0.55" />
+        <path d="M170,16 Q178,52 188,88 Q194,108 198,120" strokeWidth="0.6" opacity="0.55" />
+      </g>
+
+      {/* Mycelial filaments + pulsing nodes */}
+      <g stroke={COLORS.mycelium} strokeWidth="0.3" fill="none" opacity="0.35">
+        <path d="M0,60 Q30,66 50,62 T100,66 T150,62 T200,68" />
+        <path d="M0,86 Q35,92 55,88 T110,92 T160,88 T200,90" opacity="0.7" />
       </g>
       <g fill={COLORS.mycelium} className="mycelium-pulse">
-        <circle cx="38" cy="30" r="0.7" opacity="0.7" />
-        <circle cx="64" cy="55" r="0.5" opacity="0.55" />
-        <circle cx="18" cy="70" r="0.6" opacity="0.6" />
-        <circle cx="86" cy="40" r="0.45" opacity="0.5" />
+        <circle cx="38" cy="50" r="0.7" opacity="0.7" />
+        <circle cx="64" cy="74" r="0.55" opacity="0.55" />
+        <circle cx="18" cy="96" r="0.6" opacity="0.6" />
+        <circle cx="136" cy="60" r="0.5" opacity="0.6" />
+        <circle cx="174" cy="86" r="0.5" opacity="0.55" />
       </g>
     </svg>
     <style>{`
       @media (prefers-reduced-motion: no-preference) {
         .mycelium-pulse circle { animation: mycelium-pulse 6s ease-in-out infinite; }
-        .mycelium-pulse circle:nth-child(2) { animation-delay: 1.5s; }
-        .mycelium-pulse circle:nth-child(3) { animation-delay: 3s; }
-        .mycelium-pulse circle:nth-child(4) { animation-delay: 4.5s; }
+        .mycelium-pulse circle:nth-child(2) { animation-delay: 1.2s; }
+        .mycelium-pulse circle:nth-child(3) { animation-delay: 2.4s; }
+        .mycelium-pulse circle:nth-child(4) { animation-delay: 3.6s; }
+        .mycelium-pulse circle:nth-child(5) { animation-delay: 4.8s; }
         @keyframes mycelium-pulse {
           0%, 100% { opacity: 0.25; }
           50% { opacity: 0.85; }
