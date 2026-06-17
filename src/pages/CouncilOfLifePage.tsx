@@ -7,10 +7,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin } from "lucide-react";
+import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin, Sparkles, Flame, Archive } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
@@ -26,41 +26,6 @@ import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides"
 
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
-
-/* Grid cards:
-   Row 1: Council Chamber
-   Row 2: Council Records, Cycle Markets
-   Row 3: Host a Pod
-*/
-const councilRooms = [
-  {
-    id: "chamber-live",
-    title: "Council Chamber",
-    description: "Enter the live council room",
-    icon: Users,
-  },
-  {
-    id: "records",
-    title: "Council Records",
-    description: "Walk the archives of past circles",
-    icon: ScrollText,
-    internalUrl: "/council/records",
-  },
-  {
-    id: "markets",
-    title: "Cycle Markets",
-    description: "Shape the rhythm of future gatherings",
-    icon: BarChart3,
-    internalUrl: "/library/rhythms",
-  },
-  {
-    id: "pod",
-    title: "Host a Pod",
-    description: "Grow a local circle",
-    icon: Podcast,
-    comingSoon: true,
-  },
-];
 
 const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
