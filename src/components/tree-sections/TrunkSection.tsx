@@ -104,7 +104,7 @@ const TrunkSection = () => {
           className="font-serif text-base md:text-lg max-w-md mx-auto"
           style={{ color: "hsl(35 30% 88%)", lineHeight: 1.55 }}
         >
-          Your library of journeys, offerings, and memories.
+          The library of every journey, song, and offering left at a tree.
         </DepthRevealText>
 
         <DepthRevealText

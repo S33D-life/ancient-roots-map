@@ -65,9 +65,9 @@ const GroundSection = () => {
           <DepthRevealText
             delay={2800}
             className="font-serif text-base md:text-lg text-center max-w-xs leading-relaxed italic"
-            style={{ color: "hsl(var(--muted-foreground) / 0.55)" }}
+            style={{ color: "hsl(var(--foreground) / 0.7)" }}
           >
-            The forest opens in two directions
+            Choose where to begin.
           </DepthRevealText>
 
           {/* Two pathways — wrapped in a soft lantern halo (Arborium threshold) */}
@@ -186,11 +186,11 @@ const GroundSection = () => {
 
           <DepthRevealText
             delay={200}
-            className="text-sm md:text-base text-muted-foreground/50 leading-relaxed max-w-xl mx-auto"
+            className="text-sm md:text-base text-foreground/70 leading-relaxed max-w-xl mx-auto"
             style={{ lineHeight: depth.lineHeight }}
           >
-            S33D maps ancient trees worldwide, gathers stories from those who visit them,
-            and rewards care with Hearts — tokens of stewardship earned by contributing to the grove.
+            Find ancient trees near you. Leave offerings, share stories, and earn Hearts
+            for the care you give.
           </DepthRevealText>
 
           <motion.div
@@ -208,10 +208,10 @@ const GroundSection = () => {
             ].map(({ icon: Icon, text }) => (
               <span
                 key={text}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif text-foreground/50"
-                style={{ background: "hsl(var(--foreground) / 0.03)" }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif text-foreground/80 border border-foreground/10"
+                style={{ background: "hsl(var(--foreground) / 0.06)" }}
               >
-                <Icon className="w-3.5 h-3.5 text-primary/50" />
+                <Icon className="w-3.5 h-3.5 text-primary/80" />
                 {text}
               </span>
             ))}

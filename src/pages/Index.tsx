@@ -148,13 +148,13 @@ const Index = () => {
                 Ancient Friends
               </h2>
               <p
-                className="font-serif text-base md:text-lg max-w-md mx-auto"
-                style={{ color: "hsl(140 22% 86%)", lineHeight: 1.55 }}
+                className="font-serif text-lg md:text-2xl max-w-xl mx-auto"
+                style={{ color: "hsl(140 28% 90%)", lineHeight: 1.5 }}
               >
-                Meet remarkable trees and build relationships with them.
+                Meet a tree. Leave an offering. Build a relationship that lasts.
               </p>
               <p className="text-foreground/65 font-serif text-sm md:text-base max-w-lg mx-auto leading-relaxed">
-                Meet trees · leave offerings · build relationships · join quests · grow the living atlas.
+                Meet trees · leave offerings · join quests · grow the living atlas.
               </p>
             </div>
 
