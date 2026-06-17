@@ -1369,3 +1369,56 @@ All colors MUST be HSL.
   .sheet-rise,
   .tab-cross { animation: none !important; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Depth-channel reveals — bind opacity/translate to the global
+   scroll-depth bell curves published by useTreeDepthChannel().
+   Applied to wrappers so child motion opacity multiplies cleanly.
+   ───────────────────────────────────────────────────────────── */
+.depth-reveal-crown,
+.depth-reveal-canopy,
+.depth-reveal-trunk,
+.depth-reveal-roots {
+  transition: opacity 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+}
+.depth-reveal-crown {
+  opacity: calc(0.18 + var(--tree-crown, 0) * 0.82);
+  transform: translate3d(0, calc((1 - var(--tree-crown, 0)) * -10px), 0);
+}
+.depth-reveal-canopy {
+  opacity: calc(0.18 + var(--tree-canopy, 0) * 0.82);
+  transform: translate3d(0, calc((1 - var(--tree-canopy, 0)) * -8px), 0);
+}
+.depth-reveal-trunk {
+  opacity: calc(0.20 + var(--tree-trunk, 0) * 0.80);
+  transform: translate3d(0, calc((1 - var(--tree-trunk, 0)) * 10px), 0);
+}
+.depth-reveal-roots {
+  opacity: calc(0.20 + var(--tree-roots, 0) * 0.80);
+  transform: translate3d(0, calc((1 - var(--tree-roots, 0)) * 14px), 0);
+}
+/* Staggered children — each child reads its --i and shifts a tiny bit more
+   so chamber doors and offering cards crest into view one after another. */
+.depth-reveal-trunk > * {
+  transition: opacity 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.depth-reveal-roots > * {
+  transition: opacity 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .depth-reveal-crown,
+  .depth-reveal-canopy,
+  .depth-reveal-trunk,
+  .depth-reveal-roots {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
