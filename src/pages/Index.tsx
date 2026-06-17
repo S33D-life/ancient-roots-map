@@ -136,27 +136,7 @@ const Index = () => {
               </svg>
             </div>
 
-            {/* Ancient Friends anchor — orientation for new visitors */}
-            <div className="relative z-10 text-center px-6 pt-8 pb-14 md:pt-12 md:pb-20 max-w-2xl mx-auto space-y-5">
-              <p className="text-[10px] uppercase tracking-[0.35em] font-serif text-foreground/45">
-                🌱 The Roots · Ancient Friends
-              </p>
-              <h2
-                className="text-3xl md:text-5xl font-serif tracking-wide"
-                style={{ color: "hsl(140 35% 62%)" }}
-              >
-                Ancient Friends
-              </h2>
-              <p
-                className="font-serif text-lg md:text-2xl max-w-xl mx-auto"
-                style={{ color: "hsl(140 28% 90%)", lineHeight: 1.5 }}
-              >
-                Meet a tree. Leave an offering. Build a relationship that lasts.
-              </p>
-              <p className="text-foreground/65 font-serif text-sm md:text-base max-w-lg mx-auto leading-relaxed">
-                Meet trees · leave offerings · join quests · grow the living atlas.
-              </p>
-            </div>
+            {/* Ancient Friends anchor moved up into GroundSection (above the Living Atlas explanation). */}
 
             <EcosystemOverview />
             <div className="section-divider max-w-xl mx-auto" />
