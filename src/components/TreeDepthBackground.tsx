@@ -220,44 +220,124 @@ CanopyBranches.displayName = "CanopyBranches";
 
 /** Sparse floating motes — very few, zone-tinted, organic drift */
 const FloatingMotes = memo(({ progress, reducedMotion }: { progress: number; reducedMotion: boolean }) => {
-  const motes = useMemo(() => {
-    // Only 6 motes total across the entire viewport — always present, tint shifts
-    const base = [
-      { left: "12%", top: "18%", size: 3.5, delay: 0, dur: 8 },
-      { left: "78%", top: "25%", size: 3, delay: 2.5, dur: 10 },
-      { left: "35%", top: "55%", size: 2.8, delay: 4, dur: 9 },
-      { left: "62%", top: "68%", size: 3.2, delay: 1.5, dur: 7 },
-      { left: "88%", top: "42%", size: 2.5, delay: 5, dur: 11 },
-      { left: "22%", top: "82%", size: 3, delay: 3, dur: 8.5 },
-    ];
-    return base;
-  }, []);
+/** Habitat-aware ambient motes — color, count, motion, and glow all evolve with scroll depth */
+type HabitatKey = "crown" | "canopy" | "trunk" | "ground" | "roots";
+
+interface MoteSpec {
+  left: string;
+  top: string;
+  size: number;
+  delay: number;
+  dur: number;
+  habitat: HabitatKey;
+}
+
+// Each habitat anchors at a scroll-progress center; opacity is a soft bell around it
+const HABITAT_CENTERS: Record<HabitatKey, number> = {
+  crown: 0.0,
+  canopy: 0.22,
+  trunk: 0.5,
+  ground: 0.72,
+  roots: 0.95,
+};
+
+// Per-habitat ambient personality
+const HABITAT_PROFILE: Record<HabitatKey, {
+  color: string;        // base hsl
+  glow: string;         // box-shadow hsl
+  anim: string;         // keyframe name
+  blur: number;         // px
+}> = {
+  crown: {
+    color: "hsl(45 85% 70%)",
+    glow: "hsl(45 90% 65% / 0.55)",
+    anim: "mote-crown-sun",
+    blur: 0.6,
+  },
+  canopy: {
+    color: "hsl(135 55% 60%)",
+    glow: "hsl(140 60% 55% / 0.4)",
+    anim: "mote-canopy-leaf",
+    blur: 0.4,
+  },
+  trunk: {
+    color: "hsl(32 70% 55%)",
+    glow: "hsl(28 65% 45% / 0.4)",
+    anim: "mote-trunk-sap",
+    blur: 0.3,
+  },
+  ground: {
+    color: "hsl(40 35% 50%)",
+    glow: "hsl(35 30% 40% / 0.3)",
+    anim: "mote-ground-settle",
+    blur: 0.4,
+  },
+  roots: {
+    color: "hsl(140 70% 55%)",
+    glow: "hsl(140 80% 50% / 0.55)",
+    anim: "mote-roots-mycelium",
+    blur: 0.5,
+  },
+};
+
+function habitatOpacity(progress: number, center: number) {
+  // bell curve, ~0 outside 0.3 window, 1 at center
+  const d = Math.abs(progress - center);
+  return Math.max(0, 1 - d / 0.28);
+}
+
+const FloatingMotes = memo(({ progress, reducedMotion }: { progress: number; reducedMotion: boolean }) => {
+  // 14 motes across habitats — different counts give each habitat a feel
+  const motes = useMemo<MoteSpec[]>(() => [
+    // crown — sparse, drifting up like sunlit dust
+    { left: "30%", top: "8%",  size: 2.6, delay: 0,   dur: 14, habitat: "crown" },
+    { left: "68%", top: "14%", size: 2.2, delay: 3.5, dur: 16, habitat: "crown" },
+    // canopy — leafy drift, more lateral
+    { left: "12%", top: "22%", size: 3.2, delay: 1,   dur: 11, habitat: "canopy" },
+    { left: "82%", top: "26%", size: 2.8, delay: 4.2, dur: 13, habitat: "canopy" },
+    { left: "48%", top: "30%", size: 2.4, delay: 6,   dur: 12, habitat: "canopy" },
+    // trunk — slow amber sap-glow bobbing
+    { left: "22%", top: "46%", size: 3,   delay: 0.5, dur: 18, habitat: "trunk" },
+    { left: "74%", top: "50%", size: 3.4, delay: 5,   dur: 17, habitat: "trunk" },
+    { left: "44%", top: "56%", size: 2.6, delay: 2,   dur: 19, habitat: "trunk" },
+    // ground — settled, sparse dust
+    { left: "16%", top: "70%", size: 2.4, delay: 3,   dur: 14, habitat: "ground" },
+    { left: "62%", top: "74%", size: 2.2, delay: 7,   dur: 16, habitat: "ground" },
+    // roots — denser mycelial pulse network
+    { left: "10%", top: "84%", size: 2.8, delay: 0,   dur: 5,  habitat: "roots" },
+    { left: "38%", top: "88%", size: 3.2, delay: 1.5, dur: 6,  habitat: "roots" },
+    { left: "66%", top: "82%", size: 2.6, delay: 3,   dur: 5.5,habitat: "roots" },
+    { left: "88%", top: "90%", size: 3,   delay: 4.5, dur: 6.2,habitat: "roots" },
+  ], []);
 
   if (reducedMotion) return null;
 
-  // Color shifts continuously with progress
-  const moteHue = 45 + (progress * 80); // gold → green
-  const moteSat = 40 + (1 - Math.abs(progress - 0.5) * 2) * 20; // brighter near ground
-  const moteLight = 45 - progress * 15; // dimmer in roots
-
   return (
     <>
-      {motes.map((m, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full tree-depth-particle"
-          style={{
-            left: m.left,
-            top: m.top,
-            width: m.size,
-            height: m.size,
-            backgroundColor: `hsl(${moteHue} ${moteSat}% ${moteLight}%)`,
-            animationDelay: `${m.delay}s`,
-            animationDuration: `${m.dur}s`,
-            transition: "background-color 2s ease",
-          }}
-        />
-      ))}
+      {motes.map((m, i) => {
+        const op = habitatOpacity(progress, HABITAT_CENTERS[m.habitat]);
+        if (op < 0.02) return null;
+        const profile = HABITAT_PROFILE[m.habitat];
+        return (
+          <div
+            key={i}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              left: m.left,
+              top: m.top,
+              width: m.size,
+              height: m.size,
+              backgroundColor: profile.color,
+              boxShadow: `0 0 ${4 + m.size * 2}px ${profile.glow}`,
+              filter: `blur(${profile.blur}px)`,
+              opacity: op * 0.85,
+              animation: `${profile.anim} ${m.dur}s ease-in-out ${m.delay}s infinite`,
+              transition: "opacity 1.6s ease",
+              willChange: "transform, opacity",
+            }}
+          />
+        );
+      })}
     </>
   );
 });
