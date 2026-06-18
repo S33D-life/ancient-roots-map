@@ -21,7 +21,7 @@ const Footer = () => {
           <Dot />
           <Link to="/support" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
             <Heart className="w-3 h-3" />
-            Support
+            Nourish
           </Link>
           <Dot />
           <Link to="/about" className="hover:text-primary transition-colors">About</Link>
