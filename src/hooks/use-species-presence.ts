@@ -13,9 +13,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toPresenceWhisper } from "@/lib/species/speciesPresence";
 
-export function useSpeciesPresence(speciesKey: string | null | undefined): string | null {
+export function useSpeciesPresence(
+  speciesKey: string | null | undefined,
+  /** Max whisper length — compact surfaces (sidebar/search) pass a shorter value. */
+  maxLen?: number,
+): string | null {
   const { data } = useQuery<string | null>({
-    queryKey: ["species-presence", speciesKey],
+    queryKey: ["species-presence", speciesKey, maxLen ?? null],
     enabled: !!speciesKey,
     staleTime: 10 * 60_000,
     queryFn: async () => {
@@ -39,7 +43,7 @@ export function useSpeciesPresence(speciesKey: string | null | undefined): strin
         .maybeSingle();
       if (loreErr || !lore) return null;
 
-      return toPresenceWhisper(lore.body || lore.title || null);
+      return toPresenceWhisper(lore.body || lore.title || null, maxLen);
     },
   });
 
