@@ -185,8 +185,24 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
   const [quote, setQuote] = useState<QuoteData>({ text: "", author: "", source: "" });
 
-  // Sync type when prop changes
-  useEffect(() => { setActiveType(initialType); }, [initialType]);
+  // ── Art origin sub-flow ───────────────────────────────────────────────
+  // For Art offerings we ask one more question: did the user create this,
+  // or are they offering a public-domain / open-access artwork that
+  // inspired them? Defaults to `null` so the choice screen renders first.
+  type ArtOrigin = "created_by_user" | "inspired_by_existing_art";
+  const [artOrigin, setArtOrigin] = useState<ArtOrigin | null>(null);
+  // Inspired-artwork metadata (only used when artOrigin === inspired_by_existing_art)
+  const [originalArtistName, setOriginalArtistName] = useState("");
+  const [originalArtworkYear, setOriginalArtworkYear] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [institutionName, setInstitutionName] = useState("");
+  const [rightsStatus, setRightsStatus] = useState<string>("");
+  const [medium, setMedium] = useState("");
+  const [artTags, setArtTags] = useState("");
+
+  // Sync type when prop changes; reset the art-origin choice whenever the
+  // active offering type changes so the choice screen reappears for Art.
+  useEffect(() => { setActiveType(initialType); setArtOrigin(null); }, [initialType]);
 
   const cfg = typeConfig[activeType];
 
