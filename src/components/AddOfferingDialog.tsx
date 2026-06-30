@@ -205,7 +205,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   // Sync type when prop changes; reset the art-origin choice whenever the
   // active offering type changes so the choice screen reappears for Art.
-  useEffect(() => { setActiveType(initialType); setArtOrigin(null); }, [initialType]);
+  useEffect(() => { setActiveType(initialType); setArtOrigin(null); setFieldErrors({}); }, [initialType]);
 
   const cfg = typeConfig[activeType];
 
