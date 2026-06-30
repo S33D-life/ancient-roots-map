@@ -1066,6 +1066,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                     ? "Upload the artwork image"
                     : "Photograph the artwork (optional)"}
                 </Label>
+                {artOrigin === "inspired_by_existing_art" && (
+                  <p className="font-serif text-[11px] text-muted-foreground/60 leading-snug mb-1.5">
+                    Choose public-domain or open-access images so the whole community can see them safely.
+                  </p>
+                )}
                 <OfferingPhotoTray
                   photos={photoSlots}
                   onAdd={addPhoto}
@@ -1089,15 +1094,15 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                         id="art-image-url"
                         value={mediaUrl}
                         onChange={e => setMediaUrl(e.target.value)}
-                        placeholder="https://commons.wikimedia.org/…"
+                        placeholder="https://commons.wikimedia.org/wiki/File:…"
                         className="bg-secondary/10 border-border/30 font-serif"
                       />
                     </div>
-                    <p className="mt-2 text-[11px] font-serif text-muted-foreground/70 italic leading-snug">
-                      Please use public-domain or open-access images where possible, and credit the
-                      artist and source. This offering is a gesture of relationship, not a claim of
-                      ownership.
-                    </p>
+                    <div className="mt-2 rounded-lg border border-primary/10 bg-primary/[0.04] px-3 py-2.5">
+                      <p className="text-[11px] font-serif text-foreground/70 leading-snug">
+                        Whenever possible, credit the artist and share the source link. If you’re unsure of the license, pick the closest option — this offering is a gesture of relationship, not a claim of ownership.
+                      </p>
+                    </div>
                   </>
                 )}
               </div>
