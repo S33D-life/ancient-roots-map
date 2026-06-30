@@ -339,6 +339,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   const resetForm = () => {
     setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
+    setOriginalArtistName(""); setOriginalArtworkYear(""); setSourceUrl(""); setInstitutionName(""); setRightsStatus(""); setMedium(""); setArtTags("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
