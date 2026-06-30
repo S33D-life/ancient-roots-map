@@ -13,6 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic, BookOpen, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -199,10 +200,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [rightsStatus, setRightsStatus] = useState<string>("");
   const [medium, setMedium] = useState("");
   const [artTags, setArtTags] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; artist?: string; reflection?: string; image?: string }>({});
+
 
   // Sync type when prop changes; reset the art-origin choice whenever the
   // active offering type changes so the choice screen reappears for Art.
-  useEffect(() => { setActiveType(initialType); setArtOrigin(null); }, [initialType]);
+  useEffect(() => { setActiveType(initialType); setArtOrigin(null); setFieldErrors({}); }, [initialType]);
 
   const cfg = typeConfig[activeType];
 
@@ -239,6 +242,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       };
       setPhotoSlots((prev) => [...prev, slot].slice(0, MAX_OFFERING_PHOTOS));
       setMediaUrl("");
+      setFieldErrors(prev => ({ ...prev, image: undefined }));
+
     } catch {
       toast({ title: "Processing failed", description: "Could not process the image", variant: "destructive" });
     }
@@ -340,6 +345,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const resetForm = () => {
     setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
     setOriginalArtistName(""); setOriginalArtworkYear(""); setSourceUrl(""); setInstitutionName(""); setRightsStatus(""); setMedium(""); setArtTags("");
+    setFieldErrors({});
   };
 
   /** Build the art-origin + art-metadata fields for an offerings insert.
@@ -370,22 +376,27 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     e.preventDefault();
     if (submittingRef.current || loading) return;
 
-    // For inspired-artwork offerings we require an artwork title and a
-    // reflection so attribution is clear in the feed.
+    // For inspired-artwork offerings we require a title, artist, reflection,
+    // and an image so attribution and presence are clear in the feed.
     if (activeType === "art" && artOrigin === "inspired_by_existing_art") {
-      if (!title.trim()) {
-        toast({ title: "Artwork title is required", description: "Please enter the title of the artwork." });
-        return;
-      }
-      if (!content.trim()) {
-        toast({ title: "A short reflection is required", description: "Why are you offering this artwork to this tree?" });
-        return;
-      }
+      const nextErrors: typeof fieldErrors = {};
+      if (!title.trim()) nextErrors.title = "Artwork title is required";
+      if (!originalArtistName.trim()) nextErrors.artist = "Artist or creator is required";
+      if (!content.trim()) nextErrors.reflection = "Please share why you are offering this artwork";
       if (photoSlots.length === 0 && !mediaUrl.trim()) {
-        toast({ title: "Add an image or image URL", description: "Please upload the artwork or paste an open-access image URL." });
+        nextErrors.image = "Please upload the artwork or paste an image URL";
+      }
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
+        toast({
+          title: "A few details are missing",
+          description: "Fill in the required fields so the artwork can live here.",
+          variant: "destructive",
+        });
         return;
       }
     }
+
 
     // Auto-generate title if the user didn't provide one
     const resolvedTitle = title.trim() || content.trim().slice(0, 60).replace(/\n/g, " ") || `Untitled ${cfg.singular}`;
@@ -1071,6 +1082,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                     Choose public-domain or open-access images so the whole community can see them safely.
                   </p>
                 )}
+                {fieldErrors.image && (
+                  <p id="art-image-error" className="font-serif text-[11px] text-destructive leading-snug mb-1.5">{fieldErrors.image}</p>
+                )}
                 <OfferingPhotoTray
                   photos={photoSlots}
                   onAdd={addPhoto}
@@ -1093,9 +1107,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                       <Input
                         id="art-image-url"
                         value={mediaUrl}
-                        onChange={e => setMediaUrl(e.target.value)}
+                        onChange={e => { setMediaUrl(e.target.value); setFieldErrors(prev => ({ ...prev, image: undefined })); }}
                         placeholder="https://commons.wikimedia.org/wiki/File:…"
-                        className="bg-secondary/10 border-border/30 font-serif"
+                        className={cn("bg-secondary/10 font-serif", fieldErrors.image ? "border-destructive" : "border-border/30")}
+                        aria-describedby={fieldErrors.image ? "art-image-error" : undefined}
                       />
                     </div>
                     <div className="mt-2 rounded-lg border border-primary/10 bg-primary/[0.04] px-3 py-2.5">
@@ -1117,24 +1132,34 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                     <Input
                       id="art-title"
                       value={title}
-                      onChange={e => setTitle(e.target.value.slice(0, 200))}
+                      onChange={e => { setTitle(e.target.value.slice(0, 200)); setFieldErrors(prev => ({ ...prev, title: undefined })); }}
                       placeholder="e.g. The Tree of Life"
-                      className="bg-background/40 border-border/30 font-serif"
+                      className={cn("bg-background/40 font-serif", fieldErrors.title ? "border-destructive" : "border-border/30")}
                       maxLength={200}
+                      aria-invalid={!!fieldErrors.title}
+                      aria-describedby={fieldErrors.title ? "art-title-error" : undefined}
                     />
+                    {fieldErrors.title && (
+                      <p id="art-title-error" className="text-[11px] text-destructive font-serif">{fieldErrors.title}</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="art-artist" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
-                        Artist / creator
+                        Artist / creator <span className="text-primary/70">*</span>
                       </Label>
                       <Input
                         id="art-artist"
                         value={originalArtistName}
-                        onChange={e => setOriginalArtistName(e.target.value.slice(0, 200))}
+                        onChange={e => { setOriginalArtistName(e.target.value.slice(0, 200)); setFieldErrors(prev => ({ ...prev, artist: undefined })); }}
                         placeholder="e.g. Hilma af Klint"
-                        className="bg-background/40 border-border/30 font-serif"
+                        className={cn("bg-background/40 font-serif", fieldErrors.artist ? "border-destructive" : "border-border/30")}
+                        aria-invalid={!!fieldErrors.artist}
+                        aria-describedby={fieldErrors.artist ? "art-artist-error" : undefined}
                       />
+                      {fieldErrors.artist && (
+                        <p id="art-artist-error" className="text-[11px] text-destructive font-serif">{fieldErrors.artist}</p>
+                      )}
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="art-year" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
@@ -1230,16 +1255,21 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               <Textarea
                 id="content"
                 value={content}
-                onChange={e => setContent(e.target.value.slice(0, 5000))}
+                onChange={e => { setContent(e.target.value.slice(0, 5000)); setFieldErrors(prev => ({ ...prev, reflection: undefined })); }}
                 placeholder={
                   activeType === "art" && artOrigin === "inspired_by_existing_art"
                     ? "Why are you offering this artwork to this tree?"
                     : cfg.placeholder
                 }
                 maxLength={5000}
-                className="bg-secondary/10 border-border/30 font-serif min-h-[120px] text-base resize-none"
+                className={cn("bg-secondary/10 font-serif min-h-[120px] text-base resize-none", fieldErrors.reflection ? "border-destructive" : "border-border/30")}
                 autoFocus
+                aria-invalid={!!fieldErrors.reflection}
+                aria-describedby={fieldErrors.reflection ? "content-error" : undefined}
               />
+              {fieldErrors.reflection && (
+                <p id="content-error" className="text-[11px] text-destructive font-serif">{fieldErrors.reflection}</p>
+              )}
 
               {/* Title appears after user starts writing — hidden for inspired-art
                   (it already has its own dedicated 'Artwork title' field above). */}
