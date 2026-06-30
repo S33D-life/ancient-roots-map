@@ -504,6 +504,7 @@ const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit
           <source src={offering.media_url} />
         </audio>
       )}
+      <ArtAttribution offering={offering} />
       <QuoteSection offering={offering} />
       <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
     </CardContent>
