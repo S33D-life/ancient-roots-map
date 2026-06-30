@@ -342,9 +342,50 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     setOriginalArtistName(""); setOriginalArtworkYear(""); setSourceUrl(""); setInstitutionName(""); setRightsStatus(""); setMedium(""); setArtTags("");
   };
 
+  /** Build the art-origin + art-metadata fields for an offerings insert.
+   *  Returns an empty object for non-art offerings so the spread is a no-op. */
+  const buildArtFields = (): Record<string, unknown> => {
+    if (activeType !== "art") return {};
+    const origin: ArtOrigin = artOrigin || "created_by_user";
+    if (origin === "created_by_user") {
+      return { art_origin: "created_by_user", art_metadata: null };
+    }
+    const tags = artTags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const metadata = {
+      original_artist_name: originalArtistName.trim() || null,
+      original_artwork_year: originalArtworkYear.trim() || null,
+      source_url: sourceUrl.trim() || null,
+      institution_name: institutionName.trim() || null,
+      rights_status: rightsStatus || null,
+      medium: medium.trim() || null,
+      tags: tags.length ? tags : null,
+    };
+    return { art_origin: "inspired_by_existing_art", art_metadata: metadata };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current || loading) return;
+
+    // For inspired-artwork offerings we require an artwork title and a
+    // reflection so attribution is clear in the feed.
+    if (activeType === "art" && artOrigin === "inspired_by_existing_art") {
+      if (!title.trim()) {
+        toast({ title: "Artwork title is required", description: "Please enter the title of the artwork." });
+        return;
+      }
+      if (!content.trim()) {
+        toast({ title: "A short reflection is required", description: "Why are you offering this artwork to this tree?" });
+        return;
+      }
+      if (photoSlots.length === 0 && !mediaUrl.trim()) {
+        toast({ title: "Add an image or image URL", description: "Please upload the artwork or paste an open-access image URL." });
+        return;
+      }
+    }
 
     // Auto-generate title if the user didn't provide one
     const resolvedTitle = title.trim() || content.trim().slice(0, 60).replace(/\n/g, " ") || `Untitled ${cfg.singular}`;
