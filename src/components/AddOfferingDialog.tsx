@@ -438,6 +438,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               quote_text: quoteText,
               quote_author: quoteAuthor,
               quote_source: quoteSource,
+              ...buildArtFields(),
               // photos + media_url are filled in by the sync engine after upload
             },
             photoDataUrls: dataUrls,
