@@ -199,6 +199,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [rightsStatus, setRightsStatus] = useState<string>("");
   const [medium, setMedium] = useState("");
   const [artTags, setArtTags] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; artist?: string; reflection?: string; image?: string }>({});
+
 
   // Sync type when prop changes; reset the art-origin choice whenever the
   // active offering type changes so the choice screen reappears for Art.
@@ -1071,6 +1073,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                     Choose public-domain or open-access images so the whole community can see them safely.
                   </p>
                 )}
+                {fieldErrors.image && (
+                  <p id="art-image-error" className="font-serif text-[11px] text-destructive leading-snug mb-1.5">{fieldErrors.image}</p>
+                )}
                 <OfferingPhotoTray
                   photos={photoSlots}
                   onAdd={addPhoto}
@@ -1093,9 +1098,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                       <Input
                         id="art-image-url"
                         value={mediaUrl}
-                        onChange={e => setMediaUrl(e.target.value)}
+                        onChange={e => { setMediaUrl(e.target.value); setFieldErrors(prev => ({ ...prev, image: undefined })); }}
                         placeholder="https://commons.wikimedia.org/wiki/File:…"
-                        className="bg-secondary/10 border-border/30 font-serif"
+                        className={cn("bg-secondary/10 font-serif", fieldErrors.image ? "border-destructive" : "border-border/30")}
+                        aria-describedby={fieldErrors.image ? "art-image-error" : undefined}
                       />
                     </div>
                     <div className="mt-2 rounded-lg border border-primary/10 bg-primary/[0.04] px-3 py-2.5">
@@ -1117,24 +1123,34 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                     <Input
                       id="art-title"
                       value={title}
-                      onChange={e => setTitle(e.target.value.slice(0, 200))}
+                      onChange={e => { setTitle(e.target.value.slice(0, 200)); setFieldErrors(prev => ({ ...prev, title: undefined })); }}
                       placeholder="e.g. The Tree of Life"
-                      className="bg-background/40 border-border/30 font-serif"
+                      className={cn("bg-background/40 font-serif", fieldErrors.title ? "border-destructive" : "border-border/30")}
                       maxLength={200}
+                      aria-invalid={!!fieldErrors.title}
+                      aria-describedby={fieldErrors.title ? "art-title-error" : undefined}
                     />
+                    {fieldErrors.title && (
+                      <p id="art-title-error" className="text-[11px] text-destructive font-serif">{fieldErrors.title}</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="art-artist" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
-                        Artist / creator
+                        Artist / creator <span className="text-primary/70">*</span>
                       </Label>
                       <Input
                         id="art-artist"
                         value={originalArtistName}
-                        onChange={e => setOriginalArtistName(e.target.value.slice(0, 200))}
+                        onChange={e => { setOriginalArtistName(e.target.value.slice(0, 200)); setFieldErrors(prev => ({ ...prev, artist: undefined })); }}
                         placeholder="e.g. Hilma af Klint"
-                        className="bg-background/40 border-border/30 font-serif"
+                        className={cn("bg-background/40 font-serif", fieldErrors.artist ? "border-destructive" : "border-border/30")}
+                        aria-invalid={!!fieldErrors.artist}
+                        aria-describedby={fieldErrors.artist ? "art-artist-error" : undefined}
                       />
+                      {fieldErrors.artist && (
+                        <p id="art-artist-error" className="text-[11px] text-destructive font-serif">{fieldErrors.artist}</p>
+                      )}
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="art-year" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
@@ -1230,16 +1246,21 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               <Textarea
                 id="content"
                 value={content}
-                onChange={e => setContent(e.target.value.slice(0, 5000))}
+                onChange={e => { setContent(e.target.value.slice(0, 5000)); setFieldErrors(prev => ({ ...prev, reflection: undefined })); }}
                 placeholder={
                   activeType === "art" && artOrigin === "inspired_by_existing_art"
                     ? "Why are you offering this artwork to this tree?"
                     : cfg.placeholder
                 }
                 maxLength={5000}
-                className="bg-secondary/10 border-border/30 font-serif min-h-[120px] text-base resize-none"
+                className={cn("bg-secondary/10 font-serif min-h-[120px] text-base resize-none", fieldErrors.reflection ? "border-destructive" : "border-border/30")}
                 autoFocus
+                aria-invalid={!!fieldErrors.reflection}
+                aria-describedby={fieldErrors.reflection ? "content-error" : undefined}
               />
+              {fieldErrors.reflection && (
+                <p id="content-error" className="text-[11px] text-destructive font-serif">{fieldErrors.reflection}</p>
+              )}
 
               {/* Title appears after user starts writing — hidden for inspired-art
                   (it already has its own dedicated 'Artwork title' field above). */}
