@@ -5204,6 +5204,8 @@ export type Database = {
       }
       offerings: {
         Row: {
+          art_metadata: Json | null
+          art_origin: string | null
           content: string | null
           created_at: string
           created_by: string | null
@@ -5236,6 +5238,8 @@ export type Database = {
           youtube_video_id: string | null
         }
         Insert: {
+          art_metadata?: Json | null
+          art_origin?: string | null
           content?: string | null
           created_at?: string
           created_by?: string | null
@@ -5268,6 +5272,8 @@ export type Database = {
           youtube_video_id?: string | null
         }
         Update: {
+          art_metadata?: Json | null
+          art_origin?: string | null
           content?: string | null
           created_at?: string
           created_by?: string | null

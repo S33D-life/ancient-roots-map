@@ -185,8 +185,24 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
   const [quote, setQuote] = useState<QuoteData>({ text: "", author: "", source: "" });
 
-  // Sync type when prop changes
-  useEffect(() => { setActiveType(initialType); }, [initialType]);
+  // ── Art origin sub-flow ───────────────────────────────────────────────
+  // For Art offerings we ask one more question: did the user create this,
+  // or are they offering a public-domain / open-access artwork that
+  // inspired them? Defaults to `null` so the choice screen renders first.
+  type ArtOrigin = "created_by_user" | "inspired_by_existing_art";
+  const [artOrigin, setArtOrigin] = useState<ArtOrigin | null>(null);
+  // Inspired-artwork metadata (only used when artOrigin === inspired_by_existing_art)
+  const [originalArtistName, setOriginalArtistName] = useState("");
+  const [originalArtworkYear, setOriginalArtworkYear] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [institutionName, setInstitutionName] = useState("");
+  const [rightsStatus, setRightsStatus] = useState<string>("");
+  const [medium, setMedium] = useState("");
+  const [artTags, setArtTags] = useState("");
+
+  // Sync type when prop changes; reset the art-origin choice whenever the
+  // active offering type changes so the choice screen reappears for Art.
+  useEffect(() => { setActiveType(initialType); setArtOrigin(null); }, [initialType]);
 
   const cfg = typeConfig[activeType];
 
@@ -323,11 +339,53 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   const resetForm = () => {
     setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
+    setOriginalArtistName(""); setOriginalArtworkYear(""); setSourceUrl(""); setInstitutionName(""); setRightsStatus(""); setMedium(""); setArtTags("");
+  };
+
+  /** Build the art-origin + art-metadata fields for an offerings insert.
+   *  Returns an empty object for non-art offerings so the spread is a no-op. */
+  const buildArtFields = (): Record<string, unknown> => {
+    if (activeType !== "art") return {};
+    const origin: ArtOrigin = artOrigin || "created_by_user";
+    if (origin === "created_by_user") {
+      return { art_origin: "created_by_user", art_metadata: null };
+    }
+    const tags = artTags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const metadata = {
+      original_artist_name: originalArtistName.trim() || null,
+      original_artwork_year: originalArtworkYear.trim() || null,
+      source_url: sourceUrl.trim() || null,
+      institution_name: institutionName.trim() || null,
+      rights_status: rightsStatus || null,
+      medium: medium.trim() || null,
+      tags: tags.length ? tags : null,
+    };
+    return { art_origin: "inspired_by_existing_art", art_metadata: metadata };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current || loading) return;
+
+    // For inspired-artwork offerings we require an artwork title and a
+    // reflection so attribution is clear in the feed.
+    if (activeType === "art" && artOrigin === "inspired_by_existing_art") {
+      if (!title.trim()) {
+        toast({ title: "Artwork title is required", description: "Please enter the title of the artwork." });
+        return;
+      }
+      if (!content.trim()) {
+        toast({ title: "A short reflection is required", description: "Why are you offering this artwork to this tree?" });
+        return;
+      }
+      if (photoSlots.length === 0 && !mediaUrl.trim()) {
+        toast({ title: "Add an image or image URL", description: "Please upload the artwork or paste an open-access image URL." });
+        return;
+      }
+    }
 
     // Auto-generate title if the user didn't provide one
     const resolvedTitle = title.trim() || content.trim().slice(0, 60).replace(/\n/g, " ") || `Untitled ${cfg.singular}`;
@@ -380,6 +438,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               quote_text: quoteText,
               quote_author: quoteAuthor,
               quote_source: quoteSource,
+              ...buildArtFields(),
               // photos + media_url are filled in by the sync engine after upload
             },
             photoDataUrls: dataUrls,
@@ -484,6 +543,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   quote_text: quoteText,
                   quote_author: quoteText ? quote.author.trim() || null : null,
                   quote_source: quoteText ? quote.source.trim() || null : null,
+                  ...buildArtFields(),
                 },
                 photoDataUrls: dataUrls,
                 label: `${cfg.singular}${treeName ? ` to ${treeName}` : ""}`,
@@ -561,6 +621,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         quote_text: quoteText,
         quote_author: quoteAuthor,
         quote_source: quoteSource,
+        ...buildArtFields(),
       }).select("id").single();
       if (error) throw error;
 
@@ -862,7 +923,53 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       >
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-1">
+          {/* ─── ART ORIGIN CHOICE — shown once before the rest of the form ─── */}
+          {activeType === "art" && !artOrigin ? (
+            <div className="space-y-3 py-2">
+              <p className="font-serif text-sm text-foreground/80 text-center">
+                What kind of artwork are you offering?
+              </p>
+              <button
+                type="button"
+                onClick={() => setArtOrigin("created_by_user")}
+                className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎨</span>
+                  <div className="flex-1">
+                    <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">My Artwork</p>
+                    <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">Offer something you created yourself.</p>
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setArtOrigin("inspired_by_existing_art")}
+                className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🖼️</span>
+                  <div className="flex-1">
+                    <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">Artwork That Inspired Me</p>
+                    <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">
+                      Offer a public-domain or open-access artwork, painting, illustration, or image that has moved you.
+                    </p>
+                  </div>
+                </div>
+              </button>
+              {onChangeType && (
+                <button
+                  type="button"
+                  onClick={onChangeType}
+                  className="block mx-auto text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors pt-1"
+                >
+                  ← Change offering type
+                </button>
+              )}
+            </div>
+          ) : (<>
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
+
 
           {/* PHOTO: tray of up to 3 photos, then title + caption */}
           {activeType === "photo" && (
@@ -922,30 +1029,185 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
           {/* ART: optional photo tray of the artwork, then content-first hero below */}
           {activeType === "art" && (
-            <div
-              onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={handleDrop}
-              className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
-            >
-              <Label className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase block mb-1.5">
-                Photograph the artwork (optional)
-              </Label>
-              <OfferingPhotoTray
-                photos={photoSlots}
-                onAdd={addPhoto}
-                onRemove={removePhoto}
-                onReorder={(next) => setPhotoSlots(next)}
-                uploadingIds={uploadingPhotoIds}
-                failedIds={failedPhotoIds}
-                successIds={new Set(Object.keys(uploadedUrlsById))}
-                onRetry={retryPhotoUpload}
-                uploadProgress={uploadBatch ?? undefined}
-                offline={!online}
-                disabled={loading && failedPhotoIds.size === 0}
-              />
-            </div>
+            <>
+              {/* Small banner showing which art path is active, with a way back */}
+              <div className="flex items-center justify-between rounded-lg border border-border/30 bg-secondary/10 px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">{artOrigin === "inspired_by_existing_art" ? "🖼️" : "🎨"}</span>
+                  <span className="font-serif text-xs text-foreground/80">
+                    {artOrigin === "inspired_by_existing_art" ? "Artwork that inspired me" : "My artwork"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setArtOrigin(null); }}
+                  className="text-[11px] font-serif text-muted-foreground/60 hover:text-primary transition-colors"
+                >
+                  Change
+                </button>
+              </div>
+
+              <div
+                onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
+              >
+                <Label className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase block mb-1.5">
+                  {artOrigin === "inspired_by_existing_art"
+                    ? "Upload the artwork image"
+                    : "Photograph the artwork (optional)"}
+                </Label>
+                <OfferingPhotoTray
+                  photos={photoSlots}
+                  onAdd={addPhoto}
+                  onRemove={removePhoto}
+                  onReorder={(next) => setPhotoSlots(next)}
+                  uploadingIds={uploadingPhotoIds}
+                  failedIds={failedPhotoIds}
+                  successIds={new Set(Object.keys(uploadedUrlsById))}
+                  onRetry={retryPhotoUpload}
+                  uploadProgress={uploadBatch ?? undefined}
+                  offline={!online}
+                  disabled={loading && failedPhotoIds.size === 0}
+                />
+                {artOrigin === "inspired_by_existing_art" && (
+                  <>
+                    <div className="mt-3 space-y-1.5">
+                      <Label htmlFor="art-image-url" className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase">
+                        …or paste an image URL
+                      </Label>
+                      <Input
+                        id="art-image-url"
+                        value={mediaUrl}
+                        onChange={e => setMediaUrl(e.target.value)}
+                        placeholder="https://commons.wikimedia.org/…"
+                        className="bg-secondary/10 border-border/30 font-serif"
+                      />
+                    </div>
+                    <p className="mt-2 text-[11px] font-serif text-muted-foreground/70 italic leading-snug">
+                      Please use public-domain or open-access images where possible, and credit the
+                      artist and source. This offering is a gesture of relationship, not a claim of
+                      ownership.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Inspired-art metadata fields */}
+              {artOrigin === "inspired_by_existing_art" && (
+                <div className="space-y-3 rounded-xl border border-border/30 bg-secondary/5 p-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-title" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Artwork title <span className="text-primary/70">*</span>
+                    </Label>
+                    <Input
+                      id="art-title"
+                      value={title}
+                      onChange={e => setTitle(e.target.value.slice(0, 200))}
+                      placeholder="e.g. The Tree of Life"
+                      className="bg-background/40 border-border/30 font-serif"
+                      maxLength={200}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-artist" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Artist / creator
+                      </Label>
+                      <Input
+                        id="art-artist"
+                        value={originalArtistName}
+                        onChange={e => setOriginalArtistName(e.target.value.slice(0, 200))}
+                        placeholder="e.g. Hilma af Klint"
+                        className="bg-background/40 border-border/30 font-serif"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-year" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Year / era
+                      </Label>
+                      <Input
+                        id="art-year"
+                        value={originalArtworkYear}
+                        onChange={e => setOriginalArtworkYear(e.target.value.slice(0, 80))}
+                        placeholder="e.g. 1907"
+                        className="bg-background/40 border-border/30 font-serif"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-source" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Source link
+                    </Label>
+                    <Input
+                      id="art-source"
+                      value={sourceUrl}
+                      onChange={e => setSourceUrl(e.target.value)}
+                      placeholder="Link to museum, archive, or source page"
+                      className="bg-background/40 border-border/30 font-serif"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-institution" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Museum / archive / collection
+                    </Label>
+                    <Input
+                      id="art-institution"
+                      value={institutionName}
+                      onChange={e => setInstitutionName(e.target.value.slice(0, 200))}
+                      placeholder="e.g. Moderna Museet"
+                      className="bg-background/40 border-border/30 font-serif"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-rights" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Rights status
+                      </Label>
+                      <select
+                        id="art-rights"
+                        value={rightsStatus}
+                        onChange={e => setRightsStatus(e.target.value)}
+                        className="w-full h-9 rounded-md bg-background/40 border border-border/30 font-serif text-sm px-2"
+                      >
+                        <option value="">—</option>
+                        <option value="public_domain">Public domain</option>
+                        <option value="open_access">Open access</option>
+                        <option value="permission_given">Permission given</option>
+                        <option value="unsure">Unsure</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-medium" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Medium
+                      </Label>
+                      <Input
+                        id="art-medium"
+                        value={medium}
+                        onChange={e => setMedium(e.target.value.slice(0, 120))}
+                        placeholder="oil on canvas, engraving…"
+                        className="bg-background/40 border-border/30 font-serif"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-tags" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Tags (comma-separated)
+                    </Label>
+                    <Input
+                      id="art-tags"
+                      value={artTags}
+                      onChange={e => setArtTags(e.target.value.slice(0, 300))}
+                      placeholder="botanical, sacred, folk…"
+                      className="bg-background/40 border-border/30 font-serif"
+                    />
+                  </div>
+                </div>
+              )}
+            </>
           )}
+
 
           {/* MUSING / POEM / NFT / ART text hero: content-first */}
           {activeType !== "photo" && (
@@ -956,15 +1218,21 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 id="content"
                 value={content}
                 onChange={e => setContent(e.target.value.slice(0, 5000))}
-                placeholder={cfg.placeholder}
+                placeholder={
+                  activeType === "art" && artOrigin === "inspired_by_existing_art"
+                    ? "Why are you offering this artwork to this tree?"
+                    : cfg.placeholder
+                }
                 maxLength={5000}
                 className="bg-secondary/10 border-border/30 font-serif min-h-[120px] text-base resize-none"
                 autoFocus
               />
 
-              {/* Title appears after user starts writing */}
+              {/* Title appears after user starts writing — hidden for inspired-art
+                  (it already has its own dedicated 'Artwork title' field above). */}
               <AnimatePresence>
-                {(content.length > 0 || title.length > 0) && (
+                {(content.length > 0 || title.length > 0) &&
+                  !(activeType === "art" && artOrigin === "inspired_by_existing_art") && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <Input
                       id="title"
@@ -1103,6 +1371,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               </p>
             )}
           </div>
+          </>)}
         </form>
       </ResponsiveDialog>
       <RewardReceipt
