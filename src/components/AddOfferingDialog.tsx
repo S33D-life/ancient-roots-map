@@ -1228,9 +1228,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 autoFocus
               />
 
-              {/* Title appears after user starts writing */}
+              {/* Title appears after user starts writing — hidden for inspired-art
+                  (it already has its own dedicated 'Artwork title' field above). */}
               <AnimatePresence>
-                {(content.length > 0 || title.length > 0) && (
+                {(content.length > 0 || title.length > 0) &&
+                  !(activeType === "art" && artOrigin === "inspired_by_existing_art") && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <Input
                       id="title"
