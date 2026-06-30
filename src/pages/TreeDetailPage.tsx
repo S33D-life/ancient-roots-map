@@ -1618,7 +1618,7 @@ const TreeDetailPage = () => {
                             <ToggleGroup
                               type="single"
                               value={artOriginFilter}
-                              onValueChange={(v) => v && setArtOriginFilter(v)}
+                              onValueChange={(v) => v && setArtOriginFilter(v as "all" | "created_by_user" | "inspired_by_existing_art")}
                               variant="outline"
                               size="sm"
                             >
