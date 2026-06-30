@@ -114,12 +114,44 @@ const getStaffImageFromCode = (code: string): string | null => {
   return `/images/staffs/${prefix}.jpeg`;
 };
 
+const RIGHTS_LABELS: Record<string, string> = {
+  cc0: "CC0",
+  public_domain: "Public domain",
+  cc_by: "CC BY",
+  cc_by_sa: "CC BY-SA",
+  cc_by_nc: "CC BY-NC",
+  cc_by_nc_sa: "CC BY-NC-SA",
+  cc_by_nd: "CC BY-ND",
+};
+
+const formatRightsStatus = (status?: string | null) => {
+  if (!status) return null;
+  const key = status.toLowerCase().replace(/\s+/g, "_");
+  return RIGHTS_LABELS[key] || status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const SourceLink = ({ url }: { url: string }) => {
+  const host = hostLabel(url);
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 text-[11px] font-serif font-medium text-primary bg-primary/10 hover:bg-primary/15 px-2.5 py-1.5 rounded-md transition-colors"
+    >
+      <ExternalLink className="w-3 h-3" />
+      <span>View source</span>
+      {host && <span className="text-primary/70">· {host}</span>}
+    </a>
+  );
+};
+
 /**
  * Art attribution block — shown on Art offerings to make clear whether the
  * piece was created by the user or is an existing public-domain / open-access
  * artwork the user is offering in relationship to a tree.
  */
-const ArtAttribution = ({ offering }: { offering: Offering }) => {
+const ArtAttribution = ({ offering, compact = false }: { offering: Offering; compact?: boolean }) => {
   const origin = (offering as any).art_origin as string | null | undefined;
   const meta = ((offering as any).art_metadata || null) as null | {
     original_artist_name?: string | null;
@@ -134,35 +166,67 @@ const ArtAttribution = ({ offering }: { offering: Offering }) => {
 
   if (origin === "inspired_by_existing_art") {
     const artist = meta?.original_artist_name?.trim();
+    const rightsLabel = formatRightsStatus(meta?.rights_status);
+    const source = meta?.source_url?.trim();
+
+    if (compact) {
+      return (
+        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+          <Badge variant="outline" className="text-[9px] font-serif border-primary/30 text-primary/80">
+            Inspired artwork
+          </Badge>
+          {rightsLabel && (
+            <Badge variant="secondary" className="text-[9px] font-serif">
+              {rightsLabel}
+            </Badge>
+          )}
+          {source && (
+            <a
+              href={source}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-0.5 text-[10px] font-serif text-primary/80 hover:text-primary"
+            >
+              <ExternalLink className="w-3 h-3" /> source
+            </a>
+          )}
+        </div>
+      );
+    }
+
     return (
-      <div className="mt-2 rounded-md border border-primary/15 bg-primary/[0.04] px-3 py-2 space-y-1">
-        <p className="font-serif text-[11px] text-foreground/80">
-          <span className="text-primary/80">{offering.title || "Untitled"}</span>
-          {artist && <> — <span className="italic">{artist}</span></>}
+      <div className="mt-3 rounded-lg border border-primary/15 bg-primary/[0.04] px-3.5 py-3 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="text-[10px] font-serif border-primary/30 text-primary/80">
+            Inspired artwork
+          </Badge>
+          {rightsLabel && (
+            <Badge variant="secondary" className="text-[10px] font-serif">
+              {rightsLabel}
+            </Badge>
+          )}
+        </div>
+
+        <p className="font-serif text-xs text-foreground/80">
+          <span className="text-primary/90 font-medium">{offering.title || "Untitled"}</span>
+          {artist && (
+            <>
+              {" "}— <span className="italic">{artist}</span>
+            </>
+          )}
           {meta?.original_artwork_year && (
-            <span className="text-muted-foreground/60"> · {meta.original_artwork_year}</span>
+            <span className="text-muted-foreground/70"> · {meta.original_artwork_year}</span>
           )}
         </p>
-        <p className="font-serif text-[10px] text-muted-foreground/70 italic">
-          Artwork that inspired this offering — not created by the wanderer.
-        </p>
-        {(meta?.institution_name || meta?.medium || meta?.rights_status) && (
-          <p className="font-serif text-[10px] text-muted-foreground/60">
-            {[meta?.medium, meta?.institution_name, meta?.rights_status?.replace(/_/g, " ")]
-              .filter(Boolean)
-              .join(" · ")}
+
+        {(meta?.medium || meta?.institution_name) && (
+          <p className="font-serif text-[11px] text-muted-foreground/70">
+            {[meta.medium, meta.institution_name].filter(Boolean).join(" · ")}
           </p>
         )}
-        {meta?.source_url && (
-          <a
-            href={meta.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[10px] font-serif text-primary/80 hover:text-primary"
-          >
-            <ExternalLink className="w-3 h-3" /> source
-          </a>
-        )}
+
+        {source && <SourceLink url={source} />}
+
         {meta?.tags && meta.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-0.5">
             {meta.tags.slice(0, 6).map((t) => (
@@ -175,7 +239,9 @@ const ArtAttribution = ({ offering }: { offering: Offering }) => {
       </div>
     );
   }
+
   // Default / created_by_user — gentle "original artwork" line
+  if (compact) return null;
   return (
     <p className="mt-2 font-serif text-[10px] text-muted-foreground/60 italic">
       Original artwork offered by the wanderer.
@@ -565,14 +631,17 @@ const CompactRow = ({
         <span className="text-primary/70 shrink-0">{typeIcons[offering.type]}</span>
         <div className="flex-1 min-w-0">
           <p className="font-serif text-sm text-foreground truncate">{offering.title}</p>
-          {showTreeLink && treeName && (
-            <Link to={`/tree/${offering.tree_id}`} className="text-[11px] text-primary/70 hover:text-primary font-serif transition-colors">
-              at {treeName}
-            </Link>
-          )}
-          <span className="text-[10px] text-muted-foreground/50 ml-2 font-mono">
-            {new Date(offering.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {showTreeLink && treeName && (
+              <Link to={`/tree/${offering.tree_id}`} className="text-[11px] text-primary/70 hover:text-primary font-serif transition-colors">
+                at {treeName}
+              </Link>
+            )}
+            <span className="text-[10px] text-muted-foreground/50 font-mono">
+              {new Date(offering.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+            </span>
+            <ArtAttribution offering={offering} compact />
+          </div>
         </div>
         {/* Resonance + Influence in compact mode */}
         <OfferingResonanceButton
