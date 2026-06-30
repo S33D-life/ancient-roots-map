@@ -174,6 +174,7 @@ const TreeDetailPage = () => {
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
+  const [artOriginFilter, setArtOriginFilter] = useState<"all" | "created_by_user" | "inspired_by_existing_art">("all");
   const [sectionTab, setSectionTab] = useState<string>(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam === "encounters") return "encounters";
