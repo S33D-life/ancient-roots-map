@@ -481,6 +481,7 @@ const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId, onEdit }
         {offering.content && (
           <p className="text-sm text-foreground/70 font-serif mt-2 whitespace-pre-wrap">{offering.content}</p>
         )}
+        <ArtAttribution offering={offering} />
         <QuoteSection offering={offering} />
         <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} onEdit={onEdit} />
       </CardContent>
