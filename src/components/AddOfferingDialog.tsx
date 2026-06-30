@@ -242,6 +242,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       };
       setPhotoSlots((prev) => [...prev, slot].slice(0, MAX_OFFERING_PHOTOS));
       setMediaUrl("");
+      setFieldErrors(prev => ({ ...prev, image: undefined }));
+
     } catch {
       toast({ title: "Processing failed", description: "Could not process the image", variant: "destructive" });
     }
