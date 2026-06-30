@@ -114,6 +114,75 @@ const getStaffImageFromCode = (code: string): string | null => {
   return `/images/staffs/${prefix}.jpeg`;
 };
 
+/**
+ * Art attribution block — shown on Art offerings to make clear whether the
+ * piece was created by the user or is an existing public-domain / open-access
+ * artwork the user is offering in relationship to a tree.
+ */
+const ArtAttribution = ({ offering }: { offering: Offering }) => {
+  const origin = (offering as any).art_origin as string | null | undefined;
+  const meta = ((offering as any).art_metadata || null) as null | {
+    original_artist_name?: string | null;
+    original_artwork_year?: string | null;
+    source_url?: string | null;
+    institution_name?: string | null;
+    rights_status?: string | null;
+    medium?: string | null;
+    tags?: string[] | null;
+  };
+  if (offering.type !== "art") return null;
+
+  if (origin === "inspired_by_existing_art") {
+    const artist = meta?.original_artist_name?.trim();
+    return (
+      <div className="mt-2 rounded-md border border-primary/15 bg-primary/[0.04] px-3 py-2 space-y-1">
+        <p className="font-serif text-[11px] text-foreground/80">
+          <span className="text-primary/80">{offering.title || "Untitled"}</span>
+          {artist && <> — <span className="italic">{artist}</span></>}
+          {meta?.original_artwork_year && (
+            <span className="text-muted-foreground/60"> · {meta.original_artwork_year}</span>
+          )}
+        </p>
+        <p className="font-serif text-[10px] text-muted-foreground/70 italic">
+          Artwork that inspired this offering — not created by the wanderer.
+        </p>
+        {(meta?.institution_name || meta?.medium || meta?.rights_status) && (
+          <p className="font-serif text-[10px] text-muted-foreground/60">
+            {[meta?.medium, meta?.institution_name, meta?.rights_status?.replace(/_/g, " ")]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        )}
+        {meta?.source_url && (
+          <a
+            href={meta.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[10px] font-serif text-primary/80 hover:text-primary"
+          >
+            <ExternalLink className="w-3 h-3" /> source
+          </a>
+        )}
+        {meta?.tags && meta.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 pt-0.5">
+            {meta.tags.slice(0, 6).map((t) => (
+              <span key={t} className="text-[9px] font-serif tracking-wide px-1.5 py-0.5 rounded-full bg-primary/10 text-primary/70">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  // Default / created_by_user — gentle "original artwork" line
+  return (
+    <p className="mt-2 font-serif text-[10px] text-muted-foreground/60 italic">
+      Original artwork offered by the wanderer.
+    </p>
+  );
+};
+
 const SealedByLabel = ({ staff }: { staff: string | null }) => {
   if (!staff) return null;
   const img = getStaffImageFromCode(staff);
