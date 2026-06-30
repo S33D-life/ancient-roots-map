@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2, Palette, HandHeart,
@@ -173,6 +174,7 @@ const TreeDetailPage = () => {
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
+  const [artOriginFilter, setArtOriginFilter] = useState<"all" | "created_by_user" | "inspired_by_existing_art">("all");
   const [sectionTab, setSectionTab] = useState<string>(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam === "encounters") return "encounters";
@@ -1580,6 +1582,11 @@ const TreeDetailPage = () => {
 
                   {(Object.keys(offeringLabels) as OfferingType[]).map((type) => {
                     const canAdd = meetingStatus === "active" || meetingStatus === "expiring";
+                    const allOfType = sortOfferings(getOfferingsByType(type));
+                    const visibleOfType =
+                      type === "art" && artOriginFilter !== "all"
+                        ? allOfType.filter((o) => o.art_origin === artOriginFilter)
+                        : allOfType;
                     return (
                       <TabsContent key={type} value={type}>
                         <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
@@ -1605,15 +1612,54 @@ const TreeDetailPage = () => {
                           </div>
                         </div>
 
-                        {getOfferingsByType(type).length === 0 ? (
+                        {type === "art" && allOfType.length > 0 && (
+                          <div className="flex items-center gap-2 mb-4 flex-wrap">
+                            <span className="text-[11px] font-serif text-muted-foreground/70">Show</span>
+                            <ToggleGroup
+                              type="single"
+                              value={artOriginFilter}
+                              onValueChange={(v) => v && setArtOriginFilter(v as "all" | "created_by_user" | "inspired_by_existing_art")}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <ToggleGroupItem
+                                value="all"
+                                className="font-serif text-[11px] px-2.5 h-7 data-[state=on]:bg-primary/15 data-[state=on]:text-primary"
+                              >
+                                All
+                              </ToggleGroupItem>
+                              <ToggleGroupItem
+                                value="created_by_user"
+                                className="font-serif text-[11px] px-2.5 h-7 data-[state=on]:bg-primary/15 data-[state=on]:text-primary"
+                              >
+                                My Artwork
+                              </ToggleGroupItem>
+                              <ToggleGroupItem
+                                value="inspired_by_existing_art"
+                                className="font-serif text-[11px] px-2.5 h-7 data-[state=on]:bg-primary/15 data-[state=on]:text-primary"
+                              >
+                                Inspired by…
+                              </ToggleGroupItem>
+                            </ToggleGroup>
+                            <span className="text-[10px] text-muted-foreground/60 font-mono ml-auto">
+                              {visibleOfType.length} of {allOfType.length}
+                            </span>
+                          </div>
+                        )}
+
+                        {allOfType.length === 0 ? (
                           <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
+                        ) : visibleOfType.length === 0 ? (
+                          <p className="py-8 text-center text-sm font-serif text-muted-foreground">
+                            No {artOriginFilter === "created_by_user" ? "original artwork" : "inspired artwork"} in this filter.
+                          </p>
                         ) : type === "photo" ? (
-                          <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={openLightboxAt} />
+                          <PhotoGrid offerings={visibleOfType} onImageClick={openLightboxAt} />
                         ) : type === "book" ? (
-                          <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
-                        ) : (
+                          <BookShelf offerings={visibleOfType} />
+                        ) :(
                           <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                            {sortOfferings(getOfferingsByType(type)).map((offering) => {
+                            {visibleOfType.map((offering) => {
                               const isHighlighted = highlightedOfferingId === offering.id;
                               return (
                                 <motion.div
