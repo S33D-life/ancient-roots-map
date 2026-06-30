@@ -1218,7 +1218,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 id="content"
                 value={content}
                 onChange={e => setContent(e.target.value.slice(0, 5000))}
-                placeholder={cfg.placeholder}
+                placeholder={
+                  activeType === "art" && artOrigin === "inspired_by_existing_art"
+                    ? "Why are you offering this artwork to this tree?"
+                    : cfg.placeholder
+                }
                 maxLength={5000}
                 className="bg-secondary/10 border-border/30 font-serif min-h-[120px] text-base resize-none"
                 autoFocus
