@@ -923,7 +923,53 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       >
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-1">
+          {/* ─── ART ORIGIN CHOICE — shown once before the rest of the form ─── */}
+          {activeType === "art" && !artOrigin ? (
+            <div className="space-y-3 py-2">
+              <p className="font-serif text-sm text-foreground/80 text-center">
+                What kind of artwork are you offering?
+              </p>
+              <button
+                type="button"
+                onClick={() => setArtOrigin("created_by_user")}
+                className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎨</span>
+                  <div className="flex-1">
+                    <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">My Artwork</p>
+                    <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">Offer something you created yourself.</p>
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setArtOrigin("inspired_by_existing_art")}
+                className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🖼️</span>
+                  <div className="flex-1">
+                    <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">Artwork That Inspired Me</p>
+                    <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">
+                      Offer a public-domain or open-access artwork, painting, illustration, or image that has moved you.
+                    </p>
+                  </div>
+                </div>
+              </button>
+              {onChangeType && (
+                <button
+                  type="button"
+                  onClick={onChangeType}
+                  className="block mx-auto text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors pt-1"
+                >
+                  ← Change offering type
+                </button>
+              )}
+            </div>
+          ) : (<>
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
+
 
           {/* PHOTO: tray of up to 3 photos, then title + caption */}
           {activeType === "photo" && (
