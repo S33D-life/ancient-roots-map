@@ -375,22 +375,27 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     e.preventDefault();
     if (submittingRef.current || loading) return;
 
-    // For inspired-artwork offerings we require an artwork title and a
-    // reflection so attribution is clear in the feed.
+    // For inspired-artwork offerings we require a title, artist, reflection,
+    // and an image so attribution and presence are clear in the feed.
     if (activeType === "art" && artOrigin === "inspired_by_existing_art") {
-      if (!title.trim()) {
-        toast({ title: "Artwork title is required", description: "Please enter the title of the artwork." });
-        return;
-      }
-      if (!content.trim()) {
-        toast({ title: "A short reflection is required", description: "Why are you offering this artwork to this tree?" });
-        return;
-      }
+      const nextErrors: typeof fieldErrors = {};
+      if (!title.trim()) nextErrors.title = "Artwork title is required";
+      if (!originalArtistName.trim()) nextErrors.artist = "Artist or creator is required";
+      if (!content.trim()) nextErrors.reflection = "Please share why you are offering this artwork";
       if (photoSlots.length === 0 && !mediaUrl.trim()) {
-        toast({ title: "Add an image or image URL", description: "Please upload the artwork or paste an open-access image URL." });
+        nextErrors.image = "Please upload the artwork or paste an image URL";
+      }
+      if (Object.keys(nextErrors).length > 0) {
+        setFieldErrors(nextErrors);
+        toast({
+          title: "A few details are missing",
+          description: "Fill in the required fields so the artwork can live here.",
+          variant: "destructive",
+        });
         return;
       }
     }
+
 
     // Auto-generate title if the user didn't provide one
     const resolvedTitle = title.trim() || content.trim().slice(0, 60).replace(/\n/g, " ") || `Untitled ${cfg.singular}`;
