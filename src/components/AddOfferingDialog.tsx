@@ -1210,6 +1210,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               </p>
             )}
           </div>
+          </>)}
         </form>
       </ResponsiveDialog>
       <RewardReceipt
