@@ -1029,30 +1029,185 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
           {/* ART: optional photo tray of the artwork, then content-first hero below */}
           {activeType === "art" && (
-            <div
-              onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={handleDrop}
-              className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
-            >
-              <Label className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase block mb-1.5">
-                Photograph the artwork (optional)
-              </Label>
-              <OfferingPhotoTray
-                photos={photoSlots}
-                onAdd={addPhoto}
-                onRemove={removePhoto}
-                onReorder={(next) => setPhotoSlots(next)}
-                uploadingIds={uploadingPhotoIds}
-                failedIds={failedPhotoIds}
-                successIds={new Set(Object.keys(uploadedUrlsById))}
-                onRetry={retryPhotoUpload}
-                uploadProgress={uploadBatch ?? undefined}
-                offline={!online}
-                disabled={loading && failedPhotoIds.size === 0}
-              />
-            </div>
+            <>
+              {/* Small banner showing which art path is active, with a way back */}
+              <div className="flex items-center justify-between rounded-lg border border-border/30 bg-secondary/10 px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">{artOrigin === "inspired_by_existing_art" ? "🖼️" : "🎨"}</span>
+                  <span className="font-serif text-xs text-foreground/80">
+                    {artOrigin === "inspired_by_existing_art" ? "Artwork that inspired me" : "My artwork"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setArtOrigin(null); }}
+                  className="text-[11px] font-serif text-muted-foreground/60 hover:text-primary transition-colors"
+                >
+                  Change
+                </button>
+              </div>
+
+              <div
+                onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                className={`rounded-xl transition-all ${dragActive ? "ring-2 ring-primary/40 bg-primary/5 p-2" : ""}`}
+              >
+                <Label className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase block mb-1.5">
+                  {artOrigin === "inspired_by_existing_art"
+                    ? "Upload the artwork image"
+                    : "Photograph the artwork (optional)"}
+                </Label>
+                <OfferingPhotoTray
+                  photos={photoSlots}
+                  onAdd={addPhoto}
+                  onRemove={removePhoto}
+                  onReorder={(next) => setPhotoSlots(next)}
+                  uploadingIds={uploadingPhotoIds}
+                  failedIds={failedPhotoIds}
+                  successIds={new Set(Object.keys(uploadedUrlsById))}
+                  onRetry={retryPhotoUpload}
+                  uploadProgress={uploadBatch ?? undefined}
+                  offline={!online}
+                  disabled={loading && failedPhotoIds.size === 0}
+                />
+                {artOrigin === "inspired_by_existing_art" && (
+                  <>
+                    <div className="mt-3 space-y-1.5">
+                      <Label htmlFor="art-image-url" className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase">
+                        …or paste an image URL
+                      </Label>
+                      <Input
+                        id="art-image-url"
+                        value={mediaUrl}
+                        onChange={e => setMediaUrl(e.target.value)}
+                        placeholder="https://commons.wikimedia.org/…"
+                        className="bg-secondary/10 border-border/30 font-serif"
+                      />
+                    </div>
+                    <p className="mt-2 text-[11px] font-serif text-muted-foreground/70 italic leading-snug">
+                      Please use public-domain or open-access images where possible, and credit the
+                      artist and source. This offering is a gesture of relationship, not a claim of
+                      ownership.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Inspired-art metadata fields */}
+              {artOrigin === "inspired_by_existing_art" && (
+                <div className="space-y-3 rounded-xl border border-border/30 bg-secondary/5 p-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-title" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Artwork title <span className="text-primary/70">*</span>
+                    </Label>
+                    <Input
+                      id="art-title"
+                      value={title}
+                      onChange={e => setTitle(e.target.value.slice(0, 200))}
+                      placeholder="e.g. The Tree of Life"
+                      className="bg-background/40 border-border/30 font-serif"
+                      maxLength={200}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-artist" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Artist / creator
+                      </Label>
+                      <Input
+                        id="art-artist"
+                        value={originalArtistName}
+                        onChange={e => setOriginalArtistName(e.target.value.slice(0, 200))}
+                        placeholder="e.g. Hilma af Klint"
+                        className="bg-background/40 border-border/30 font-serif"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-year" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Year / era
+                      </Label>
+                      <Input
+                        id="art-year"
+                        value={originalArtworkYear}
+                        onChange={e => setOriginalArtworkYear(e.target.value.slice(0, 80))}
+                        placeholder="e.g. 1907"
+                        className="bg-background/40 border-border/30 font-serif"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-source" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Source link
+                    </Label>
+                    <Input
+                      id="art-source"
+                      value={sourceUrl}
+                      onChange={e => setSourceUrl(e.target.value)}
+                      placeholder="Link to museum, archive, or source page"
+                      className="bg-background/40 border-border/30 font-serif"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-institution" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Museum / archive / collection
+                    </Label>
+                    <Input
+                      id="art-institution"
+                      value={institutionName}
+                      onChange={e => setInstitutionName(e.target.value.slice(0, 200))}
+                      placeholder="e.g. Moderna Museet"
+                      className="bg-background/40 border-border/30 font-serif"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-rights" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Rights status
+                      </Label>
+                      <select
+                        id="art-rights"
+                        value={rightsStatus}
+                        onChange={e => setRightsStatus(e.target.value)}
+                        className="w-full h-9 rounded-md bg-background/40 border border-border/30 font-serif text-sm px-2"
+                      >
+                        <option value="">—</option>
+                        <option value="public_domain">Public domain</option>
+                        <option value="open_access">Open access</option>
+                        <option value="permission_given">Permission given</option>
+                        <option value="unsure">Unsure</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="art-medium" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                        Medium
+                      </Label>
+                      <Input
+                        id="art-medium"
+                        value={medium}
+                        onChange={e => setMedium(e.target.value.slice(0, 120))}
+                        placeholder="oil on canvas, engraving…"
+                        className="bg-background/40 border-border/30 font-serif"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="art-tags" className="font-serif text-[10px] tracking-wider text-muted-foreground/60 uppercase">
+                      Tags (comma-separated)
+                    </Label>
+                    <Input
+                      id="art-tags"
+                      value={artTags}
+                      onChange={e => setArtTags(e.target.value.slice(0, 300))}
+                      placeholder="botanical, sacred, folk…"
+                      className="bg-background/40 border-border/30 font-serif"
+                    />
+                  </div>
+                </div>
+              )}
+            </>
           )}
+
 
           {/* MUSING / POEM / NFT / ART text hero: content-first */}
           {activeType !== "photo" && (
