@@ -927,36 +927,44 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
           {activeType === "art" && !artOrigin ? (
             <div className="space-y-3 py-2">
               <p className="font-serif text-sm text-foreground/80 text-center">
-                What kind of artwork are you offering?
+                What kind of artwork are you sharing?
               </p>
-              <button
-                type="button"
-                onClick={() => setArtOrigin("created_by_user")}
-                className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🎨</span>
-                  <div className="flex-1">
-                    <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">My Artwork</p>
-                    <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">Offer something you created yourself.</p>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setArtOrigin("created_by_user")}
+                  className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">🎨</span>
+                    <div className="flex-1">
+                      <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">My Artwork</p>
+                      <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">Something I created myself — a drawing, painting, digital piece, or photograph.</p>
+                    </div>
                   </div>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setArtOrigin("inspired_by_existing_art")}
-                className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🖼️</span>
-                  <div className="flex-1">
-                    <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">Artwork That Inspired Me</p>
-                    <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">
-                      Offer a public-domain or open-access artwork, painting, illustration, or image that has moved you.
-                    </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setArtOrigin("inspired_by_existing_art")}
+                  className="w-full text-left rounded-xl border border-border/40 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/40 transition-all p-4 group"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">🖼️</span>
+                    <div className="flex-1">
+                      <p className="font-serif text-base text-foreground group-hover:text-primary transition-colors">Artwork That Inspired Me</p>
+                      <p className="font-serif text-xs text-muted-foreground/70 mt-0.5">
+                        A public-domain or open-access piece from a museum, archive, or library that I want to place in relationship with this tree.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
+              <div className="rounded-lg border border-primary/10 bg-primary/[0.04] px-3 py-2.5">
+                <p className="font-serif text-[11px] text-foreground/70 leading-snug">
+                  <span className="font-medium text-primary/80">Gentle invitation:</span>{" "}
+                  Please favour public-domain or openly licensed images (CC0, CC BY, open access) so every wanderer can meet them freely.
+                </p>
+              </div>
               {onChangeType && (
                 <button
                   type="button"
@@ -1058,6 +1066,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                     ? "Upload the artwork image"
                     : "Photograph the artwork (optional)"}
                 </Label>
+                {artOrigin === "inspired_by_existing_art" && (
+                  <p className="font-serif text-[11px] text-muted-foreground/60 leading-snug mb-1.5">
+                    Choose public-domain or open-access images so the whole community can see them safely.
+                  </p>
+                )}
                 <OfferingPhotoTray
                   photos={photoSlots}
                   onAdd={addPhoto}
@@ -1081,15 +1094,15 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                         id="art-image-url"
                         value={mediaUrl}
                         onChange={e => setMediaUrl(e.target.value)}
-                        placeholder="https://commons.wikimedia.org/…"
+                        placeholder="https://commons.wikimedia.org/wiki/File:…"
                         className="bg-secondary/10 border-border/30 font-serif"
                       />
                     </div>
-                    <p className="mt-2 text-[11px] font-serif text-muted-foreground/70 italic leading-snug">
-                      Please use public-domain or open-access images where possible, and credit the
-                      artist and source. This offering is a gesture of relationship, not a claim of
-                      ownership.
-                    </p>
+                    <div className="mt-2 rounded-lg border border-primary/10 bg-primary/[0.04] px-3 py-2.5">
+                      <p className="text-[11px] font-serif text-foreground/70 leading-snug">
+                        Whenever possible, credit the artist and share the source link. If you’re unsure of the license, pick the closest option — this offering is a gesture of relationship, not a claim of ownership.
+                      </p>
+                    </div>
                   </>
                 )}
               </div>
