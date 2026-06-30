@@ -621,6 +621,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         quote_text: quoteText,
         quote_author: quoteAuthor,
         quote_source: quoteSource,
+        ...buildArtFields(),
       }).select("id").single();
       if (error) throw error;
 
