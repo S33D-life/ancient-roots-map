@@ -380,6 +380,7 @@ const App = () => {
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsentPage />} />
                 <Route path="/reset-password" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/welcome" element={<WelcomePage />} />
