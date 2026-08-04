@@ -232,6 +232,7 @@ export default defineConfig(async ({ mode }) => {
   },
   plugins: [
     react(),
+    mcpPlugin(),
     pwaPlugin,
     patronsPortalPreviewPlugin,
   ].filter(Boolean),
