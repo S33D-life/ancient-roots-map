@@ -89,6 +89,7 @@ const TetolHomePage = lazyImportWithRetry(() => import("./pages/TetolHomePage"),
 const S33dGatewayPage = lazyImportWithRetry(() => import("./pages/Index"), "s33d-gateway");
 const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page");
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
+const OAuthConsentPage = lazyImportWithRetry(() => import("./pages/OAuthConsentPage"), "oauth-consent");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
 const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplorerPage"), "pulse-explorer");
 const PathwaysPage = lazyImportWithRetry(() => import("./pages/PathwaysPage"), "pathways");
@@ -379,6 +380,7 @@ const App = () => {
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsentPage />} />
                 <Route path="/reset-password" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/welcome" element={<WelcomePage />} />
