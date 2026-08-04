@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 import { readFileSync } from "node:fs";
 import path from "path";
 
