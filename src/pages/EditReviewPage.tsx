@@ -310,10 +310,14 @@ export default function EditReviewPage() {
                         key={proposal.id}
                         proposal={proposal}
                         tree={tree}
+                        mergeTarget={proposal.merge_target_tree_id ? trees[proposal.merge_target_tree_id] : undefined}
                         proposer={proposer}
                         onAction={(action) => {
                           setActionDialog({ proposal, action });
                           setReviewNote("");
+                          setConflictAck(false);
+                          setStaleWarning(false);
+                          setMergeSurvivor(proposal.merge_preferred_tree_id ?? proposal.tree_id);
                         }}
                       />
                     );
