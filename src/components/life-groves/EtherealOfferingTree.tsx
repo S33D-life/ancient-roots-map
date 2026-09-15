@@ -396,8 +396,8 @@ export default function EtherealOfferingTree({
           50% { opacity: 1; transform: scale(1.03); }
         }
         @keyframes lifeGroveSway {
-          0%, 100% { transform: translate(-50%, -50%) rotate(-1.6deg); }
-          50% { transform: translate(-50%, -50%) rotate(1.6deg); }
+          0%, 100% { transform: rotate(-2deg); }
+          50% { transform: rotate(2deg); }
         }
       `}</style>
     </div>
