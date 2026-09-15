@@ -46,6 +46,7 @@ export const GROVE_CONTENT_FIELDS: GroveFieldDef[] = [
   { key: "event_date", label: "Date of the moment", input: "date" },
   { key: "birth_date", label: "Born", input: "date" },
   { key: "passing_date", label: "Passed", input: "date" },
+  { key: "cover_photo_url", label: "Cover photograph", hint: "Link to an image", input: "text" },
   { key: "planted_tree_location_text", label: "Where the tree stands", input: "text" },
   { key: "planting_notes", label: "Planting notes", input: "longtext" },
 ];
