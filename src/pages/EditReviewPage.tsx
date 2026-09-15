@@ -378,6 +378,7 @@ function ProposalCard({
 }: {
   proposal: Proposal;
   tree?: TreeInfo;
+  mergeTarget?: TreeInfo;
   proposer?: ProposerInfo;
   onAction: (action: "accept" | "reject" | "needs_more_info") => void;
 }) {
@@ -444,6 +445,32 @@ function ProposalCard({
             </Badge>
           </div>
         </div>
+
+        {/* Merge comparison */}
+        {proposal.proposal_type === "merge" && (
+          <div className="bg-secondary/20 rounded-lg p-3 grid grid-cols-2 gap-3 text-xs font-serif">
+            {[tree, mergeTarget].map((t, i) => (
+              <div key={i} className="space-y-0.5">
+                <p className="text-foreground/90">{t?.name || "Unknown tree"}</p>
+                <p className="text-muted-foreground">{t?.species || "—"}</p>
+                <p className="text-muted-foreground/70 font-mono text-[10px]">
+                  {t?.latitude != null ? `${t.latitude.toFixed(5)}, ${t.longitude?.toFixed(5)}` : "no position"}
+                </p>
+                {t?.id && (
+                  <Link to={`/tree/${t.id}`} className="text-primary/80 text-[10px]">Open record</Link>
+                )}
+                {proposal.merge_preferred_tree_id === t?.id && (
+                  <Badge variant="outline" className="text-[9px] mt-1">Proposed survivor</Badge>
+                )}
+              </div>
+            ))}
+            {tree?.latitude != null && mergeTarget?.latitude != null && (
+              <p className="col-span-2 text-[10px] text-muted-foreground">
+                {Math.round(haversineMeters(tree.latitude, tree.longitude!, mergeTarget.latitude, mergeTarget.longitude!))}m apart
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Diff view */}
         <div className="bg-secondary/20 rounded-lg p-3 space-y-2">
