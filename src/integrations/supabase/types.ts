@@ -3339,6 +3339,135 @@ export type Database = {
           },
         ]
       }
+      grove_root_history: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: Json | null
+          grove_root_id: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          grove_root_id: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          grove_root_id?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grove_root_history_grove_root_id_fkey"
+            columns: ["grove_root_id"]
+            isOneToOne: false
+            referencedRelation: "grove_roots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grove_roots: {
+        Row: {
+          created_at: string
+          created_by: string
+          dedication: string | null
+          entry_mode: string
+          id: string
+          inscription_date_text: string | null
+          inscription_style: string
+          inscription_text: string | null
+          inscription_visibility: string
+          life_grove_id: string
+          portal_disclosure: string
+          position_data: Json | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          root_type: string
+          signature_url: string | null
+          status: string
+          tree_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          dedication?: string | null
+          entry_mode?: string
+          id?: string
+          inscription_date_text?: string | null
+          inscription_style?: string
+          inscription_text?: string | null
+          inscription_visibility?: string
+          life_grove_id: string
+          portal_disclosure?: string
+          position_data?: Json | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          root_type?: string
+          signature_url?: string | null
+          status?: string
+          tree_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          dedication?: string | null
+          entry_mode?: string
+          id?: string
+          inscription_date_text?: string | null
+          inscription_style?: string
+          inscription_text?: string | null
+          inscription_visibility?: string
+          life_grove_id?: string
+          portal_disclosure?: string
+          position_data?: Json | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          root_type?: string
+          signature_url?: string | null
+          status?: string
+          tree_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grove_roots_life_grove_id_fkey"
+            columns: ["life_grove_id"]
+            isOneToOne: false
+            referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grove_roots_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grove_roots_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grove_trees: {
         Row: {
           added_at: string
@@ -11817,6 +11946,19 @@ export type Database = {
         }
         Returns: Json
       }
+      create_grove_root: {
+        Args: {
+          p_dedication?: string
+          p_entry_mode?: string
+          p_grove_id: string
+          p_inscription_text?: string
+          p_inscription_visibility?: string
+          p_portal_disclosure?: string
+          p_root_type?: string
+          p_tree_id: string
+        }
+        Returns: string
+      }
       current_lunation: { Args: never; Returns: string }
       execute_lottery_draw: { Args: { p_draw_id: string }; Returns: Json }
       get_bio_region_trees: {
@@ -12054,6 +12196,10 @@ export type Database = {
         Args: { _grove_id: string; _user_id: string }
         Returns: boolean
       }
+      is_tree_root_authority: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_untrusted_heart_writer: { Args: never; Returns: boolean }
       is_whisper_group_member: {
         Args: { _group_id: string; _user_id: string }
@@ -12061,6 +12207,36 @@ export type Database = {
       }
       join_life_grove_with_token: { Args: { p_token: string }; Returns: string }
       life_grove_content_fields: { Args: never; Returns: string[] }
+      list_grove_roots: {
+        Args: { p_grove_id: string }
+        Returns: {
+          created_at: string
+          entry_mode: string
+          inscription_text: string
+          inscription_visibility: string
+          portal_disclosure: string
+          review_note: string
+          root_id: string
+          status: string
+          tree_id: string
+          tree_name: string
+          tree_species: string
+        }[]
+      }
+      list_tree_inscriptions: {
+        Args: { p_tree_id: string }
+        Returns: {
+          can_enter: boolean
+          dedication: string
+          grove_title: string
+          inscription_style: string
+          inscription_text: string
+          life_grove_id: string
+          remembered_name: string
+          root_id: string
+          rooted_year: number
+        }[]
+      }
       locked_own_heart_balance: { Args: never; Returns: number }
       open_group_whisper: {
         Args: { _current_tree_id: string; _whisper_id: string }
@@ -12104,9 +12280,17 @@ export type Database = {
         }[]
       }
       refresh_trees_map_hot: { Args: never; Returns: undefined }
+      remove_grove_root: {
+        Args: { p_note?: string; p_root_id: string }
+        Returns: undefined
+      }
       resolve_bot_handoff: { Args: { p_token: string }; Returns: Json }
       retract_influence_vote: {
         Args: { p_user_id: string; p_vote_id: string }
+        Returns: undefined
+      }
+      review_grove_root: {
+        Args: { p_decision: string; p_note?: string; p_root_id: string }
         Returns: undefined
       }
       review_tree_change_proposal: {
@@ -12202,6 +12386,17 @@ export type Database = {
           p_grove_id: string
           p_note?: string
           p_value: string
+        }
+        Returns: undefined
+      }
+      tend_grove_root_inscription: {
+        Args: {
+          p_dedication?: string
+          p_entry_mode?: string
+          p_inscription_text?: string
+          p_inscription_visibility?: string
+          p_portal_disclosure?: string
+          p_root_id: string
         }
         Returns: undefined
       }
