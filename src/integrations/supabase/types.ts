@@ -4040,6 +4040,7 @@ export type Database = {
           id: string
           is_used: boolean
           max_uses: number | null
+          revoked_at: string | null
           used_at: string | null
           used_by_user_id: string | null
           uses_count: number
@@ -4052,6 +4053,7 @@ export type Database = {
           id?: string
           is_used?: boolean
           max_uses?: number | null
+          revoked_at?: string | null
           used_at?: string | null
           used_by_user_id?: string | null
           uses_count?: number
@@ -4064,6 +4066,7 @@ export type Database = {
           id?: string
           is_used?: boolean
           max_uses?: number | null
+          revoked_at?: string | null
           used_at?: string | null
           used_by_user_id?: string | null
           uses_count?: number
@@ -11403,6 +11406,14 @@ export type Database = {
           _tree_anchor_id: string
         }
         Returns: Json
+      }
+      check_invite_code: {
+        Args: { p_code: string }
+        Returns: {
+          expires_at: string
+          invite_id: string
+          status: string
+        }[]
       }
       claim_bot_handoff: { Args: { p_token: string }; Returns: Json }
       claim_council_participation: {
