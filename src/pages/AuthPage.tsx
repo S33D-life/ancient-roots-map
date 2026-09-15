@@ -1400,7 +1400,7 @@ const AuthPage = () => {
                     type="text"
                     placeholder="Enter your invitation code"
                     value={inviteCode}
-                    onChange={(e) => { setInviteCode(e.target.value); if (inviteBloomFailure) setInviteBloomFailure(null); }}
+                    onChange={(e) => { setInviteCode(e.target.value); setInviteBloomFailure(null); setInviteStatus("idle"); }}
                     disabled={isLoading}
                     className="font-mono text-sm"
                     required
@@ -1408,19 +1408,31 @@ const AuthPage = () => {
                   <p className="text-[10px] text-muted-foreground/60 font-serif">
                     S33D is invitation-only. Ask a wanderer for an invite link to join.
                   </p>
-                  {inviteExpiresAt && !inviteBloomFailure && (
+                  {inviteStatus === "checking" && (
+                    <p className="text-[11px] text-muted-foreground/70 font-serif flex items-center gap-1.5" aria-live="polite">
+                      <Loader2 className="w-3 h-3 animate-spin" aria-hidden />
+                      Listening for this invitation…
+                    </p>
+                  )}
+                  {inviteStatus === "valid" && (
+                    <p className="text-[11px] text-primary/80 font-serif" aria-live="polite">
+                      This invitation is alive — the grove is ready for you.
+                    </p>
+                  )}
+                  {inviteExpiresAt && inviteStatus === "valid" && (
                     <div className="pt-1">
                       <InviteExpiryHint expiresAt={inviteExpiresAt} />
                     </div>
                   )}
-                  {inviteBloomFailure && (
+                  {inviteBloomFailure && inviteStatus !== "checking" && inviteStatus !== "valid" && (
                     <div className="pt-2">
                       <InviteBloomFailure
                         reason={inviteBloomFailure}
                         onRetry={() => {
+                          // Re-run validation only — never touches the invitation.
                           setInviteBloomFailure(null);
-                          // Trigger a fresh validation pass with the current code.
-                          handleSignup(new Event("submit") as unknown as React.FormEvent);
+                          setInviteStatus("checking");
+                          setInviteCheckNonce((n) => n + 1);
                         }}
                         onRequestFresh={() => {
                           void trackInviteEvent("invite_request_fresh_clicked", {
