@@ -15,6 +15,7 @@ import FullscreenTreeView from "@/components/life-groves/FullscreenTreeView";
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
 import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
 import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
+import AncestralRootsSection from "@/components/life-groves/AncestralRootsSection";
 import LifeGroveOfferingComposer from "@/components/life-groves/LifeGroveOfferingComposer";
 import GroveStewardshipSection from "@/components/life-groves/GroveStewardshipSection";
 import { useGroveAuthority } from "@/hooks/use-grove-authority";
@@ -178,6 +179,9 @@ export default function LifeGrovePage() {
         )}
 
         <RootedTreeSection grove={grove} />
+
+        {/* Ancestral Roots — where this tree has reached into the living world */}
+        <AncestralRootsSection groveId={grove.id} />
 
         {/* Library */}
         <section className="mb-8">
