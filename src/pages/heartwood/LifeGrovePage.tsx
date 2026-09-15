@@ -10,22 +10,22 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
-import EtherealOfferingTree, {
-  OfferingPreviewCard,
-} from "@/components/life-groves/EtherealOfferingTree";
+import EtherealOfferingTree from "@/components/life-groves/EtherealOfferingTree";
+import FullscreenTreeView from "@/components/life-groves/FullscreenTreeView";
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
 import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
 import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
 import LifeGroveOfferingComposer from "@/components/life-groves/LifeGroveOfferingComposer";
 import GroveStewardshipSection from "@/components/life-groves/GroveStewardshipSection";
 import { useGroveAuthority } from "@/hooks/use-grove-authority";
-import { GROVE_TYPES, TREE_ARCHETYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
+import { GROVE_TYPES, TREE_ARCHETYPES } from "@/lib/life-groves/types";
 
 export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
   const { userId } = useCurrentUser();
-  const [selected, setSelected] = useState<LifeGroveOffering | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [immersive, setImmersive] = useState(false);
+  const [entryOfferingId, setEntryOfferingId] = useState<string | null>(null);
   const { isContributor } = useGroveAuthority(id);
 
   const { data: grove, isLoading, isError } = useQuery({
@@ -42,12 +42,12 @@ export default function LifeGrovePage() {
     refetchOnMount: true,
   });
 
-  // Clear selection if the chosen offering disappears after refetch.
+  // Clear the entry memory if it disappears after a refetch.
   useEffect(() => {
-    if (selected && !offerings.some((o) => o.id === selected.id)) {
-      setSelected(null);
+    if (entryOfferingId && !offerings.some((o) => o.id === entryOfferingId)) {
+      setEntryOfferingId(null);
     }
-  }, [offerings, selected]);
+  }, [offerings, entryOfferingId]);
 
   if (isLoading) {
     return (
@@ -115,30 +115,46 @@ export default function LifeGrovePage() {
               className="absolute inset-0 -z-0 rounded-full blur-3xl opacity-60"
               style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }}
             />
-            <div className="relative z-10">
+            {/* Tapping the tree — or any memory in it — enters the full view. */}
+            <div
+              className="relative z-10 cursor-pointer"
+              onClick={() => {
+                setEntryOfferingId(null);
+                setImmersive(true);
+              }}
+            >
               <EtherealOfferingTree
                 archetype={grove.tree_archetype_species}
                 treeName={grove.tree_name}
                 offerings={offerings}
-                selectedId={selected?.id ?? null}
-                onSelect={setSelected}
+                selectedId={null}
+                onSelect={(o) => {
+                  setEntryOfferingId(o?.id ?? null);
+                  setImmersive(true);
+                }}
                 size={400}
               />
             </div>
           </div>
-          {selected ? (
-            <div className="max-w-md mx-auto text-left">
-              <OfferingPreviewCard offering={selected} onClose={() => setSelected(null)} />
-            </div>
-          ) : offerings.length === 0 ? (
-            <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
-              The branches are waiting. Hang the first offering.
-            </p>
-          ) : (
-            <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto">
-              Tap a glyph to read what is hanging in the branches.
-            </p>
-          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setEntryOfferingId(null);
+              setImmersive(true);
+            }}
+            className="font-serif text-xs uppercase tracking-[0.3em] text-muted-foreground/70
+              hover:text-foreground transition-colors min-h-[44px] px-4
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+          >
+            Enter the Tree
+          </button>
+
+          <p className="font-serif text-sm italic text-muted-foreground/80 max-w-xl mx-auto mt-2">
+            {offerings.length === 0
+              ? "The branches are waiting. Hang the first offering."
+              : "Step inside to see what is hanging in the branches."}
+          </p>
 
           {isContributor && (
             <div className="mt-6">
@@ -192,6 +208,17 @@ export default function LifeGrovePage() {
           </section>
         )}
       </main>
+
+      <FullscreenTreeView
+        open={immersive}
+        onClose={() => setImmersive(false)}
+        archetype={grove.tree_archetype_species}
+        groveTitle={grove.grove_title}
+        treeName={grove.tree_name}
+        rememberedName={grove.remembered_or_celebrated_name}
+        offerings={offerings}
+        initialOfferingId={entryOfferingId}
+      />
 
       {userId && (
         <LifeGroveOfferingComposer
