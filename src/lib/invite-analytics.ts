@@ -36,6 +36,7 @@ export type InviteEventSource =
   | "storage"
   | "oauth_return"
   | "manual"
+  | "auto"
   | "system";
 
 interface TrackOptions {
