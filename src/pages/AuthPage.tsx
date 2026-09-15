@@ -19,6 +19,7 @@ import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
 import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
 import { trackInviteEvent } from "@/lib/invite-analytics";
+import { checkInviteCode, type InviteStatus } from "@/lib/invite-validation";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -146,6 +147,9 @@ const AuthPage = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
+  // Invitation validity is the single source of truth for whether signup is allowed.
+  const [inviteStatus, setInviteStatus] = useState<InviteStatus>("idle");
+  const [inviteCheckNonce, setInviteCheckNonce] = useState(0);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -253,6 +257,47 @@ const AuthPage = () => {
       setView("signup");
     }
   }, [searchParams]);
+
+  // Live invitation validation (debounced). Runs for logged-out visitors via a
+  // SECURITY DEFINER RPC, so RLS on invite_links never blocks it. This decides
+  // whether the Create Account button is enabled — nothing else does.
+  useEffect(() => {
+    if (view !== "signup") return;
+    const raw = inviteCode.trim();
+    if (!raw) {
+      setInviteStatus("idle");
+      setInviteBloomFailure(null);
+      setInviteExpiresAt(null);
+      return;
+    }
+    let cancelled = false;
+    setInviteStatus("checking");
+    const t = window.setTimeout(async () => {
+      const result = await checkInviteCode(raw);
+      if (cancelled) return;
+      setInviteStatus(result.status);
+      setInviteExpiresAt(result.expiresAt);
+      if (result.status === "valid") {
+        setInviteBloomFailure(null);
+        void trackInviteEvent("invite_validation_success", {
+          code: raw,
+          source: "auto",
+          metadata: { expires_at: result.expiresAt },
+        });
+      } else {
+        setInviteBloomFailure(result.detail);
+        void trackInviteEvent("invite_validation_failed", {
+          code: raw,
+          source: "auto",
+          metadata: { reason: result.status },
+        });
+      }
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [inviteCode, view, inviteCheckNonce]);
 
   // Use a ref for view to avoid re-subscribing on every view change
   const viewRef = useRef(view);
@@ -750,6 +795,7 @@ const AuthPage = () => {
     const code = inviteCode.trim();
     if (!code) {
       // Use the same soft Heartwood warning rather than a harsh red toast.
+      setInviteStatus("malformed");
       setInviteBloomFailure("No invitation code entered yet.");
       return;
     }
@@ -757,34 +803,28 @@ const AuthPage = () => {
     setInviteBloomFailure(null);
     setIsLoading(true);
     try {
-      // Pre-validate via SECURITY DEFINER RPC. The invite_links table has RLS
-      // restricting SELECT to the invite creator, so anonymous signup flows
-      // CANNOT read the row directly — that's why fresh invites used to look
-      // "already used or invalid". The RPC bypasses RLS safely.
-      console.log("[invite] validating", { code });
-      const { data: validation, error: validationError } = await supabase.rpc(
-        "validate_invite_code",
-        { p_code: code },
-      );
-      console.log("[invite] validation response", { validation, validationError });
+      // Re-validate immediately before signup via a SECURITY DEFINER RPC. The
+      // invite_links table restricts SELECT to the invite creator, so anonymous
+      // signup flows CANNOT read the row directly — the RPC bypasses RLS safely
+      // and returns a precise status only.
+      const result = await checkInviteCode(code);
+      setInviteStatus(result.status);
+      setInviteExpiresAt(result.expiresAt);
 
-      const validRow = Array.isArray(validation) ? validation[0] : validation;
-      if (validationError || !validRow?.id) {
+      if (result.status !== "valid") {
         void trackInviteEvent("invite_validation_failed", {
           code,
           source: "manual",
-          metadata: { error: validationError?.message ?? "no_row" },
+          metadata: { reason: result.status },
         });
-        setInviteExpiresAt(null);
+        setInviteBloomFailure(result.detail);
         throw new Error("INVITE_BLOOM_FAILED");
       }
 
-      // Surface a soft expiry hint when the backend reports one.
-      setInviteExpiresAt((validRow as any)?.expires_at ?? null);
       void trackInviteEvent("invite_validation_success", {
         code,
         source: "manual",
-        metadata: { expires_at: (validRow as any)?.expires_at ?? null },
+        metadata: { expires_at: result.expiresAt },
       });
 
       // Persist the code BEFORE attempting signup so it survives any redirect,
@@ -823,10 +863,11 @@ const AuthPage = () => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
       if (msg === "INVITE_BLOOM_FAILED") {
-        // Soft Heartwood inline state — no destructive red toast.
-        setInviteBloomFailure(`code: ${code}`);
+        // Soft Heartwood inline state — no destructive red toast. The detail
+        // string was already set from the precise validation status.
       } else {
-        // Other signup errors stay as toasts but use a calmer default variant.
+        // Signup failed for another reason — the invitation is untouched and
+        // still available to retry.
         toast({ title: "Sign up could not complete", description: msg });
       }
     } finally {
@@ -1359,7 +1400,7 @@ const AuthPage = () => {
                     type="text"
                     placeholder="Enter your invitation code"
                     value={inviteCode}
-                    onChange={(e) => { setInviteCode(e.target.value); if (inviteBloomFailure) setInviteBloomFailure(null); }}
+                    onChange={(e) => { setInviteCode(e.target.value); setInviteBloomFailure(null); setInviteStatus("idle"); }}
                     disabled={isLoading}
                     className="font-mono text-sm"
                     required
@@ -1367,19 +1408,31 @@ const AuthPage = () => {
                   <p className="text-[10px] text-muted-foreground/60 font-serif">
                     S33D is invitation-only. Ask a wanderer for an invite link to join.
                   </p>
-                  {inviteExpiresAt && !inviteBloomFailure && (
+                  {inviteStatus === "checking" && (
+                    <p className="text-[11px] text-muted-foreground/70 font-serif flex items-center gap-1.5" aria-live="polite">
+                      <Loader2 className="w-3 h-3 animate-spin" aria-hidden />
+                      Listening for this invitation…
+                    </p>
+                  )}
+                  {inviteStatus === "valid" && (
+                    <p className="text-[11px] text-primary/80 font-serif" aria-live="polite">
+                      This invitation is alive — the grove is ready for you.
+                    </p>
+                  )}
+                  {inviteExpiresAt && inviteStatus === "valid" && (
                     <div className="pt-1">
                       <InviteExpiryHint expiresAt={inviteExpiresAt} />
                     </div>
                   )}
-                  {inviteBloomFailure && (
+                  {inviteBloomFailure && inviteStatus !== "checking" && inviteStatus !== "valid" && (
                     <div className="pt-2">
                       <InviteBloomFailure
                         reason={inviteBloomFailure}
                         onRetry={() => {
+                          // Re-run validation only — never touches the invitation.
                           setInviteBloomFailure(null);
-                          // Trigger a fresh validation pass with the current code.
-                          handleSignup(new Event("submit") as unknown as React.FormEvent);
+                          setInviteStatus("checking");
+                          setInviteCheckNonce((n) => n + 1);
                         }}
                         onRequestFresh={() => {
                           void trackInviteEvent("invite_request_fresh_clicked", {
@@ -1419,7 +1472,13 @@ const AuthPage = () => {
                 </div>
               )}
 
-              <Button type="submit" className="w-full font-serif" disabled={isLoading}>
+              {/* Invitation validity is the single gate on account creation. */}
+              <Button
+                type="submit"
+                className="w-full font-serif"
+                disabled={isLoading || (isSignup && inviteStatus !== "valid")}
+                aria-describedby={isSignup && inviteStatus !== "valid" ? "invite-code" : undefined}
+              >
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isForgot ? "Sending..." : isSignup ? "Creating account..." : "Logging in..."}</>
                 ) : (

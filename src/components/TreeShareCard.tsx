@@ -82,10 +82,14 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
           return;
         }
 
+        // Reuse only a still-redeemable link; otherwise mint a fresh one.
         const { data: existing } = await supabase
           .from("invite_links")
           .select("code")
           .eq("created_by", user.id)
+          .eq("is_used", false)
+          .is("revoked_at", null)
+          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
