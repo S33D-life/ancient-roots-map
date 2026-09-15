@@ -367,10 +367,16 @@ export default function EtherealOfferingTree({
               height: glyphSize,
               padding: 0,
               border: "none",
-              animationDelay: `${(i % 5) * 0.7}s`,
             }}
           >
-            <LifeGroveOfferingGlyph type={p.offering.offering_type} size={glyphSize} variant="tree" />
+            {/* Sway lives on the glyph, not the button — the touch target
+                stays exactly where the finger expects it. */}
+            <span
+              className="motion-safe:animate-[lifeGroveSway_9s_ease-in-out_infinite] flex"
+              style={{ animationDelay: `${(i % 5) * 0.7}s` }}
+            >
+              <LifeGroveOfferingGlyph type={p.offering.offering_type} size={glyphSize} variant="tree" />
+            </span>
           </button>
         );
       })}
