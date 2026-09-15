@@ -21,6 +21,34 @@ const ALLOWED_CATEGORIES = new Set([
 
 const ALLOWED_PRIORITIES = new Set(["low", "normal", "high"]);
 
+// Abuse limits — a single Wanderer may not flood the grove.
+const MAX_PER_ACTOR_PER_HOUR = 30;
+const MAX_PER_PAIR_PER_HOUR = 5;
+
+/**
+ * Deep links must stay inside S33D. Only a relative path is accepted:
+ * no scheme, no protocol-relative "//host", no backslashes, no fragments
+ * that could smuggle a redirect. Anything else is dropped (not rejected)
+ * so a legitimate notification still arrives without its link.
+ */
+function safeDeepLink(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const v = raw.trim();
+  if (!v || v.length > 200) return null;
+  if (!v.startsWith("/")) return null;
+  if (v.startsWith("//")) return null;
+  if (/[\\<>"'\s]/.test(v)) return null;
+  if (/^\/+\w+:/.test(v)) return null;
+  if (!/^\/[A-Za-z0-9\-._~/%?=&#:+]*$/.test(v)) return null;
+  return v;
+}
+
+/** Strip control characters so titles/bodies cannot fake UI chrome. */
+function clean(v: string, max: number): string {
+  // deno-lint-ignore no-control-regex
+  return v.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, max);
+}
+
 function bad(status: number, error: string) {
   return new Response(JSON.stringify({ error }), {
     status,
@@ -65,11 +93,17 @@ Deno.serve(async (req) => {
     if (typeof title !== "string" || !title.trim() || title.length > 200) return bad(400, "Invalid title");
     if (typeof category !== "string" || !ALLOWED_CATEGORIES.has(category)) return bad(400, "Invalid category");
     const pri = typeof priority === "string" && ALLOWED_PRIORITIES.has(priority) ? priority : "normal";
-    const bodyText = typeof text === "string" ? text.slice(0, 1000) : null;
-    const link = typeof deep_link === "string" ? deep_link.slice(0, 500) : null;
-    const meta = (metadata && typeof metadata === "object" && !Array.isArray(metadata))
+    const bodyText = typeof text === "string" ? clean(text, 1000) || null : null;
+    const link = safeDeepLink(deep_link);
+    const rawMeta = (metadata && typeof metadata === "object" && !Array.isArray(metadata))
       ? metadata as Record<string, unknown>
       : {};
+    // The caller may never assert who the actor is.
+    const meta = { ...rawMeta };
+    delete meta.actor_id;
+
+    const cleanTitle = clean(title, 200);
+    if (!cleanTitle) return bad(400, "Invalid title");
 
     // No self-notifications
     if (user_id === actorId) {
@@ -82,9 +116,33 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
 
+    // ── Rate limiting: per actor, and per actor→recipient pair ──
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    const { count: actorCount } = await admin
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("metadata->>actor_id", actorId)
+      .gte("created_at", since);
+
+    if ((actorCount ?? 0) >= MAX_PER_ACTOR_PER_HOUR) {
+      return bad(429, "Too many notifications sent recently");
+    }
+
+    const { count: pairCount } = await admin
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("metadata->>actor_id", actorId)
+      .eq("user_id", user_id)
+      .gte("created_at", since);
+
+    if ((pairCount ?? 0) >= MAX_PER_PAIR_PER_HOUR) {
+      return bad(429, "Too many notifications to this Wanderer recently");
+    }
+
     const { error: insertErr } = await admin.from("notifications").insert([{
       user_id,
-      title: title.trim().slice(0, 200),
+      title: cleanTitle,
       body: bodyText,
       category,
       priority: pri,
