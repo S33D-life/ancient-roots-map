@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import { BottomNavSpacer } from "@/components/BottomNav";
+import AncestralInscriptions from "@/components/tree-sections/AncestralInscriptions";
 import {
   TreePageHero,
   TreeStorySection,
