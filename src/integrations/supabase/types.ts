@@ -9259,14 +9259,20 @@ export type Database = {
       }
       tree_edit_proposals: {
         Row: {
+          base_updated_at: string | null
+          base_values: Json
           confidence: string
           created_at: string
           evidence: Json
           flags: string[] | null
           id: string
+          merge_preferred_tree_id: string | null
+          merge_target_tree_id: string | null
+          proposal_type: string
           proposed_by: string
           proposed_changes: Json
           reason: string
+          reviewed_at: string | null
           reviewer_id: string | null
           reviewer_note: string | null
           status: string
@@ -9274,14 +9280,20 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          base_updated_at?: string | null
+          base_values?: Json
           confidence?: string
           created_at?: string
           evidence?: Json
           flags?: string[] | null
           id?: string
+          merge_preferred_tree_id?: string | null
+          merge_target_tree_id?: string | null
+          proposal_type?: string
           proposed_by: string
           proposed_changes?: Json
           reason: string
+          reviewed_at?: string | null
           reviewer_id?: string | null
           reviewer_note?: string | null
           status?: string
@@ -9289,14 +9301,20 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          base_updated_at?: string | null
+          base_values?: Json
           confidence?: string
           created_at?: string
           evidence?: Json
           flags?: string[] | null
           id?: string
+          merge_preferred_tree_id?: string | null
+          merge_target_tree_id?: string | null
+          proposal_type?: string
           proposed_by?: string
           proposed_changes?: Json
           reason?: string
+          reviewed_at?: string | null
           reviewer_id?: string | null
           reviewer_note?: string | null
           status?: string
@@ -9319,6 +9337,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tree_growth_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          source_id: string | null
+          source_table: string
+          tree_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          source_id?: string | null
+          source_table: string
+          tree_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          source_id?: string | null
+          source_table?: string
+          tree_id?: string
+        }
+        Relationships: []
       }
       tree_guardians: {
         Row: {
@@ -11621,6 +11669,25 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_tree_direct_edit: {
+        Args: {
+          _base_updated_at?: string
+          _changes: Json
+          _reason?: string
+          _tree_id: string
+        }
+        Returns: Json
+      }
+      approve_tree_merge: {
+        Args: {
+          _acknowledge_conflict?: boolean
+          _field_resolutions?: Json
+          _note?: string
+          _proposal_id: string
+          _surviving_tree_id: string
+        }
+        Returns: Json
+      }
       assign_staff_steward: {
         Args: { p_new_owner_id: string; p_staff_code: string }
         Returns: Json
@@ -12009,6 +12076,16 @@ export type Database = {
         Args: { p_user_id: string; p_vote_id: string }
         Returns: undefined
       }
+      review_tree_change_proposal: {
+        Args: {
+          _acknowledge_conflict?: boolean
+          _decision: string
+          _note?: string
+          _overrides?: Json
+          _proposal_id: string
+        }
+        Returns: Json
+      }
       revoke_grove_steward: {
         Args: { p_grove_id: string; p_user_id: string }
         Returns: undefined
@@ -12073,6 +12150,19 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       species_make_slug: { Args: { input: string }; Returns: string }
+      submit_tree_change_proposal: {
+        Args: {
+          _changes: Json
+          _confidence?: string
+          _evidence?: Json
+          _merge_preferred_tree_id?: string
+          _merge_target_tree_id?: string
+          _proposal_type: string
+          _reason: string
+          _tree_id: string
+        }
+        Returns: string
+      }
       tend_grove_field: {
         Args: {
           p_field: string
@@ -12082,6 +12172,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      tree_edit_eligibility: {
+        Args: { _tree_id: string; _user_id?: string }
+        Returns: Json
+      }
+      tree_editable_fields: { Args: never; Returns: string[] }
       unassign_staff_steward: { Args: { p_staff_code: string }; Returns: Json }
       update_agent_trust_score: {
         Args: { p_agent_id: string }
