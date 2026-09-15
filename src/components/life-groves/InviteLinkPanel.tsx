@@ -24,8 +24,11 @@ export default function InviteLinkPanel({ inviteToken }: Props) {
     <div className="rounded-xl border border-border/40 bg-card/40 p-4 space-y-2">
       <p className="font-serif text-sm text-foreground">Invite Others</p>
       <p className="text-xs font-serif text-muted-foreground/80">
-        Anyone with this link can leave an offering for the tree.
+        Whoever accepts this invitation is welcomed into the grove and may hang offerings
+        and suggest gentle corrections. It does not make them a steward — stewardship is
+        always granted deliberately.
       </p>
+
       <div className="flex gap-2">
         <Input value={url} readOnly className="text-xs" />
         <Button onClick={copy} variant="outline" size="sm" className="shrink-0">
