@@ -420,6 +420,10 @@ function ProposalCard({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-[10px] font-serif">
+              {proposal.proposal_type === "merge" ? "Duplicate / merge"
+                : proposal.proposal_type === "location" ? "Location" : "Details"}
+            </Badge>
             {proposal.flags?.map((f) => (
               <Badge key={f} variant="outline" className="text-[10px] border-yellow-500/40 text-yellow-600 font-serif">
                 <AlertTriangle className="w-3 h-3 mr-1" />
