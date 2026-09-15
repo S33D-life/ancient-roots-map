@@ -122,3 +122,34 @@ export async function searchAncientFriends(term: string): Promise<AncientFriendR
   if (error) throw error;
   return (data ?? []) as AncientFriendResult[];
 }
+
+/** May I, as an Ancient Friend's keeper, welcome roots reaching towards it? */
+export async function isTreeRootAuthority(treeId: string, userId: string | null): Promise<boolean> {
+  if (!userId) return false;
+  const { data, error } = await db.rpc("is_tree_root_authority", {
+    _tree_id: treeId,
+    _user_id: userId,
+  });
+  if (error) return false;
+  return !!data;
+}
+
+export interface PendingTreeRoot {
+  id: string;
+  life_grove_id: string;
+  inscription_text: string | null;
+  dedication: string | null;
+  created_at: string;
+}
+
+/** Roots waiting at this Ancient Friend. Row access is enforced by the database. */
+export async function listPendingTreeRoots(treeId: string): Promise<PendingTreeRoot[]> {
+  const { data, error } = await db
+    .from("grove_roots")
+    .select("id,life_grove_id,inscription_text,dedication,created_at")
+    .eq("tree_id", treeId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as PendingTreeRoot[];
+}
