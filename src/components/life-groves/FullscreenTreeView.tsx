@@ -115,13 +115,15 @@ export default function FullscreenTreeView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, selectedId, onClose, visible.length]);
 
-  // Reset when the tree is left.
+  // Reset when the tree is left; honour an entry memory when it is entered.
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setSelectedId(initialOfferingId ?? null);
+    } else {
       setSelectedId(null);
       setFilter("all");
     }
-  }, [open]);
+  }, [open, initialOfferingId]);
 
   /** Deterministic far starfield — calm, never busy. */
   const stars = useMemo(
