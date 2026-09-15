@@ -34,3 +34,12 @@
 ## Deferred (with reason)
 - Unauthenticated guest offerings — would require anonymous impersonation; reported, not built.
 - Offering moderation queue, structured recipe fields, botanical bloom metadata, stewardship succession mechanics.
+
+# Roadmap — Ancestral Roots V1 (Grove ↔ Ancient Friend)
+- [ ] Migration: grove_roots + grove_root_history, GRANTs, RLS
+- [ ] Functions: create_grove_root (steward-only, pending unless tree authority), review_grove_root, remove_grove_root, list_tree_inscriptions (safe fields), list_grove_roots
+- [ ] Fold grove_roots into approve_tree_merge (deterministic, preserve earliest, history)
+- [ ] Grove page: "Rooted in the living world" + Root into an Ancient Friend (stewards)
+- [ ] Tree page: inscriptions in the digital bark + Ancestral Root portal → FullscreenTreeView
+- [ ] DB-level authority/privacy tests; Maithe journey rehearsed end to end
+- Deferred: signatures/drawings, contributor proposals, notifications, non-ancestral root UI, rewards, 3D twins, large archive views
