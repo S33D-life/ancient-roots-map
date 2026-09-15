@@ -16,12 +16,17 @@ import EtherealOfferingTree, {
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
 import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
 import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
+import LifeGroveOfferingComposer from "@/components/life-groves/LifeGroveOfferingComposer";
+import GroveStewardshipSection from "@/components/life-groves/GroveStewardshipSection";
+import { useGroveAuthority } from "@/hooks/use-grove-authority";
 import { GROVE_TYPES, TREE_ARCHETYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
 
 export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
   const { userId } = useCurrentUser();
   const [selected, setSelected] = useState<LifeGroveOffering | null>(null);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const { isContributor } = useGroveAuthority(id);
 
   const { data: grove, isLoading, isError } = useQuery({
     queryKey: ["life-grove", id],
@@ -134,6 +139,14 @@ export default function LifeGrovePage() {
               Tap a glyph to read what is hanging in the branches.
             </p>
           )}
+
+          {isContributor && (
+            <div className="mt-6">
+              <Button className="h-14 px-8 font-serif text-base" onClick={() => setComposerOpen(true)}>
+                Hang an Offering
+              </Button>
+            </div>
+          )}
         </section>
 
         {/* Meta */}
@@ -158,26 +171,39 @@ export default function LifeGrovePage() {
               Gathering offerings…
             </p>
           ) : (
-            <HeartwoodLibraryTabs offerings={offerings} />
+            <HeartwoodLibraryTabs offerings={offerings} groveId={grove.id} />
           )}
         </section>
 
-        {/* Invite */}
+        {/* Tending */}
+        <GroveStewardshipSection grove={grove} />
+
+        {/* Invite — contributor access only, never stewardship */}
         {isOwner && (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
             <InviteLinkPanel inviteToken={grove.invite_token} />
             <div className="rounded-xl border border-border/40 bg-card/40 p-4 flex flex-col justify-center">
-              <p className="font-serif text-sm text-foreground mb-2">Leave an offering</p>
-              <p className="text-xs font-serif text-muted-foreground/80 mb-3">
-                Add a story, photo, song, or poem yourself.
+              <p className="font-serif text-sm text-foreground mb-2">Share the invitation</p>
+              <p className="text-xs font-serif text-muted-foreground/80">
+                Anyone with this link may hang offerings in the tree. It does not make them a steward —
+                stewardship is always granted deliberately.
               </p>
-              <Button asChild>
-                <Link to={`/life-grove-invite/${grove.invite_token}`}>Hang an Offering</Link>
-              </Button>
             </div>
           </section>
         )}
       </main>
+
+      {userId && (
+        <LifeGroveOfferingComposer
+          open={composerOpen}
+          onClose={() => setComposerOpen(false)}
+          groveId={grove.id}
+          groveTitle={grove.grove_title}
+          rememberedName={grove.remembered_or_celebrated_name}
+          grovePrivacy={grove.privacy}
+          contributorUserId={userId}
+        />
+      )}
       <Footer />
     </div>
   );

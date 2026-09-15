@@ -4133,18 +4133,117 @@ export type Database = {
         }
         Relationships: []
       }
+      life_grove_edit_proposals: {
+        Row: {
+          created_at: string
+          current_value: string | null
+          explanation: string | null
+          field_name: string
+          id: string
+          life_grove_id: string
+          proposed_by: string
+          proposed_value: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_note: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: string | null
+          explanation?: string | null
+          field_name: string
+          id?: string
+          life_grove_id: string
+          proposed_by: string
+          proposed_value?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: string | null
+          explanation?: string | null
+          field_name?: string
+          id?: string
+          life_grove_id?: string
+          proposed_by?: string
+          proposed_value?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_grove_edit_proposals_life_grove_id_fkey"
+            columns: ["life_grove_id"]
+            isOneToOne: false
+            referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      life_grove_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          joined_via: string
+          life_grove_id: string
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          joined_via?: string
+          life_grove_id: string
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          joined_via?: string
+          life_grove_id?: string
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_grove_members_life_grove_id_fkey"
+            columns: ["life_grove_id"]
+            isOneToOne: false
+            referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       life_grove_offerings: {
         Row: {
           body_text: string | null
           contributor_name: string
           contributor_user_id: string | null
           created_at: string
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           life_grove_id: string
+          media_metadata: Json | null
+          media_type: string | null
           media_url: string | null
           memory_position_data: Json | null
           offering_type: string
           title: string | null
+          updated_at: string
           visibility: string
         }
         Insert: {
@@ -4152,12 +4251,17 @@ export type Database = {
           contributor_name: string
           contributor_user_id?: string | null
           created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           life_grove_id: string
+          media_metadata?: Json | null
+          media_type?: string | null
           media_url?: string | null
           memory_position_data?: Json | null
           offering_type?: string
           title?: string | null
+          updated_at?: string
           visibility?: string
         }
         Update: {
@@ -4165,12 +4269,17 @@ export type Database = {
           contributor_name?: string
           contributor_user_id?: string | null
           created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           life_grove_id?: string
+          media_metadata?: Json | null
+          media_type?: string | null
           media_url?: string | null
           memory_position_data?: Json | null
           offering_type?: string
           title?: string | null
+          updated_at?: string
           visibility?: string
         }
         Relationships: [
@@ -4179,6 +4288,113 @@ export type Database = {
             columns: ["life_grove_id"]
             isOneToOne: false
             referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      life_grove_stewards: {
+        Row: {
+          created_at: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          life_grove_id: string
+          note: string | null
+          permissions: Json
+          revoked_at: string | null
+          revoked_by: string | null
+          steward_role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          life_grove_id: string
+          note?: string | null
+          permissions?: Json
+          revoked_at?: string | null
+          revoked_by?: string | null
+          steward_role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          life_grove_id?: string
+          note?: string | null
+          permissions?: Json
+          revoked_at?: string | null
+          revoked_by?: string | null
+          steward_role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_grove_stewards_life_grove_id_fkey"
+            columns: ["life_grove_id"]
+            isOneToOne: false
+            referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      life_grove_tending_history: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          field_name: string
+          id: string
+          life_grove_id: string
+          new_value: string | null
+          note: string | null
+          old_value: string | null
+          proposal_id: string | null
+          source: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          field_name: string
+          id?: string
+          life_grove_id: string
+          new_value?: string | null
+          note?: string | null
+          old_value?: string | null
+          proposal_id?: string | null
+          source?: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          field_name?: string
+          id?: string
+          life_grove_id?: string
+          new_value?: string | null
+          note?: string | null
+          old_value?: string | null
+          proposal_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_grove_tending_history_life_grove_id_fkey"
+            columns: ["life_grove_id"]
+            isOneToOne: false
+            referencedRelation: "life_groves"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_grove_tending_history_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "life_grove_edit_proposals"
             referencedColumns: ["id"]
           },
         ]
@@ -11397,6 +11613,14 @@ export type Database = {
         }[]
       }
       aggregate_phenology: { Args: never; Returns: undefined }
+      apply_grove_proposal: {
+        Args: {
+          p_override_value?: string
+          p_proposal_id: string
+          p_reviewer_note?: string
+        }
+        Returns: undefined
+      }
       assign_staff_steward: {
         Args: { p_new_owner_id: string; p_staff_code: string }
         Returns: Json
@@ -11407,6 +11631,10 @@ export type Database = {
       }
       can_edit_tree: {
         Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_view_life_grove: {
+        Args: { _grove_id: string; _user_id: string }
         Returns: boolean
       }
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
@@ -11523,6 +11751,23 @@ export type Database = {
           story_intro: string
           tree_archetype_species: string
           tree_name: string
+        }[]
+      }
+      get_life_grove_contributors: {
+        Args: { p_grove_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          email: string
+          user_id: string
+        }[]
+      }
+      get_life_grove_offering_identities: {
+        Args: { p_grove_id: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          user_id: string
         }[]
       }
       get_my_lottery_stats: { Args: { p_user_id?: string }; Returns: Json }
@@ -11678,6 +11923,10 @@ export type Database = {
         }[]
       }
       get_user_lineage: { Args: { p_user_id: string }; Returns: Json }
+      grant_grove_steward: {
+        Args: { p_grove_id: string; p_note?: string; p_user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -11693,11 +11942,25 @@ export type Database = {
         Args: { p_id: string; p_weight: number }
         Returns: undefined
       }
+      is_grove_contributor: {
+        Args: { _grove_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_grove_primary_steward: {
+        Args: { _grove_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_grove_steward: {
+        Args: { _grove_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_untrusted_heart_writer: { Args: never; Returns: boolean }
       is_whisper_group_member: {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
       }
+      join_life_grove_with_token: { Args: { p_token: string }; Returns: string }
+      life_grove_content_fields: { Args: never; Returns: string[] }
       locked_own_heart_balance: { Args: never; Returns: number }
       open_group_whisper: {
         Args: { _current_tree_id: string; _whisper_id: string }
@@ -11744,6 +12007,10 @@ export type Database = {
       resolve_bot_handoff: { Args: { p_token: string }; Returns: Json }
       retract_influence_vote: {
         Args: { p_user_id: string; p_vote_id: string }
+        Returns: undefined
+      }
+      revoke_grove_steward: {
+        Args: { p_grove_id: string; p_user_id: string }
         Returns: undefined
       }
       schedule_lottery_draw: {
@@ -11799,9 +12066,22 @@ export type Database = {
           species_key: string
         }[]
       }
+      set_grove_rooted_tree: {
+        Args: { p_grove_id: string; p_note?: string; p_tree_id: string }
+        Returns: undefined
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       species_make_slug: { Args: { input: string }; Returns: string }
+      tend_grove_field: {
+        Args: {
+          p_field: string
+          p_grove_id: string
+          p_note?: string
+          p_value: string
+        }
+        Returns: undefined
+      }
       unassign_staff_steward: { Args: { p_staff_code: string }; Returns: Json }
       update_agent_trust_score: {
         Args: { p_agent_id: string }

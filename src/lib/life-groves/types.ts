@@ -183,9 +183,15 @@ export interface LifeGroveOffering {
   title: string | null;
   body_text: string | null;
   media_url: string | null;
+  /** "image" | "audio" | "song" | "book" | "poem" — what the media is. */
+  media_type?: string | null;
+  /** Song, book and poem details resolved at the time of offering. */
+  media_metadata?: Record<string, unknown> | null;
   visibility: "family_only" | "public";
   memory_position_data: unknown | null;
   created_at: string;
+  updated_at?: string;
+  hidden_at?: string | null;
 }
 
 

@@ -21,7 +21,8 @@ export interface BookOfferingData {
 }
 
 interface BookOfferingFlowProps {
-  treeId: string;
+  /** Ancient Friend id. Optional so Life Groves can reuse this search. */
+  treeId?: string;
   onComplete: (data: BookOfferingData) => void;
   onCancel: () => void;
 }
@@ -52,6 +53,7 @@ const BookOfferingFlow = ({ treeId, onComplete, onCancel }: BookOfferingFlowProp
 
   // Fetch recently offered books for this tree
   useEffect(() => {
+    if (!treeId) return;
     const fetchRecent = async () => {
       const { data } = await supabase
         .from("offerings")
