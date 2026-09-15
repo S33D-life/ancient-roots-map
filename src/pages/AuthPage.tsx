@@ -1472,7 +1472,13 @@ const AuthPage = () => {
                 </div>
               )}
 
-              <Button type="submit" className="w-full font-serif" disabled={isLoading}>
+              {/* Invitation validity is the single gate on account creation. */}
+              <Button
+                type="submit"
+                className="w-full font-serif"
+                disabled={isLoading || (isSignup && inviteStatus !== "valid")}
+                aria-describedby={isSignup && inviteStatus !== "valid" ? "invite-code" : undefined}
+              >
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isForgot ? "Sending..." : isSignup ? "Creating account..." : "Logging in..."}</>
                 ) : (
