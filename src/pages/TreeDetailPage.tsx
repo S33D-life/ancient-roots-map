@@ -1087,6 +1087,9 @@ const TreeDetailPage = () => {
             {/* Story + Structured Data */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} speciesResolution={speciesResolution} />
 
+            {/* Names resting in the digital bark */}
+            <AncestralInscriptions treeId={tree.id} />
+
             {/* Photo Gallery */}
             {photoOfferings.length > 0 && (
               <PhotoGrid offerings={photoOfferings} onImageClick={openLightboxAt} />
