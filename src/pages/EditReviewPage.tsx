@@ -142,85 +142,72 @@ export default function EditReviewPage() {
     return c;
   }, [proposals]);
 
+  // All decisions run through SECURITY DEFINER functions so curator authority,
+  // conflict detection and atomic merges are enforced by the database.
   const handleAction = async () => {
     if (!actionDialog || !curatorId) return;
-    setProcessing(true);
     const { proposal, action } = actionDialog;
+    setProcessing(true);
 
-    if (action === "accept") {
-      // 1. Update tree canonical record
-      const tree = trees[proposal.tree_id];
-      const prevValues: Record<string, unknown> = {};
-      const updateFields: Record<string, unknown> = {};
+    try {
+      if (proposal.proposal_type === "merge") {
+        if (action !== "accept") {
+          const { error } = await (supabase.rpc as any)("review_tree_change_proposal", {
+            _proposal_id: proposal.id,
+            _decision: action === "reject" ? "decline" : "needs_more_info",
+            _note: reviewNote.trim(),
+          });
+          if (error) throw error;
+        } else {
+          const survivor = mergeSurvivor || proposal.merge_preferred_tree_id || proposal.tree_id;
+          const { error } = await (supabase.rpc as any)("approve_tree_merge", {
+            _proposal_id: proposal.id,
+            _surviving_tree_id: survivor,
+            _field_resolutions: {},
+            _note: reviewNote.trim() || null,
+            _acknowledge_conflict: conflictAck,
+          });
+          if (error) throw error;
+          toast.success("Merged. Every offering and memory now rests with the surviving record.");
+        }
+      } else {
+        const { error } = await (supabase.rpc as any)("review_tree_change_proposal", {
+          _proposal_id: proposal.id,
+          _decision: action === "accept" ? "approve" : action === "reject" ? "decline" : "needs_more_info",
+          _note: reviewNote.trim() || null,
+          _overrides: null,
+          _acknowledge_conflict: conflictAck,
+        });
+        if (error) throw error;
+        toast.success(
+          action === "accept" ? "Approved — the tree's record has been updated."
+            : action === "reject" ? "Declined." : "Requested more information.",
+        );
 
-      for (const [key, value] of Object.entries(proposal.proposed_changes)) {
-        if (key === "access_notes") continue; // not a tree column
-        if (tree) prevValues[key] = (tree as any)[key];
-        updateFields[key] = value;
-      }
-
-      if (Object.keys(updateFields).length > 0) {
-        const { error: treeErr } = await supabase
-          .from("trees")
-          .update(updateFields)
-          .eq("id", proposal.tree_id);
-        if (treeErr) {
-          toast.error("Failed to update tree: " + treeErr.message);
-          setProcessing(false);
-          return;
+        if (action === "accept") {
+          const tree = trees[proposal.tree_id];
+          if (tree) {
+            setTrees((prev) => ({
+              ...prev,
+              [proposal.tree_id]: { ...tree, ...proposal.proposed_changes } as TreeInfo,
+            }));
+          }
         }
       }
-
-      // 2. Write change log (rich merge record — keeps previous_values + proposal link)
-      await supabase.from("tree_change_log" as any).insert({
-        tree_id: proposal.tree_id,
-        change_set: proposal.proposed_changes,
-        previous_values: prevValues,
-        merged_from_proposal_id: proposal.id,
-        merged_by: curatorId,
-      } as any);
-
-      // 2b. Cross-write tree_edit_history for one canonical provenance chain.
-      //     One row per changed field, linked to the proposal. Best-effort: a
-      //     logging failure must not roll back the accepted change. The Refinement
-      //     Trail dedups these against the change_log entry above (see
-      //     refinementTrail.fromEditHistory), so this does not double-display.
-      const historyRows = Object.entries(updateFields).map(([field, value]) => ({
-        tree_id: proposal.tree_id,
-        user_id: curatorId,
-        field_name: field,
-        old_value: prevValues[field] != null ? String(prevValues[field]) : null,
-        new_value: value != null ? String(value) : null,
-        edit_reason: reviewNote || proposal.reason || null,
-        edit_type: "proposal_accepted",
-        proposal_id: proposal.id,
-      }));
-      if (historyRows.length > 0) {
-        await supabase.from("tree_edit_history" as any).insert(historyRows as any);
+    } catch (err: any) {
+      const msg = String(err?.message ?? err);
+      if (msg.includes("stale_proposal")) {
+        setStaleWarning(true);
+        toast.error("This record changed after the proposal was written — please review it afresh.");
+      } else if (msg.includes("already_reviewed")) {
+        toast.error("This proposal has already been decided.");
+      } else if (msg.includes("already_merged")) {
+        toast.error("One of these records has already been merged.");
+      } else {
+        toast.error(msg);
       }
-
-      // 3. Update proposal status
-      await supabase
-        .from("tree_edit_proposals" as any)
-        .update({ status: "accepted", reviewer_id: curatorId, reviewer_note: reviewNote || null } as any)
-        .eq("id", proposal.id);
-
-      // Update local tree cache
-      if (tree) {
-        setTrees((prev) => ({
-          ...prev,
-          [proposal.tree_id]: { ...tree, ...updateFields } as TreeInfo,
-        }));
-      }
-
-      toast.success("Proposal accepted and merged!");
-    } else {
-      const newStatus = action === "reject" ? "rejected" : "needs_more_info";
-      await supabase
-        .from("tree_edit_proposals" as any)
-        .update({ status: newStatus, reviewer_id: curatorId, reviewer_note: reviewNote || null } as any)
-        .eq("id", proposal.id);
-      toast.success(action === "reject" ? "Proposal rejected." : "Requested more info.");
+      setProcessing(false);
+      return;
     }
 
     setProposals((prev) =>
@@ -233,6 +220,9 @@ export default function EditReviewPage() {
     setProcessing(false);
     setActionDialog(null);
     setReviewNote("");
+    setConflictAck(false);
+    setStaleWarning(false);
+    setMergeSurvivor(null);
   };
 
   if (roleLoading) {
