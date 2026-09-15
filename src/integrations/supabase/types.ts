@@ -11961,6 +11961,10 @@ export type Database = {
       }
       current_lunation: { Args: never; Returns: string }
       execute_lottery_draw: { Args: { p_draw_id: string }; Returns: Json }
+      fold_grove_roots_on_merge: {
+        Args: { _actor: string; _drop_id: string; _keep_id: string }
+        Returns: Json
+      }
       get_bio_region_trees: {
         Args: { p_bio_region_id: string }
         Returns: {
