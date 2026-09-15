@@ -110,7 +110,9 @@ export default function EditReviewPage() {
       setProposals(props);
 
       // Load tree info
-      const treeIds = [...new Set(props.map((p) => p.tree_id))];
+      const treeIds = [...new Set(
+        props.flatMap((p) => [p.tree_id, p.merge_target_tree_id]).filter(Boolean) as string[],
+      )];
       if (treeIds.length > 0) {
         const { data: treesData } = await supabase
           .from("trees")
