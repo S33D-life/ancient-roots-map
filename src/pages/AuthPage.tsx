@@ -823,9 +823,8 @@ const AuthPage = () => {
 
       void trackInviteEvent("invite_validation_success", {
         code,
-
         source: "manual",
-        metadata: { expires_at: (validRow as any)?.expires_at ?? null },
+        metadata: { expires_at: result.expiresAt },
       });
 
       // Persist the code BEFORE attempting signup so it survives any redirect,
@@ -864,10 +863,11 @@ const AuthPage = () => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account";
       if (msg === "INVITE_BLOOM_FAILED") {
-        // Soft Heartwood inline state — no destructive red toast.
-        setInviteBloomFailure(`code: ${code}`);
+        // Soft Heartwood inline state — no destructive red toast. The detail
+        // string was already set from the precise validation status.
       } else {
-        // Other signup errors stay as toasts but use a calmer default variant.
+        // Signup failed for another reason — the invitation is untouched and
+        // still available to retry.
         toast({ title: "Sign up could not complete", description: msg });
       }
     } finally {
