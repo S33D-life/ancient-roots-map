@@ -338,6 +338,47 @@ export default function EditReviewPage() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {actionDialog?.proposal.proposal_type === "merge" && actionDialog.action === "accept" && (
+              <div className="space-y-2">
+                <p className="text-xs font-serif text-muted-foreground">
+                  Choose the record that survives. All offerings, check-ins and contributions move
+                  across with their original authors and dates; the other record is kept as a
+                  traceable reference and its links redirect here.
+                </p>
+                <div className="flex gap-2">
+                  {[actionDialog.proposal.tree_id, actionDialog.proposal.merge_target_tree_id].map((tid) =>
+                    tid ? (
+                      <button
+                        key={tid}
+                        type="button"
+                        onClick={() => setMergeSurvivor(tid)}
+                        className={`flex-1 rounded-md border px-2 py-2 text-xs font-serif min-h-11 ${
+                          mergeSurvivor === tid ? "border-primary/60 bg-primary/5" : "border-border/40"
+                        }`}
+                      >
+                        {trees[tid]?.name || "Unknown tree"}
+                      </button>
+                    ) : null,
+                  )}
+                </div>
+              </div>
+            )}
+
+            {staleWarning && (
+              <label className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/5 p-2 text-xs font-serif">
+                <input
+                  type="checkbox"
+                  checked={conflictAck}
+                  onChange={(e) => setConflictAck(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  This record changed after the proposal was written. I have reviewed the newest
+                  values and still want to apply this decision.
+                </span>
+              </label>
+            )}
+
             <Textarea
               value={reviewNote}
               onChange={(e) => setReviewNote(e.target.value)}
