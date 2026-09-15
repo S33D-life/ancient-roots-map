@@ -92,17 +92,21 @@ const DashboardWanderers = ({ userId }: Props) => {
   const searchTimer = useRef<ReturnType<typeof setTimeout>>();
   const { toast } = useToast();
 
-  // Load existing invite code on mount
+  // Load an invite code that is still redeemable. A used/expired/revoked link
+  // must never be re-shared — that produced "this invitation could not bloom".
   useEffect(() => {
     supabase
       .from("invite_links")
       .select("code")
       .eq("created_by", userId)
+      .eq("is_used", false)
+      .is("revoked_at", null)
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setInviteCode(data.code);
+        setInviteCode(data?.code ?? null);
       });
   }, [userId]);
 

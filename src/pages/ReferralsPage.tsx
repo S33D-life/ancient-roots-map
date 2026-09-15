@@ -38,10 +38,15 @@ const ReferralsPage = () => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { navigate("/auth"); return; }
       setUserId(user.id);
+      // Only surface an invitation that can still be redeemed — re-sharing a
+      // spent link is what made fresh Wanderers see "could not bloom".
       supabase
         .from("invite_links")
         .select("code")
         .eq("created_by", user.id)
+        .eq("is_used", false)
+        .is("revoked_at", null)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle()
