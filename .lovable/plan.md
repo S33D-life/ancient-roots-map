@@ -1,100 +1,75 @@
-# Life Groves — Effortless Offerings + Grove Stewardship
+# Ethereal Tree — Full-Screen Immersive Viewing Mode
 
-## Part XVI — What I found
+## What exists today (inspection report)
 
-**A. Ancient Friends capabilities we can reuse**
-- Photo: `AddOfferingDialog` uploads to the `offerings` storage bucket; `utils/backgroundPhotoProcessor.ts` already compresses + makes thumbnails; `utils/offeringPhotos.ts` bridges `media_url` ↔ `photos[]`.
-- Song: `MusicOfferingFlow` has catalog + iTunes search with artwork/preview, plus Apple Music and YouTube link parsers.
-- Book: `utils/bookSearch.ts` (Google Books → Open Library fallback) is already a clean shared service.
-- Voice: `VoiceOfferingFlow` records via MediaRecorder and uploads to the `offerings` bucket.
-- Cards: `OfferingCard`, `OfferingVisibilityPicker`.
+**A. Current tree components**
+- `EtherealOfferingTree.tsx` — the live tree on the Grove page. SVG trunk, one canopy circle, 5 branch strokes, thin threads, plus absolutely-positioned glyph buttons. Exports `OfferingPreviewCard` (small preview under the tree).
+- `EtherealTreePreview.tsx` — a simpler decorative tree used in listings/creation. Untouched.
+- `LifeGroveOfferingGlyph.tsx` — bespoke SVG glyphs for all ten offering types (leaf, framed leaf, sound-seed, acorn, scroll, letter, fruit, lantern, window, bloom). Already strong; keep and reuse.
+- `OfferingLibraryCard.tsx` — per-type rich rendering (photo, song with artwork, book with cover, voice note with audio player, poem, letter). Already the "elevated viewing" logic; reuse rather than rebuild.
+- `HangingMemoryTree.tsx` — a legacy grid prototype, superseded by the library tabs. Leave alone.
 
-**B. Life Grove ownership/access today**
-`life_groves.created_by` is the only owner concept. Row access = public grove OR creator. Offerings insert requires a signed-in user whose `contributor_user_id` matches, on a public grove or their own. The invite token resolves the grove through a security-definer function but grants no write rights of its own. No steward, proposal or history layer exists.
+**B. Enhance vs replace**
+- Enhance: `EtherealOfferingTree` visuals (silhouette, luminosity, depth). No replacement, no change to its props contract.
+- Reuse unchanged: glyphs, `OfferingLibraryCard`, positions module, offerings query, visibility/stewardship rules, composer.
+- New: a full-screen viewing layer and a memory viewer overlay.
 
-**C. Collaborators/stewards** — none for Life Groves. Ancient Friends has `tree_access_grants`, a per-tree grant table: a good shape to copy, not to reuse directly.
+**C. How offerings are positioned now**
+`src/lib/life-groves/positions.ts` — five quadratic-bezier branches in a 0–400 viewBox. Each offering stores `memory_position_data` (`branch`, `t`, `orbit`, `side`); missing values get a deterministic golden-ratio assignment (least-populated branch, staggered along it). This is good and stays canonical.
 
-**D. Edit/proposal/history infrastructure** — `tree_edit_proposals` + `tree_edit_history` exist for Ancient Friends and are tree-scoped. I will mirror their column shape for groves rather than forcing grove rows into tree tables.
+**D. Smallest coherent full-screen mode**
+One new overlay component rendering the *same* `EtherealOfferingTree` at viewport scale, opened from the Grove page. No routing change, no data change.
 
-**E. What genuinely needs building** — a focused offering composer for groves, four shared capability components, a steward layer, a proposal + tending-history layer, and richer library cards.
+**E. Performance**
+Pure SVG, ~10–40 nodes. Cheap. Risks: blur filters and infinite animations on low-end phones — so glows use static gradients plus a couple of slow CSS opacity animations, all behind `motion-safe:` / `prefers-reduced-motion`.
 
-**F. Database changes** — listed below. No rewrite of existing tables; additive only.
+**F. Placement** — stays deterministic and data-driven (stored position first, deterministic fallback). No procedural randomness.
 
-**G. Smallest coherent plan** — extract shared components first, build the composer on top, then add stewardship.
+**G. Staging** — Phase 1 now; Phases 2–3 listed at the end.
 
 ---
 
-## Part 1 — Shared offering capabilities
+## Phase 1 — what gets built
 
-Extract the mature Ancient Friends logic into reusable pieces under `src/components/offering-kit/`, then point the existing Ancient Friends flows at them so there is exactly one implementation:
+**1. Upgraded tree visual** (`EtherealOfferingTree.tsx`, in place)
+- Organic silhouette: tapered trunk with root flare, branches drawn as tapered tapering strokes with secondary twigs, layered canopy clusters rather than one circle.
+- Depth: three canopy layers at different opacity/blur, back layer desaturated, front layer catching light.
+- Luminosity: a soft inner-light gradient behind the trunk, faint rim light on branch tips.
+- Growth response: canopy fullness, glow strength and a small number of ambient motes scale with offering count (0 → sparse and poised; many → fuller, warmer).
+- All motion wrapped in `motion-safe:`; durations 6–12s, no fast movement.
 
-- `PhotoOfferingPicker` — "Choose from photo library" + "Take photo" (`capture="environment"` on mobile), compression, upload to the `offerings` bucket, large preview, replace/remove.
-- `SongOfferingSearch` — search field + pasted-link field, result rows with artwork/title/artist, preview playback; returns full metadata.
-- `BookOfferingSearch` — search field, cover/title/author rows, manual fallback.
-- `PoemOfferingInput` — search known/public-domain poems, write your own, or paste a link.
-- `VoiceOfferingRecorder` — record, play, re-record, upload; explicit microphone-permission handling and iOS-safe mime selection.
+**2. Full-screen mode** (`FullscreenTreeView.tsx`, new)
+- Fixed overlay, night-sky gradient ground, very light drifting motes, tree centred and scaled to the smaller viewport axis.
+- Minimal chrome: close control (top-left), grove/tree name (top centre, small serif), offering-type filter (bottom, horizontal scroll pills), offering count.
+- Entered by tapping the tree on the Grove page, or a quiet "Enter the Tree" text action beneath it. Exit: close control, Escape, browser back gesture on mobile is unaffected.
+- Body scroll locked while open; focus trapped to the overlay; `role="dialog"`, labelled by the grove name.
 
-Ancient Friends behaviour must not change; these are internal extractions.
+**3. Offerings hanging in the branches**
+- Same glyph vocabulary, rendered larger in full-screen (44px touch targets) with a gentle per-glyph sway and halo.
+- Filtering dims non-matching glyphs to a faint presence instead of removing them — the tree never empties.
 
-## Part 2 — The Life Grove offering composer
+**4. Memory viewer** (`OfferingMemoryViewer.tsx`, new)
+- Opens over the tree as a calm sheet; the tree stays perceptible behind a soft scrim.
+- Body content comes from `OfferingLibraryCard`, so each type keeps its existing elevated presentation.
+- Previous / next navigation between offerings (respecting the active filter), attribution line, close control.
 
-New `LifeGroveOfferingComposer` (full-screen sheet, mobile-first) replacing the form on `LifeGroveInvitePage` and opened by **Hang an Offering** on `LifeGrovePage`.
+**5. Empty state**
+- The tree renders quietly with "The branches are waiting" and, for contributors, a single gentle invitation to hang the first offering. Sparse, not blank.
 
-Step 1: "What would you like to hang in the tree?" — the existing nine types with their existing glyphs.
-Step 2: only the controls that type needs, then an optional few words, then a single **Hang … in the tree** action.
+**6. Accessibility**
+- Reduced motion removes sway, drift and breathing.
+- 44px minimum targets, visible focus rings, arrow-key movement between offerings, Escape closes viewer then tree.
 
-- Photo — picker first, big preview, optional words, optional quiet title.
-- Song — search/paste, select fills metadata, "Why does this song belong here?".
-- Book — search, select fills metadata, optional reflection.
-- Poem — search / write / paste.
-- Voice — recorder opens immediately; play, re-record, optional words.
-- Story, Letter — open straight into a generous autosizing writing surface; everything else optional.
-- Recipe — optional photo, name, free memory text.
-- Flower Memory — flower name, optional photo, words.
+---
 
-Visibility becomes a final two-choice line (Family only / Public), preselected from the grove's own privacy and never silently widening it. The consent checkbox is replaced by one line of gentle text above the Hang action.
+## Technical notes
 
-Drafts are kept in session storage per grove + type so a keyboard dismissal or accidental back does not lose a written memory.
-
-## Part 3 — Identity
-
-Offerings stop storing email. Attribution resolves from the contributor's profile: display name, avatar, and a link to their Wanderer profile. Where no profile name exists, "A Wanderer". A new security-definer function returns contributor display identities for a grove; contributor email is returned **only** to the grove's own stewards, never to visitors, invite-link holders, or stewards of other groves.
-
-## Part 4 — Heartwood Library cards
-
-`HeartwoodLibraryTabs` gains per-type renderers: image-first photo card, song card with artwork + open action, book card with cover, audio player for voice memories, readable poem excerpt, letter-style preview, recipe and flower cards.
-
-## Part 5 — Stewardship
-
-- **Primary Steward** — the grove creator; unchanged.
-- **Grove Steward** — explicitly granted by the primary steward; may tend the grove and review proposals.
-- **Contributor** — may hang offerings, edit their own, and propose edits.
-- **Visitor** — may view what the grove's privacy allows.
-
-**Tend this Grove** (stewards only): a calm editor for grove title, person's name, dedication, story, tree archetype, tree name, grove type, visibility, imagery and the Rooted Tree link. Changing or removing an established Rooted Tree asks for confirmation and is always recorded.
-
-**Propose an Edit** (contributors): records proposer, field, current value, proposed value, optional explanation, timestamp, status. Stewards can Accept, Decline, or Edit & Accept; accepting applies the change through a server function.
-
-**Tending history**: a quiet list of what changed, from what to what, by whom, when, and whether it was a direct tending or an accepted proposal.
-
-**Steward management**: the primary steward can grant and revoke stewardship by Wanderer. Revoking ends future authority but keeps that person's offerings and history intact.
-
-## Part 6 — Database and security
-
-New migration, additive only:
-- `life_grove_offerings` gains `media_metadata` (jsonb), `media_type`, `updated_at`, and moderation fields `hidden_at` / `hidden_by`.
-- `life_grove_stewards` — grove, user, granted_by, granted_at, revoked_at.
-- `life_grove_edit_proposals` — grove, proposer, field, old value, proposed value, note, status, reviewer, reviewer note, timestamps.
-- `life_grove_tending_history` — grove, field, old value, new value, actor, source (tending or accepted proposal), timestamp.
-- Functions: `is_grove_steward(grove, user)`, `apply_grove_proposal(...)`, `grant_grove_steward(...)`, `revoke_grove_steward(...)`, `get_life_grove_contributors(grove)`.
-- Policies rewritten for the new roles, with grants for every new table. Offering edit: author edits their own; stewards may hide but not rewrite; nobody else may touch it. Grove canonical updates: stewards only. Proposals: contributors insert their own, stewards review; a proposer cannot accept their own unless independently a steward.
-
-Every rule is enforced in the database, not by hidden buttons, and I will exercise all ten scenarios in Part XIII against live policies using rollback-safe checks.
-
-## Part 7 — Testing
-
-Mobile flow checks on an iPhone-sized viewport for photo, song, book, poem, voice, writing surfaces and the stewardship actions, plus the permission matrix above, the existing test suite and type check.
+- New files: `src/components/life-groves/FullscreenTreeView.tsx`, `src/components/life-groves/OfferingMemoryViewer.tsx`.
+- Edited: `src/components/life-groves/EtherealOfferingTree.tsx` (visual upgrade, optional `scale`/`immersive` props — existing props unchanged), `src/pages/heartwood/LifeGrovePage.tsx` (tap target + "Enter the Tree" + mounts the overlay).
+- No database, RLS, RPC, composer, stewardship, invitation or Heartwood Library changes. The overlay consumes the offerings array the page already fetches, so visibility rules are inherited untouched.
+- Semantic tokens plus the existing archetype `hueA`/`hueB` values only; no hardcoded colour utilities.
 
 ## Deferred
 
-No offering-schema consolidation, no structured recipe fields, no botanical metadata for Flower Memory, no succession mechanics beyond grant/revoke, no moderation queue, and no changes to Ancient Friends behaviour, Hearts, invitations or unrelated RLS.
+- Phase 2: branch clustering by offering type, cross-fade filter transitions, richer recency radiance.
+- Phase 3: ambient audio toggle, deeper parallax, "view in library" jump, shared-link deep focus on one memory.
