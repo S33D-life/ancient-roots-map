@@ -9,6 +9,7 @@
  * and the tree itself.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import {
@@ -144,7 +145,9 @@ export default function FullscreenTreeView({
 
   const subtitle = rememberedName ? `for ${rememberedName}` : treeName ?? null;
 
-  return (
+  // Portalled to <body>: page-level motion wrappers create containing blocks
+  // for fixed positioning, which would otherwise strand the tree mid-document.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
