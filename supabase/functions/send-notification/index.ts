@@ -93,11 +93,17 @@ Deno.serve(async (req) => {
     if (typeof title !== "string" || !title.trim() || title.length > 200) return bad(400, "Invalid title");
     if (typeof category !== "string" || !ALLOWED_CATEGORIES.has(category)) return bad(400, "Invalid category");
     const pri = typeof priority === "string" && ALLOWED_PRIORITIES.has(priority) ? priority : "normal";
-    const bodyText = typeof text === "string" ? text.slice(0, 1000) : null;
-    const link = typeof deep_link === "string" ? deep_link.slice(0, 500) : null;
-    const meta = (metadata && typeof metadata === "object" && !Array.isArray(metadata))
+    const bodyText = typeof text === "string" ? clean(text, 1000) || null : null;
+    const link = safeDeepLink(deep_link);
+    const rawMeta = (metadata && typeof metadata === "object" && !Array.isArray(metadata))
       ? metadata as Record<string, unknown>
       : {};
+    // The caller may never assert who the actor is.
+    const meta = { ...rawMeta };
+    delete meta.actor_id;
+
+    const cleanTitle = clean(title, 200);
+    if (!cleanTitle) return bad(400, "Invalid title");
 
     // No self-notifications
     if (user_id === actorId) {
@@ -110,9 +116,33 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
 
+    // ── Rate limiting: per actor, and per actor→recipient pair ──
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    const { count: actorCount } = await admin
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("metadata->>actor_id", actorId)
+      .gte("created_at", since);
+
+    if ((actorCount ?? 0) >= MAX_PER_ACTOR_PER_HOUR) {
+      return bad(429, "Too many notifications sent recently");
+    }
+
+    const { count: pairCount } = await admin
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("metadata->>actor_id", actorId)
+      .eq("user_id", user_id)
+      .gte("created_at", since);
+
+    if ((pairCount ?? 0) >= MAX_PER_PAIR_PER_HOUR) {
+      return bad(429, "Too many notifications to this Wanderer recently");
+    }
+
     const { error: insertErr } = await admin.from("notifications").insert([{
       user_id,
-      title: title.trim().slice(0, 200),
+      title: cleanTitle,
       body: bodyText,
       category,
       priority: pri,
