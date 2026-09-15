@@ -43,6 +43,7 @@ export default function FullscreenTreeView({
   treeName,
   rememberedName,
   offerings,
+  initialOfferingId = null,
 }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
