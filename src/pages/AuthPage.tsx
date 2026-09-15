@@ -146,6 +146,9 @@ const AuthPage = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [inviteBloomFailure, setInviteBloomFailure] = useState<string | null>(null);
   const [inviteExpiresAt, setInviteExpiresAt] = useState<string | null>(null);
+  // Invitation validity is the single source of truth for whether signup is allowed.
+  const [inviteStatus, setInviteStatus] = useState<InviteStatus>("idle");
+  const [inviteCheckNonce, setInviteCheckNonce] = useState(0);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -253,6 +256,47 @@ const AuthPage = () => {
       setView("signup");
     }
   }, [searchParams]);
+
+  // Live invitation validation (debounced). Runs for logged-out visitors via a
+  // SECURITY DEFINER RPC, so RLS on invite_links never blocks it. This decides
+  // whether the Create Account button is enabled — nothing else does.
+  useEffect(() => {
+    if (view !== "signup") return;
+    const raw = inviteCode.trim();
+    if (!raw) {
+      setInviteStatus("idle");
+      setInviteBloomFailure(null);
+      setInviteExpiresAt(null);
+      return;
+    }
+    let cancelled = false;
+    setInviteStatus("checking");
+    const t = window.setTimeout(async () => {
+      const result = await checkInviteCode(raw);
+      if (cancelled) return;
+      setInviteStatus(result.status);
+      setInviteExpiresAt(result.expiresAt);
+      if (result.status === "valid") {
+        setInviteBloomFailure(null);
+        void trackInviteEvent("invite_validation_success", {
+          code: raw,
+          source: "auto",
+          metadata: { expires_at: result.expiresAt },
+        });
+      } else {
+        setInviteBloomFailure(result.detail);
+        void trackInviteEvent("invite_validation_failed", {
+          code: raw,
+          source: "auto",
+          metadata: { reason: result.status },
+        });
+      }
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [inviteCode, view, inviteCheckNonce]);
 
   // Use a ref for view to avoid re-subscribing on every view change
   const viewRef = useRef(view);
