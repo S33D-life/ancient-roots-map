@@ -2,13 +2,16 @@
  * EtherealOfferingTree — SVG ethereal tree with offerings hanging in the
  * branches at positions stored in life_grove_offerings.memory_position_data.
  *
- * - SVG draws the tree (trunk, canopy, branch paths, threads).
+ * - SVG draws the tree (root flare, tapered trunk, layered canopy, branches,
+ *   twigs, threads) with a soft inner light.
  * - Each offering also gets an absolutely-positioned <button> overlay so
  *   it is keyboard reachable and announced to screen readers.
- * - Selected state is lifted: parent decides what to do with the selection
- *   (preview card, scroll-to library entry, etc).
+ * - Selected state is lifted: parent decides what to do with the selection.
+ *
+ * The tree quietly responds to how inhabited it is: more offerings mean a
+ * fuller canopy, a warmer glow and a few more ambient motes.
  */
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import {
   OFFERING_TYPES,
   TREE_ARCHETYPES,
@@ -18,7 +21,6 @@ import {
 import {
   BRANCHES,
   TREE_VIEWBOX,
-  branchPath,
   parsePosition,
   pointFor,
   assignOfferingPosition,
@@ -34,6 +36,10 @@ interface Props {
   onSelect?: (offering: LifeGroveOffering | null) => void;
   /** size in pixels (square). Defaults to 360. */
   size?: number;
+  /** Offering ids to keep fully lit; others fade to a faint presence. */
+  highlightIds?: string[] | null;
+  /** Immersive mode: bigger touch targets, deeper glow, ambient motes. */
+  immersive?: boolean;
 }
 
 interface Placed {
@@ -41,6 +47,64 @@ interface Placed {
   pos: OfferingPosition;
   x: number; // svg coords
   y: number;
+  ax: number; // branch anchor
+  ay: number;
+}
+
+const C = TREE_VIEWBOX / 2;
+
+/** Point on a quadratic bezier. */
+function bezierAt(b: (typeof BRANCHES)[number], t: number) {
+  const u = 1 - t;
+  return {
+    x: u * u * b.s[0] + 2 * u * t * b.c[0] + t * t * b.e[0],
+    y: u * u * b.s[1] + 2 * u * t * b.c[1] + t * t * b.e[1],
+  };
+}
+
+/** Tapered branch: outline drawn as a closed shape so it thins toward the tip. */
+function taperedBranch(idx: number, baseWidth: number): string {
+  const b = BRANCHES[idx] ?? BRANCHES[0];
+  const steps = 10;
+  const left: string[] = [];
+  const right: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const p = bezierAt(b, t);
+    const n = bezierAt(b, Math.min(1, t + 0.01));
+    const dx = n.x - p.x;
+    const dy = n.y - p.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const w = (baseWidth * (1 - t) ** 1.4) / 2 + 0.35;
+    const nx = (-dy / len) * w;
+    const ny = (dx / len) * w;
+    left.push(`${p.x + nx} ${p.y + ny}`);
+    right.unshift(`${p.x - nx} ${p.y - ny}`);
+  }
+  return `M ${left.join(" L ")} L ${right.join(" L ")} Z`;
+}
+
+/** Small twigs branching off each main limb. */
+function twigs(idx: number): string[] {
+  const b = BRANCHES[idx] ?? BRANCHES[0];
+  const out: string[] = [];
+  for (const t of [0.52, 0.72, 0.88]) {
+    const p = bezierAt(b, t);
+    const n = bezierAt(b, Math.min(1, t + 0.02));
+    const dx = n.x - p.x;
+    const dy = n.y - p.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len;
+    const uy = dy / len;
+    const side = t === 0.72 ? -1 : 1;
+    const px = -uy * side;
+    const py = ux * side;
+    const reach = 22 * (1 - t) + 9;
+    out.push(
+      `M ${p.x} ${p.y} Q ${p.x + ux * reach * 0.5 + px * reach * 0.5} ${p.y + uy * reach * 0.5 + py * reach * 0.5} ${p.x + ux * reach + px * reach * 0.8} ${p.y + uy * reach + py * reach * 0.8}`,
+    );
+  }
+  return out;
 }
 
 export default function EtherealOfferingTree({
@@ -50,6 +114,8 @@ export default function EtherealOfferingTree({
   selectedId = null,
   onSelect,
   size = 360,
+  highlightIds = null,
+  immersive = false,
 }: Props) {
   const meta =
     TREE_ARCHETYPES.find((a) => a.value === archetype) ?? TREE_ARCHETYPES[0];
@@ -65,10 +131,32 @@ export default function EtherealOfferingTree({
       if (!pos) pos = assignOfferingPosition(filled);
       filled.push({ ...o, memory_position_data: pos });
       const { x, y } = pointFor(pos);
-      out.push({ offering: o, pos, x, y });
+      const anchor = bezierAt(BRANCHES[pos.branch] ?? BRANCHES[0], pos.t);
+      out.push({ offering: o, pos, x, y, ax: anchor.x, ay: anchor.y });
     }
     return out;
   }, [offerings]);
+
+  // How inhabited the tree feels — 0 (waiting) → 1 (richly tended).
+  const fullness = Math.min(1, offerings.length / 12);
+  const glyphSize = immersive ? 44 : 32;
+
+  /** Deterministic ambient motes — scale gently with fullness. */
+  const motes = useMemo(() => {
+    const count = immersive ? 8 + Math.round(fullness * 10) : Math.round(fullness * 6);
+    const phi = 0.6180339887;
+    return Array.from({ length: count }, (_, i) => {
+      const a = ((i * phi) % 1) * Math.PI * 2;
+      const r = TREE_VIEWBOX * (0.16 + ((i * 0.37) % 1) * 0.22);
+      return {
+        key: i,
+        cx: C + Math.cos(a) * r,
+        cy: TREE_VIEWBOX * 0.38 + Math.sin(a) * r * 0.82,
+        r: 0.9 + ((i * 0.53) % 1) * 1.3,
+        dur: 7 + ((i * 0.41) % 1) * 6,
+      };
+    });
+  }, [fullness, immersive]);
 
   // Focus the selected glyph button when it changes (keyboard friendliness).
   useEffect(() => {
@@ -79,21 +167,26 @@ export default function EtherealOfferingTree({
     node?.focus({ preventScroll: true });
   }, [selectedId]);
 
+  const leaf = (l: number, s: number, a: number) =>
+    `hsl(${meta.hueA} ${s}% ${l}% / ${a})`;
+  const bark = (l: number, a: number) => `hsl(${meta.hueB} 30% ${l}% / ${a})`;
+
   return (
     <div
       ref={containerRef}
       className="relative mx-auto select-none"
       style={{ width: size, height: size, maxWidth: "100%" }}
     >
-      {/* halo */}
+      {/* outer halo — breathing light around the whole tree */}
       <div
         aria-hidden
-        className="absolute inset-0 rounded-full motion-safe:animate-[lifeGroveBreathe_8s_ease-in-out_infinite]"
+        className="absolute inset-0 rounded-full motion-safe:animate-[lifeGroveBreathe_11s_ease-in-out_infinite]"
         style={{
-          background: `radial-gradient(circle at 50% 45%, hsl(${meta.hueA} 60% 60% / 0.32), hsl(${meta.hueB} 35% 25% / 0.06) 60%, transparent 75%)`,
-          filter: "blur(10px)",
+          background: `radial-gradient(circle at 50% 42%, ${leaf(64, 58, 0.16 + fullness * 0.2)}, ${bark(24, 0.05)} 58%, transparent 74%)`,
+          filter: "blur(14px)",
         }}
       />
+
       <svg
         viewBox={`0 0 ${TREE_VIEWBOX} ${TREE_VIEWBOX}`}
         width="100%"
@@ -103,85 +196,151 @@ export default function EtherealOfferingTree({
         aria-label={`Ethereal ${meta.label}${treeName ? ` named ${treeName}` : ""}, holding ${offerings.length} offering${offerings.length === 1 ? "" : "s"}`}
       >
         <defs>
-          <radialGradient id={`canopy-${archetype}`} cx="50%" cy="40%" r="55%">
-            <stop offset="0%" stopColor={`hsl(${meta.hueA} 65% 68%)`} stopOpacity="0.6" />
-            <stop offset="60%" stopColor={`hsl(${meta.hueA} 50% 38%)`} stopOpacity="0.45" />
-            <stop offset="100%" stopColor={`hsl(${meta.hueA} 45% 22%)`} stopOpacity="0.15" />
+          <radialGradient id={`canopy-back-${archetype}`} cx="50%" cy="42%" r="58%">
+            <stop offset="0%" stopColor={leaf(46, 32, 0.4)} />
+            <stop offset="70%" stopColor={leaf(30, 28, 0.22)} />
+            <stop offset="100%" stopColor={leaf(22, 24, 0)} />
           </radialGradient>
-          <linearGradient id={`trunk-${archetype}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={`hsl(${meta.hueB} 35% 28%)`} />
-            <stop offset="100%" stopColor={`hsl(${meta.hueB} 30% 16%)`} />
+          <radialGradient id={`canopy-mid-${archetype}`} cx="46%" cy="38%" r="55%">
+            <stop offset="0%" stopColor={leaf(58, 48, 0.42)} />
+            <stop offset="65%" stopColor={leaf(38, 44, 0.26)} />
+            <stop offset="100%" stopColor={leaf(28, 40, 0)} />
+          </radialGradient>
+          <radialGradient id={`canopy-front-${archetype}`} cx="52%" cy="33%" r="48%">
+            <stop offset="0%" stopColor={leaf(72, 58, 0.34 + fullness * 0.18)} />
+            <stop offset="60%" stopColor={leaf(52, 52, 0.2)} />
+            <stop offset="100%" stopColor={leaf(40, 48, 0)} />
+          </radialGradient>
+          <radialGradient id={`heartlight-${archetype}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={`hsl(42 85% 74% / ${0.22 + fullness * 0.22})`} />
+            <stop offset="100%" stopColor="hsl(42 85% 74% / 0)" />
+          </radialGradient>
+          <linearGradient id={`trunk-${archetype}`} x1="0.2" y1="0" x2="0.9" y2="1">
+            <stop offset="0%" stopColor={bark(34, 1)} />
+            <stop offset="45%" stopColor={bark(24, 1)} />
+            <stop offset="100%" stopColor={bark(14, 1)} />
+          </linearGradient>
+          <linearGradient id={`ground-${archetype}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={leaf(40, 30, 0)} />
+            <stop offset="50%" stopColor={leaf(46, 36, 0.36)} />
+            <stop offset="100%" stopColor={leaf(40, 30, 0)} />
           </linearGradient>
         </defs>
 
-        {/* soft canopy aura */}
-        <circle
-          cx={TREE_VIEWBOX / 2}
-          cy={TREE_VIEWBOX * 0.36}
-          r={TREE_VIEWBOX * 0.34}
-          fill={`url(#canopy-${archetype})`}
+        {/* layered canopy — back, mid, front for depth */}
+        <g aria-hidden>
+          <ellipse cx={C} cy={TREE_VIEWBOX * 0.4} rx={TREE_VIEWBOX * 0.42} ry={TREE_VIEWBOX * 0.34} fill={`url(#canopy-back-${archetype})`} />
+          <ellipse cx={C * 0.86} cy={TREE_VIEWBOX * 0.4} rx={TREE_VIEWBOX * 0.3} ry={TREE_VIEWBOX * 0.26} fill={`url(#canopy-mid-${archetype})`} />
+          <ellipse cx={C * 1.16} cy={TREE_VIEWBOX * 0.42} rx={TREE_VIEWBOX * 0.29} ry={TREE_VIEWBOX * 0.25} fill={`url(#canopy-mid-${archetype})`} />
+          <ellipse
+            cx={C}
+            cy={TREE_VIEWBOX * 0.32}
+            rx={TREE_VIEWBOX * (0.26 + fullness * 0.05)}
+            ry={TREE_VIEWBOX * (0.22 + fullness * 0.04)}
+            fill={`url(#canopy-front-${archetype})`}
+            className="motion-safe:animate-[lifeGroveBreathe_13s_ease-in-out_infinite]"
+            style={{ transformOrigin: "50% 36%" }}
+          />
+        </g>
+
+        {/* inner life force behind the trunk */}
+        <ellipse
+          aria-hidden
+          cx={C}
+          cy={TREE_VIEWBOX * 0.5}
+          rx={TREE_VIEWBOX * 0.2}
+          ry={TREE_VIEWBOX * 0.26}
+          fill={`url(#heartlight-${archetype})`}
         />
 
         {/* ground glow */}
-        <ellipse
-          cx={TREE_VIEWBOX / 2}
-          cy={TREE_VIEWBOX * 0.86}
-          rx={TREE_VIEWBOX * 0.32}
-          ry={TREE_VIEWBOX * 0.04}
-          fill={`hsl(${meta.hueA} 40% 30% / 0.35)`}
-        />
+        <ellipse aria-hidden cx={C} cy={TREE_VIEWBOX * 0.87} rx={TREE_VIEWBOX * 0.3} ry={TREE_VIEWBOX * 0.035} fill={`url(#ground-${archetype})`} />
 
-        {/* trunk */}
+        {/* root flare + tapered trunk */}
         <path
-          d={`M ${TREE_VIEWBOX / 2 - 9} ${TREE_VIEWBOX * 0.86}
-              C ${TREE_VIEWBOX / 2 - 11} ${TREE_VIEWBOX * 0.66}, ${TREE_VIEWBOX / 2 - 6} ${TREE_VIEWBOX * 0.55}, ${TREE_VIEWBOX / 2 - 4} ${TREE_VIEWBOX * 0.44}
-              L ${TREE_VIEWBOX / 2 + 4} ${TREE_VIEWBOX * 0.44}
-              C ${TREE_VIEWBOX / 2 + 6} ${TREE_VIEWBOX * 0.55}, ${TREE_VIEWBOX / 2 + 11} ${TREE_VIEWBOX * 0.66}, ${TREE_VIEWBOX / 2 + 9} ${TREE_VIEWBOX * 0.86}
-              Z`}
+          aria-hidden
+          d={`M ${C - 26} ${TREE_VIEWBOX * 0.885}
+              C ${C - 19} ${TREE_VIEWBOX * 0.85}, ${C - 14} ${TREE_VIEWBOX * 0.79}, ${C - 11} ${TREE_VIEWBOX * 0.68}
+              C ${C - 9} ${TREE_VIEWBOX * 0.58}, ${C - 6} ${TREE_VIEWBOX * 0.5}, ${C - 5} ${TREE_VIEWBOX * 0.41}
+              L ${C + 5} ${TREE_VIEWBOX * 0.41}
+              C ${C + 6} ${TREE_VIEWBOX * 0.5}, ${C + 9} ${TREE_VIEWBOX * 0.58}, ${C + 11} ${TREE_VIEWBOX * 0.68}
+              C ${C + 14} ${TREE_VIEWBOX * 0.79}, ${C + 19} ${TREE_VIEWBOX * 0.85}, ${C + 26} ${TREE_VIEWBOX * 0.885}
+              C ${C + 12} ${TREE_VIEWBOX * 0.9}, ${C - 12} ${TREE_VIEWBOX * 0.9}, ${C - 26} ${TREE_VIEWBOX * 0.885} Z`}
           fill={`url(#trunk-${archetype})`}
         />
+        {/* trunk rim light */}
+        <path
+          aria-hidden
+          d={`M ${C + 4} ${TREE_VIEWBOX * 0.42} C ${C + 6} ${TREE_VIEWBOX * 0.55}, ${C + 10} ${TREE_VIEWBOX * 0.7}, ${C + 15} ${TREE_VIEWBOX * 0.85}`}
+          stroke={`hsl(42 70% 80% / ${0.14 + fullness * 0.1})`}
+          strokeWidth="1.6"
+          fill="none"
+          strokeLinecap="round"
+        />
 
-        {/* branches */}
-        {BRANCHES.map((_, i) => (
-          <path
-            key={i}
-            d={branchPath(i)}
-            fill="none"
-            stroke={`hsl(${meta.hueB} 30% 22% / 0.85)`}
-            strokeWidth={3.5 - i * 0.2}
-            strokeLinecap="round"
-          />
-        ))}
+        {/* branches + twigs */}
+        <g aria-hidden>
+          {BRANCHES.map((_, i) => (
+            <g key={i}>
+              <path d={taperedBranch(i, 9 - i * 0.5)} fill={bark(21, 0.92)} />
+              {twigs(i).map((d, j) => (
+                <path
+                  key={j}
+                  d={d}
+                  fill="none"
+                  stroke={bark(26, 0.6)}
+                  strokeWidth={1.1}
+                  strokeLinecap="round"
+                />
+              ))}
+              {/* faint rim light along the top of each limb */}
+              <path
+                d={taperedBranch(i, 9 - i * 0.5)}
+                fill="none"
+                stroke={`hsl(42 70% 82% / 0.1)`}
+                strokeWidth={0.6}
+              />
+            </g>
+          ))}
+        </g>
+
+        {/* ambient motes */}
+        <g aria-hidden>
+          {motes.map((m) => (
+            <circle key={m.key} cx={m.cx} cy={m.cy} r={m.r} fill="hsl(42 90% 82% / 0.5)">
+              <animate
+                attributeName="opacity"
+                values="0.12;0.6;0.12"
+                dur={`${m.dur}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+          ))}
+        </g>
 
         {/* threads from branch to glyph */}
-        {placed.map((p) => {
-          const b = BRANCHES[p.pos.branch];
-          // branch point at same t (without offset) as anchor
-          const u = 1 - p.pos.t;
-          const ax =
-            u * u * b.s[0] + 2 * u * p.pos.t * b.c[0] + p.pos.t * p.pos.t * b.e[0];
-          const ay =
-            u * u * b.s[1] + 2 * u * p.pos.t * b.c[1] + p.pos.t * p.pos.t * b.e[1];
-          return (
+        <g aria-hidden>
+          {placed.map((p) => (
             <line
               key={`thread-${p.offering.id}`}
-              x1={ax}
-              y1={ay}
+              x1={p.ax}
+              y1={p.ay}
               x2={p.x}
               y2={p.y}
-              stroke={`hsl(${meta.hueB} 25% 60% / 0.45)`}
+              stroke={`hsl(${meta.hueB} 25% 62% / 0.4)`}
               strokeWidth={0.7}
             />
-          );
-        })}
+          ))}
+        </g>
       </svg>
 
       {/* Glyph buttons overlay */}
-      {placed.map((p) => {
-        const meta = OFFERING_TYPES.find((m) => m.value === p.offering.offering_type);
+      {placed.map((p, i) => {
+        const glyphMeta = OFFERING_TYPES.find((m) => m.value === p.offering.offering_type);
         const leftPct = (p.x / TREE_VIEWBOX) * 100;
         const topPct = (p.y / TREE_VIEWBOX) * 100;
         const isSelected = selectedId === p.offering.id;
+        const dimmed = highlightIds ? !highlightIds.includes(p.offering.id) : false;
         return (
           <button
             key={p.offering.id}
@@ -189,27 +348,30 @@ export default function EtherealOfferingTree({
             data-offering-id={p.offering.id}
             onClick={() => onSelect?.(isSelected ? null : p.offering)}
             aria-pressed={isSelected}
-            aria-label={`${meta?.label ?? "Offering"}: ${p.offering.title ?? p.offering.contributor_name}`}
+            aria-label={`${glyphMeta?.label ?? "Offering"}: ${p.offering.title ?? p.offering.contributor_name}`}
             className={[
               "absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
               "flex items-center justify-center bg-transparent",
-              "transition-all duration-200",
+              "transition-all duration-500",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "hover:scale-110",
+              "motion-safe:animate-[lifeGroveSway_9s_ease-in-out_infinite]",
               isSelected
-                ? "scale-125 drop-shadow-[0_0_10px_hsl(38_90%_70%/0.85)]"
-                : "drop-shadow-[0_0_5px_hsl(38_90%_70%/0.45)]",
+                ? "scale-125 drop-shadow-[0_0_14px_hsl(38_90%_70%/0.9)]"
+                : "drop-shadow-[0_0_6px_hsl(38_90%_70%/0.45)]",
+              dimmed ? "opacity-25" : "opacity-100",
             ].join(" ")}
             style={{
               left: `${leftPct}%`,
               top: `${topPct}%`,
-              width: 32,
-              height: 32,
+              width: glyphSize,
+              height: glyphSize,
               padding: 0,
               border: "none",
+              animationDelay: `${(i % 5) * 0.7}s`,
             }}
           >
-            <LifeGroveOfferingGlyph type={p.offering.offering_type} size={32} variant="tree" />
+            <LifeGroveOfferingGlyph type={p.offering.offering_type} size={glyphSize} variant="tree" />
           </button>
         );
       })}
@@ -217,7 +379,7 @@ export default function EtherealOfferingTree({
       {treeName && (
         <p
           className="absolute bottom-0 left-0 right-0 text-center font-serif text-xs italic pointer-events-none"
-          style={{ color: `hsl(${meta.hueB} 25% 65% / 0.85)` }}
+          style={{ color: `hsl(${meta.hueB} 25% 68% / 0.85)` }}
         >
           {treeName}
         </p>
@@ -225,8 +387,12 @@ export default function EtherealOfferingTree({
 
       <style>{`
         @keyframes lifeGroveBreathe {
-          0%, 100% { opacity: 0.7; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.04); }
+          0%, 100% { opacity: 0.72; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.03); }
+        }
+        @keyframes lifeGroveSway {
+          0%, 100% { transform: translate(-50%, -50%) rotate(-1.6deg); }
+          50% { transform: translate(-50%, -50%) rotate(1.6deg); }
         }
       `}</style>
     </div>
