@@ -18,7 +18,7 @@ import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
 import LifeGroveOfferingComposer from "@/components/life-groves/LifeGroveOfferingComposer";
 import GroveStewardshipSection from "@/components/life-groves/GroveStewardshipSection";
 import { useGroveAuthority } from "@/hooks/use-grove-authority";
-import { GROVE_TYPES, TREE_ARCHETYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
+import { GROVE_TYPES, TREE_ARCHETYPES } from "@/lib/life-groves/types";
 
 export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
@@ -208,6 +208,17 @@ export default function LifeGrovePage() {
           </section>
         )}
       </main>
+
+      <FullscreenTreeView
+        open={immersive}
+        onClose={() => setImmersive(false)}
+        archetype={grove.tree_archetype_species}
+        groveTitle={grove.grove_title}
+        treeName={grove.tree_name}
+        rememberedName={grove.remembered_or_celebrated_name}
+        offerings={offerings}
+        initialOfferingId={entryOfferingId}
+      />
 
       {userId && (
         <LifeGroveOfferingComposer
