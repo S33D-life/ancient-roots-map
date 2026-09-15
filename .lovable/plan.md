@@ -1,110 +1,100 @@
-# Blooms Nearby — Implementation Plan
+# Life Groves — Effortless Offerings + Grove Stewardship
 
-A poetic seasonal flower-offering layer for Ancient Friend trees. Presence becoming memory.
+## Part XVI — What I found
 
-## Scope (this pass)
+**A. Ancient Friends capabilities we can reuse**
+- Photo: `AddOfferingDialog` uploads to the `offerings` storage bucket; `utils/backgroundPhotoProcessor.ts` already compresses + makes thumbnails; `utils/offeringPhotos.ts` bridges `media_url` ↔ `photos[]`.
+- Song: `MusicOfferingFlow` has catalog + iTunes search with artwork/preview, plus Apple Music and YouTube link parsers.
+- Book: `utils/bookSearch.ts` (Google Books → Open Library fallback) is already a clean shared service.
+- Voice: `VoiceOfferingFlow` records via MediaRecorder and uploads to the `offerings` bucket.
+- Cards: `OfferingCard`, `OfferingVisibilityPicker`.
 
-Ship a working v1 that lets a wanderer photograph a flower near a tree, leave it as a Bloom Offering, and see the tree's seasonal bloom gallery. Defer AI recognition, heatmaps, and network views.
+**B. Life Grove ownership/access today**
+`life_groves.created_by` is the only owner concept. Row access = public grove OR creator. Offerings insert requires a signed-in user whose `contributor_user_id` matches, on a public grove or their own. The invite token resolves the grove through a security-definer function but grants no write rights of its own. No steward, proposal or history layer exists.
 
-## Architecture
+**C. Collaborators/stewards** — none for Life Groves. Ancient Friends has `tree_access_grants`, a per-tree grant table: a good shape to copy, not to reuse directly.
 
-```text
-Tree page
- └─ <BloomsNearbySection treeId>
-     ├─ Intro + [Add Bloom Offering] CTA
-     ├─ <BloomGallery>          (masonry, season + year filters)
-     └─ <SeasonalTimeline>      (lightweight diary)
+**D. Edit/proposal/history infrastructure** — `tree_edit_proposals` + `tree_edit_history` exist for Ancient Friends and are tree-scoped. I will mirror their column shape for groves rather than forcing grove rows into tree tables.
 
-Modal: <AddBloomOfferingDialog treeId>
- └─ photo upload → storage bucket → insert row → toast + reward
+**E. What genuinely needs building** — a focused offering composer for groves, four shared capability components, a steward layer, a proposal + tending-history layer, and richer library cards.
 
-Data:
- bloom_offerings table (RLS: public read, auth insert own)
- storage bucket: bloom-offerings (public read)
- hearts: reuse existing repositories/hearts.ts
-```
+**F. Database changes** — listed below. No rewrite of existing tables; additive only.
 
-## Data model
+**G. Smallest coherent plan** — extract shared components first, build the composer on top, then add stewardship.
 
-New table `public.bloom_offerings`:
-- `id uuid pk`
-- `tree_id uuid not null` (FK trees.id)
-- `user_id uuid not null` (auth.uid)
-- `image_url text not null`
-- `note text`
-- `species_guess text`
-- `season text` (spring|summer|autumn|winter, derived)
-- `year int` (derived)
-- `latitude numeric`, `longitude numeric`
-- `hearts_rewarded int default 0`
-- `created_at timestamptz default now()`
+---
 
-Indexes on `tree_id`, `(tree_id, year, season)`.
+## Part 1 — Shared offering capabilities
 
-RLS:
-- SELECT: anyone (public bloom log)
-- INSERT: `auth.uid() = user_id`
-- UPDATE/DELETE: own row only
+Extract the mature Ancient Friends logic into reusable pieces under `src/components/offering-kit/`, then point the existing Ancient Friends flows at them so there is exactly one implementation:
 
-Storage bucket `bloom-offerings` (public). Per-user folder path `{user_id}/{uuid}.jpg`.
+- `PhotoOfferingPicker` — "Choose from photo library" + "Take photo" (`capture="environment"` on mobile), compression, upload to the `offerings` bucket, large preview, replace/remove.
+- `SongOfferingSearch` — search field + pasted-link field, result rows with artwork/title/artist, preview playback; returns full metadata.
+- `BookOfferingSearch` — search field, cover/title/author rows, manual fallback.
+- `PoemOfferingInput` — search known/public-domain poems, write your own, or paste a link.
+- `VoiceOfferingRecorder` — record, play, re-record, upload; explicit microphone-permission handling and iOS-safe mime selection.
 
-Season derivation (hemisphere-naive, northern default for v1; document):
-- Mar–May spring · Jun–Aug summer · Sep–Nov autumn · Dec–Feb winter
+Ancient Friends behaviour must not change; these are internal extractions.
 
-## Hearts
+## Part 2 — The Life Grove offering composer
 
-Reuse `repositories/hearts.ts`. Award:
-- 2 hearts for any bloom offering (Contribution)
-- +3 bonus on first bloom of a season for that tree (Windfall-style)
+New `LifeGroveOfferingComposer` (full-screen sheet, mobile-first) replacing the form on `LifeGroveInvitePage` and opened by **Hang an Offering** on `LifeGrovePage`.
 
-Compute bonus client-side by checking existing rows for `(tree_id, season, year)` before insert; write `hearts_rewarded` value into the row.
+Step 1: "What would you like to hang in the tree?" — the existing nine types with their existing glyphs.
+Step 2: only the controls that type needs, then an optional few words, then a single **Hang … in the tree** action.
 
-## Files to create
+- Photo — picker first, big preview, optional words, optional quiet title.
+- Song — search/paste, select fills metadata, "Why does this song belong here?".
+- Book — search, select fills metadata, optional reflection.
+- Poem — search / write / paste.
+- Voice — recorder opens immediately; play, re-record, optional words.
+- Story, Letter — open straight into a generous autosizing writing surface; everything else optional.
+- Recipe — optional photo, name, free memory text.
+- Flower Memory — flower name, optional photo, words.
 
-- `supabase/migrations/...` (table + RLS + bucket + bucket policies)
-- `src/lib/blooms/season.ts` — season+year derivation, season labels/emoji
-- `src/lib/blooms/types.ts` — `BloomOffering` type
-- `src/repositories/blooms.ts` — list/insert + photo upload helper
-- `src/hooks/use-blooms.ts` — react-query list + invalidate
-- `src/components/blooms/AddBloomOfferingDialog.tsx`
-- `src/components/blooms/BloomGallery.tsx` (masonry, filters)
-- `src/components/blooms/SeasonalTimeline.tsx`
-- `src/components/blooms/BloomsNearbySection.tsx` (composition)
-- `src/components/blooms/BloomPatternHints.tsx` (poetic emergent lines)
+Visibility becomes a final two-choice line (Family only / Public), preselected from the grove's own privacy and never silently widening it. The consent checkbox is replaced by one line of gentle text above the Hang action.
 
-## Wiring
+Drafts are kept in session storage per grove + type so a keyboard dismissal or accidental back does not lose a written memory.
 
-Add `<BloomsNearbySection treeId={tree.id} />` to `src/pages/TreeDetailPage.tsx` below the existing offerings/whispers sections (find correct anchor when implementing).
+## Part 3 — Identity
 
-## Visual
+Offerings stop storing email. Attribution resolves from the contributor's profile: display name, avatar, and a link to their Wanderer profile. Where no profile name exists, "A Wanderer". A new security-definer function returns contributor display identities for a grove; contributor email is returned **only** to the grove's own stewards, never to visitors, invite-link holders, or stewards of other groves.
 
-- Soft seasonal palette using existing tokens (`--primary`, `--accent`, `--muted`)
-- Serif headings ("Blooms Nearby"), warm parchment surfaces
-- Masonry via CSS columns (no new dep)
-- Success: gentle gold→green glow (Tailwind transition + ring)
+## Part 4 — Heartwood Library cards
 
-## Pattern hints (lightweight phenology)
+`HeartwoodLibraryTabs` gains per-type renderers: image-first photo card, song card with artwork + open action, book card with cover, audio player for voice memories, readable poem excerpt, letter-style preview, recipe and flower cards.
 
-After fetch, group rows by `species_guess` lowercased; if same species appears across ≥2 distinct years for same season → render line: *"Bluebells have been noticed here for N springs."* Keep to top 2 hints.
+## Part 5 — Stewardship
 
-## Out of scope
+- **Primary Steward** — the grove creator; unchanged.
+- **Grove Steward** — explicitly granted by the primary steward; may tend the grove and review proposals.
+- **Contributor** — may hang offerings, edit their own, and propose edits.
+- **Visitor** — may view what the grove's privacy allows.
 
-AI recognition, species validation, bloom heatmaps, compare mode, pollinators, radio playlists, council quests, southern-hemisphere season nuance.
+**Tend this Grove** (stewards only): a calm editor for grove title, person's name, dedication, story, tree archetype, tree name, grove type, visibility, imagery and the Rooted Tree link. Changing or removing an established Rooted Tree asks for confirmation and is always recorded.
 
-## Steps
+**Propose an Edit** (contributors): records proposer, field, current value, proposed value, optional explanation, timestamp, status. Stewards can Accept, Decline, or Edit & Accept; accepting applies the change through a server function.
 
-1. Migration: table + RLS + bucket + policies (single call, await approval)
-2. Types, season util, repository, hook
-3. Components (dialog, gallery, timeline, hints, section)
-4. Mount on TreeDetailPage
-5. Bump `public/version.json`
-6. Smoke test: create row, gallery refreshes, season filter works, hearts awarded
+**Tending history**: a quiet list of what changed, from what to what, by whom, when, and whether it was a direct tending or an accepted proposal.
 
-## Acceptance
+**Steward management**: the primary steward can grant and revoke stewardship by Wanderer. Revoking ends future authority but keeps that person's offerings and history intact.
 
-- Visiting a tree shows "Blooms Nearby" with empty-state poetic copy
-- Authed user can upload a photo + note and see it appear immediately
-- Gallery filters by season + year
-- Timeline groups by Season YYYY with species_guess chips
-- Hearts increment in user balance
-- Anonymous visitors can browse blooms but CTA prompts sign-in
+## Part 6 — Database and security
+
+New migration, additive only:
+- `life_grove_offerings` gains `media_metadata` (jsonb), `media_type`, `updated_at`, and moderation fields `hidden_at` / `hidden_by`.
+- `life_grove_stewards` — grove, user, granted_by, granted_at, revoked_at.
+- `life_grove_edit_proposals` — grove, proposer, field, old value, proposed value, note, status, reviewer, reviewer note, timestamps.
+- `life_grove_tending_history` — grove, field, old value, new value, actor, source (tending or accepted proposal), timestamp.
+- Functions: `is_grove_steward(grove, user)`, `apply_grove_proposal(...)`, `grant_grove_steward(...)`, `revoke_grove_steward(...)`, `get_life_grove_contributors(grove)`.
+- Policies rewritten for the new roles, with grants for every new table. Offering edit: author edits their own; stewards may hide but not rewrite; nobody else may touch it. Grove canonical updates: stewards only. Proposals: contributors insert their own, stewards review; a proposer cannot accept their own unless independently a steward.
+
+Every rule is enforced in the database, not by hidden buttons, and I will exercise all ten scenarios in Part XIII against live policies using rollback-safe checks.
+
+## Part 7 — Testing
+
+Mobile flow checks on an iPhone-sized viewport for photo, song, book, poem, voice, writing surfaces and the stewardship actions, plus the permission matrix above, the existing test suite and type check.
+
+## Deferred
+
+No offering-schema consolidation, no structured recipe fields, no botanical metadata for Flower Memory, no succession mechanics beyond grant/revoke, no moderation queue, and no changes to Ancient Friends behaviour, Hearts, invitations or unrelated RLS.
