@@ -291,6 +291,7 @@ export default function FullscreenTreeView({
           `}</style>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
