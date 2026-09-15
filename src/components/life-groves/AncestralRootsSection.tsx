@@ -39,7 +39,7 @@ interface Props {
 
 export default function AncestralRootsSection({ groveId }: Props) {
   const qc = useQueryClient();
-  const { isSteward } = useGroveAuthority(groveId);
+  const { isSteward, isContributor, userId } = useGroveAuthority(groveId);
   const [open, setOpen] = useState(false);
 
   const { data: roots = [], isLoading } = useQuery({
@@ -47,15 +47,33 @@ export default function AncestralRootsSection({ groveId }: Props) {
     queryFn: () => listGroveRoots(groveId),
   });
 
+  const refresh = () => qc.invalidateQueries({ queryKey: ["grove-roots", groveId] });
+
   const remove = useMutation({
-    mutationFn: (rootId: string) => removeGroveRoot(rootId, "Withdrawn by a steward"),
+    mutationFn: (v: { rootId: string; mine: boolean }) =>
+      removeGroveRoot(v.rootId, v.mine ? "Withdrawn by the person who suggested it" : "Let go by a steward"),
     onSuccess: () => {
-      toast.success("The root has been let go. Its history remains.");
-      qc.invalidateQueries({ queryKey: ["grove-roots", groveId] });
+      toast.success("Let go. Its history remains.");
+      refresh();
     },
     onError: (e: unknown) => toast.error(describe(e)),
   });
 
+  const review = useMutation({
+    mutationFn: (v: { rootId: string; decision: "accept" | "decline"; note?: string }) =>
+      reviewGroveRootProposal(v.rootId, v.decision, v.note),
+    onSuccess: (_d, v) => {
+      toast.success(
+        v.decision === "accept"
+          ? "Taken up. The Ancient Friend will be asked to welcome it."
+          : "Set aside, with your words kept.",
+      );
+      refresh();
+    },
+    onError: (e: unknown) => toast.error(describe(e)),
+  });
+
+  const suggested = roots.filter((r) => r.status === "proposed");
   const active = roots.filter((r) => r.status === "active");
   const waiting = roots.filter((r) => r.status === "pending");
   const declined = roots.filter((r) => r.status === "declined");
