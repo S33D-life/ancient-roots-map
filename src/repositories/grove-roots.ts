@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const db = supabase as any;
 
-export type RootStatus = "pending" | "active" | "declined" | "removed";
+export type RootStatus = "proposed" | "pending" | "active" | "declined" | "removed";
 export type InscriptionVisibility = "private" | "public";
 export type PortalDisclosure = "mark_only" | "named";
 export type EntryMode = "members_only" | "as_grove_permits";
@@ -28,6 +28,7 @@ export interface GroveRootRow {
   portal_disclosure: PortalDisclosure;
   entry_mode: EntryMode;
   review_note: string | null;
+  created_by: string;
   created_at: string;
 }
 
@@ -81,6 +82,20 @@ export async function createGroveRoot(input: CreateRootInput): Promise<string> {
   });
   if (error) throw error;
   return data as string;
+}
+
+/** A grove steward takes up, or sets aside, a suggested root. */
+export async function reviewGroveRootProposal(
+  rootId: string,
+  decision: "accept" | "decline",
+  note?: string,
+): Promise<void> {
+  const { error } = await db.rpc("review_grove_root_proposal", {
+    p_root_id: rootId,
+    p_decision: decision,
+    p_note: note ?? null,
+  });
+  if (error) throw error;
 }
 
 export async function removeGroveRoot(rootId: string, note?: string): Promise<void> {

@@ -12215,6 +12215,7 @@ export type Database = {
         Args: { p_grove_id: string }
         Returns: {
           created_at: string
+          created_by: string
           entry_mode: string
           inscription_text: string
           inscription_visibility: string
@@ -12294,6 +12295,10 @@ export type Database = {
         Returns: undefined
       }
       review_grove_root: {
+        Args: { p_decision: string; p_note?: string; p_root_id: string }
+        Returns: undefined
+      }
+      review_grove_root_proposal: {
         Args: { p_decision: string; p_note?: string; p_root_id: string }
         Returns: undefined
       }

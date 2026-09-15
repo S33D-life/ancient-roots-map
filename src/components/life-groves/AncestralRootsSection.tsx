@@ -27,6 +27,7 @@ import {
   createGroveRoot,
   listGroveRoots,
   removeGroveRoot,
+  reviewGroveRootProposal,
   searchAncientFriends,
   type AncientFriendResult,
   type EntryMode,
@@ -39,7 +40,7 @@ interface Props {
 
 export default function AncestralRootsSection({ groveId }: Props) {
   const qc = useQueryClient();
-  const { isSteward } = useGroveAuthority(groveId);
+  const { isSteward, isContributor, userId } = useGroveAuthority(groveId);
   const [open, setOpen] = useState(false);
 
   const { data: roots = [], isLoading } = useQuery({
@@ -47,15 +48,33 @@ export default function AncestralRootsSection({ groveId }: Props) {
     queryFn: () => listGroveRoots(groveId),
   });
 
+  const refresh = () => qc.invalidateQueries({ queryKey: ["grove-roots", groveId] });
+
   const remove = useMutation({
-    mutationFn: (rootId: string) => removeGroveRoot(rootId, "Withdrawn by a steward"),
+    mutationFn: (v: { rootId: string; mine: boolean }) =>
+      removeGroveRoot(v.rootId, v.mine ? "Withdrawn by the person who suggested it" : "Let go by a steward"),
     onSuccess: () => {
-      toast.success("The root has been let go. Its history remains.");
-      qc.invalidateQueries({ queryKey: ["grove-roots", groveId] });
+      toast.success("Let go. Its history remains.");
+      refresh();
     },
     onError: (e: unknown) => toast.error(describe(e)),
   });
 
+  const review = useMutation({
+    mutationFn: (v: { rootId: string; decision: "accept" | "decline"; note?: string }) =>
+      reviewGroveRootProposal(v.rootId, v.decision, v.note),
+    onSuccess: (_d, v) => {
+      toast.success(
+        v.decision === "accept"
+          ? "Taken up. The Ancient Friend will be asked to welcome it."
+          : "Set aside, with your words kept.",
+      );
+      refresh();
+    },
+    onError: (e: unknown) => toast.error(describe(e)),
+  });
+
+  const suggested = roots.filter((r) => r.status === "proposed");
   const active = roots.filter((r) => r.status === "active");
   const waiting = roots.filter((r) => r.status === "pending");
   const declined = roots.filter((r) => r.status === "declined");
@@ -78,70 +97,116 @@ export default function AncestralRootsSection({ groveId }: Props) {
         </p>
       ) : (
         <ul className="space-y-3">
-          {[...active, ...waiting, ...declined].map((r) => (
-            <li
-              key={r.root_id}
-              className="rounded-xl border border-border/40 bg-background/40 p-3"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Link
-                  to={`/tree/${r.tree_id}`}
-                  className="font-serif text-sm text-primary underline decoration-primary/40 underline-offset-4"
-                >
-                  {r.tree_name || "An Ancient Friend"}
-                </Link>
-                <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-                  {r.status === "active"
-                    ? "Welcomed"
-                    : r.status === "pending"
-                      ? "Awaiting welcome"
-                      : "Not welcomed"}
-                </span>
-              </div>
-              {r.inscription_text && (
-                <p className="font-serif tracking-[0.3em] text-sm text-foreground/85 mt-1">
-                  {r.inscription_text}
-                </p>
-              )}
-              {r.status === "pending" && (
-                <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
-                  A keeper of that Ancient Friend will decide whether the mark may rest there.
-                </p>
-              )}
-              {r.status === "declined" && r.review_note && (
-                <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
-                  {r.review_note}
-                </p>
-              )}
-              {isSteward && r.status !== "declined" && (
-                <button
-                  type="button"
-                  onClick={() => remove.mutate(r.root_id)}
-                  className="mt-2 font-serif text-[11px] uppercase tracking-[0.22em]
-                    text-muted-foreground/60 hover:text-foreground min-h-[44px]"
-                >
-                  Let this root go
-                </button>
-              )}
-            </li>
-          ))}
+          {[...suggested, ...active, ...waiting, ...declined].map((r) => {
+            const mine = !!userId && r.created_by === userId;
+            return (
+              <li
+                key={r.root_id}
+                className={`rounded-xl border p-3 ${
+                  r.status === "proposed"
+                    ? "border-primary/35 bg-primary/5"
+                    : "border-border/40 bg-background/40"
+                }`}
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <Link
+                    to={`/tree/${r.tree_id}`}
+                    className="font-serif text-sm text-primary underline decoration-primary/40 underline-offset-4"
+                  >
+                    {r.tree_name || "An Ancient Friend"}
+                  </Link>
+                  <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                    {r.status === "active"
+                      ? "Welcomed"
+                      : r.status === "pending"
+                        ? "Awaiting welcome"
+                        : r.status === "proposed"
+                          ? "Suggested"
+                          : "Not welcomed"}
+                  </span>
+                </div>
+                {r.inscription_text && (
+                  <p className="font-serif tracking-[0.3em] text-sm text-foreground/85 mt-1">
+                    {r.inscription_text}
+                  </p>
+                )}
+                {r.status === "proposed" && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
+                    {mine
+                      ? "Your suggestion rests here until a steward takes it up."
+                      : "Suggested by someone welcomed into this grove. A steward decides whether it travels on."}
+                  </p>
+                )}
+                {r.status === "pending" && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
+                    A keeper of that Ancient Friend will decide whether the mark may rest there.
+                  </p>
+                )}
+                {r.status === "declined" && r.review_note && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
+                    {r.review_note}
+                  </p>
+                )}
+
+                {r.status === "proposed" && isSteward && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Button
+                      size="sm"
+                      className="font-serif"
+                      disabled={review.isPending}
+                      onClick={() => review.mutate({ rootId: r.root_id, decision: "accept" })}
+                    >
+                      Take it up
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="font-serif"
+                      disabled={review.isPending}
+                      onClick={() => {
+                        const note = window.prompt("A few words for the person who suggested it:");
+                        if (note && note.trim()) {
+                          review.mutate({ rootId: r.root_id, decision: "decline", note: note.trim() });
+                        }
+                      }}
+                    >
+                      Set it aside
+                    </Button>
+                  </div>
+                )}
+
+                {((isSteward && r.status !== "declined") ||
+                  (mine && r.status === "proposed")) && (
+                  <button
+                    type="button"
+                    onClick={() => remove.mutate({ rootId: r.root_id, mine: mine && r.status === "proposed" })}
+                    className="mt-2 font-serif text-[11px] uppercase tracking-[0.22em]
+                      text-muted-foreground/60 hover:text-foreground min-h-[44px]"
+                  >
+                    {mine && r.status === "proposed" ? "Withdraw my suggestion" : "Let this root go"}
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 
-      {isSteward && (
+      {isContributor && (
         <div className="mt-4">
           <Button
             variant="outline"
             className="font-serif text-xs uppercase tracking-[0.25em] h-12"
             onClick={() => setOpen(true)}
           >
-            + Root into an Ancient Friend
+            {isSteward ? "+ Root into an Ancient Friend" : "+ Suggest a root"}
           </Button>
         </div>
       )}
 
       <RootIntoAncientFriendDialog
         groveId={groveId}
+        isSteward={isSteward}
         open={open}
         onClose={() => setOpen(false)}
         onRooted={() => qc.invalidateQueries({ queryKey: ["grove-roots", groveId] })}
@@ -154,11 +219,13 @@ export default function AncestralRootsSection({ groveId }: Props) {
 
 function RootIntoAncientFriendDialog({
   groveId,
+  isSteward,
   open,
   onClose,
   onRooted,
 }: {
   groveId: string;
+  isSteward: boolean;
   open: boolean;
   onClose: () => void;
   onRooted: () => void;
@@ -189,7 +256,11 @@ function RootIntoAncientFriendDialog({
         entryMode,
       }),
     onSuccess: () => {
-      toast.success("The root reaches out. It will be marked once welcomed.");
+      toast.success(
+        isSteward
+          ? "The root reaches out. It will be marked once welcomed."
+          : "Your suggestion rests with the grove's stewards.",
+      );
       reset();
       onClose();
       onRooted();
@@ -362,10 +433,16 @@ function RootIntoAncientFriendDialog({
               disabled={!inscription.trim() || create.isPending}
               onClick={() => create.mutate()}
             >
-              {create.isPending ? "Reaching…" : "Root into this Ancient Friend"}
+              {create.isPending
+                ? "Reaching…"
+                : isSteward
+                  ? "Root into this Ancient Friend"
+                  : "Suggest this root"}
             </Button>
             <p className="font-serif text-[11px] italic text-muted-foreground/70 text-center">
-              A keeper of that Ancient Friend welcomes the root before the mark appears.
+              {isSteward
+                ? "A keeper of that Ancient Friend welcomes the root before the mark appears."
+                : "A steward of this grove takes up the suggestion first; the Ancient Friend's keeper welcomes it after."}
             </p>
           </div>
         )}
@@ -402,7 +479,10 @@ function Choice({
 
 function describe(e: unknown): string {
   const m = (e as { message?: string })?.message ?? "";
-  if (m.includes("steward_only")) return "Only a steward of this grove may begin a root.";
+  if (m.includes("steward_only")) return "Only a steward of this grove may decide on a suggestion.";
+  if (m.includes("contributor_only")) return "Only people welcomed into this grove may suggest a root.";
+  if (m.includes("not_a_suggestion")) return "That root has already moved on.";
+  if (m.includes("reason_required")) return "Please leave a few words with your decision.";
   if (m.includes("root_already_exists")) return "This grove is already rooted in that Ancient Friend.";
   if (m.includes("tree_merged")) return "That Ancient Friend has been merged into another record.";
   return m || "Something would not settle. Please try again.";
