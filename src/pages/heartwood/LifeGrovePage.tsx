@@ -10,9 +10,8 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
-import EtherealOfferingTree, {
-  OfferingPreviewCard,
-} from "@/components/life-groves/EtherealOfferingTree";
+import EtherealOfferingTree from "@/components/life-groves/EtherealOfferingTree";
+import FullscreenTreeView from "@/components/life-groves/FullscreenTreeView";
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
 import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
 import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
@@ -26,6 +25,8 @@ export default function LifeGrovePage() {
   const { userId } = useCurrentUser();
   const [selected, setSelected] = useState<LifeGroveOffering | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [immersive, setImmersive] = useState(false);
+  const [entryOfferingId, setEntryOfferingId] = useState<string | null>(null);
   const { isContributor } = useGroveAuthority(id);
 
   const { data: grove, isLoading, isError } = useQuery({
