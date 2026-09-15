@@ -29,6 +29,8 @@ interface Props {
   treeName?: string | null;
   rememberedName?: string | null;
   offerings: LifeGroveOffering[];
+  /** Open straight onto one memory (tapped from the Grove page). */
+  initialOfferingId?: string | null;
 }
 
 type Filter = "all" | OfferingType;
