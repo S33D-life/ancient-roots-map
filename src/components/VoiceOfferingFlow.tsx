@@ -17,7 +17,8 @@ export interface VoiceOfferingData {
 }
 
 interface VoiceOfferingFlowProps {
-  treeId: string;
+  /** Ancient Friend id. Optional so Life Groves can reuse this recorder. */
+  treeId?: string;
   meetingExpired?: boolean;
   onComplete: (data: VoiceOfferingData) => void;
   onCancel: () => void;
@@ -273,7 +274,7 @@ const VoiceOfferingFlow = ({ treeId, meetingExpired, onComplete, onCancel }: Voi
       if (!user) throw new Error("Please sign in to leave a voice offering");
 
       // Upload to offerings bucket
-      const fileName = `${user.id}/${treeId}/${Date.now()}-voice.webm`;
+      const fileName = `${user.id}/${treeId ?? "grove"}/${Date.now()}-voice.webm`;
       const { error: uploadErr } = await supabase.storage
         .from("offerings")
         .upload(fileName, audioBlob, {

@@ -54,7 +54,8 @@ export interface SelectedSongData {
 }
 
 interface MusicOfferingFlowProps {
-  treeId: string;
+  /** Ancient Friend id. Optional so Life Groves can reuse this flow. */
+  treeId?: string;
   treeName?: string;
   onComplete: (data: SelectedSongData) => void;
   onCancel: () => void;
@@ -225,6 +226,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
 
   // Fetch recent songs on mount
   useEffect(() => {
+    if (!treeId) return;
     supabase
       .rpc("get_recent_tree_songs", { p_tree_id: treeId })
       .then(({ data }) => {
