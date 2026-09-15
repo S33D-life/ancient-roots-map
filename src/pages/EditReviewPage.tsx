@@ -34,6 +34,10 @@ interface Proposal {
   flags: string[];
   created_at: string;
   updated_at: string;
+  proposal_type?: string;
+  merge_target_tree_id?: string | null;
+  merge_preferred_tree_id?: string | null;
+  base_updated_at?: string | null;
 }
 
 interface TreeInfo {
@@ -78,6 +82,9 @@ export default function EditReviewPage() {
   const [reviewNote, setReviewNote] = useState("");
   const [processing, setProcessing] = useState(false);
   const [curatorId, setCuratorId] = useState<string | null>(null);
+  const [mergeSurvivor, setMergeSurvivor] = useState<string | null>(null);
+  const [conflictAck, setConflictAck] = useState(false);
+  const [staleWarning, setStaleWarning] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCuratorId(user?.id ?? null));
