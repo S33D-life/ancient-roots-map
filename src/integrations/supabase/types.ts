@@ -11698,6 +11698,7 @@ export type Database = {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
       }
+      locked_own_heart_balance: { Args: never; Returns: number }
       open_group_whisper: {
         Args: { _current_tree_id: string; _whisper_id: string }
         Returns: Json
