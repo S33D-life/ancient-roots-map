@@ -3509,6 +3509,33 @@ export type Database = {
           },
         ]
       }
+      heart_award_rules: {
+        Row: {
+          client_allowed: boolean
+          created_at: string
+          heart_type: string
+          max_amount: number
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_allowed?: boolean
+          created_at?: string
+          heart_type: string
+          max_amount: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_allowed?: boolean
+          created_at?: string
+          heart_type?: string
+          max_amount?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       heart_campaigns: {
         Row: {
           created_at: string
@@ -11666,6 +11693,7 @@ export type Database = {
         Args: { p_id: string; p_weight: number }
         Returns: undefined
       }
+      is_untrusted_heart_writer: { Args: never; Returns: boolean }
       is_whisper_group_member: {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
