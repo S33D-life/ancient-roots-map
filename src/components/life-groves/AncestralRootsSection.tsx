@@ -27,6 +27,7 @@ import {
   createGroveRoot,
   listGroveRoots,
   removeGroveRoot,
+  reviewGroveRootProposal,
   searchAncientFriends,
   type AncientFriendResult,
   type EntryMode,
@@ -205,6 +206,7 @@ export default function AncestralRootsSection({ groveId }: Props) {
 
       <RootIntoAncientFriendDialog
         groveId={groveId}
+        isSteward={isSteward}
         open={open}
         onClose={() => setOpen(false)}
         onRooted={() => qc.invalidateQueries({ queryKey: ["grove-roots", groveId] })}
@@ -217,11 +219,13 @@ export default function AncestralRootsSection({ groveId }: Props) {
 
 function RootIntoAncientFriendDialog({
   groveId,
+  isSteward,
   open,
   onClose,
   onRooted,
 }: {
   groveId: string;
+  isSteward: boolean;
   open: boolean;
   onClose: () => void;
   onRooted: () => void;
@@ -252,7 +256,11 @@ function RootIntoAncientFriendDialog({
         entryMode,
       }),
     onSuccess: () => {
-      toast.success("The root reaches out. It will be marked once welcomed.");
+      toast.success(
+        isSteward
+          ? "The root reaches out. It will be marked once welcomed."
+          : "Your suggestion rests with the grove's stewards.",
+      );
       reset();
       onClose();
       onRooted();
@@ -425,10 +433,16 @@ function RootIntoAncientFriendDialog({
               disabled={!inscription.trim() || create.isPending}
               onClick={() => create.mutate()}
             >
-              {create.isPending ? "Reaching…" : "Root into this Ancient Friend"}
+              {create.isPending
+                ? "Reaching…"
+                : isSteward
+                  ? "Root into this Ancient Friend"
+                  : "Suggest this root"}
             </Button>
             <p className="font-serif text-[11px] italic text-muted-foreground/70 text-center">
-              A keeper of that Ancient Friend welcomes the root before the mark appears.
+              {isSteward
+                ? "A keeper of that Ancient Friend welcomes the root before the mark appears."
+                : "A steward of this grove takes up the suggestion first; the Ancient Friend's keeper welcomes it after."}
             </p>
           </div>
         )}
@@ -465,7 +479,10 @@ function Choice({
 
 function describe(e: unknown): string {
   const m = (e as { message?: string })?.message ?? "";
-  if (m.includes("steward_only")) return "Only a steward of this grove may begin a root.";
+  if (m.includes("steward_only")) return "Only a steward of this grove may decide on a suggestion.";
+  if (m.includes("contributor_only")) return "Only people welcomed into this grove may suggest a root.";
+  if (m.includes("not_a_suggestion")) return "That root has already moved on.";
+  if (m.includes("reason_required")) return "Please leave a few words with your decision.";
   if (m.includes("root_already_exists")) return "This grove is already rooted in that Ancient Friend.";
   if (m.includes("tree_merged")) return "That Ancient Friend has been merged into another record.";
   return m || "Something would not settle. Please try again.";
