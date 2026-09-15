@@ -21,6 +21,34 @@ const ALLOWED_CATEGORIES = new Set([
 
 const ALLOWED_PRIORITIES = new Set(["low", "normal", "high"]);
 
+// Abuse limits — a single Wanderer may not flood the grove.
+const MAX_PER_ACTOR_PER_HOUR = 30;
+const MAX_PER_PAIR_PER_HOUR = 5;
+
+/**
+ * Deep links must stay inside S33D. Only a relative path is accepted:
+ * no scheme, no protocol-relative "//host", no backslashes, no fragments
+ * that could smuggle a redirect. Anything else is dropped (not rejected)
+ * so a legitimate notification still arrives without its link.
+ */
+function safeDeepLink(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const v = raw.trim();
+  if (!v || v.length > 200) return null;
+  if (!v.startsWith("/")) return null;
+  if (v.startsWith("//")) return null;
+  if (/[\\<>"'\s]/.test(v)) return null;
+  if (/^\/+\w+:/.test(v)) return null;
+  if (!/^\/[A-Za-z0-9\-._~/%?=&#:+]*$/.test(v)) return null;
+  return v;
+}
+
+/** Strip control characters so titles/bodies cannot fake UI chrome. */
+function clean(v: string, max: number): string {
+  // deno-lint-ignore no-control-regex
+  return v.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, max);
+}
+
 function bad(status: number, error: string) {
   return new Response(JSON.stringify({ error }), {
     status,
