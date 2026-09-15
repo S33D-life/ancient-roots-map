@@ -119,8 +119,19 @@ export default function LifeGroveCreatePage() {
       navigate(`/heartwood/life-groves/${grove.id}`);
     },
     onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : "Could not create grove.";
-      toast(msg);
+      // Supabase errors are plain objects, not Error instances — without this the
+      // real cause (RLS, constraint, missing field) was swallowed by a generic line.
+      const e = (err ?? {}) as Record<string, unknown>;
+      const parts = [e.message, e.details, e.hint]
+        .filter((p): p is string => typeof p === "string" && p.trim().length > 0);
+      const detail = parts.length
+        ? parts.join(" — ")
+        : err instanceof Error
+          ? err.message
+          : "Unknown reason.";
+      const code = typeof e.code === "string" ? ` (${e.code})` : "";
+      console.error("Life Grove creation failed", err);
+      toast("The grove could not begin", { description: `${detail}${code}` });
     },
   });
 
