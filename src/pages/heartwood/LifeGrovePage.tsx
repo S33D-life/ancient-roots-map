@@ -23,7 +23,6 @@ import { GROVE_TYPES, TREE_ARCHETYPES, type LifeGroveOffering } from "@/lib/life
 export default function LifeGrovePage() {
   const { id } = useParams<{ id: string }>();
   const { userId } = useCurrentUser();
-  const [selected, setSelected] = useState<LifeGroveOffering | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [immersive, setImmersive] = useState(false);
   const [entryOfferingId, setEntryOfferingId] = useState<string | null>(null);
@@ -43,12 +42,12 @@ export default function LifeGrovePage() {
     refetchOnMount: true,
   });
 
-  // Clear selection if the chosen offering disappears after refetch.
+  // Clear the entry memory if it disappears after a refetch.
   useEffect(() => {
-    if (selected && !offerings.some((o) => o.id === selected.id)) {
-      setSelected(null);
+    if (entryOfferingId && !offerings.some((o) => o.id === entryOfferingId)) {
+      setEntryOfferingId(null);
     }
-  }, [offerings, selected]);
+  }, [offerings, entryOfferingId]);
 
   if (isLoading) {
     return (
