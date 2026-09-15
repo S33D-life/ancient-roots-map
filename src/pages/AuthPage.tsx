@@ -795,6 +795,7 @@ const AuthPage = () => {
     const code = inviteCode.trim();
     if (!code) {
       // Use the same soft Heartwood warning rather than a harsh red toast.
+      setInviteStatus("malformed");
       setInviteBloomFailure("No invitation code entered yet.");
       return;
     }
@@ -802,32 +803,27 @@ const AuthPage = () => {
     setInviteBloomFailure(null);
     setIsLoading(true);
     try {
-      // Pre-validate via SECURITY DEFINER RPC. The invite_links table has RLS
-      // restricting SELECT to the invite creator, so anonymous signup flows
-      // CANNOT read the row directly — that's why fresh invites used to look
-      // "already used or invalid". The RPC bypasses RLS safely.
-      console.log("[invite] validating", { code });
-      const { data: validation, error: validationError } = await supabase.rpc(
-        "validate_invite_code",
-        { p_code: code },
-      );
-      console.log("[invite] validation response", { validation, validationError });
+      // Re-validate immediately before signup via a SECURITY DEFINER RPC. The
+      // invite_links table restricts SELECT to the invite creator, so anonymous
+      // signup flows CANNOT read the row directly — the RPC bypasses RLS safely
+      // and returns a precise status only.
+      const result = await checkInviteCode(code);
+      setInviteStatus(result.status);
+      setInviteExpiresAt(result.expiresAt);
 
-      const validRow = Array.isArray(validation) ? validation[0] : validation;
-      if (validationError || !validRow?.id) {
+      if (result.status !== "valid") {
         void trackInviteEvent("invite_validation_failed", {
           code,
           source: "manual",
-          metadata: { error: validationError?.message ?? "no_row" },
+          metadata: { reason: result.status },
         });
-        setInviteExpiresAt(null);
+        setInviteBloomFailure(result.detail);
         throw new Error("INVITE_BLOOM_FAILED");
       }
 
-      // Surface a soft expiry hint when the backend reports one.
-      setInviteExpiresAt((validRow as any)?.expires_at ?? null);
       void trackInviteEvent("invite_validation_success", {
         code,
+
         source: "manual",
         metadata: { expires_at: (validRow as any)?.expires_at ?? null },
       });
