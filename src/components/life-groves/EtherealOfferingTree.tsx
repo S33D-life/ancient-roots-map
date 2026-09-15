@@ -355,7 +355,6 @@ export default function EtherealOfferingTree({
               "transition-all duration-500",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               "hover:scale-110",
-              "motion-safe:animate-[lifeGroveSway_9s_ease-in-out_infinite]",
               isSelected
                 ? "scale-125 drop-shadow-[0_0_14px_hsl(38_90%_70%/0.9)]"
                 : "drop-shadow-[0_0_6px_hsl(38_90%_70%/0.45)]",
