@@ -373,6 +373,7 @@ export default function EditReviewPage() {
 function ProposalCard({
   proposal,
   tree,
+  mergeTarget,
   proposer,
   onAction,
 }: {
