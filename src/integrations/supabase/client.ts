@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { brokeredPreviewStorage } from "./previewAuthStorage";
 import { supabaseEnv } from "@/config/env";
 
 const missingEnvError = {
@@ -114,7 +115,7 @@ const createMissingEnvSupabaseClient = () => {
 export const supabase: SupabaseClient<Database> = supabaseEnv
   ? createClient<Database>(supabaseEnv.url, supabaseEnv.anonKey, {
       auth: {
-        storage: localStorage,
+        storage: brokeredPreviewStorage(),
         persistSession: true,
         autoRefreshToken: true,
       },
