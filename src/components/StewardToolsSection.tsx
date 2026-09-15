@@ -10,13 +10,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf, Camera } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
+import { useTreeEditEligibility } from "@/hooks/use-tree-edit-eligibility";
 
 const TreeDirectEditPanel = lazy(() => import("@/components/TreeDirectEditPanel"));
 const RefinementTrail = lazy(() => import("@/components/RefinementTrail"));
 const DuplicateReviewQueue = lazy(() => import("@/components/DuplicateReviewQueue"));
 const TreeMergeDialog = lazy(() => import("@/components/TreeMergeDialog"));
 const ReportDuplicateButton = lazy(() => import("@/components/ReportDuplicateButton"));
+const TreeChangeFlow = lazy(() => import("@/components/tree-change/TreeChangeFlow"));
 
 interface Tree {
   id: string;
@@ -80,8 +83,35 @@ export default function StewardToolsSection({
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergePrimaryId, setMergePrimaryId] = useState("");
   const [mergeSecondaryId, setMergeSecondaryId] = useState("");
+  const [changeFlowOpen, setChangeFlowOpen] = useState(false);
+  const [changeFlowTab, setChangeFlowTab] = useState<"details" | "location" | "duplicate">("details");
+  const { eligibility } = useTreeEditEligibility(treeId);
 
-  if (loading || role === "anonymous") return null;
+  const openChangeFlow = (tab: "details" | "location" | "duplicate") => {
+    setChangeFlowTab(tab);
+    setChangeFlowOpen(true);
+  };
+
+  if (loading) return null;
+
+  if (role === "anonymous") {
+    return (
+      <Card className="bg-card/40 border-primary/10 backdrop-blur">
+        <CardContent className="p-4 space-y-2">
+          <h3 className="font-serif text-sm tracking-wide text-foreground/80 flex items-center gap-2">
+            <Leaf className="h-3.5 w-3.5 text-primary/60" />
+            Tend This Tree
+          </h3>
+          <p className="text-[11px] text-muted-foreground font-serif">
+            Sign in to correct this tree's details, its location, or to flag a duplicate record.
+          </p>
+          <Button asChild variant="outline" size="sm" className="text-xs font-serif min-h-11">
+            <Link to={`/auth?redirect=${encodeURIComponent(`/tree/${treeId}`)}`}>Sign in to contribute</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const roleInfo = ROLE_LABELS[role];
 
@@ -112,39 +142,45 @@ export default function StewardToolsSection({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {canDirectEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40"
-                onClick={() => setEditOpen(true)}
-              >
-                <Leaf className="h-3 w-3" />
-                Refine This Placement
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40 min-h-11"
+              onClick={() => openChangeFlow("details")}
+            >
+              {eligibility.can_direct_edit ? <Pencil className="h-3 w-3" /> : <MessageSquarePlus className="h-3 w-3" />}
+              {eligibility.can_direct_edit ? "Edit tree" : "Propose changes"}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs font-serif gap-1.5 text-muted-foreground min-h-11"
+              onClick={() => openChangeFlow("location")}
+            >
+              <Leaf className="h-3 w-3" />
+              Correct location
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs font-serif gap-1.5 text-muted-foreground min-h-11"
+              onClick={() => openChangeFlow("duplicate")}
+            >
+              <GitMerge className="h-3 w-3" />
+              Propose duplicate / merge
+            </Button>
 
             {canDirectEdit && onTendPhotos && (
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40"
+                className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40 min-h-11"
                 onClick={onTendPhotos}
               >
                 <Camera className="h-3 w-3" />
                 Tend Photos
-              </Button>
-            )}
-
-            {!canDirectEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40"
-                onClick={onProposeEdit}
-              >
-                <MessageSquarePlus className="h-3 w-3" />
-                Offer a Refinement
               </Button>
             )}
 
@@ -219,6 +255,19 @@ export default function StewardToolsSection({
             userId={userId}
             role={role}
             onTreeUpdated={onTreeUpdated}
+          />
+        </Suspense>
+      )}
+
+      {changeFlowOpen && (
+        <Suspense fallback={null}>
+          <TreeChangeFlow
+            open={changeFlowOpen}
+            onOpenChange={setChangeFlowOpen}
+            treeId={treeId}
+            tree={tree as any}
+            initialTab={changeFlowTab}
+            onTreeUpdated={(updated) => onTreeUpdated(updated)}
           />
         </Suspense>
       )}

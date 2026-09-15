@@ -34,6 +34,10 @@ interface Proposal {
   flags: string[];
   created_at: string;
   updated_at: string;
+  proposal_type?: string;
+  merge_target_tree_id?: string | null;
+  merge_preferred_tree_id?: string | null;
+  base_updated_at?: string | null;
 }
 
 interface TreeInfo {
@@ -78,6 +82,9 @@ export default function EditReviewPage() {
   const [reviewNote, setReviewNote] = useState("");
   const [processing, setProcessing] = useState(false);
   const [curatorId, setCuratorId] = useState<string | null>(null);
+  const [mergeSurvivor, setMergeSurvivor] = useState<string | null>(null);
+  const [conflictAck, setConflictAck] = useState(false);
+  const [staleWarning, setStaleWarning] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCuratorId(user?.id ?? null));
@@ -103,7 +110,9 @@ export default function EditReviewPage() {
       setProposals(props);
 
       // Load tree info
-      const treeIds = [...new Set(props.map((p) => p.tree_id))];
+      const treeIds = [...new Set(
+        props.flatMap((p) => [p.tree_id, p.merge_target_tree_id]).filter(Boolean) as string[],
+      )];
       if (treeIds.length > 0) {
         const { data: treesData } = await supabase
           .from("trees")
@@ -142,85 +151,72 @@ export default function EditReviewPage() {
     return c;
   }, [proposals]);
 
+  // All decisions run through SECURITY DEFINER functions so curator authority,
+  // conflict detection and atomic merges are enforced by the database.
   const handleAction = async () => {
     if (!actionDialog || !curatorId) return;
-    setProcessing(true);
     const { proposal, action } = actionDialog;
+    setProcessing(true);
 
-    if (action === "accept") {
-      // 1. Update tree canonical record
-      const tree = trees[proposal.tree_id];
-      const prevValues: Record<string, unknown> = {};
-      const updateFields: Record<string, unknown> = {};
+    try {
+      if (proposal.proposal_type === "merge") {
+        if (action !== "accept") {
+          const { error } = await (supabase.rpc as any)("review_tree_change_proposal", {
+            _proposal_id: proposal.id,
+            _decision: action === "reject" ? "decline" : "needs_more_info",
+            _note: reviewNote.trim(),
+          });
+          if (error) throw error;
+        } else {
+          const survivor = mergeSurvivor || proposal.merge_preferred_tree_id || proposal.tree_id;
+          const { error } = await (supabase.rpc as any)("approve_tree_merge", {
+            _proposal_id: proposal.id,
+            _surviving_tree_id: survivor,
+            _field_resolutions: {},
+            _note: reviewNote.trim() || null,
+            _acknowledge_conflict: conflictAck,
+          });
+          if (error) throw error;
+          toast.success("Merged. Every offering and memory now rests with the surviving record.");
+        }
+      } else {
+        const { error } = await (supabase.rpc as any)("review_tree_change_proposal", {
+          _proposal_id: proposal.id,
+          _decision: action === "accept" ? "approve" : action === "reject" ? "decline" : "needs_more_info",
+          _note: reviewNote.trim() || null,
+          _overrides: null,
+          _acknowledge_conflict: conflictAck,
+        });
+        if (error) throw error;
+        toast.success(
+          action === "accept" ? "Approved — the tree's record has been updated."
+            : action === "reject" ? "Declined." : "Requested more information.",
+        );
 
-      for (const [key, value] of Object.entries(proposal.proposed_changes)) {
-        if (key === "access_notes") continue; // not a tree column
-        if (tree) prevValues[key] = (tree as any)[key];
-        updateFields[key] = value;
-      }
-
-      if (Object.keys(updateFields).length > 0) {
-        const { error: treeErr } = await supabase
-          .from("trees")
-          .update(updateFields)
-          .eq("id", proposal.tree_id);
-        if (treeErr) {
-          toast.error("Failed to update tree: " + treeErr.message);
-          setProcessing(false);
-          return;
+        if (action === "accept") {
+          const tree = trees[proposal.tree_id];
+          if (tree) {
+            setTrees((prev) => ({
+              ...prev,
+              [proposal.tree_id]: { ...tree, ...proposal.proposed_changes } as TreeInfo,
+            }));
+          }
         }
       }
-
-      // 2. Write change log (rich merge record — keeps previous_values + proposal link)
-      await supabase.from("tree_change_log" as any).insert({
-        tree_id: proposal.tree_id,
-        change_set: proposal.proposed_changes,
-        previous_values: prevValues,
-        merged_from_proposal_id: proposal.id,
-        merged_by: curatorId,
-      } as any);
-
-      // 2b. Cross-write tree_edit_history for one canonical provenance chain.
-      //     One row per changed field, linked to the proposal. Best-effort: a
-      //     logging failure must not roll back the accepted change. The Refinement
-      //     Trail dedups these against the change_log entry above (see
-      //     refinementTrail.fromEditHistory), so this does not double-display.
-      const historyRows = Object.entries(updateFields).map(([field, value]) => ({
-        tree_id: proposal.tree_id,
-        user_id: curatorId,
-        field_name: field,
-        old_value: prevValues[field] != null ? String(prevValues[field]) : null,
-        new_value: value != null ? String(value) : null,
-        edit_reason: reviewNote || proposal.reason || null,
-        edit_type: "proposal_accepted",
-        proposal_id: proposal.id,
-      }));
-      if (historyRows.length > 0) {
-        await supabase.from("tree_edit_history" as any).insert(historyRows as any);
+    } catch (err: any) {
+      const msg = String(err?.message ?? err);
+      if (msg.includes("stale_proposal")) {
+        setStaleWarning(true);
+        toast.error("This record changed after the proposal was written — please review it afresh.");
+      } else if (msg.includes("already_reviewed")) {
+        toast.error("This proposal has already been decided.");
+      } else if (msg.includes("already_merged")) {
+        toast.error("One of these records has already been merged.");
+      } else {
+        toast.error(msg);
       }
-
-      // 3. Update proposal status
-      await supabase
-        .from("tree_edit_proposals" as any)
-        .update({ status: "accepted", reviewer_id: curatorId, reviewer_note: reviewNote || null } as any)
-        .eq("id", proposal.id);
-
-      // Update local tree cache
-      if (tree) {
-        setTrees((prev) => ({
-          ...prev,
-          [proposal.tree_id]: { ...tree, ...updateFields } as TreeInfo,
-        }));
-      }
-
-      toast.success("Proposal accepted and merged!");
-    } else {
-      const newStatus = action === "reject" ? "rejected" : "needs_more_info";
-      await supabase
-        .from("tree_edit_proposals" as any)
-        .update({ status: newStatus, reviewer_id: curatorId, reviewer_note: reviewNote || null } as any)
-        .eq("id", proposal.id);
-      toast.success(action === "reject" ? "Proposal rejected." : "Requested more info.");
+      setProcessing(false);
+      return;
     }
 
     setProposals((prev) =>
@@ -233,6 +229,9 @@ export default function EditReviewPage() {
     setProcessing(false);
     setActionDialog(null);
     setReviewNote("");
+    setConflictAck(false);
+    setStaleWarning(false);
+    setMergeSurvivor(null);
   };
 
   if (roleLoading) {
@@ -311,10 +310,14 @@ export default function EditReviewPage() {
                         key={proposal.id}
                         proposal={proposal}
                         tree={tree}
+                        mergeTarget={proposal.merge_target_tree_id ? trees[proposal.merge_target_tree_id] : undefined}
                         proposer={proposer}
                         onAction={(action) => {
                           setActionDialog({ proposal, action });
                           setReviewNote("");
+                          setConflictAck(false);
+                          setStaleWarning(false);
+                          setMergeSurvivor(proposal.merge_preferred_tree_id ?? proposal.tree_id);
                         }}
                       />
                     );
@@ -335,6 +338,47 @@ export default function EditReviewPage() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {actionDialog?.proposal.proposal_type === "merge" && actionDialog.action === "accept" && (
+              <div className="space-y-2">
+                <p className="text-xs font-serif text-muted-foreground">
+                  Choose the record that survives. All offerings, check-ins and contributions move
+                  across with their original authors and dates; the other record is kept as a
+                  traceable reference and its links redirect here.
+                </p>
+                <div className="flex gap-2">
+                  {[actionDialog.proposal.tree_id, actionDialog.proposal.merge_target_tree_id].map((tid) =>
+                    tid ? (
+                      <button
+                        key={tid}
+                        type="button"
+                        onClick={() => setMergeSurvivor(tid)}
+                        className={`flex-1 rounded-md border px-2 py-2 text-xs font-serif min-h-11 ${
+                          mergeSurvivor === tid ? "border-primary/60 bg-primary/5" : "border-border/40"
+                        }`}
+                      >
+                        {trees[tid]?.name || "Unknown tree"}
+                      </button>
+                    ) : null,
+                  )}
+                </div>
+              </div>
+            )}
+
+            {staleWarning && (
+              <label className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/5 p-2 text-xs font-serif">
+                <input
+                  type="checkbox"
+                  checked={conflictAck}
+                  onChange={(e) => setConflictAck(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  This record changed after the proposal was written. I have reviewed the newest
+                  values and still want to apply this decision.
+                </span>
+              </label>
+            )}
+
             <Textarea
               value={reviewNote}
               onChange={(e) => setReviewNote(e.target.value)}
@@ -374,11 +418,13 @@ export default function EditReviewPage() {
 function ProposalCard({
   proposal,
   tree,
+  mergeTarget,
   proposer,
   onAction,
 }: {
   proposal: Proposal;
   tree?: TreeInfo;
+  mergeTarget?: TreeInfo;
   proposer?: ProposerInfo;
   onAction: (action: "accept" | "reject" | "needs_more_info") => void;
 }) {
@@ -421,6 +467,10 @@ function ProposalCard({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-[10px] font-serif">
+              {proposal.proposal_type === "merge" ? "Duplicate / merge"
+                : proposal.proposal_type === "location" ? "Location" : "Details"}
+            </Badge>
             {proposal.flags?.map((f) => (
               <Badge key={f} variant="outline" className="text-[10px] border-yellow-500/40 text-yellow-600 font-serif">
                 <AlertTriangle className="w-3 h-3 mr-1" />
@@ -441,6 +491,32 @@ function ProposalCard({
             </Badge>
           </div>
         </div>
+
+        {/* Merge comparison */}
+        {proposal.proposal_type === "merge" && (
+          <div className="bg-secondary/20 rounded-lg p-3 grid grid-cols-2 gap-3 text-xs font-serif">
+            {[tree, mergeTarget].map((t, i) => (
+              <div key={i} className="space-y-0.5">
+                <p className="text-foreground/90">{t?.name || "Unknown tree"}</p>
+                <p className="text-muted-foreground">{t?.species || "—"}</p>
+                <p className="text-muted-foreground/70 font-mono text-[10px]">
+                  {t?.latitude != null ? `${t.latitude.toFixed(5)}, ${t.longitude?.toFixed(5)}` : "no position"}
+                </p>
+                {t?.id && (
+                  <Link to={`/tree/${t.id}`} className="text-primary/80 text-[10px]">Open record</Link>
+                )}
+                {proposal.merge_preferred_tree_id === t?.id && (
+                  <Badge variant="outline" className="text-[9px] mt-1">Proposed survivor</Badge>
+                )}
+              </div>
+            ))}
+            {tree?.latitude != null && mergeTarget?.latitude != null && (
+              <p className="col-span-2 text-[10px] text-muted-foreground">
+                {Math.round(haversineMeters(tree.latitude, tree.longitude!, mergeTarget.latitude, mergeTarget.longitude!))}m apart
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Diff view */}
         <div className="bg-secondary/20 rounded-lg p-3 space-y-2">
