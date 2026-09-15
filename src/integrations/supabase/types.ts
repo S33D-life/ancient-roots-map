@@ -12172,6 +12172,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      tree_column_type: { Args: { _field: string }; Returns: string }
       tree_edit_eligibility: {
         Args: { _tree_id: string; _user_id?: string }
         Returns: Json

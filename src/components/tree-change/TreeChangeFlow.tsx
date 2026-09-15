@@ -43,22 +43,12 @@ import TreeLocationPicker from "./TreeLocationPicker";
 import { useTreeEditEligibility, type TreeEditEligibility } from "@/hooks/use-tree-edit-eligibility";
 import { haversineDistance } from "@/utils/treeSimilarityEngine";
 
-type FieldKey =
-  | "name" | "species" | "description" | "lore_text" | "estimated_age"
-  | "what3words" | "access_notes" | "girth_cm" | "planted_year" | "variety_name";
+import { TREE_TEXT_FIELDS, type TreeFieldKey } from "@/lib/tree-change/fields";
 
-const TEXT_FIELDS: { key: FieldKey; label: string; hint?: string; long?: boolean; numeric?: boolean }[] = [
-  { key: "name", label: "Tree name" },
-  { key: "species", label: "Species" },
-  { key: "variety_name", label: "Variety", hint: "Optional" },
-  { key: "estimated_age", label: "Estimated age (years)", numeric: true },
-  { key: "planted_year", label: "Planted year", numeric: true },
-  { key: "girth_cm", label: "Girth (cm)", numeric: true },
-  { key: "what3words", label: "what3words", hint: "Optional — e.g. ///word.word.word" },
-  { key: "description", label: "Description", long: true },
-  { key: "lore_text", label: "Lore & stories", long: true },
-  { key: "access_notes", label: "Access notes", long: true, hint: "How a visitor reaches this tree" },
-];
+type FieldKey = TreeFieldKey;
+
+const TEXT_FIELDS = TREE_TEXT_FIELDS;
+
 
 interface TreeRow {
   id: string;
