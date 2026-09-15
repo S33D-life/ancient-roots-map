@@ -2986,6 +2986,39 @@ export type Database = {
           },
         ]
       }
+      fractal_award_rules: {
+        Row: {
+          action_type: string
+          client_allowed: boolean
+          created_at: string
+          currency: string
+          daily_cap: number
+          max_amount: number
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          client_allowed?: boolean
+          created_at?: string
+          currency: string
+          daily_cap?: number
+          max_amount?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          client_allowed?: boolean
+          created_at?: string
+          currency?: string
+          daily_cap?: number
+          max_amount?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gardens: {
         Row: {
           cover_image_url: string | null
