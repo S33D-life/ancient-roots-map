@@ -96,64 +96,109 @@ export default function AncestralRootsSection({ groveId }: Props) {
         </p>
       ) : (
         <ul className="space-y-3">
-          {[...active, ...waiting, ...declined].map((r) => (
-            <li
-              key={r.root_id}
-              className="rounded-xl border border-border/40 bg-background/40 p-3"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Link
-                  to={`/tree/${r.tree_id}`}
-                  className="font-serif text-sm text-primary underline decoration-primary/40 underline-offset-4"
-                >
-                  {r.tree_name || "An Ancient Friend"}
-                </Link>
-                <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-                  {r.status === "active"
-                    ? "Welcomed"
-                    : r.status === "pending"
-                      ? "Awaiting welcome"
-                      : "Not welcomed"}
-                </span>
-              </div>
-              {r.inscription_text && (
-                <p className="font-serif tracking-[0.3em] text-sm text-foreground/85 mt-1">
-                  {r.inscription_text}
-                </p>
-              )}
-              {r.status === "pending" && (
-                <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
-                  A keeper of that Ancient Friend will decide whether the mark may rest there.
-                </p>
-              )}
-              {r.status === "declined" && r.review_note && (
-                <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
-                  {r.review_note}
-                </p>
-              )}
-              {isSteward && r.status !== "declined" && (
-                <button
-                  type="button"
-                  onClick={() => remove.mutate(r.root_id)}
-                  className="mt-2 font-serif text-[11px] uppercase tracking-[0.22em]
-                    text-muted-foreground/60 hover:text-foreground min-h-[44px]"
-                >
-                  Let this root go
-                </button>
-              )}
-            </li>
-          ))}
+          {[...suggested, ...active, ...waiting, ...declined].map((r) => {
+            const mine = !!userId && r.created_by === userId;
+            return (
+              <li
+                key={r.root_id}
+                className={`rounded-xl border p-3 ${
+                  r.status === "proposed"
+                    ? "border-primary/35 bg-primary/5"
+                    : "border-border/40 bg-background/40"
+                }`}
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <Link
+                    to={`/tree/${r.tree_id}`}
+                    className="font-serif text-sm text-primary underline decoration-primary/40 underline-offset-4"
+                  >
+                    {r.tree_name || "An Ancient Friend"}
+                  </Link>
+                  <span className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                    {r.status === "active"
+                      ? "Welcomed"
+                      : r.status === "pending"
+                        ? "Awaiting welcome"
+                        : r.status === "proposed"
+                          ? "Suggested"
+                          : "Not welcomed"}
+                  </span>
+                </div>
+                {r.inscription_text && (
+                  <p className="font-serif tracking-[0.3em] text-sm text-foreground/85 mt-1">
+                    {r.inscription_text}
+                  </p>
+                )}
+                {r.status === "proposed" && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
+                    {mine
+                      ? "Your suggestion rests here until a steward takes it up."
+                      : "Suggested by someone welcomed into this grove. A steward decides whether it travels on."}
+                  </p>
+                )}
+                {r.status === "pending" && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
+                    A keeper of that Ancient Friend will decide whether the mark may rest there.
+                  </p>
+                )}
+                {r.status === "declined" && r.review_note && (
+                  <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
+                    {r.review_note}
+                  </p>
+                )}
+
+                {r.status === "proposed" && isSteward && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Button
+                      size="sm"
+                      className="font-serif"
+                      disabled={review.isPending}
+                      onClick={() => review.mutate({ rootId: r.root_id, decision: "accept" })}
+                    >
+                      Take it up
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="font-serif"
+                      disabled={review.isPending}
+                      onClick={() => {
+                        const note = window.prompt("A few words for the person who suggested it:");
+                        if (note && note.trim()) {
+                          review.mutate({ rootId: r.root_id, decision: "decline", note: note.trim() });
+                        }
+                      }}
+                    >
+                      Set it aside
+                    </Button>
+                  </div>
+                )}
+
+                {((isSteward && r.status !== "declined") ||
+                  (mine && r.status === "proposed")) && (
+                  <button
+                    type="button"
+                    onClick={() => remove.mutate({ rootId: r.root_id, mine: mine && r.status === "proposed" })}
+                    className="mt-2 font-serif text-[11px] uppercase tracking-[0.22em]
+                      text-muted-foreground/60 hover:text-foreground min-h-[44px]"
+                  >
+                    {mine && r.status === "proposed" ? "Withdraw my suggestion" : "Let this root go"}
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 
-      {isSteward && (
+      {isContributor && (
         <div className="mt-4">
           <Button
             variant="outline"
             className="font-serif text-xs uppercase tracking-[0.25em] h-12"
             onClick={() => setOpen(true)}
           >
-            + Root into an Ancient Friend
+            {isSteward ? "+ Root into an Ancient Friend" : "+ Suggest a root"}
           </Button>
         </div>
       )}
