@@ -281,10 +281,11 @@ function RootIntoAncientFriendDialog({
   });
 
   const create = useMutation({
-    mutationFn: () =>
-      createGroveRoot({
+    mutationFn: () => {
+      if (!chosen) throw new Error("tree_not_found");
+      return createGroveRoot({
         groveId,
-        treeId: chosen!.id,
+        treeId: chosen.id,
         inscriptionText: inscription.trim(),
         dedication: dedication.trim() || null,
         inscriptionVisibility: visible ? "public" : "private",
@@ -292,7 +293,8 @@ function RootIntoAncientFriendDialog({
         entryMode,
         signatureStrokes: signature,
         rootType,
-      }),
+      });
+    },
     onSuccess: () => {
       toast.success(
         isSteward

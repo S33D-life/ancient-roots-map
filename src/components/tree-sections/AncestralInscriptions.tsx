@@ -2,7 +2,7 @@
  * AncestralInscriptions — names discovered in the digital bark.
  *
  * Not a list of memorials: a few quiet marks resting in the twin's surface.
- * Touching one opens the Ancestral Root portal, and from there — where the
+ * Touching one opens the Root portal, and from there — where the
  * grove permits it — the Ethereal Tree itself.
  *
  * The living tree is never carved. The digital twin remembers.
@@ -140,14 +140,14 @@ export default function AncestralInscriptions({ treeId }: Props) {
         </div>
       )}
 
-      <AncestralRootPortal mark={portal} onClose={() => setPortal(null)} />
+      <RootPortal mark={portal} onClose={() => setPortal(null)} />
     </section>
   );
 }
 
 /* ---------------- the portal ---------------- */
 
-function AncestralRootPortal({
+function RootPortal({
   mark,
   onClose,
 }: {
