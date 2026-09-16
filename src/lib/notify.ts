@@ -10,6 +10,7 @@ export type NotifyCategory =
   | "whisper"
   | "resonance"
   | "invite"
+  | "root_approval"
   | "general";
 
 export interface NotifyInput {
