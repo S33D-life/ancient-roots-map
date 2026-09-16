@@ -75,6 +75,10 @@ export default function FullscreenTreeView({
   );
   const selectedIndex = visible.findIndex((o) => o.id === selectedId);
 
+  useEffect(() => {
+    if (selectedId && selectedIndex < 0) setSelectedId(null);
+  }, [filter, selectedId, selectedIndex]);
+
   const step = (delta: number) => {
     if (visible.length === 0) return;
     const from = selectedIndex >= 0 ? selectedIndex : 0;
@@ -88,7 +92,8 @@ export default function FullscreenTreeView({
     const measure = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      setTreeSize(Math.max(260, Math.min(w * 0.94, h - 210, 720)));
+      const mobile = w < 640;
+      setTreeSize(Math.max(300, Math.min(w * (mobile ? 1.1 : 0.86), h - (mobile ? 150 : 120), 820)));
     };
     measure();
     window.addEventListener("resize", measure);
@@ -129,7 +134,7 @@ export default function FullscreenTreeView({
   /** Deterministic far starfield — calm, never busy. */
   const stars = useMemo(
     () =>
-      Array.from({ length: 34 }, (_, i) => {
+      Array.from({ length: 22 }, (_, i) => {
         const phi = 0.6180339887;
         return {
           key: i,
@@ -170,6 +175,12 @@ export default function FullscreenTreeView({
         >
           {/* night-sky ambience */}
           <div aria-hidden className="absolute inset-0 pointer-events-none">
+            <div
+              className="absolute inset-0 opacity-80"
+              style={{
+                background: `radial-gradient(ellipse 60% 46% at 50% 43%, hsl(${meta.hueA} 42% 32% / 0.12), transparent 72%), linear-gradient(to bottom, hsl(${meta.hueB} 30% 5% / 0.16), transparent 42%, hsl(${meta.hueA} 30% 12% / 0.08))`,
+              }}
+            />
             {stars.map((s) => (
               <span
                 key={s.key}
@@ -214,27 +225,33 @@ export default function FullscreenTreeView({
           </header>
 
           {/* the tree */}
-          <div className="relative z-10 flex-1 flex items-center justify-center px-2">
-            <EtherealOfferingTree
-              archetype={archetype}
-              treeName={rememberedName ? treeName : null}
-              offerings={offerings}
-              selectedId={selectedId}
-              onSelect={(o) => setSelectedId(o?.id ?? null)}
-              size={treeSize}
-              immersive
-              highlightIds={filter === "all" ? null : visible.map((o) => o.id)}
-            />
+          <div className="relative z-10 flex-1 min-h-0 flex items-center justify-center px-0 -my-2 sm:-my-4">
+            <motion.div
+              initial={reduced ? false : { opacity: 0, scale: 0.955, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: reduced ? 0 : 1.05, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <EtherealOfferingTree
+                archetype={archetype}
+                treeName={rememberedName ? treeName : null}
+                offerings={offerings}
+                selectedId={selectedId}
+                onSelect={(o) => setSelectedId(o?.id ?? null)}
+                size={treeSize}
+                immersive
+                highlightIds={filter === "all" ? null : visible.map((o) => o.id)}
+              />
+            </motion.div>
           </div>
 
           {/* invitation / hint */}
-          <div className="relative z-10 px-6 text-center min-h-[2.5rem]">
+          <div className="relative z-10 px-6 text-center min-h-[2rem]">
             {offerings.length === 0 ? (
               <p className="font-serif text-sm italic text-foreground/60">
                 The branches are waiting. This tree is ready to receive memory.
               </p>
             ) : (
-              <p className="font-serif text-xs italic text-foreground/45">
+                <p className="font-serif text-xs italic text-foreground/55">
                 {offerings.length} memor{offerings.length === 1 ? "y" : "ies"} resting in
                 the branches · touch one to open it
               </p>
@@ -245,7 +262,7 @@ export default function FullscreenTreeView({
           {presentTypes.length > 1 && (
             <nav
               aria-label="Filter what glows in the branches"
-              className="relative z-10 px-3 pb-4 pt-3 overflow-x-auto"
+               className="relative z-10 px-3 pb-3 pt-2 overflow-x-auto"
             >
               <ul className="flex gap-2 w-max mx-auto">
                 {[{ value: "all" as const, label: "All" }, ...presentTypes].map((t) => {
