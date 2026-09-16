@@ -29,10 +29,15 @@ import {
   removeGroveRoot,
   reviewGroveRootProposal,
   searchAncientFriends,
+  tendGroveRootInscription,
   type AncientFriendResult,
   type EntryMode,
   type PortalDisclosure,
 } from "@/repositories/grove-roots";
+import RootSignaturePad, {
+  SignatureMark,
+  type SignatureStrokes,
+} from "@/components/life-groves/RootSignaturePad";
 
 interface Props {
   groveId: string;
@@ -42,6 +47,7 @@ export default function AncestralRootsSection({ groveId }: Props) {
   const qc = useQueryClient();
   const { isSteward, isContributor, userId } = useGroveAuthority(groveId);
   const [open, setOpen] = useState(false);
+  const [tendingRoot, setTendingRoot] = useState<(typeof roots)[number] | null>(null);
 
   const { data: roots = [], isLoading } = useQuery({
     queryKey: ["grove-roots", groveId],
@@ -130,6 +136,11 @@ export default function AncestralRootsSection({ groveId }: Props) {
                     {r.inscription_text}
                   </p>
                 )}
+                <SignatureMark
+                  strokes={r.signature_strokes}
+                  label={`Handwritten mark: ${r.inscription_text || "ancestral inscription"}`}
+                  className="mt-2 h-16 w-36 opacity-75"
+                />
                 {r.status === "proposed" && (
                   <p className="font-serif text-[11px] italic text-muted-foreground/70 mt-1">
                     {mine
@@ -186,6 +197,17 @@ export default function AncestralRootsSection({ groveId }: Props) {
                     {mine && r.status === "proposed" ? "Withdraw my suggestion" : "Let this root go"}
                   </button>
                 )}
+                {isSteward && (r.status === "active" || r.status === "pending") && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="mt-2 font-serif"
+                    onClick={() => setTendingRoot(r)}
+                  >
+                    Tend inscription
+                  </Button>
+                )}
               </li>
             );
           })}
@@ -210,6 +232,11 @@ export default function AncestralRootsSection({ groveId }: Props) {
         open={open}
         onClose={() => setOpen(false)}
         onRooted={() => qc.invalidateQueries({ queryKey: ["grove-roots", groveId] })}
+      />
+      <TendInscriptionDialog
+        root={tendingRoot}
+        onClose={() => setTendingRoot(null)}
+        onTended={refresh}
       />
     </section>
   );
@@ -237,6 +264,7 @@ function RootIntoAncientFriendDialog({
   const [disclosure, setDisclosure] = useState<PortalDisclosure>("mark_only");
   const [entryMode, setEntryMode] = useState<EntryMode>("members_only");
   const [visible, setVisible] = useState(true);
+  const [signature, setSignature] = useState<SignatureStrokes>([]);
 
   const { data: results = [], isFetching } = useQuery({
     queryKey: ["ancient-friend-search", term],
@@ -254,6 +282,7 @@ function RootIntoAncientFriendDialog({
         inscriptionVisibility: visible ? "public" : "private",
         portalDisclosure: disclosure,
         entryMode,
+        signatureStrokes: signature,
       }),
     onSuccess: () => {
       toast.success(
@@ -276,6 +305,7 @@ function RootIntoAncientFriendDialog({
     setDisclosure("mark_only");
     setEntryMode("members_only");
     setVisible(true);
+    setSignature([]);
   }
 
   return (
@@ -368,6 +398,14 @@ function RootIntoAncientFriendDialog({
             </div>
 
             <div className="space-y-2">
+              <Label className="font-serif text-sm">Handwritten mark (optional)</Label>
+              <RootSignaturePad value={signature} onChange={setSignature} />
+              <p className="font-serif text-[11px] italic text-muted-foreground/70">
+                Draw with a finger, pen or pointer. The written inscription remains its spoken name.
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="dedication" className="font-serif text-sm">
                 A dedication (optional)
               </Label>
@@ -451,6 +489,83 @@ function RootIntoAncientFriendDialog({
   );
 }
 
+function TendInscriptionDialog({
+  root,
+  onClose,
+  onTended,
+}: {
+  root: Awaited<ReturnType<typeof listGroveRoots>>[number] | null;
+  onClose: () => void;
+  onTended: () => void;
+}) {
+  const [text, setText] = useState("");
+  const [signature, setSignature] = useState<SignatureStrokes>([]);
+  const [started, setStarted] = useState(false);
+
+  const save = useMutation({
+    mutationFn: () =>
+      tendGroveRootInscription({
+        rootId: root?.root_id ?? "",
+        inscriptionText: text.trim() || null,
+        signatureStrokes: started && signature.length ? signature : null,
+        clearSignature: started && signature.length === 0,
+      }),
+    onSuccess: () => {
+      toast.success("The inscription rests anew in the bark.");
+      onTended();
+      onClose();
+    },
+    onError: (e: unknown) => toast.error(describe(e)),
+  });
+
+  const prepare = () => {
+    setText(root?.inscription_text ?? "");
+    setSignature(root?.signature_strokes ?? []);
+    setStarted(false);
+  };
+
+  return (
+    <Dialog
+      open={!!root}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+        else prepare();
+      }}
+    >
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" onOpenAutoFocus={prepare}>
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl">Tend the inscription</DialogTitle>
+          <DialogDescription className="font-serif text-xs italic">
+            Renew the mark without changing the Root beneath it.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="tended-inscription" className="font-serif text-sm">The spoken inscription</Label>
+            <Input
+              id="tended-inscription"
+              value={text}
+              onChange={(event) => setText(event.target.value.slice(0, 48))}
+              className="text-base font-serif tracking-[0.3em] text-center"
+            />
+          </div>
+          <div className="space-y-2" onPointerDown={() => setStarted(true)}>
+            <Label className="font-serif text-sm">The handwritten mark</Label>
+            <RootSignaturePad value={signature} onChange={(next) => { setStarted(true); setSignature(next); }} />
+          </div>
+          <Button
+            className="w-full h-14 font-serif"
+            disabled={!text.trim() || save.isPending}
+            onClick={() => save.mutate()}
+          >
+            {save.isPending ? "Tending…" : "Let the bark remember"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function Choice({
   active,
   onClick,
@@ -485,5 +600,6 @@ function describe(e: unknown): string {
   if (m.includes("reason_required")) return "Please leave a few words with your decision.";
   if (m.includes("root_already_exists")) return "This grove is already rooted in that Ancient Friend.";
   if (m.includes("tree_merged")) return "That Ancient Friend has been merged into another record.";
+  if (m.includes("invalid_signature")) return "That mark held too much detail. Try a simpler gesture.";
   return m || "Something would not settle. Please try again.";
 }
