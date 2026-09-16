@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from "react
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ChevronDown, Layers, Leaf } from "lucide-react";
+import { ChevronDown, Layers, Leaf, RefreshCw } from "lucide-react";
 import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,6 +161,8 @@ const TreeDetailPage = () => {
   const [tree, setTree] = useState<Tree | null>(null);
   useDocumentTitle(tree ? `${tree.name} — ${tree.species}` : "Tree");
   const [loading, setLoading] = useState(true);
+  const [treeLoadError, setTreeLoadError] = useState(false);
+  const [treeRetryCount, setTreeRetryCount] = useState(0);
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
   const [gatewayOpen, setGatewayOpen] = useState(false);
   const [bloomDialogOpen, setBloomDialogOpen] = useState(false);
@@ -182,7 +184,7 @@ const TreeDetailPage = () => {
   const [sectionTab, setSectionTab] = useState<string>(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam === "encounters") return "encounters";
-    if (tabParam === "offerings" || tabParam === "ethereal" || tabParam === "memory") return "memory";
+    if (tabParam === "offerings" || tabParam === "ethereal" || tabParam === "memory" || tabParam === "living") return "memory";
     return "overview";
   });
   // Memory sub-mode: "living" = Ethereal canopy, "list" = catalogued offerings.
@@ -209,6 +211,14 @@ const TreeDetailPage = () => {
   const [witnessCount, setWitnessCount] = useState(0);
   const [treeLinkCopied, setTreeLinkCopied] = useState(false);
   const witnessSessionId = searchParams.get("witness") || undefined;
+
+  const handleSectionTabChange = useCallback((nextTab: string) => {
+    setSectionTab(nextTab);
+    const next = new URLSearchParams(searchParams);
+    if (nextTab === "overview") next.delete("tab");
+    else next.set("tab", nextTab);
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   // Capture arrival context from shared links
   const [arrivalRef, setArrivalRef] = useState<string | null>(null);
@@ -463,6 +473,7 @@ const TreeDetailPage = () => {
 
     const fetchTree = async () => {
       log("tree:fetch:start");
+      setTreeLoadError(false);
       const { data, error } = await supabase
         .from("trees")
         .select("*")
@@ -470,6 +481,7 @@ const TreeDetailPage = () => {
         .maybeSingle();
       if (error) {
         console.error(`[tree-detail:${id}] tree:fetch:error`, error);
+        setTreeLoadError(true);
         return;
       }
       if (!data) {
@@ -583,7 +595,7 @@ const TreeDetailPage = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [id]);
+  }, [id, treeRetryCount]);
 
   if (loading) {
     return (
@@ -633,6 +645,37 @@ const TreeDetailPage = () => {
     );
   }
 
+  if (treeLoadError) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="container mx-auto max-w-md space-y-4 px-4 py-16 text-center"
+          role="alert"
+        >
+          <div className="mb-2 text-4xl" aria-hidden="true">🌿</div>
+          <p className="font-serif text-muted-foreground">
+            This Ancient Friend could not be reached. Your place in the forest is unchanged.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 gap-2"
+            onClick={() => {
+              setLoading(true);
+              setTreeRetryCount((count) => count + 1);
+            }}
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            Try again
+          </Button>
+        </motion.main>
+      </div>
+    );
+  }
+
   if (!tree) {
     return (
       <div className="min-h-screen bg-background">
@@ -647,7 +690,7 @@ const TreeDetailPage = () => {
           <p className="text-muted-foreground font-serif">
             This Ancient Friend could not be found — it may have moved to another part of the forest.
           </p>
-          <Link to="/map" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm transition-colors">
+          <Link to={ROUTES.MAP} className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm transition-colors">
             <Map className="h-4 w-4" />
             Return to the Map
           </Link>
@@ -976,7 +1019,7 @@ const TreeDetailPage = () => {
 
 
         {/* ══════ Top-Level Section Tabs ══════ */}
-        <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
+        <Tabs value={sectionTab} onValueChange={handleSectionTabChange} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               Overview

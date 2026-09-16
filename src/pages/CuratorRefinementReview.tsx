@@ -9,12 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, MapPin, TreeDeciduous, Loader2, ArrowLeft, Camera, ImageIcon } from "lucide-react";
+import { Check, X, MapPin, TreeDeciduous, Loader2, Camera, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { clusterRefinements, CONFIDENCE_LABELS } from "@/utils/locationRefinement";
 import type { RefinementPoint } from "@/utils/locationRefinement";
 import Header from "@/components/Header";
+import ContextBackButton from "@/components/navigation/ContextBackButton";
+import { ROUTES } from "@/lib/routes";
 
 interface RefinementRow {
   id: string;
@@ -50,7 +51,6 @@ export default function CuratorRefinementReview() {
   const [reviewNote, setReviewNote] = useState<Record<string, string>>({});
   const [acting, setActing] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const loadPending = useCallback(async () => {
     setLoading(true);
@@ -216,12 +216,7 @@ export default function CuratorRefinementReview() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center text-muted-foreground hover:text-primary text-sm font-serif gap-1.5"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back
-        </button>
+        <ContextBackButton fallback={ROUTES.MAP} label="Back" />
 
         <div>
           <h1 className="text-xl font-serif font-bold tracking-wide">Location Refinements</h1>

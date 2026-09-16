@@ -55,3 +55,11 @@
 - [x] Add accessible room climb/descend controls and non-conflicting dedicated gestures
 - [x] Surface Edit tree / Propose changes beside each relevant Encounter tree
 - [x] Verify mobile navigation, unsaved-change protection, gestures, controls, and permission paths
+
+# Roadmap — Small Usability + Reliability Pass
+- [x] Separate transient tree-load failures from true missing records and provide retry
+- [x] Add recoverable Shared Encounters loading with accessible disclosure state
+- [x] Preserve the selected tree section in the URL
+- [x] Standardise curator review Back navigation with a safe fallback
+- [x] Verify phone journeys, type safety, and regression suite
+- Deferred: Species Hearts for background canopy check-ins requires a separate server-authoritative reward pass

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { findNearbyEncounters } from "@/utils/treeEncounterClustering";
-import { Users, ChevronDown, ChevronUp, MapPin, Camera, Eye, Unlink } from "lucide-react";
+import { Users, ChevronDown, ChevronUp, MapPin, Camera, Eye, Unlink, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
@@ -36,10 +36,14 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
   const [encounters, setEncounters] = useState<EncounterWithMeta[]>([]);
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const fetchEncounters = async () => {
       try {
+      setLoading(true);
+      setLoadError(false);
       // Fetch all trees with same species in a bounding box for efficiency
       if (!tree.latitude || !tree.longitude) {
         setLoading(false);
@@ -50,7 +54,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
       const lng = Number(tree.longitude);
       const delta = 0.001; // ~100m in degrees
 
-      const { data: nearbyTrees } = await supabase
+      const { data: nearbyTrees, error: nearbyError } = await supabase
         .from("trees")
         .select("*")
         .gte("latitude", lat - delta)
@@ -58,6 +62,8 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
         .gte("longitude", lng - delta)
         .lte("longitude", lng + delta)
         .neq("id", tree.id);
+
+      if (nearbyError) throw nearbyError;
 
       if (!nearbyTrees || nearbyTrees.length === 0) {
         setLoading(false);
@@ -80,6 +86,9 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
           : Promise.resolve({ data: [] }),
         supabase.from("offerings").select("tree_id, media_url").in("tree_id", treeIds).eq("type", "photo"),
       ]);
+
+      if ("error" in profilesRes && profilesRes.error) throw profilesRes.error;
+      if (photosRes.error) throw photosRes.error;
 
       const profileMap = new Map<string, WandererInfo>();
       for (const p of (profilesRes.data || [])) {
@@ -108,16 +117,35 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
       setLoading(false);
       } catch (err) {
         console.error("[EncounterCluster] Failed to load encounters", err);
+        setLoadError(true);
         setLoading(false);
       }
     };
     fetchEncounters();
-  }, [tree.id, tree.latitude, tree.longitude]);
+  }, [tree.id, tree.latitude, tree.longitude, retryCount]);
 
   if (loading) {
     return (
-      <div className="flex justify-center py-6">
+      <div className="flex justify-center py-6" role="status" aria-label="Loading shared encounters">
         <div className="animate-spin h-5 w-5 border-2 border-primary/30 border-t-primary rounded-full" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-lg border border-border/50 bg-card/30 px-4 py-5 text-center">
+        <p className="text-sm font-serif text-muted-foreground">Shared encounters could not be gathered.</p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-2 min-h-11 gap-2"
+          onClick={() => setRetryCount((count) => count + 1)}
+        >
+          <RefreshCw className="h-4 w-4" aria-hidden="true" />
+          Try again
+        </Button>
       </div>
     );
   }
@@ -148,8 +176,11 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
 
       {/* Summary bar */}
       <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:bg-card/60 transition-all group"
+        aria-expanded={expanded}
+        aria-controls="shared-encounters-list"
       >
         {/* Stacked avatars */}
         <div className="flex -space-x-2">
@@ -198,6 +229,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
       <AnimatePresence>
         {expanded && (
           <motion.div
+            id="shared-encounters-list"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
