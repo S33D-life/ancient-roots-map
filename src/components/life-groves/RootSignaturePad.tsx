@@ -87,6 +87,14 @@ export default function RootSignaturePad({
             onChange([...value.slice(0, -1), [...current, point]]);
           }}
           onPointerUp={() => {
+            const current = value[value.length - 1];
+            if (current?.length === 1) {
+              const first = current[0];
+              onChange([
+                ...value.slice(0, -1),
+                [first, { x: Math.min(1, first.x + 0.001), y: first.y }],
+              ]);
+            }
             drawing.current = false;
           }}
           onPointerCancel={() => {
