@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, TreePine, Heart, WifiOff, RotateCcw, AlertCircle, Scan, ArrowLeft } from "lucide-react";
+import { Users, TreePine, Heart, WifiOff, RotateCcw, AlertCircle, Scan } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSharedEncounter } from "@/hooks/use-shared-encounter";
 import type { SharedEncounterState } from "@/lib/companion-types";
 import { getPublicAppUrl } from "@/utils/ogMeta";
+import ContextBackButton from "@/components/navigation/ContextBackButton";
+import { ROUTES } from "@/lib/routes";
 
 interface Props {
   onBack: () => void;
@@ -52,9 +54,7 @@ export default function SharedEncounterView({ onBack, treeContext, user }: Props
     >
       <div className="w-full max-w-xs flex flex-col items-center gap-5">
         {/* Back */}
-        <button onClick={onBack} className="self-start flex items-center gap-1 text-xs text-muted-foreground min-h-[32px]">
-          <ArrowLeft className="w-3 h-3" /> Back
-        </button>
+        <ContextBackButton fallback={ROUTES.MAP} onBack={onBack} className="self-start -ml-3" />
 
         <div className="p-4 rounded-full" style={{ background: "hsl(42 50% 50% / 0.1)", border: "1px solid hsl(42 50% 50% / 0.2)" }}>
           <Users className="w-8 h-8" style={{ color: "hsl(42 50% 60%)" }} />
