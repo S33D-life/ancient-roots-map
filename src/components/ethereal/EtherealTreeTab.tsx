@@ -249,14 +249,21 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
   const nodes: NodeDatum[] = useMemo(() => {
     const offeringNodes: NodeDatum[] = offerings
       .filter((o) => (o.type as OfferingType) in ZONE_FOR_TYPE)
-      .map((o) => ({
-        id: `off-${o.id}`,
-        zone: ZONE_FOR_TYPE[o.type as OfferingType],
-        kind: o.type as OfferingType,
-        title: o.title || o.type,
-        subtitle: o.content?.slice(0, 80) || undefined,
-        payload: o,
-      }));
+      .map((o) => {
+        const id = `off-${o.id}`;
+        const zone = ZONE_FOR_TYPE[o.type as OfferingType];
+        const { x, y } = placeInZone(zone, id);
+        return {
+          id,
+          zone,
+          kind: o.type as OfferingType,
+          title: o.title || o.type,
+          subtitle: o.content?.slice(0, 80) || undefined,
+          payload: o,
+          x,
+          y,
+        };
+      });
     const whisperNodes: NodeDatum[] = whispers.map((w) => {
       const id = `wsp-${w.id}`;
       const zone = "roots" as const;
