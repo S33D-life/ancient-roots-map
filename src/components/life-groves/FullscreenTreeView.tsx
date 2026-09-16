@@ -148,7 +148,9 @@ export default function FullscreenTreeView({
     [],
   );
 
-  const subtitle = rememberedName ? `for ${rememberedName}` : treeName ?? null;
+  const subtitle = rememberedName
+    ? `for ${rememberedName}${treeName ? ` · ${treeName}` : ""}`
+    : treeName ?? null;
 
   // Portalled to <body>: page-level motion wrappers create containing blocks
   // for fixed positioning, which would otherwise strand the tree mid-document.
@@ -233,7 +235,7 @@ export default function FullscreenTreeView({
             >
               <EtherealOfferingTree
                 archetype={archetype}
-                treeName={rememberedName ? treeName : null}
+                treeName={null}
                 offerings={offerings}
                 selectedId={selectedId}
                 onSelect={(o) => setSelectedId(o?.id ?? null)}

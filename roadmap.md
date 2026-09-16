@@ -48,4 +48,4 @@
 # Roadmap — Ethereal Tree Beauty Pass
 - [x] Harmonise botanical silhouette, memorial warmth, and celestial depth into one graceful immersive direction
 - [x] Improve branch-borne offering clarity, filtering, entry motion, reduced motion, and mobile composition
-- [ ] Verify the immersive Tree and memory viewer at mobile and desktop sizes
+- [x] Verify the immersive Tree and memory viewer at mobile and desktop sizes
