@@ -1,120 +1,43 @@
-# Ancestral Roots — architecture report and V1 plan
+# Navigation and Encounter Editing Refinement
 
-No code changed yet. This is the inspection report and the smallest first build.
+## Goal
+Make returning from detail views predictable, let people climb through Heartwood rooms without disrupting scrolling, and make tree corrections easy to find from Encounters while preserving all existing permissions and curator review rules.
 
-## A. What exists today
+## Implementation
 
-**Rooted Tree (singular).** A Life Grove carries six columns on `life_groves`:
-`tree_link_type` (symbolic_only / plant_new_tree / link_existing_planted_tree / link_ancient_friend),
-`linked_tree_id`, `planted_tree_location_text`, `planted_tree_latitude`, `planted_tree_longitude`,
-`planting_notes`, `planting_status`.
+### 1. Context-preserving Back navigation
+- Add one shared Back control pattern with a 44px mobile tap target and clear accessible label.
+- On tree details, return through browser history when the previous entry is inside S33D; otherwise return to the map.
+- Preserve map position, filters, and page scroll by using history rather than rebuilding the destination URL.
+- Add the same visible treatment to the in-app shared Encounter view, using its existing parent callback.
+- Add a visible Back control to Heartwood room views, returning to the prior in-app page or the Heartwood Library when opened directly.
+- Do not add a custom horizontal swipe-back gesture; native browser/platform navigation remains untouched.
+- Keep the existing discard confirmation inside the unified tree-change dialog, so the page Back control cannot bypass dirty form state while the dialog is open.
 
-Involved pieces:
-- `RootedTreeSection.tsx` (read-only display), `TreeLinkPicker.tsx` (creation choice, Ancient Friend by pasted ID)
-- `set_grove_rooted_tree` database function (stewards only, writes tending history)
-- `life_grove_tending_history` (append-only), `life_grove_stewards`, `life_grove_members`
-- authority: `is_grove_primary_steward` / `is_grove_steward` / `is_grove_contributor` / `can_view_life_grove`
-- Ancient Friend page: `src/pages/TreeDetailPage.tsx` composed of section cards (`src/components/tree-sections/`)
-- Ancient Friend authority: `has_role(uid,'curator')` / `'keeper'`, plus tree creator and the edit-proposal system
+### 2. Heartwood “climb the tree” navigation
+- Keep `JOURNEY_ROOM_SEQUENCE` as the single room order; do not edit the canonical room registry.
+- Replace horizontal room switching with a dedicated vertical room-navigation strip in the shared Heartwood room shell.
+- Show the current room plus explicit “Climb to [next room]” and “Descend to [previous room]” controls; disable/omit directions at the ends rather than wrapping.
+- Recognize swipe-up/down only inside that dedicated strip, never across room content. Normal page scrolling, maps, galleries, forms, and browser gestures remain unaffected.
+- Use vertical entry motion for room changes and render transitions instantly when reduced motion is requested.
+- Keep keyboard navigation through explicit controls rather than global arrow-key interception.
 
-**Existing data.** One Life Grove exists (Edmondson / Maithe Edmondson, invite_only). Its
-`tree_link_type` is `symbolic_only` and **no grove anywhere uses `linked_tree_id`**. Migration
-risk is therefore effectively zero.
+### 3. Discoverable tree editing in Encounters
+- Add a clearly labelled action beside the current tree’s identity at the top of the Encounters tab.
+- Add the corresponding action beside each related tree shown in Shared Encounters, so the target tree is always explicit.
+- Resolve each label through the existing server-backed eligibility check: `Edit tree` only for direct-edit eligibility; otherwise `Propose changes`.
+- Open the existing `TreeChangeFlow` for Details, Location, and Duplicate/Merge. No second editor or permission path will be introduced.
+- Keep the existing discoverable entry on the tree detail page, but make Encounters the primary visible location.
+- Leave all write-time permission rechecks and curator workflows unchanged.
 
-## B. Migration path (singular → many)
+## Verification
+- Test at a phone-sized viewport that Back returns to the prior in-app view and direct links use the expected parent fallback.
+- Confirm the tree-change dialog still warns before discarding unsaved edits.
+- Confirm room swipes work only within the navigation strip, normal vertical scrolling remains reliable, controls work without gestures, and first/last rooms do not wrap.
+- Confirm every Encounter action names the intended tree, opens the unified three-part change flow, and displays the server-derived `Edit tree` or `Propose changes` label.
+- Run focused tests plus the existing test suite; document any pre-existing failures separately.
 
-Keep the singular columns exactly as they are. They keep describing the grove's *own* planting
-intention (symbolic / new tree / existing planted tree). Ancestral Roots become a separate
-many-to-many table. `set_grove_rooted_tree` stays for the legacy field but the Grove page's
-"Rooted Tree" card gains a second part: "Rooted in the living world". Nothing to backfill.
-
-## C. Schema (generic roots, ancestral as a type)
-
-One table, `grove_roots` — generic relationship, `root_type` defaults to `ancestral`:
-
-- `id`, `life_grove_id`, `tree_id`, `root_type` (ancestral | family | birth | union | community | other)
-- `created_by`, `created_at`, `updated_at`
-- inscription: `inscription_text` (short, max ~48 chars), `dedication`, `inscription_date_text`,
-  `signature_url` (drawing/handwriting asset, deferred to V2), `inscription_style`
-- `visibility`: `private_root` | `visible_inscription` | `public_portal`
-- `status`: `pending` | `active` | `declined` | `removed` (never hard-deleted)
-- moderation: `reviewed_by`, `reviewed_at`, `review_note`
-- `position_data` jsonb — where the mark sits on the twin (future spatial twin; V1 uses a
-  deterministic seed from the root id, so nothing blocks richer placement later)
-- partial unique index on (`life_grove_id`, `tree_id`) where `status in ('pending','active')`
-  — the same grove cannot root twice into the same Ancient Friend while one is live; a removed
-  root can be re-established and the old row stays as provenance.
-
-Plus `grove_root_history` (append-only: created / approved / declined / edited / removed, actor, note).
-
-## D. Permissions — both sides
-
-- Establish a root: Life Grove **stewards only** (`is_grove_steward`). Contributors may propose —
-  V1 stores their attempt as `status='pending'` with the grove steward as first reviewer; simpler
-  path is to hide the action from contributors in V1 and add proposal UI in V2.
-- Ancient Friend side: a root lands `pending` and needs a curator/keeper (or the tree's creator)
-  to approve, **unless** the grove steward is also the tree's creator or a curator, in which case
-  it activates immediately. Curators can moderate an active inscription back to `declined`.
-- Public wanderers see only `status='active'` roots whose visibility is not `private_root`.
-
-## E. Privacy
-
-Rooting never changes grove privacy. Three levels, enforced in the database:
-
-- **Private root** — only grove members see the connection exists; nothing shows on the tree.
-- **Visible inscription** — the mark and the name are discoverable; the portal card shows name,
-  grove title, "rooted by … year" and an entry that still runs through `can_view_life_grove`, so a
-  stranger is invited to request access rather than shown the library.
-- **Public portal** — the mark is discoverable and entry proceeds to whatever the grove already
-  permits publicly. Family-only offerings, emails, membership and stewardship controls remain
-  invisible in every case; nothing new is exposed because the portal reuses the existing grove
-  read paths.
-
-A read RPC `list_tree_inscriptions(tree_id)` returns only active, non-private rows with a minimal
-safe shape (root id, inscription text, grove id, grove title, remembered name, year, whether the
-viewer may enter). No direct table select for anonymous users.
-
-## F. Inscriptions on the Ancient Friend (V1, no 3D twin)
-
-A new `AncestralRootsSection` card on the tree page, placed near the ground/roots part of the
-scroll: a quiet stylised bark panel with the marks set into it, each one a soft serif name with a
-faint incised shadow, positioned by a deterministic seed so a mark always sits in the same spot.
-Under ~12 marks they sit freely in the bark; beyond that they collapse into a "names in the bark"
-panel with a gentle search — so hundreds never become a list.
-
-Tapping a mark opens the **Ancestral Root portal**: a small calm sheet — name, grove title, "Rooted
-here by her family · 2026", "A Life Grove held in Heartwood" — and **Enter the Ethereal Tree**,
-which navigates to the grove route with a flag that opens `FullscreenTreeView` immediately. If the
-viewer may not enter, the sheet ends at the dedication instead.
-
-## G. Lifecycle answers
-
-- Root removed → `status='removed'`, mark disappears, row and history kept.
-- Ancient Friend merged → `approve_tree_merge` repoints roots to the survivor; a duplicate pair is
-  folded into the earliest root and noted in history (matching the merge handling already built).
-- Grove becomes private → inscription may remain per its own visibility; entry is refused by
-  `can_view_life_grove`, so nothing leaks.
-- Stewardship changes → authority is always recomputed; no stored permission snapshots.
-- Moderated → `declined` with a required reason, kept in history.
-- Same pair twice → blocked by the partial unique index with a warm message.
-
-## H. Not rewards
-
-No Hearts, Species Hearts or Influence for creating roots. No triggers touch the economy.
-
-## I. V1 scope (what I would build next)
-
-1. Migration: `grove_roots`, `grove_root_history`, GRANTs, RLS, and functions
-   `create_grove_root`, `review_grove_root`, `remove_grove_root`, `list_tree_inscriptions`,
-   `list_grove_roots`.
-2. Grove page: "Rooted in the living world" — count, the Ancient Friends listed, and
-   **Root into an Ancient Friend** for stewards: search the atlas, confirm the pairing,
-   inscription text, visibility, confirm.
-3. Tree page: `AncestralRootsSection` bark panel + portal sheet + entry into the full-screen tree.
-4. Prove the Maithe journey end to end with the inscription "MAITHE".
-
-## J. Deferred
-
-Handwritten signature capture and storage, contributor proposals with their own review queue,
-spatial 3D twin placement, inscription constellations, root types beyond ancestral in the UI,
-time-layered archive views, notifications to tree guardians.
+## Technical notes
+- Frontend-only change; no schema, policy, reward, or curator-workflow changes.
+- New reusable navigation/control helpers will use existing Button, route constants, semantic tokens, and reduced-motion conventions.
+- `src/config/heartwoodRooms.ts` remains untouched because it is the canonical room-order source and owned by the Heartwood lane.

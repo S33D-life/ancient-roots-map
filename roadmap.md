@@ -49,3 +49,9 @@
 - [x] Harmonise botanical silhouette, memorial warmth, and celestial depth into one graceful immersive direction
 - [x] Improve branch-borne offering clarity, filtering, entry motion, reduced motion, and mobile composition
 - [x] Verify the immersive Tree and memory viewer at mobile and desktop sizes
+# Roadmap — Navigation + Encounter Editing
+- [ ] Inspect Back navigation, Heartwood room order, Encounters tree rows, and unified edit permissions
+- [ ] Add context-preserving Back controls with direct-link fallbacks
+- [ ] Add accessible room climb/descend controls and non-conflicting dedicated gestures
+- [ ] Surface Edit tree / Propose changes beside each relevant Encounter tree
+- [ ] Verify mobile navigation, unsaved-change protection, gestures, controls, and permission paths
