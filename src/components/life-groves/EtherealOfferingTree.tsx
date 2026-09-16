@@ -139,7 +139,7 @@ export default function EtherealOfferingTree({
 
   // How inhabited the tree feels — 0 (waiting) → 1 (richly tended).
   const fullness = Math.min(1, offerings.length / 12);
-  const glyphSize = immersive ? 44 : 32;
+  const glyphSize = immersive ? 48 : 40;
 
   /** Deterministic ambient motes — scale gently with fullness. */
   const motes = useMemo(() => {
