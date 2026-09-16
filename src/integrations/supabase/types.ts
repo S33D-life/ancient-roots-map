@@ -3395,6 +3395,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           root_type: string
+          signature_strokes: Json | null
           signature_url: string | null
           status: string
           tree_id: string
@@ -3417,6 +3418,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           root_type?: string
+          signature_strokes?: Json | null
           signature_url?: string | null
           status?: string
           tree_id: string
@@ -3439,6 +3441,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           root_type?: string
+          signature_strokes?: Json | null
           signature_url?: string | null
           status?: string
           tree_id?: string
@@ -11955,6 +11958,7 @@ export type Database = {
           p_inscription_visibility?: string
           p_portal_disclosure?: string
           p_root_type?: string
+          p_signature_strokes?: Json
           p_tree_id: string
         }
         Returns: string
@@ -12205,6 +12209,7 @@ export type Database = {
         Returns: boolean
       }
       is_untrusted_heart_writer: { Args: never; Returns: boolean }
+      is_valid_root_signature: { Args: { p_strokes: Json }; Returns: boolean }
       is_whisper_group_member: {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
@@ -12222,6 +12227,7 @@ export type Database = {
           portal_disclosure: string
           review_note: string
           root_id: string
+          signature_strokes: Json
           status: string
           tree_id: string
           tree_name: string
@@ -12240,6 +12246,7 @@ export type Database = {
           remembered_name: string
           root_id: string
           rooted_year: number
+          signature_strokes: Json
         }[]
       }
       locked_own_heart_balance: { Args: never; Returns: number }
@@ -12400,12 +12407,14 @@ export type Database = {
       }
       tend_grove_root_inscription: {
         Args: {
+          p_clear_signature?: boolean
           p_dedication?: string
           p_entry_mode?: string
           p_inscription_text?: string
           p_inscription_visibility?: string
           p_portal_disclosure?: string
           p_root_id: string
+          p_signature_strokes?: Json
         }
         Returns: undefined
       }
