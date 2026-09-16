@@ -9,6 +9,7 @@ import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
 import { HEARTWOOD_ROOMS, ROOM_LABEL_MAP, ROOM_KEYS, JOURNEY_ROOM_SEQUENCE } from "@/config/heartwoodRooms";
+import { ROUTES } from "@/lib/routes";
 
 // Lazy room components — each loads independently
 const StaffRoomGallery = lazy(() => import("@/components/StaffRoomGallery"));
@@ -160,7 +161,7 @@ const HeartwoodRoomPage = () => {
   const label = ROOM_LABELS[resolvedRoom] || resolvedRoom;
 
   const handleRoomNavigate = (room: string) => {
-    navigate(`/library/${room}`, { replace: true });
+    navigate(ROUTES.HEARTWOOD_ROOM(room), { replace: true });
   };
 
   return (

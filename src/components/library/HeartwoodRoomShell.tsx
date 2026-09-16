@@ -2,7 +2,7 @@
  * HeartwoodRoomShell — Shared visual wrapper for all Heartwood Library rooms.
  * Provides: Header, HeartwoodBackground, breadcrumb, swipe navigation, room dots, Footer.
  */
-import { ReactNode, useEffect, useCallback } from "react";
+import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
@@ -11,10 +11,10 @@ import TetolBridge from "@/components/TetolBridge";
 import Footer from "@/components/Footer";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-/** Rooms with internal horizontal gesture content (carousels, sliders) */
-const GESTURE_HEAVY_ROOMS = ["staff-room"];
+import ContextBackButton from "@/components/navigation/ContextBackButton";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 interface HeartwoodRoomShellProps {
   roomLabel: string;
@@ -38,35 +38,16 @@ const HeartwoodRoomShell = ({
   const currentIndex = currentRoom ? roomSequence.indexOf(currentRoom) : -1;
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < roomSequence.length - 1;
+  const previousRoom = hasPrev ? roomSequence[currentIndex - 1] : null;
+  const nextRoom = hasNext ? roomSequence[currentIndex + 1] : null;
 
-  // Restrict room-swipe to top 22% of viewport for gesture-heavy rooms
-  const needsZone = currentRoom ? GESTURE_HEAVY_ROOMS.includes(currentRoom) : false;
-
-  const { onTouchStart, onTouchEnd, blockedHint } = useSwipeNavigation({
+  const { onTouchStart, onTouchEnd } = useSwipeNavigation({
     items: roomSequence,
     activeItem: currentRoom || "",
     onNavigate: onNavigateRoom || (() => {}),
-    threshold: 60,
-    zoneTopPercent: needsZone ? 22 : undefined,
+    threshold: 52,
+    axis: "vertical",
   });
-
-  // Keyboard arrow navigation
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!canSwipe) return;
-      if (e.key === "ArrowLeft" && hasPrev) {
-        onNavigateRoom!(roomSequence[currentIndex - 1]);
-      } else if (e.key === "ArrowRight" && hasNext) {
-        onNavigateRoom!(roomSequence[currentIndex + 1]);
-      }
-    },
-    [canSwipe, hasPrev, hasNext, currentIndex, roomSequence, onNavigateRoom]
-  );
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
 
   return (
     <div className="min-h-screen relative botanical-heartwood bg-background">
@@ -76,12 +57,11 @@ const HeartwoodRoomShell = ({
       <main
         className="relative z-10 container mx-auto px-4 pb-12"
         style={{ paddingTop: "calc(var(--content-top) + 0.5rem)" }}
-        onTouchStart={canSwipe ? onTouchStart : undefined}
-        onTouchEnd={canSwipe ? onTouchEnd : undefined}
       >
-        {/* Breadcrumb + context + nav arrows */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Back + room context */}
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div>
+            <ContextBackButton fallback={ROUTES.LIBRARY} className="-ml-3 mb-1" />
             <nav
               aria-label="Library breadcrumb"
               className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground/70 select-none"
@@ -104,66 +84,59 @@ const HeartwoodRoomShell = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-1">
-            {canSwipe && (
-              <>
-                <button
-                  onClick={() => hasPrev && onNavigateRoom!(roomSequence[currentIndex - 1])}
-                  disabled={!hasPrev}
-                  aria-label="Previous room"
-                  className="p-1.5 rounded-full text-muted-foreground/50 hover:text-foreground/80 disabled:opacity-20 transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => hasNext && onNavigateRoom!(roomSequence[currentIndex + 1])}
-                  disabled={!hasNext}
-                  aria-label="Next room"
-                  className="p-1.5 rounded-full text-muted-foreground/50 hover:text-foreground/80 disabled:opacity-20 transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </>
-            )}
+          <div className="flex items-center gap-1 pt-1">
             <CompanionPairDialog />
           </div>
         </div>
 
-        {/* Room position dots */}
+        {/* Dedicated climb zone: vertical gestures are captured only here. */}
         {canSwipe && (
-          <div className="flex items-center justify-center gap-1.5 mb-5" role="tablist" aria-label="Room navigation">
-            {roomSequence.map((room, i) => (
-              <button
-                key={room}
-                onClick={() => onNavigateRoom!(room)}
-                role="tab"
-                aria-selected={i === currentIndex}
-                aria-label={roomLabels[room] || room}
-                title={roomLabels[room] || room}
-                className={`rounded-full transition-all duration-200 ${
-                  i === currentIndex
-                    ? "w-2.5 h-2.5 bg-primary/80"
-                    : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                }`}
-              />
-            ))}
+          <div
+            className="mb-6 rounded-md border border-border/40 bg-card/35 px-2 py-2 touch-none"
+            aria-label="Climb between Heartwood rooms"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={!previousRoom}
+                onClick={() => previousRoom && onNavigateRoom!(previousRoom)}
+                aria-label={previousRoom ? `Descend to ${roomLabels[previousRoom] || previousRoom}` : "No lower room"}
+                className="min-h-11 min-w-0 justify-start px-2 text-left text-muted-foreground"
+              >
+                <ChevronDown className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="min-w-0">
+                  <span className="block text-[9px] uppercase tracking-widest">Descend</span>
+                  <span className="block truncate text-xs">{previousRoom ? roomLabels[previousRoom] || previousRoom : "Roots reached"}</span>
+                </span>
+              </Button>
+
+              <div className="text-center font-serif" aria-live="polite">
+                <span className="block text-[9px] uppercase tracking-widest text-muted-foreground">Room</span>
+                <span className="block max-w-28 truncate text-xs text-foreground">{roomLabel}</span>
+                <span className="block text-[9px] text-muted-foreground">{currentIndex + 1} of {roomSequence.length}</span>
+              </div>
+
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={!nextRoom}
+                onClick={() => nextRoom && onNavigateRoom!(nextRoom)}
+                aria-label={nextRoom ? `Climb to ${roomLabels[nextRoom] || nextRoom}` : "No higher room"}
+                className="min-h-11 min-w-0 justify-end px-2 text-right text-muted-foreground"
+              >
+                <span className="min-w-0">
+                  <span className="block text-[9px] uppercase tracking-widest">Climb</span>
+                  <span className="block truncate text-xs">{nextRoom ? roomLabels[nextRoom] || nextRoom : "Crown reached"}</span>
+                </span>
+                <ChevronUp className="h-4 w-4 shrink-0" aria-hidden="true" />
+              </Button>
+            </div>
+            <p className="sr-only">Swipe up here to climb, or swipe down to descend.</p>
           </div>
         )}
-
-        {/* Swipe hint for zone-restricted rooms */}
-        <AnimatePresence>
-          {blockedHint && needsZone && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-serif
-                bg-card/90 backdrop-blur-sm border border-border/30 text-muted-foreground shadow-lg"
-            >
-              Swipe from the top to move between rooms
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Room content with slide transition */}
         {prefersReduced || !canSwipe ? (
@@ -172,9 +145,9 @@ const HeartwoodRoomShell = ({
           <AnimatePresence mode="wait">
             <motion.div
               key={currentRoom}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
               transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {children}

@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
-  ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
+  MapPin, Music, Camera, MessageSquare, FileText,
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous, Flower2, Palette, HandHeart,
 } from "lucide-react";
 
@@ -136,6 +136,9 @@ import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 import { useTreeAccessibility } from "@/hooks/use-tree-accessibility";
 import { canCheckIn, ACCESSIBILITY_VISUALS } from "@/lib/treeAccessibility";
 import { useToast } from "@/hooks/use-toast";
+import ContextBackButton from "@/components/navigation/ContextBackButton";
+import EncounterTreeChangeAction from "@/components/tree-change/EncounterTreeChangeAction";
+import { ROUTES } from "@/lib/routes";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -754,19 +757,7 @@ const TreeDetailPage = () => {
         style={{ paddingTop: 'var(--content-top)' }}
         data-testid="tree-detail"
       >
-        <button
-          onClick={() => {
-            if (window.history.length > 1) {
-              navigate(-1);
-            } else {
-              navigate("/map");
-            }
-          }}
-          className="inline-flex items-center text-muted-foreground hover:text-primary mb-6 font-serif text-sm tracking-wide transition-colors bg-transparent border-none cursor-pointer p-0"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </button>
+        <ContextBackButton fallback={ROUTES.MAP} className="-ml-3 mb-3" />
 
         {/* ══════ MASTER TEMPLATE: Sacred Hero ══════ */}
         <TreePageHero
@@ -1290,9 +1281,16 @@ const TreeDetailPage = () => {
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
 
             {/* Encounters intro — always visible */}
-            <div className="text-center py-4">
-              <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Encounters</h3>
-              <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
+            <div className="flex flex-col gap-3 rounded-md border border-border/35 bg-card/25 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 text-center sm:text-left">
+                <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Encounters with {tree.name}</h3>
+                <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
+              </div>
+              <EncounterTreeChangeAction
+                tree={tree}
+                onTreeUpdated={(updated) => setTree(updated as Tree)}
+                className="w-full sm:w-auto"
+              />
             </div>
 
             {/* Plant / collect / whisper actions now live in the unified

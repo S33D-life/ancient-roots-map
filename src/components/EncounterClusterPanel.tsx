@@ -11,6 +11,7 @@ import { Users, ChevronDown, ChevronUp, MapPin, Camera, Eye, Unlink } from "luci
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
+import EncounterTreeChangeAction from "@/components/tree-change/EncounterTreeChangeAction";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -245,42 +246,47 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.06, duration: 0.3 }}
                 >
-                  <Link
-                    to={`/tree/${enc.tree.id}`}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-border/30 bg-card/30 hover:bg-card/50 hover:border-primary/30 transition-all group/card"
-                  >
-                    {/* Avatar or tree emoji */}
-                    <div className="w-10 h-10 rounded-full overflow-hidden border border-border/50 flex-shrink-0">
-                      {enc.profile?.avatar_url ? (
-                        <img src={enc.profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-secondary flex items-center justify-center text-lg">🌳</div>
-                      )}
-                    </div>
+                  <div className="rounded-lg border border-border/30 bg-card/30 p-3 transition-colors hover:border-primary/30 hover:bg-card/50">
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={`/tree/${enc.tree.id}?tab=encounters`}
+                        className="flex min-w-0 flex-1 items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        aria-label={`Open encounters for ${enc.tree.name}`}
+                      >
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-border/50 flex-shrink-0">
+                          {enc.profile?.avatar_url ? (
+                            <img src={enc.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-secondary flex items-center justify-center text-lg" aria-hidden="true">🌳</div>
+                          )}
+                        </div>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-serif text-foreground/90 truncate">
-                        {enc.profile?.full_name || "Anonymous Wanderer"}
-                      </p>
-                      <p className="text-xs text-muted-foreground font-serif">
-                        Called "{enc.tree.name}" · {new Date(enc.tree.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-serif text-foreground/90 truncate">{enc.tree.name}</p>
+                          <p className="text-xs text-muted-foreground font-serif">
+                            Recorded by {enc.profile?.full_name || "Anonymous Wanderer"} · {new Date(enc.tree.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {enc.photoCount > 0 && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                          <Camera className="h-3 w-3" />
-                          {enc.photoCount}
-                        </span>
-                      )}
-                      {enc.tree.what3words && (
-                        <span className="text-[10px] text-muted-foreground/60 font-mono hidden md:block">
-                          /{enc.tree.what3words}
-                        </span>
-                      )}
+                        <div className="hidden items-center gap-2 flex-shrink-0 sm:flex">
+                          {enc.photoCount > 0 && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                              <Camera className="h-3 w-3" aria-hidden="true" />
+                              {enc.photoCount}
+                            </span>
+                          )}
+                          {enc.tree.what3words && (
+                            <span className="text-[10px] text-muted-foreground/60 font-mono hidden md:block">
+                              /{enc.tree.what3words}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
                     </div>
-                  </Link>
+                    <div className="mt-3 border-t border-border/25 pt-3">
+                      <EncounterTreeChangeAction tree={enc.tree} className="w-full sm:w-auto" />
+                    </div>
+                  </div>
                 </motion.div>
               ))}
 
