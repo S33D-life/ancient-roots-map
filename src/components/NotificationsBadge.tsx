@@ -19,6 +19,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
   whisper: "🍄",
   resonance: "💧",
   invite: "🌱",
+  root_approval: "🌿",
   general: "✨",
 };
 

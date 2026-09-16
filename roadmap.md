@@ -45,7 +45,8 @@
 - [x] Contributor root suggestions: 'proposed' status, steward take-up/set-aside, own-suggestion withdrawal
 - [x] V2 handwritten marks: touch capture, trusted validation, steward tending, bark and portal rendering
 - [x] V2 relationship types: ancestral, family, birth, union and community through the shared Root journey
-- Deferred: photographic signatures, notifications, custom “other” roots, rewards, 3D twins, large archive views
+- [x] Approval notifications: Grove stewards for suggestions; Ancient Friend authorities for pending Roots
+- Deferred: photographic signatures, custom “other” roots, rewards, 3D twins, large archive views
 
 # Roadmap — Ethereal Tree Beauty Pass
 - [x] Harmonise botanical silhouette, memorial warmth, and celestial depth into one graceful immersive direction
