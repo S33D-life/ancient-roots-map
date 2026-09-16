@@ -18,6 +18,7 @@ import {
   listPendingTreeRoots,
   listTreeInscriptions,
   reviewGroveRoot,
+  rootTypeLabel,
   type TreeInscription,
 } from "@/repositories/grove-roots";
 import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
@@ -65,7 +66,7 @@ export default function AncestralInscriptions({ treeId }: Props) {
   if (marks.length === 0 && waiting.length === 0) return null;
 
   return (
-    <section aria-label="Ancestral roots" className="my-10">
+    <section aria-label="Roots in the digital bark" className="my-10">
       <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60 text-center">
         Names in the bark
       </p>
@@ -77,14 +78,14 @@ export default function AncestralInscriptions({ treeId }: Props) {
               key={m.root_id}
               type="button"
               onClick={() => setPortal(m)}
-              aria-label={`Open the ancestral root ${m.inscription_text ?? ""}`}
+              aria-label={`Open the ${rootTypeLabel(m.root_type).toLowerCase()} root ${m.inscription_text ?? ""}`}
               className="group relative min-h-[44px] px-3 py-2 rounded-md
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {m.signature_strokes?.length ? (
                 <SignatureMark
                   strokes={m.signature_strokes}
-                  label={`Handwritten mark: ${m.inscription_text ?? "ancestral inscription"}`}
+                  label={`Handwritten mark: ${m.inscription_text ?? `${rootTypeLabel(m.root_type)} inscription`}`}
                   className="h-14 w-28 opacity-55 transition-opacity duration-700 group-hover:opacity-90"
                 />
               ) : (
@@ -107,6 +108,9 @@ export default function AncestralInscriptions({ treeId }: Props) {
           <ul className="space-y-3">
             {waiting.map((w) => (
               <li key={w.id} className="text-sm font-serif">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                  {rootTypeLabel(w.root_type)} root
+                </p>
                 <p className="tracking-[0.3em] text-foreground/85">{w.inscription_text}</p>
                 {w.dedication && (
                   <p className="text-[11px] italic text-muted-foreground/80">{w.dedication}</p>
@@ -180,7 +184,7 @@ function AncestralRootPortal({
               {mark.signature_strokes?.length ? (
                 <SignatureMark
                   strokes={mark.signature_strokes}
-                  label={`Handwritten mark: ${mark.inscription_text ?? "ancestral inscription"}`}
+                  label={`Handwritten mark: ${mark.inscription_text ?? `${rootTypeLabel(mark.root_type)} inscription`}`}
                   className="mx-auto h-28 w-64"
                 />
               ) : (
@@ -191,6 +195,9 @@ function AncestralRootPortal({
               {mark.signature_strokes?.length && (
                 <p className="sr-only">{mark.inscription_text}</p>
               )}
+              <p className="font-serif text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70 mt-3">
+                {rootTypeLabel(mark.root_type)} root
+              </p>
               {mark.remembered_name && (
                 <p className="font-serif text-base italic text-muted-foreground/90 mt-3">
                   {mark.remembered_name}
