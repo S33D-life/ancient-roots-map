@@ -14,6 +14,7 @@ export default function EtherealTreeArchetypePicker({ value, onChange }: Props) 
           key={a.value}
           type="button"
           onClick={() => onChange(a.value)}
+          aria-pressed={value === a.value}
           className={cn(
             "text-left p-3 rounded-xl border transition-all",
             "bg-card/40 hover:bg-card/70",
