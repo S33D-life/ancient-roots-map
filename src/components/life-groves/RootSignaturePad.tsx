@@ -72,29 +72,24 @@ export default function RootSignaturePad({
           tabIndex={0}
           className="block h-[160px] w-full touch-none text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
           onPointerDown={(event) => {
-            if (event.button !== 0 || value.length >= 12) return;
+            const pointCount = value.reduce((total, stroke) => total + stroke.length, 0);
+            if (event.button !== 0 || value.length >= 12 || pointCount >= 1199) return;
             drawing.current = true;
             event.currentTarget.setPointerCapture(event.pointerId);
-            onChange([...value, [pointFromEvent(event)]]);
+            const first = pointFromEvent(event);
+            onChange([...value, [first, { x: Math.min(1, first.x + 0.001), y: first.y }]]);
           }}
           onPointerMove={(event) => {
             if (!drawing.current || value.length === 0) return;
             const current = value[value.length - 1];
-            if (!current || current.length >= 200) return;
+            const pointCount = value.reduce((total, stroke) => total + stroke.length, 0);
+            if (!current || current.length >= 200 || pointCount >= 1200) return;
             const point = pointFromEvent(event);
             const previous = current[current.length - 1];
             if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) < 0.004) return;
             onChange([...value.slice(0, -1), [...current, point]]);
           }}
           onPointerUp={() => {
-            const current = value[value.length - 1];
-            if (current?.length === 1) {
-              const first = current[0];
-              onChange([
-                ...value.slice(0, -1),
-                [first, { x: Math.min(1, first.x + 0.001), y: first.y }],
-              ]);
-            }
             drawing.current = false;
           }}
           onPointerCancel={() => {
