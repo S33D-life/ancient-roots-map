@@ -11,7 +11,7 @@
  * The tree quietly responds to how inhabited it is: more offerings mean a
  * fuller canopy, a warmer glow and a few more ambient motes.
  */
-import { useMemo, useRef, useEffect } from "react";
+import { useId, useMemo, useRef, useEffect } from "react";
 import {
   OFFERING_TYPES,
   TREE_ARCHETYPES,
@@ -120,6 +120,15 @@ export default function EtherealOfferingTree({
   const meta =
     TREE_ARCHETYPES.find((a) => a.value === archetype) ?? TREE_ARCHETYPES[0];
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const gradientPrefix = useId().replace(/:/g, "");
+
+  const branchGeometry = useMemo(
+    () => BRANCHES.map((_, i) => ({
+      body: taperedBranch(i, 9 - i * 0.5),
+      twigs: twigs(i),
+    })),
+    [],
+  );
 
   // Resolve positions (assign on the fly if missing — kept ephemeral; the
   // server-stored value is authoritative once the row is re-fetched).
@@ -175,7 +184,7 @@ export default function EtherealOfferingTree({
     <div
       ref={containerRef}
       className="relative mx-auto select-none"
-      style={{ width: size, height: size, maxWidth: "100%" }}
+      style={{ width: size, height: size, maxWidth: immersive ? "112vw" : "100%" }}
     >
       {/* outer halo — breathing light around the whole tree */}
       <div
@@ -196,31 +205,31 @@ export default function EtherealOfferingTree({
         aria-label={`Ethereal ${meta.label}${treeName ? ` named ${treeName}` : ""}, holding ${offerings.length} offering${offerings.length === 1 ? "" : "s"}`}
       >
         <defs>
-          <radialGradient id={`canopy-back-${archetype}`} cx="50%" cy="42%" r="58%">
+          <radialGradient id={`${gradientPrefix}-canopy-back`} cx="50%" cy="42%" r="58%">
             <stop offset="0%" stopColor={leaf(46, 32, 0.4)} />
             <stop offset="70%" stopColor={leaf(30, 28, 0.22)} />
             <stop offset="100%" stopColor={leaf(22, 24, 0)} />
           </radialGradient>
-          <radialGradient id={`canopy-mid-${archetype}`} cx="46%" cy="38%" r="55%">
+          <radialGradient id={`${gradientPrefix}-canopy-mid`} cx="46%" cy="38%" r="55%">
             <stop offset="0%" stopColor={leaf(58, 48, 0.42)} />
             <stop offset="65%" stopColor={leaf(38, 44, 0.26)} />
             <stop offset="100%" stopColor={leaf(28, 40, 0)} />
           </radialGradient>
-          <radialGradient id={`canopy-front-${archetype}`} cx="52%" cy="33%" r="48%">
+          <radialGradient id={`${gradientPrefix}-canopy-front`} cx="52%" cy="33%" r="48%">
             <stop offset="0%" stopColor={leaf(72, 58, 0.34 + fullness * 0.18)} />
             <stop offset="60%" stopColor={leaf(52, 52, 0.2)} />
             <stop offset="100%" stopColor={leaf(40, 48, 0)} />
           </radialGradient>
-          <radialGradient id={`heartlight-${archetype}`} cx="50%" cy="50%" r="50%">
+          <radialGradient id={`${gradientPrefix}-heartlight`} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor={`hsl(42 85% 74% / ${0.22 + fullness * 0.22})`} />
             <stop offset="100%" stopColor="hsl(42 85% 74% / 0)" />
           </radialGradient>
-          <linearGradient id={`trunk-${archetype}`} x1="0.2" y1="0" x2="0.9" y2="1">
+          <linearGradient id={`${gradientPrefix}-trunk`} x1="0.2" y1="0" x2="0.9" y2="1">
             <stop offset="0%" stopColor={bark(34, 1)} />
             <stop offset="45%" stopColor={bark(24, 1)} />
             <stop offset="100%" stopColor={bark(14, 1)} />
           </linearGradient>
-          <linearGradient id={`ground-${archetype}`} x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={`${gradientPrefix}-ground`} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor={leaf(40, 30, 0)} />
             <stop offset="50%" stopColor={leaf(46, 36, 0.36)} />
             <stop offset="100%" stopColor={leaf(40, 30, 0)} />
@@ -229,15 +238,17 @@ export default function EtherealOfferingTree({
 
         {/* layered canopy — back, mid, front for depth */}
         <g aria-hidden>
-          <ellipse cx={C} cy={TREE_VIEWBOX * 0.4} rx={TREE_VIEWBOX * 0.42} ry={TREE_VIEWBOX * 0.34} fill={`url(#canopy-back-${archetype})`} />
-          <ellipse cx={C * 0.86} cy={TREE_VIEWBOX * 0.4} rx={TREE_VIEWBOX * 0.3} ry={TREE_VIEWBOX * 0.26} fill={`url(#canopy-mid-${archetype})`} />
-          <ellipse cx={C * 1.16} cy={TREE_VIEWBOX * 0.42} rx={TREE_VIEWBOX * 0.29} ry={TREE_VIEWBOX * 0.25} fill={`url(#canopy-mid-${archetype})`} />
+          <ellipse cx={C - 28} cy={TREE_VIEWBOX * 0.4} rx={TREE_VIEWBOX * 0.37} ry={TREE_VIEWBOX * 0.3} fill={`url(#${gradientPrefix}-canopy-back)`} opacity="0.72" />
+          <ellipse cx={C + 42} cy={TREE_VIEWBOX * 0.37} rx={TREE_VIEWBOX * 0.32} ry={TREE_VIEWBOX * 0.27} fill={`url(#${gradientPrefix}-canopy-back)`} opacity="0.58" />
+          <ellipse cx={C * 0.66} cy={TREE_VIEWBOX * 0.48} rx={TREE_VIEWBOX * 0.22} ry={TREE_VIEWBOX * 0.18} fill={`url(#${gradientPrefix}-canopy-mid)`} />
+          <ellipse cx={C * 0.9} cy={TREE_VIEWBOX * 0.29} rx={TREE_VIEWBOX * 0.25} ry={TREE_VIEWBOX * 0.2} fill={`url(#${gradientPrefix}-canopy-mid)`} />
+          <ellipse cx={C * 1.3} cy={TREE_VIEWBOX * 0.4} rx={TREE_VIEWBOX * 0.24} ry={TREE_VIEWBOX * 0.21} fill={`url(#${gradientPrefix}-canopy-mid)`} />
           <ellipse
             cx={C}
             cy={TREE_VIEWBOX * 0.32}
             rx={TREE_VIEWBOX * (0.26 + fullness * 0.05)}
             ry={TREE_VIEWBOX * (0.22 + fullness * 0.04)}
-            fill={`url(#canopy-front-${archetype})`}
+            fill={`url(#${gradientPrefix}-canopy-front)`}
             className="motion-safe:animate-[lifeGroveBreathe_13s_ease-in-out_infinite]"
             style={{ transformOrigin: "50% 36%" }}
           />
@@ -250,11 +261,11 @@ export default function EtherealOfferingTree({
           cy={TREE_VIEWBOX * 0.5}
           rx={TREE_VIEWBOX * 0.2}
           ry={TREE_VIEWBOX * 0.26}
-          fill={`url(#heartlight-${archetype})`}
+          fill={`url(#${gradientPrefix}-heartlight)`}
         />
 
         {/* ground glow */}
-        <ellipse aria-hidden cx={C} cy={TREE_VIEWBOX * 0.87} rx={TREE_VIEWBOX * 0.3} ry={TREE_VIEWBOX * 0.035} fill={`url(#ground-${archetype})`} />
+        <ellipse aria-hidden cx={C} cy={TREE_VIEWBOX * 0.87} rx={TREE_VIEWBOX * 0.34} ry={TREE_VIEWBOX * 0.035} fill={`url(#${gradientPrefix}-ground)`} />
 
         {/* root flare + tapered trunk */}
         <path
@@ -266,7 +277,7 @@ export default function EtherealOfferingTree({
               C ${C + 6} ${TREE_VIEWBOX * 0.5}, ${C + 9} ${TREE_VIEWBOX * 0.58}, ${C + 11} ${TREE_VIEWBOX * 0.68}
               C ${C + 14} ${TREE_VIEWBOX * 0.79}, ${C + 19} ${TREE_VIEWBOX * 0.85}, ${C + 26} ${TREE_VIEWBOX * 0.885}
               C ${C + 12} ${TREE_VIEWBOX * 0.9}, ${C - 12} ${TREE_VIEWBOX * 0.9}, ${C - 26} ${TREE_VIEWBOX * 0.885} Z`}
-          fill={`url(#trunk-${archetype})`}
+          fill={`url(#${gradientPrefix}-trunk)`}
         />
         {/* trunk rim light */}
         <path
@@ -280,10 +291,10 @@ export default function EtherealOfferingTree({
 
         {/* branches + twigs */}
         <g aria-hidden>
-          {BRANCHES.map((_, i) => (
+          {branchGeometry.map((branch, i) => (
             <g key={i}>
-              <path d={taperedBranch(i, 9 - i * 0.5)} fill={bark(21, 0.92)} />
-              {twigs(i).map((d, j) => (
+              <path d={branch.body} fill={bark(21, 0.92)} />
+              {branch.twigs.map((d, j) => (
                 <path
                   key={j}
                   d={d}
@@ -295,7 +306,7 @@ export default function EtherealOfferingTree({
               ))}
               {/* faint rim light along the top of each limb */}
               <path
-                d={taperedBranch(i, 9 - i * 0.5)}
+                d={branch.body}
                 fill="none"
                 stroke={`hsl(42 70% 82% / 0.1)`}
                 strokeWidth={0.6}
@@ -307,14 +318,15 @@ export default function EtherealOfferingTree({
         {/* ambient motes */}
         <g aria-hidden>
           {motes.map((m) => (
-            <circle key={m.key} cx={m.cx} cy={m.cy} r={m.r} fill="hsl(42 90% 82% / 0.5)">
-              <animate
-                attributeName="opacity"
-                values="0.12;0.6;0.12"
-                dur={`${m.dur}s`}
-                repeatCount="indefinite"
-              />
-            </circle>
+            <circle
+              key={m.key}
+              cx={m.cx}
+              cy={m.cy}
+              r={m.r}
+              fill="hsl(42 90% 82% / 0.5)"
+              className="ethereal-mote"
+              style={{ animationDuration: `${m.dur}s`, animationDelay: `${m.key * -0.47}s` }}
+            />
           ))}
         </g>
 
@@ -348,6 +360,8 @@ export default function EtherealOfferingTree({
             data-offering-id={p.offering.id}
             onClick={() => onSelect?.(isSelected ? null : p.offering)}
             aria-pressed={isSelected}
+            aria-hidden={dimmed || undefined}
+            tabIndex={dimmed ? -1 : 0}
             aria-label={`${glyphMeta?.label ?? "Offering"}: ${p.offering.title ?? p.offering.contributor_name}`}
             className={[
               "absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
@@ -358,7 +372,7 @@ export default function EtherealOfferingTree({
               isSelected
                 ? "scale-125 drop-shadow-[0_0_14px_hsl(38_90%_70%/0.9)]"
                 : "drop-shadow-[0_0_6px_hsl(38_90%_70%/0.45)]",
-              dimmed ? "opacity-25" : "opacity-100",
+              dimmed ? "opacity-20 scale-90 pointer-events-none" : "opacity-100",
             ].join(" ")}
             style={{
               left: `${leftPct}%`,
@@ -372,7 +386,7 @@ export default function EtherealOfferingTree({
             {/* Sway lives on the glyph, not the button — the touch target
                 stays exactly where the finger expects it. */}
             <span
-              className="motion-safe:animate-[lifeGroveSway_9s_ease-in-out_infinite] flex"
+              className="motion-safe:animate-[lifeGroveSway_11s_ease-in-out_infinite] flex rounded-full border border-primary/15 bg-background/5"
               style={{ animationDelay: `${(i % 5) * 0.7}s` }}
             >
               <LifeGroveOfferingGlyph type={p.offering.offering_type} size={glyphSize} variant="tree" />
@@ -396,8 +410,16 @@ export default function EtherealOfferingTree({
           50% { opacity: 1; transform: scale(1.03); }
         }
         @keyframes lifeGroveSway {
-          0%, 100% { transform: rotate(-2deg); }
-          50% { transform: rotate(2deg); }
+          0%, 100% { transform: rotate(-1.25deg) translateY(0); }
+          50% { transform: rotate(1.25deg) translateY(-1px); }
+        }
+        @keyframes etherealMote {
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.58; }
+        }
+        .ethereal-mote { animation: etherealMote 10s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .ethereal-mote { animation: none; opacity: 0.34; }
         }
       `}</style>
     </div>

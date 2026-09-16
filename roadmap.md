@@ -44,3 +44,8 @@
 - [x] DB-level authority/privacy tests; Maithe journey rehearsed end to end
 - [x] Contributor root suggestions: 'proposed' status, steward take-up/set-aside, own-suggestion withdrawal
 - Deferred: signatures/drawings, notifications, non-ancestral root UI, rewards, 3D twins, large archive views
+
+# Roadmap — Ethereal Tree Beauty Pass
+- [x] Harmonise botanical silhouette, memorial warmth, and celestial depth into one graceful immersive direction
+- [x] Improve branch-borne offering clarity, filtering, entry motion, reduced motion, and mobile composition
+- [x] Verify the immersive Tree and memory viewer at mobile and desktop sizes

@@ -8,6 +8,7 @@
  * Palette is intentionally narrow: warm gold + heartwood green + parchment.
  * Strokes use semi-transparent ink so glyphs sit softly on the canopy.
  */
+import { useId } from "react";
 import { OFFERING_TYPES, type OfferingType } from "@/lib/life-groves/types";
 
 interface Props {
@@ -39,6 +40,7 @@ export default function LifeGroveOfferingGlyph({
   decorative = true,
 }: Props) {
   const meta = OFFERING_TYPES.find((m) => m.value === type);
+  const haloId = useId().replace(/:/g, "");
   const ariaProps = decorative
     ? { "aria-hidden": true as const }
     : { role: "img" as const, "aria-label": `${meta?.label ?? "Offering"} glyph` };
@@ -53,14 +55,14 @@ export default function LifeGroveOfferingGlyph({
     >
       {variant === "tree" && (
         <defs>
-          <radialGradient id={`halo-${type}`} cx="50%" cy="50%" r="55%">
+           <radialGradient id={haloId} cx="50%" cy="50%" r="55%">
             <stop offset="0%" stopColor={GOLD_SOFT} stopOpacity="0.65" />
             <stop offset="70%" stopColor={GOLD} stopOpacity="0.18" />
             <stop offset="100%" stopColor={GOLD} stopOpacity="0" />
           </radialGradient>
         </defs>
       )}
-      {variant === "tree" && <circle cx="16" cy="16" r="15" fill={`url(#halo-${type})`} />}
+       {variant === "tree" && <circle cx="16" cy="16" r="15" fill={`url(#${haloId})`} />}
       <Glyph type={type} variant={variant} />
     </svg>
   );
@@ -256,11 +258,7 @@ function Lantern({ variant }: { variant: "tree" | "card" }) {
         stroke={INK}
         strokeWidth="0.9"
       />
-      <circle cx="16" cy="16" r="3.2" fill={GOLD} opacity={variant === "tree" ? "1" : "0.85"}>
-        {variant === "tree" && (
-          <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite" />
-        )}
-      </circle>
+       <circle cx="16" cy="16" r="3.2" fill={GOLD} opacity={variant === "tree" ? "1" : "0.85"} />
       <path d="M10 22 L 22 22 L 21 24 L 11 24 Z" fill={INK} opacity="0.8" />
     </g>
   );
@@ -272,9 +270,7 @@ function Window() {
       <rect x="7" y="7" width="18" height="18" rx="2" fill={PARCH} stroke={INK} strokeWidth="0.9" />
       <path d="M16 7 L 16 25" stroke={INK_SOFT} strokeWidth="0.6" />
       <path d="M7 16 L 25 16" stroke={INK_SOFT} strokeWidth="0.6" />
-      <circle cx="16" cy="16" r="3.5" fill={GOLD} opacity="0.55">
-        <animate attributeName="opacity" values="0.3;0.65;0.3" dur="4s" repeatCount="indefinite" />
-      </circle>
+       <circle cx="16" cy="16" r="3.5" fill={GOLD} opacity="0.55" />
     </g>
   );
 }

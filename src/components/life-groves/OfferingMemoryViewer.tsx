@@ -8,7 +8,7 @@
  * elevated rendering they already have in the Heartwood Library.
  */
 import { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { OFFERING_TYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
 import LifeGroveOfferingGlyph from "./LifeGroveOfferingGlyph";
@@ -33,9 +33,14 @@ export default function OfferingMemoryViewer({
   total,
 }: Props) {
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     if (!offering) return;
+    returnFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
     panelRef.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -44,9 +49,27 @@ export default function OfferingMemoryViewer({
       }
       if (e.key === "ArrowLeft") onPrev?.();
       if (e.key === "ArrowRight") onNext?.();
+      if (e.key === "Tab") {
+        const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], audio[controls], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusable?.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener("keydown", onKey, true);
-    return () => document.removeEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("keydown", onKey, true);
+      returnFocusRef.current?.focus({ preventScroll: true });
+    };
   }, [offering, onClose, onPrev, onNext]);
 
   const meta = offering
@@ -61,7 +84,7 @@ export default function OfferingMemoryViewer({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.28 }}
+          transition={{ duration: reduced ? 0 : 0.36 }}
           className="absolute inset-0 z-[20] flex items-end sm:items-center justify-center"
         >
           {/* scrim — the tree remains perceptible through it */}
@@ -78,10 +101,10 @@ export default function OfferingMemoryViewer({
             role="dialog"
             aria-modal="true"
             aria-label={`${meta?.label ?? "Offering"}${offering.title ? `: ${offering.title}` : ""}`}
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+             initial={reduced ? false : { opacity: 0, y: 18, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
+             transition={{ duration: reduced ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }}
             className="relative w-full sm:max-w-lg max-h-[86vh] overflow-y-auto
               rounded-t-3xl sm:rounded-3xl border border-primary/25
               bg-card/85 backdrop-blur-xl shadow-2xl focus:outline-none"
