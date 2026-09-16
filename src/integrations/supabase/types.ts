@@ -12227,6 +12227,7 @@ export type Database = {
           portal_disclosure: string
           review_note: string
           root_id: string
+          root_type: string
           signature_strokes: Json
           status: string
           tree_id: string
@@ -12245,6 +12246,7 @@ export type Database = {
           life_grove_id: string
           remembered_name: string
           root_id: string
+          root_type: string
           rooted_year: number
           signature_strokes: Json
         }[]
