@@ -172,6 +172,16 @@ export default function TreeChangeFlow({
 
   const dirty = Object.keys(detailChanges).length > 0 || locationChanged || !!dupSelected;
 
+  useEffect(() => {
+    if (!open || !dirty || success) return;
+    const protectUnsavedChanges = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", protectUnsavedChanges);
+    return () => window.removeEventListener("beforeunload", protectUnsavedChanges);
+  }, [dirty, open, success]);
+
   const validateDetails = () => {
     const e: Record<string, string> = {};
     if ("name" in detailChanges && !detailChanges.name) e.name = "A tree needs a name.";

@@ -5,7 +5,7 @@
 import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, Map, Share2, ExternalLink, TreeDeciduous, CheckCircle2, XCircle, ClipboardCheck, Heart } from "lucide-react";
+import { Loader2, Map, Share2, ExternalLink, TreeDeciduous, CheckCircle2, XCircle, ClipboardCheck, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,8 @@ import { useHasRole } from "@/hooks/use-role";
 import { generateVerificationTasks, promoteResearchToAncientFriend } from "@/services/research-bridge";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
+import ContextBackButton from "@/components/navigation/ContextBackButton";
+import { ROUTES } from "@/lib/routes";
 
 const PhenologyBadge = lazy(() => import("@/components/PhenologyBadge"));
 const ConversionReviewPanel = lazy(() => import("@/components/tree-sections/ConversionReviewPanel"));
@@ -177,10 +179,7 @@ const ResearchTreeDetailPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 pb-20 max-w-4xl" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 5rem)" }}>
-        <button onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/map")}
-          className="inline-flex items-center text-muted-foreground hover:text-primary mb-6 font-serif text-sm tracking-wide transition-colors bg-transparent border-none cursor-pointer p-0">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back
-        </button>
+        <ContextBackButton fallback={ROUTES.MAP} className="-ml-3 mb-3" />
 
         {/* Research indicator banner */}
         <div className="rounded-xl p-3 mb-4 flex items-center gap-3" style={{ background: "hsl(var(--secondary) / 0.15)", border: "1px solid hsl(var(--primary) / 0.12)" }}>
