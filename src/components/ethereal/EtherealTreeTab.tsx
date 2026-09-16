@@ -117,6 +117,8 @@ interface NodeDatum {
   title: string;
   subtitle?: string;
   payload: Offering | TreeWhisper;
+  x: number;
+  y: number;
 }
 
 /** Derive a poetic atmospheric state from the living memory ecology.
@@ -255,14 +257,21 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
         subtitle: o.content?.slice(0, 80) || undefined,
         payload: o,
       }));
-    const whisperNodes: NodeDatum[] = whispers.map((w) => ({
-      id: `wsp-${w.id}`,
-      zone: "roots",
-      kind: "whisper",
-      title: "A whisper",
-      subtitle: (w.message_content || "").slice(0, 80),
-      payload: w,
-    }));
+    const whisperNodes: NodeDatum[] = whispers.map((w) => {
+      const id = `wsp-${w.id}`;
+      const zone = "roots" as const;
+      const { x, y } = placeInZone(zone, id);
+      return {
+        id,
+        zone,
+        kind: "whisper" as const,
+        title: "A whisper",
+        subtitle: (w.message_content || "").slice(0, 80),
+        payload: w,
+        x,
+        y,
+      };
+    });
     return [...offeringNodes, ...whisperNodes];
   }, [offerings, whispers]);
 
@@ -477,7 +486,6 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
 
           {/* Nodes */}
           {visible.map((n) => {
-            const pos = placeInZone(n.zone, n.id);
             const dim = !FILTERS.find((f) => f.id === filter)!.match(n);
             const isWhisper = n.kind === "whisper";
             const baseRadius = isWhisper ? 2.2 : 3;
@@ -489,8 +497,14 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
               <g
                 key={n.id}
                 onClick={() => setActiveNode(n)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActiveNode(n);
+                  }
+                }}
                 className={cn(
-                  "cursor-pointer transition-opacity duration-700",
+                  "cursor-pointer transition-opacity duration-700 outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
                   dim
                     ? "opacity-[0.10]"
                     : quieted
@@ -501,13 +515,16 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                 role="button"
                 aria-label={`${n.kind}: ${n.title}`}
               >
+                {/* Invisible hit area for better touch/mobile interaction */}
+                <circle cx={n.x} cy={n.y} r={20} fill="transparent" />
+
                 {/* Selected anchor — ceremonial ring that keeps the memory
                     visibly rooted in place while the sheet is open. */}
                 {highlighted && (
                   <>
                     <circle
-                      cx={pos.x}
-                      cy={pos.y}
+                      cx={n.x}
+                      cy={n.y}
                       r={16}
                       fill="none"
                       stroke={isWhisper ? "hsl(160 60% 70%)" : "hsl(45 85% 72%)"}
@@ -516,8 +533,8 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                       className={cn("et-anchor-ring", isLingering && "et-anchor-ring-linger")}
                     />
                     <circle
-                      cx={pos.x}
-                      cy={pos.y}
+                      cx={n.x}
+                      cy={n.y}
                       r={isLingering ? 26 : 22}
                       fill={isWhisper ? "url(#et-whisper)" : "url(#et-glow)"}
                       opacity={isLingering ? 0.75 : 0.55}
@@ -528,8 +545,8 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                 )}
                 {/* outer glow */}
                 <circle
-                  cx={pos.x}
-                  cy={pos.y}
+                  cx={n.x}
+                  cy={n.y}
                   r={9}
                   fill={isWhisper ? "url(#et-whisper)" : "url(#et-glow)"}
                   filter="url(#et-soft)"
@@ -537,8 +554,8 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
                 />
                 {/* core */}
                 <circle
-                  cx={pos.x}
-                  cy={pos.y}
+                  cx={n.x}
+                  cy={n.y}
                   r={highlighted ? baseRadius + 0.6 : baseRadius}
                   fill={isWhisper ? "hsl(160 70% 75%)" : "hsl(45 90% 78%)"}
                   className="et-node-core"
@@ -553,6 +570,8 @@ export function EtherealTreeTab({ treeId, treeName, offerings, whispers, onViewI
             return (
               <g
                 key={`ov-${zone}`}
+                role="status"
+                aria-label={`${count} more memories in the ${zoneLabel(zone as Zone).toLowerCase()}`}
                 className={cn(
                   "transition-opacity duration-700",
                   activeNode ? "opacity-[0.25]" : "opacity-100"
