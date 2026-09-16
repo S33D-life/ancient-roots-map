@@ -22,6 +22,7 @@ import {
 } from "@/repositories/grove-roots";
 import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
 import FullscreenTreeView from "@/components/life-groves/FullscreenTreeView";
+import { SignatureMark } from "@/components/life-groves/RootSignaturePad";
 
 interface Props {
   treeId: string;
@@ -80,13 +81,17 @@ export default function AncestralInscriptions({ treeId }: Props) {
               className="group relative min-h-[44px] px-3 py-2 rounded-md
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <span
-                className="font-serif tracking-[0.42em] text-base md:text-lg text-foreground/55
-                  group-hover:text-foreground/90 transition-colors duration-700"
-                style={{ textShadow: "0 1px 0 hsl(var(--background) / 0.7)" }}
-              >
-                {m.inscription_text}
-              </span>
+              {m.signature_strokes?.length ? (
+                <SignatureMark
+                  strokes={m.signature_strokes}
+                  label={`Handwritten mark: ${m.inscription_text ?? "ancestral inscription"}`}
+                  className="h-14 w-28 opacity-55 transition-opacity duration-700 group-hover:opacity-90"
+                />
+              ) : (
+                <span className="font-serif tracking-[0.42em] text-base md:text-lg text-foreground/55 group-hover:text-foreground/90 transition-colors duration-700">
+                  {m.inscription_text}
+                </span>
+              )}
               <span
                 aria-hidden
                 className="block h-px mt-1 bg-foreground/15 group-hover:bg-primary/40 transition-colors duration-700"
@@ -172,9 +177,20 @@ function AncestralRootPortal({
         <SheetContent side="bottom" className="rounded-t-3xl border-border/40 pb-10">
           {mark && (
             <div className="max-w-md mx-auto text-center pt-2">
-              <p className="font-serif tracking-[0.42em] text-2xl text-foreground">
-                {mark.inscription_text}
-              </p>
+              {mark.signature_strokes?.length ? (
+                <SignatureMark
+                  strokes={mark.signature_strokes}
+                  label={`Handwritten mark: ${mark.inscription_text ?? "ancestral inscription"}`}
+                  className="mx-auto h-28 w-64"
+                />
+              ) : (
+                <p className="font-serif tracking-[0.42em] text-2xl text-foreground">
+                  {mark.inscription_text}
+                </p>
+              )}
+              {mark.signature_strokes?.length && (
+                <p className="sr-only">{mark.inscription_text}</p>
+              )}
               {mark.remembered_name && (
                 <p className="font-serif text-base italic text-muted-foreground/90 mt-3">
                   {mark.remembered_name}

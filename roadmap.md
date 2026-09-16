@@ -43,7 +43,8 @@
 - [x] Tree page: inscriptions in the digital bark + Ancestral Root portal → FullscreenTreeView
 - [x] DB-level authority/privacy tests; Maithe journey rehearsed end to end
 - [x] Contributor root suggestions: 'proposed' status, steward take-up/set-aside, own-suggestion withdrawal
-- Deferred: signatures/drawings, notifications, non-ancestral root UI, rewards, 3D twins, large archive views
+- [x] V2 handwritten marks: touch capture, trusted validation, steward tending, bark and portal rendering
+- Deferred: photographic signatures, notifications, non-ancestral root UI, rewards, 3D twins, large archive views
 
 # Roadmap — Ethereal Tree Beauty Pass
 - [x] Harmonise botanical silhouette, memorial warmth, and celestial depth into one graceful immersive direction

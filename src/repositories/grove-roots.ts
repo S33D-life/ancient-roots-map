@@ -7,6 +7,7 @@
  * These helpers only carry the request; they never decide who may do what.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { SignatureStrokes } from "@/components/life-groves/RootSignaturePad";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const db = supabase as any;
@@ -24,6 +25,7 @@ export interface GroveRootRow {
   tree_species: string | null;
   status: RootStatus;
   inscription_text: string | null;
+  signature_strokes: SignatureStrokes | null;
   inscription_visibility: InscriptionVisibility;
   portal_disclosure: PortalDisclosure;
   entry_mode: EntryMode;
@@ -38,6 +40,7 @@ export interface TreeInscription {
   life_grove_id: string;
   inscription_text: string | null;
   inscription_style: string | null;
+  signature_strokes: SignatureStrokes | null;
   /** Only present when the Root discloses it, or the viewer belongs to the grove. */
   remembered_name: string | null;
   grove_title: string | null;
@@ -66,6 +69,7 @@ export interface CreateRootInput {
   inscriptionVisibility?: InscriptionVisibility;
   portalDisclosure?: PortalDisclosure;
   entryMode?: EntryMode;
+  signatureStrokes?: SignatureStrokes | null;
 }
 
 export async function createGroveRoot(input: CreateRootInput): Promise<string> {
@@ -79,9 +83,27 @@ export async function createGroveRoot(input: CreateRootInput): Promise<string> {
     p_entry_mode: input.entryMode ?? "members_only",
     // V1 only ever creates ancestral roots, though the schema holds others.
     p_root_type: "ancestral",
+    p_signature_strokes: input.signatureStrokes?.length ? input.signatureStrokes : null,
   });
   if (error) throw error;
   return data as string;
+}
+
+export interface TendRootInscriptionInput {
+  rootId: string;
+  inscriptionText?: string | null;
+  signatureStrokes?: SignatureStrokes | null;
+  clearSignature?: boolean;
+}
+
+export async function tendGroveRootInscription(input: TendRootInscriptionInput): Promise<void> {
+  const { error } = await db.rpc("tend_grove_root_inscription", {
+    p_root_id: input.rootId,
+    p_inscription_text: input.inscriptionText ?? null,
+    p_signature_strokes: input.signatureStrokes?.length ? input.signatureStrokes : null,
+    p_clear_signature: input.clearSignature ?? false,
+  });
+  if (error) throw error;
 }
 
 /** A grove steward takes up, or sets aside, a suggested root. */
