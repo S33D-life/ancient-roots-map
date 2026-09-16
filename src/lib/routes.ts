@@ -22,6 +22,8 @@ export const ROUTES = {
   SUB_REGION: (countrySlug: string, subSlug: string) => `/atlas/${countrySlug}/${subSlug}` as const,
   /** Library / Heartwood */
   LIBRARY: "/library",
+  /** Heartwood room */
+  HEARTWOOD_ROOM: (room: string) => `/library/${room}` as const,
   /** Council of Life */
   COUNCIL: "/council-of-life",
   /** Council Records archive */

@@ -11,6 +11,7 @@ interface UseSwipeNavigationOptions {
    * Swipes outside the zone produce a "blocked" callback instead.
    */
   zoneTopPercent?: number;
+  axis?: "horizontal" | "vertical";
 }
 
 export function useSwipeNavigation({
@@ -19,6 +20,7 @@ export function useSwipeNavigation({
   onNavigate,
   threshold = 50,
   zoneTopPercent,
+  axis = "horizontal",
 }: UseSwipeNavigationOptions) {
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -44,8 +46,11 @@ export function useSwipeNavigation({
       touchStartY.current = null;
       touchStartScreenY.current = null;
 
-      // Only trigger if horizontal swipe is dominant
-      if (Math.abs(deltaX) < threshold || Math.abs(deltaY) > Math.abs(deltaX)) {
+      const primaryDelta = axis === "vertical" ? deltaY : deltaX;
+      const crossDelta = axis === "vertical" ? deltaX : deltaY;
+
+      // Only trigger when the configured direction is dominant.
+      if (Math.abs(primaryDelta) < threshold || Math.abs(crossDelta) > Math.abs(primaryDelta)) {
         return;
       }
 
@@ -63,13 +68,13 @@ export function useSwipeNavigation({
       const currentIndex = items.indexOf(activeItem);
       if (currentIndex === -1) return;
 
-      if (deltaX < -threshold && currentIndex < items.length - 1) {
+      if (primaryDelta < -threshold && currentIndex < items.length - 1) {
         onNavigate(items[currentIndex + 1]);
-      } else if (deltaX > threshold && currentIndex > 0) {
+      } else if (primaryDelta > threshold && currentIndex > 0) {
         onNavigate(items[currentIndex - 1]);
       }
     },
-    [items, activeItem, onNavigate, threshold, zoneTopPercent]
+    [items, activeItem, onNavigate, threshold, zoneTopPercent, axis]
   );
 
   return { onTouchStart, onTouchEnd, blockedHint };
