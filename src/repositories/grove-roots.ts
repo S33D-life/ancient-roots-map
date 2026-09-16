@@ -1,5 +1,5 @@
 /**
- * grove-roots repository — Ancestral Roots.
+ * grove-roots repository — Grove Roots.
  *
  * A Root is the relationship. An Inscription is the mark it leaves.
  *
@@ -13,9 +13,26 @@ import type { SignatureStrokes } from "@/components/life-groves/RootSignaturePad
 const db = supabase as any;
 
 export type RootStatus = "proposed" | "pending" | "active" | "declined" | "removed";
+export type RootType = "ancestral" | "family" | "birth" | "union" | "community";
 export type InscriptionVisibility = "private" | "public";
 export type PortalDisclosure = "mark_only" | "named";
 export type EntryMode = "members_only" | "as_grove_permits";
+
+export const ROOT_TYPE_DETAILS: ReadonlyArray<{
+  value: RootType;
+  label: string;
+  description: string;
+}> = [
+  { value: "ancestral", label: "Ancestral", description: "Honouring lineage and those who came before." },
+  { value: "family", label: "Family", description: "Holding kinship, belonging and shared memory." },
+  { value: "birth", label: "Birth", description: "Marking an arrival and a life beginning." },
+  { value: "union", label: "Union", description: "Remembering lives, families or paths joined." },
+  { value: "community", label: "Community", description: "Rooting a shared place, people or purpose." },
+] as const;
+
+export function rootTypeLabel(type: RootType): string {
+  return ROOT_TYPE_DETAILS.find((item) => item.value === type)?.label ?? "Root";
+}
 
 /** A Root as its Grove sees it. */
 export interface GroveRootRow {
@@ -23,6 +40,7 @@ export interface GroveRootRow {
   tree_id: string;
   tree_name: string | null;
   tree_species: string | null;
+  root_type: RootType;
   status: RootStatus;
   inscription_text: string | null;
   signature_strokes: SignatureStrokes | null;
@@ -38,6 +56,7 @@ export interface GroveRootRow {
 export interface TreeInscription {
   root_id: string;
   life_grove_id: string;
+  root_type: RootType;
   inscription_text: string | null;
   inscription_style: string | null;
   signature_strokes: SignatureStrokes | null;
@@ -70,6 +89,7 @@ export interface CreateRootInput {
   portalDisclosure?: PortalDisclosure;
   entryMode?: EntryMode;
   signatureStrokes?: SignatureStrokes | null;
+  rootType?: RootType;
 }
 
 export async function createGroveRoot(input: CreateRootInput): Promise<string> {
@@ -81,8 +101,7 @@ export async function createGroveRoot(input: CreateRootInput): Promise<string> {
     p_inscription_visibility: input.inscriptionVisibility ?? "private",
     p_portal_disclosure: input.portalDisclosure ?? "mark_only",
     p_entry_mode: input.entryMode ?? "members_only",
-    // V1 only ever creates ancestral roots, though the schema holds others.
-    p_root_type: "ancestral",
+    p_root_type: input.rootType ?? "ancestral",
     p_signature_strokes: input.signatureStrokes?.length ? input.signatureStrokes : null,
   });
   if (error) throw error;
@@ -174,6 +193,7 @@ export async function isTreeRootAuthority(treeId: string, userId: string | null)
 export interface PendingTreeRoot {
   id: string;
   life_grove_id: string;
+  root_type: RootType;
   inscription_text: string | null;
   dedication: string | null;
   created_at: string;
@@ -183,7 +203,7 @@ export interface PendingTreeRoot {
 export async function listPendingTreeRoots(treeId: string): Promise<PendingTreeRoot[]> {
   const { data, error } = await db
     .from("grove_roots")
-    .select("id,life_grove_id,inscription_text,dedication,created_at")
+    .select("id,life_grove_id,root_type,inscription_text,dedication,created_at")
     .eq("tree_id", treeId)
     .eq("status", "pending")
     .order("created_at", { ascending: true });

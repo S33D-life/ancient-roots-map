@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { SignatureMark } from "@/components/life-groves/RootSignaturePad";
 
-describe("Ancestral Root handwritten marks", () => {
+describe("Root handwritten marks", () => {
   it("renders normalized strokes with an accessible spoken inscription", () => {
     render(
       <SignatureMark

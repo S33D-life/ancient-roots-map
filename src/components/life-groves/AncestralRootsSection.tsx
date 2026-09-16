@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
   DialogContent,
@@ -30,9 +31,12 @@ import {
   reviewGroveRootProposal,
   searchAncientFriends,
   tendGroveRootInscription,
+  ROOT_TYPE_DETAILS,
+  rootTypeLabel,
   type AncientFriendResult,
   type EntryMode,
   type PortalDisclosure,
+  type RootType,
 } from "@/repositories/grove-roots";
 import RootSignaturePad, {
   SignatureMark,
@@ -131,6 +135,9 @@ export default function AncestralRootsSection({ groveId }: Props) {
                           : "Not welcomed"}
                   </span>
                 </div>
+                <p className="font-serif text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70 mt-1">
+                  {rootTypeLabel(r.root_type)} root
+                </p>
                 {r.inscription_text && (
                   <p className="font-serif tracking-[0.3em] text-sm text-foreground/85 mt-1">
                     {r.inscription_text}
@@ -138,7 +145,7 @@ export default function AncestralRootsSection({ groveId }: Props) {
                 )}
                 <SignatureMark
                   strokes={r.signature_strokes}
-                  label={`Handwritten mark: ${r.inscription_text || "ancestral inscription"}`}
+                  label={`Handwritten mark: ${r.inscription_text || `${rootTypeLabel(r.root_type)} inscription`}`}
                   className="mt-2 h-16 w-36 opacity-75"
                 />
                 {r.status === "proposed" && (
@@ -265,6 +272,7 @@ function RootIntoAncientFriendDialog({
   const [entryMode, setEntryMode] = useState<EntryMode>("members_only");
   const [visible, setVisible] = useState(true);
   const [signature, setSignature] = useState<SignatureStrokes>([]);
+  const [rootType, setRootType] = useState<RootType>("ancestral");
 
   const { data: results = [], isFetching } = useQuery({
     queryKey: ["ancient-friend-search", term],
@@ -273,17 +281,20 @@ function RootIntoAncientFriendDialog({
   });
 
   const create = useMutation({
-    mutationFn: () =>
-      createGroveRoot({
+    mutationFn: () => {
+      if (!chosen) throw new Error("tree_not_found");
+      return createGroveRoot({
         groveId,
-        treeId: chosen!.id,
+        treeId: chosen.id,
         inscriptionText: inscription.trim(),
         dedication: dedication.trim() || null,
         inscriptionVisibility: visible ? "public" : "private",
         portalDisclosure: disclosure,
         entryMode,
         signatureStrokes: signature,
-      }),
+        rootType,
+      });
+    },
     onSuccess: () => {
       toast.success(
         isSteward
@@ -306,6 +317,7 @@ function RootIntoAncientFriendDialog({
     setEntryMode("members_only");
     setVisible(true);
     setSignature([]);
+    setRootType("ancestral");
   }
 
   return (
@@ -364,6 +376,31 @@ function RootIntoAncientFriendDialog({
           </div>
         ) : (
           <div className="space-y-4">
+            <fieldset className="space-y-2">
+              <legend className="font-serif text-sm text-foreground">The relationship</legend>
+              <RadioGroup
+                value={rootType}
+                onValueChange={(value) => setRootType(value as RootType)}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+              >
+                {ROOT_TYPE_DETAILS.map((type) => (
+                  <Label
+                    key={type.value}
+                    htmlFor={`root-type-${type.value}`}
+                    className="flex min-h-[64px] cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card/40 p-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[[data-state=checked]]:border-primary/60 has-[[data-state=checked]]:bg-primary/5"
+                  >
+                    <RadioGroupItem id={`root-type-${type.value}`} value={type.value} className="mt-0.5 shrink-0" />
+                    <span>
+                      <span className="block font-serif text-sm text-foreground">{type.label}</span>
+                      <span className="mt-0.5 block font-serif text-[11px] font-normal leading-relaxed text-muted-foreground/80">
+                        {type.description}
+                      </span>
+                    </span>
+                  </Label>
+                ))}
+              </RadioGroup>
+            </fieldset>
+
             <div className="rounded-xl border border-primary/40 bg-primary/5 p-3">
               <p className="font-serif text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
                 The pairing
@@ -600,6 +637,7 @@ function describe(e: unknown): string {
   if (m.includes("reason_required")) return "Please leave a few words with your decision.";
   if (m.includes("root_already_exists")) return "This grove is already rooted in that Ancient Friend.";
   if (m.includes("tree_merged")) return "That Ancient Friend has been merged into another record.";
+  if (m.includes("invalid_root_type")) return "Choose one of the available Root relationships.";
   if (m.includes("invalid_signature")) return "That mark held too much detail. Try a simpler gesture.";
   return m || "Something would not settle. Please try again.";
 }
