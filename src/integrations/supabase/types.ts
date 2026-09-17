@@ -430,6 +430,7 @@ export type Database = {
           hearts_earned: number | null
           id: string
           last_active: string | null
+          owner_user_id: string | null
           registration_source: string | null
           rejected_contributions: number
           specialization: string | null
@@ -458,6 +459,7 @@ export type Database = {
           hearts_earned?: number | null
           id?: string
           last_active?: string | null
+          owner_user_id?: string | null
           registration_source?: string | null
           rejected_contributions?: number
           specialization?: string | null
@@ -486,6 +488,7 @@ export type Database = {
           hearts_earned?: number | null
           id?: string
           last_active?: string | null
+          owner_user_id?: string | null
           registration_source?: string | null
           rejected_contributions?: number
           specialization?: string | null
@@ -601,6 +604,7 @@ export type Database = {
       }
       agent_tokens: {
         Row: {
+          agent_id: string | null
           created_at: string
           expires_at: string | null
           id: string
@@ -612,6 +616,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          agent_id?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -623,6 +628,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          agent_id?: string | null
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -633,7 +639,15 @@ export type Database = {
           token_hash?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agent_tokens_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_logs: {
         Row: {
