@@ -305,6 +305,7 @@ function RegisterAgentDialog({ onSuccess }: { onSuccess: () => void }) {
     const { error } = await (supabase.from as any)("agent_profiles").insert({
       agent_name: form.agent_name.trim(),
       creator: form.creator.trim(),
+      owner_user_id: user.id,
       agent_type: form.agent_type,
       specialization: form.specialization.trim() || null,
       description: form.description.trim() || null,

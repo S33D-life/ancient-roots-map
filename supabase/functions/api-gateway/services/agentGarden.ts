@@ -46,6 +46,7 @@ function trustMultiplier(trustScore: number | null): number {
 
 interface AuthResult {
   userId: string | null;
+  agentId: string | null;
   roles: string[];
   scopes: string[];
   isAgent: boolean;
@@ -60,6 +61,16 @@ async function verifyAgent(agentId: string): Promise<{ ok: boolean; agent?: any;
   if (data.status === "rejected") return { ok: false, error: "Agent registration was rejected" };
   if (data.status === "pending") return { ok: false, error: "Agent is still pending activation" };
   return { ok: true, agent: data };
+}
+
+async function verifyAgentAccess(auth: AuthResult, agentId: string): Promise<{ ok: boolean; agent?: any; error?: string }> {
+  if (!agentId || (!auth.userId && !auth.agentId)) return { ok: false, error: "Authentication required" };
+  const check = await verifyAgent(agentId);
+  if (!check.ok) return check;
+  const ownsAgent = auth.agentId === agentId || check.agent.owner_user_id === auth.userId;
+  const isPrivileged = auth.scopes.includes("admin:*");
+  if (!ownsAgent && !isPrivileged) return { ok: false, error: "Not authorized for this agent" };
+  return check;
 }
 
 /* ── Create contribution event ── */
@@ -123,6 +134,7 @@ export async function registerAgent(_req: Request, auth: AuthResult, body: any) 
     external_marketplace: externalMarketplace ?? null,
     api_endpoint: endpointUrl ?? null,
     auth_method: authMethod ?? "api_key",
+    owner_user_id: auth.userId,
     status: "pending",
     trust_score: 50,
     tier: "seedling",
@@ -176,8 +188,8 @@ export async function getAgent(_req: Request, _auth: AuthResult, params: Record<
 }
 
 /** POST /api/v1/agent-garden/agents/:agentId/capabilities */
-export async function updateCapabilities(_req: Request, _auth: AuthResult, params: Record<string, string>, body: any) {
-  const check = await verifyAgent(params.agentId);
+export async function updateCapabilities(_req: Request, auth: AuthResult, params: Record<string, string>, body: any) {
+  const check = await verifyAgentAccess(auth, params.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const capabilities = body.capabilities;
@@ -206,8 +218,8 @@ export async function updateCapabilities(_req: Request, _auth: AuthResult, param
 }
 
 /** POST /api/v1/agent-garden/sources */
-export async function submitSource(_req: Request, _auth: AuthResult, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitSource(_req: Request, auth: AuthResult, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const { agentId, name, url, scope, country, region, sourceType, dataFormat, license, updateFrequency } = body;
@@ -245,8 +257,8 @@ export async function submitSource(_req: Request, _auth: AuthResult, body: any) 
 }
 
 /** POST /api/v1/agent-garden/datasets */
-export async function submitDataset(_req: Request, _auth: AuthResult, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitDataset(_req: Request, auth: AuthResult, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const { agentId, sourceId, name, description, treeCount, regionCoverage, speciesCoverage, ingestionStatus } = body;
@@ -278,8 +290,8 @@ export async function submitDataset(_req: Request, _auth: AuthResult, body: any)
 }
 
 /** POST /api/v1/agent-garden/research-trees/bulk */
-export async function submitResearchTreesBulk(_req: Request, _auth: AuthResult, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitResearchTreesBulk(_req: Request, auth: AuthResult, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const { agentId, datasetId, records } = body;
@@ -381,8 +393,8 @@ export async function submitResearchTreesBulk(_req: Request, _auth: AuthResult, 
 }
 
 /** POST /api/v1/agent-garden/research-trees/:recordId/species-classification */
-export async function submitSpeciesClassification(_req: Request, _auth: AuthResult, params: Record<string, string>, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitSpeciesClassification(_req: Request, auth: AuthResult, params: Record<string, string>, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const db = adminClient();
@@ -406,8 +418,8 @@ export async function submitSpeciesClassification(_req: Request, _auth: AuthResu
 }
 
 /** POST /api/v1/agent-garden/research-trees/:recordId/geocode */
-export async function submitGeocode(_req: Request, _auth: AuthResult, params: Record<string, string>, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitGeocode(_req: Request, auth: AuthResult, params: Record<string, string>, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   if (body.latitude < -90 || body.latitude > 90 || body.longitude < -180 || body.longitude > 180) {
@@ -436,8 +448,8 @@ export async function submitGeocode(_req: Request, _auth: AuthResult, params: Re
 }
 
 /** POST /api/v1/agent-garden/research-trees/:recordId/enrich */
-export async function submitEnrichment(_req: Request, _auth: AuthResult, params: Record<string, string>, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitEnrichment(_req: Request, auth: AuthResult, params: Record<string, string>, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const db = adminClient();
@@ -464,8 +476,8 @@ export async function submitEnrichment(_req: Request, _auth: AuthResult, params:
 }
 
 /** POST /api/v1/agent-garden/research-trees/:recordId/duplicate-check */
-export async function submitDuplicateCheck(_req: Request, _auth: AuthResult, params: Record<string, string>, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitDuplicateCheck(_req: Request, auth: AuthResult, params: Record<string, string>, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const db = adminClient();
@@ -488,8 +500,8 @@ export async function submitDuplicateCheck(_req: Request, _auth: AuthResult, par
 }
 
 /** POST /api/v1/agent-garden/research-trees/:recordId/candidate */
-export async function submitCandidate(_req: Request, _auth: AuthResult, params: Record<string, string>, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitCandidate(_req: Request, auth: AuthResult, params: Record<string, string>, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   const db = adminClient();
@@ -512,8 +524,8 @@ export async function submitCandidate(_req: Request, _auth: AuthResult, params: 
 }
 
 /** POST /api/v1/agent-garden/sparks */
-export async function submitSpark(_req: Request, _auth: AuthResult, body: any) {
-  const check = await verifyAgent(body.agentId);
+export async function submitSpark(_req: Request, auth: AuthResult, body: any) {
+  const check = await verifyAgentAccess(auth, body.agentId);
   if (!check.ok) return { error: check.error, status: 403 };
 
   if (!VALID_SPARK_TYPES.includes(body.reportType ?? "other")) {

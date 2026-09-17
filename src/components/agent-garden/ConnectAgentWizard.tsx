@@ -123,6 +123,7 @@ export function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
     const { error } = await (supabase.from as any)("agent_profiles").insert({
       agent_name: form.agent_name.trim(),
       creator: form.creator.trim(),
+      owner_user_id: user.id,
       agent_type: form.agent_type,
       agent_role: form.agent_role,
       connection_mode: form.connection_mode,

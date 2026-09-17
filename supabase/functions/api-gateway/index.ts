@@ -63,13 +63,14 @@ function rateOk(key: string, max = 60, windowMs = 60000): boolean {
 
 interface AuthResult {
   userId: string | null;
+  agentId: string | null;
   roles: string[];
   scopes: string[];
   isAgent: boolean;
 }
 
 async function authenticate(req: Request): Promise<AuthResult> {
-  const noAuth: AuthResult = { userId: null, roles: ["guest"], scopes: ["read:public"], isAgent: false };
+  const noAuth: AuthResult = { userId: null, agentId: null, roles: ["guest"], scopes: ["read:public"], isAgent: false };
 
   // Check API key header first
   const apiKey = req.headers.get("x-api-key");
@@ -80,13 +81,15 @@ async function authenticate(req: Request): Promise<AuthResult> {
     );
     const { data: token } = await admin
       .from("agent_tokens")
-      .select("*")
+      .select("user_id, agent_id, scopes, expires_at")
       .eq("token_hash", await hashToken(apiKey))
       .eq("revoked", false)
       .single();
     if (token) {
+      if (token.expires_at && new Date(token.expires_at).getTime() <= Date.now()) return noAuth;
       return {
         userId: token.user_id,
+        agentId: token.agent_id,
         roles: ["agent"],
         scopes: token.scopes ?? ["read:public"],
         isAgent: true,
@@ -127,7 +130,7 @@ async function authenticate(req: Request): Promise<AuthResult> {
   if (roles.includes("steward")) scopes.push("write:trees");
   if (roles.includes("admin") || roles.includes("keeper")) scopes.push("admin:*");
 
-  return { userId: user.id, roles, scopes, isAgent: false };
+  return { userId: user.id, agentId: null, roles, scopes, isAgent: false };
 }
 
 async function hashToken(token: string): Promise<string> {
