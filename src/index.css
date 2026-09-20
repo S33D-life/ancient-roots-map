@@ -1422,3 +1422,30 @@ All colors MUST be HSL.
     transition: none !important;
   }
 }
+
+/* ── Route entry animation (RealmTransition) ──────────────────────────────
+   Base state is fully visible. The keyframe only *starts* from the hidden
+   state, so a route that suspends mid-animation can never remain invisible. */
+@keyframes realm-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--realm-enter-y, 0px), 0) scale(var(--realm-enter-scale, 1));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.realm-enter {
+  animation: realm-enter 320ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .realm-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
