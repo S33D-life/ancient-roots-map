@@ -72,5 +72,6 @@
 - [x] Trace and rank every global-skeleton boot path
 - [x] Remove authentication restoration from the public-render critical path
 - [x] Add focused boot regression coverage, including never-settling and failed restoration
-- [ ] Verify route loading, signed-in hydration, offline/backend-failure behavior, and release checks
-- [ ] Return an unshipped candidate and exact release recommendation to TEOTAG
+- [x] Verify asynchronous signed-in hydration, failed/never-settling restoration, and full release checks
+- [ ] Verify production routes in Safari/iPhone hardware and stale-service-worker scenarios
+- [x] Return an unshipped candidate and exact release recommendation to TEOTAG
