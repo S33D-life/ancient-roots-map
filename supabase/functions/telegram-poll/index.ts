@@ -136,6 +136,7 @@ async function createAndSendHandoff(
 ): Promise<boolean> {
   try {
     const handoffResp = await supabase.functions.invoke("telegram-handoff", {
+      headers: { "x-internal-secret": Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "" },
       body: {
         action: "create_handoff",
         telegram_user_id: telegramUserId,
@@ -442,6 +443,7 @@ Deno.serve(async () => {
         case "radio": {
           try {
             const radioResp = await supabase.functions.invoke("telegram-handoff", {
+              headers: { "x-internal-secret": Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "" },
               body: { action: "radio", telegram_user_id: telegramUserId },
             });
 
@@ -474,6 +476,7 @@ Deno.serve(async () => {
         case "continue": {
           try {
             const contResp = await supabase.functions.invoke("telegram-handoff", {
+              headers: { "x-internal-secret": Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "" },
               body: { action: "continue", telegram_user_id: telegramUserId },
             });
 
@@ -506,6 +509,7 @@ Deno.serve(async () => {
         case "plant": {
           try {
             const councilResp = await supabase.functions.invoke("telegram-handoff", {
+              headers: { "x-internal-secret": Deno.env.get("INTERNAL_FUNCTION_SECRET") ?? "" },
               body: { action: "council", telegram_user_id: telegramUserId },
             });
 
