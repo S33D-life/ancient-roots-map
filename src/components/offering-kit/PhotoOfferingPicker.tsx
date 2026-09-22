@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Camera, ImagePlus, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadOfferingMedia, useOfferingMediaUrl } from "@/utils/offeringMedia";
 
 export interface PhotoOfferingResult {
   url: string;
@@ -24,6 +25,8 @@ interface Props {
   value: PhotoOfferingResult | null;
   onChange: (photo: PhotoOfferingResult | null) => void;
   label?: string;
+  /** Offering visibility — non-public photos go to the private bucket. */
+  visibility?: string | null;
 }
 
 const MAX_EDGE = 1800;
@@ -48,7 +51,8 @@ async function compress(file: File): Promise<{ blob: Blob; width: number; height
   return { blob, width, height };
 }
 
-export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label }: Props) {
+export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label, visibility }: Props) {
+  const previewUrl = useOfferingMediaUrl(value?.url ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
@@ -70,19 +74,17 @@ export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label
         if (!auth.user) throw new Error("Please sign in to add a photograph.");
         const { blob, width, height } = await compress(file);
         const path = `${auth.user.id}/${pathPrefix}/${Date.now()}.jpg`;
-        const { error: upErr } = await supabase.storage
-          .from("offerings")
-          .upload(path, blob, { cacheControl: "3600", contentType: "image/jpeg", upsert: false });
-        if (upErr) throw upErr;
-        const { data } = supabase.storage.from("offerings").getPublicUrl(path);
-        onChange({ url: data.publicUrl, width, height, bytes: blob.size });
+        const url = await uploadOfferingMedia(path, blob, visibility, {
+          contentType: "image/jpeg",
+        });
+        onChange({ url, width, height, bytes: blob.size });
       } catch (err) {
         setError(err instanceof Error ? err.message : "The photograph could not be added.");
       } finally {
         setBusy(false);
       }
     },
-    [pathPrefix, onChange],
+    [pathPrefix, onChange, visibility],
   );
 
   if (value) {
@@ -93,7 +95,7 @@ export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label
           animate={{ opacity: 1, scale: 1 }}
           className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/30"
         >
-          <img src={value.url} alt="Your offering" className="w-full max-h-[52vh] object-contain" />
+          <img src={previewUrl ?? value.url} alt="Your offering" className="w-full max-h-[52vh] object-contain" />
           <button
             type="button"
             onClick={() => onChange(null)}

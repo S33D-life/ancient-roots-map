@@ -4,6 +4,7 @@
  */
 import { ExternalLink, Music, BookOpen } from "lucide-react";
 import type { LifeGroveOffering } from "@/lib/life-groves/types";
+import { useOfferingMediaUrl } from "@/utils/offeringMedia";
 
 interface Props {
   offering: LifeGroveOffering;
@@ -27,6 +28,8 @@ const Attribution = ({ name, when }: { name?: string; when: string }) => (
 
 export default function OfferingLibraryCard({ offering: o, attribution }: Props) {
   const m = meta(o);
+  // Private-bucket media needs a short-lived signed URL before it can render.
+  const mediaUrl = useOfferingMediaUrl(o.media_url);
   const words = o.body_text?.trim();
 
   const body = (() => {
@@ -34,7 +37,7 @@ export default function OfferingLibraryCard({ offering: o, attribution }: Props)
       case "photo":
         return (
           <>
-            {o.media_url && <img src={o.media_url} alt={o.title ?? "A photograph"} loading="lazy" className="w-full object-cover max-h-[60vh]" />}
+            {mediaUrl && <img src={mediaUrl} alt={o.title ?? "A photograph"} loading="lazy" className="w-full object-cover max-h-[60vh]" />}
             <div className="px-4 pt-3 space-y-1">
               {o.title && <h3 className="font-serif text-base text-foreground">{o.title}</h3>}
               {words && <p className="font-serif text-sm text-foreground/85 whitespace-pre-wrap">{words}</p>}
@@ -92,7 +95,7 @@ export default function OfferingLibraryCard({ offering: o, attribution }: Props)
         return (
           <div className="p-4 space-y-2">
             {o.title && <h3 className="font-serif text-base text-foreground">{o.title}</h3>}
-            {o.media_url && <audio controls src={o.media_url} className="w-full" />}
+            {mediaUrl && <audio controls src={mediaUrl} className="w-full" />}
             {words && <p className="font-serif text-sm text-foreground/85 whitespace-pre-wrap">{words}</p>}
           </div>
         );
@@ -130,7 +133,7 @@ export default function OfferingLibraryCard({ offering: o, attribution }: Props)
         // story, recipe, flower memory and anything new
         return (
           <>
-            {o.media_url && <img src={o.media_url} alt="" loading="lazy" className="w-full object-cover max-h-[50vh]" />}
+            {mediaUrl && <img src={mediaUrl} alt="" loading="lazy" className="w-full object-cover max-h-[50vh]" />}
             <div className="px-4 pt-3 space-y-1">
               {o.title && <h3 className="font-serif text-base text-foreground">{o.title}</h3>}
               {words && <p className="font-serif text-sm text-foreground/85 whitespace-pre-wrap">{words}</p>}
