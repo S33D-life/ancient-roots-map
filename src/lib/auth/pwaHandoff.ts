@@ -14,6 +14,7 @@
  * Nothing sensitive travels in a URL. Safari and desktop sign-in are untouched.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseEnv } from "@/config/env";
 
 const PENDING_KEY = "s33d_pwa_auth_handoff";
 export const HANDOFF_RETURN_PATH = "/auth/handoff";
@@ -82,8 +83,8 @@ type HandoffResponse = { status: number; data: Record<string, unknown> | null };
  * "not bound yet", and invoke collapses every non-2xx into an opaque error.
  */
 async function callHandoff(body: Record<string, unknown>): Promise<HandoffResponse> {
-  const base = import.meta.env.VITE_SUPABASE_URL;
-  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const base = supabaseEnv?.url;
+  const anonKey = supabaseEnv?.anonKey;
   if (!base || !anonKey) return { status: 0, data: null };
 
   const { data: sessionData } = await supabase.auth.getSession();
