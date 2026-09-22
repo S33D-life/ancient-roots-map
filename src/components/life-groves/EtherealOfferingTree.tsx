@@ -18,6 +18,7 @@ import {
   type LifeGroveOffering,
   type TreeArchetype,
 } from "@/lib/life-groves/types";
+import { isPrivateOfferingMedia, resolveOfferingMediaUrl } from "@/utils/offeringMedia";
 import {
   BRANCHES,
   TREE_VIEWBOX,
@@ -472,6 +473,13 @@ export function OfferingPreviewCard({
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-primary hover:underline mt-2 inline-block break-all"
+          onClick={async (e) => {
+            // Private media is only released through the checked server path.
+            if (!isPrivateOfferingMedia(offering.media_url)) return;
+            e.preventDefault();
+            const signed = await resolveOfferingMediaUrl(offering.media_url, offering.id);
+            if (signed) window.open(signed, "_blank", "noopener,noreferrer");
+          }}
         >
           Open media
         </a>

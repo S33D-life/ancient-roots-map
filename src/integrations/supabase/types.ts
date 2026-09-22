@@ -11883,6 +11883,10 @@ export type Database = {
         Args: { _grove_id: string; _user_id: string }
         Returns: boolean
       }
+      can_view_life_grove_offering: {
+        Args: { _offering_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
       cast_influence_vote: {
         Args: {

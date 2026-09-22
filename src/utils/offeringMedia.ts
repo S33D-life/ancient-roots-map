@@ -5,8 +5,12 @@
  * previews and NFTree metadata all depend on stable public URLs).
  *
  * Offerings that are not public (private / family / tribe) upload instead to the
- * private `offerings-private` bucket. Those files are never fetchable anonymously;
- * viewers read them through short-lived signed URLs.
+ * private `offerings-private` bucket. Those files are never fetchable anonymously,
+ * and being signed in is not enough either: viewers ask the `offering-media`
+ * function for a media link *by offering id*, and the server checks that
+ * offering's own visibility rules before signing. Only the uploader keeps direct
+ * access to their own objects (used for the composer preview before an offering
+ * row exists).
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,17 +53,39 @@ export async function uploadOfferingMedia(
   return data.publicUrl;
 }
 
-/** Resolve a stored media URL for display, signing it when it is private. */
+/** Ask the server for a checked, short-lived link to an offering's private media. */
+export async function signedOfferingMediaUrl(offeringId: string): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke("offering-media", {
+    body: { offering_id: offeringId },
+  });
+  if (error) return null;
+  const url = (data as { url?: string } | null)?.url;
+  return typeof url === "string" ? url : null;
+}
+
+/**
+ * Resolve a stored media URL for display.
+ *
+ * Public media is returned as-is. Private media is only resolved through the
+ * server-side access path, which needs the offering id; the owner-only direct
+ * signing fallback exists for media that has no offering row yet (composer
+ * preview) and will fail for anybody but the uploader.
+ */
 export async function resolveOfferingMediaUrl(
   url: string | null | undefined,
+  offeringId?: string | null,
 ): Promise<string | null> {
   if (!url) return null;
   if (!isPrivateOfferingMedia(url)) return url;
+  if (offeringId) return signedOfferingMediaUrl(offeringId);
   return signedStorageUrl(PRIVATE_OFFERING_BUCKET, url);
 }
 
 /** React helper: resolves a single media URL, signing private media as needed. */
-export function useOfferingMediaUrl(url: string | null | undefined): string | null {
+export function useOfferingMediaUrl(
+  url: string | null | undefined,
+  offeringId?: string | null,
+): string | null {
   const [resolved, setResolved] = useState<string | null>(
     url && !isPrivateOfferingMedia(url) ? url : null,
   );
@@ -76,13 +102,13 @@ export function useOfferingMediaUrl(url: string | null | undefined): string | nu
     }
     setResolved(null);
     (async () => {
-      const signed = await resolveOfferingMediaUrl(url);
+      const signed = await resolveOfferingMediaUrl(url, offeringId);
       if (!cancelled) setResolved(signed);
     })();
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, offeringId]);
 
   return resolved;
 }
