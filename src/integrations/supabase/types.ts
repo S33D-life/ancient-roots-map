@@ -12312,6 +12312,7 @@ export type Database = {
         Args: { p_note?: string; p_root_id: string }
         Returns: undefined
       }
+      require_admin_analytics: { Args: never; Returns: boolean }
       resolve_bot_handoff: { Args: { p_token: string }; Returns: Json }
       retract_influence_vote: {
         Args: { p_user_id: string; p_vote_id: string }

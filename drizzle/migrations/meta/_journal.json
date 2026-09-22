@@ -8,6 +8,13 @@
       "when": 1790074544031,
       "tag": "0000_harden_species_heart_awards",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790077177998,
+      "tag": "0001_harden_admin_rpcs_rls_and_storage_policies",
+      "breakpoints": true
     }
   ]
 }
