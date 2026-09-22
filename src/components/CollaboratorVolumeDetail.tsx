@@ -11,6 +11,8 @@ import { BookOpen, Lock, Users, Globe, Beaker, Plus, Save, TreeDeciduous, HelpCi
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { CollaboratorVolume, CollaboratorExperiment } from "@/hooks/use-collaborator-volumes";
+import { openSignedStorageUrl } from "@/utils/privateStorage";
+
 
 interface Props {
   volume: CollaboratorVolume | null;
