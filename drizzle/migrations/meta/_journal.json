@@ -29,6 +29,13 @@
       "when": 1790079236738,
       "tag": "0003_private_offering_media_audience_boundary",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790081960571,
+      "tag": "0004_create_auth_pwa_handoffs",
+      "breakpoints": true
     }
   ]
 }
