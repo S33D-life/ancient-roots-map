@@ -85,7 +85,12 @@ export default function StewardToolsSection({
   const [mergeSecondaryId, setMergeSecondaryId] = useState("");
   const [changeFlowOpen, setChangeFlowOpen] = useState(false);
   const [changeFlowTab, setChangeFlowTab] = useState<"details" | "location" | "duplicate">("details");
-  const { eligibility } = useTreeEditEligibility(treeId);
+  const {
+    eligibility,
+    loading: eligLoading,
+    error: eligError,
+    retry: retryEligibility,
+  } = useTreeEditEligibility(treeId);
 
   const openChangeFlow = (tab: "details" | "location" | "duplicate") => {
     setChangeFlowTab(tab);
@@ -142,15 +147,39 @@ export default function StewardToolsSection({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40 min-h-11"
-              onClick={() => openChangeFlow("details")}
-            >
-              {eligibility.can_direct_edit ? <Pencil className="h-3 w-3" /> : <MessageSquarePlus className="h-3 w-3" />}
-              {eligibility.can_direct_edit ? "Edit tree" : "Propose changes"}
-            </Button>
+            {eligLoading ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                aria-live="polite"
+                className="text-xs font-serif gap-1.5 border-primary/20 min-h-11"
+              >
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                Checking editing access…
+              </Button>
+            ) : eligError ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void retryEligibility()}
+                aria-label="Retry checking editing access"
+                className="text-xs font-serif gap-1.5 border-primary/20 min-h-11"
+              >
+                <RefreshCw className="h-3 w-3" aria-hidden="true" />
+                Editing access unavailable — Retry
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-serif gap-1.5 border-primary/20 hover:border-primary/40 min-h-11"
+                onClick={() => openChangeFlow("details")}
+              >
+                {eligibility.can_direct_edit ? <Pencil className="h-3 w-3" /> : <MessageSquarePlus className="h-3 w-3" />}
+                {eligibility.can_direct_edit ? "Edit tree" : "Propose changes"}
+              </Button>
+            )}
 
             <Button
               variant="ghost"
