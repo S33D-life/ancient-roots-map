@@ -425,19 +425,8 @@ const BugGardenPage = () => {
                   )}
 
                   {/* Screenshots */}
-                  {selectedBug.screenshot_urls && selectedBug.screenshot_urls.length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium mb-1">Screenshots</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {selectedBug.screenshot_urls.map((url, i) => (
-                          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                            className="w-20 h-20 rounded-lg overflow-hidden border border-border/40 hover:border-primary/50 transition-colors">
-                            <img src={url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <BugScreenshots urls={selectedBug.screenshot_urls} />
+
 
                   {/* Hearts awarded */}
                   {selectedBug.hearts_awarded_total > 0 && (
