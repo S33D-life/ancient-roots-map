@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import TetolBridge from "@/components/TetolBridge";
 import Footer from "@/components/Footer";
+import { BottomNavSpacer } from "@/components/BottomNav";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import ContextBackButton from "@/components/navigation/ContextBackButton";
@@ -158,6 +159,8 @@ const HeartwoodRoomShell = ({
 
       <TetolBridge />
       <Footer />
+      {/* Keeps the last of the room reachable above the fixed mobile nav. */}
+      <BottomNavSpacer />
     </div>
   );
 };

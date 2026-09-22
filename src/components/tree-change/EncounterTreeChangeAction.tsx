@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { Loader2, MessageSquarePlus, Pencil } from "lucide-react";
+import { Loader2, MessageSquarePlus, Pencil, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTreeEditEligibility } from "@/hooks/use-tree-edit-eligibility";
 
@@ -28,9 +28,48 @@ export default function EncounterTreeChangeAction({
   className,
 }: EncounterTreeChangeActionProps) {
   const [open, setOpen] = useState(false);
-  const { eligibility, loading } = useTreeEditEligibility(tree.id);
+  const { eligibility, loading, error, retry } = useTreeEditEligibility(tree.id);
 
-  if (!loading && !eligibility.signed_in) return null;
+  // A failed lookup is not a permission decision — offer a retry instead.
+  if (error) {
+    return (
+      <div className={`flex flex-col gap-1 ${className ?? ""}`} role="status">
+        <p className="text-[11px] font-serif text-muted-foreground">
+          Editing access for {tree.name} could not be checked.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => void retry()}
+          aria-label={`Retry checking editing access: ${tree.name}`}
+          className="min-h-11 shrink-0 gap-1.5 font-serif text-xs border-primary/25 self-start"
+        >
+          <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled
+        aria-live="polite"
+        aria-label={`Checking editing access: ${tree.name}`}
+        className={`min-h-11 shrink-0 gap-1.5 font-serif text-xs border-primary/25 ${className ?? ""}`}
+      >
+        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+        Checking editing access…
+      </Button>
+    );
+  }
+
+  if (!eligibility.signed_in) return null;
 
   const directEdit = eligibility.can_direct_edit;
   const label = directEdit ? "Edit tree" : "Propose changes";
@@ -42,18 +81,15 @@ export default function EncounterTreeChangeAction({
         variant="outline"
         size="sm"
         onClick={() => setOpen(true)}
-        disabled={loading}
         aria-label={`${label}: ${tree.name}`}
         className={`min-h-11 shrink-0 gap-1.5 font-serif text-xs border-primary/25 ${className ?? ""}`}
       >
-        {loading ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-        ) : directEdit ? (
+        {directEdit ? (
           <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
         ) : (
           <MessageSquarePlus className="h-3.5 w-3.5" aria-hidden="true" />
         )}
-        {loading ? "Checking…" : label}
+        {label}
       </Button>
 
       {open && (

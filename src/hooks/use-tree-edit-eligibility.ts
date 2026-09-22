@@ -12,7 +12,7 @@
  * deleting a contribution never silently restores unilateral editing rights.
  * Curators and keepers may always edit directly (existing review authority).
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface TreeEditEligibility {
@@ -45,47 +45,62 @@ const FALLBACK: TreeEditEligibility = {
   reason: "signed_out",
 };
 
+/**
+ * Throws when the lookup itself fails. A failed lookup is NEVER a permission
+ * decision — callers must surface a retry instead of assuming "no access".
+ */
 export async function fetchTreeEditEligibility(
   treeId: string,
 ): Promise<TreeEditEligibility> {
   const { data, error } = await (supabase.rpc as any)("tree_edit_eligibility", {
     _tree_id: treeId,
   });
-  if (error || !data) return FALLBACK;
+  if (error) throw error;
+  if (!data) return FALLBACK;
   return { ...FALLBACK, ...(data as Partial<TreeEditEligibility>) };
 }
 
 export function useTreeEditEligibility(treeId: string | undefined) {
   const [eligibility, setEligibility] = useState<TreeEditEligibility>(FALLBACK);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(treeId));
+  const [error, setError] = useState(false);
+  // Guards against a slow answer for a previously selected tree landing after
+  // the user has moved on to another one.
+  const requestRef = useRef(0);
 
-  const refresh = useCallback(async () => {
+  const load = useCallback(async () => {
     if (!treeId) {
+      setLoading(false);
+      setError(false);
+      setEligibility(FALLBACK);
+      return FALLBACK;
+    }
+    const requestId = ++requestRef.current;
+    setLoading(true);
+    setError(false);
+    try {
+      const next = await fetchTreeEditEligibility(treeId);
+      if (requestRef.current !== requestId) return next;
+      setEligibility(next);
+      setLoading(false);
+      return next;
+    } catch {
+      if (requestRef.current !== requestId) return FALLBACK;
+      setEligibility(FALLBACK);
+      setError(true);
       setLoading(false);
       return FALLBACK;
     }
-    const next = await fetchTreeEditEligibility(treeId);
-    setEligibility(next);
-    setLoading(false);
-    return next;
   }, [treeId]);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    if (!treeId) {
-      setLoading(false);
-      return;
-    }
-    fetchTreeEditEligibility(treeId).then((next) => {
-      if (cancelled) return;
-      setEligibility(next);
-      setLoading(false);
-    });
+    // Reset immediately so a previous tree's answer is never shown.
+    setEligibility(FALLBACK);
+    void load();
     return () => {
-      cancelled = true;
+      requestRef.current += 1;
     };
-  }, [treeId]);
+  }, [load]);
 
-  return { eligibility, loading, refresh };
+  return { eligibility, loading, error, refresh: load, retry: load };
 }
