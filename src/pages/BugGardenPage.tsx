@@ -31,6 +31,32 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import RoadmapLinker from "@/components/bugs/RoadmapLinker";
 import { ROADMAP_FEATURES, STAGE_META } from "@/data/roadmap-forest";
+import { useSignedStorageUrls } from "@/utils/privateStorage";
+
+/** Screenshots live in a private bucket — resolve short-lived signed URLs. */
+function BugScreenshots({ urls }: { urls: string[] | null }) {
+  const signed = useSignedStorageUrls("bounty-screenshots", urls);
+  if (!urls || urls.length === 0) return null;
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground font-medium mb-1">Screenshots</p>
+      {signed.length === 0 ? (
+        <p className="text-xs text-muted-foreground/70">Loading images…</p>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {signed.map((url, i) => (
+            <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+              className="w-20 h-20 rounded-lg overflow-hidden border border-border/40 hover:border-primary/50 transition-colors">
+              <img src={url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 
 type BugReport = {
   id: string;
@@ -425,19 +451,8 @@ const BugGardenPage = () => {
                   )}
 
                   {/* Screenshots */}
-                  {selectedBug.screenshot_urls && selectedBug.screenshot_urls.length > 0 && (
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium mb-1">Screenshots</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {selectedBug.screenshot_urls.map((url, i) => (
-                          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                            className="w-20 h-20 rounded-lg overflow-hidden border border-border/40 hover:border-primary/50 transition-colors">
-                            <img src={url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <BugScreenshots urls={selectedBug.screenshot_urls} />
+
 
                   {/* Hearts awarded */}
                   {selectedBug.hearts_awarded_total > 0 && (

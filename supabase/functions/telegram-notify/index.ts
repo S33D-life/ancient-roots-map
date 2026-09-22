@@ -15,7 +15,7 @@ const APP_URL = "https://ancient-roots-map.lovable.app";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-internal-secret, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 /* ── Message formatters (HTML parse_mode) ── */
@@ -133,8 +133,24 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // Internal callers only — this posts to the official Telegram channel.
+    const INTERNAL_SECRET = Deno.env.get("INTERNAL_FUNCTION_SECRET");
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const presentedSecret = req.headers.get("x-internal-secret");
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const isInternal =
+      (!!INTERNAL_SECRET && presentedSecret === INTERNAL_SECRET) ||
+      (!!SERVICE_KEY && authHeader === `Bearer ${SERVICE_KEY}`);
+    if (!isInternal) {
+      return new Response(JSON.stringify({ ok: false, error: "forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
 
     const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
     if (!TELEGRAM_API_KEY) throw new Error("TELEGRAM_API_KEY is not configured");

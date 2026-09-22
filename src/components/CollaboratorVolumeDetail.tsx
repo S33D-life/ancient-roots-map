@@ -11,6 +11,8 @@ import { BookOpen, Lock, Users, Globe, Beaker, Plus, Save, TreeDeciduous, HelpCi
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { CollaboratorVolume, CollaboratorExperiment } from "@/hooks/use-collaborator-volumes";
+import { openSignedStorageUrl } from "@/utils/privateStorage";
+
 
 interface Props {
   volume: CollaboratorVolume | null;
@@ -151,17 +153,20 @@ const CollaboratorVolumeDetail = ({ volume, open, onClose, onUpdate, isOwner }: 
                   </a>
                 )}
                 {volume.document_file_url && (
-                  <a
-                    href={volume.document_file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const opened = await openSignedStorageUrl("collaborator-files", volume.document_file_url!);
+                      if (!opened) toast.error("You do not have access to this file");
+                    }}
                     className="inline-flex items-center gap-1.5 text-xs font-serif text-primary hover:text-primary/80 transition-colors rounded-md border border-primary/20 px-3 py-1.5"
                   >
                     <FileText className="w-3 h-3" />
                     View File
                     <ExternalLink className="w-2.5 h-2.5" />
-                  </a>
+                  </button>
                 )}
+
               </div>
             </div>
           )}
