@@ -29,7 +29,7 @@ const Attribution = ({ name, when }: { name?: string; when: string }) => (
 export default function OfferingLibraryCard({ offering: o, attribution }: Props) {
   const m = meta(o);
   // Private-bucket media needs a short-lived signed URL before it can render.
-  const mediaUrl = useOfferingMediaUrl(o.media_url);
+  const mediaUrl = useOfferingMediaUrl(o.media_url, o.id);
   const words = o.body_text?.trim();
 
   const body = (() => {

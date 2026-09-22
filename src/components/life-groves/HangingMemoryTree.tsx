@@ -54,7 +54,7 @@ export default function HangingMemoryTree({ offerings }: Props) {
                   // Private media lives in a protected bucket — sign it first.
                   if (!isPrivateOfferingMedia(o.media_url)) return;
                   e.preventDefault();
-                  const signed = await resolveOfferingMediaUrl(o.media_url);
+                  const signed = await resolveOfferingMediaUrl(o.media_url, o.id);
                   if (signed) window.open(signed, "_blank", "noopener,noreferrer");
                 }}
               >
