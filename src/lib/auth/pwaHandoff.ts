@@ -75,8 +75,35 @@ export function clearPendingHandoff() {
   try { localStorage.removeItem(PENDING_KEY); } catch { /* storage unavailable */ }
 }
 
-async function callHandoff(body: Record<string, unknown>) {
-  return supabase.functions.invoke<Record<string, unknown>>("auth-handoff", { body });
+type HandoffResponse = { status: number; data: Record<string, unknown> | null };
+
+/**
+ * Raw fetch rather than functions.invoke: the claim path uses 202 to mean
+ * "not bound yet", and invoke collapses every non-2xx into an opaque error.
+ */
+async function callHandoff(body: Record<string, unknown>): Promise<HandoffResponse> {
+  const base = import.meta.env.VITE_SUPABASE_URL;
+  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!base || !anonKey) return { status: 0, data: null };
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token ?? anonKey;
+
+  try {
+    const res = await fetch(`${base}/functions/v1/auth-handoff`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: anonKey,
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+    return { status: res.status, data };
+  } catch {
+    return { status: 0, data: null };
+  }
 }
 
 /**
@@ -86,9 +113,9 @@ async function callHandoff(body: Record<string, unknown>) {
 export async function beginHandoff(returnPath: string): Promise<string | null> {
   const verifier = randomSecret();
   const verifierHash = await sha256Hex(verifier);
-  const { data, error } = await callHandoff({ action: "create", verifier_hash: verifierHash });
-  const id = typeof data?.handoff_id === "string" ? data.handoff_id : null;
-  if (error || !id) return null;
+  const { status, data } = await callHandoff({ action: "create", verifier_hash: verifierHash });
+  const id = status === 200 && typeof data?.handoff_id === "string" ? data.handoff_id : null;
+  if (!id) return null;
 
   const pending: PendingHandoff = { id, verifier, createdAt: Date.now(), returnPath };
   try { localStorage.setItem(PENDING_KEY, JSON.stringify(pending)); } catch { return null; }
@@ -100,8 +127,8 @@ export async function beginHandoff(returnPath: string): Promise<string | null> {
 export async function bindHandoff(handoffId: string): Promise<{ ok: boolean; reason?: string }> {
   const { data: sessionData } = await supabase.auth.getSession();
   if (!sessionData.session) return { ok: false, reason: "no-session" };
-  const { data, error } = await callHandoff({ action: "bind", handoff_id: handoffId });
-  if (error || data?.ok !== true) return { ok: false, reason: "bind-failed" };
+  const { status, data } = await callHandoff({ action: "bind", handoff_id: handoffId });
+  if (status !== 200 || data?.ok !== true) return { ok: false, reason: "bind-failed" };
   return { ok: true };
 }
 
@@ -113,16 +140,16 @@ export async function claimHandoff(): Promise<ClaimResult> {
   const pending = readPendingHandoff();
   if (!pending) return { status: "none" };
 
-  const { data, error } = await callHandoff({
+  const { status, data } = await callHandoff({
     action: "claim",
     handoff_id: pending.id,
     verifier: pending.verifier,
   });
 
-  if (data?.status === "pending") return { status: "pending" };
+  if (status === 202 || data?.status === "pending") return { status: "pending" };
 
-  const tokenHash = typeof data?.token_hash === "string" ? data.token_hash : null;
-  if (error || !tokenHash) {
+  const tokenHash = status === 200 && typeof data?.token_hash === "string" ? data.token_hash : null;
+  if (!tokenHash) {
     clearPendingHandoff();
     return { status: "failed", reason: "handoff-unavailable" };
   }
