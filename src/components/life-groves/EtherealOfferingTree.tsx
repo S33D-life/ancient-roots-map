@@ -18,6 +18,7 @@ import {
   type LifeGroveOffering,
   type TreeArchetype,
 } from "@/lib/life-groves/types";
+import { isPrivateOfferingMedia, resolveOfferingMediaUrl } from "@/utils/offeringMedia";
 import {
   BRANCHES,
   TREE_VIEWBOX,
