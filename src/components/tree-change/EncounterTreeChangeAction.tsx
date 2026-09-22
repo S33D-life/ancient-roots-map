@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { Loader2, MessageSquarePlus, Pencil } from "lucide-react";
+import { Loader2, MessageSquarePlus, Pencil, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTreeEditEligibility } from "@/hooks/use-tree-edit-eligibility";
 
