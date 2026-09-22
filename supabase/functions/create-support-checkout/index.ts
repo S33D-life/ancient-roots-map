@@ -63,7 +63,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    const origin = returnUrl || req.headers.get("origin") || "https://ancient-roots-map.lovable.app";
+    // Only trusted S33D origins may be used as the Stripe return destination,
+    // otherwise a crafted checkout link could redirect payers to a phishing page.
+    const ALLOWED_ORIGINS = new Set([
+      "https://s33d.life",
+      "https://www.s33d.life",
+      "https://s33d.lovable.app",
+      "https://ancient-roots-map.lovable.app",
+      "http://localhost:8080",
+      "http://127.0.0.1:8080",
+    ]);
+    const normalise = (value: string | null | undefined): string | null => {
+      if (!value) return null;
+      try {
+        const parsed = new URL(value);
+        const candidate = parsed.origin;
+        return ALLOWED_ORIGINS.has(candidate) ? candidate : null;
+      } catch {
+        return null;
+      }
+    };
+    const origin =
+      normalise(returnUrl) ||
+      normalise(req.headers.get("origin")) ||
+      "https://s33d.life";
 
     // Build Stripe session
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
