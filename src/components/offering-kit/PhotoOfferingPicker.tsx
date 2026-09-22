@@ -95,7 +95,7 @@ export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label
           animate={{ opacity: 1, scale: 1 }}
           className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/30"
         >
-          <img src={value.url} alt="Your offering" className="w-full max-h-[52vh] object-contain" />
+          <img src={previewUrl ?? value.url} alt="Your offering" className="w-full max-h-[52vh] object-contain" />
           <button
             type="button"
             onClick={() => onChange(null)}

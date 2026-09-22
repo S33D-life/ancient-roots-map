@@ -312,7 +312,8 @@ export default function LifeGroveOfferingComposer({
               <div className="space-y-5 max-w-xl mx-auto">
                 {type === "photo" && (
                   <>
-                    <PhotoOfferingPicker pathPrefix={groveId} value={photo} onChange={setPhoto} />
+                    <PhotoOfferingPicker
+                          visibility={visibility} pathPrefix={groveId} value={photo} onChange={setPhoto} />
                     {photo && (
                       <>
                         <Textarea
@@ -418,6 +419,7 @@ export default function LifeGroveOfferingComposer({
                       className="font-serif text-base"
                     />
                     <PhotoOfferingPicker
+                          visibility={visibility}
                       pathPrefix={groveId}
                       value={photo}
                       onChange={setPhoto}
@@ -443,6 +445,7 @@ export default function LifeGroveOfferingComposer({
                       className="font-serif text-base leading-relaxed resize-none"
                     />
                     <PhotoOfferingPicker
+                          visibility={visibility}
                       pathPrefix={groveId}
                       value={photo}
                       onChange={setPhoto}
@@ -468,6 +471,7 @@ export default function LifeGroveOfferingComposer({
                       className="font-serif text-base resize-none"
                     />
                     <PhotoOfferingPicker
+                          visibility={visibility}
                       pathPrefix={groveId}
                       value={photo}
                       onChange={setPhoto}
