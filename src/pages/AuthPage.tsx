@@ -20,6 +20,7 @@ import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
 import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
 import { trackInviteEvent } from "@/lib/invite-analytics";
 import { checkInviteCode, type InviteStatus } from "@/lib/invite-validation";
+import { beginHandoff, claimHandoff, isStandaloneDisplay, readPendingHandoff } from "@/lib/auth/pwaHandoff";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -920,8 +921,19 @@ const AuthPage = () => {
 
     try {
       const redirectPath = resolvePostAuthPath();
+
+      // Installed iOS web apps do not share storage with Safari, where the
+      // Google journey finishes. Route those through a short-lived handoff so
+      // the app can restore the session in its own context. Safari and desktop
+      // keep the unchanged direct flow.
+      let redirectUri = `${window.location.origin}${redirectPath}`;
+      if (isStandaloneDisplay()) {
+        const handoffUri = await beginHandoff(redirectPath);
+        if (handoffUri) redirectUri = handoffUri;
+      }
+
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}${redirectPath}`,
+        redirect_uri: redirectUri,
       });
 
       // If redirected, the page will navigate away — don't reset loading

@@ -60,6 +60,10 @@ export const ROUTES = {
   WANDERER: (id: string) => `/wanderer/${id}` as const,
   /** Authentication */
   AUTH: "/auth",
+  /** Installed-app sign-in handoff landing page */
+  AUTH_HANDOFF: "/auth/handoff",
+  /** Sign-in diagnostics panel (requires ?diag=1) */
+  AUTH_DIAGNOSTICS: "/auth/diagnostics",
   /** Password reset */
   RESET_PASSWORD: "/reset-password",
   /** Add tree */
