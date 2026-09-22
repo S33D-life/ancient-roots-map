@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       // caller (or a replay) matches nothing and gets no ticket.
       const { data: consumed } = await admin
         .from("auth_pwa_handoffs")
-        .update({ consumed_at: nowIso, ticket_token: null })
+        .update({ consumed_at: nowIso })
         .eq("id", body.handoff_id)
         .eq("verifier_hash", verifierHash)
         .is("consumed_at", null)
@@ -144,6 +144,12 @@ Deno.serve(async (req) => {
         }
         return json({ error: "handoff unavailable" }, 403);
       }
+
+      // The row is already consumed; drop the ticket copy now that it is handed over.
+      await admin
+        .from("auth_pwa_handoffs")
+        .update({ ticket_token: null })
+        .eq("id", body.handoff_id);
 
       return json({ status: "ready", token_hash: consumed.ticket_token });
     }
