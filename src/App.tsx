@@ -90,6 +90,8 @@ const S33dGatewayPage = lazyImportWithRetry(() => import("./pages/Index"), "s33d
 const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page");
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const OAuthConsentPage = lazyImportWithRetry(() => import("./pages/OAuthConsentPage"), "oauth-consent");
+const AuthHandoffPage = lazyImportWithRetry(() => import("./pages/AuthHandoffPage"), "auth-handoff");
+const AuthDiagnosticsPage = lazyImportWithRetry(() => import("./pages/AuthDiagnosticsPage"), "auth-diagnostics");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
 const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplorerPage"), "pulse-explorer");
 const PathwaysPage = lazyImportWithRetry(() => import("./pages/PathwaysPage"), "pathways");
@@ -333,6 +335,8 @@ const App = () => {
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/auth/handoff" element={<AuthHandoffPage />} />
+                <Route path="/auth/diagnostics" element={<AuthDiagnosticsPage />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsentPage />} />
                 <Route path="/reset-password" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />

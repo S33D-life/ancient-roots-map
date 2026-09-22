@@ -685,6 +685,39 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_pwa_handoffs: {
+        Row: {
+          bound_at: string | null
+          bound_user_id: string | null
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          ticket_token: string | null
+          verifier_hash: string
+        }
+        Insert: {
+          bound_at?: string | null
+          bound_user_id?: string | null
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ticket_token?: string | null
+          verifier_hash: string
+        }
+        Update: {
+          bound_at?: string | null
+          bound_user_id?: string | null
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ticket_token?: string | null
+          verifier_hash?: string
+        }
+        Relationships: []
+      }
       background_jobs: {
         Row: {
           attempts: number

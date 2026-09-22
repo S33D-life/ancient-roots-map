@@ -20,6 +20,7 @@ import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
 import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
 import { trackInviteEvent } from "@/lib/invite-analytics";
 import { checkInviteCode, type InviteStatus } from "@/lib/invite-validation";
+import { beginHandoff, claimHandoff, isStandaloneDisplay, readPendingHandoff } from "@/lib/auth/pwaHandoff";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -914,14 +915,62 @@ const AuthPage = () => {
     }
   };
 
+  // Installed app returning from a Google journey that finished in Safari:
+  // claim the single-use handoff and restore the session in this context.
+  useEffect(() => {
+    if (!isStandaloneDisplay()) return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const attempt = async () => {
+      if (!active || !readPendingHandoff()) return;
+      const result = await claimHandoff();
+      if (!active) return;
+      if (result.status === "signed-in") {
+        navigate(resolvePostAuthPath(), { replace: true });
+        return;
+      }
+      if (result.status === "pending") {
+        timer = setTimeout(() => void attempt(), 2000);
+        return;
+      }
+      if (result.status === "failed") {
+        setOauthError("That sign-in didn't reach the app. Please try once more.");
+      }
+    };
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void attempt();
+    };
+
+    void attempt();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [navigate, resolvePostAuthPath]);
+
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setOauthError(null);
 
     try {
       const redirectPath = resolvePostAuthPath();
+
+      // Installed iOS web apps do not share storage with Safari, where the
+      // Google journey finishes. Route those through a short-lived handoff so
+      // the app can restore the session in its own context. Safari and desktop
+      // keep the unchanged direct flow.
+      let redirectUri = `${window.location.origin}${redirectPath}`;
+      if (isStandaloneDisplay()) {
+        const handoffUri = await beginHandoff(redirectPath);
+        if (handoffUri) redirectUri = handoffUri;
+      }
+
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}${redirectPath}`,
+        redirect_uri: redirectUri,
       });
 
       // If redirected, the page will navigate away — don't reset loading
