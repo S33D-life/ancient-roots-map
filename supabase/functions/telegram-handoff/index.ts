@@ -96,7 +96,19 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const { action } = body;
 
+    /* Bot-only actions: require the internal shared secret so nobody on the
+     * open internet can mint handoff tokens for a Telegram identity. */
+    const BOT_ONLY_ACTIONS = ["create_handoff", "radio", "continue", "council"];
+    if (BOT_ONLY_ACTIONS.includes(action)) {
+      const internalSecret = Deno.env.get("INTERNAL_FUNCTION_SECRET");
+      const presented = req.headers.get("x-internal-secret");
+      if (!internalSecret || presented !== internalSecret) {
+        return jsonResponse({ ok: false, error: "forbidden" }, 403);
+      }
+    }
+
     switch (action) {
+
       /* ────────────────────────────────────────────────────
        * create_handoff — called by telegram-poll when bot
        * receives /connect, /new, /gardener, /wanderer, /login.
