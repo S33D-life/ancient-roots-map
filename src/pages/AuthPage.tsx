@@ -915,6 +915,43 @@ const AuthPage = () => {
     }
   };
 
+  // Installed app returning from a Google journey that finished in Safari:
+  // claim the single-use handoff and restore the session in this context.
+  useEffect(() => {
+    if (!isStandaloneDisplay()) return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const attempt = async () => {
+      if (!active || !readPendingHandoff()) return;
+      const result = await claimHandoff();
+      if (!active) return;
+      if (result.status === "signed-in") {
+        navigate(resolvePostAuthPath(), { replace: true });
+        return;
+      }
+      if (result.status === "pending") {
+        timer = setTimeout(() => void attempt(), 2000);
+        return;
+      }
+      if (result.status === "failed") {
+        setOauthError("That sign-in didn't reach the app. Please try once more.");
+      }
+    };
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void attempt();
+    };
+
+    void attempt();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [navigate, resolvePostAuthPath]);
+
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setOauthError(null);
