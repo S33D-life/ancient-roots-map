@@ -4,6 +4,7 @@
  */
 import { OFFERING_TYPES, type LifeGroveOffering } from "@/lib/life-groves/types";
 import LifeGroveOfferingGlyph from "./LifeGroveOfferingGlyph";
+import { isPrivateOfferingMedia, resolveOfferingMediaUrl } from "@/utils/offeringMedia";
 
 interface Props {
   offerings: LifeGroveOffering[];
@@ -49,6 +50,13 @@ export default function HangingMemoryTree({ offerings }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[11px] text-primary hover:underline mt-1 inline-block break-all"
+                onClick={async (e) => {
+                  // Private media lives in a protected bucket — sign it first.
+                  if (!isPrivateOfferingMedia(o.media_url)) return;
+                  e.preventDefault();
+                  const signed = await resolveOfferingMediaUrl(o.media_url);
+                  if (signed) window.open(signed, "_blank", "noopener,noreferrer");
+                }}
               >
                 Open media
               </a>
