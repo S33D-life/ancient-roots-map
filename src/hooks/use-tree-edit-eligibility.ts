@@ -12,7 +12,7 @@
  * deleting a contribution never silently restores unilateral editing rights.
  * Curators and keepers may always edit directly (existing review authority).
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface TreeEditEligibility {
