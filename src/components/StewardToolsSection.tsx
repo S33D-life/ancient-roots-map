@@ -9,7 +9,7 @@ import { lazy, Suspense, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf, Camera } from "lucide-react";
+import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge, Leaf, Camera, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
 import { useTreeEditEligibility } from "@/hooks/use-tree-edit-eligibility";
