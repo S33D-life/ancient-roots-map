@@ -164,9 +164,9 @@ describe("installed-app Google sign-in handoff", () => {
   });
 
   it("does not bind without a session in the completing browser", async () => {
-    authMock.getSession.mockResolvedValueOnce({ data: { session: null } } as never);
     const uri = await beginHandoff("/welcome");
     const id = new URL(uri!).searchParams.get("h")!;
+    authMock.getSession.mockResolvedValue({ data: { session: null } } as never);
     expect(await bindHandoff(id)).toEqual({ ok: false, reason: "no-session" });
   });
 });
