@@ -66,3 +66,12 @@
 - [x] Standardise curator review Back navigation with a safe fallback
 - [x] Verify phone journeys, type safety, and regression suite
 - Deferred: Species Hearts for background canopy check-ins requires a separate server-authoritative reward pass
+
+# Roadmap — iPhone/Safari Boot Incident
+- [x] Establish production, main, diagnostic-branch, Cloud, and usage state
+- [x] Trace and rank every global-skeleton boot path
+- [x] Remove authentication restoration from the public-render critical path
+- [x] Add focused boot regression coverage, including never-settling and failed restoration
+- [x] Verify asynchronous signed-in hydration, failed/never-settling restoration, and full release checks
+- [ ] Verify production routes in Safari/iPhone hardware and stale-service-worker scenarios
+- [x] Return an unshipped candidate and exact release recommendation to TEOTAG
