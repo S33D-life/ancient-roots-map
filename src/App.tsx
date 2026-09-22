@@ -218,31 +218,35 @@ const PatronsPortalRedirect = () => {
 const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
-  const [authReady, setAuthReady] = useState(false);
-  const [authInitError, setAuthInitError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Global connection resilience — shows reconnection toasts
   useConnectionResilience();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUserId(session?.user?.id ?? null);
-    });
+    let active = true;
 
-    supabase.auth
+    // Session restore must never block the public S33D world from rendering.
+    // Older Supabase auth clients can deadlock during persisted-session recovery
+    // on iOS Safari/WebKit. Restore opportunistically, then subscribe for changes.
+    void supabase.auth
       .getSession()
-      .then(({ data: { session } }) => {
-        setCurrentUserId(session?.user?.id ?? null);
-        setAuthReady(true);
+      .then(({ data: { session }, error }) => {
+        if (error) throw error;
+        if (active) setCurrentUserId(session?.user?.id ?? null);
       })
       .catch((error) => {
-        const message = error instanceof Error ? error.message : "Failed to restore your session";
-        setAuthInitError(message);
-        setAuthReady(true);
+        console.warn("[auth] Session restore failed; continuing as a public wanderer.", error);
       });
 
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setCurrentUserId(session?.user?.id ?? null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Arterial pulse: pause animations when tab hidden
@@ -253,27 +257,6 @@ const App = () => {
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
-
-  if (authInitError) {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-6 bg-background text-foreground">
-        <section className="w-full max-w-lg rounded-xl border border-border bg-card p-6 space-y-3">
-          <h1 className="text-xl font-semibold">Authentication unavailable</h1>
-          <p className="text-sm text-muted-foreground">
-            We couldn’t restore your session. Refresh the page. If this continues, verify backend URL/key settings and Google redirect URLs.
-          </p>
-          <p className="text-xs text-destructive break-words" role="alert">{authInitError}</p>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="inline-flex items-center justify-center rounded-md border border-border bg-secondary px-4 py-2 text-sm text-secondary-foreground"
-          >
-            Reload
-          </button>
-        </section>
-      </main>
-    );
-  }
 
   const CelebrationOverlay = () => {
     const { celebration, dismiss: dismissTree } = useTreeCelebration();
@@ -300,11 +283,6 @@ const App = () => {
     }
     return null;
   };
-
-  // Show loading skeleton while auth state resolves
-  if (!authReady) {
-    return <PageSkeleton variant="default" />;
-  }
 
   return (
     <GlobalErrorBoundary>
