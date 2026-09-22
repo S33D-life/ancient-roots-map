@@ -22,6 +22,13 @@
       "when": 1790077662604,
       "tag": "0002_offerings_private_bucket_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790079236738,
+      "tag": "0003_private_offering_media_audience_boundary",
+      "breakpoints": true
     }
   ]
 }
