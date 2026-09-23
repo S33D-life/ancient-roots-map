@@ -21,6 +21,7 @@ import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
 import { trackInviteEvent } from "@/lib/invite-analytics";
 import { checkInviteCode, type InviteStatus } from "@/lib/invite-validation";
 import { beginHandoff, claimHandoff, isStandaloneDisplay, readPendingHandoff } from "@/lib/auth/pwaHandoff";
+import UpdateAppButton from "@/components/auth/UpdateAppButton";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
