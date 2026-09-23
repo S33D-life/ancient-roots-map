@@ -3,6 +3,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithOAuthChecked } from "@/lib/auth/oauthSignIn";
+import { createPostSignInQueue } from "@/lib/auth/postSignInQueue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -658,7 +659,7 @@ const AuthPage = () => {
       // Handle session expiry gracefully
       if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
         sessionStorage.removeItem("s33d_recovery_active");
-        handledUsersRef.current.clear();
+        queue.reset();
         setView("login");
         return;
       }
@@ -668,7 +669,7 @@ const AuthPage = () => {
       if (!session) return;
       if (isRecoveryFlow()) return;
 
-      enqueuePostSignIn(event, session);
+      queue.enqueue(event, session);
     });
 
     supabase.auth.getSession()
@@ -684,7 +685,7 @@ const AuthPage = () => {
           // Go through the same queue rather than navigating straight away:
           // a recovered session may still have an invite, gift, pending tree or
           // bot handoff waiting, and navigation happens at the end of that work.
-          enqueuePostSignIn("INITIAL_SESSION", session);
+          queue.enqueue("INITIAL_SESSION", session);
         }
       })
       .catch(() => {
