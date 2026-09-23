@@ -11,7 +11,7 @@ import { RefreshCw, Check, Loader2 } from "lucide-react";
 import { useAppUpdate } from "@/hooks/use-app-update";
 import { readPendingHandoff } from "@/lib/auth/pwaHandoff";
 
-type State = "idle" | "checking" | "up-to-date" | "available" | "applying";
+type State = "idle" | "checking" | "up-to-date" | "available" | "applying" | "failed";
 
 const callbackInProgress = () => {
   try {
@@ -44,9 +44,10 @@ const UpdateAppButton = () => {
     setState("checking");
     try {
       const found = await manualCheck();
+      // "Up to date" must only mean: we checked, and there was nothing new.
       setState(found ? "available" : "up-to-date");
     } catch {
-      setState("up-to-date");
+      setState("failed");
     }
   };
 
@@ -55,6 +56,7 @@ const UpdateAppButton = () => {
     : state === "applying" ? "Updating…"
     : state === "available" ? "Update available — tap to update"
     : state === "up-to-date" ? "You're up to date"
+    : state === "failed" ? "Couldn't check — try again"
     : "Update app";
 
   return (
