@@ -458,26 +458,10 @@ const AuthPage = () => {
 
   useEffect(() => {
     const runPostSignIn = async (event: string, session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>) => {
-      authLog("event", event, "hasSession:", !!session);
-
-      // Handle password recovery redirect — show reset form instead of navigating away
-      if (event === "PASSWORD_RECOVERY") {
-        sessionStorage.setItem("s33d_recovery_active", "1");
-        setView("reset-password");
-        return;
-      }
-
-      // Handle session expiry gracefully
-      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
-        sessionStorage.removeItem("s33d_recovery_active");
-        setView("login");
-        return;
-      }
-
-      // Block all navigation when in recovery flow — user must complete password reset first
+      // Re-check: the flow may have entered recovery while this item was queued.
       if (isRecoveryFlow()) return;
 
-      if (session) {
+      {
         // Verification round-trip success: warm welcome and clean up the pending email.
         const wasPending = !!readPendingEmail();
         if (event === "SIGNED_IN" && wasPending) {
