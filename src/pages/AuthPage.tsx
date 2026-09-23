@@ -21,6 +21,7 @@ import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
 import { trackInviteEvent } from "@/lib/invite-analytics";
 import { checkInviteCode, type InviteStatus } from "@/lib/invite-validation";
 import { beginHandoff, claimHandoff, isStandaloneDisplay, readPendingHandoff } from "@/lib/auth/pwaHandoff";
+import UpdateAppButton from "@/components/auth/UpdateAppButton";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -449,28 +450,19 @@ const AuthPage = () => {
     viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
     sessionStorage.getItem("s33d_recovery_active") === "1";
 
+  // Follow-up work must never run inside the auth callback: awaited Supabase
+  // calls there hold the SDK's internal lock and can stall session recovery
+  // (most visibly on Safari/installed iOS). We queue it instead, preserving
+  // arrival order and running each session at most once.
+  const postSignInQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const handledSessionsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      authLog("event", event, "hasSession:", !!session);
-
-      // Handle password recovery redirect — show reset form instead of navigating away
-      if (event === "PASSWORD_RECOVERY") {
-        sessionStorage.setItem("s33d_recovery_active", "1");
-        setView("reset-password");
-        return;
-      }
-
-      // Handle session expiry gracefully
-      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
-        sessionStorage.removeItem("s33d_recovery_active");
-        setView("login");
-        return;
-      }
-
-      // Block all navigation when in recovery flow — user must complete password reset first
+    const runPostSignIn = async (event: string, session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>) => {
+      // Re-check: the flow may have entered recovery while this item was queued.
       if (isRecoveryFlow()) return;
 
-      if (session) {
+      {
         // Verification round-trip success: warm welcome and clean up the pending email.
         const wasPending = !!readPendingEmail();
         if (event === "SIGNED_IN" && wasPending) {
@@ -641,15 +633,57 @@ const AuthPage = () => {
 
         navigate(resolvePostAuthPath(), { replace: true });
       }
+    };
+
+    // The callback itself stays synchronous — no awaited Supabase calls.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      authLog("event", event, "hasSession:", !!session);
+
+      // Handle password recovery redirect — show reset form instead of navigating away
+      if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("s33d_recovery_active", "1");
+        setView("reset-password");
+        return;
+      }
+
+      // Handle session expiry gracefully
+      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        sessionStorage.removeItem("s33d_recovery_active");
+        handledSessionsRef.current.clear();
+        setView("login");
+        return;
+      }
+
+      if (!session) return;
+      if (isRecoveryFlow()) return;
+
+      // One run per session — repeated TOKEN_REFRESHED/SIGNED_IN events for the
+      // same session must not re-consume invites or re-plant pending trees.
+      const key = `${session.user?.id ?? "anon"}:${session.access_token?.slice(-12) ?? ""}`;
+      if (handledSessionsRef.current.has(key)) return;
+      handledSessionsRef.current.add(key);
+
+      postSignInQueueRef.current = postSignInQueueRef.current
+        .then(() => runPostSignIn(event, session))
+        .catch((e) => { authLog("post-sign-in work failed", e); });
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      // Don't redirect if user arrived via recovery link — they need to reset password first
-      if (isRecoveryFlow()) return;
-      if (session) {
-        navigate(resolvePostAuthPath(), { replace: true });
-      }
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          // Recovering a stored session failed — say so plainly, never log tokens.
+          setOauthError("We couldn't restore your previous sign-in on this device. Please sign in again.");
+          return;
+        }
+        // Don't redirect if user arrived via recovery link — they need to reset password first
+        if (isRecoveryFlow()) return;
+        if (session) {
+          navigate(resolvePostAuthPath(), { replace: true });
+        }
+      })
+      .catch(() => {
+        setOauthError("We couldn't restore your previous sign-in on this device. Please sign in again.");
+      });
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, resolvePostAuthPath]);
@@ -900,6 +934,7 @@ const AuthPage = () => {
       return;
     }
     setIsLoading(true);
+    setOauthError(null);
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -908,8 +943,14 @@ const AuthPage = () => {
       if (error) throw error;
       setView("magic-sent");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't send a magic link just now";
-      toast({ title: "This link could not take root yet", description: "Take a breath and try once more." });
+      // Email-link failure, distinct from a Google failure. Message is sanitised:
+      // only the reason category is shown, never tokens or raw provider payloads.
+      const raw = err instanceof Error ? err.message : "";
+      const msg = /rate|too many|429/i.test(raw)
+        ? "Email link: too many requests just now — please wait a minute and try again."
+        : "Email link: we couldn't send your sign-in link. Check the address and try once more.";
+      setOauthError(msg);
+      toast({ title: "This link could not take root yet", description: msg });
     } finally {
       setIsLoading(false);
     }
@@ -1575,10 +1616,11 @@ const AuthPage = () => {
           </div>
 
           {/* Return home */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-6 space-y-3">
             <button onClick={() => navigate("/")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← Return to Home
             </button>
+            <div><UpdateAppButton /></div>
           </div>
         </div>
       </div>
