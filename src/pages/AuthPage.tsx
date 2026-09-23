@@ -1615,10 +1615,11 @@ const AuthPage = () => {
           </div>
 
           {/* Return home */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-6 space-y-3">
             <button onClick={() => navigate("/")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← Return to Home
             </button>
+            <div><UpdateAppButton /></div>
           </div>
         </div>
       </div>
