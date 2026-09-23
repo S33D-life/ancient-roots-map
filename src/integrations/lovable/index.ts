@@ -32,8 +32,14 @@ export const lovable = {
         // throw. Surfacing only thrown errors leaves the caller believing a
         // sign-in succeeded while no session was ever persisted.
         const { error } = await supabase.auth.setSession(result.tokens);
-        if (error) {
-          return { error: error instanceof Error ? error : new Error(String(error?.message ?? error)) };
+        const setSessionError = error as { message?: string } | null;
+        if (setSessionError) {
+          return {
+            error:
+              setSessionError instanceof Error
+                ? setSessionError
+                : new Error(String(setSessionError.message ?? setSessionError)),
+          };
         }
       } catch (e) {
         return { error: e instanceof Error ? e : new Error(String(e)) };
