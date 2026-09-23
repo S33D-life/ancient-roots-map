@@ -187,16 +187,15 @@ export function useAppUpdate() {
         }
       }
     }
-    try {
-      const res = await fetchVersion();
-      if (res.ok) {
-        const data = await res.json();
-        if (data.build && data.build !== __BUILD_ID__) {
-          setUpdate({ available: true, source: "version", remoteBuild: data.build });
-          return true;
-        }
-      }
-    } catch { /* ignore */ }
+    // A failed check must be reported as a failure — callers otherwise show
+    // "you're up to date" when in truth nothing was ever checked.
+    const res = await fetchVersion();
+    if (!res.ok) throw new Error(`version check failed (${res.status})`);
+    const data = await res.json();
+    if (data.build && data.build !== __BUILD_ID__) {
+      setUpdate({ available: true, source: "version", remoteBuild: data.build });
+      return true;
+    }
     return false;
   }, []);
 
