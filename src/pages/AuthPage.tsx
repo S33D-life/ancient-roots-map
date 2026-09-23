@@ -632,15 +632,57 @@ const AuthPage = () => {
 
         navigate(resolvePostAuthPath(), { replace: true });
       }
+    };
+
+    // The callback itself stays synchronous — no awaited Supabase calls.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      authLog("event", event, "hasSession:", !!session);
+
+      // Handle password recovery redirect — show reset form instead of navigating away
+      if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("s33d_recovery_active", "1");
+        setView("reset-password");
+        return;
+      }
+
+      // Handle session expiry gracefully
+      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        sessionStorage.removeItem("s33d_recovery_active");
+        handledSessionsRef.current.clear();
+        setView("login");
+        return;
+      }
+
+      if (!session) return;
+      if (isRecoveryFlow()) return;
+
+      // One run per session — repeated TOKEN_REFRESHED/SIGNED_IN events for the
+      // same session must not re-consume invites or re-plant pending trees.
+      const key = `${session.user?.id ?? "anon"}:${session.access_token?.slice(-12) ?? ""}`;
+      if (handledSessionsRef.current.has(key)) return;
+      handledSessionsRef.current.add(key);
+
+      postSignInQueueRef.current = postSignInQueueRef.current
+        .then(() => runPostSignIn(event, session))
+        .catch((e) => { authLog("post-sign-in work failed", e); });
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      // Don't redirect if user arrived via recovery link — they need to reset password first
-      if (isRecoveryFlow()) return;
-      if (session) {
-        navigate(resolvePostAuthPath(), { replace: true });
-      }
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          // Recovering a stored session failed — say so plainly, never log tokens.
+          setOauthError("We couldn't restore your previous sign-in on this device. Please sign in again.");
+          return;
+        }
+        // Don't redirect if user arrived via recovery link — they need to reset password first
+        if (isRecoveryFlow()) return;
+        if (session) {
+          navigate(resolvePostAuthPath(), { replace: true });
+        }
+      })
+      .catch(() => {
+        setOauthError("We couldn't restore your previous sign-in on this device. Please sign in again.");
+      });
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, resolvePostAuthPath]);
