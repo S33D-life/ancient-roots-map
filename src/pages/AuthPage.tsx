@@ -454,8 +454,7 @@ const AuthPage = () => {
   // calls there hold the SDK's internal lock and can stall session recovery
   // (most visibly on Safari/installed iOS). We queue it instead, preserving
   // arrival order and running it at most once per signed-in user.
-  const postSignInQueueRef = useRef<Promise<void>>(Promise.resolve());
-  const handledUsersRef = useRef<Set<string>>(new Set());
+  const postSignInQueueRef = useRef<ReturnType<typeof createPostSignInQueue> | null>(null);
 
   useEffect(() => {
     const runPostSignIn = async (event: string, session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>) => {
