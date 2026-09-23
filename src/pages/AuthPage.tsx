@@ -933,6 +933,7 @@ const AuthPage = () => {
       return;
     }
     setIsLoading(true);
+    setOauthError(null);
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -941,8 +942,14 @@ const AuthPage = () => {
       if (error) throw error;
       setView("magic-sent");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't send a magic link just now";
-      toast({ title: "This link could not take root yet", description: "Take a breath and try once more." });
+      // Email-link failure, distinct from a Google failure. Message is sanitised:
+      // only the reason category is shown, never tokens or raw provider payloads.
+      const raw = err instanceof Error ? err.message : "";
+      const msg = /rate|too many|429/i.test(raw)
+        ? "Email link: too many requests just now — please wait a minute and try again."
+        : "Email link: we couldn't send your sign-in link. Check the address and try once more.";
+      setOauthError(msg);
+      toast({ title: "This link could not take root yet", description: msg });
     } finally {
       setIsLoading(false);
     }
