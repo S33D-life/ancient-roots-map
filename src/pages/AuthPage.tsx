@@ -1,3 +1,5 @@
+import { checkRecoveryReadiness, finishRecovery, recordAuthEvidence, safeAuthError } from "@/lib/auth/sessionEvidence";
+import { returnContext } from "@/lib/auth/returnContext";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -84,41 +86,29 @@ const writeUnverifiedModalOpen = (open: boolean) => {
 const isDev = (() => { try { return Boolean((import.meta as any)?.env?.DEV); } catch { return false; } })();
 const authLog = (...args: unknown[]) => { if (isDev) console.log("[auth]", ...args); };
 
-// Detect recovery from URL hash OR query params before first render
-// This must run synchronously before any auth listener fires
-const detectRecoveryFromHash = (): AuthView => {
-  const hash = window.location.hash;
-  const search = window.location.search;
-  if (hash.includes("type=recovery") || search.includes("type=recovery")) return "reset-password";
-  return "login";
-};
-
-// Persistent flag: once we detect recovery, keep it until the flow completes.
-// This survives the Supabase SDK consuming the hash fragment.
-let _recoveryDetected = detectRecoveryFromHash() === "reset-password";
-if (_recoveryDetected) {
-  sessionStorage.setItem("s33d_recovery_active", "1");
-} else if (sessionStorage.getItem("s33d_recovery_active") === "1") {
-  _recoveryDetected = true;
-}
-
 const AuthPage = () => {
   useDocumentTitle("Sign In");
-  // Also detect if we landed on /reset-password directly
-  const isResetRoute = window.location.pathname === "/reset-password";
-  if (isResetRoute && !_recoveryDetected) {
-    _recoveryDetected = true;
-    sessionStorage.setItem("s33d_recovery_active", "1");
-  }
-  // If we have a pending email and we're not in recovery, prefer the verification waiting screen.
   const _pendingOnLoad = readPendingEmail();
-  const _initialView: AuthView = _recoveryDetected
-    ? "reset-password"
-    : _pendingOnLoad
-      ? "verify-email"
-      : "login";
-
+  const _initialView: AuthView = (returnContext.recovery || window.location.pathname === "/reset-password")
+    ? "reset-password" : _pendingOnLoad ? "verify-email" : "login";
   const [view, setView] = useState<AuthView>(_initialView);
+  const [recoveryState, setRecoveryState] = useState<"checking" | "ready" | "failed">("checking");
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  useEffect(() => {
+    if (view !== "reset-password") return;
+    let active = true;
+    setRecoveryState("checking");
+    const timer = window.setTimeout(() => {
+      if (active) { active = false; setRecoveryState("failed"); setRecoveryError("AuthInitializationTimeout"); }
+    }, 12000);
+    void checkRecoveryReadiness().then(error => {
+      if (!active) return;
+      setRecoveryError(error); setRecoveryState(error ? "failed" : "ready");
+    }).catch(error => {
+      if (active) { setRecoveryError(safeAuthError(error)); setRecoveryState("failed"); }
+    }).finally(() => window.clearTimeout(timer));
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [view]);
   const [email, setEmail] = useState(_pendingOnLoad);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -362,7 +352,7 @@ const AuthPage = () => {
       params.get("error_description") || hashParams.get("error_description") || "";
     if (!err) return;
     // Recovery flow handles its own errors — leave it alone.
-    if (sessionStorage.getItem("s33d_recovery_active") === "1") return;
+    if (returnContext.recovery || window.location.pathname === "/reset-password") return;
     const looksExpired =
       /expired|invalid|otp_expired|access_denied/i.test(errCode || "") ||
       /expired|invalid|already/i.test(errDesc);
@@ -446,8 +436,7 @@ const AuthPage = () => {
 
   // Helper: is the current flow a password recovery flow?
   const isRecoveryFlow = () =>
-    viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
-    sessionStorage.getItem("s33d_recovery_active") === "1";
+    viewRef.current === "reset-password" || viewRef.current === "reset-success";
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -463,7 +452,9 @@ const AuthPage = () => {
       // Handle session expiry gracefully
       if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
         sessionStorage.removeItem("s33d_recovery_active");
-        setView("login");
+        if (viewRef.current === "reset-password") {
+          setRecoveryState("failed"); setRecoveryError("AuthSessionMissingError");
+        } else { setView("login"); }
         return;
       }
 
@@ -641,6 +632,7 @@ const AuthPage = () => {
 
         navigate(resolvePostAuthPath(), { replace: true });
       }
+
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -961,12 +953,15 @@ const AuthPage = () => {
 
       // Installed iOS web apps do not share storage with Safari, where the
       // Google journey finishes. Route those through a short-lived handoff so
-      // the app can restore the session in its own context. Safari and desktop
-      // keep the unchanged direct flow.
-      let redirectUri = `${window.location.origin}${redirectPath}`;
+      // the app can restore the session in its own context. Every browser return
+      // first confirms its session on the dedicated callback route.
+      let redirectUri = `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(redirectPath)}`;
       if (isStandaloneDisplay()) {
         const handoffUri = await beginHandoff(redirectPath);
-        if (handoffUri) redirectUri = handoffUri;
+        if (handoffUri) {
+          const target = new URL(handoffUri);
+          redirectUri = `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(target.pathname + target.search)}`;
+        }
       }
 
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -992,6 +987,8 @@ const AuthPage = () => {
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (recoveryState !== "ready" || isLoading) return;
+    setRecoveryError(null);
     const errors: typeof fieldErrors = {};
     try { passwordSchema.parse(newPassword); } catch { errors.newPassword = "At least 6 characters required"; }
     if (newPassword !== confirmNewPassword) errors.confirmNew = "Passwords don't match";
@@ -1000,14 +997,21 @@ const AuthPage = () => {
 
     setIsLoading(true);
     try {
+      const readinessError = await checkRecoveryReadiness();
+      if (readinessError) {
+        setRecoveryError(readinessError); setRecoveryState("failed"); return;
+      }
+      recordAuthEvidence("PASSWORD_UPDATE_REQUESTED");
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+      recordAuthEvidence("PASSWORD_UPDATE_SUCCEEDED");
+      finishRecovery();
       // Clear recovery flag — flow is complete
       sessionStorage.removeItem("s33d_recovery_active");
       setView("reset-success");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't update your password just now";
-      toast({ title: "This update could not take root yet", description: "Take a breath and try once more." });
+      recordAuthEvidence("PASSWORD_UPDATE_FAILED", err);
+      setRecoveryError(safeAuthError(err));
     } finally {
       setIsLoading(false);
     }
@@ -1026,7 +1030,10 @@ const AuthPage = () => {
               <h2 className="text-xl font-serif">Set New Password</h2>
               <p className="text-muted-foreground text-sm">Choose a new password for your grove account.</p>
             </div>
+            {recoveryError && <p role="alert" className="text-sm text-destructive">We couldn't confirm or update your recovery session. Request a fresh recovery link if this continues. ({recoveryError})</p>}
+            {recoveryState === "checking" && <p role="status">Checking your recovery session…</p>}
             <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <fieldset disabled={isLoading || recoveryState !== "ready"} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="new-password" className="text-xs uppercase tracking-wider text-muted-foreground">New Password</Label>
                 <div className="relative">
@@ -1067,6 +1074,7 @@ const AuthPage = () => {
               <Button type="submit" className="w-full font-serif" disabled={isLoading}>
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating...</> : "Update Password"}
               </Button>
+            </fieldset>
             </form>
             <button onClick={() => { sessionStorage.removeItem("s33d_recovery_active"); setView("forgot"); }} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
               Link expired? Request a new one

@@ -1,3 +1,5 @@
+import "./lib/auth/returnContext";
+import { startSessionEvidence } from "./lib/auth/sessionEvidence";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
@@ -30,22 +32,11 @@ function pushError(entry: (typeof errorQueue)[0]) {
   } catch {}
 }
 
-window.addEventListener("error", (e) => {
-  pushError({
-    message: e.message || String(e.error),
-    source: e.filename,
-    line: e.lineno,
-    col: e.colno,
-    timestamp: new Date().toISOString(),
-  });
+window.addEventListener("error", () => {
+  pushError({ message: "RuntimeError", timestamp: new Date().toISOString() });
 });
-
-window.addEventListener("unhandledrejection", (e) => {
-  pushError({
-    message: e.reason?.message || String(e.reason),
-    source: e.reason?.stack?.split("\n")[1]?.trim(),
-    timestamp: new Date().toISOString(),
-  });
+window.addEventListener("unhandledrejection", () => {
+  pushError({ message: "UnhandledRejection", timestamp: new Date().toISOString() });
 });
 
 // Register service worker (vite-plugin-pwa prompt mode)
@@ -56,6 +47,8 @@ if ("serviceWorker" in navigator) {
     });
   });
 }
+
+void startSessionEvidence();
 
 const root = document.getElementById("root")!;
 createRoot(root).render(<App />);
