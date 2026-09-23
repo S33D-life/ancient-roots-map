@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithOAuthChecked } from "@/lib/auth/oauthSignIn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -639,7 +639,7 @@ const AuthPage = () => {
     // access token, which rotates on refresh) so a TOKEN_REFRESHED event can
     // never re-consume an invite, re-claim a gift, re-plant a pending tree,
     // re-claim a bot handoff or re-navigate.
-    const enqueuePostSignIn = (event: string, session: Session) => {
+    const enqueuePostSignIn = (event: string, session: Parameters<typeof runPostSignIn>[1]) => {
       const userId = session.user?.id;
       if (!userId) return;
       if (handledUsersRef.current.has(userId)) return;
@@ -1022,7 +1022,7 @@ const AuthPage = () => {
         if (handoffUri) redirectUri = handoffUri;
       }
 
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await signInWithOAuthChecked("google", {
         redirect_uri: redirectUri,
       });
 
