@@ -449,8 +449,15 @@ const AuthPage = () => {
     viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
     sessionStorage.getItem("s33d_recovery_active") === "1";
 
+  // Follow-up work must never run inside the auth callback: awaited Supabase
+  // calls there hold the SDK's internal lock and can stall session recovery
+  // (most visibly on Safari/installed iOS). We queue it instead, preserving
+  // arrival order and running each session at most once.
+  const postSignInQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const handledSessionsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const runPostSignIn = async (event: string, session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>) => {
       authLog("event", event, "hasSession:", !!session);
 
       // Handle password recovery redirect — show reset form instead of navigating away
