@@ -638,16 +638,11 @@ const AuthPage = () => {
     // access token, which rotates on refresh) so a TOKEN_REFRESHED event can
     // never re-consume an invite, re-claim a gift, re-plant a pending tree,
     // re-claim a bot handoff or re-navigate.
-    const enqueuePostSignIn = (event: string, session: Parameters<typeof runPostSignIn>[1]) => {
-      const userId = session.user?.id;
-      if (!userId) return;
-      if (handledUsersRef.current.has(userId)) return;
-      handledUsersRef.current.add(userId);
-
-      postSignInQueueRef.current = postSignInQueueRef.current
-        .then(() => runPostSignIn(event, session))
-        .catch((e) => { authLog("post-sign-in work failed", e); });
-    };
+    const queue = createPostSignInQueue(
+      (event, session) => runPostSignIn(event, session as Parameters<typeof runPostSignIn>[1]),
+      (e) => { authLog("post-sign-in work failed", e); },
+    );
+    postSignInQueueRef.current = queue;
 
     // The callback itself stays synchronous — no awaited Supabase calls.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
