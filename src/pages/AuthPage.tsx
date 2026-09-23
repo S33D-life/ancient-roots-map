@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithOAuthChecked } from "@/lib/auth/oauthSignIn";
+import { createPostSignInQueue } from "@/lib/auth/postSignInQueue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -453,9 +454,8 @@ const AuthPage = () => {
   // Follow-up work must never run inside the auth callback: awaited Supabase
   // calls there hold the SDK's internal lock and can stall session recovery
   // (most visibly on Safari/installed iOS). We queue it instead, preserving
-  // arrival order and running each session at most once.
-  const postSignInQueueRef = useRef<Promise<void>>(Promise.resolve());
-  const handledSessionsRef = useRef<Set<string>>(new Set());
+  // arrival order and running it at most once per signed-in user.
+  const postSignInQueueRef = useRef<ReturnType<typeof createPostSignInQueue> | null>(null);
 
   useEffect(() => {
     const runPostSignIn = async (event: string, session: NonNullable<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>) => {
@@ -635,6 +635,16 @@ const AuthPage = () => {
       }
     };
 
+    // Single entry point for "a session is present". Keyed by user id (not the
+    // access token, which rotates on refresh) so a TOKEN_REFRESHED event can
+    // never re-consume an invite, re-claim a gift, re-plant a pending tree,
+    // re-claim a bot handoff or re-navigate.
+    const queue = createPostSignInQueue(
+      (event, session) => runPostSignIn(event, session as Parameters<typeof runPostSignIn>[1]),
+      (e) => { authLog("post-sign-in work failed", e); },
+    );
+    postSignInQueueRef.current = queue;
+
     // The callback itself stays synchronous — no awaited Supabase calls.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       authLog("event", event, "hasSession:", !!session);
@@ -649,23 +659,17 @@ const AuthPage = () => {
       // Handle session expiry gracefully
       if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
         sessionStorage.removeItem("s33d_recovery_active");
-        handledSessionsRef.current.clear();
+        queue.reset();
         setView("login");
         return;
       }
 
+      // A rotated token for an already-handled user carries no new work.
+      if (event === "TOKEN_REFRESHED") return;
       if (!session) return;
       if (isRecoveryFlow()) return;
 
-      // One run per session — repeated TOKEN_REFRESHED/SIGNED_IN events for the
-      // same session must not re-consume invites or re-plant pending trees.
-      const key = `${session.user?.id ?? "anon"}:${session.access_token?.slice(-12) ?? ""}`;
-      if (handledSessionsRef.current.has(key)) return;
-      handledSessionsRef.current.add(key);
-
-      postSignInQueueRef.current = postSignInQueueRef.current
-        .then(() => runPostSignIn(event, session))
-        .catch((e) => { authLog("post-sign-in work failed", e); });
+      queue.enqueue(event, session);
     });
 
     supabase.auth.getSession()
@@ -678,7 +682,10 @@ const AuthPage = () => {
         // Don't redirect if user arrived via recovery link — they need to reset password first
         if (isRecoveryFlow()) return;
         if (session) {
-          navigate(resolvePostAuthPath(), { replace: true });
+          // Go through the same queue rather than navigating straight away:
+          // a recovered session may still have an invite, gift, pending tree or
+          // bot handoff waiting, and navigation happens at the end of that work.
+          queue.enqueue("INITIAL_SESSION", session);
         }
       })
       .catch(() => {
@@ -1010,7 +1017,7 @@ const AuthPage = () => {
         if (handoffUri) redirectUri = handoffUri;
       }
 
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await signInWithOAuthChecked("google", {
         redirect_uri: redirectUri,
       });
 
