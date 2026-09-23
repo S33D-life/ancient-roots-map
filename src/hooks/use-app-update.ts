@@ -176,17 +176,21 @@ export function useAppUpdate() {
     try { sessionStorage.removeItem(DISMISSED_KEY); } catch {}
     fetchFailures.current = 0;
 
-    if ("serviceWorker" in navigator) {
-      const reg = await navigator.serviceWorker.getRegistration();
-      if (reg) {
-        await reg.update();
-        if (reg.waiting) {
-          waitingWorkerRef.current = reg.waiting;
-          setUpdate({ available: true, source: "sw", remoteBuild: "sw-update" });
-          return true;
+    // A blocked or unavailable service worker is not a failed version check —
+    // fall through to version.json rather than reporting an error.
+    try {
+      if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          await reg.update();
+          if (reg.waiting) {
+            waitingWorkerRef.current = reg.waiting;
+            setUpdate({ available: true, source: "sw", remoteBuild: "sw-update" });
+            return true;
+          }
         }
       }
-    }
+    } catch { /* SW blocked — version.json is still authoritative */ }
     // A failed check must be reported as a failure — callers otherwise show
     // "you're up to date" when in truth nothing was ever checked.
     const res = await fetchVersion();
