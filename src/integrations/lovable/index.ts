@@ -28,7 +28,13 @@ export const lovable = {
       }
 
       try {
-        await supabase.auth.setSession(result.tokens);
+        // setSession reports storage/refresh problems as a returned error, not a
+        // throw. Surfacing only thrown errors leaves the caller believing a
+        // sign-in succeeded while no session was ever persisted.
+        const { error } = await supabase.auth.setSession(result.tokens);
+        if (error) {
+          return { error: error instanceof Error ? error : new Error(String(error?.message ?? error)) };
+        }
       } catch (e) {
         return { error: e instanceof Error ? e : new Error(String(e)) };
       }
