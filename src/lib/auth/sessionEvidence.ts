@@ -1,3 +1,4 @@
+import { callbackShapeEvents } from './callbackShape';
 import { returnContext } from './returnContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -14,7 +15,7 @@ let session: SessionShape = null;
 let recoveryConfirmed = false;
 let initializationError: unknown = null;
 let startPromise: Promise<void> | undefined;
-const events = new Set(['CALLBACK_CREDENTIALS_PRESENT', 'CALLBACK_CREDENTIALS_ABSENT', 'CALLBACK_ERROR', 'INITIAL_SESSION', 'SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', 'USER_UPDATED', 'PASSWORD_RECOVERY', 'MFA_CHALLENGE_VERIFIED', 'SDK_INITIALIZATION_OBSERVED', 'SDK_CALLBACK_PROCESSING_OBSERVED', 'SDK_INITIALIZATION_SETTLED', 'SDK_INITIALIZATION_FAILED', 'SESSION_READ', 'RECOVERY_SESSION_CHECK', 'ROUTE_NAVIGATION', 'ROUTE_SESSION_READ', 'ROUTE_SESSION_READ_FAILED', 'CALLBACK_ENTERED', 'CALLBACK_VALIDATION_REQUESTED', 'CALLBACK_VALIDATION_FAILED', 'CALLBACK_SESSION_CONFIRMED', 'DESTINATION_NAVIGATION', 'PASSWORD_UPDATE_REQUESTED', 'PASSWORD_UPDATE_SUCCEEDED', 'PASSWORD_UPDATE_FAILED']);
+const events = new Set([...callbackShapeEvents, 'CALLBACK_SESSION_MISSING','CALLBACK_CREDENTIALS_PRESENT', 'CALLBACK_CREDENTIALS_ABSENT', 'CALLBACK_ERROR', 'INITIAL_SESSION', 'SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', 'USER_UPDATED', 'PASSWORD_RECOVERY', 'MFA_CHALLENGE_VERIFIED', 'SDK_INITIALIZATION_OBSERVED', 'SDK_CALLBACK_PROCESSING_OBSERVED', 'SDK_INITIALIZATION_SETTLED', 'SDK_INITIALIZATION_FAILED', 'SESSION_READ', 'RECOVERY_SESSION_CHECK', 'ROUTE_NAVIGATION', 'ROUTE_SESSION_READ', 'ROUTE_SESSION_READ_FAILED', 'CALLBACK_ENTERED', 'CALLBACK_VALIDATION_REQUESTED', 'CALLBACK_VALIDATION_FAILED', 'CALLBACK_SESSION_CONFIRMED', 'DESTINATION_NAVIGATION', 'PASSWORD_UPDATE_REQUESTED', 'PASSWORD_UPDATE_SUCCEEDED', 'PASSWORD_UPDATE_FAILED']);
 function restoreRows(): EvidenceRow[] {
   try {
     const saved: unknown = JSON.parse(sessionStorage.getItem(key) || '[]');
@@ -43,6 +44,7 @@ export function readAuthEvidence(): EvidenceRow[] { return rows.slice(); }
 export function startSessionEvidence() {
   if (startPromise) return startPromise;
   recordAuthEvidence(returnContext.credentials ? 'CALLBACK_CREDENTIALS_PRESENT' : 'CALLBACK_CREDENTIALS_ABSENT');
+  for (const event of returnContext.shape ?? []) recordAuthEvidence(event);
   if (returnContext.error) recordAuthEvidence('CALLBACK_ERROR', { name: 'AuthImplicitGrantRedirectError' });
   supabase.auth.onAuthStateChange((event, next) => {
     session = next;

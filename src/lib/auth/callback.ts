@@ -27,7 +27,10 @@ export async function completeCallback(): Promise<string | null> {
   if (returnContext.codeOnly) return 'AuthFlowMismatch';
   const result = await supabase.auth.getSession();
   if (result.error) return safeAuthError(result.error);
-  if (!result.data.session?.user) return 'AuthSessionMissingError';
+  if (!result.data.session?.user) {
+    recordAuthEvidence('CALLBACK_SESSION_MISSING', { name: 'AuthSessionMissingError' });
+    return 'AuthSessionMissingError';
+  }
   recordAuthEvidence('CALLBACK_VALIDATION_REQUESTED');
   const verified = await supabase.auth.getUser();
   if (verified.error) {

@@ -15,3 +15,13 @@ it('installed SDK consumes an implicit callback once and restores the stored ses
   expect(fetch).toHaveBeenCalledTimes(1);
   first.auth.stopAutoRefresh(); restored.auth.stopAutoRefresh();
 });
+
+it('empty query access parameter masks a valid fragment without an SDK initialization error', async () => {
+  window.history.replaceState({}, '', '/auth/callback?access_token=#access_token=synthetic-access&refresh_token=synthetic-refresh&expires_in=3600&token_type=bearer');
+  const fetch = vi.fn();
+  const client = createClient('https://sdk-test.invalid', 'synthetic-public-key', { auth: { storageKey: 'sdk-empty-query-test', autoRefreshToken: false }, global: { fetch } });
+  expect((await client.auth.initialize()).error).toBeNull();
+  expect((await client.auth.getSession()).data.session).toBeNull();
+  expect(fetch).not.toHaveBeenCalled();
+  client.auth.stopAutoRefresh();
+});
