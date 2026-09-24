@@ -1,3 +1,4 @@
+import { observeAuthFetch, observeAuthStorage } from '@/lib/auth/observeAuthIO';
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { brokeredPreviewStorage } from "./previewAuthStorage";
@@ -114,8 +115,9 @@ const createMissingEnvSupabaseClient = () => {
 
 export const supabase: SupabaseClient<Database> = supabaseEnv
   ? createClient<Database>(supabaseEnv.url, supabaseEnv.anonKey, {
+      global: { fetch: observeAuthFetch(supabaseEnv.url) },
       auth: {
-        storage: brokeredPreviewStorage(),
+        storage: observeAuthStorage(brokeredPreviewStorage(), supabaseEnv.url),
         persistSession: true,
         autoRefreshToken: true,
       },

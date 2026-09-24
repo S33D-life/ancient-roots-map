@@ -15,3 +15,23 @@ it('distinguishes complete implicit credentials from empty or code-only paramete
   for (const event of [...complete, ...masked]) expect(callbackShapeEvents.has(event)).toBe(true);
   expect(JSON.stringify([...complete, ...masked])).not.toMatch(/SECRET|PRIVATE/);
 });
+
+it.each([
+  ['?access_token=SECRET&access_token=', '', false, 'CALLBACK_QUERY_DUPLICATES'],
+  ['?access_token=&access_token=SECRET', '', true, 'CALLBACK_QUERY_DUPLICATES'],
+  ['', '#access_token=SECRET&access_token=', false, 'CALLBACK_FRAGMENT_DUPLICATES'],
+  ['', '#access_token=&access_token=SECRET', true, 'CALLBACK_FRAGMENT_DUPLICATES'],
+  ['?access_token=', '#access_token=SECRET', false, 'CALLBACK_QUERY_FRAGMENT_OVERLAP'],
+  ['?access_token=SECRET', '#access_token=', true, 'CALLBACK_QUERY_FRAGMENT_OVERLAP'],
+])('matches SDK last-occurrence precedence (%s, %s)', (query, fragment, nonempty, event) => {
+  const rows = callbackShape(query, fragment);
+  expect(rows.includes('CALLBACK_EFFECTIVE_ACCESS_NONEMPTY')).toBe(nonempty);
+  expect(rows).toContain(event);
+  expect(JSON.stringify(rows)).not.toContain('SECRET');
+});
+it('uses the same duplicate precedence for refresh, metadata and code', () => {
+  const rows = callbackShape('?refresh_token=SECRET&refresh_token=&code=SECRET&code=', '#expires_in=3600&expires_in=&token_type=bearer');
+  expect(rows).not.toContain('CALLBACK_EFFECTIVE_REFRESH_NONEMPTY');
+  expect(rows).not.toContain('CALLBACK_IMPLICIT_METADATA_PRESENT');
+  expect(rows).not.toContain('CALLBACK_EFFECTIVE_CODE_NONEMPTY');
+});

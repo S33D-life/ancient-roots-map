@@ -38,7 +38,7 @@ describe('recovery readiness and evidence', () => {
     expect(await m.checkRecoveryReadiness()).toBe('AuthApiError');
     expect(JSON.stringify(m.readAuthEvidence())).not.toMatch(/SECRET|email@|access_token/);
     expect(m.safeAuthError({ name: 'SECRET' })).toBe('AuthError');
-    expect(Object.keys(m.readAuthEvidence()[0]).sort()).toEqual(['timestamp','pathname','authEvent','sdkInitialized','sessionPresent','userPresent','errorCategory'].sort());
+    expect(Object.keys(m.readAuthEvidence()[0]).sort()).toEqual(['timestamp','pathname','authEvent','sdkInitialized','sessionPresent','userPresent','errorCategory','sequence','documentSequence','build','context','browserHint','httpStatus','operation'].sort());
   });
   it('loses readiness when session disappears and does not serialize user data', async () => {
     Object.assign(mocks.context, { credentials: true, recovery: true });
@@ -65,7 +65,7 @@ it('retains only safe structured history across navigation/reload', async () => 
   vi.resetModules();
   const next = await import('@/lib/auth/sessionEvidence');
   expect(next.readAuthEvidence().length).toBe(prior);
-  sessionStorage.setItem('s33d-auth-evidence-v1', JSON.stringify([{ authEvent: 'SECRET', pathname: '/auth#access_token=SECRET' }]));
+  sessionStorage.setItem('s33d-auth-evidence-v2', JSON.stringify([{ authEvent: 'SECRET', pathname: '/auth#access_token=SECRET' }]));
   vi.resetModules();
   const clean = await import('@/lib/auth/sessionEvidence');
   expect(clean.readAuthEvidence()).toEqual([]);
