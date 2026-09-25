@@ -294,10 +294,13 @@ route("GET", "/api/v1/trees/:id/offerings", async (_req, _auth, params, url) => 
   const { limit, offset } = parseQuery(url);
   const db = adminClient();
 
+  // Service role bypasses RLS, so this unauthenticated route must filter to
+  // public itself. Tribe/private offerings follow the "Offerings visible by
+  // access level" policy and are only served per-offering by /offerings/:id.
   let query = db.from("offerings")
     .select("id, title, type, content, media_url, nft_link, visibility, tree_role, created_at", { count: "exact" })
     .eq("tree_id", params.id)
-    .in("visibility", ["public", "tribe"]);
+    .eq("visibility", "public");
 
   const type = url.searchParams.get("type");
   if (type) query = query.eq("type", type);
