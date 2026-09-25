@@ -6,7 +6,7 @@
  * component since they control renderer-specific Leaflet/MapLibre layers.
  */
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 /* ── Types ── */
 export type AgeBand = "all" | "under100" | "100-300" | "300-800" | "800-1500" | "1500+";
@@ -111,6 +111,7 @@ const MapFilterContext = createContext<MapFilterContextValue>({
 });
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
+  const { pathname } = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [filters, setFilters] = useState<MapFilters>(() => ({
@@ -126,6 +127,10 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
 
   // Sync filters → URL
   useEffect(() => {
+    // Auth owns these URLs until the SDK consumes their callback credentials.
+    // setSearchParams drops the fragment, including while SDK startup waits
+    // for a browser lock. Keep map-filter navigation out of the auth lifecycle.
+    if (/^\/(?:auth|reset-password)(?:\/|$)/.test(pathname)) return;
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       for (const [key, param] of Object.entries(PARAM_MAP)) {
@@ -139,7 +144,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
       }
       return next;
     }, { replace: true });
-  }, [filters, setSearchParams]);
+  }, [filters, pathname, setSearchParams]);
 
   const setSpecies = useCallback((v: string) => setFilters(f => ({ ...f, species: v })), []);
   const setCountry = useCallback((v: string) => setFilters(f => ({ ...f, country: v })), []);
