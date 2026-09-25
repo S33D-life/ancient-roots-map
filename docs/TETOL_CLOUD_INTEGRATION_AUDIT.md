@@ -244,7 +244,7 @@ separate `storageKey`), so TETOL cannot touch the auth flow now under repair.
 `/tetol/* /tetol/:splat 200`) above the SPA catch-all; add `/^\/tetol/` to
 `navigateFallbackDenylist` and `tetol/**` to `globIgnores`; add
 `<meta name="robots" content="noindex">`. Swap **one** demo object each:
-one Ancient Friend alcove, one Staff in the Spiral.
+one Ancient Friend (`friend` address, Revision 3), one Staff in the Spiral.
 
 **Phase 2: public, optional, read-only.** Add the "Enter the Tree" link (feature-flagged),
 TETOL-side "Open in S33D" links, accessibility baseline, and performance gates (§11).
@@ -546,7 +546,7 @@ TEOTAG + security review).
 
 1. Ed commits the TETOL 0.9.1 prototype to a repo (XS).
 2. Review/merge this bridge PoC (S).
-3. In the prototype: `tetol-routes.js` ← `SPATIAL_REGISTRY`; one Ancient Friend alcove
+3. In the prototype: `tetol-routes.js` ← `SPATIAL_REGISTRY`; one Ancient Friend (`friend`)
    and one Staff read via `createBridge()` (S).
 4. Dedicated Staff identity audit, then TEOTAG decides the canonical code (S, decision-heavy).
 5. Preview-branch `/tetol/` static mount with redirects/SW/CSP handling (S).
