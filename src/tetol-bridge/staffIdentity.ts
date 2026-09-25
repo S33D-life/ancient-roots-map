@@ -13,6 +13,9 @@
  *
  * The canonical output is the web route code, because /staff/:code is the
  * public URL that both interfaces must agree on.
+ *
+ * EXPLORATORY ONLY: the canonical Staff code is an OPEN decision pending a
+ * dedicated identity audit. Do not use this to normalise production identities.
  */
 import { SPECIES_CODES, SPECIES_MAP, CIRCLES, type SpeciesCode } from "@/config/staffContract";
 import { getDisplayCode, getGridStaffs } from "@/utils/staffRoomData";

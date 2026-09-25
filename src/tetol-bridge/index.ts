@@ -1,6 +1,9 @@
 /**
  * S33D ↔ TETOL bridge — public entry.
  *
+ * EXPERIMENTAL PROOF (TETOL integration audit, 25 Sep 2026). Not approved
+ * architecture; implementation is on hold pending TEOTAG direction.
+ *
  * Not imported by the main app. Built separately (scripts/build-tetol-bridge.mjs)
  * into one ES module a standalone TETOL prototype can import:
  *

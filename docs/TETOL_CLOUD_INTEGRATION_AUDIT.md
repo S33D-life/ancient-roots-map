@@ -15,6 +15,27 @@ Labels used throughout: **LIVE APP** (in `main` of `S33D-life/ancient-roots-map`
 > and the generated `types.ts`, not from production. Production may differ where
 > changes were applied outside migrations.
 
+## Audit state: COMPLETE · implementation on HOLD (TEOTAG steer, 25 Sep 2026)
+
+`src/tetol-bridge/` is kept as an **EXPERIMENTAL PROOF**. It is not approved architecture
+and is not to be extended or wired into the app under this PR.
+
+**TEOTAG working directions** (working, not canonical):
+
+1. `/tetol/` is acceptable as the **working technical route**. It is not yet the final public-facing name.
+2. For the first online experiment, TETOL stays a **separately deliverable spatial application**. Do not rewrite it into React merely for integration.
+3. The first online TETOL should be **public / read-only where possible** and must not depend on solving production authentication.
+4. TETOL must eventually consume the **same underlying entity identities** as S33D.life.
+5. For the Wand, investigate **reusing the existing Companion protocol** (`use-companion-session.ts`) rather than building another remote protocol.
+6. Notion ingestion starts **one-way, reviewed and provenance-preserving**. No live browser reads, and no automatic bidirectional sync.
+7. **Council:** Notion is the editorial / working source. Reviewed S33D records become the eventual web / TETOL representation.
+8. **Life Groves** wait until after the first public TETOL experiment, because of privacy and personal-data complexity.
+9. **Staff canonical code: OPEN**, pending a dedicated identity audit. Production identities are **not** to be normalised yet; `staffIdentity.ts` is exploratory only.
+10. TETOL 0.9.x needs a **proper version-controlled home**, accessible to integration work, before implementation proceeds.
+
+**Recommended next single implementation step:** commit TETOL 0.9.x to a version-controlled
+repository that integration work can reach (direction 10). Every later step depends on it.
+
 ---
 
 ## 1. Executive architecture (PROPOSED)
@@ -164,10 +185,10 @@ the brief asks to avoid. **D** adds a second origin and makes Phase 3 auth harde
 3. **Mode switch** in the web app = an ordinary link, "Enter the Tree", computed with
    `routeToSpatial(location.pathname)` → `/tetol/?at=<address>`. And from TETOL,
    "Open in S33D" = `spatialToRoute(address).route`. No shared React state.
-4. **Route name `/tetol/`**: "TETOL" is already the product name in `ROUTES`-adjacent
+4. **Route name `/tetol/`** (TEOTAG: accepted as the working technical route, not the final public name). "TETOL" is already the product name in `ROUTES`-adjacent
    code (`TetolHomePage`, `TetolLevelContext`, `/api/v1` description), Notion, and
    the brief. `/explore` is generic and collides semantically with `/discovery`,
-   `/map`. Ed decides (§18).
+   `/map`.
 
 ### C. Route ↔ spatial address bridge
 
@@ -304,7 +325,7 @@ Notion data source ──(Edge Function `notion-ingest`, service role, NOTION_TO
 | Ancient Friend long-form story | **Editorial source** (tree identity stays in Supabase) |
 | Source notes / provenance | **Editorial source** → `curated_records` layer `real_world_evidence` |
 | Staff maker records | **Authoritative** for maker testimony and record census; Supabase `staffs` stays authoritative for token/on-chain |
-| Council records (Circles) | **Authoritative** until an in-app Council editor exists; replaces `COUNCIL_CYCLES` |
+| Council records (Circles) | **Editorial / working source** (TEOTAG direction). Reviewed S33D records become the web / TETOL representation and eventually replace `COUNCIL_CYCLES` |
 | Golden Dream blueprints | **Editorial source** (Crown, future-facing, approval-gated) |
 | Heartwood room descriptions | **Reference only** (`heartwoodRooms.ts` stays canonical for keys/access) |
 | Public project docs | **Editorial source** |
@@ -367,6 +388,13 @@ into it.
 | S11 | Admin routes (`/admin/*`, `/curator/*`) | — | App.tsx | No spatial mapping; registry test would expose any accidental addition |
 | S12 | Preview content indexed | Low | — | `noindex` + no sitemap entry for `/tetol/` until Phase 2 |
 
+**Split from this PR (none are fixed in #70):**
+
+1. **S1**, offerings visible via the service-role gateway: **security blocker candidate**.
+2. **S3**, public Life Grove invite tokens: **review**.
+3. **S4**, circle/tribe book-note visibility: **review**.
+4. **S2**, `tree_meetings` / `meetings` mismatch: **separate defect**.
+
 Public-repo note: this repository is public, so this document and the branch are visible.
 
 ---
@@ -391,8 +419,10 @@ Public-repo note: this repository is public, so this document and the branch are
 
 **Not measured (blocked in sandbox):** three.js/bridge bundle sizes and build timings.
 The dependency install could not complete: 165 `package-lock.json` entries resolve to a
-private Lovable npm cache (`europe-west1-npm.pkg.dev/lovable-core-prod/...`) that returns
-403 outside Lovable, and `npm ci` already fails on `main` (lockfile missing `drizzle-kit`).
+private npm cache (`europe-west1-npm.pkg.dev/lovable-core-prod/...`) that returned 403 from
+this environment, and the lockfile has drifted from `package.json` (`drizzle-kit` missing, so
+`npm ci` fails on `main`). That is all this environment proved. The lockfile repair is being
+handled in a separate lane.
 Prototype runtime (FPS, memory lifecycle, interior suspension) could not be measured
 without its source.
 
@@ -495,7 +525,7 @@ TEOTAG + security review).
 
 1. **Prototype source not in a reachable repo.** `tetol-routes.js` cannot be reconciled
    or bundled until it is committed somewhere this workflow can see.
-2. **Staff identity has three spellings.** Web/Notion use per-species circles
+2. **Staff identity has three spellings** (canonical-code decision OPEN pending a dedicated identity audit; do not normalise production identities yet). Web/Notion use per-species circles
    (`YEW-C1S1`); the contract config numbers circles globally (Oak 1–3, Yew 4–6), so
    `formatStaffCode` yields `YEW-C4S1` for Yew circle 1, which **collides** with
    Notion's real Yew circle 4. The `staffs` table comment shows zero-padding
@@ -507,7 +537,8 @@ TEOTAG + security review).
 5. **CSP / PWA constraints for a static app.** `script-src 'self'` (no inline, no CDN
    three.js), SPA navigate-fallback, and default precache globs must all be handled,
    as they were for `/patronsportal`. Also, `npm ci` fails on `main` (lockfile out of
-   sync: `drizzle-kit` missing), which will block any CI that uses `npm ci`.
+   sync: `drizzle-kit` missing), which will block any CI that uses `npm ci`. Lockfile repair
+   is being handled in a separate lane.
 
 ---
 
@@ -517,7 +548,7 @@ TEOTAG + security review).
 2. Review/merge this bridge PoC (S).
 3. In the prototype: `tetol-routes.js` ← `SPATIAL_REGISTRY`; one Ancient Friend alcove
    and one Staff read via `createBridge()` (S).
-4. Decide Staff canonical code + reconcile Notion ↔ `staffs` ids (S, decision-heavy).
+4. Dedicated Staff identity audit, then TEOTAG decides the canonical code (S, decision-heavy).
 5. Preview-branch `/tetol/` static mount with redirects/SW/CSP handling (S).
 6. Performance gates (§11) on a mid-range phone (S–M).
 7. "Enter the Tree" link, feature-flagged; public read-only (S).
@@ -543,14 +574,16 @@ TEOTAG + security review).
 
 ---
 
-## 18. Questions for TEOTAG
+## 18. Decisions
 
-1. **Where does the 0.9.x prototype live**, and may it be committed (private repo is fine)?
-2. **Route name:** `/tetol/` (recommended) or something else?
-3. **Canonical Staff code:** adopt the web/Notion per-species form (`YEW-C1S1`,
-   origin = `YEW`) everywhere, and treat the contract's global circle id as metadata only?
-4. **Council records:** is Notion the authoritative Council record for now (sync it
-   into Supabase), or should Council records be authored in-app?
-5. **Life Groves in TETOL:** are public memorial groves appropriate for the first
-   public spatial browser, or held until Phase 3?
-6. **S3 / S4** (grove invite tokens, book-note visibility): intended behaviour or tighten?
+**Answered by TEOTAG (working):** route `/tetol/` (working technical name only); Council
+(Notion editorial → reviewed S33D records); Life Groves (defer until after the first public
+experiment). See the directions at the top of this document.
+
+**Still open:**
+
+1. **Where TETOL 0.9.x will live** under version control, and how integration work reaches it.
+2. **Canonical Staff code**, after a dedicated identity audit.
+3. **Final public-facing name** for the spatial mode.
+4. **Security review outcomes** for S3 (grove invite tokens) and S4 (book-note visibility); S1 as a blocker candidate.
+5. **Whether the Companion channel needs auth** before an anonymous display can use it for the Wand.
