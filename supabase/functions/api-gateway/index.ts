@@ -377,7 +377,7 @@ route("GET", "/api/v1/offerings/:id", async (_req, auth, params) => {
     const { data: tree } = await db.from("trees").select("created_by").eq("id", data.tree_id).maybeSingle();
     if (tree?.created_by === auth.userId) return json({ data });
     const { data: meeting } = await db
-      .from("tree_meetings")
+      .from("meetings")
       .select("id")
       .eq("tree_id", data.tree_id)
       .eq("user_id", auth.userId)
