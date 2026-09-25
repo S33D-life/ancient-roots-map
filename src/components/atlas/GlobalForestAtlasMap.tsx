@@ -8,6 +8,7 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import L from "leaflet";
+import { mountBasemap } from "@/utils/mapBasemap";
 import "leaflet/dist/leaflet.css";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -157,11 +158,8 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // Vintage warm tiles
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 19, subdomains: "abcd" }
-    ).addTo(map);
+    L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
+    const basemap = mountBasemap(map, import.meta.env.VITE_CARTO_BASEMAP_API_KEY, false, () => {});
 
     // Warm vignette overlay
     const vignettePane = map.createPane("vignette");
@@ -174,6 +172,7 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
     layerGroup.current = L.layerGroup().addTo(map);
 
     return () => {
+      basemap.dispose();
       map.remove();
       leafletMap.current = null;
       layerGroup.current = null;
