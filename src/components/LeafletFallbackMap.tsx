@@ -281,7 +281,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   }, [location.search, SAFE_MAP_DEBUG]);
 
   // Map init — extracted into useMapInit hook
-  const { renderDebug: mapInitDebug, atmosphereReady } = useMapInit({
+  const { renderDebug: mapInitDebug, atmosphereReady, retryTiles, useOsmTiles } = useMapInit({
     containerRef,
     mapRef,
     clusterRef,
@@ -2149,10 +2149,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   return (
     <div className={`${className || "absolute inset-0"} ${groveViewActive ? "grove-view-active" : ""}`} style={{ height: '100dvh' }}>
-      <div ref={containerRef} className="w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
+      <div ref={containerRef} className="atlas-map-canvas w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
 
       {/* Loading overlay — warm screen shown until tiles are ready */}
-      <MapLoadingOverlay ready={renderDebug.tileStatus === "loaded" || renderDebug.tileLoads > 3} />
+      <MapLoadingOverlay ready={renderDebug.tileStatus === "loaded" || renderDebug.tileStatus === "failed" || renderDebug.tileLoads > 3} />
+      {renderDebug.tileStatus === "failed" && (
+        <div role="status" className="absolute left-3 right-3 top-24 z-[501] mx-auto max-w-sm rounded-lg border border-border bg-background/95 p-3 text-sm shadow-lg">
+          <p>Map background unavailable. You can still explore tree markers.</p>
+          <button className="mt-2 min-h-11 underline" onClick={retryTiles}>Retry map background</button>
+        </div>
+      )}
+      {renderDebug.provider === "carto" && (
+        <button className="absolute right-3 bottom-36 z-[501] min-h-11 rounded-lg border border-border bg-background/95 px-3 text-xs" onClick={useOsmTiles}>
+          Map background not right? Use standard map
+        </button>
+      )}
 
       {/* Atmospheric overlay — rendered as React sibling, NOT injected into Leaflet DOM.
           This avoids mix-blend-mode compositing issues on iOS Safari that hide tiles. */}

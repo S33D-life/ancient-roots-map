@@ -53,7 +53,7 @@ export default function MapLoadingOverlay({ ready }: MapLoadingOverlayProps) {
       <p
         className="font-serif text-sm tracking-wide text-muted-foreground"
       >
-        Locating Ancient Friends…
+        Loading map background…
       </p>
     </div>
   );
