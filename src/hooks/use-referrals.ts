@@ -89,16 +89,6 @@ export function useReferrals(userId: string | undefined) {
   return { referrals, referredBy, loading, refresh: fetchReferrals, totalTreesFromReferrals };
 }
 
-/**
- * Record a referral after signup. Call once after the user creates an account.
- */
-export async function recordReferral(inviteeId: string, inviteCode: string) {
-  const { data, error } = await supabase.rpc("record_referral_secure", {
-    p_invitee_id: inviteeId,
-    p_invite_code: inviteCode,
-  });
-
-  if (error) return { error: error.message };
-  const result = data as { error: string | null };
-  return { error: result?.error || null };
-}
+// Referrals are written only by public.consume_invitation (see
+// src/lib/invitations/consumeInvitation.ts). The former record_referral_secure
+// client path is retired.

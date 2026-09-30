@@ -14,7 +14,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
-import { recordReferral } from "@/hooks/use-referrals";
 import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
@@ -22,6 +21,7 @@ import InviteBloomFailure from "@/components/auth/InviteBloomFailure";
 import InviteExpiryHint from "@/components/auth/InviteExpiryHint";
 import { trackInviteEvent } from "@/lib/invite-analytics";
 import { checkInviteCode, type InviteStatus } from "@/lib/invite-validation";
+import { readPendingInvite } from "@/lib/invitations/pendingInvite";
 import { beginHandoff, claimHandoff, isStandaloneDisplay, readPendingHandoff } from "@/lib/auth/pwaHandoff";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -213,9 +213,8 @@ const AuthPage = () => {
     let detectedSource: "url" | "storage" | "oauth_return" = code ? "url" : "storage";
     if (!effectiveCode) {
       try {
-        effectiveCode =
-          sessionStorage.getItem("s33d_pending_invite_code") ||
-          localStorage.getItem("s33d_pending_invite_code");
+        // Invitation-doorway code only (not share or Telegram traffic).
+        effectiveCode = readPendingInvite();
         // If sessionStorage was wiped but localStorage survived, this is
         // almost certainly an OAuth round-trip.
         if (effectiveCode && !sessionStorage.getItem("s33d_pending_invite_code")) {
@@ -494,43 +493,8 @@ const AuthPage = () => {
           } catch {}
         }
         clearPendingEmail(); clearUnverifiedEmail();
-        // Consume invitation on first sign-in (assigns lineage + decrements inviter).
-        // Read from BOTH legacy and new persistence keys so any prior session can
-        // still complete its consumption. We only mark the invite "used" AFTER
-        // we have a real authenticated session — never on page load.
-        const storedCode =
-          localStorage.getItem("s33d_invite_code") ||
-          localStorage.getItem("s33d_pending_invite_code") ||
-          sessionStorage.getItem("s33d_pending_invite_code");
-        if (storedCode && session.user) {
-          console.log("[invite] consuming after auth success", { userId: session.user.id });
-          const { data: consumeResult, error: consumeError } = await supabase.rpc(
-            "consume_invitation",
-            { p_invite_code: storedCode, p_new_user_id: session.user.id },
-          );
-          console.log("[invite] consume result", { consumeResult, consumeError });
-          const consumeOk = !!consumeResult && !(consumeResult as any)?.error && !consumeError;
-          if (consumeOk) {
-            void trackInviteEvent("invite_consumed", {
-              code: storedCode,
-              source: "system",
-              userId: session.user.id,
-            });
-          } else {
-            void trackInviteEvent("invite_consume_failed", {
-              code: storedCode,
-              source: "system",
-              userId: session.user.id,
-              metadata: {
-                error: consumeError?.message ?? (consumeResult as any)?.error ?? "unknown",
-              },
-            });
-            await recordReferral(session.user.id, storedCode);
-          }
-          localStorage.removeItem("s33d_invite_code");
-          localStorage.removeItem("s33d_pending_invite_code");
-          sessionStorage.removeItem("s33d_pending_invite_code");
-        }
+        // Invitation consumption runs app-wide in <InvitationConsumer /> after any
+        // successful sign-in, outside this listener (never here, never twice).
 
         // Auto-claim gift seed if arriving via gift link
         const giftCode = localStorage.getItem("s33d_gift_code");
