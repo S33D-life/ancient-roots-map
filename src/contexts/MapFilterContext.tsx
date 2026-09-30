@@ -130,7 +130,8 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     // Auth owns these URLs until the SDK consumes their callback credentials.
     // setSearchParams drops the fragment, including while SDK startup waits
     // for a browser lock. Keep map-filter navigation out of the auth lifecycle.
-    if (/^\/(?:auth|reset-password)(?:\/|$)/.test(pathname)) return;
+    // /welcome is where sign-up confirmation and magic links land.
+    if (/^\/(?:auth|reset-password|welcome)(?:\/|$)/.test(pathname)) return;
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       for (const [key, param] of Object.entries(PARAM_MAP)) {

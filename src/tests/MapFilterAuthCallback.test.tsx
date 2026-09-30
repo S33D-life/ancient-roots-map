@@ -24,7 +24,7 @@ function mount() {
   return render(<BrowserRouter><MapFilterProvider><Controls /></MapFilterProvider></BrowserRouter>);
 }
 
-it.each(['/auth/callback', '/reset-password'])(
+it.each(['/auth/callback', '/reset-password', '/welcome'])(
   'preserves %s credentials while real SDK initialization waits for its lock', async path => {
     window.history.replaceState({}, '', `${path}?returnTo=%2Fatlas${fragment}${path === '/reset-password' ? '&type=recovery' : ''}`);
     let release!: () => void;
@@ -53,7 +53,7 @@ it.each(['/auth/callback', '/reset-password'])(
   },
 );
 
-it.each(['/auth', '/auth/callback', '/auth/handoff', '/reset-password', '/auth/callback/', '/reset-password/'])(
+it.each(['/auth', '/auth/callback', '/auth/handoff', '/reset-password', '/auth/callback/', '/reset-password/', '/welcome', '/welcome/'])(
   'does not rewrite %s when filter state changes', path => {
     window.history.replaceState({}, '', `${path}?code=synthetic-code&h=synthetic-handoff&returnTo=%2Fatlas${fragment}`);
     const before = window.location.href;

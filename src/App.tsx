@@ -1,4 +1,5 @@
 import AuthInitializationGate from "@/components/AuthInitializationGate";
+import InvitationConsumer from "@/components/auth/InvitationConsumer";
 import { recordRouteSession } from "@/lib/auth/sessionEvidence";
 import { useEffect, lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { useConnectionResilience } from "@/hooks/use-connection-resilience";
@@ -297,6 +298,7 @@ const App = () => {
           <CompanionProvider>
           <TeotagProvider>
             <RefCapture />
+            <InvitationConsumer />
             <CompanionBridge />
             <BottomNav />
             <FireflyFAB />
