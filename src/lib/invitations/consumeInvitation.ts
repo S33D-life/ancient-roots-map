@@ -16,7 +16,7 @@ export type ConsumeOutcome =
   | { kind: "declined"; reason: string }
   /** Transient: the code is kept and tried again on the next arrival. */
   | { kind: "retry"; reason: string }
-  /** Not attempted: the account is not new enough to be joining by invitation. */
+  /** Not attempted: TEMPORARY R1 guard — see INVITEE_ACCOUNT_MAX_AGE_MS. */
   | { kind: "skipped"; reason: "established_account" };
 
 type RpcResult = { data: unknown; error: { message?: string } | null };
@@ -29,10 +29,15 @@ export interface ConsumeDeps {
 }
 
 /**
- * An invitation brings someone new into the grove. Sign-up confirmation and
- * magic links expire within a day, so a week covers every real arrival while
- * keeping an established Wanderer who opens a shared link from being re-parented
- * (the server enforces the exact rule: account must post-date the link).
+ * TEMPORARY R1 SAFETY GUARD — not invitation semantics.
+ *
+ * identity ≠ invitation: an existing Wanderer may later be genuinely invited.
+ * Until R2 defines how an established identity accepts an invitation (and
+ * separates invitation codes from share codes at the source), R1 only records
+ * invitations for accounts created within the last week — enough for every
+ * sign-up, confirmation or magic-link arrival (links expire within a day).
+ * Client-side only; the database function carries no account-age rule.
+ * Remove in R2.
  */
 export const INVITEE_ACCOUNT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 

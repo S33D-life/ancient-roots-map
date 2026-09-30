@@ -33,7 +33,7 @@ export default function InvitationConsumer() {
 
     void consumeInvitation(user, code, {
       rpc: (fn, args) => supabase.rpc(fn, args),
-      clear: () => clearPendingInvite(),
+      clear: () => clearPendingInvite(code),
       track: (event, c, userId, metadata) => {
         void trackInviteEvent(event, { code: c, source: "system", userId, metadata });
       },

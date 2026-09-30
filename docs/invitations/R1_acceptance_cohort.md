@@ -57,6 +57,8 @@ Stop. Record which criterion failed, the invitee label (A/B/C), the device and t
 
 ## Known limits (not tested by this cohort)
 
+- **Only the invitation doorway counts.** Only `/auth?invite=` links from the Hearth, or a code entered on the sign-up form, are recorded as invitations. Tree shares, whisper shares and Telegram codes are not (see `R2_share_vs_invitation.md`), so send the cohort Hearth links, not tree shares.
+
 - **Telegram arrivals** are the Telegram lane (NEXT).
 - **The installed iOS app:** email links open in Safari. The installed app then needs one ordinary sign-in, and the invitation is recorded on whichever side the session first appears.
 - **The Vault lineage tree** is repaired in R2.

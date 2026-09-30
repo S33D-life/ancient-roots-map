@@ -61,9 +61,19 @@ describe("migration: canonical relationship, history preserved", () => {
     expect(sql).toMatch(/OR EXISTS \(SELECT 1 FROM public\.referrals r WHERE r\.invitee_id = p_new_user_id\) THEN\s+RETURN jsonb_build_object\('error', 'already_attributed'\)/);
   });
 
-  it("refuses accounts that pre-date the invitation link", () => {
-    expect(sql).toContain("il.created_at INTO v_link");
-    expect(sql).toMatch(/u\.created_at < v_link\.created_at\) THEN\s+RETURN jsonb_build_object\('error', 'account_predates_invitation'\)/);
+  it("carries no account-age rule (identity ≠ invitation)", () => {
+    expect(sql).not.toMatch(/auth\.users|created_at <|account_predates/);
+  });
+
+  it("locks the invitee before the attribution check, so nothing can overwrite an inviter", () => {
+    const lock = sql.indexOf("PERFORM 1 FROM public.profiles WHERE id = p_new_user_id FOR UPDATE;");
+    const check = sql.indexOf("RETURN jsonb_build_object('error', 'already_attributed')");
+    const write = sql.indexOf("SET invited_by_user_id = v_link.created_by");
+    expect(lock).toBeGreaterThan(-1);
+    expect(lock).toBeLessThan(check);
+    expect(check).toBeLessThan(write);
+    // The idempotent same-link repeat returns before any write.
+    expect(sql.indexOf("'already_consumed', true")).toBeLessThan(write);
   });
 
   it("never resets an existing Wanderer's allowance", () => {

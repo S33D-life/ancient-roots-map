@@ -213,7 +213,7 @@ const AuthPage = () => {
     let detectedSource: "url" | "storage" | "oauth_return" = code ? "url" : "storage";
     if (!effectiveCode) {
       try {
-        // Every arrival key: /auth?invite=, shared tree links, Telegram.
+        // Invitation-doorway code only (not share or Telegram traffic).
         effectiveCode = readPendingInvite();
         // If sessionStorage was wiped but localStorage survived, this is
         // almost certainly an OAuth round-trip.

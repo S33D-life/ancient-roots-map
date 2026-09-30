@@ -7,12 +7,13 @@
 -- 1. consume_invitation (previous body: 20260915072446), three changes only:
 --    a. an existing referrals row also counts as "already attributed", so the
 --       canonical record and its profile mirror can never diverge;
---    b. an account created before the invitation link cannot accept it
---       ('account_predates_invitation'), so opening a shared link while
---       signed in never re-parents an established Wanderer;
+--    b. the invitee's profile row is locked before that check, so concurrent
+--       redemptions cannot both write an inviter (no overwrite, ever);
 --    c. the invitee's own invites_remaining is no longer reset to 144 when the
 --       profile already exists (new profiles still start at the column
 --       default of 144). Counters are never reset.
+--    No account-age rule lives here: identity ≠ invitation. R1's temporary
+--    new-account guard is client-side only (src/lib/invitations).
 -- 2. record_referral_secure: no longer callable by clients. It wrote a
 --    referral without lineage or allowance, ignored spent/revoked links and
 --    carried its own 50-per-inviter cap (retired). Function kept for history.
@@ -61,6 +62,9 @@ BEGIN
   END IF;
 
   -- A Wanderer may only ever be attributed to one inviter.
+  -- Lock the invitee's profile first so two redemptions racing (two tabs, two
+  -- codes) serialise here and the second sees the first one's inviter.
+  PERFORM 1 FROM public.profiles WHERE id = p_new_user_id FOR UPDATE;
   -- referrals is the canonical relationship; the profile field mirrors it.
   -- Either one already naming an inviter means this Wanderer is attributed.
   IF EXISTS (SELECT 1 FROM public.profiles p
@@ -69,7 +73,7 @@ BEGIN
     RETURN jsonb_build_object('error', 'already_attributed');
   END IF;
 
-  SELECT il.id, il.created_by, il.max_uses, il.created_at INTO v_link
+  SELECT il.id, il.created_by, il.max_uses INTO v_link
   FROM public.invite_links il
   WHERE lower(il.code) = v_norm
     AND il.is_used = false
@@ -86,13 +90,6 @@ BEGIN
   -- Never allow self-invitation.
   IF v_link.created_by = p_new_user_id THEN
     RETURN jsonb_build_object('error', 'self_invite');
-  END IF;
-
-  -- An invitation opens the door for someone new. An account that already
-  -- existed when the link was made is never re-parented onto it.
-  IF EXISTS (SELECT 1 FROM auth.users u
-             WHERE u.id = p_new_user_id AND u.created_at < v_link.created_at) THEN
-    RETURN jsonb_build_object('error', 'account_predates_invitation');
   END IF;
 
   SELECT invites_remaining, active_staff_id, lineage_staff_id

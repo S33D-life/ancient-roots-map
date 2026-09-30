@@ -52,7 +52,7 @@ describe("consumeInvitation — one path, after any sign-in", () => {
     expect(d.clear).toHaveBeenCalledTimes(1);
   });
 
-  it.each(["invalid_or_used_invite", "inviter_no_invites_remaining", "already_attributed", "self_invite", "account_predates_invitation", "malformed_invite"])(
+  it.each(["invalid_or_used_invite", "inviter_no_invites_remaining", "already_attributed", "self_invite", "malformed_invite"])(
     "declines finally on %s, clears the code and writes nothing else", async (reason) => {
       const d = deps({ error: reason });
       expect(await consumeInvitation(newUser, "abc123", d)).toEqual({ kind: "declined", reason });
@@ -77,7 +77,7 @@ describe("consumeInvitation — one path, after any sign-in", () => {
     expect(rpcError.clear).not.toHaveBeenCalled();
   });
 
-  it("never re-parents an established Wanderer who opens a shared link", async () => {
+  it("temporary R1 guard: does not attempt for an established account", async () => {
     const d = deps({ success: true });
     const established = { id: "ed", created_at: new Date(NOW - INVITEE_ACCOUNT_MAX_AGE_MS - 1000).toISOString() };
     expect(await consumeInvitation(established, "abc123", d)).toEqual({ kind: "skipped", reason: "established_account" });
@@ -96,24 +96,33 @@ describe("consumeInvitation — one path, after any sign-in", () => {
     expect(declineMessage("invalid_or_used_invite")).toBeTruthy();
     expect(declineMessage("inviter_no_invites_remaining")).toBeTruthy();
     expect(declineMessage("already_attributed")).toBeNull();
-    expect(declineMessage("account_predates_invitation")).toBeNull();
+    expect(declineMessage("self_invite")).toBeNull();
   });
 });
 
-describe("pending invitation code — every arrival key", () => {
-  it("reads /auth?invite= (session, then local) before shared-link and Telegram keys", () => {
-    expect(readPendingInvite(memoryStorage({ [PENDING_INVITE_KEY]: "local", [LEGACY_INVITE_KEY]: "legacy" }), memoryStorage({ [PENDING_INVITE_KEY]: "session" }))).toBe("session");
-    expect(readPendingInvite(memoryStorage({ [PENDING_INVITE_KEY]: "local", [LEGACY_INVITE_KEY]: "legacy" }), memoryStorage())).toBe("local");
-    expect(readPendingInvite(memoryStorage({ [LEGACY_INVITE_KEY]: " shared-tree " }), memoryStorage())).toBe("shared-tree");
-    expect(readPendingInvite(memoryStorage({ [LEGACY_INVITE_KEY]: "  " }), memoryStorage())).toBeNull();
+describe("pending invitation code — invitation doorway only", () => {
+  it("reads the /auth?invite= code (this tab first, then this browser)", () => {
+    expect(readPendingInvite(memoryStorage({ [PENDING_INVITE_KEY]: "local" }), memoryStorage({ [PENDING_INVITE_KEY]: "session" }))).toBe("session");
+    expect(readPendingInvite(memoryStorage({ [PENDING_INVITE_KEY]: " local " }), memoryStorage())).toBe("local");
+    expect(readPendingInvite(memoryStorage({ [PENDING_INVITE_KEY]: "  " }), memoryStorage())).toBeNull();
     expect(readPendingInvite(null, null)).toBeNull();
   });
 
-  it("clears every key together", () => {
-    const local = memoryStorage({ [PENDING_INVITE_KEY]: "a", [LEGACY_INVITE_KEY]: "b", other: "keep" });
-    const session = memoryStorage({ [PENDING_INVITE_KEY]: "c" });
-    clearPendingInvite(local, session);
+  it("never treats share / Telegram traffic as an invitation", () => {
+    // Tree shares, whispers and Telegram store their code under the legacy key.
+    expect(readPendingInvite(memoryStorage({ [LEGACY_INVITE_KEY]: "shared-tree-code" }), memoryStorage())).toBeNull();
+  });
+
+  it("clears the doorway code, and the share key only when it holds the same code", () => {
+    const local = memoryStorage({ [PENDING_INVITE_KEY]: "abc", [LEGACY_INVITE_KEY]: "ABC", other: "keep" });
+    const session = memoryStorage({ [PENDING_INVITE_KEY]: "abc" });
+    clearPendingInvite("abc", local, session);
     expect(local.has(PENDING_INVITE_KEY) || local.has(LEGACY_INVITE_KEY) || session.has(PENDING_INVITE_KEY)).toBe(false);
     expect(local.has("other")).toBe(true);
+
+    const shared = memoryStorage({ [PENDING_INVITE_KEY]: "abc", [LEGACY_INVITE_KEY]: "someone-elses-share" });
+    clearPendingInvite("abc", shared, memoryStorage());
+    expect(shared.has(PENDING_INVITE_KEY)).toBe(false);
+    expect(shared.has(LEGACY_INVITE_KEY)).toBe(true);
   });
 });
