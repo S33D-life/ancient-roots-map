@@ -14,7 +14,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
-import { recordReferral } from "@/hooks/use-referrals";
 import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
@@ -525,7 +524,8 @@ const AuthPage = () => {
                 error: consumeError?.message ?? (consumeResult as any)?.error ?? "unknown",
               },
             });
-            await recordReferral(session.user.id, storedCode);
+            // consume_invitation is the single invitation-acceptance writer.
+            // A failed acceptance must never create a referral via another path.
           }
           localStorage.removeItem("s33d_invite_code");
           localStorage.removeItem("s33d_pending_invite_code");
