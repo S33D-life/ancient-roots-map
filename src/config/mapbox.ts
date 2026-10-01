@@ -6,20 +6,21 @@ import type { StyleSpecification } from "maplibre-gl";
 
 export const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || '';
 
-// Free style options (no API key needed)
-export const FREE_STYLE: StyleSpecification = {
+// Preserve source/layer IDs for consumers; only the provider URL changes.
+export function getRasterBasemapStyle(cartoKey?: string): StyleSpecification {
+  const key = cartoKey?.trim();
+  return {
   version: 8,
   name: "Ancient Friends Atlas",
   sources: {
     carto: {
       type: "raster",
-      tiles: [
-        "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-      ],
+      tiles: key
+        ? ["a", "b", "c"].map(host => `https://${host}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}`)
+        : ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
       tileSize: 256,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        + (key ? ' &copy; <a href="https://carto.com/attributions">CARTO</a>' : ''),
     },
   },
   layers: [
@@ -42,6 +43,9 @@ export const FREE_STYLE: StyleSpecification = {
     },
   ],
 };
+}
+
+export const FREE_STYLE = getRasterBasemapStyle(import.meta.env.VITE_CARTO_BASEMAP_API_KEY);
 
 // If user provides a MapTiler key, use their outdoor style for a richer look
 export function getMapStyle(): string | StyleSpecification {

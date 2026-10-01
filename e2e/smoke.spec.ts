@@ -1,5 +1,19 @@
 import { test, expect, type Page } from "@playwright/test";
 
+// Public-route smoke tests must never record production page views or other writes.
+test.use({ serviceWorkers: "block" });
+test.beforeEach(async ({ page }) => {
+  await page.route("**/*", async route => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const local = ["127.0.0.1", "localhost"].includes(url.hostname);
+    if (!local && (!["GET", "HEAD"].includes(request.method()) || url.pathname.includes("/rpc/") || url.pathname.includes("/functions/"))) {
+      return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    }
+    return route.continue();
+  });
+});
+
 /**
  * Smoke tests — boot the production bundle and assert the four
  * highest-traffic routes render without crashing.
