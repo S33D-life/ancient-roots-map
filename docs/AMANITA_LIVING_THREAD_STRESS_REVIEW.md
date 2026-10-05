@@ -1,6 +1,8 @@
 # Amanita / Fly Agaric schema stress review
 
-Status: REVIEW / PROPOSED NEXT STEP. PR #77 remains draft. This pass adds fixtures, tests and this review only. No application or appearance JSON changes; no taxonomy binding, migration, historical-record edits, TETOL change, merge or deployment.
+Baseline: fixture-only stress review at commit `3d4cbae87`. The integrity hardening addendum below records the subsequent approved runtime changes.
+
+Status at baseline: REVIEW / PROPOSED NEXT STEP. PR #77 remains draft. This pass adds fixtures, tests and this review only. No application or appearance JSON changes; no taxonomy binding, migration, historical-record edits, TETOL change, merge or deployment.
 
 ## Evidence inspected and limits
 
@@ -90,3 +92,22 @@ Then inventory the recovered thread's exact owner IDs, source locators, dates/pr
 Added only `src/tests/fixtures/amanitaChronologyStress.json`, `src/tests/amanitaChronologyStress.test.ts`, and this review. 19 stress tests plus the existing 13 pilot tests pass. Tests exercise repeated appearances, original/copy date separation, seven kinds, documentary gap, null dates/refs, all seven prohibited inference promotions, outward unresolved slots, public suppression and current projection/lookup/reader limitations.
 
 The proposed derived-view helper exists only inside the test file. It performs no writes or automatic inference. Negative-inference tests verify the fixture/query contract, not a production claim-validation engine. Runtime appearance record, UI, readers, resolver and frozen publication remain unchanged.
+
+
+## Approved generic integrity hardening — implemented
+
+Only reference integrity and projection transparency changed. No species adapter or new event model was introduced.
+
+- `AppearanceProjection` now includes `role` and `subjectBinding` (state, original reference and any approval metadata). The development review panel displays role and binding state.
+- `CompleteSubjectRef` requires provider, owner `record_type` and stable `id`. `isCompleteSubjectRef` checks those values at runtime: non-empty strings without outer whitespace. It neither normalises nor substitutes IDs. This validator applies only to subject identities; path/hash/selector-based source and artefact references retain their existing shape.
+- Reciprocal lookup validates the requested reference and each candidate, requires BOUND_TO_EXISTING_RECORD, and compares exact provider/type/ID. Null, missing, blank, padded and non-string components cannot match. A complete indexed reference does not by itself prove canonical existence or reader support.
+- Resolution states are explicit: UNRESOLVED for an unbound/proposed identity; INVALID_SUBJECT_REFERENCE for a claimed bound identity with a malformed reference; UNSUPPORTED_NAMESPACE for a complete bound reference outside the current `s33d` provider; UNSUPPORTED_READER for an unsupported owner record type inside `s33d`. These early stops perform no queries. Existing missing/error/resolved statuses are retained.
+- The Holm Oak JSON, existing source IDs/copies, chronology fixture, SELECT-only adapter, downstream species/Hive ownership and appearance keys are unchanged. No permission or publication state is upgraded. Public output remains null; development gates remain in place.
+
+Compatibility: Holm Oak's existing qualified trees reference remains valid and its traversal remains RESOLVED. Consumers receive two additive projection fields and three new status variants. There is no record migration. Subject matching intentionally becomes stricter for malformed references, which were never valid identities.
+
+Future adapter: provider + owner record type + stable ID is sufficient to reference a verified existing species record. A species key must not be placed in an ID field unless it is the owning system's actual identity contract. Any alternate key-only provider contract needs explicit review rather than implicit coercion. No generic adapter registry or species reader was added.
+
+Remaining pressure: an adapter for another subject type will need a truthful non-tree subject projection (the current resolved links remain tree/species/Hive shaped). Binding state is still a source-owned string, and reference validation proves completeness rather than existence, consent or claim truth. Council occurrence namespace/copy equivalence and claim/temporal provenance remain separate review questions; none was expanded in this pass. Living Thread remains a derived traversal and documentary gaps remain visible.
+
+Validation: 56 focused tests (37 Council integrity/pilot + 19 chronology stress tests). Tests cover both lookup sides, malformed strings/types, exact namespaces, unchanged approval metadata, unresolved/proposed complete refs, unsupported cases without queries, provenance separation, repeated appearances and documentary gaps. Full `npm run release-check` passes: 44 files / 368 tests, typecheck, lint, security checks, duplicate and asset guards, and production build. Production JavaScript excludes the review-only pilot.

@@ -77,15 +77,14 @@ describe("Amanita chronology stress-test — fixtures only", () => {
   it("pins the real resolver limitation: a non-tree subject cannot yet traverse to a Hive", async () => {
     const reader = emptyReader();
     const p = await resolveCouncilAppearance(appearances[0], reader, "review");
-    expect(p).toMatchObject({ status: "UNRESOLVED", tree: null, species: null, hive: null });
+    expect(p).toMatchObject({ status: "UNSUPPORTED_NAMESPACE", tree: null, species: null, hive: null });
     expect(reader.tree).not.toHaveBeenCalled();
     expect(reader.species).not.toHaveBeenCalled();
   });
-  it("pins projection pressure: role and original subject binding are currently omitted", async () => {
+  it("preserves role and original subject binding in the projection", async () => {
     const p = await resolveCouncilAppearance(appearances[0], emptyReader(), "review");
-    expect(p).not.toHaveProperty("role");
-    expect(p).not.toHaveProperty("subjectBinding");
-    expect(appearances[0].role).toBe("Fungi");
+    expect(p.role).toBe("Fungi");
+    expect(p.subjectBinding).toEqual(appearances[0].subject_binding);
   });
   it("preserves null binding and the Council spatial ID without querying or inventing a species", async () => {
     const a = { ...appearances[0], companion_id: "c235_flyagaric", subject_binding: { state: "UNRESOLVED", ref: null } };
@@ -94,11 +93,10 @@ describe("Amanita chronology stress-test — fixtures only", () => {
     expect(reader.tree).not.toHaveBeenCalled();
     expect(appearancesForSubject([a], ref)).toEqual([]);
   });
-  it("pins incomplete-reference pressure: the lookup currently accepts missing IDs", () => {
+  it("rejects incomplete-reference matches without fabricating a subject ID", () => {
     const incomplete = { provider: "fixture", record_type: "species_strand" };
     const a = { ...appearances[0], subject_binding: { state: "BOUND_TO_EXISTING_RECORD", ref: incomplete } };
-    // Demonstrates a validation gap, not approved behaviour for a future index.
-    expect(appearancesForSubject([a], incomplete)).toHaveLength(1);
+    expect(appearancesForSubject([a], incomplete)).toEqual([]);
   });
   it("suppresses every historical fixture for the public audience", async () => {
     for (const a of appearances) expect(await resolveCouncilAppearance(a, emptyReader(), "public")).toBeNull();

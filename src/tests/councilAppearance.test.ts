@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import raw from "@/data/relationships/council-appearances/c235_holmoak.json";
-import { appearancesForSubject, appearanceKey, resolveCouncilAppearance, type CouncilAppearance, type AppearanceReader } from "@/lib/relationships/councilAppearance";
+import { appearancesForSubject, appearanceKey, isCompleteSubjectRef, resolveCouncilAppearance, type CouncilAppearance, type AppearanceReader } from "@/lib/relationships/councilAppearance";
 
 const appearance = raw as CouncilAppearance;
 const tree = { id: "924453c0-f4f5-4ed4-88fe-5b2ed6570af0", name: "Holm Oak", species_key: "quercus-ilex" };
@@ -18,6 +18,8 @@ describe("Holm Oak reference-only pilot", () => {
     expect(p.tree.id).toBe(tree.id);
     expect(p.species.id).toBe(species.id);
     expect(p.hive.id).toBe(hive.id);
+    expect(p.role).toBe("Ancient Friend");
+    expect(p.subjectBinding).toEqual(appearance.subject_binding);
     expect(r.tree).toHaveBeenCalledWith(tree.id);
     expect(r.species).toHaveBeenCalledWith("quercus-ilex");
     expect(r.hive).toHaveBeenCalledWith("Fagaceae");
@@ -89,6 +91,65 @@ describe("Holm Oak reference-only pilot", () => {
     const futureRef = { provider: "fixture", record_type: "species_strand", id: "same-existing-subject" };
     const bound = [unresolved, next].map(a => ({ ...a, subject_binding: { state: "BOUND_TO_EXISTING_RECORD", ref: futureRef } }));
     expect(appearancesForSubject(bound, futureRef)).toHaveLength(2);
+  });
+});
+
+describe("generic subject integrity", () => {
+  const completeRef = appearance.subject_binding.ref;
+  const malformed = [
+    null, undefined, {}, [], "a-reference", 42,
+    { ...completeRef, provider: undefined }, { ...completeRef, record_type: undefined }, { ...completeRef, id: undefined },
+    { ...completeRef, provider: "" }, { ...completeRef, record_type: "" }, { ...completeRef, id: "" },
+    { ...completeRef, provider: " " }, { ...completeRef, record_type: " " }, { ...completeRef, id: " " },
+    { ...completeRef, provider: " s33d" }, { ...completeRef, record_type: "trees " }, { ...completeRef, id: ` ${tree.id}` },
+    { ...completeRef, provider: 42 }, { ...completeRef, record_type: [] }, { ...completeRef, id: {} },
+  ];
+  it.each(malformed.map((ref, i) => [i, ref] as const))("rejects malformed subject reference case %s on both sides of reciprocal lookup", async (_i, ref) => {
+    expect(isCompleteSubjectRef(ref)).toBe(false);
+    const malformedAppearance = { ...appearance, subject_binding: { state: "BOUND_TO_EXISTING_RECORD", ref: ref as never } };
+    expect(appearancesForSubject([appearance], ref as never)).toEqual([]);
+    expect(appearancesForSubject([malformedAppearance], completeRef)).toEqual([]);
+    expect(appearancesForSubject([malformedAppearance], ref as never)).toEqual([]);
+    const r = reader();
+    const p = await resolveCouncilAppearance(malformedAppearance, r, "review");
+    expect(p.status).toBe("INVALID_SUBJECT_REFERENCE");
+    expect(p.subjectBinding).toEqual(malformedAppearance.subject_binding);
+    expect(r.tree).not.toHaveBeenCalled();
+    expect(r.species).not.toHaveBeenCalled();
+    expect(r.hive).not.toHaveBeenCalled();
+  });
+  it("distinguishes unsupported namespace and reader from unresolved binding without lookups", async () => {
+    for (const [ref, status] of [
+      [{ ...completeRef, provider: "another-owner" }, "UNSUPPORTED_NAMESPACE"],
+      [{ ...completeRef, record_type: "species_index" }, "UNSUPPORTED_READER"],
+    ] as const) {
+      const a = { ...appearance, subject_binding: { ...appearance.subject_binding, ref } };
+      const r = reader();
+      const p = await resolveCouncilAppearance(a, r, "review");
+      expect(p).toMatchObject({ status, role: a.role, subjectBinding: a.subject_binding, tree: null, species: null, hive: null });
+      expect(appearancesForSubject([a], ref)).toEqual([a]); // indexed relationship != reader support or verified existence
+      expect(r.tree).not.toHaveBeenCalled();
+      expect(r.species).not.toHaveBeenCalled();
+      expect(r.hive).not.toHaveBeenCalled();
+    }
+    const a = { ...appearance, subject_binding: { state: "UNRESOLVED", ref: null } };
+    expect((await resolveCouncilAppearance(a, reader(), "review")).status).toBe("UNRESOLVED");
+  });
+  it("compares exact provider/type/ID without normalising aliases or changing source provenance", () => {
+    for (const ref of [{ ...completeRef, provider: "S33D" }, { ...completeRef, record_type: "species_index" }, { ...completeRef, id: "different-existing-id" }]) {
+      expect(appearancesForSubject([appearance], ref)).toEqual([]);
+    }
+    expect(isCompleteSubjectRef(appearance.represented_by[0])).toBe(false);
+    expect(appearance.represented_by[0].path).toBeTruthy(); // asset references are not subject identities
+  });
+  it("does not promote an unresolved or proposed binding with a complete reference", async () => {
+    for (const state of ["UNRESOLVED", "PROPOSED"]) {
+      const a = { ...appearance, subject_binding: { state, ref: completeRef } };
+      const r = reader();
+      expect(appearancesForSubject([a], completeRef)).toEqual([]);
+      expect((await resolveCouncilAppearance(a, r, "review")).status).toBe("UNRESOLVED");
+      expect(r.tree).not.toHaveBeenCalled();
+    }
   });
 });
 

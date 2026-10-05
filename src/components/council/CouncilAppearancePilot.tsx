@@ -27,6 +27,7 @@ export default function CouncilAppearancePilot({ treeId }: { treeId?: string }) 
     <p className="text-sm">council-of-life/circle-235 / c235_holmoak</p>
     {!loaded ? <p>Reading existing records…</p> : <>
       <p className="text-sm">Resolution: {projection?.status ?? "Unavailable"}</p>
+      <p className="text-sm">Role: {projection?.role ?? "Unavailable"} · Subject binding: {projection?.subjectBinding.state ?? "Unavailable"}</p>
       <div className="flex flex-wrap gap-4 text-sm underline underline-offset-4">
         {projection?.tree && <Link to={ROUTES.TREE(projection.tree.id)}>{projection.tree.name} · existing Ancient Friend</Link>}
         {projection?.species?.slug && <Link to={ROUTES.SPECIES(encodeURIComponent(projection.species.slug))}>{projection.species.scientific_name || projection.species.species_key}</Link>}
