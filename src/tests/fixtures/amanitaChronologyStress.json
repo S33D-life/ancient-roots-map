@@ -1,0 +1,173 @@
+{
+  "status": "TEST_ONLY_NOT_A_CANONICAL_HISTORY",
+  "identity": {
+    "display_name": "Amanita muscaria",
+    "verified_canonical_ref": null,
+    "test_subject_ref": {
+      "provider": "fixture",
+      "record_type": "species_strand",
+      "id": "ONE_TEST_SUBJECT_NOT_A_REAL_ID"
+    }
+  },
+  "coverage": {
+    "basis": "user_supplied_chronology",
+    "early_encounter_year": 2018,
+    "sustained_encounters_from_year": 2022,
+    "gap": {
+      "after_year": 2018,
+      "before_year": 2022,
+      "state": "DOCUMENTARY_GAP",
+      "absence_of_encounters_asserted": false
+    }
+  },
+  "sources": [
+    {
+      "ref": {
+        "provider": "google_drive",
+        "record_type": "document",
+        "id": "1wcqP0ZJjnMxDEp2J51--fIVNlItiRZT5WCAqiY0C71g"
+      },
+      "selector": "A Blooming Week / Fungi / Amanita Muscaria",
+      "council_number": 124,
+      "event_date": "2022-10-25",
+      "recorded_date": "2022-10-25",
+      "basis": "FETCHED_ORIGINAL_COUNCIL_RECORD",
+      "knowledge_state": "HISTORICAL_SOURCE_NOT_CURRENT_VERIFICATION"
+    },
+    {
+      "ref": {
+        "provider": "google_drive",
+        "record_type": "document",
+        "id": "1crnTIKzoV1S2yAgJ7k-0jE3dNWhSN8WyrudtjZBNEnY"
+      },
+      "selector": "A Blooming Week / Fungi / Amanita Muscaria",
+      "council_number": 132,
+      "event_date": "2022-12-21",
+      "recorded_date": "2022-12-21",
+      "basis": "FETCHED_ORIGINAL_COUNCIL_RECORD",
+      "knowledge_state": "HISTORICAL_SOURCE_NOT_CURRENT_VERIFICATION"
+    },
+    {
+      "ref": {
+        "provider": "google_drive",
+        "record_type": "document",
+        "id": "1h714EeoREedzC3IJLZls301MKGsPhESqSgKH_3cp48g"
+      },
+      "selector": "A Blooming Week / Fungi / Amanita Muscaria",
+      "council_number": 139,
+      "event_date": "2023-02-07",
+      "recorded_date": "2023-02-07",
+      "basis": "FETCHED_ORIGINAL_COUNCIL_RECORD",
+      "knowledge_state": "HISTORICAL_SOURCE_NOT_CURRENT_VERIFICATION"
+    }
+  ],
+  "historical_copy": {
+    "source_id": "1xqQQciy6uPeAlwNKP1ChaojeCHv5qUb8uQYCVz55pnM",
+    "copied_on": "2024-12-09",
+    "same_council_number": 124,
+    "same_event_date": "2022-10-25",
+    "equivalence": "REVIEW_REQUIRED_NOT_HASH_VERIFIED"
+  },
+  "items": [
+    {
+      "fixture_id": "early",
+      "kind": "encounter",
+      "when": {
+        "value": "2018",
+        "precision": "year"
+      },
+      "basis": "USER_CHRONOLOGY_UNDERLYING_SOURCE_NOT_RECOVERED",
+      "source_ref": null
+    },
+    {
+      "fixture_id": "later",
+      "kind": "encounter",
+      "when": {
+        "value": "2022",
+        "precision": "year",
+        "extent": "from_year_onward_user_summary_not_continuous_observation"
+      },
+      "basis": "USER_CHRONOLOGY_UNDERLYING_SOURCE_NOT_RECOVERED",
+      "source_ref": null
+    },
+    {
+      "fixture_id": "gathering",
+      "kind": "gathering",
+      "when": null,
+      "basis": "SCENARIO_ONLY_DATE_AND_SOURCE_UNVERIFIED",
+      "source_ref": null
+    },
+    {
+      "fixture_id": "practice",
+      "kind": "living_practice",
+      "when": null,
+      "basis": "SCENARIO_ONLY_DATE_AND_SOURCE_UNVERIFIED",
+      "source_ref": null
+    },
+    {
+      "fixture_id": "beside",
+      "kind": "relationship",
+      "predicate": "photographed_beside",
+      "object_ref": null,
+      "object_label": "Silver Birch",
+      "scope": "depicted_co_presence",
+      "when": null,
+      "basis": "SCENARIO_ONLY_PHOTO_NOT_FETCHED",
+      "source_ref": null
+    },
+    {
+      "fixture_id": "photo",
+      "kind": "source_artefact",
+      "when": null,
+      "basis": "SCENARIO_ONLY_PHOTO_NOT_FETCHED",
+      "source_ref": null
+    },
+    {
+      "fixture_id": "recollection",
+      "kind": "testimony",
+      "when": null,
+      "recorded_when": null,
+      "scope": "personal_retrospective",
+      "basis": "SCENARIO_ONLY_TESTIMONY_NOT_FETCHED",
+      "source_ref": null
+    }
+  ],
+  "outward_roles": [
+    "place",
+    "person",
+    "council",
+    "chapter",
+    "ecological_relationship",
+    "hive"
+  ],
+  "unsupported_promotions": [
+    [
+      "photographed_beside",
+      "ecological_partnership"
+    ],
+    [
+      "gathered",
+      "later_used"
+    ],
+    [
+      "temporal_proximity",
+      "caused"
+    ],
+    [
+      "personal_testimony",
+      "general_efficacy"
+    ],
+    [
+      "council_appearance",
+      "encounter"
+    ],
+    [
+      "represented_by",
+      "supported_by"
+    ],
+    [
+      "historical_source",
+      "current_verified_knowledge"
+    ]
+  ]
+}
