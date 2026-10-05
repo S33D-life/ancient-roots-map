@@ -16,6 +16,7 @@ describe("Holm Oak reference-only pilot", () => {
     const p = await resolveCouncilAppearance(appearance, r, "review");
     expect(p.status).toBe("RESOLVED");
     expect(p.tree.id).toBe(tree.id);
+    expect(p.resolvedSubject).toEqual(appearance.subject_binding.ref);
     expect(p.species.id).toBe(species.id);
     expect(p.hive.id).toBe(hive.id);
     expect(p.role).toBe("Ancient Friend");

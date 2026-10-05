@@ -35,6 +35,7 @@ export interface ReadResult<T> { data: T | null; error: unknown | null }
 export interface AppearanceReader {
   tree(id: string): Promise<ReadResult<TreeLink>>;
   species(key: string): Promise<ReadResult<SpeciesLink>>;
+  speciesById?(id: string): Promise<ReadResult<SpeciesLink>>;
   hive(family: string): Promise<ReadResult<HiveLink>>;
 }
 export interface AppearanceProjection {
@@ -43,6 +44,8 @@ export interface AppearanceProjection {
   role: CouncilAppearance["role"];
   subjectBinding: CouncilAppearance["subject_binding"];
   status: "UNRESOLVED" | "INVALID_SUBJECT_REFERENCE" | "UNSUPPORTED_NAMESPACE" | "UNSUPPORTED_READER" | "UNAVAILABLE" | "SUBJECT_MISSING" | "SPECIES_MISSING" | "HIVE_MISSING" | "RESOLVED";
+  /** Exact owning record resolved; never an attestation of encounter or claim truth. */
+  resolvedSubject: CompleteSubjectRef | null;
   tree: TreeLink | null;
   species: SpeciesLink | null;
   hive: HiveLink | null;
@@ -77,7 +80,7 @@ export async function resolveCouncilAppearance(
   const out: AppearanceProjection = {
     circle: a.circle_ref, companionId: a.companion_id,
     role: a.role, subjectBinding: a.subject_binding, status: "UNRESOLVED",
-    tree: null, species: null, hive: null,
+    resolvedSubject: null, tree: null, species: null, hive: null,
     representedBy: a.represented_by, supportedBy: a.supported_by,
     editions: a.chapter_editions, encounterRef: a.encounter_ref, encounterState: a.encounter_state,
     consent: a.consent, provenance: a.provenance, harvestRef: a.harvest_ref, visibility: a.visibility,
@@ -86,11 +89,24 @@ export async function resolveCouncilAppearance(
   if (a.subject_binding.state !== "BOUND_TO_EXISTING_RECORD") return out;
   if (!isCompleteSubjectRef(ref)) { out.status = "INVALID_SUBJECT_REFERENCE"; return out; }
   if (ref.provider !== "s33d") { out.status = "UNSUPPORTED_NAMESPACE"; return out; }
-  if (ref.record_type !== "trees") { out.status = "UNSUPPORTED_READER"; return out; }
+  if (ref.record_type !== "trees" &&
+    !(ref.record_type === "species_index" && typeof reader.speciesById === "function")) {
+    out.status = "UNSUPPORTED_READER"; return out;
+  }
   try {
+    if (ref.record_type === "species_index") {
+      const species = await reader.speciesById(ref.id);
+      if (species.error) { out.status = "UNAVAILABLE"; return out; }
+      if (!species.data || species.data.id !== ref.id) { out.status = "SUBJECT_MISSING"; return out; }
+      out.resolvedSubject = ref;
+      out.species = species.data;
+      out.status = "RESOLVED";
+      return out; // Canonical species only: no individual, encounter or Hive inference.
+    }
     const tree = await reader.tree(ref.id);
     if (tree.error) { out.status = "UNAVAILABLE"; return out; }
     if (!tree.data || tree.data.id !== ref.id) { out.status = "SUBJECT_MISSING"; return out; }
+    out.resolvedSubject = ref;
     out.tree = tree.data;
     if (!out.tree.species_key) { out.status = "SPECIES_MISSING"; return out; }
     const species = await reader.species(out.tree.species_key);

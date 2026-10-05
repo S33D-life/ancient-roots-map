@@ -9,6 +9,8 @@ export const councilAppearanceReader: AppearanceReader = {
     .select("id, name, species_key").eq("id", id).maybeSingle(),
   species: async key => await supabase.from("species_index")
     .select("id, species_key, slug, scientific_name, family").eq("species_key", key).maybeSingle(),
+  speciesById: async id => await supabase.from("species_index")
+    .select("id, species_key, slug, scientific_name, family").eq("id", id).maybeSingle(),
   hive: async family => await supabase.from("species_hives")
     .select("id, slug, display_name, family_name").eq("family_name", family).maybeSingle(),
 };
