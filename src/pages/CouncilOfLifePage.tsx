@@ -104,7 +104,7 @@ const CouncilOfLifePage = () => {
           {/* ── 1. Next Gathering — primary entry ── */}
           <section aria-labelledby="next-gathering" className="mb-14">
             <h2 id="next-gathering" className="font-serif text-[11px] tracking-[0.2em] uppercase text-muted-foreground/60 mb-4 text-center">
-              Next Gathering
+              Council Gathering
             </h2>
             <NextCouncilCard
               onJoinCouncil={() => setActiveRoom("chamber")}
