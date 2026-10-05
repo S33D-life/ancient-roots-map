@@ -58,6 +58,8 @@ import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 
 import BloomsNearbySection from "@/components/blooms/BloomsNearbySection";
 const OfferingHero = lazy(() => import("@/components/tree-detail/OfferingHero"));
+const CouncilAppearancePilot = import.meta.env.DEV
+  ? lazy(() => import("@/components/council/CouncilAppearancePilot")) : null;
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
 const InviterContext = lazy(() => import("@/components/InviterContext"));
 const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
@@ -1121,6 +1123,7 @@ const TreeDetailPage = () => {
 
             {/* Story + Structured Data */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} speciesResolution={speciesResolution} />
+            {CouncilAppearancePilot && <Suspense fallback={null}><CouncilAppearancePilot treeId={tree.id} /></Suspense>}
 
             {/* Names resting in the digital bark */}
             <AncestralInscriptions treeId={tree.id} />

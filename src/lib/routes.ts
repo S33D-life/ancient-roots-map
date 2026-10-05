@@ -52,6 +52,7 @@ export const ROUTES = {
   HIVES: "/hives",
   /** Species Hive dashboard */
   HIVE: (family: string) => `/hive/${family}` as const,
+  SPECIES: (slug: string) => `/species/${slug}` as const,
   /** Cosmic Calendar */
   COSMIC: "/cosmic",
   /** Tree detail */
