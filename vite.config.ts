@@ -70,9 +70,9 @@ async function loadPwaPlugin() {
       injectRegister: false,
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
-        navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/],
+        navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//],
         // Never precache version.json — always fetch fresh
-        globIgnores: ["**/version.json"],
+        globIgnores: ["**/version.json", "tetol/circle-235/pre-fire/**"],
         runtimeCaching: [
           {
             // Always fetch live deployment version metadata
