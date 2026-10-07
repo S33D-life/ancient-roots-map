@@ -1,3 +1,5 @@
+// Never render stale weekly labels if the approved static adapter fails.
+if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
 const D = window.TETOL;
 const $ = (s) => document.querySelector(s);
