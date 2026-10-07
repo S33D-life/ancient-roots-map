@@ -163,18 +163,446 @@ var whoami_default = defineTool4({
   }
 });
 
+// src/lib/mcp/tools/living-dream.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.3";
+import { z as z4 } from "npm:zod@^3.25.76";
+
+// supabase/functions/_shared/currentCircle.ts
+var CURRENT_CIRCLE = {
+  number: 235,
+  title: "Circle 235 \xB7 yOur Blooming Week",
+  weekState: "Open Circle",
+  openLine: "The Circle is open now. Times will be shared in the group as each fire is lit.",
+  question: "What is already blooming in us that we haven\u2019t noticed yet?",
+  companions: ["Fulham Palace Holm Oak", "Apple Blossom", "Dragon Fruit / Pitaya", "Fly Agaric", "Hen Harrier", "Peter Pan"],
+  peopleSeat: "People / those who gather hold the open seventh seat.",
+  companionsLabel: "This week\u2019s companions, chosen by Leo",
+  safetyLabel: "Fly Agaric",
+  safety: "Toxic \xB7 Meet with care \xB7 Never eat.",
+  approval: "approved",
+  revision: "circle-235-ce9bab5",
+  links: {
+    council: { url: "https://www.s33d.life/council-of-life", approved: true },
+    tetol: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", approved: true },
+    group: { url: "https://t.me/s33dlife", approved: true },
+    councilDeck: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom", approved: true }
+  }
+};
+function approvedCircleUrl(link) {
+  if (!link?.approved) return void 0;
+  try {
+    const u = new URL(link.url);
+    if (u.protocol !== "https:" || u.username || u.password || u.port) return void 0;
+    if (!["www.s33d.life", "s33d.life", "t.me", "meet.google.com"].includes(u.hostname)) return void 0;
+    return u.href;
+  } catch {
+    return void 0;
+  }
+}
+
+// src/lib/routes.ts
+var ROUTES = {
+  /** TETOL homepage / navigation compass */
+  HOME: "/",
+  /** S33D gateway page (former homepage) */
+  S33D: "/s33d",
+  /** Main interactive map view */
+  MAP: "/map",
+  /** Atlas landing — countries index */
+  ATLAS: "/atlas",
+  /** Country portal page */
+  COUNTRY: (slug) => `/atlas/${slug}`,
+  /** Sub-region portal */
+  SUB_REGION: (countrySlug, subSlug) => `/atlas/${countrySlug}/${subSlug}`,
+  /** Library / Heartwood */
+  LIBRARY: "/library",
+  /** Heartwood room */
+  HEARTWOOD_ROOM: (room) => `/library/${room}`,
+  /** Council of Life */
+  COUNCIL: "/council-of-life",
+  /** Council Records archive */
+  COUNCIL_RECORDS: "/council/records",
+  /** Council session detail */
+  COUNCIL_SESSION: (id) => `/council/records/${id}`,
+  /** Dashboard / Hearth */
+  HEARTH: "/dashboard",
+  /** Vault */
+  VAULT: "/vault",
+  /** Twin Moons — lunar lottery & staking yield */
+  LOTTERY: "/lottery",
+  /** Value Tree */
+  VALUE_TREE: "/value-tree",
+  /** Value Tree — Earn branch */
+  VALUE_TREE_EARN: "/value-tree?tab=earn",
+  /** Support hub */
+  SUPPORT: "/support",
+  /** Guardian Harvest Exchange */
+  HARVEST: "/harvest",
+  /** Harvest detail */
+  HARVEST_DETAIL: (id) => `/harvest/${id}`,
+  /** Living Forest Roadmap */
+  ROADMAP: "/roadmap",
+  /** The Crown — yOur Golden Dream */
+  GOLDEN_DREAM: "/golden-dream",
+  /** Crown Growth Folio (read-only) */
+  CROWN_GROWTH: (id) => `/golden-dream/growth/${id}`,
+  /** Species Hives index */
+  HIVES: "/hives",
+  /** Species Hive dashboard */
+  HIVE: (family) => `/hive/${family}`,
+  /** Cosmic Calendar */
+  COSMIC: "/cosmic",
+  /** Tree detail */
+  TREE: (id) => `/tree/${id}`,
+  /** Wanderer profile */
+  WANDERER: (id) => `/wanderer/${id}`,
+  /** Authentication */
+  AUTH: "/auth",
+  AUTH_CALLBACK: "/auth/callback",
+  /** Installed-app sign-in handoff landing page */
+  AUTH_HANDOFF: "/auth/handoff",
+  /** Sign-in diagnostics panel (requires ?diag=1) */
+  AUTH_DIAGNOSTICS: "/auth/diagnostics",
+  /** Password reset */
+  RESET_PASSWORD: "/reset-password",
+  /** Add tree */
+  ADD_TREE: "/add-tree",
+  /** Bug garden */
+  BUG_GARDEN: "/bug-garden",
+  /** Bio-regions index */
+  BIO_REGIONS: "/atlas/bio-regions",
+  /** Bio-region detail */
+  BIO_REGION: (slug) => `/atlas/bio-regions/${slug}`,
+  /** Patron Offering */
+  PATRON_OFFERING: "/patron-offering",
+  /** Staff Room */
+  STAFF_ROOM: "/library/staff-room",
+  /** Staff Detail */
+  STAFF: (code) => `/staff/${code}`,
+  /** Value Tree — Living Economy */
+  VALUE_TREE_ECONOMY: "/value-tree?tab=economy",
+  /** Tree Data Commons */
+  TREE_DATA_COMMONS: "/tree-data-commons",
+  /** Agent Garden */
+  AGENT_GARDEN: "/agent-garden",
+  /** AI assistant connection and refresh instructions */
+  AGENT_CONNECT: "/connect",
+  /** Telegram Handoff */
+  TELEGRAM_HANDOFF: "/telegram-handoff",
+  /** My Sovereign Data — personal data export */
+  SOVEREIGN_DATA: "/living-archive",
+  /** The Arborium — living field guide */
+  ARBORIUM: "/library/arborium",
+  /** Tree Edit Review — curator queue for community edit proposals */
+  EDIT_REVIEW: "/edit-review"
+};
+
+// src/data/crown/growths.ts
+var ONE_CIRCLE_MANY_SURFACES = {
+  id: "one-circle-many-surfaces",
+  title: "One Circle \xB7 Many Surfaces",
+  titleNote: "A working name for this example, not a canonical one.",
+  subtitle: "Current Circle shared-state reconciliation",
+  maturity: "growing",
+  maturitySetBy: { by: "TEOTAG", date: "2026-10-07" },
+  origin: [
+    "Council of Life \xB7 Circle 235 opened as an open Circle that people step into from wherever they are.",
+    "The same Circle details were being written separately into the website, the Telegram copy, the invitation and the 3D Council.",
+    "This growth gathers them into one approved Current Circle that every surface reads, so each place tells the same truth."
+  ],
+  realms: {
+    touched: [
+      { realm: "canopy", weight: "primary", where: "Council of Life page, Council Deck doorway, Telegram Council command" },
+      { realm: "taproot", weight: "secondary", where: "Shared Current Circle module, publishing boundary, invitation freshness check" },
+      { realm: "heartwood", weight: "light", where: "Checked-in invitation, regenerated from the Current Circle" },
+      { realm: "embodied-tetol", weight: "light", where: "Static 3D Council labels, destinations and return path (geometry unchanged)" }
+    ],
+    notTouched: [
+      "Ancient Friends tree records (the Holm Oak appears by name only)",
+      "Heartwood memory records and Offering saving",
+      "Hearts",
+      "Sign-in and invitations",
+      "Database schema",
+      "Notion pages",
+      "Telegram sending"
+    ]
+  },
+  roadmapFeatureId: "council",
+  sourceOfTruth: {
+    path: "supabase/functions/_shared/currentCircle.ts",
+    readers: [
+      { path: "src/data/council/circle235Doorway.ts", role: "Website adapter" },
+      { path: "src/components/council/NextCouncilCard.tsx", role: "2D Council card" },
+      { path: "src/components/council/CouncilDeckDoorway.tsx", role: "Council Deck doorway" },
+      { path: "src/lib/council/currentCircleShare.ts", role: "Invitation / share projection" },
+      { path: "supabase/functions/_shared/councilPublishing.ts", role: "Telegram publishing boundary" },
+      { path: "src/lib/council/staticCouncilAdapter.ts", role: "Static 3D Council adapter" }
+    ]
+  },
+  releaseLine: {
+    branch: "main",
+    points: [
+      { sha: "ce9bab52935cbce2174bfa15454e6d907d7e8668", label: "Historical verified production source" },
+      { sha: "cc4b0148ab21", label: "#84 release base reconciled" },
+      { sha: "c54971970131", label: "#80 Current Circle + Telegram path" },
+      { sha: "2d5393df75b3", label: "#85 Council Deck doorway" },
+      { sha: "9e478d18fb0143834e96a855d2b21a3026a65281", label: "#86 checked-in invitation" },
+      { sha: "9055912a04acd83b21a3aad9abd37e6d92e37f46", label: "#87 static 3D Council inheritance \xB7 reviewed release head" },
+      { sha: "db3dfa7a51fb24412cd4e6bfa8630cf9908fef87", label: "#88 corrected read-only Crown Growth Folio" },
+      { sha: "4e3281de8854cef05c21ce115898ec002190fc83", label: "#89 reviewed release / main reconciliation" },
+      { sha: "84716ebd7984cf4657b8d2ea8da9423f35f6c672", label: "Published release source \xB7 route verification remains open" },
+      { sha: "da5209feae985426c86bcad9d27cd2a1c02ae815", label: "Current main \xB7 agent connection guide; publication not established here" }
+    ]
+  },
+  seams: [
+    {
+      id: "growth-folio",
+      surface: "Crown Growth Folio",
+      state: "merged",
+      branch: "teotag/crown-growth-folio",
+      commits: ["db3dfa7a51fb24412cd4e6bfa8630cf9908fef87"],
+      pr: 88,
+      mergeSha: "db3dfa7a51fb24412cd4e6bfa8630cf9908fef87",
+      evidence: [{ path: "docs/releases/Reviewed-release-main-reconciliation.md" }],
+      testsRecorded: "Reconciliation evidence records read-only Folio and 390px browser checks; these are local checks, not live verification.",
+      open: ["Published source includes this seam; the public Folio route still needs independent live verification."]
+    },
+    {
+      id: "release-reconciliation",
+      surface: "Reviewed release / main reconciliation",
+      state: "merged",
+      branch: "codex/reconcile-reviewed-release-main-88",
+      commits: ["04247f2eb394911182e26494af30b4bf42ca1f7b"],
+      pr: 89,
+      mergeSha: "4e3281de8854cef05c21ce115898ec002190fc83",
+      evidence: [{ path: "docs/releases/Reviewed-release-main-reconciliation.md" }],
+      testsRecorded: "Recorded release-check: 446 tests across 59 files; combined Chromium checks: 16 passed, 2 opt-in checks skipped."
+    },
+    {
+      id: "current-circle",
+      surface: "Current Circle",
+      state: "merged",
+      branch: "codex/current-circle-telegram",
+      commits: ["10b83456cc9c", "21317863023d"],
+      pr: 80,
+      mergeSha: "c54971970131",
+      evidence: [{ path: "docs/council/Current-Circle-Telegram-candidate.md" }],
+      testsRecorded: "Full release-check recorded: 378 tests across 49 files."
+    },
+    {
+      id: "website",
+      surface: "Website \xB7 Council of Life card",
+      state: "merged",
+      branch: "codex/current-circle-telegram",
+      commits: ["10b83456cc9c"],
+      pr: 80,
+      mergeSha: "c54971970131",
+      evidence: [{ path: "docs/council/Current-Circle-Telegram-candidate.md" }],
+      testsRecorded: "Built desktop and phone checks recorded in the candidate doc."
+    },
+    {
+      id: "telegram",
+      surface: "Telegram publishing path",
+      state: "blocked",
+      branch: "codex/current-circle-telegram",
+      commits: ["dc39fac6a4e3", "0a90bf0c79d3"],
+      pr: 80,
+      mergeSha: "c54971970131",
+      evidence: [{ path: "docs/council/Current-Circle-Telegram-candidate.md" }],
+      testsRecorded: "Preview and private-publish boundary tests recorded (20 new).",
+      open: ["Code is merged; sending stays held behind a server-side gate until an operational prerequisite is met and a send is explicitly approved."]
+    },
+    {
+      id: "council-2d",
+      surface: "2D Council",
+      state: "merged",
+      branch: "codex/current-circle-council-deck",
+      commits: ["b069cef8f064"],
+      pr: 85,
+      mergeSha: "2d5393df75b3",
+      evidence: [{ path: "docs/council/Current-Circle-Council-Deck-candidate.md" }],
+      testsRecorded: "Full release-check recorded: 394 tests across 52 files."
+    },
+    {
+      id: "deck-doorway",
+      surface: "Council Deck doorway",
+      state: "merged",
+      branch: "codex/current-circle-council-deck",
+      commits: ["b069cef8f064"],
+      pr: 85,
+      mergeSha: "2d5393df75b3",
+      evidence: [{ path: "docs/council/Current-Circle-Council-Deck-candidate.md" }],
+      testsRecorded: "Six Deck doorway tests; phone viewport 390\xD7844 recorded."
+    },
+    {
+      id: "invitation",
+      surface: "Checked-in invitation",
+      state: "merged",
+      branch: "codex/current-circle-share-projection",
+      commits: ["39cfba299886"],
+      pr: 86,
+      mergeSha: "9e478d18fb01",
+      evidence: [{ path: "docs/council/Current-Circle-share-reconciliation.md" }, { path: "docs/council/Circle-235-Telegram-invitation.md" }],
+      testsRecorded: "Share projection tests; invitation freshness checked in release-check.",
+      open: ["The external share pack keeps its own manifest and is not yet wired to the Current Circle."]
+    },
+    {
+      id: "static-3d",
+      surface: "3D Council inheritance",
+      state: "merged",
+      branch: "codex/current-circle-static-council",
+      commits: ["87a15a022c88", "234c96e6e6d3", "2bda8b834194"],
+      pr: 87,
+      mergeSha: "9055912a04ac",
+      evidence: [{ path: "docs/council/Current-Circle-static-seam.md" }],
+      testsRecorded: "Static adapter unit tests; bounded static Council browser regression at desktop and phone widths in CI. Full 3D renderer checked locally only.",
+      open: ["Labels and destinations only; static companion names and learning threads remain duplicated by design."]
+    }
+  ],
+  handoffs: [
+    { lane: "Codex", tended: "Current Circle, Telegram path, Deck doorway, invitation, 3D seam", returned: "Branches, merged pull requests and candidate docs" },
+    { lane: "Claude Code", tended: "Crown and Taproot integration audits", returned: "Audit documents in the project" },
+    { lane: "Claude Design", tended: "Living Canopy and Growth Folio grammar", returned: "Design artifact" },
+    { lane: "TEOTAG", tended: "Briefs, wording and maturity decisions", returned: "Approvals recorded with each pass" }
+  ],
+  heartwood: {
+    remembered: [
+      { label: "Council records", route: ROUTES.COUNCIL_RECORDS },
+      { label: "Council of Life", route: ROUTES.COUNCIL }
+    ],
+    notYet: "This growth's decisions and learning are not yet kept as a Heartwood record. Engineering evidence stays in the repository and is related here, not copied."
+  },
+  nextDecisions: [
+    "Verify the public Folio route against published source 84716ebd. Publication is recorded; successful live route verification is not established here.",
+    "When, if ever, Telegram may send. Code is ready; sending is held.",
+    "Where Heartwood should remember this growth's decisions."
+  ]
+};
+var CROWN_GROWTHS = [ONE_CIRCLE_MANY_SURFACES];
+
+// src/lib/mcp/tools/living-dream.ts
+var annotations = { readOnlyHint: true, idempotentHint: true, openWorldHint: false };
+var authority = "Read-only context. MCP access does not imply TEOTAG approval or permission to act.";
+var failure = (message) => ({ content: [{ type: "text", text: message }], isError: true });
+var result = (payload) => ({
+  content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+  structuredContent: payload
+});
+var provenance = (path) => ({ source: path, freshness: "Checked-in public projection in the serving MCP build; not a live Notion read.", authority });
+function projectCircle(circle) {
+  if (circle.approval !== "approved") return void 0;
+  const links = Object.fromEntries(Object.entries(circle.links).flatMap(([key, link]) => {
+    const url = approvedCircleUrl(link);
+    return url ? [[key, { url, approved: true }]] : [];
+  }));
+  return {
+    number: circle.number,
+    title: circle.title,
+    weekState: circle.weekState,
+    openLine: circle.openLine,
+    question: circle.question,
+    companions: [...circle.companions],
+    peopleSeat: circle.peopleSeat,
+    safety: circle.safety,
+    companionsLabel: circle.companionsLabel,
+    safetyLabel: circle.safetyLabel,
+    approval: circle.approval,
+    revision: circle.revision,
+    links
+  };
+}
+function summarizeGrowth(growth) {
+  return {
+    id: growth.id,
+    title: growth.title,
+    subtitle: growth.subtitle,
+    maturity: growth.maturity,
+    touchedRealms: growth.realms.touched.map(({ realm, weight, where }) => ({ realm, weight, where })),
+    implementationSummary: growth.seams.map(({ id, surface, state }) => ({ id, surface, state })),
+    decisionNeeded: growth.nextDecisions.length > 0
+  };
+}
+function projectGrowth(growth) {
+  return {
+    ...summarizeGrowth(growth),
+    titleNote: growth.titleNote,
+    maturitySetBy: { ...growth.maturitySetBy },
+    origin: [...growth.origin],
+    realms: { touched: growth.realms.touched, notTouched: growth.realms.notTouched },
+    sourceOfTruth: growth.sourceOfTruth,
+    roadmapFeatureId: growth.roadmapFeatureId,
+    releaseLine: growth.releaseLine,
+    seams: growth.seams.map(({ id, surface, state, branch, commits, pr, mergeSha, evidence, testsRecorded, open }) => ({ id, surface, state, branch, commits, pr, mergeSha, evidence, testsRecorded, open })),
+    heartwood: growth.heartwood,
+    handoffs: growth.handoffs,
+    openItems: growth.seams.flatMap((seam) => (seam.open ?? []).map((item) => ({ seamId: seam.id, item }))),
+    nextDecisions: [...growth.nextDecisions]
+  };
+}
+function createLivingDreamTools(sources = {
+  circle: () => CURRENT_CIRCLE,
+  growths: () => CROWN_GROWTHS
+}) {
+  const read = (ctx, load) => {
+    if (!ctx.isAuthenticated()) return failure("Not authenticated");
+    try {
+      const payload = load();
+      return payload ? result(payload) : failure("No approved public item found.");
+    } catch {
+      return failure("Public projection unavailable.");
+    }
+  };
+  return [
+    defineTool5({
+      name: "get_current_circle",
+      title: "Get approved Current Circle",
+      description: "Read the approved public Current Circle, including its revision and safety wording. Read access grants no publication or TEOTAG authority.",
+      inputSchema: {},
+      annotations,
+      handler: (_input, ctx) => read(ctx, () => {
+        const source = sources.circle();
+        const circle = source && projectCircle(source);
+        return circle ? { circle, provenance: provenance("supabase/functions/_shared/currentCircle.ts") } : void 0;
+      })
+    }),
+    defineTool5({
+      name: "list_growth_items",
+      title: "List Crown growth items",
+      description: "Read compact public Crown growth summaries. Public maturity is independent of implementation state; recorded engineering evidence is not proof of deployment.",
+      inputSchema: {},
+      annotations,
+      handler: (_input, ctx) => read(ctx, () => ({
+        growths: sources.growths().map(summarizeGrowth),
+        provenance: provenance("src/data/crown/growths.ts")
+      }))
+    }),
+    defineTool5({
+      name: "get_growth_item",
+      title: "Get Crown growth item",
+      description: "Read one public Crown growth and its related evidence references, memory references, handoffs, open items and next decisions. Does not fetch private evidence or confer approval.",
+      inputSchema: { growth_id: z4.string().trim().min(1).max(128).describe("The Crown growth id.") },
+      annotations,
+      handler: ({ growth_id }, ctx) => read(ctx, () => {
+        const growth = sources.growths().find((item) => item.id === growth_id);
+        return growth ? { growth: projectGrowth(growth), provenance: provenance("src/data/crown/growths.ts") } : void 0;
+      })
+    })
+  ];
+}
+var livingDreamTools = createLivingDreamTools();
+
 // src/lib/mcp/index.ts
 var projectRef = "mwzcuczfedrjplndggiv";
 var mcp_default = defineMcp({
   name: "s33d",
   title: "S33D",
   version: "0.1.0",
-  instructions: "Tools for S33D, a living atlas of ancient trees. Use `search_trees` to find ancient friends by name, species or nation, `get_tree` to read one tree and its offerings, `list_my_trees` for the signed-in keeper's own mapped trees, and `whoami` for their profile.",
+  instructions: "Tools for S33D, a living atlas of ancient trees. Use `search_trees` to find ancient friends by name, species or nation, `get_tree` to read one tree and its offerings, `list_my_trees` for the signed-in keeper's own mapped trees, and `whoami` for their profile. Use `get_current_circle` for the approved public Circle and `list_growth_items` / `get_growth_item` for the same public growth records used by the Crown Folio. These are checked-in projections, not live Notion reads. MCP access grants no Staff, Curator or TEOTAG authority, reward or publishing permission, or canonical promotion. Growth maturity is independent of engineering state; relationship truth must not be inferred from maturity. Current priorities are unavailable until an approved Notion projection exists.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [search_trees_default, get_tree_default, list_my_trees_default, whoami_default]
+  tools: [search_trees_default, get_tree_default, list_my_trees_default, whoami_default, ...livingDreamTools]
 });
 
 // lovable-mcp-supabase-entry.ts

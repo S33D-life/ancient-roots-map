@@ -122,17 +122,36 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
     ],
   },
   releaseLine: {
-    branch: "codex/circle-235-open-journey",
+    branch: "main",
     points: [
-      { sha: "ce9bab52935cbce2174bfa15454e6d907d7e8668", label: "Last verified production source" },
+      { sha: "ce9bab52935cbce2174bfa15454e6d907d7e8668", label: "Historical verified production source" },
       { sha: "cc4b0148ab21", label: "#84 release base reconciled" },
       { sha: "c54971970131", label: "#80 Current Circle + Telegram path" },
       { sha: "2d5393df75b3", label: "#85 Council Deck doorway" },
       { sha: "9e478d18fb0143834e96a855d2b21a3026a65281", label: "#86 checked-in invitation" },
       { sha: "9055912a04acd83b21a3aad9abd37e6d92e37f46", label: "#87 static 3D Council inheritance · reviewed release head" },
+      { sha: "db3dfa7a51fb24412cd4e6bfa8630cf9908fef87", label: "#88 corrected read-only Crown Growth Folio" },
+      { sha: "4e3281de8854cef05c21ce115898ec002190fc83", label: "#89 reviewed release / main reconciliation" },
+      { sha: "84716ebd7984cf4657b8d2ea8da9423f35f6c672", label: "Published release source · route verification remains open" },
+      { sha: "da5209feae985426c86bcad9d27cd2a1c02ae815", label: "Current main · agent connection guide; publication not established here" },
     ],
   },
   seams: [
+    {
+      id: "growth-folio", surface: "Crown Growth Folio", state: "merged",
+      branch: "teotag/crown-growth-folio", commits: ["db3dfa7a51fb24412cd4e6bfa8630cf9908fef87"],
+      pr: 88, mergeSha: "db3dfa7a51fb24412cd4e6bfa8630cf9908fef87",
+      evidence: [{ path: "docs/releases/Reviewed-release-main-reconciliation.md" }],
+      testsRecorded: "Reconciliation evidence records read-only Folio and 390px browser checks; these are local checks, not live verification.",
+      open: ["Published source includes this seam; the public Folio route still needs independent live verification."],
+    },
+    {
+      id: "release-reconciliation", surface: "Reviewed release / main reconciliation", state: "merged",
+      branch: "codex/reconcile-reviewed-release-main-88", commits: ["04247f2eb394911182e26494af30b4bf42ca1f7b"],
+      pr: 89, mergeSha: "4e3281de8854cef05c21ce115898ec002190fc83",
+      evidence: [{ path: "docs/releases/Reviewed-release-main-reconciliation.md" }],
+      testsRecorded: "Recorded release-check: 446 tests across 59 files; combined Chromium checks: 16 passed, 2 opt-in checks skipped.",
+    },
     {
       id: "current-circle", surface: "Current Circle", state: "merged",
       branch: "codex/current-circle-telegram", commits: ["10b83456cc9c", "21317863023d"], pr: 80, mergeSha: "c54971970131",
@@ -193,7 +212,7 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
     notYet: "This growth's decisions and learning are not yet kept as a Heartwood record. Engineering evidence stays in the repository and is related here, not copied.",
   },
   nextDecisions: [
-    "Whether the release line is deployed. Production still serves an earlier build.",
+    "Verify the public Folio route against published source 84716ebd. Publication is recorded; successful live route verification is not established here.",
     "When, if ever, Telegram may send. Code is ready; sending is held.",
     "Where Heartwood should remember this growth's decisions.",
   ],

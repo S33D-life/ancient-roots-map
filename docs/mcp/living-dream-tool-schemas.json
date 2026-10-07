@@ -1,0 +1,67 @@
+[
+  {
+    "name": "get_current_circle",
+    "title": "Get approved Current Circle",
+    "description": "Read the approved public Current Circle, including its revision and safety wording. Read access grants no publication or TEOTAG authority.",
+    "inputSchema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "execution": {
+      "taskSupport": "forbidden"
+    }
+  },
+  {
+    "name": "list_growth_items",
+    "title": "List Crown growth items",
+    "description": "Read compact public Crown growth summaries. Public maturity is independent of implementation state; recorded engineering evidence is not proof of deployment.",
+    "inputSchema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {}
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "execution": {
+      "taskSupport": "forbidden"
+    }
+  },
+  {
+    "name": "get_growth_item",
+    "title": "Get Crown growth item",
+    "description": "Read one public Crown growth and its related evidence references, memory references, handoffs, open items and next decisions. Does not fetch private evidence or confer approval.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "growth_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The Crown growth id."
+        }
+      },
+      "required": [
+        "growth_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "execution": {
+      "taskSupport": "forbidden"
+    }
+  }
+]
