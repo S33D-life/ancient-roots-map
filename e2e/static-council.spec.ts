@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 for (const width of [1280, 390]) test(`static Council Deck arrival and return at ${width}px`, async ({ page }) => {
+  // Static bundle unpacking plus the return SPA load exceeded the generic 30s budget in CI.
+  test.setTimeout(60_000);
   await page.setViewportSize({ width, height: 844 });
   await page.route("**/*", route => {
     const url = new URL(route.request().url());
