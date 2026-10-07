@@ -1,3 +1,5 @@
+import AuthInitializationGate from "@/components/AuthInitializationGate";
+import { recordRouteSession } from "@/lib/auth/sessionEvidence";
 import { useEffect, lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { useConnectionResilience } from "@/hooks/use-connection-resilience";
 import { Navigate } from "react-router-dom";
@@ -20,6 +22,11 @@ import { CompanionProvider } from "@/contexts/CompanionContext";
 import { QuietModeProvider } from "@/contexts/QuietModeContext";
 import CompanionBridge from "@/components/companion/CompanionBridge";
 
+function AuthRouteEvidence() {
+  const { pathname } = useLocation();
+  useEffect(() => { void recordRouteSession(); }, [pathname]);
+  return null;
+}
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -32,11 +39,11 @@ import DevDiagnosticsOverlay from "@/components/DevDiagnosticsOverlay";
 import { WandererDevPanel } from "@/components/agent-garden/WandererDevPanel";
 const ShowDevPanel = import.meta.env.DEV;
 
-import { useAuthHydration } from "@/hooks/use-auth-hydration";
+import { useSessionState } from "@/hooks/use-session-state";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
@@ -91,6 +98,7 @@ const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page")
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const OAuthConsentPage = lazyImportWithRetry(() => import("./pages/OAuthConsentPage"), "oauth-consent");
 const AuthHandoffPage = lazyImportWithRetry(() => import("./pages/AuthHandoffPage"), "auth-handoff");
+const AuthCallbackPage = lazyImportWithRetry(() => import("./pages/AuthCallbackPage"), "auth-callback");
 const AuthDiagnosticsPage = lazyImportWithRetry(() => import("./pages/AuthDiagnosticsPage"), "auth-diagnostics");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
 const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplorerPage"), "pulse-explorer");
@@ -105,6 +113,7 @@ const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"),
 const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "welcome");
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
+const GrowthFolioPage = lazyImportWithRetry(() => import("./pages/GrowthFolioPage"), "growth-folio");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
 const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/CouncilRecordsPage"), "council-records");
 const CouncilSessionPage = lazyImportWithRetry(() => import("./pages/council/CouncilSessionPage"), "council-session");
@@ -221,7 +230,8 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
   // Authentication enhances the public world; it never gates the initial render.
-  const currentUserId = useAuthHydration();
+  const authState = useSessionState();
+  const currentUserId = authState.user?.id ?? null;
 
   // Global connection resilience — shows reconnection toasts
   useConnectionResilience();
@@ -278,6 +288,7 @@ const App = () => {
         <CanopyHeartPulse />
         
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AuthRouteEvidence />
           <QuietModeProvider userId={currentUserId}>
           <TetolLevelProvider>
           <HiveSeasonProvider>
@@ -335,24 +346,26 @@ const App = () => {
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 <Route path="/auth/handoff" element={<AuthHandoffPage />} />
                 <Route path="/auth/diagnostics" element={<AuthDiagnosticsPage />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsentPage />} />
                 <Route path="/reset-password" element={<AuthPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<AuthInitializationGate><DashboardPage /></AuthInitializationGate>} />
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/email-confirmed" element={<Navigate to="/welcome" replace />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
+                <Route path="/golden-dream/growth/:growthId" element={realm(<GrowthFolioPage />, "crown")} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
                 <Route path="/council/records/:id" element={realm(<CouncilSessionPage />, "canopy")} />
                 <Route path="/assets" element={<AssetsPage />} />
-                <Route path="/vault" element={<VaultPage />} />
-                <Route path="/lottery" element={<LotteryPage />} />
+                <Route path="/vault" element={<AuthInitializationGate><VaultPage /></AuthInitializationGate>} />
+                <Route path="/lottery" element={<AuthInitializationGate><LotteryPage /></AuthInitializationGate>} />
                 {/* /heartwood/vault removed — consolidated to /vault */}
                 <Route path="/radio" element={<RadioPage />} />
                 <Route path="/visits" element={<VisitsPage />} />
-                <Route path="/referrals" element={<ReferralsPage />} />
+                <Route path="/referrals" element={<AuthInitializationGate><ReferralsPage /></AuthInitializationGate>} />
                 <Route path="/install" element={<InstallPage />} />
                 {ShowDevPanel && <Route path="/share-simulator" element={<ShareSimulatorPage />} />}
                 <Route path="/incoming-share" element={<IncomingSharePage />} />
@@ -369,8 +382,8 @@ const App = () => {
                 <Route path="/hive/:family" element={<HivePage />} />
                 <Route path="/hive/:family/treasury" element={<HiveTreasuryPage />} />
                 <Route path="/value-tree" element={<ValueTreePage />} />
-                <Route path="/living-archive" element={<LivingArchivePage />} />
-                <Route path="/discovery" element={<DiscoveryPage />} />
+                <Route path="/living-archive" element={<AuthInitializationGate><LivingArchivePage /></AuthInitializationGate>} />
+                <Route path="/discovery" element={<AuthInitializationGate><DiscoveryPage /></AuthInitializationGate>} />
                 <Route path="/markets" element={<Navigate to="/library/rhythms" replace />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/countries" element={<AtlasCountryWallPage />} />

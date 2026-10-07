@@ -1,5 +1,9 @@
 {
-  "comment": "Files allowed to exceed the 500 KB asset budget. Add intentionally; do not auto-grow this list. Each entry must justify itself in a PR description.",
+  "comment": "Three explicit exceptions preserve the locally tested Circle 235 standalone 3D package and existing production-pinned Three.js bytes. The 500 KB limit remains for all other files. TETOL is excluded from PWA precaching. See docs/council/Circle-235-release.md for measured sizes and rationale.",
   "maxBytes": 512000,
-  "allowList": []
+  "allowList": [
+    "public/tetol/circle-235/pre-fire/tetol.html",
+    "public/tetol/circle-235/pre-fire/vendor/three/build/three.core.js",
+    "public/tetol/circle-235/pre-fire/vendor/three/build/three.module.js"
+  ]
 }
