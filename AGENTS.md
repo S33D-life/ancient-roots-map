@@ -1,5 +1,7 @@
 # S33D Agent Guide
-
+<!-- LOVABLE:BEGIN -->
+- Keep the agent connection guide frontend-only and derive its public MCP URL from validated deployment configuration; this avoids changing the existing MCP server.
+<!-- LOVABLE:END -->
 > Ground rules for agents (Claude Code, Codex, Lovable, TEOTAG, future) collaborating on this repo.
 > Read this before starting any work. Also read [`PROJECT_MAP.md`](./PROJECT_MAP.md) and [`CURRENT_TASKS.md`](./CURRENT_TASKS.md).
 

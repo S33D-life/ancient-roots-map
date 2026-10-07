@@ -91,6 +91,8 @@ export const ROUTES = {
   TREE_DATA_COMMONS: "/tree-data-commons",
   /** Agent Garden */
   AGENT_GARDEN: "/agent-garden",
+  /** AI assistant connection and refresh instructions */
+  AGENT_CONNECT: "/connect",
   /** Telegram Handoff */
   TELEGRAM_HANDOFF: "/telegram-handoff",
   /** My Sovereign Data — personal data export */

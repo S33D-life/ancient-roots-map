@@ -1,5 +1,6 @@
-import { TreeDeciduous, Heart, Map } from "lucide-react";
+import { TreeDeciduous, Heart, Map, Plug } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ROUTES } from "@/lib/routes";
 import JourneyPulse from "@/components/JourneyPulse";
 
 const Footer = () => {
@@ -25,6 +26,11 @@ const Footer = () => {
           </Link>
           <Dot />
           <Link to="/about" className="hover:text-primary transition-colors">About</Link>
+          <Dot />
+          <Link to={ROUTES.AGENT_CONNECT} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
+            <Plug className="w-3 h-3" />
+            Connect your assistant
+          </Link>
         </div>
 
         <div className="flex items-center justify-center gap-x-2 text-[10px] text-muted-foreground/40">

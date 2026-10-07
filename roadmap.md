@@ -1,5 +1,9 @@
 # Roadmap — Life Groves: Effortless Offerings + Grove Stewardship
 
+## Agent connection instructions
+- [x] Add a public connection guide with runtime server URL, per-client connect and refresh steps, and a visible footer link.
+- [x] Verify URL validation, command quoting, guide controls, and route rendering without changing the MCP server.
+
 ## Database & security
 - [x] Migration: life_grove_offerings additive columns (media_metadata, media_type, updated_at, hidden_at, hidden_by)
 - [x] Migration: life_grove_stewards (durable, succession-ready — grantor not hardcoded to created_by)
