@@ -17,6 +17,7 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
+import CouncilDeckDoorway from "@/components/council/CouncilDeckDoorway";
 import CuratorEditor from "@/components/council/CuratorEditor";
 import CouncilQuickView from "@/components/council/CouncilQuickView";
 import CouncilCalendar from "@/components/council/CouncilCalendar";
@@ -112,6 +113,7 @@ const CouncilOfLifePage = () => {
               refreshKey={curatorRefreshKey}
               onEditCouncil={() => setCuratorOpen(true)}
             />
+            <CouncilDeckDoorway />
           </section>
 
           {/* ── 2. Reflection — heart of the Council experience ── */}
