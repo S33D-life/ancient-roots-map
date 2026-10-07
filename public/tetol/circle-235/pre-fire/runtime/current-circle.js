@@ -46,6 +46,7 @@
     link.textContent = "Return to Council of Life";
     link.className = "home";
     link.id = "council-return";
-    document.querySelector("#hdr")?.appendChild(link);
+    link.style.cssText = "position:fixed;right:16px;bottom:calc(112px + env(safe-area-inset-bottom, 0px));z-index:2147483647;min-height:44px;display:inline-flex;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg, #1a1f14);color:var(--ink, #f0eadb);text-decoration:none;font:13px var(--sans, sans-serif)";
+    document.body.appendChild(link);
   });
 })();
