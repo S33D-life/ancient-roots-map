@@ -3,9 +3,11 @@ export interface PublicCircleLink { url: string; approved: boolean }
 export interface CurrentCircle {
   number: number; title: string; weekState: string; openLine: string; question: string;
   companions: readonly string[]; peopleSeat: string; safety: string;
+  companionsLabel: string; safetyLabel: string;
   approval: "approved" | "draft"; revision: string;
   links: { council: PublicCircleLink; tetol: PublicCircleLink; group: PublicCircleLink;
-    fire?: PublicCircleLink; guide?: PublicCircleLink; images?: PublicCircleLink; livingRecord?: PublicCircleLink };
+    fire?: PublicCircleLink; guide?: PublicCircleLink; images?: PublicCircleLink; livingRecord?: PublicCircleLink;
+    councilDeck?: PublicCircleLink };
 }
 export const CURRENT_CIRCLE = {
   number: 235, title: "Circle 235 · yOur Blooming Week", weekState: "Open Circle",
@@ -13,11 +15,14 @@ export const CURRENT_CIRCLE = {
   question: "What is already blooming in us that we haven’t noticed yet?",
   companions: ["Fulham Palace Holm Oak", "Apple Blossom", "Dragon Fruit / Pitaya", "Fly Agaric", "Hen Harrier", "Peter Pan"],
   peopleSeat: "People / those who gather hold the open seventh seat.",
+  companionsLabel: "This week’s companions, chosen by Leo",
+  safetyLabel: "Fly Agaric",
   safety: "Toxic · Meet with care · Never eat.", approval: "approved", revision: "circle-235-ce9bab5",
   links: {
     council: { url: "https://www.s33d.life/council-of-life", approved: true },
     tetol: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", approved: true },
     group: { url: "https://t.me/s33dlife", approved: true },
+    councilDeck: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom", approved: true },
   },
 } as const satisfies CurrentCircle;
 /** Fail closed to approved, known public HTTPS origins. */

@@ -17,8 +17,8 @@ const NextCouncilCard = (_props: NextCouncilCardProps) => (
       <CardTitle className="text-xl md:text-2xl font-serif tracking-wide">{circle.title}</CardTitle>
       <p className="text-sm font-serif">{circle.openLine}</p>
       <p className="text-lg font-serif italic">{circle.question}</p>
-      <p className="text-sm font-serif">This week’s companions, chosen by Leo: {circle.companions.join(" · ")}. {circle.peopleSeat}</p>
-      <p className="text-xs text-muted-foreground">Fly Agaric: {circle.safety}</p>
+      <p className="text-sm font-serif">{circle.companionsLabel}: {circle.companions.join(" · ")}. {circle.peopleSeat}</p>
+      <p className="text-xs text-muted-foreground">{circle.safetyLabel}: {circle.safety}</p>
       <p className="text-sm font-serif">Enter the Tree, wander through the Canopy, meet a companion, follow its learning and remembered relationships, then return to the Circle and the living world.</p>
       <div className="flex flex-col sm:flex-row gap-2 pt-1">
         <Button asChild className="font-serif"><a href={circle.tetolUrl}>Explore Circle {circle.number} in 3D TETOL</a></Button>
