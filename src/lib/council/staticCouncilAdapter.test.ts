@@ -33,7 +33,7 @@ describe("static Council adapter", () => {
     expect(circle.links.fire).toBeUndefined(); expect(circle.links.guide).toBeUndefined();
   });
   it("returns to the fixed 2D Council section and rejects missing Council approval", () => {
-    expect(councilReturnUrl(staticCouncilProjection())).toBe("/council-of-life#next-gathering");
+    expect(councilReturnUrl(staticCouncilProjection())).toBe("/council-of-life?from=spatial-council#next-gathering");
     expect(councilReturnUrl(staticCouncilProjection({ ...CURRENT_CIRCLE, links: { ...CURRENT_CIRCLE.links, council: { ...CURRENT_CIRCLE.links.council, approved: false } } }))).toBeNull();
   });
   it("loads the generated artifact before legacy consumers in the unpacked template", () => {

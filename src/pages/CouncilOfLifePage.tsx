@@ -60,6 +60,13 @@ const CouncilOfLifePage = () => {
       });
   }, []);
 
+  // Auth startup may clear a fragment. The fixed spatial return marker survives it.
+  useEffect(() => {
+    if (showEntrance || new URLSearchParams(window.location.search).get("from") !== "spatial-council") return;
+    const frame = requestAnimationFrame(() => document.getElementById("next-gathering")?.scrollIntoView({ block: "center" }));
+    return () => cancelAnimationFrame(frame);
+  }, [showEntrance]);
+
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {

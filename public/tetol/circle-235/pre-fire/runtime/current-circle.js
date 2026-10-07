@@ -81,7 +81,7 @@
     if (!circle?.links.council) return null;
     const url = new URL(circle.links.council);
     if (url.pathname !== "/council-of-life") return null;
-    return url.pathname + "#next-gathering";
+    return url.pathname + "?from=spatial-council#next-gathering";
   }
   if (typeof window !== "undefined") {
     Object.assign(window, { S33D_APPLY_CURRENT_CIRCLE: (registry) => applyStaticCouncil(registry, staticCouncilProjection()) });
