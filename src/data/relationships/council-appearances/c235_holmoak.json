@@ -1,0 +1,83 @@
+{
+  "record_type": "council_appearance",
+  "circle_ref": {
+    "provider": "council_manifest",
+    "id": "council-of-life/circle-235"
+  },
+  "companion_id": "c235_holmoak",
+  "role": "Ancient Friend",
+  "subject_binding": {
+    "state": "BOUND_TO_EXISTING_RECORD",
+    "approved_by": "TEOTAG",
+    "approved_on": "2026-10-05",
+    "ref": {
+      "provider": "s33d",
+      "record_type": "trees",
+      "id": "924453c0-f4f5-4ed4-88fe-5b2ed6570af0"
+    }
+  },
+  "represented_by": [
+    {
+      "provider": "existing_chapter_asset",
+      "path": "output/pdf/council-chapter-235-v4/source/assets/4-Photo-4.jpg",
+      "sha256": "4d11c6b35f2d84ea5280fa4d44657fa1fdb2b8541268406d8361d8fbd324b147",
+      "kind": "illustrated_learning_artefact",
+      "visibility": "REVIEW_ONLY",
+      "permission_state": "NOT_VERIFIED_FOR_PUBLIC_REUSE",
+      "provenance_ref": {
+        "provider": "existing_chapter_design_manifest",
+        "path": "output/pdf/council-chapter-235-v4/source/design-manifest.json",
+        "selector": "assets[file=4-Photo-4.jpg]"
+      }
+    }
+  ],
+  "supported_by": [],
+  "chapter_editions": [
+    {
+      "provider": "existing_chapter_package",
+      "file": "Council-Chapter-235_V4-candidate.pdf",
+      "version": "V4",
+      "review_state": "CANDIDATE",
+      "edition": "PRE_FIRE",
+      "visibility": "REVIEW_ONLY"
+    }
+  ],
+  "encounter_ref": {
+    "provider": "council_manifest",
+    "id": "council-of-life/circle-235",
+    "version": "235.6.0",
+    "selector": "ancient_friend.encounter"
+  },
+  "consent": {
+    "personal_material": "NOT_VERIFIED_FOR_PUBLIC_REUSE",
+    "source_ref": {
+      "provider": "council_manifest",
+      "id": "council-of-life/circle-235",
+      "version": "235.6.0",
+      "selector": "ancient_friend.encounter.consent"
+    }
+  },
+  "harvest_ref": null,
+  "visibility": "REVIEW_ONLY",
+  "provenance": {
+    "basis": "TEOTAG explicit instruction to bind the existing Circle companion to the existing Ancient Friend",
+    "source_ref": {
+      "provider": "council_manifest",
+      "id": "council-of-life/circle-235",
+      "version": "235.6.0",
+      "selector": "companions[id=c235_holmoak]"
+    },
+    "individual_identification_ref": {
+      "provider": "council_manifest",
+      "id": "council-of-life/circle-235",
+      "version": "235.6.0",
+      "selector": "ancient_friend.identification"
+    },
+    "individual_identification_state": "PROPOSAL"
+  },
+  "encounter_state": {
+    "code": "ENCOUNTERED_DOCUMENTATION_PARTIAL",
+    "label": "Encountered · documentation partial",
+    "as_of": "2026-10-04"
+  }
+}

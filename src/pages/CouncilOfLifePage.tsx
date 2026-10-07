@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
@@ -28,6 +28,9 @@ import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides"
 
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
+
+const CouncilAppearancePilot = import.meta.env.DEV
+  ? lazy(() => import("@/components/council/CouncilAppearancePilot")) : null;
 
 const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
@@ -102,6 +105,7 @@ const CouncilOfLifePage = () => {
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto px-4 pt-16 pb-12">
+          {CouncilAppearancePilot && <div id="council-appearance-pilot"><Suspense fallback={null}><CouncilAppearancePilot /></Suspense></div>}
           {/* Hero */}
           <h1 className="text-4xl md:text-5xl font-serif text-center mb-3 tracking-wider drop-shadow-lg">
             Council of Life
