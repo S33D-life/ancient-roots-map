@@ -46,6 +46,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Static Council freshness
+        run: npm run council:static:check
+
       - name: Invitation freshness
         run: npm run council:share:check
 

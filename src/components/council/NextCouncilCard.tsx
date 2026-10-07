@@ -21,7 +21,7 @@ const NextCouncilCard = (_props: NextCouncilCardProps) => (
       <p className="text-xs text-muted-foreground">{circle.safetyLabel}: {circle.safety}</p>
       <p className="text-sm font-serif">Enter the Tree, wander through the Canopy, meet a companion, follow its learning and remembered relationships, then return to the Circle and the living world.</p>
       <div className="flex flex-col sm:flex-row gap-2 pt-1">
-        <Button asChild className="font-serif"><a href={circle.tetolUrl}>Explore Circle {circle.number} in 3D TETOL</a></Button>
+        <Button asChild className="font-serif"><a href={circle.tetolUrl} target="_blank" rel="noopener noreferrer">Explore Circle {circle.number} in 3D TETOL</a></Button>
         <Button asChild variant="secondary" className="font-serif"><a href={circle.groupUrl} target="_blank" rel="noopener noreferrer">Council group · Fire times</a></Button>
       </div>
       <p className="text-xs text-muted-foreground">Different places. Different moments. One living Council.</p>
