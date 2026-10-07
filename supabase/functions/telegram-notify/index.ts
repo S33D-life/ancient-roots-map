@@ -8,6 +8,7 @@
  * event_type: "new_tree" | "offering" | "whisper" | "heart_milestone" | "council_invite" | "ecosystem_update"
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { councilPublishing, type CouncilPreview } from "../_shared/councilPublishing.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const APP_URL = "https://ancient-roots-map.lovable.app";
@@ -81,20 +82,6 @@ function formatMessage(eventType: string, d: EventData): string {
         `🔗 <a href="${APP_URL}/dashboard?tab=vault">Open the Vault</a>`,
       ].filter(Boolean).join("\n");
 
-    case "council_invite":
-      return [
-        `🌿 <b>Council of Life — Gathering</b>`,
-        ``,
-        d.council_name ? `<b>${d.council_name}</b>` : "A council gathers",
-        d.gathering_date ? `📅 ${d.gathering_date}` : "",
-        ``,
-        `All voices are welcome in the circle.`,
-        ``,
-        d.council_slug
-          ? `🔗 <a href="${APP_URL}/councils/${d.council_slug}">Join the Council</a>`
-          : `🔗 <a href="${APP_URL}/councils">View Councils</a>`,
-      ].filter(Boolean).join("\n");
-
     case "ecosystem_update":
       return [
         `✨ <b>${d.title || "S33D Ecosystem Update"}</b>`,
@@ -149,23 +136,75 @@ Deno.serve(async (req: Request) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
 
 
     const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
-    if (!TELEGRAM_API_KEY) throw new Error("TELEGRAM_API_KEY is not configured");
+
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { event_type, data } = await req.json();
+    const { event_type, data, action, preview_id, confirm } = await req.json();
     if (!event_type) {
       return new Response(JSON.stringify({ error: "event_type required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // The public Council payload is server-owned; caller data is never rendered.
+    if (event_type === "council_invite") {
+      if (action === "publish" && Deno.env.get("TELEGRAM_EXPOSED_CREDENTIALS_ROTATED") !== "true") {
+        return new Response(JSON.stringify({ ok: false, error: "Credential rotation confirmation required" }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const result = await councilPublishing({ action, preview_id, confirm }, Deno.env.get("TELEGRAM_COUNCIL_TEST_CHAT_ID"), {
+        savePreview: async (chatId, payload, revision) => {
+          const { data: row, error } = await supabase.from("telegram_outbound_log").insert({
+            event_type, chat_id: chatId, message_text: payload.text, status: "pending",
+            metadata: { kind: "council_preview", revision, payload },
+          }).select("*").single();
+          if (error || !row) throw new Error("Could not record Council preview");
+          return row as CouncilPreview;
+        },
+        loadPreview: async (id) => {
+          const { data: row, error } = await supabase.from("telegram_outbound_log").select("*")
+            .eq("id", id).eq("event_type", "council_invite").maybeSingle();
+          if (error) throw new Error("Could not read Council preview");
+          return row as CouncilPreview | null;
+        },
+        claimPreview: async (id) => {
+          const { data: row, error } = await supabase.from("telegram_outbound_log")
+            .update({ error_message: "Publication claimed; outcome pending" })
+            .eq("id", id).eq("status", "pending").is("error_message", null).select("id").maybeSingle();
+          if (error) throw new Error("Could not claim Council preview");
+          return !!row;
+        },
+        send: async (chatId, payload) => {
+          if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY) throw new Error("Server connector secrets missing");
+          const { data: settings, error } = await supabase.from("telegram_settings").select("enabled, notify_council_invite").eq("id", 1).single();
+          if (error || !settings?.enabled || !settings.notify_council_invite) throw new Error("Council Telegram publishing disabled");
+          const response = await fetch(`${GATEWAY_URL}/sendMessage`, {
+            method: "POST", headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "X-Connection-Api-Key": TELEGRAM_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: chatId, ...payload }),
+          });
+          const body = await response.json();
+          return { ok: response.ok && body.ok === true, message_id: body.result?.message_id };
+        },
+        finish: async (id, result) => {
+          const { error } = await supabase.from("telegram_outbound_log").update({
+            status: result.ok ? "sent" : "failed", telegram_message_id: result.message_id ?? null,
+            error_message: result.error ?? null,
+          }).eq("id", id);
+          if (error) throw new Error("Publication result could not be recorded; inspect claimed preview before retry");
+        },
+      });
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY) throw new Error("Server connector secrets missing");
 
     // Check settings
     const { data: settings } = await supabase
