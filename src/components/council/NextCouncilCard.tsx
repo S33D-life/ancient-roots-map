@@ -1,151 +1,32 @@
-import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoonStar, CalendarDays, Clock, Mic, Video } from "lucide-react";
-import {
-  getCurrentCouncilWithOverrides,
-  getNextCouncilWithOverrides,
-  hasCuratorOverride,
-} from "@/data/council/curatorOverrides";
-import {
-  formatGatheringDate,
-  formatMarkerDate,
-  moonEmoji,
-  moonLabel,
-} from "@/data/council/councilCycles";
+import { CIRCLE_235_DOORWAY as circle } from "@/data/council/circle235Doorway";
 
 interface NextCouncilCardProps {
   onJoinCouncil: () => void;
-  /** Increment to force re-read after curator save */
   refreshKey?: number;
   onEditCouncil?: () => void;
 }
 
-const NextCouncilCard = ({ onJoinCouncil, refreshKey, onEditCouncil }: NextCouncilCardProps) => {
-  const navigate = useNavigate();
-
-  // Re-read when refreshKey changes (after curator save)
-  const current = getCurrentCouncilWithOverrides();
-  const next = getNextCouncilWithOverrides();
-  const isDraft = hasCuratorOverride(current.id);
-
-  return (
-    <div className="space-y-4">
-      {/* Main invitation card */}
-      <Card className="relative bg-card/70 backdrop-blur-sm border-primary/30 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-        <CardHeader className="p-5 md:p-6 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
-                Next Gathering
-              </Badge>
-              {isDraft && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 border-amber-500/20">
-                  Curator Draft
-                </Badge>
-              )}
-              {onEditCouncil && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onEditCouncil(); }}
-                  className="text-[10px] font-serif text-muted-foreground/40 hover:text-primary/60 transition-colors underline underline-offset-2"
-                >
-                  Edit
-                </button>
-              )}
-              <CardTitle className="text-xl md:text-2xl font-serif tracking-wide">
-                Next Council of Life
-              </CardTitle>
-              <CardDescription className="text-sm font-serif italic mt-1">
-                Invitation &amp; Agenda
-              </CardDescription>
-            </div>
-            <MoonStar className="h-8 w-8 text-primary/70 mt-1 shrink-0" />
-          </div>
-
-          {/* Session details */}
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-foreground/80">
-              <span className="text-base">{moonEmoji(current.moonPhase)}</span>
-              <span className="font-serif">{current.title}</span>
-            </div>
-            <div className="flex items-center gap-2 text-foreground/80">
-              <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-serif">{formatGatheringDate(current.gatheringDate)}</span>
-            </div>
-            <div className="flex items-center gap-2 text-foreground/80">
-              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-serif">{current.time}</span>
-            </div>
-            <div className="flex items-center gap-2 text-foreground/80">
-              <Mic className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-serif">{current.curator}</span>
-            </div>
-          </div>
-
-          <p className="text-xs text-muted-foreground/60 font-serif italic">
-            "The circle is open. Step in when you are ready."
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-2 pt-1">
-            <Button onClick={onJoinCouncil} className="gap-2 font-serif tracking-wide">
-              <Video className="h-4 w-4" />
-              Join Council
-            </Button>
-            <Button
-              variant="secondary"
-              className="gap-2 font-serif tracking-wide text-sm"
-              onClick={() => navigate("/time-tree")}
-            >
-              🌳 Reflect in the Time Tree
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
-
-      {/* Moon cycle indicator — dynamic */}
-      <div className="rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm p-4">
-        <h4 className="font-serif text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 mb-3">
-          Bi-weekly Moon Rhythm
-        </h4>
-        <div className="grid grid-cols-2 gap-4">
-          {/* Current cycle */}
-          <div className="space-y-1.5">
-            <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Current</p>
-            <div className="text-xs font-serif text-foreground/70">
-              <span>{moonEmoji(current.moonPhase)} {moonLabel(current.moonPhase)}</span>
-              <span className="text-muted-foreground/40"> — {formatMarkerDate(current.markerDate)}</span>
-            </div>
-            <div className="text-xs font-serif text-foreground/70">
-              <span>🌿 Council</span>
-              <span className="text-muted-foreground/40"> — {formatMarkerDate(current.gatheringDate)}</span>
-            </div>
-          </div>
-          {/* Next cycle */}
-          {next ? (
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Next</p>
-              <div className="text-xs font-serif text-foreground/70">
-                <span>{moonEmoji(next.moonPhase)} {moonLabel(next.moonPhase)}</span>
-                <span className="text-muted-foreground/40"> — {formatMarkerDate(next.markerDate)}</span>
-              </div>
-              <div className="text-xs font-serif text-foreground/70">
-                <span>🌿 Council</span>
-                <span className="text-muted-foreground/40"> — {formatMarkerDate(next.gatheringDate)}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Next</p>
-              <p className="text-xs font-serif text-muted-foreground/40 italic">To be announced</p>
-            </div>
-          )}
-        </div>
+const NextCouncilCard = (_props: NextCouncilCardProps) => (
+  <Card className="relative bg-card/70 backdrop-blur-sm border-primary/30 overflow-hidden">
+    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+    <CardHeader className="p-5 md:p-6 space-y-4">
+      <Badge variant="outline" className="w-fit text-[10px] border-primary/40 text-primary">Open Circle</Badge>
+      <CardTitle className="text-xl md:text-2xl font-serif tracking-wide">{circle.title}</CardTitle>
+      <p className="text-sm font-serif">{circle.openLine}</p>
+      <p className="text-lg font-serif italic">{circle.question}</p>
+      <p className="text-sm font-serif">This week’s companions, chosen by Leo: {circle.companions.join(" · ")}. People / those who gather hold the open seventh seat.</p>
+      <p className="text-xs text-muted-foreground">Fly Agaric: {circle.safety}</p>
+      <p className="text-sm font-serif">Enter the Tree, wander through the Canopy, meet a companion, follow its learning and remembered relationships, then return to the Circle and the living world.</p>
+      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+        <Button asChild className="font-serif"><a href={circle.tetolUrl}>Explore Circle 235 in 3D TETOL</a></Button>
+        <Button asChild variant="secondary" className="font-serif"><a href={circle.groupUrl} target="_blank" rel="noopener noreferrer">Council group · Fire times</a></Button>
       </div>
-    </div>
-  );
-};
+      <p className="text-xs text-muted-foreground">Different places. Different moments. One living Council.</p>
+    </CardHeader>
+  </Card>
+);
 
 export default NextCouncilCard;

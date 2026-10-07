@@ -22,6 +22,7 @@ import CouncilQuickView from "@/components/council/CouncilQuickView";
 import CouncilCalendar from "@/components/council/CouncilCalendar";
 import { HeartwoodChamber } from "@/components/library/HeartwoodChamber";
 import { useCouncilInvitation } from "@/hooks/use-council-invitation";
+import { CIRCLE_235_DOORWAY } from "@/data/council/circle235Doorway";
 import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides";
 
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
@@ -98,13 +99,13 @@ const CouncilOfLifePage = () => {
             Council of Life
           </h1>
           <p className="text-center text-muted-foreground mb-10 text-lg font-serif italic">
-            Gather Around The Ancient Fire
+            A living Circle for a living world.
           </p>
 
           {/* ── 1. Next Gathering — primary entry ── */}
           <section aria-labelledby="next-gathering" className="mb-14">
             <h2 id="next-gathering" className="font-serif text-[11px] tracking-[0.2em] uppercase text-muted-foreground/60 mb-4 text-center">
-              Next Gathering
+              Current Circle
             </h2>
             <NextCouncilCard
               onJoinCouncil={() => setActiveRoom("chamber")}
@@ -125,7 +126,7 @@ const CouncilOfLifePage = () => {
                   <Sparkles className="h-3.5 w-3.5 text-primary" /> The Time Tree
                 </h3>
                 <p className="text-lg md:text-2xl font-serif italic text-foreground/90 leading-[1.55] mb-7 max-w-xl mx-auto">
-                  "{invitation.timeTreeQuestion}"
+                  "{CIRCLE_235_DOORWAY.question}"
                 </p>
                 <Button
                   variant="outline"
@@ -143,8 +144,8 @@ const CouncilOfLifePage = () => {
           <div className="space-y-4">
             {/* Council Scroll */}
             <HeartwoodChamber
-              title="Council Scroll"
-              caption="The full invitation, focus areas, and context for this cycle."
+              title="Earlier Council Scroll"
+              caption="Earlier invitation and context, preserved as a historical Council record."
               icon={<ScrollText className="w-4 h-4 text-primary" />}
               collapsible
               defaultOpen={false}
