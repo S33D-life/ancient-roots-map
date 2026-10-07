@@ -124,6 +124,7 @@ const RadioPage = lazyImportWithRetry(() => import("./pages/RadioPage"), "radio"
 const VisitsPage = lazyImportWithRetry(() => import("./pages/VisitsPage"), "visits");
 const ReferralsPage = lazyImportWithRetry(() => import("./pages/ReferralsPage"), "referrals");
 const InstallPage = lazyImportWithRetry(() => import("./pages/InstallPage"), "install");
+const AgentConnectionPage = lazyImportWithRetry(() => import("./pages/AgentConnectionPage"), "agent-connect");
 const ShareSimulatorPage = lazyImportWithRetry(() => import("./pages/ShareSimulatorPage"), "share-sim");
 const IncomingSharePage = lazyImportWithRetry(() => import("./pages/IncomingSharePage"), "incoming-share");
 const TestLabPage = lazyImportWithRetry(() => import("./pages/TestLabPage"), "test-lab");
@@ -367,6 +368,7 @@ const App = () => {
                 <Route path="/visits" element={<VisitsPage />} />
                 <Route path="/referrals" element={<AuthInitializationGate><ReferralsPage /></AuthInitializationGate>} />
                 <Route path="/install" element={<InstallPage />} />
+                <Route path={ROUTES.AGENT_CONNECT} element={<AgentConnectionPage />} />
                 {ShowDevPanel && <Route path="/share-simulator" element={<ShareSimulatorPage />} />}
                 <Route path="/incoming-share" element={<IncomingSharePage />} />
                 {ShowDevPanel && <Route path="/test-lab" element={<TestLabPage />} />}
