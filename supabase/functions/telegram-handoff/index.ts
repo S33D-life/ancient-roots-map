@@ -10,6 +10,7 @@
  *   continue          → Returns resume-where-you-left-off destination
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { CURRENT_CIRCLE } from "../_shared/currentCircle.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -798,7 +799,8 @@ Deno.serve(async (req: Request) => {
 
         return jsonResponse({
           ok: true,
-          council_url: `${appUrl}/council`,
+          council_url: CURRENT_CIRCLE.links.council.url,
+          current_circle: CURRENT_CIRCLE,
           linked: !!link,
           last_gathering: lastGathering ? {
             date: lastGathering.gathering_date,

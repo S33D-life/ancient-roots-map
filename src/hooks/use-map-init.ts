@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import L from "leaflet";
+import { mountBasemap } from "@/utils/mapBasemap";
 import { saveMapMemory, restoreMapMemory } from "@/hooks/use-map-memory";
 import { applySeasonalTint } from "@/utils/mapSeasonalTint";
 import { markTreeVisited, applyVisitedClass } from "@/utils/mapVisitedTracker";
@@ -81,6 +82,7 @@ export function useMapInit({
 }: MapInitOptions) {
   const [renderDebug, setRenderDebug] = useState<MapInitResult>(EMPTY_INIT_RESULT);
   const [atmosphereReady, setAtmosphereReady] = useState(false);
+  const basemapRef = useRef<ReturnType<typeof mountBasemap> | null>(null);
   const mapCleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -138,72 +140,12 @@ export function useMapInit({
         containerSize,
       });
 
-      const isRetina = window.devicePixelRatio > 1;
-      const primaryTileLayer = L.tileLayer(
-        safeBareMapMode
-          ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          : isRetina
-          ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
-          : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        {
-          attribution: safeBareMapMode ? '&copy; OpenStreetMap contributors' : '&copy; OSM &copy; CARTO',
-          maxZoom: 19,
-          subdomains: safeBareMapMode ? "abc" : "abcd",
-          keepBuffer: 4,
-        }
-      ).addTo(map);
-
-      const fallbackTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19,
-        subdomains: "abc",
-        keepBuffer: 4,
-      });
-
-      let tileLoadCount = 0;
-      let tileErrorCount = 0;
-      primaryTileLayer.on("loading", () => {
-        console.info(`${logPrefix} tiles loading…`);
-        setRenderDebug((prev) => ({ ...prev, tileStatus: "loading" }));
-      });
-      primaryTileLayer.on("load", () => {
-        console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`);
-        setRenderDebug((prev) => ({ ...prev, tileStatus: "loaded", tileLoads: tileLoadCount, tileErrors: tileErrorCount }));
-      });
-      primaryTileLayer.on("tileloadstart", (e: any) => {
-        if (safeMapDebug && e?.tile?.src) {
-          console.info(`${logPrefix} tileloadstart`, e.tile.src);
-        }
-      });
-
-      let tileErrors = 0;
-      let usingFallbackTiles = false;
-      const TILE_ERROR_THRESHOLD = 8;
-
-      const activateFallbackTiles = () => {
-        if (usingFallbackTiles) return;
-        usingFallbackTiles = true;
-        try {
-          if (map.hasLayer(primaryTileLayer)) map.removeLayer(primaryTileLayer);
-          fallbackTileLayer.addTo(map);
-          console.warn(`${logPrefix} Switched to OSM fallback tiles`);
-        } catch {}
-      };
-
-      primaryTileLayer.on("tileload", () => {
-        tileLoadCount += 1;
-        if (tileErrors > 0) tileErrors -= 1;
-      });
-
-      primaryTileLayer.on("tileerror", (e: any) => {
-        tileErrors += 1;
-        tileErrorCount += 1;
-        setRenderDebug((prev) => ({ ...prev, tileStatus: "failed", tileErrors: tileErrorCount }));
-        console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 160));
-        if (tileErrors >= (safeMapDebug ? 1 : TILE_ERROR_THRESHOLD)) {
-          activateFallbackTiles();
-        }
-      });
+      basemapRef.current = mountBasemap(
+        map,
+        import.meta.env.VITE_CARTO_BASEMAP_API_KEY,
+        safeBareMapMode,
+        (status) => setRenderDebug((prev) => ({ ...prev, ...status })),
+      );
 
       L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
       L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -289,6 +231,8 @@ export function useMapInit({
         cleanupPopupActions();
         sizeObserver.disconnect();
         window.removeEventListener('resize', onResize);
+        basemapRef.current?.dispose();
+        basemapRef.current = null;
         map.remove();
         mapRef.current = null;
         clusterRef.current = null;
@@ -321,5 +265,5 @@ export function useMapInit({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { renderDebug, atmosphereReady };
+  return { renderDebug, atmosphereReady, retryTiles: () => basemapRef.current?.retry(), useOsmTiles: () => basemapRef.current?.useOsm() };
 }

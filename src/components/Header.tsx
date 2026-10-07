@@ -1,3 +1,4 @@
+import { useSessionState } from "@/hooks/use-session-state";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { TreeDeciduous, BookOpen, Leaf, Crown, Search } from "lucide-react";
@@ -102,7 +103,7 @@ function getPageContext(pathname: string): string | null {
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { user, status: authStatus } = useSessionState();
 
   const [tetolOpen, setTetolOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
@@ -143,17 +144,7 @@ const Header = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+
 
   
 
@@ -277,7 +268,7 @@ const Header = () => {
               {user && <HeartJar userId={user.id} />}
 
               {/* Login for non-authenticated users */}
-              {!user && (
+              {authStatus === "UNAUTHENTICATED" && (
                 <Button variant="sacred" size="sm" asChild>
                   <Link to="/auth">Login</Link>
                 </Button>

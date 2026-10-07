@@ -48,6 +48,10 @@ export const ROUTES = {
   HARVEST_DETAIL: (id: string) => `/harvest/${id}` as const,
   /** Living Forest Roadmap */
   ROADMAP: "/roadmap",
+  /** The Crown — yOur Golden Dream */
+  GOLDEN_DREAM: "/golden-dream",
+  /** Crown Growth Folio (read-only) */
+  CROWN_GROWTH: (id: string) => `/golden-dream/growth/${id}` as const,
   /** Species Hives index */
   HIVES: "/hives",
   /** Species Hive dashboard */
@@ -60,6 +64,7 @@ export const ROUTES = {
   WANDERER: (id: string) => `/wanderer/${id}` as const,
   /** Authentication */
   AUTH: "/auth",
+  AUTH_CALLBACK: "/auth/callback",
   /** Installed-app sign-in handoff landing page */
   AUTH_HANDOFF: "/auth/handoff",
   /** Sign-in diagnostics panel (requires ?diag=1) */

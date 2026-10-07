@@ -165,3 +165,10 @@
 }
 .tree-zoom-pulse{animation:treeZoomPulse 1.2s ease-out!important;border-radius:50%}
 @media(prefers-reduced-motion:reduce){.tree-zoom-pulse{animation:none!important}}
+
+/* Keep provider attribution above the mobile bottom navigation. */
+@media (max-width: 767px) {
+  .atlas-map-canvas .leaflet-bottom {
+    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

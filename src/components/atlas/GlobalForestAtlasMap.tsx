@@ -8,6 +8,7 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import L from "leaflet";
+import { mountBasemap, type BasemapStatus } from "@/utils/mapBasemap";
 import "leaflet/dist/leaflet.css";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +102,8 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<L.Map | null>(null);
   const layerGroup = useRef<L.LayerGroup | null>(null);
+  const basemapRef = useRef<ReturnType<typeof mountBasemap> | null>(null);
+  const [tileStatus, setTileStatus] = useState<BasemapStatus["tileStatus"]>("idle");
   const [selectedNode, setSelectedNode] = useState<RegionNode | null>(null);
   const navigate = useNavigate();
 
@@ -157,11 +160,9 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // Vintage warm tiles
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 19, subdomains: "abcd" }
-    ).addTo(map);
+    L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
+    const basemap = mountBasemap(map, import.meta.env.VITE_CARTO_BASEMAP_API_KEY, false, (status) => setTileStatus(status.tileStatus));
+    basemapRef.current = basemap;
 
     // Warm vignette overlay
     const vignettePane = map.createPane("vignette");
@@ -174,6 +175,8 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
     layerGroup.current = L.layerGroup().addTo(map);
 
     return () => {
+      basemap.dispose();
+      basemapRef.current = null;
       map.remove();
       leafletMap.current = null;
       layerGroup.current = null;
@@ -292,6 +295,15 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
   }, []);
 
   return (
+    <div>
+      {tileStatus === "failed" && (
+        <div role="status" className="mb-3 rounded-lg border border-border bg-background p-3 text-sm">
+          <p>Map background unavailable. You can still explore forest regions.</p>
+          <button className="mt-2 min-h-11 underline" onClick={() => basemapRef.current?.retry()}>
+            Retry map background
+          </button>
+        </div>
+      )}
     <div className="relative w-full" style={{ height: "min(65vh, 520px)" }}>
       {/* Map container */}
       <div ref={mapRef} className="absolute inset-0 rounded-xl overflow-hidden border border-border/20" />
@@ -413,6 +425,7 @@ export default function GlobalForestAtlasMap({ countryStats }: Props) {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
