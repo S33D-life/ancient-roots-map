@@ -15,14 +15,16 @@
     "guard:config-churn": "node scripts/assert-no-churn-writers.mjs",
     "guard:assets": "node scripts/asset-budget.mjs",
     "check:duplicates": "node scripts/check-duplicate-artifacts.mjs",
-    "release-check": "npm run typecheck && npm run lint && npm run security:check && npm run check:duplicates && npm run guard:assets && npm run test && npm run build",
+    "release-check": "npm run council:share:check && npm run typecheck && npm run lint && npm run security:check && npm run check:duplicates && npm run guard:assets && npm run test && npm run build",
     "import:rootstones": "node scripts/import-rootstones.mjs",
     "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs",
     "open:country": "node scripts/open-country.mjs",
     "seed:country": "node scripts/seed-country.mjs",
     "seed:hong-kong": "node scripts/seed-hong-kong.mjs",
     "e2e": "playwright test",
-    "e2e:install": "playwright install --with-deps chromium"
+    "e2e:install": "playwright install --with-deps chromium",
+    "council:share": "node scripts/council-share.mjs",
+    "council:share:check": "node scripts/council-share.mjs --check"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.3",

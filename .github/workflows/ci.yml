@@ -46,6 +46,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Invitation freshness
+        run: npm run council:share:check
+
       - name: Unit tests (vitest)
         run: npm run test
 
