@@ -48,6 +48,10 @@ export const ROUTES = {
   HARVEST_DETAIL: (id: string) => `/harvest/${id}` as const,
   /** Living Forest Roadmap */
   ROADMAP: "/roadmap",
+  /** The Crown — yOur Golden Dream */
+  GOLDEN_DREAM: "/golden-dream",
+  /** Crown Growth Folio (read-only) */
+  CROWN_GROWTH: (id: string) => `/golden-dream/growth/${id}` as const,
   /** Species Hives index */
   HIVES: "/hives",
   /** Species Hive dashboard */

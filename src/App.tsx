@@ -113,6 +113,7 @@ const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"),
 const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "welcome");
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
+const GrowthFolioPage = lazyImportWithRetry(() => import("./pages/GrowthFolioPage"), "growth-folio");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
 const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/CouncilRecordsPage"), "council-records");
 const CouncilSessionPage = lazyImportWithRetry(() => import("./pages/council/CouncilSessionPage"), "council-session");
@@ -354,6 +355,7 @@ const App = () => {
                 <Route path="/welcome" element={<WelcomePage />} />
                 <Route path="/email-confirmed" element={<Navigate to="/welcome" replace />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
+                <Route path="/golden-dream/growth/:growthId" element={realm(<GrowthFolioPage />, "crown")} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
                 <Route path="/council/records/:id" element={realm(<CouncilSessionPage />, "canopy")} />

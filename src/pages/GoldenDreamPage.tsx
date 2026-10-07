@@ -1,5 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,6 +7,8 @@ import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
 import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/routes";
+import { ONE_CIRCLE_MANY_SURFACES } from "@/data/crown/growths";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 import LevelEntrance from "@/components/LevelEntrance";
@@ -243,6 +245,15 @@ const GoldenDreamPage = () => {
               );
             })}
           </div>
+
+          <p className="mt-10 text-center text-sm font-serif">
+            <Link
+              to={ROUTES.CROWN_GROWTH(ONE_CIRCLE_MANY_SURFACES.id)}
+              className="underline underline-offset-4 decoration-primary/60 hover:text-primary transition-colors"
+            >
+              Growth folio · {ONE_CIRCLE_MANY_SURFACES.title}
+            </Link>
+          </p>
         </div>
         <TetolBridge />
       </main>
