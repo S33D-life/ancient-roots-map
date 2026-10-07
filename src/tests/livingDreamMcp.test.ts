@@ -22,6 +22,15 @@ const [circleTool, listTool, detailTool] = createLivingDreamTools();
 afterEach(() => vi.restoreAllMocks());
 
 describe("Living Dream read-only MCP", () => {
+  it("pins the manifest, npm lock and installed generator to the reviewed SDK", () => {
+    const manifest = JSON.parse(readFileSync("package.json", "utf8"));
+    const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
+    const installed = JSON.parse(readFileSync("node_modules/@lovable.dev/mcp-js/package.json", "utf8"));
+    expect(manifest.dependencies["@lovable.dev/mcp-js"]).toBe("0.26.3");
+    expect(lock.packages[""].dependencies["@lovable.dev/mcp-js"]).toBe("0.26.3");
+    expect(lock.packages["node_modules/@lovable.dev/mcp-js"].version).toBe("0.26.3");
+    expect(installed.version).toBe("0.26.3");
+  });
   it("registers exactly the four original and three supported tools; priorities remain held", () => {
     expect(mcp.tools.map(t => t.name)).toEqual(["search_trees", "get_tree", "list_my_trees", "whoami", "get_current_circle", "list_growth_items", "get_growth_item"]);
     expect(mcp.auth).toBeDefined();
@@ -80,6 +89,11 @@ describe("Living Dream read-only MCP", () => {
     }));
     expect(response.status).toBe(401);
   });
+  it.each(["GET", "PUT", "DELETE"])("authenticates unsupported %s requests before method rejection", async method => {
+    const response = await createMcpProtocolHandler(mcp)(new Request("https://s33d.life/mcp", { method }));
+    expect(response.status).toBe(401);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
   it("serves discovery and all three tools after actual JWT verification", async () => {
     const issuer = "https://test.invalid/auth";
     const { publicKey, privateKey } = generateKeyPairSync("ec", { namedCurve: "prime256v1" });
@@ -89,6 +103,11 @@ describe("Living Dream read-only MCP", () => {
     const unsigned = `${encode({ alg: "ES256", kid: "test-key", typ: "JWT" })}.${encode({ iss: issuer, aud: "authenticated", sub: "test-user", client_id: "test-client", exp: Math.floor(Date.now() / 1000) + 300 })}`;
     const token = `${unsigned}.${sign("sha256", Buffer.from(unsigned), { key: privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url")}`;
     const handler = createMcpProtocolHandler({ ...mcp, auth: { ...mcp.auth!, issuer, jwksUri: "https://test.invalid/jwks" } });
+    const unsupported = await handler(new Request("https://s33d.life/mcp", {
+      method: "GET", headers: { Authorization: `Bearer ${token}` },
+    }));
+    expect(unsupported.status).toBe(405);
+    expect(unsupported.headers.get("cache-control")).toBe("no-store");
     const discovery = await handler(new Request("https://s33d.life/mcp", {
       method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ jsonrpc: "2.0", id: 4, method: "tools/list", params: {} }),
