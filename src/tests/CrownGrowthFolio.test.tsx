@@ -47,7 +47,7 @@ describe("Growth Folio", () => {
     expect(within(dev).queryByText("Growing")).not.toBeInTheDocument();
     expect(within(dev).getAllByText("Merged").length).toBeGreaterThan(0);
     expect(within(dev).getByText("Held")).toBeInTheDocument();
-    expect(within(dev).getByText("Candidate · testing")).toBeInTheDocument();
+    expect(within(dev).queryByText("Candidate · testing")).not.toBeInTheDocument();
   });
 
   it("derives Taproot facts from the live Current Circle source", () => {

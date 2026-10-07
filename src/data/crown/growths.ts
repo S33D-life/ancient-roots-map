@@ -97,7 +97,7 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
       { realm: "canopy", weight: "primary", where: "Council of Life page, Council Deck doorway, Telegram Council command" },
       { realm: "taproot", weight: "secondary", where: "Shared Current Circle module, publishing boundary, invitation freshness check" },
       { realm: "heartwood", weight: "light", where: "Checked-in invitation, regenerated from the Current Circle" },
-      { realm: "embodied-tetol", weight: "pending", where: "Static 3D Council labels and return path (candidate only)" },
+      { realm: "embodied-tetol", weight: "light", where: "Static 3D Council labels, destinations and return path (geometry unchanged)" },
     ],
     notTouched: [
       "Ancient Friends tree records (the Holm Oak appears by name only)",
@@ -118,6 +118,7 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
       { path: "src/components/council/CouncilDeckDoorway.tsx", role: "Council Deck doorway" },
       { path: "src/lib/council/currentCircleShare.ts", role: "Invitation / share projection" },
       { path: "supabase/functions/_shared/councilPublishing.ts", role: "Telegram publishing boundary" },
+      { path: "src/lib/council/staticCouncilAdapter.ts", role: "Static 3D Council adapter" },
     ],
   },
   releaseLine: {
@@ -128,6 +129,7 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
       { sha: "c54971970131", label: "#80 Current Circle + Telegram path" },
       { sha: "2d5393df75b3", label: "#85 Council Deck doorway" },
       { sha: "9e478d18fb0143834e96a855d2b21a3026a65281", label: "#86 checked-in invitation" },
+      { sha: "9055912a04acd83b21a3aad9abd37e6d92e37f46", label: "#87 static 3D Council inheritance · reviewed release head" },
     ],
   },
   seams: [
@@ -170,11 +172,11 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
       open: ["The external share pack keeps its own manifest and is not yet wired to the Current Circle."],
     },
     {
-      id: "static-3d", surface: "3D Council inheritance", state: "testing",
-      branch: "codex/current-circle-static-council", commits: ["234c96e6e6d3"],
-      evidence: [{ path: "docs/council/Current-Circle-static-seam.md", onBranch: "codex/current-circle-static-council" }],
-      testsRecorded: "Static adapter unit tests and a static Council browser test on the branch.",
-      open: ["Unmerged candidate. Embodied TETOL changes wait for conscious approval."],
+      id: "static-3d", surface: "3D Council inheritance", state: "merged",
+      branch: "codex/current-circle-static-council", commits: ["87a15a022c88", "234c96e6e6d3", "2bda8b834194"], pr: 87, mergeSha: "9055912a04ac",
+      evidence: [{ path: "docs/council/Current-Circle-static-seam.md" }],
+      testsRecorded: "Static adapter unit tests; bounded static Council browser regression at desktop and phone widths in CI. Full 3D renderer checked locally only.",
+      open: ["Labels and destinations only; static companion names and learning threads remain duplicated by design."],
     },
   ],
   handoffs: [
@@ -192,7 +194,6 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
   },
   nextDecisions: [
     "Whether the release line is deployed. Production still serves an earlier build.",
-    "Whether the 3D Council candidate is reviewed and allowed to inherit the Current Circle.",
     "When, if ever, Telegram may send. Code is ready; sending is held.",
     "Where Heartwood should remember this growth's decisions.",
   ],

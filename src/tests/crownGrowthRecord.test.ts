@@ -112,9 +112,17 @@ describe("Dev Room evidence", () => {
     expect(placeBuild("abc", line)).toEqual({ kind: "elsewhere", build: "abc" });
   });
 
-  it("always reports candidate and held seams as open", () => {
-    const p = placeBuild("9e478d18", line);
+  it("always reports held seams as open, even at the reviewed release head", () => {
+    const p = placeBuild("9055912a", line);
     const open = stillOpen(G, p);
-    expect(open.map(o => o.seam.id).sort()).toEqual(["static-3d", "telegram"]);
+    expect(open.map(o => o.seam.id)).toEqual(["telegram"]);
+  });
+
+  it("places the #87 static 3D inheritance after #86 on the release line", () => {
+    const p = placeBuild("9e478d18", line);
+    const staticSeam = G.seams.find(s => s.id === "static-3d")!;
+    expect(staticSeam.state).toBe("merged");
+    expect(seamInBuild(staticSeam, p, line)).toBe(false);
+    expect(seamInBuild(staticSeam, placeBuild("9055912a", line), line)).toBe(true);
   });
 });
