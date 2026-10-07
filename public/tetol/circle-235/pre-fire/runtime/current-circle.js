@@ -1,99 +1,51 @@
 // Generated from approved Current Circle. Run npm run council:static.
 (() => {
-  // supabase/functions/_shared/currentCircle.ts
-  var CURRENT_CIRCLE = {
-    number: 235,
-    title: "Circle 235 \xB7 yOur Blooming Week",
-    weekState: "Open Circle",
-    openLine: "The Circle is open now. Times will be shared in the group as each fire is lit.",
-    question: "What is already blooming in us that we haven\u2019t noticed yet?",
-    companions: ["Fulham Palace Holm Oak", "Apple Blossom", "Dragon Fruit / Pitaya", "Fly Agaric", "Hen Harrier", "Peter Pan"],
-    peopleSeat: "People / those who gather hold the open seventh seat.",
-    companionsLabel: "This week\u2019s companions, chosen by Leo",
-    safetyLabel: "Fly Agaric",
-    safety: "Toxic \xB7 Meet with care \xB7 Never eat.",
-    approval: "approved",
-    revision: "circle-235-ce9bab5",
-    links: {
-      council: { url: "https://www.s33d.life/council-of-life", approved: true },
-      tetol: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", approved: true },
-      group: { url: "https://t.me/s33dlife", approved: true },
-      councilDeck: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom", approved: true }
-    }
-  };
-  function approvedCircleUrl(link) {
-    if (!link?.approved) return void 0;
-    try {
-      const u = new URL(link.url);
-      if (u.protocol !== "https:" || u.username || u.password || u.port) return void 0;
-      if (!["www.s33d.life", "s33d.life", "t.me", "meet.google.com"].includes(u.hostname)) return void 0;
-      return u.href;
-    } catch {
-      return void 0;
-    }
-  }
-
   // src/lib/council/staticCouncilAdapter.ts
-  function staticCouncilProjection(circle = CURRENT_CIRCLE) {
-    if (circle.approval !== "approved") return null;
-    return {
-      number: circle.number,
-      title: circle.title,
-      question: circle.question,
-      weekState: circle.weekState,
-      openLine: circle.openLine,
-      companionsLabel: circle.companionsLabel,
-      revision: circle.revision,
-      links: Object.fromEntries(Object.entries(circle.links).flatMap(([key, link]) => {
-        const url = approvedCircleUrl(link);
-        return url ? [[key, url]] : [];
-      }))
-    };
-  }
-  function applyStaticCouncil(registry, circle) {
+  function applyStaticCouncil(registry, circle2) {
     const manifest = registry.circles[registry.registry.current];
-    if (!circle || circle.number !== manifest.circle_number) throw new Error("Approved Current Circle does not match this static Council package");
-    manifest.title = circle.title.replace(`Circle ${circle.number} \xB7 `, "");
-    manifest.central_question.text = manifest.central_question.final = circle.question;
+    if (!circle2 || circle2.number !== manifest.circle_number) throw new Error("Approved Current Circle does not match this static Council package");
+    manifest.title = circle2.title.replace(`Circle ${circle2.number} \xB7 `, "");
+    manifest.central_question.text = manifest.central_question.final = circle2.question;
     manifest.central_question.status = "TEOTAG APPROVED";
-    manifest.fire.display_note = manifest.fire.display_when_unknown = circle.openLine;
+    manifest.fire.display_note = manifest.fire.display_when_unknown = circle2.openLine;
     manifest.fire.fires = [];
-    manifest.join_link.href = circle.links.fire || null;
-    manifest.join_link.platform = circle.links.fire ? "Council room" : "TBC";
-    manifest.join_link.status = circle.links.fire ? "APPROVED" : "TBC";
+    manifest.join_link.href = circle2.links.fire || null;
+    manifest.join_link.platform = circle2.links.fire ? "Council room" : "TBC";
+    manifest.join_link.status = circle2.links.fire ? "APPROVED" : "TBC";
     Object.assign(manifest.tetol_surfaces, {
-      fire_unknown: circle.openLine,
-      fire_unknown_short: circle.weekState,
-      welcome_fire_unknown: circle.openLine,
-      join_pending: circle.openLine
+      fire_unknown: circle2.openLine,
+      fire_unknown_short: circle2.weekState,
+      welcome_fire_unknown: circle2.openLine,
+      join_pending: circle2.openLine
     });
     Object.assign(manifest.links, {
-      council_of_life: circle.links.council || null,
-      s33d_council: circle.links.council || null,
-      tetol: circle.links.tetol || null,
-      group: circle.links.group || null,
-      councilDeck: circle.links.councilDeck || null,
-      join: circle.links.fire || null
+      council_of_life: circle2.links.council || null,
+      s33d_council: circle2.links.council || null,
+      tetol: circle2.links.tetol || null,
+      group: circle2.links.group || null,
+      councilDeck: circle2.links.councilDeck || null,
+      join: circle2.links.fire || null
     });
-    return circle;
+    return circle2;
   }
-  function councilReturnUrl(circle) {
-    if (!circle?.links.council) return null;
-    const url = new URL(circle.links.council);
+  function councilReturnUrl(circle2) {
+    if (!circle2?.links.council) return null;
+    const url = new URL(circle2.links.council);
     if (url.pathname !== "/council-of-life") return null;
     return url.pathname + "?from=spatial-council#next-gathering";
   }
-  if (typeof window !== "undefined") {
-    Object.assign(window, { S33D_APPLY_CURRENT_CIRCLE: (registry) => applyStaticCouncil(registry, staticCouncilProjection()) });
-    window.addEventListener("tetol:current-circle", () => {
-      const circle = staticCouncilProjection(), href = councilReturnUrl(circle);
-      if (!href) return;
-      const link = document.createElement("a");
-      link.href = href;
-      link.textContent = "Return to Council of Life";
-      link.className = "home";
-      link.id = "council-return";
-      document.querySelector("#hdr")?.appendChild(link);
-    });
-  }
+
+  // static-council-runtime.js
+  var circle = { "number": 235, "title": "Circle 235 \xB7 yOur Blooming Week", "question": "What is already blooming in us that we haven\u2019t noticed yet?", "weekState": "Open Circle", "openLine": "The Circle is open now. Times will be shared in the group as each fire is lit.", "companionsLabel": "This week\u2019s companions, chosen by Leo", "revision": "circle-235-ce9bab5", "links": { "council": "https://www.s33d.life/council-of-life", "tetol": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", "group": "https://t.me/s33dlife", "councilDeck": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom" } };
+  window.S33D_APPLY_CURRENT_CIRCLE = (registry) => applyStaticCouncil(registry, circle);
+  window.addEventListener("tetol:current-circle", () => {
+    const href = councilReturnUrl(circle);
+    if (!href) return;
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = "Return to Council of Life";
+    link.className = "home";
+    link.id = "council-return";
+    document.querySelector("#hdr")?.appendChild(link);
+  });
 })();

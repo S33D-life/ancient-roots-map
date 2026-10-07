@@ -36,15 +36,3 @@ export function councilReturnUrl(circle: ReturnType<typeof staticCouncilProjecti
   if (url.pathname !== "/council-of-life") return null;
   return url.pathname + "?from=spatial-council#next-gathering";
 }
-
-if (typeof window !== "undefined") {
-  Object.assign(window, { S33D_APPLY_CURRENT_CIRCLE: (registry) => applyStaticCouncil(registry, staticCouncilProjection()) });
-  window.addEventListener("tetol:current-circle", () => {
-    const circle = staticCouncilProjection(), href = councilReturnUrl(circle);
-    if (!href) return;
-    const link = document.createElement("a");
-    link.href = href; link.textContent = "Return to Council of Life"; link.className = "home";
-    link.id = "council-return";
-    document.querySelector("#hdr")?.appendChild(link);
-  });
-}

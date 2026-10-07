@@ -36,6 +36,13 @@ describe("static Council adapter", () => {
     expect(councilReturnUrl(staticCouncilProjection())).toBe("/council-of-life?from=spatial-council#next-gathering");
     expect(councilReturnUrl(staticCouncilProjection({ ...CURRENT_CIRCLE, links: { ...CURRENT_CIRCLE.links, council: { ...CURRENT_CIRCLE.links.council, approved: false } } }))).toBeNull();
   });
+  it("publishes only filtered data rather than the raw shared state", () => {
+    const artifact = readFileSync("public/tetol/circle-235/pre-fire/runtime/current-circle.js", "utf8");
+    expect(artifact).not.toMatch(/(?:var|const) CURRENT_CIRCLE\b/);
+    expect(artifact).not.toContain("Fulham Palace Holm Oak");
+    expect(artifact).not.toContain("approved: true");
+    expect(artifact).toContain("What is already blooming");
+  });
   it("loads the generated artifact before legacy consumers in the unpacked template", () => {
     const html = readFileSync("public/tetol/circle-235/pre-fire/tetol.html", "utf8");
     const template = JSON.parse(html.match(/<script type="__bundler\/template">([\s\S]*?)<\/script>/)[1]);
