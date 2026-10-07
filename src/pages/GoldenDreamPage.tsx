@@ -249,7 +249,7 @@ const GoldenDreamPage = () => {
           <p className="mt-10 text-center text-sm font-serif">
             <Link
               to={ROUTES.CROWN_GROWTH(ONE_CIRCLE_MANY_SURFACES.id)}
-              className="underline underline-offset-4 decoration-primary/60 hover:text-primary transition-colors"
+              className="inline-block rounded-full bg-card/70 backdrop-blur-sm border border-border/50 px-4 py-2 underline-offset-4 decoration-primary/60 hover:underline hover:text-primary transition-colors"
             >
               Growth folio · {ONE_CIRCLE_MANY_SURFACES.title}
             </Link>

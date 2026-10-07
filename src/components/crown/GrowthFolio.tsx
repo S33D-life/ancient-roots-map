@@ -135,7 +135,7 @@ export default function GrowthFolio({ growth, build = servingBuild() }: { growth
         aria-labelledby="folio-title"
         className="parchment-card bg-background text-foreground mx-auto max-w-3xl px-5 py-7 sm:px-10 sm:py-10 leading-relaxed"
       >
-        <header className="mb-8">
+        <div className="mb-8">
           <p className="text-xs tracking-[0.25em] uppercase text-muted-foreground flex items-center gap-2">
             <Feather className="h-3.5 w-3.5 text-primary" aria-hidden /> Crown · Growth folio
           </p>
@@ -143,7 +143,7 @@ export default function GrowthFolio({ growth, build = servingBuild() }: { growth
           <p className="font-serif italic text-muted-foreground mt-1">{growth.subtitle}</p>
           {growth.titleNote && <p className="text-sm text-muted-foreground mt-2">{growth.titleNote}</p>}
           <p className="text-sm mt-4">Read-only. Nothing on this page changes anything.</p>
-        </header>
+        </div>
 
         <Section n="I" kicker="Crown" title="Where this growth came from" id="folio-origin">
           <div className="space-y-2">{growth.origin.map(line => <p key={line}>{line}</p>)}</div>
