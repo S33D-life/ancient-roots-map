@@ -30,7 +30,7 @@ npm run guard:assets        # asset bundle size budget
 
 **`npm run release-check` must pass before opening a PR.** CI runs identical steps.
 
-> Known issue: `security:check` currently fails on `main` because the Supabase anon key fallback in `src/config/env.ts` trips the generic JWT regex. A pragma-based allowlist fix is planned (see CURRENT_TASKS.md Phase 3).
+> `security:check` passes on `main`: the anon-key fallback in `src/config/env.ts` is allowlisted by pragma (PR #18, see CURRENT_TASKS.md, 2026-05-29).
 
 ## Branch rules
 
