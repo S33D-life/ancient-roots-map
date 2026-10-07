@@ -10,6 +10,7 @@
  * - Deep-link /start payloads (invite_CODE, login, connect, tree_ID, room_*, etc.)
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderCouncilInvite } from "../_shared/councilPublishing.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const MAX_RUNTIME_MS = 55_000;
@@ -505,7 +506,11 @@ Deno.serve(async () => {
           break;
         }
 
-        case "council":
+        case "council": {
+          const invite = renderCouncilInvite();
+          await sendMessage(chatId, invite.text, LOVABLE_API_KEY, TELEGRAM_API_KEY, invite.reply_markup);
+          break;
+        }
         case "plant": {
           try {
             const councilResp = await supabase.functions.invoke("telegram-handoff", {
