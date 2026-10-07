@@ -26,7 +26,8 @@
     "council:share": "node scripts/council-share.mjs",
     "council:share:check": "node scripts/council-share.mjs --check",
     "council:static": "node scripts/static-council.mjs",
-    "council:static:check": "node scripts/static-council.mjs --check"
+    "council:static:check": "node scripts/static-council.mjs --check",
+    "crown:growth:check": "node scripts/crown-growth-check.mjs"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.3",
