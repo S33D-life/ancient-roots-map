@@ -126,7 +126,7 @@ describe("Dev Room evidence", () => {
     ]);
     // The latest recorded main is a repository fact only: no deployment or live claim.
     const latest = G.releaseLine.points.at(-1)!.label;
-    expect(latest).toContain("publication and live verification not recorded here");
+    expect(latest).toBe("PR #90 Living Dream read layer and MCP SDK alignment merged into main; publication and live verification are not recorded here.");
     expect(latest).not.toMatch(/\b(deployed|verified live|is live|serving)\b/i);
     expect(G.seams.find(s => s.pr === 88)?.state).toBe("merged");
     expect(G.seams.find(s => s.pr === 89)?.state).toBe("merged");

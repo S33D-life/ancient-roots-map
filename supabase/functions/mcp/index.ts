@@ -352,7 +352,7 @@ var ONE_CIRCLE_MANY_SURFACES = {
       { sha: "4e3281de8854cef05c21ce115898ec002190fc83", label: "#89 reviewed release / main reconciliation" },
       { sha: "84716ebd7984cf4657b8d2ea8da9423f35f6c672", label: "Published release source \xB7 route verification remains open" },
       { sha: "da5209feae985426c86bcad9d27cd2a1c02ae815", label: "Agent connection guide (/connect) added on main" },
-      { sha: "40709eeabd5602c43fb919f807c2a5dac63f36e7", label: "#90 MCP SDK alignment \xB7 latest recorded main; publication and live verification not recorded here" }
+      { sha: "40709eeabd5602c43fb919f807c2a5dac63f36e7", label: "PR #90 Living Dream read layer and MCP SDK alignment merged into main; publication and live verification are not recorded here." }
     ]
   },
   seams: [
