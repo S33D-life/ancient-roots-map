@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
+import EmbeddedCouncilDeck from "@/components/council/EmbeddedCouncilDeck";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import CouncilDeckDoorway from "@/components/council/CouncilDeckDoorway";
 import CuratorEditor from "@/components/council/CuratorEditor";
@@ -73,7 +74,7 @@ const CouncilOfLifePage = () => {
       <ParchmentGround realm="canopy">
         <Header />
         <main className="parchment-main">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto parchment-room-content">
             <Button variant="ghost" size="sm" onClick={() => setActiveRoom(null)} className="text-muted-foreground hover:text-foreground mb-4">
               ← Back to Council
             </Button>
@@ -104,7 +105,7 @@ const CouncilOfLifePage = () => {
             <div><h2>The spatial deck</h2><p>Enter TETOL’s Council of Life deck and explore the Canopy.</p>{deckUrl && <><button type="button" className="parchment-action" aria-expanded={deckOpen} aria-controls="council-deck-preview" onClick={() => setDeckOpen(open => !open)}>{deckOpen ? "Close the deck" : "Enter the deck here"} →</button><div><CouncilDeckDoorway /></div></>}</div>
             <div><h2>The 2D Council</h2><p>Read the Current Circle, open the Council chamber and follow its records.</p><button type="button" className="parchment-action" onClick={() => setActiveRoom("chamber")}>Open the 2D Council →</button><div><a className="parchment-action" href="#next-gathering">Read the Current Circle ↓</a></div></div>
           </div>
-          {deckOpen && deckUrl && <div className="parchment-deck-frame" id="council-deck-preview"><p>The existing TETOL deck, carried into this Canopy. You can also open the public Council Deck in its own tab.</p><iframe src={localDeckUrl} title="TETOL Council of Life spatial deck" allow="fullscreen" allowFullScreen /><a href={deckUrl} target="_blank" rel="noopener noreferrer" className="parchment-action">Open the Council Deck in a new tab →</a></div>}
+          {deckOpen && deckUrl && <div className="parchment-deck-frame" id="council-deck-preview"><p>The existing TETOL deck, carried into this Canopy. You can also open the public Council Deck in its own tab.</p><EmbeddedCouncilDeck src={localDeckUrl!} onReturn={() => { setDeckOpen(false); requestAnimationFrame(() => document.getElementById("next-gathering")?.scrollIntoView({ block: "start", behavior: "instant" })); }} /><a href={deckUrl} target="_blank" rel="noopener noreferrer" className="parchment-action">Open the Council Deck in a new tab →</a></div>}
         </section>
         <div className="parchment-council-body"><div className="parchment-room-content">
           {/* ── 1. Next Gathering — primary entry ── */}

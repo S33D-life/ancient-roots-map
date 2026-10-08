@@ -56,7 +56,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide }: {
 
   return <header className="parchment-header">
     <div className="parchment-header-bar">
-      <Link to={back.to} className="parchment-back"><ArrowLeft size={17} aria-hidden="true" /><span>{back.label.replace("Return to the ", "")}</span></Link>
+      <Link to={back.to} className="parchment-back"><ArrowLeft size={17} aria-hidden="true" /><span>{"short" in back ? back.short : back.label.replace("Return to the ", "")}</span></Link>
       <span className="parchment-realm">{realm === "canopy" ? "Canopy" : realm}</span>
       <nav className="parchment-desktop-index" aria-label="Tree realms">
         {treeLinks.slice(0, 4).map(link => <Link key={link.to} to={link.to} aria-current={realm === link.realm ? "page" : undefined}>{link.label}</Link>)}
@@ -68,8 +68,8 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide }: {
     </div>
     {open && <div ref={menu} id="parchment-tree-index" className="parchment-tree-panel">
       <div className="parchment-menu-heading"><span className="parchment-realm">One Tree</span><button type="button" onClick={close} aria-label="Close Tree index"><X size={20} /></button></div>
-      <nav aria-label="Tree index">{treeLinks.map(link => <Link key={link.to} to={link.to} aria-current={realm === link.realm ? "page" : undefined}><span>{link.label}</span><em>{link.sub}</em></Link>)}</nav>
-      <details><summary>Heartwood rooms</summary><nav aria-label="Heartwood rooms">{HEARTWOOD_ROOMS.map(room => <Link key={room.key} to={room.route}>{room.label}</Link>)}</nav></details>
+      <nav aria-label="Tree index" onClick={() => setOpen(false)}>{treeLinks.map(link => <Link key={link.to} to={link.to} aria-current={realm === link.realm ? "page" : undefined}><span>{link.label}</span><em>{link.sub}</em></Link>)}</nav>
+      <details><summary>Heartwood rooms</summary><nav aria-label="Heartwood rooms" onClick={() => setOpen(false)}>{HEARTWOOD_ROOMS.map(room => <Link key={room.key} to={room.route}>{room.label}</Link>)}</nav></details>
       <div className="parchment-menu-utilities"><button type="button" onClick={() => { setOpen(false); onSearch(); }}>Search the Tree</button><ThemeToggle /><MoonGlyph variant="seal" /><button type="button" onClick={() => { setOpen(false); onGuide(); }}>TEOTAG</button><Link to={signedIn ? "/dashboard" : "/auth"}>{signedIn ? "Your Hearth" : "Sign in"}</Link></div>
     </div>}
   </header>;

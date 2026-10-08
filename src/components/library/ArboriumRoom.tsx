@@ -122,9 +122,9 @@ export default function ArboriumRoom() {
             </div>
             <FamilyModeToggle active={familyMode} onToggle={toggle} />
           </div>
-          <h1 className="mt-3 font-serif text-2xl md:text-3xl leading-tight text-[hsl(95_30%_17%)] dark:text-[hsl(45_55%_88%)]">
+          <h2 className="mt-3 font-serif text-2xl md:text-3xl leading-tight text-[hsl(95_30%_17%)] dark:text-[hsl(45_55%_88%)]">
             {familyMode ? "Meet the trees" : "Learn to read the forest"}
-          </h1>
+          </h2>
           <p className="mt-2.5 font-serif text-sm md:text-base leading-relaxed text-[hsl(95_15%_28%)]/82 dark:text-[hsl(45_25%_78%)]/85 max-w-lg">
             {familyMode
               ? "Look at a leaf. Touch the bark. Find a seed. Each tree has clues — and you can learn to spot them."

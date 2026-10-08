@@ -153,9 +153,9 @@ const ScrollsRoom = () => {
         <p className="text-[10px] uppercase tracking-[0.35em] font-serif text-muted-foreground/70">
           The Cycle Trunk
         </p>
-        <h1 className="font-serif text-2xl md:text-3xl text-foreground/90">
+        <h2 className="font-serif text-2xl md:text-3xl text-foreground/90">
           Every moon, the trunk grows one ring.
-        </h1>
+        </h2>
         <p className="text-sm font-serif italic text-muted-foreground/80">
           Three voices sign it. The forest remembers.
         </p>

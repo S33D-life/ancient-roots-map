@@ -571,7 +571,7 @@ export default function QuestCaveRoom() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 border border-primary/30 mb-3">
             <Mountain className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="font-serif text-2xl text-foreground tracking-wide">🜨 Quest Cave</h1>
+          <h2 className="font-serif text-2xl text-foreground tracking-wide">🜨 Quest Cave</h2>
           <p className="text-xs font-serif text-muted-foreground/80 mt-1 italic max-w-md mx-auto">
             Where real-world actions become living paths. Roots weave through stone; the chamber listens for your steps.
           </p>

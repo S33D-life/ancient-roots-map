@@ -175,3 +175,18 @@ html[data-living-parchment] footer a { min-height: 44px; display: inline-flex; a
   .parchment-ground .lp-crown .lp-meta { font-size: 16px; }
 }
 @media(prefers-reduced-motion: reduce) { html[data-living-parchment] * { animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important; } }
+
+/* Phone tools remain inside the viewport and use the same reading surfaces. */
+html[data-living-parchment] .parchment-orb-sheet { width: calc(100% - 32px); max-height: calc(100dvh - 48px); overflow-y: auto; border-radius: 2px; padding: 24px; font-family: 'Cormorant Garamond',Georgia,serif; }
+.parchment-orb-sheet h2 { font-size: 30px; font-weight: 400; padding-right: 24px; }
+.parchment-orb-sheet > p { font-size: 18px; line-height: 1.4; }
+.parchment-orb-hearth { display: flex; align-items: center; gap: 12px; font-size: 22px; padding-block: 12px; border-block: 1px solid hsl(var(--border)); }
+.parchment-orb-hearth img { width: 40px; height: 40px; border-radius: 50%; }
+.parchment-orb-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.parchment-orb-actions button { display: flex; gap: 10px; align-items: center; text-align: left; font-size: 19px; min-height: 48px; }
+html[data-living-parchment] .parchment-room-content header { background: transparent !important; box-shadow: none !important; border: 0; }
+
+html[data-living-parchment] #next-gathering { scroll-margin-top: 88px; }
+
+html[data-living-parchment] .parchment-orb-sheet > button:last-child { width: 44px; height: 44px; right: 8px; top: 8px; }
+@media(max-width:359px) { .parchment-orb-actions { grid-template-columns: 1fr; } }

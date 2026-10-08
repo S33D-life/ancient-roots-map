@@ -10,6 +10,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Z } from "@/lib/z-index";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useState } from "react";
+import { Bell, Search, Wind, Smartphone, Camera, Bug, RefreshCw } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { internalRealm } from "@/components/parchment/ParchmentHeader";
 import teotagLogo from "@/assets/teotag-small.webp";
 import { captureAndExport } from "@/lib/capture-view";
 
@@ -145,6 +149,7 @@ export default function OrbConstellation({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const paperPhone = useIsMobile() && Boolean(internalRealm(pathname));
 
   const baseActions = useMemo(() => getActionsForRoute(pathname), [pathname]);
   const actions = useMemo(() => {
@@ -183,6 +188,27 @@ export default function OrbConstellation({
     },
     [onClose, navigate, onSelectAction, onApplyUpdate],
   );
+
+  if (paperPhone) {
+    const icons = { signals: Bell, search: Search, whisper: Wind, companion: Smartphone, capture: Camera, spark: Bug, update: RefreshCw };
+    return <>
+      <Dialog open={open} onOpenChange={value => { if (!value) onClose(); }}>
+        <DialogContent className="parchment-orb-sheet" style={{ zIndex: Z.MODAL }} onCloseAutoFocus={event => {
+          event.preventDefault();
+          document.querySelector<HTMLButtonElement>("button[aria-label=\"TEOTAG's guiding orb — explore, contribute, and discover\"]")?.focus();
+        }}>
+          <DialogTitle>TEOTAG’s tools</DialogTitle>
+          <DialogDescription>Follow a thread, leave a whisper, or tend the Tree.</DialogDescription>
+          <button type="button" className="parchment-orb-hearth" onClick={() => handleAction({ key: "hearth", emoji: "", label: "Your Hearth", action: "nav", to: "/dashboard?tab=teotag" })}><img src={teotagLogo} alt="" /><span>Enter your Hearth</span></button>
+          <div className="parchment-orb-actions">{actions.map(action => {
+            const Icon = icons[action.key as keyof typeof icons];
+            return <button type="button" key={action.key} onClick={() => handleAction(action)}>{Icon && <Icon size={20} aria-hidden="true" />}<span>{action.label}{action.key === "signals" && unreadSignals > 0 ? ` (${unreadSignals})` : ""}</span></button>;
+          })}</div>
+        </DialogContent>
+      </Dialog>
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>;
+  }
 
   // Orb center in page coords
   const orbCenterX = cx + 24; // FAB_SIZE/2

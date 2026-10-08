@@ -441,7 +441,7 @@ function PathHero() {
       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/30 mb-2">
         <Footprints className="w-5 h-5 text-primary" />
       </div>
-      <h1 className="font-serif text-2xl sm:text-3xl text-foreground tracking-wide">Star Trail</h1>
+      <h2 className="font-serif text-2xl sm:text-3xl text-foreground tracking-wide">Star Trail</h2>
       <p className="text-xs sm:text-sm font-serif text-muted-foreground mt-1">
         Your path is remembered here.
       </p>
