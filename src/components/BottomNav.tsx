@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Plus } from "lucide-react";
 import { Z, SAFE_ZONES } from "@/lib/z-index";
 import { ROUTES } from "@/lib/routes";
+import { internalRealm } from "@/components/parchment/ParchmentHeader";
 
 const NAV_ITEMS = [
   { to: ROUTES.MAP, icon: TreeDeciduous, label: "Atlas", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree", "/harvest", "/cosmic"] },
@@ -17,6 +18,12 @@ const BottomNav = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isMap = pathname === "/map";
+  if (internalRealm(pathname)) return <nav className="parchment-bottom-nav" aria-label="Continue through the Tree">{[
+    { to: ROUTES.GOLDEN_DREAM, label: "Crown", realm: "crown" },
+    { to: ROUTES.COUNCIL, label: "Canopy", realm: "canopy" },
+    { to: ROUTES.LIBRARY, label: "Heartwood", realm: "heartwood" },
+    { to: ROUTES.MAP, label: "Roots", realm: "roots" },
+  ].map(item => <Link key={item.to} to={item.to} aria-current={internalRealm(pathname) === item.realm ? "page" : undefined}>{item.label}</Link>)}</nav>;
 
   return (
     <nav

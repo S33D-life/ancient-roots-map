@@ -31,6 +31,7 @@ import { useHeartSignals } from "@/hooks/use-heart-signals";
 import { useWhisperSignals } from "@/hooks/use-whisper-signals";
 import { SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { supabase } from "@/integrations/supabase/client";
+import { internalRealm } from "@/components/parchment/ParchmentHeader";
 import { useLongPress } from "@/hooks/use-long-press";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
@@ -302,6 +303,11 @@ const FireflyFAB = () => {
     setDialogOpen(open);
   }, []);
 
+  // In internal rooms the phone orb has its own place beside navigation.
+  // Keep the saved movable position for the rest of the site.
+  const docked = Boolean(internalRealm(location.pathname)) && window.innerWidth < 760;
+  const displayXY = docked ? { x: window.innerWidth - FAB_SIZE - 10, y: window.innerHeight - FAB_SIZE - 8 } : xy;
+
   // Dynamic orb glow based on dominant signal type
   const signalHue = dominantType ? SIGNAL_TYPE_HUE[dominantType] : null;
   const hasSignals = unreadCount > 0;
@@ -319,15 +325,17 @@ const FireflyFAB = () => {
         style={{
           width: FAB_SIZE,
           height: FAB_SIZE,
-          left: xy.x,
-          top: xy.y,
+          left: docked ? undefined : xy.x,
+          top: docked ? undefined : xy.y,
+          right: docked ? 10 : undefined,
+          bottom: docked ? "calc(env(safe-area-inset-bottom, 0px) + 8px)" : undefined,
           zIndex: Z.FLOATING,
-          cursor: anyOpen ? "default" : "grab",
+          cursor: docked || anyOpen ? "default" : "grab",
           pointerEvents: anyOpen ? "none" : "auto",
         }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        onPointerDown={docked ? undefined : handlePointerDown}
+        onPointerMove={docked ? undefined : handlePointerMove}
+        onPointerUp={docked ? undefined : handlePointerUp}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -462,7 +470,7 @@ const FireflyFAB = () => {
             exit={{ opacity: 0, y: 4, scale: 0.95 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="fixed pointer-events-none"
-            style={{ left: xy.x - 120, top: xy.y - 44, zIndex: Z.FLOATING - 1 }}
+            style={{ left: displayXY.x - 120, top: displayXY.y - 44, zIndex: Z.FLOATING - 1 }}
           >
             <span
               className="inline-block text-[10px] font-serif px-3 py-1.5 rounded-lg whitespace-nowrap"
@@ -481,15 +489,15 @@ const FireflyFAB = () => {
       </AnimatePresence>
 
       {/* Contextual guidance whispers from TEOTAG */}
-      <FireflyGuidance fabPosition={xy} visible={!anyOpen} />
+      <FireflyGuidance fabPosition={displayXY} visible={!anyOpen} />
 
       {/* Staff Constellation — radial actions around the Orb */}
       <OrbConstellation
         open={constellationOpen}
         onClose={() => setConstellationOpen(false)}
         onSelectAction={handleSelectAction}
-        cx={xy.x}
-        cy={xy.y}
+        cx={displayXY.x}
+        cy={displayXY.y}
         updateAvailable={updateAvailable}
         onApplyUpdate={applyUpdate}
         onDismissUpdate={dismissUpdate}

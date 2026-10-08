@@ -1,7 +1,7 @@
 import { Link, useLocation, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import TetolBreadcrumb from "@/components/TetolBreadcrumb";
+import { ParchmentGround, TeotagMarginNote } from "@/components/parchment/ParchmentGround";
 import GrowthFolio from "@/components/crown/GrowthFolio";
 import { ParchmentGrain } from "@/components/crown/MaturityGlyph";
 import { findGrowth } from "@/data/crown/growths";
@@ -17,13 +17,13 @@ const GrowthFolioPage = () => {
   useDocumentTitle(growth ? `${growth.title} · Growth folio` : "Growth folio");
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <ParchmentGround realm="crown">
       <Header />
-      <main className="pt-20 pb-0">
-        <TetolBreadcrumb pageLabel={growth ? growth.title : "Growth folio"} />
+      <main className="parchment-folio-main">
         <div className="lp lp-ground-folio relative overflow-hidden mt-2">
           <ParchmentGrain id="lp-folio-grain" />
           <div className="lp-page">
+            <TeotagMarginNote>Read what has been lived before choosing what comes next.</TeotagMarginNote>
             {growth ? <GrowthFolio growth={growth} returnTo={back} /> : (
               <div className="flex flex-col gap-2.5 py-12 max-w-[560px]" role="status">
                 <span className="text-[30px] text-[color:var(--lp-ink)]">This growth is not in the Crown.</span>
@@ -35,7 +35,7 @@ const GrowthFolioPage = () => {
         </div>
       </main>
       <Footer />
-    </div>
+    </ParchmentGround>
   );
 };
 

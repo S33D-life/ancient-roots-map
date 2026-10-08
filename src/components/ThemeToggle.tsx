@@ -6,13 +6,15 @@ import { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "s33d-theme";
+
 
 const ThemeToggle = () => {
+  const isParchment = Boolean(document.documentElement.dataset.livingParchment);
+  const storageKey = isParchment ? "s33d-parchment-theme" : "s33d-theme";
   const [isDark, setIsDark] = useState(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(storageKey);
     if (stored) return stored === "dark";
-    return !document.documentElement.classList.contains("light");
+    return isParchment ? false : !document.documentElement.classList.contains("light");
   });
 
   useEffect(() => {
@@ -24,15 +26,16 @@ const ThemeToggle = () => {
       root.classList.add("light");
       root.classList.remove("dark");
     }
-    localStorage.setItem(STORAGE_KEY, isDark ? "dark" : "light");
-  }, [isDark]);
+    localStorage.setItem(storageKey, isDark ? "dark" : "light");
+  }, [isDark, storageKey]);
 
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={() => setIsDark(prev => !prev)}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isParchment ? (isDark ? "Living Parchment" : "Night Grove") : (isDark ? "Light mode" : "Dark mode")}
+      aria-label={isParchment ? (isDark ? "Use Living Parchment" : "Use Night Grove") : (isDark ? "Use light mode" : "Use dark mode")}
       className="h-7 w-7 md:h-8 md:w-8 rounded-full hover:bg-accent/20 shrink-0"
     >
       {isDark ? (

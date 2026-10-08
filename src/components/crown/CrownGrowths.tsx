@@ -12,15 +12,16 @@ import { ROUTES } from "@/lib/routes";
 import MaturityGlyph, { ParchmentGrain } from "./MaturityGlyph";
 import "./living-parchment.css";
 
-export default function CrownGrowths({ growths = CROWN_GROWTHS }: { growths?: readonly CrownGrowth[] }) {
+export default function CrownGrowths({ growths = CROWN_GROWTHS, headingLevel = 2 }: { growths?: readonly CrownGrowth[]; headingLevel?: 1 | 2 }) {
   const { pathname } = useLocation();
   const n = growths.length;
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
     <section aria-labelledby="crown-growths-title" className="lp lp-crown lp-ground-crown">
       <ParchmentGrain id="lp-crown-grain" />
       <div className="lp-crown-text">
         <span className="lp-kicker">notice · tend</span>
-        <h2 id="crown-growths-title" className="lp-h1">What is asking to grow?</h2>
+        <Heading id="crown-growths-title" className="lp-h1">What is asking to grow?</Heading>
         <p className="lp-lede">
           The Crown listens to what was lived, not only to what was imagined. Reading here changes nothing and approves nothing.
         </p>

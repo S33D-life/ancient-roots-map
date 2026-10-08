@@ -10,6 +10,7 @@ import { useQuietMode } from "@/contexts/QuietModeContext";
 import { Link, useLocation } from "react-router-dom";
 import { MapPin, TreeDeciduous, Gift, Check, X, ChevronRight } from "lucide-react";
 import { useFirstWalk, type WalkStep } from "@/hooks/use-first-walk";
+import { internalRealm } from "@/components/parchment/ParchmentHeader";
 
 const STEP_META: Record<WalkStep, { icon: typeof MapPin; label: string; hint: string; to: string }> = {
   "visit-map":    { icon: MapPin,        label: "Visit the Map",     hint: "Discover ancient trees worldwide",  to: "/map" },
@@ -30,7 +31,7 @@ const FirstWalkTrail = () => {
     location.pathname.startsWith("/~oauth");
 
   // Don't render if finished, dismissed, on auth route, or nudges disabled
-  if (finished || dismissed || onAuthRoute || !showOnboardingNudges) return null;
+  if (finished || dismissed || onAuthRoute || internalRealm(location.pathname) || !showOnboardingNudges) return null;
 
   const progress = completed.size;
 

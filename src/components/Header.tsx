@@ -6,7 +6,7 @@ import teotagLogo from "@/assets/teotag-small.webp";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
-import { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import { useEffect, useLayoutEffect, useState, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLongPress } from "@/hooks/use-long-press";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -16,6 +16,7 @@ import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";
 import ThemeToggle from "./ThemeToggle";
+import ParchmentHeader, { internalRealm } from "./parchment/ParchmentHeader";
 import NotificationsBadge from "./NotificationsBadge";
 
 const TetolMenu = lazy(() => import("./TetolMenu"));
@@ -122,16 +123,17 @@ const Header = () => {
 
   const handleLogoClick = () => navigate("/");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("s33d-theme");
+  const paperRealm = internalRealm(location.pathname);
+  useLayoutEffect(() => {
     const root = document.documentElement;
-    if (saved === "light") {
-      root.classList.add("light");
-      root.classList.remove("dark");
-    } else if (!root.classList.contains("light")) {
-      root.classList.add("dark");
-    }
-  }, []);
+    if (paperRealm) root.dataset.livingParchment = paperRealm;
+    else delete root.dataset.livingParchment;
+    const saved = localStorage.getItem(paperRealm ? "s33d-parchment-theme" : "s33d-theme");
+    const dark = saved === "dark" || (!paperRealm && saved !== "light");
+    root.classList.toggle("dark", dark);
+    root.classList.toggle("light", !dark);
+    return () => { delete root.dataset.livingParchment; };
+  }, [paperRealm]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -147,6 +149,12 @@ const Header = () => {
 
 
   
+
+  if (paperRealm) return <>
+    <ParchmentHeader onSearch={() => setGlobalSearchOpen(true)} signedIn={Boolean(user)} onGuide={() => { setGuideTab("guide"); setGuideOpen(true); }} />
+    <Suspense fallback={null}>{guideOpen && <TeotagGuide open={guideOpen} onClose={() => setGuideOpen(false)} initialTab={guideTab} />}</Suspense>
+    <GlobalSearch open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
+  </>;
 
   return (
     <>

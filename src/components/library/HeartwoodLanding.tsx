@@ -1,227 +1,48 @@
-/**
- * HeartwoodLanding — the atmospheric entrance to the Heartwood Library.
- * Now navigates to standalone room routes instead of setting internal tab state.
- */
-import { lazy, Suspense, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Smartphone, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
-import HeartwoodBackground from "@/components/HeartwoodBackground";
-import LibraryRoomGrid, { EmberDrift } from "@/components/LibraryRoomGrid";
-import LibraryVaultPreview from "@/components/LibraryVaultPreview";
 import Footer from "@/components/Footer";
-import TetolBridge from "@/components/TetolBridge";
+import { HEARTWOOD_ROOMS, JOURNEY_STAGES } from "@/config/heartwoodRooms";
+import { ParchmentGround, TreePlate, TeotagMarginNote } from "@/components/parchment/ParchmentGround";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
-import { useIsMobile } from "@/hooks/use-mobile";
 import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
-import { ROOM_ROUTE_MAP } from "@/config/heartwoodRooms";
-import MoonGlyph from "@/components/rhythm/MoonGlyph";
+import LibraryVaultPreview from "@/components/LibraryVaultPreview";
+import { ROUTES } from "@/lib/routes";
 
-const MantleClock = lazy(() => import("@/components/MantleClock"));
-
-// Non-Heartwood routes that can appear in the landing grid but are not
-// canonical library rooms — supplemented on top of ROOM_ROUTE_MAP.
-const NON_ROOM_ROUTES: Record<string, string> = {
-  "life-groves":       "/heartwood/life-groves",
-  "atlas":             "/atlas",
-  "press":             "/press",
-  "tree-data-commons": "/tree-data-commons",
-};
-
-const HeartwoodLanding = () => {
-  const navigate = useNavigate();
-
-  const handleRoomSelect = (key: string) => {
-    const route = ROOM_ROUTE_MAP[key] ?? NON_ROOM_ROUTES[key] ?? `/library/${key}`;
-    navigate(route);
-  };
-
-  return (
-    <div className="min-h-screen relative overflow-hidden botanical-heartwood">
-      <Header />
-      <HeartwoodBackground />
-
-      <div className="relative z-10 flex flex-col items-center min-h-screen pb-12 px-4" style={{ paddingTop: 'var(--content-top)' }}>
-        {/* ── Quiet Threshold — compressed doorway ────────────── */}
-        <div className="relative flex flex-col items-center mb-6 max-w-xl text-center">
-          <div
-            className="absolute inset-0 -inset-x-12 -inset-y-4 pointer-events-none motion-safe:animate-[titleBreathe_6s_ease-in-out_infinite]"
-            aria-hidden="true"
-            style={{
-              background: 'radial-gradient(ellipse 60% 50% at 50% 45%, hsl(38 70% 40% / 0.14), hsl(30 60% 25% / 0.04) 55%, transparent 80%)',
-              filter: 'blur(20px)',
-            }}
-          />
-          <h1
-            className="relative text-3xl md:text-5xl font-serif tracking-wider mb-1.5"
-            style={{
-              color: 'hsl(38 75% 65%)',
-              textShadow: '0 0 40px hsl(38 80% 35% / 0.45), 0 2px 16px hsl(25 60% 20% / 0.55), 0 0 2px hsl(20 20% 8% / 0.9)',
-            }}
-          >
-            HEARTWOOD
-          </h1>
-          <p
-            className="relative font-serif text-xs md:text-sm mb-3 italic"
-            style={{ color: 'hsl(38 45% 72% / 0.65)', textShadow: '0 1px 6px hsl(20 20% 8% / 0.7)' }}
-          >
-            You have entered the living trunk.
-          </p>
-          <MoonGlyph variant="whisper" className="relative mb-4" />
-
-          {/* Primary + secondary actions — calmer hierarchy */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <button
-              onClick={() => navigate("/map")}
-              className="px-5 py-2 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-              style={{
-                background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
-                color: 'hsl(38 80% 85%)',
-                border: '1px solid hsl(38 50% 40% / 0.5)',
-              }}
-            >
-              Enter the Map
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wide transition-all duration-300 hover:scale-105"
-              style={{
-                background: 'hsl(25 20% 12% / 0.7)',
-                color: 'hsl(38 50% 70%)',
-                border: '1px solid hsl(38 40% 30% / 0.35)',
-              }}
-            >
-              Your Hearth
-            </button>
-            <CompanionPairDialog
-              className="px-3 py-1.5 rounded-lg font-serif text-[11px] tracking-wide transition-all duration-300 opacity-70 hover:opacity-100"
-            />
-          </div>
+export default function HeartwoodLanding() {
+  return <ParchmentGround realm="heartwood">
+    <Header />
+    <main className="parchment-main">
+      <div className="parchment-hero">
+        <div>
+          <span className="parchment-kicker">remember · follow a living thread</span>
+          <h1 className="parchment-title">The Heartwood Hall</h1>
+          <p className="parchment-lede">Step into the living library. Here the Tree remembers: encounters, stories, offerings and the paths we have walked.</p>
+          <TeotagMarginNote>The template carries forward; the companions do not have to.</TeotagMarginNote>
+          <Link className="parchment-action" to={ROUTES.COUNCIL}>Return to the Council above <ArrowRight size={18} aria-hidden="true" /></Link>
         </div>
-
-        <style>{`
-          @keyframes titleBreathe {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.06); }
-          }
-        `}</style>
-
-        {/* First-time Companion hint — desktop only */}
-        <CompanionHint />
-
-        {/* ── Central Chambers — the emotional landing ── */}
-        <LibraryRoomGrid
-          onRoomSelect={handleRoomSelect}
-          centerSlot={
-            <div
-              className="relative flex flex-col items-center pt-4 pb-6 px-6 rounded-2xl w-full max-w-sm mx-auto"
-              style={{
-                background: 'linear-gradient(180deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.25))',
-                borderBottom: '1px solid hsl(var(--border) / 0.2)',
-                boxShadow: '0 8px 32px hsl(var(--background) / 0.4), inset 0 1px 0 hsl(var(--border) / 0.06)',
-              }}
-            >
-              <EmberDrift />
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, hsl(30 60% 30% / 0.12), transparent 70%)' }}
-              />
-              <Suspense fallback={
-                <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsl(42 30% 15% / 0.3)' }} />
-              }>
-                <MantleClock />
-              </Suspense>
-              <p
-                className="font-serif text-[10px] tracking-[0.3em] uppercase mt-3 select-none"
-                style={{ color: 'hsl(42 30% 45% / 0.4)' }}
-              >
-                blooming clock
-              </p>
-            </div>
-          }
-        />
-
-        {/* ── Companion whisper — discovered after arrival ── */}
-        <div className="w-full max-w-2xl mt-12 mb-4">
-          <p
-            className="font-serif text-[10px] uppercase tracking-[0.3em] text-center mb-3 select-none"
-            style={{ color: 'hsl(42 30% 45% / 0.45)' }}
-          >
-            a companion stirs nearby
-          </p>
-          <BorrowedStaffCard />
-        </div>
-
-        {/* ── Deeper ecosystem — vault & metrics ── */}
-        <div className="w-full max-w-2xl mt-8 mb-6">
-          <LibraryVaultPreview />
-        </div>
-
-        {/* ── Active opportunities — moved below immersion ── */}
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={() => navigate("/value-tree?tab=earn")}
-            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'hsl(25 20% 12% / 0.7)',
-              color: 'hsl(38 50% 70%)',
-              border: '1px solid hsl(38 40% 30% / 0.35)',
-            }}
-          >
-            Active Opportunities
-          </button>
-        </div>
-
+        <TreePlate realm="heartwood" />
       </div>
-
-      <TetolBridge />
-      <Footer />
-    </div>
-  );
-};
-
-/** Dismissible first-time companion hint — desktop only */
-function CompanionHint() {
-  const isMobile = useIsMobile();
-  const [dismissed, setDismissed] = useState(() => {
-    try { return localStorage.getItem("s33d_companion_hint_dismissed") === "1"; } catch { return false; }
-  });
-
-  if (isMobile || dismissed) return null;
-
-  const dismiss = () => {
-    setDismissed(true);
-    try { localStorage.setItem("s33d_companion_hint_dismissed", "1"); } catch {}
-  };
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-xl border mb-6 max-w-md"
-        style={{
-          background: 'hsl(var(--primary) / 0.06)',
-          borderColor: 'hsl(var(--primary) / 0.2)',
-        }}
-      >
-        <Smartphone className="w-4 h-4 shrink-0" style={{ color: 'hsl(var(--primary))' }} />
-        <p className="text-xs font-serif" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
-          Try connecting your phone as a <span style={{ color: 'hsl(var(--primary))' }}>Companion</span> — use it to explore S33D hands-free.
-        </p>
-        <button
-          onClick={dismiss}
-          className="p-1 rounded-full shrink-0 min-w-[28px] min-h-[28px] flex items-center justify-center transition-colors"
-          style={{ color: 'hsl(var(--muted-foreground))' }}
-          aria-label="Dismiss hint"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-      </motion.div>
-    </AnimatePresence>
-  );
+      <section className="parchment-section" aria-labelledby="heartwood-rooms">
+        <h2 id="heartwood-rooms">Find your room</h2>
+        <p>Meet, learn, walk, offer, remember, steward and evolve.</p>
+        {JOURNEY_STAGES.map(stage => <section className="parchment-room-group" key={stage.key} aria-label={stage.label}>
+          <h3>{stage.label}</h3>
+          <div className="parchment-doors">{HEARTWOOD_ROOMS.filter(room => room.stage === stage.key).map(room => <Link key={room.key} to={room.route} state={{ from: ROUTES.LIBRARY }} className="parchment-door"><span><strong>{room.label}</strong><em>{room.subtitle}</em></span><ArrowRight aria-hidden="true" /></Link>)}</div>
+        </section>)}
+      </section>
+      <section className="parchment-section" aria-labelledby="your-path">
+        <h2 id="your-path">Your path through the Tree</h2>
+        <div className="parchment-doors">
+          <Link to="/dashboard" className="parchment-door"><span><strong>Your Hearth</strong><em>Your personal place in the library</em></span><ArrowRight aria-hidden="true" /></Link>
+          <Link to="/heartwood/life-groves" className="parchment-door"><span><strong>Life Groves</strong><em>Explore the living ecosystem</em></span><ArrowRight aria-hidden="true" /></Link>
+          <Link to="/tree-data-commons" className="parchment-door"><span><strong>Tree Data Commons</strong><em>Shared knowledge and tree projects</em></span><ArrowRight aria-hidden="true" /></Link>
+          <Link to="/press" className="parchment-door"><span><strong>Press Room</strong><em>Stories from the wider world</em></span><ArrowRight aria-hidden="true" /></Link>
+        </div>
+        <details className="parchment-tending"><summary>Companion, Staff and stewardship</summary><div className="parchment-room-content space-y-6"><CompanionPairDialog /><BorrowedStaffCard /><LibraryVaultPreview /><Link to="/value-tree?tab=earn" className="parchment-action">Active opportunities →</Link></div></details>
+      </section>
+      <div className="parchment-journey"><span>Carry what you remember back into the living world.</span><Link to={ROUTES.MAP}>Descend to Ancient Friends <ArrowRight size={18} aria-hidden="true" /></Link></div>
+    </main>
+    <Footer />
+  </ParchmentGround>;
 }
-
-export default HeartwoodLanding;

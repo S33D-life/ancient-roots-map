@@ -1,19 +1,18 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import TetolBreadcrumb from "@/components/TetolBreadcrumb";
-import TetolBridge from "@/components/TetolBridge";
+import { Link } from "react-router-dom";
+import { ParchmentGround, TreePlate, TeotagMarginNote } from "@/components/parchment/ParchmentGround";
+import { CURRENT_CIRCLE, approvedCircleUrl } from "../../supabase/functions/_shared/currentCircle";
 import { ScrollText, Users, Podcast, BarChart3, TreePine, MapPin, Sparkles, Flame, Archive } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import LevelEntrance from "@/components/LevelEntrance";
-import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
@@ -26,7 +25,6 @@ import { useCouncilInvitation } from "@/hooks/use-council-invitation";
 import { CIRCLE_235_DOORWAY } from "@/data/council/circle235Doorway";
 import { getCurrentCouncilWithOverrides } from "@/data/council/curatorOverrides";
 
-import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
 
 const CouncilOfLifePage = () => {
@@ -34,13 +32,15 @@ const CouncilOfLifePage = () => {
   const navigate = useNavigate();
   const { focusMap } = useMapFocus();
   
-  const { showEntrance, dismissEntrance } = useEntranceOnce("council");
+  const [deckOpen, setDeckOpen] = useState(false);
+  const deckUrl = CURRENT_CIRCLE.approval === "approved" ? approvedCircleUrl(CURRENT_CIRCLE.links.councilDeck) : undefined;
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [podModalOpen, setPodModalOpen] = useState(false);
   const [linkedTrees, setLinkedTrees] = useState<Array<{ id: string; name: string; species: string }>>([]);
   const [linkedRegions, setLinkedRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [curatorOpen, setCuratorOpen] = useState(false);
   const [curatorRefreshKey, setCuratorRefreshKey] = useState(0);
+  const localDeckUrl = deckUrl ? `${new URL(deckUrl).pathname}${new URL(deckUrl).hash}` : undefined;
   const invitation = useCouncilInvitation(curatorRefreshKey);
 
   useEffect(() => {
@@ -62,23 +62,17 @@ const CouncilOfLifePage = () => {
 
   // Auth startup may clear a fragment. The fixed spatial return marker survives it.
   useEffect(() => {
-    if (showEntrance || new URLSearchParams(window.location.search).get("from") !== "spatial-council") return;
+    if (new URLSearchParams(window.location.search).get("from") !== "spatial-council") return;
     const frame = requestAnimationFrame(() => document.getElementById("next-gathering")?.scrollIntoView({ block: "center" }));
     return () => cancelAnimationFrame(frame);
-  }, [showEntrance]);
-
-  const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
-
-  if (showEntrance) {
-    return <LevelEntrance phases={[{ src: councilHomeBg, alt: "The Canopy" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
-  }
+  }, []);
 
   // Council Chamber view
   if (activeRoom === "chamber" || activeRoom === "chamber-live") {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <ParchmentGround realm="canopy">
         <Header />
-        <main className="pt-28 pb-8 px-4">
+        <main className="parchment-main">
           <div className="max-w-5xl mx-auto">
             <Button variant="ghost" size="sm" onClick={() => setActiveRoom(null)} className="text-muted-foreground hover:text-foreground mb-4">
               ← Back to Council
@@ -87,29 +81,32 @@ const CouncilOfLifePage = () => {
           </div>
         </main>
         <Footer />
-      </div>
+      </ParchmentGround>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <ParchmentGround realm="canopy">
       <Header />
-      <main className="relative pt-20 pb-8 px-safe">
-        <TetolBreadcrumb />
-        <div className="absolute inset-0 z-0">
-          <img src={councilHomeBg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
+      <main className="parchment-main">
+        <div className="parchment-hero">
+          <div>
+            <span className="parchment-kicker">gather · bring one thing back to the Fire</span>
+            <h1 className="parchment-title">Council of Life</h1>
+            <p className="parchment-lede">A living Circle for a living world. Meet in the Canopy, follow a companion, and carry what you discover back to the gathering.</p>
+            <TeotagMarginNote>Different places. Different moments. One living Council.</TeotagMarginNote>
+          </div>
+          <TreePlate realm="canopy" />
         </div>
-
-        <div className="relative z-10 max-w-3xl mx-auto px-4 pt-16 pb-12">
-          {/* Hero */}
-          <h1 className="text-4xl md:text-5xl font-serif text-center mb-3 tracking-wider drop-shadow-lg">
-            Council of Life
-          </h1>
-          <p className="text-center text-muted-foreground mb-10 text-lg font-serif italic">
-            A living Circle for a living world.
-          </p>
-
+        <section className="parchment-section" aria-labelledby="council-doorways">
+          <h2 id="council-doorways">Two ways into the same Council</h2>
+          <div className="parchment-two-views">
+            <div><h2>The spatial deck</h2><p>Enter TETOL’s Council of Life deck and explore the Canopy.</p>{deckUrl && <><button type="button" className="parchment-action" aria-expanded={deckOpen} aria-controls="council-deck-preview" onClick={() => setDeckOpen(open => !open)}>{deckOpen ? "Close the deck" : "Enter the deck here"} →</button><div><CouncilDeckDoorway /></div></>}</div>
+            <div><h2>The 2D Council</h2><p>Read the Current Circle, open the Council chamber and follow its records.</p><button type="button" className="parchment-action" onClick={() => setActiveRoom("chamber")}>Open the 2D Council →</button><div><a className="parchment-action" href="#next-gathering">Read the Current Circle ↓</a></div></div>
+          </div>
+          {deckOpen && deckUrl && <div className="parchment-deck-frame" id="council-deck-preview"><p>The existing TETOL deck, carried into this Canopy. You can also open the public Council Deck in its own tab.</p><iframe src={localDeckUrl} title="TETOL Council of Life spatial deck" allow="fullscreen" allowFullScreen /><a href={deckUrl} target="_blank" rel="noopener noreferrer" className="parchment-action">Open the Council Deck in a new tab →</a></div>}
+        </section>
+        <div className="parchment-council-body"><div className="parchment-room-content">
           {/* ── 1. Next Gathering — primary entry ── */}
           <section aria-labelledby="next-gathering" className="mb-14">
             <h2 id="next-gathering" className="font-serif text-[11px] tracking-[0.2em] uppercase text-muted-foreground/60 mb-4 text-center">
@@ -120,7 +117,6 @@ const CouncilOfLifePage = () => {
               refreshKey={curatorRefreshKey}
               onEditCouncil={() => setCuratorOpen(true)}
             />
-            <CouncilDeckDoorway />
           </section>
 
           {/* ── 2. Reflection — heart of the Council experience ── */}
@@ -276,26 +272,25 @@ const CouncilOfLifePage = () => {
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => navigate("/time-tree")} className="loop-card font-serif">
-                <span className="text-primary">🌳 Time Tree</span>
+                <span className="text-primary">Time Tree →</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Offer to the Time Tree</p>
               </button>
               <button onClick={() => navigate(ROUTES.VALUE_TREE)} className="loop-card font-serif">
-                <span className="text-primary">❤️ Value Tree</span>
+                <span className="text-primary">Value Tree →</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">See how Hearts flow</p>
               </button>
               <button onClick={() => navigate(ROUTES.MAP)} className="loop-card font-serif">
-                <span className="text-primary">🗺️ Atlas</span>
+                <span className="text-primary">Atlas →</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Map an Ancient Friend</p>
               </button>
               <button onClick={() => navigate(ROUTES.LIBRARY)} className="loop-card font-serif">
-                <span className="text-primary">📚 Heartwood</span>
+                <span className="text-primary">Heartwood →</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Wishing Tree & offerings</p>
               </button>
             </div>
           </div>
-        </div>
-
-        <TetolBridge />
+        </div></div>
+        <div className="parchment-journey"><span>What the Council learns becomes living memory.</span><Link to={ROUTES.LIBRARY} state={{ from: ROUTES.COUNCIL }}>Descend to Heartwood Hall →</Link></div>
       </main>
       <Footer />
       <HostAPodModal open={podModalOpen} onOpenChange={setPodModalOpen} />
@@ -305,7 +300,7 @@ const CouncilOfLifePage = () => {
         council={getCurrentCouncilWithOverrides()}
         onSaved={() => setCuratorRefreshKey((k) => k + 1)}
       />
-    </div>
+    </ParchmentGround>
   );
 };
 
