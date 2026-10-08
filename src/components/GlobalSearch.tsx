@@ -35,14 +35,26 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape
+  // Keep keyboard search in its overlay and return to its opener when dismissed.
   useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const frame = !embedded ? requestAnimationFrame(() => containerRef.current?.querySelector<HTMLInputElement>("input")?.focus()) : undefined;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key !== "Tab" || embedded) return;
+      const controls = Array.from(containerRef.current?.querySelectorAll<HTMLElement>("button:not([disabled]), input, [tabindex='0']") || []).filter(el => el.getClientRects().length > 0);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
     };
-    if (open) document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", handleKey);
+      if (!embedded && containerRef.current?.contains(document.activeElement)) previous?.focus();
+    };
+  }, [open, embedded, onClose]);
 
   // Search when query or filter changes
   useEffect(() => {
@@ -109,6 +121,7 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
         shouldFilter={false}
       >
         <CommandInput
+          aria-label="Search the Tree"
           placeholder="Search trees, places, rooms, wanderers, support…"
           value={query}
           onValueChange={setQuery}
@@ -217,7 +230,8 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
   // Modal overlay
   return (
     <div
-      className="fixed inset-0 z-[110] flex items-start justify-center pt-[10vh] md:pt-[15vh]"
+      role="dialog" aria-modal="true" aria-label="Search the Grove"
+      className="global-search-overlay fixed inset-0 z-[110] flex items-start justify-center pt-[10vh] md:pt-[15vh]"
       onClick={onClose}
       style={{
         background: "radial-gradient(ellipse at 50% 30%, hsl(var(--card) / 0.85), hsl(var(--background) / 0.88))",
@@ -237,7 +251,7 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
               Search the Grove
             </span>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+          <button aria-label="Close search" onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1">
             <X className="w-4 h-4" />
           </button>
         </div>

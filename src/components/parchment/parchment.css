@@ -190,3 +190,7 @@ html[data-living-parchment] #next-gathering { scroll-margin-top: 88px; }
 
 html[data-living-parchment] .parchment-orb-sheet > button:last-child { width: 44px; height: 44px; right: 8px; top: 8px; }
 @media(max-width:359px) { .parchment-orb-actions { grid-template-columns: 1fr; } }
+
+html[data-living-parchment] .global-search-overlay [cmdk-input] { font-size: 19px; }
+html[data-living-parchment] .global-search-overlay :is([cmdk-item],[cmdk-group-heading]) { font-size: 17px; }
+html[data-living-parchment] .global-search-overlay button { min-width: 44px; font-size: 15px; }

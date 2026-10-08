@@ -4,7 +4,7 @@
  * Edge-aware: adjusts arc when near screen boundaries.
  * Includes faint connecting lines from center to each node.
  */
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Z } from "@/lib/z-index";
@@ -149,6 +149,8 @@ export default function OrbConstellation({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const actionClosing = useRef(false);
+  useEffect(() => { if (open) actionClosing.current = false; }, [open]);
   const paperPhone = useIsMobile() && Boolean(internalRealm(pathname));
 
   const baseActions = useMemo(() => getActionsForRoute(pathname), [pathname]);
@@ -169,6 +171,7 @@ export default function OrbConstellation({
 
   const handleAction = useCallback(
     (a: ConstellationAction) => {
+      actionClosing.current = true;
       onClose();
       if (a.key === "update" && onApplyUpdate) {
         setTimeout(() => onApplyUpdate(), 120);
@@ -195,7 +198,7 @@ export default function OrbConstellation({
       <Dialog open={open} onOpenChange={value => { if (!value) onClose(); }}>
         <DialogContent className="parchment-orb-sheet" style={{ zIndex: Z.MODAL }} onCloseAutoFocus={event => {
           event.preventDefault();
-          document.querySelector<HTMLButtonElement>("button[aria-label=\"TEOTAG's guiding orb — explore, contribute, and discover\"]")?.focus();
+          if (!actionClosing.current) document.querySelector<HTMLButtonElement>("button[aria-label=\"TEOTAG's guiding orb — explore, contribute, and discover\"]")?.focus();
         }}>
           <DialogTitle>TEOTAG’s tools</DialogTitle>
           <DialogDescription>Follow a thread, leave a whisper, or tend the Tree.</DialogDescription>
