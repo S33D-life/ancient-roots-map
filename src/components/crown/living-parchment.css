@@ -101,6 +101,8 @@
 
 @media (max-width: 759px) {
   .lp-crown-text { padding: 28px 20px 26px; max-width: none; }
+  /* Keep growth rows clear of the site's fixed TEOTAG orb (48px, 20px from the right edge). */
+  .lp-row { padding-right: var(--lp-orb-gutter, 60px); }
   .lp-h1 { font-size: 40px; }
   .lp-page { padding: 16px 14px 40px; }
   .lp-leaf { padding: 28px 20px 26px; }
@@ -112,3 +114,10 @@
 @media (prefers-reduced-motion: reduce) {
   .lp *, .lp { animation: none !important; transition-duration: 1ms !important; }
 }
+
+/* Evidence facts inside disclosures (r3): label column + value, wraps on phone */
+.lp-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; margin: 0; font-size: 16.5px; }
+.lp-facts dt { font-style: italic; color: var(--lp-muted); }
+.lp-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.lp-release-point { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; font-size: 16px; }
+.lp-release-point code { color: var(--lp-muted); }

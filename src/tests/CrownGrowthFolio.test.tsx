@@ -22,7 +22,7 @@ import GrowthFolio from "@/components/crown/GrowthFolio";
 import { restsOn } from "@/lib/crown/growthReading";
 import GrowthFolioPage from "@/pages/GrowthFolioPage";
 import { IMPLEMENTATION_LABEL, MATURITY_LABEL, ONE_CIRCLE_MANY_SURFACES as G } from "@/data/crown/growths";
-import { returnTarget } from "@/lib/crown/returnPath";
+import { normaliseReturnPath, returnTarget } from "@/lib/crown/returnPath";
 import { CURRENT_CIRCLE } from "../../supabase/functions/_shared/currentCircle";
 
 const client = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -92,15 +92,32 @@ describe("Growth Folio · Living Parchment (CROWN_HANDOFF_v3)", () => {
     expect(staticSeam).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(staticSeam);
     expect(staticSeam).toHaveAttribute("aria-expanded", "true");
-    expect(built).toHaveTextContent("Pull request #87 · merged 9055912a");
+    expect(built).toHaveTextContent("#87 · merged 9055912a");
     expect(built).toHaveTextContent("docs/council/Current-Circle-static-seam.md");
+  });
+
+  it("restores every recorded evidence field behind each seam disclosure", () => {
+    renderFolio();
+    const built = screen.getByRole("region", { name: "What has been built" });
+    for (const seam of G.seams) {
+      const toggle = within(built).getAllByRole("button").find(b => b.textContent?.startsWith(seam.surface))!;
+      fireEvent.click(toggle);
+      const row = toggle.closest("li")!;
+      if (seam.branch) expect(row, seam.id).toHaveTextContent(seam.branch);
+      for (const c of seam.commits) expect(row, seam.id).toHaveTextContent(c.slice(0, 8));
+      if (seam.pr) expect(row, seam.id).toHaveTextContent(`#${seam.pr}`);
+      if (seam.mergeSha) expect(row, seam.id).toHaveTextContent(seam.mergeSha.slice(0, 8));
+      if (seam.testsRecorded) expect(row, seam.id).toHaveTextContent(seam.testsRecorded);
+      for (const e of seam.evidence) expect(row, seam.id).toHaveTextContent(e.path);
+      for (const o of seam.open ?? []) expect(row, seam.id).toHaveTextContent(o);
+    }
   });
 
   it("lists every still-open item with its seam", () => {
     renderFolio();
     const open = screen.getByRole("region", { name: "Still open" });
     const items = G.seams.flatMap(s => (s.open ?? []).map(item => ({ item, seam: s.surface })));
-    expect(within(open).getAllByRole("listitem")).toHaveLength(items.length);
+    expect(within(within(open).getByRole("list", { name: "Recorded open items" })).getAllByRole("listitem")).toHaveLength(items.length);
     for (const { item, seam } of items) {
       const row = within(open).getByText(item).closest("li")!;
       expect(row).toHaveTextContent(seam);
@@ -118,6 +135,17 @@ describe("Growth Folio · Living Parchment (CROWN_HANDOFF_v3)", () => {
     expect(held).toHaveTextContent(CURRENT_CIRCLE.title);
     expect(held).toHaveTextContent(CURRENT_CIRCLE.revision);
     expect(held).toHaveTextContent("The Agent Garden supports tending; it does not decide.");
+    // Restored Taproot evidence.
+    expect(held).toHaveTextContent(CURRENT_CIRCLE.approval === "approved" ? "Approved for public surfaces" : "Draft · public surfaces stay closed");
+    expect(held).toHaveTextContent(/\d+ approved public links pass the link policy/);
+    const readers = within(held).getByRole("list", { name: "Read by" });
+    for (const r of G.sourceOfTruth.readers) { expect(readers).toHaveTextContent(r.role); expect(readers).toHaveTextContent(r.path); }
+    expect(held).toHaveTextContent("Living Roadmap feature Council of Life");
+    for (const h of G.handoffs) expect(held).toHaveTextContent(`Returned as: ${h.returned}`);
+    // Restored release line: every recorded point, with its short SHA.
+    const line = within(held).getByRole("list", { name: "Release line" });
+    expect(within(line).getAllByRole("listitem")).toHaveLength(G.releaseLine.points.length);
+    for (const p of G.releaseLine.points) expect(line).toHaveTextContent(p.sha.slice(0, 8));
     expect(await within(held).findByText("Tend the Council doorway")).toBeInTheDocument();
     expect(calls).toContain(`eq:${JSON.stringify(["roadmap_feature_slug", "council"])}`);
     expect(calls.filter(c => ["insert", "update", "upsert", "delete", "rpc"].includes(c))).toEqual([]);
@@ -144,6 +172,24 @@ describe("Growth Folio · Living Parchment (CROWN_HANDOFF_v3)", () => {
     fireEvent.click(screen.getByRole("button", { name: /Council Deck doorway/ }));
     expect(screen.getByText("In this build: not included")).toBeInTheDocument();
     expect(screen.queryByText("In this build: included")).not.toBeInTheDocument();
+    // Build-aware still-open evidence (restored): every merged seam is "not in this build", Telegram is held.
+    const notLive = screen.getByRole("list", { name: "Candidate, held or not in this build" });
+    expect(within(notLive).getAllByText("Merged, not in this build")).toHaveLength(G.seams.filter(s => s.state === "merged").length);
+    expect(within(notLive).getByText("Held")).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Release line" }).textContent).toContain("serving this page");
+  });
+
+  it("does not show a seam as live when the serving build is unknown", () => {
+    renderFolio(null);
+    const notLive = screen.getByRole("list", { name: "Candidate, held or not in this build" });
+    expect(within(notLive).getAllByText("Merged; deployment not shown here")).toHaveLength(G.seams.filter(s => s.state === "merged").length);
+    expect(within(notLive).getByText("Held")).toBeInTheDocument();
+  });
+
+  it("shows only held seams once the build includes every merge", () => {
+    renderFolio(G.releaseLine.points.at(-1)!.sha);
+    const notLive = screen.getByRole("list", { name: "Candidate, held or not in this build" });
+    expect(within(notLive).getAllByRole("listitem").map(li => li.textContent)).toEqual(["Telegram publishing pathHeld"]);
   });
 
   it("ends with numbered decisions and no controls that approve anything", () => {
@@ -182,6 +228,24 @@ describe("Growth Folio page · contextual return and unknown id", () => {
     for (const from of ["https://evil.example/x", "//evil.example", "/javascript:alert(1)", 42]) {
       expect(returnTarget({ from }).to).toBe("/golden-dream");
     }
+  });
+
+  it("rejects control characters, backslashes and encoded escapes", () => {
+    const bad = [
+      "/council-of-life\n", "/\t/evil.example", "/\r\nSet-Cookie:x", "/a\u0000b", "/a\u007Fb", "/a\u0085b", "/a\u2028b",
+      "/\\evil.example", "\\/evil.example", "/%5C%5Cevil.example",
+      "/%0d%0aSet-Cookie:x", "/%00", "/%2F%2Fevil.example", " /council-of-life", "", "/".repeat(2049),
+    ];
+    for (const from of bad) expect(normaliseReturnPath(from), JSON.stringify(from)).toBeNull();
+    for (const from of bad) expect(returnTarget({ from }).to, JSON.stringify(from)).toBe("/golden-dream");
+  });
+
+  it("normalises dot segments and trailing slashes before naming the return", () => {
+    expect(returnTarget({ from: "/golden-dream/../council-of-life" })).toMatchObject({ to: "/council-of-life", label: "Return to the Council" });
+    expect(returnTarget({ from: "/council-of-life/" })).toMatchObject({ to: "/council-of-life/", label: "Return to the Council" });
+    expect(returnTarget({ from: "/./roadmap?x=1#top" })).toMatchObject({ to: "/roadmap?x=1#top", label: "Return to the Living Roadmap" });
+    expect(returnTarget({ from: "/../../../etc" })).toMatchObject({ to: "/etc", label: "Return to where you were" });
+    expect(returnTarget({ from: "/library/bookshelf" })).toMatchObject({ to: "/library/bookshelf", short: "Back" });
   });
 
   it("renders the not-found state for an unknown growth without crashing", () => {

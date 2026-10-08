@@ -16,7 +16,7 @@ import {
   type CrownGrowth, type GrowthRealm, type GrowthSeam,
 } from "@/data/crown/growths";
 import { taprootContext } from "@/lib/crown/taprootContext";
-import { placeBuild, seamInBuild, servingBuild, type BuildPlacement } from "@/lib/crown/devRoomEvidence";
+import { placeBuild, seamInBuild, servingBuild, stillOpen, type BuildPlacement } from "@/lib/crown/devRoomEvidence";
 import { returnTarget, type ReturnTarget } from "@/lib/crown/returnPath";
 import { openItems, plural, restsOn } from "@/lib/crown/growthReading";
 import { useGrowthTasks } from "@/hooks/use-growth-tasks";
@@ -44,10 +44,12 @@ function SeamRow({ seam, placement, growth }: { seam: GrowthSeam; placement: Bui
       </button>
       {open && (
         <div id={panel} className="lp-seam-detail">
-          {seam.pr
-            ? <span>Pull request #{seam.pr}{seam.mergeSha && <> · merged <code>{short(seam.mergeSha)}</code></>}</span>
-            : seam.branch && <span>On branch <code>{seam.branch}</code></span>}
-          {seam.testsRecorded && <span>{seam.testsRecorded}</span>}
+          <dl className="lp-facts">
+            {seam.branch && (<><dt>Branch</dt><dd><code className="break-all">{seam.branch}</code></dd></>)}
+            <dt>Commits</dt><dd><code>{seam.commits.map(short).join(" · ")}</code></dd>
+            {seam.pr && (<><dt>Pull request</dt><dd>#{seam.pr}{seam.mergeSha && <> · merged <code>{short(seam.mergeSha)}</code></>}</dd></>)}
+            {seam.testsRecorded && (<><dt>Tests recorded</dt><dd>{seam.testsRecorded}</dd></>)}
+          </dl>
           {seam.evidence.map(e => (
             <span key={e.path} className="lp-mono">{e.path}{e.onBranch && ` (on ${e.onBranch})`}</span>
           ))}
@@ -68,7 +70,10 @@ function Tending({ growth }: { growth: CrownGrowth }) {
       <span className="lp-meta">tended so far · routed by hand</span>
       <ul className="m-0 p-0 list-none">
         {growth.handoffs.map(h => (
-          <li key={h.lane}><span className="text-[color:var(--lp-ink)]">{h.lane}</span> · {h.tended}</li>
+          <li key={h.lane}>
+            <span className="text-[color:var(--lp-ink)]">{h.lane}</span> · {h.tended}
+            <span className="lp-small-meta block">Returned as: {h.returned}</span>
+          </li>
         ))}
       </ul>
       <div aria-live="polite" className="mt-2">
@@ -109,10 +114,25 @@ function HowItIsHeld({ growth, placement }: { growth: CrownGrowth; placement: Bu
           <div>
             <span className="lp-meta">Taproot understands · depends on</span>
             <span className="lp-mono text-[13.5px] text-[color:var(--lp-ink)]">{taproot.source.path}</span>
+            <dl className="lp-facts">
+              <dt>Circle</dt><dd>{taproot.source.circleTitle}</dd>
+              <dt>Approval</dt><dd>{taproot.source.approved ? "Approved for public surfaces" : "Draft · public surfaces stay closed"}</dd>
+              <dt>Revision</dt><dd><code>{taproot.source.revision}</code></dd>
+              <dt>Destinations</dt><dd>{taproot.source.approvedDestinations} approved public links pass the link policy</dd>
+            </dl>
             <span>read by {plural(taproot.readers.length, "surface", "surfaces")}</span>
-            <span className="lp-small-meta">
-              {taproot.source.circleTitle} · {taproot.source.approved ? "public surfaces open" : "draft; public surfaces stay closed"} · revision <code>{taproot.source.revision}</code>
-            </span>
+            <ul aria-label="Read by" className="m-0 p-0 list-none">
+              {taproot.readers.map(r => (
+                <li key={r.path}>{r.role} <span className="lp-mono">{r.path}</span></li>
+              ))}
+            </ul>
+            {taproot.feature && (
+              <span className="lp-small-meta">
+                Living Roadmap feature <Link to={ROUTES.ROADMAP} className="lp-link">{taproot.feature.name}</Link>{" "}
+                (<code>{growth.roadmapFeatureId}</code>): {taproot.feature.statusLabel.toLowerCase()}, {taproot.feature.stageLabel.toLowerCase()}.
+                Connected to {taproot.feature.connections.map(c => c.name).join(" and ")}.
+              </span>
+            )}
           </div>
           <Tending growth={growth} />
           <div>
@@ -125,6 +145,14 @@ function HowItIsHeld({ growth, placement }: { growth: CrownGrowth; placement: Bu
           <div>
             <span className="lp-meta">release line · {growth.releaseLine.branch}</span>
             <span>{plural(points.length, "recorded point", "recorded points")}; the latest reads “{latest?.label}”.</span>
+            <ol aria-label="Release line" className="m-0 p-0 list-none">
+              {points.map((p, i) => (
+                <li key={p.sha} className="lp-release-point">
+                  <code>{short(p.sha)}</code>
+                  <span>{p.label}{placement.kind === "placed" && placement.index === i && <strong className="font-medium"> · serving this page</strong>}</span>
+                </li>
+              ))}
+            </ol>
             <span className="lp-small-meta">
               {placement.kind === "unknown" && "The build serving this page is not known here."}
               {placement.kind === "placed" && `This page is served from “${placement.label}”.`}
@@ -142,6 +170,8 @@ export default function GrowthFolio({ growth, build = servingBuild(), returnTo =
 }) {
   const placement = placeBuild(build, growth.releaseLine);
   const open = openItems(growth);
+  // Build-aware: a merged seam is "open" here until the serving build is known to include it.
+  const notLive = stillOpen(growth, placement);
   const stage = GROWTH_MATURITY.indexOf(growth.maturity);
   const setOn = new Date(growth.maturitySetBy.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
@@ -216,13 +246,27 @@ export default function GrowthFolio({ growth, build = servingBuild(), returnTo =
         <section aria-labelledby="folio-open" className="lp-section">
           <h2 id="folio-open" className="lp-h2">Still open</h2>
           {open.length === 0 ? <p className="lp-p">Nothing is open.</p> : (
-            <ul className="m-0 p-0 list-none">
+            <ul aria-label="Recorded open items" className="m-0 p-0 list-none">
               {open.map(o => (
                 <li key={o.item} className="lp-open-row">
                   <span aria-hidden className="lp-stroke-dotted" />
                   <span className="flex flex-col">
                     <span className="text-[18.5px] leading-[1.42] text-[color:var(--lp-ink)]">{o.item}</span>
                     <span className="lp-small-meta">{o.seam.surface}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <span className="lp-meta mt-3">candidate, held or not shown in this build</span>
+          {notLive.length === 0 ? <p className="lp-p">Every recorded surface is included in the build serving this page.</p> : (
+            <ul aria-label="Candidate, held or not in this build" className="m-0 p-0 list-none">
+              {notLive.map(o => (
+                <li key={o.seam.id} className="lp-open-row">
+                  <span aria-hidden className="lp-stroke-dotted" />
+                  <span className="flex flex-col">
+                    <span className="text-[18.5px] leading-[1.42] text-[color:var(--lp-ink)]">{o.seam.surface}</span>
+                    <span className="lp-small-meta">{o.reason}</span>
                   </span>
                 </li>
               ))}

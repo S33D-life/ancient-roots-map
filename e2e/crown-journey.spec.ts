@@ -51,3 +51,28 @@ test("unknown growth id reads as not in the Crown", async ({ page }) => {
   await expect(page.getByText("This growth is not in the Crown.")).toBeVisible();
   await expect(page.getByRole("link", { name: "↩ Return to the Crown" })).toHaveAttribute("href", "/golden-dream");
 });
+
+test("at 390px the growth row stays clear of the fixed TEOTAG orb (geometric)", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/golden-dream");
+  const crown = page.getByRole("region", { name: "What is asking to grow?" });
+  await expect(crown).toBeVisible({ timeout: 15_000 });
+  const orb = page.getByRole("button", { name: /TEOTAG's guiding orb/ });
+  await expect(orb).toBeVisible();
+  const row = crown.getByRole("link", { name: /One Circle · Many Surfaces/ });
+  const parts = row.locator(".lp-row-title, .lp-row-sub, .lp-row-line, .lp-row-open");
+  await expect(parts).toHaveCount(4);
+
+  // Scroll so each text line sits in the orb's horizontal band, then require that the two boxes do not intersect.
+  for (const part of await parts.all()) {
+    const o0 = (await orb.boundingBox())!;
+    const p0 = (await part.boundingBox())!;
+    await page.evaluate(dy => window.scrollBy(0, dy), (p0.y + p0.height / 2) - (o0.y + o0.height / 2));
+    const o = (await orb.boundingBox())!;
+    const p = (await part.boundingBox())!;
+    const verticalOverlap = p.y < o.y + o.height && o.y < p.y + p.height;
+    expect(verticalOverlap, "the line was brought level with the orb").toBe(true);
+    const intersects = p.x < o.x + o.width && o.x < p.x + p.width && verticalOverlap;
+    expect(intersects, `${await part.innerText()} [${p.x},${p.y},${p.width}x${p.height}] vs orb [${o.x},${o.y},${o.width}x${o.height}]`).toBe(false);
+  }
+});
