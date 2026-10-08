@@ -1,5 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,8 +7,7 @@ import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
 import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/routes";
-import { ONE_CIRCLE_MANY_SURFACES } from "@/data/crown/growths";
+import CrownGrowths from "@/components/crown/CrownGrowths";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 import LevelEntrance from "@/components/LevelEntrance";
@@ -215,6 +214,11 @@ const GoldenDreamPage = () => {
             A living vision for the future
           </p>
 
+          {/* What is asking to grow — read-only, from the checked-in growth record. */}
+          <div className="mb-12 -mx-4 sm:mx-0 lg:max-w-[520px]">
+            <CrownGrowths />
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
             {goldenDreamRooms.map((room) => {
               const Icon = room.icon;
@@ -246,14 +250,6 @@ const GoldenDreamPage = () => {
             })}
           </div>
 
-          <p className="mt-10 text-center text-sm font-serif">
-            <Link
-              to={ROUTES.CROWN_GROWTH(ONE_CIRCLE_MANY_SURFACES.id)}
-              className="inline-block rounded-full bg-card/70 backdrop-blur-sm border border-border/50 px-4 py-2 underline-offset-4 decoration-primary/60 hover:underline hover:text-primary transition-colors"
-            >
-              Growth folio · {ONE_CIRCLE_MANY_SURFACES.title}
-            </Link>
-          </p>
         </div>
         <TetolBridge />
       </main>

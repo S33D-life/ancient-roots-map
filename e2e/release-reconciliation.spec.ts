@@ -29,15 +29,17 @@ for (const width of [1280, 390]) {
     await expect(page.getByRole("heading", { name: "Circle 235 · yOur Blooming Week" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Open the Council Deck" })).toHaveAttribute("href", /#croom$/);
     await page.goto("/golden-dream");
-    await expect(page.getByRole("link", { name: "Growth folio · One Circle · Many Surfaces" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /One Circle · Many Surfaces/ })).toBeVisible();
     await page.goto("/golden-dream/growth/one-circle-many-surfaces");
     const folio = page.locator("article");
     await expect(folio.getByRole("heading", { name: "One Circle · Many Surfaces" })).toBeVisible();
-    await expect(folio.getByRole("list", { name: "Public maturity: Growing" })).toBeVisible();
-    await expect(folio).toContainText("Read-only. Nothing on this page changes anything.");
+    await expect(folio.getByRole("img", { name: "Maturity: Growing" })).toBeVisible();
+    await expect(folio).toContainText("A growth in the Crown · read-only");
+    await folio.getByRole("button", { name: /3D Council inheritance/ }).click();
     await expect(folio).toContainText("#87");
     await expect(folio).toContainText("9055912a");
-    await expect(folio.getByRole("button")).toHaveCount(0);
+    // Every control is a disclosure; nothing writes, votes or approves.
+    for (const button of await folio.getByRole("button").all()) await expect(button).toHaveAttribute("aria-expanded", /true|false/);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: test.info().outputPath(`folio-${width}.png`), fullPage: true });
   });
