@@ -39,6 +39,7 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
+    const container = containerRef.current;
     const frame = !embedded ? requestAnimationFrame(() => containerRef.current?.querySelector<HTMLInputElement>("input")?.focus()) : undefined;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -52,7 +53,10 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
     return () => {
       if (frame !== undefined) cancelAnimationFrame(frame);
       document.removeEventListener("keydown", handleKey);
-      if (!embedded && containerRef.current?.contains(document.activeElement)) previous?.focus();
+      if (!embedded && (container?.contains(document.activeElement) || document.activeElement === document.body)) {
+        const opener = previous?.isConnected && previous !== document.body ? previous : document.querySelector<HTMLElement>(".parchment-tree");
+        opener?.focus();
+      }
     };
   }, [open, embedded, onClose]);
 
