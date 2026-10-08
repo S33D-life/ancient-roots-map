@@ -55,6 +55,7 @@ import { attachAutoSync } from "@/utils/syncEngine";
 import { useTreeCelebration } from "@/hooks/use-tree-celebration";
 import { useCaptureRef } from "@/hooks/use-capture-ref";
 import { useContributionCelebration } from "@/hooks/use-contribution-celebration";
+import { LIBRARY_LIFE_PATTERNS } from "@/lib/library/routes";
 const ContributionCelebration = lazy(() => import("@/components/growth/ContributionCelebration"));
 
 // Attach offline auto-sync listener once at app startup
@@ -204,6 +205,7 @@ const TreeAtlasExpansionMapPage = lazyImportWithRetry(() => import("./pages/Tree
 const SeedPlanGeneratorPage = lazyImportWithRetry(() => import("./pages/SeedPlanGeneratorPage"), "seed-plan-generator");
 const CanopyProjectionPage = lazyImportWithRetry(() => import("./pages/CanopyProjectionPage"), "canopy-projection");
 const TelegramHandoffPage = lazyImportWithRetry(() => import("./pages/TelegramHandoffPage"), "telegram-handoff");
+const LibraryLifePage = lazyImportWithRetry(() => import("./pages/library/LibraryLifePage"), "library-life");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -344,6 +346,9 @@ const App = () => {
                 <Route path="/pathways" element={realm(<PathwaysPage />, "roots")} />
                 <Route path="/library" element={realm(<GalleryPage />, "trunk")} />
                 <Route path="/library/:room" element={realm(<HeartwoodRoomPage />, "trunk")} />
+                <Route path={LIBRARY_LIFE_PATTERNS.HOME} element={realm(<LibraryLifePage view="home" />, "trunk")} />
+                <Route path={LIBRARY_LIFE_PATTERNS.SPECIES} element={realm(<LibraryLifePage view="species" />, "trunk")} />
+                <Route path={LIBRARY_LIFE_PATTERNS.READER} element={realm(<LibraryLifePage view="reader" />, "trunk")} />
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />

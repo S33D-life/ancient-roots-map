@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import { BottomNavSpacer } from "@/components/BottomNav";
 import AncestralInscriptions from "@/components/tree-sections/AncestralInscriptions";
+import LibraryDoorway from "@/components/library/life/LibraryDoorway";
 import {
   TreePageHero,
   TreeStorySection,
@@ -842,6 +843,10 @@ const TreeDetailPage = () => {
             if (freshTree) setTree(freshTree);
           }}
         />
+
+        {/* PLANeTary Library doorway — exact stored species_key only, never the hero's species resolution.
+            Placed here (not in the lore-gated Story card) so every keyed tree has it. */}
+        <LibraryDoorway treeId={tree.id} speciesKey={tree.species_key} className="mt-1 flex justify-center" />
 
         {/* Canonical share-link action now lives in the hero title row (TreePageHero → onShareLink).
             Kept here as a comment so future edits don't reintroduce a duplicate pill beneath the hero. */}
