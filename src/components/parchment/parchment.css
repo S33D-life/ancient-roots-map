@@ -43,6 +43,7 @@ html[data-living-parchment] button:not(.lp button) { min-height: 44px; }
 .dark .parchment-ground { --paper-ink: #efe6cc; --paper-body: #e3dbc4; --paper-muted: #bdb79e; --paper-hair: rgba(239,230,204,.22); background: hsl(var(--background)); }
 .parchment-main { padding: 106px 56px 96px; max-width: 1440px; margin: auto; }
 .parchment-header { position: fixed; top: 0; inset-inline: 0; z-index: 50; padding-top: env(safe-area-inset-top,0px); background: hsl(var(--background) / .97); border-bottom: 1px solid hsl(var(--border) / .65); font-family: 'Cormorant Garamond',Georgia,serif; color: hsl(var(--foreground)); }
+html[data-living-parchment] header.parchment-header > .parchment-tree-panel { background: hsl(var(--background)) !important; }
 .parchment-header-bar { display: flex; align-items: center; gap: 24px; min-height: 64px; padding: 0 36px; }
 html.light[data-living-parchment] header.parchment-header > div:first-child { opacity: 1 !important; background-image: none !important; }
 .parchment-back { display: inline-flex; align-items: center; min-height: 48px; gap: 10px; font-size: 20px; flex-shrink: 0; }
