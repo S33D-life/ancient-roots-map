@@ -119,10 +119,15 @@ describe("Dev Room evidence", () => {
   });
 
   it("records corrected Folio, reconciliation and publication without promoting maturity or live verification", () => {
-    expect(G.releaseLine.points.slice(-4).map(p => p.sha)).toEqual([
+    expect(G.releaseLine.points.slice(-5).map(p => p.sha)).toEqual([
       "db3dfa7a51fb24412cd4e6bfa8630cf9908fef87", "4e3281de8854cef05c21ce115898ec002190fc83",
       "84716ebd7984cf4657b8d2ea8da9423f35f6c672", "da5209feae985426c86bcad9d27cd2a1c02ae815",
+      "40709eeabd5602c43fb919f807c2a5dac63f36e7",
     ]);
+    // The latest recorded main is a repository fact only: no deployment or live claim.
+    const latest = G.releaseLine.points.at(-1)!.label;
+    expect(latest).toContain("publication and live verification not recorded here");
+    expect(latest).not.toMatch(/\b(deployed|verified live|is live|serving)\b/i);
     expect(G.seams.find(s => s.pr === 88)?.state).toBe("merged");
     expect(G.seams.find(s => s.pr === 89)?.state).toBe("merged");
     expect(G.maturity).toBe("growing");

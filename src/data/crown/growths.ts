@@ -133,7 +133,8 @@ export const ONE_CIRCLE_MANY_SURFACES: CrownGrowth = {
       { sha: "db3dfa7a51fb24412cd4e6bfa8630cf9908fef87", label: "#88 corrected read-only Crown Growth Folio" },
       { sha: "4e3281de8854cef05c21ce115898ec002190fc83", label: "#89 reviewed release / main reconciliation" },
       { sha: "84716ebd7984cf4657b8d2ea8da9423f35f6c672", label: "Published release source · route verification remains open" },
-      { sha: "da5209feae985426c86bcad9d27cd2a1c02ae815", label: "Current main · agent connection guide; publication not established here" },
+      { sha: "da5209feae985426c86bcad9d27cd2a1c02ae815", label: "Agent connection guide (/connect) added on main" },
+      { sha: "40709eeabd5602c43fb919f807c2a5dac63f36e7", label: "#90 MCP SDK alignment · latest recorded main; publication and live verification not recorded here" },
     ],
   },
   seams: [
