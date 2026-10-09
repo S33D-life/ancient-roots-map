@@ -31,7 +31,8 @@ const FirstWalkTrail = () => {
     location.pathname.startsWith("/~oauth");
 
   // Don't render if finished, dismissed, on auth route, or nudges disabled
-  if (finished || dismissed || onAuthRoute || internalRealm(location.pathname) || !showOnboardingNudges) return null;
+  const readingAncientFriend = /^\/tree\/[^/]+/.test(location.pathname);
+  if (finished || dismissed || onAuthRoute || readingAncientFriend || internalRealm(location.pathname) || !showOnboardingNudges) return null;
 
   const progress = completed.size;
 
