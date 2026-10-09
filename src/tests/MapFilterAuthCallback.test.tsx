@@ -76,8 +76,11 @@ it('continues syncing filters on Atlas and after leaving the auth route', () => 
 it('preserves the existing router origin while syncing filters', () => {
   const origin = { from: '/tree/record', hallOrigin: '/council-of-life' };
   window.history.replaceState({ usr: origin, key: 'journey', idx: 2 }, '', '/library');
+  const replace = vi.spyOn(window.history, "replaceState");
   mount();
+  expect(replace).not.toHaveBeenCalled();
   expect(window.history.state.usr).toEqual(origin);
   fireEvent.click(screen.getByText('Select oak'));
   expect(window.history.state.usr).toEqual(origin);
+  replace.mockRestore();
 });

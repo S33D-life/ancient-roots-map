@@ -132,20 +132,18 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     // setSearchParams drops the fragment, including while SDK startup waits
     // for a browser lock. Keep map-filter navigation out of the auth lifecycle.
     if (/^\/(?:auth|reset-password)(?:\/|$)/.test(pathname)) return;
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      for (const [key, param] of Object.entries(PARAM_MAP)) {
-        const val = filters[key as keyof MapFilters];
-        const def = DEFAULTS[key as keyof MapFilters];
-        if (val && val !== def) {
-          next.set(param, val);
-        } else {
-          next.delete(param);
-        }
-      }
-      return next;
-    }, { replace: true, state: location.state });
-  }, [filters, pathname, location.state, setSearchParams]);
+    const next = new URLSearchParams(searchParams);
+    for (const [key, param] of Object.entries(PARAM_MAP)) {
+      const val = filters[key as keyof MapFilters];
+      const def = DEFAULTS[key as keyof MapFilters];
+      if (val && val !== def) next.set(param, val);
+      else next.delete(param);
+    }
+    // Do not replace a realm's history entry when there is nothing to sync.
+    // Besides losing origins, redundant navigation can race a doorway click.
+    if (next.toString() === searchParams.toString()) return;
+    setSearchParams(next, { replace: true, state: location.state });
+  }, [filters, pathname, location.state, searchParams, setSearchParams]);
 
   const setSpecies = useCallback((v: string) => setFilters(f => ({ ...f, species: v })), []);
   const setCountry = useCallback((v: string) => setFilters(f => ({ ...f, country: v })), []);
