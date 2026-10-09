@@ -198,7 +198,7 @@ const FallingLeaves = () => {
 
 // AnimatedCounter removed — replaced by LivingCensus component
 
-const Hero = () => {
+const Hero = ({ quiet = false }: { quiet?: boolean }) => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
   
   const [isHovering, setIsHovering] = useState(false);
@@ -324,7 +324,7 @@ const Hero = () => {
            </p>
 
           {/* CTA buttons — above the fold */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none mx-auto pt-2">
+          {!quiet && <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none mx-auto pt-2">
             <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/map">
                 <MapPin className="w-5 h-5 mr-2" />
@@ -339,8 +339,10 @@ const Hero = () => {
             </Button>
           </div>
 
+          }
+
           {/* Ensō compass — scroll to TEOTAG guide */}
-          <div className="flex flex-col items-center pt-4 pb-1 gap-2">
+          {!quiet && <div className="flex flex-col items-center pt-4 pb-1 gap-2">
             <EnsoNudge size={56} onInteract={() => {
               const guide = document.getElementById("teotag-guide");
               if (guide) {
@@ -361,8 +363,10 @@ const Hero = () => {
             <NewUserScrollCue />
           </div>
 
+          }
+
           {/* Welcome Journey — gentle onboarding for new visitors */}
-          <WelcomeJourney isLoggedIn={isLoggedIn} />
+          {!quiet && <WelcomeJourney isLoggedIn={isLoggedIn} />}
         </div>
 
         {/* Bottom stack: Ancient Friend card — simplified */}

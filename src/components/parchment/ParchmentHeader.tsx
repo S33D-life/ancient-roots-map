@@ -71,7 +71,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
       </nav>
       <div className="parchment-tools">
         <button type="button" onClick={onSearch} aria-label="Search the Tree" className="parchment-search"><Search size={18} /></button><ThemeToggle />{signedIn && userId && <><NotificationsBadge /><HeartJar userId={userId ?? null} className="parchment-header-jar" /></>}
-        <button ref={trigger} type="button" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="parchment-tree-index" className="parchment-tree"><TreeDeciduous size={19} aria-hidden="true" />Tree</button>
+        <button ref={trigger} type="button" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="parchment-tree-index" className="parchment-tree" aria-label="Open Tree index" title="Tree"><TreeDeciduous size={21} aria-hidden="true" /></button>
       <Link to="/dashboard" className="parchment-hearth-guide" aria-label="TEOTAG — Go to your Hearth"><img src={teotagPortrait} alt="TEOTAG" /></Link></div>
     </div>
     {open && <div ref={menu} id="parchment-tree-index" className="parchment-tree-panel">

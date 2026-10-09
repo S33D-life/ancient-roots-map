@@ -24,7 +24,10 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
 
   const scrollToRoots = useCallback(() => {
     const el = document.getElementById("atlas-content");
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el) {
+      const header = document.querySelector("header")?.getBoundingClientRect().height ?? 72;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - header - 12, behavior: "smooth" });
+    }
   }, []);
 
   // ── Pretext: balanced wrapping for identity statement ──
@@ -39,14 +42,14 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
     <section id="ground" className="relative">
       <SectionAtmosphere theme="ground" />
       {threshold}
-      <Hero />
+      {!threshold && <Hero />}
 
       {/* ── Soil-Level TEOTAG Guide — the threshold ── */}
       <div id="teotag-guide" className="relative z-20 pb-8 pointer-events-none">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.8, duration: 1.6, ease: "easeOut" }}
+          transition={{ delay: threshold ? 0 : 1.8, duration: 1.6, ease: "easeOut" }}
           className="flex flex-col items-center gap-5 pointer-events-auto px-4"
         >
           {/* TEOTAG face */}
@@ -59,12 +62,12 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
               }}
               aria-hidden
             />
-            <TeotagFace variant="masculine" size="lg" delay={2.2} className="[&_div]:w-36 [&_div]:h-36 md:[&_div]:w-44 md:[&_div]:h-44" />
+            <TeotagFace variant="masculine" size="lg" delay={threshold ? 0 : 2.2} className="[&_div]:w-36 [&_div]:h-36 md:[&_div]:w-44 md:[&_div]:h-44" />
           </div>
 
           {/* Invitation text */}
           <DepthRevealText
-            delay={2800}
+            delay={threshold ? 0 : 2800}
             className="font-serif text-base md:text-lg text-center max-w-xs leading-relaxed italic"
             style={{ color: "hsl(var(--foreground) / 0.7)" }}
           >
@@ -75,8 +78,8 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 3.4, duration: 1 }}
-            className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mt-1 px-6 py-5"
+            transition={{ delay: threshold ? 0 : 3.4, duration: 1 }}
+            className="seed-choice-paths relative flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mt-1 px-6 py-5"
           >
             {/* warm lantern halo */}
             <div
@@ -127,7 +130,12 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
 
             {/* UP — Secondary: Explore Heartwood */}
             <button
-              onClick={() => navigate("/library")}
+              onClick={() => {
+                if (!threshold) { navigate("/library"); return; }
+                const room = document.getElementById("heartwood");
+                const header = document.querySelector("header")?.getBoundingClientRect().height ?? 72;
+                if (room) window.scrollTo({ top: room.getBoundingClientRect().top + window.scrollY - header - 12, behavior: "smooth" });
+              }}
               className="group flex flex-col items-center gap-2 bg-transparent border-none cursor-pointer transition-all duration-300"
             >
               <motion.div
@@ -153,6 +161,8 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
         </motion.div>
       </div>
 
+
+      {threshold && <Hero quiet />}
 
       {/* ── Ancient Friends anchor — the product, surfaced first ── */}
       <div className="relative z-20 pt-10 md:pt-14">

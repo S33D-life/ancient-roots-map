@@ -14,7 +14,7 @@ function header(path: string, state?: object) {
 describe("internal room navigation", () => {
   it("keeps search reachable through the mobile Tree index and returns focus on Escape", () => {
     const onSearch = header("/golden-dream");
-    const tree = screen.getByRole("button", { name: "Tree" });
+    const tree = screen.getByRole("button", { name: "Open Tree index" });
     fireEvent.click(tree);
     expect(tree).toHaveAttribute("aria-expanded", "true");
     fireEvent.keyDown(document, { key: "Escape" });
@@ -27,7 +27,7 @@ describe("internal room navigation", () => {
   });
   it("dismisses the Tree index when returning to the room already open", () => {
     header("/golden-dream");
-    const tree = screen.getByRole("button", { name: "Tree" });
+    const tree = screen.getByRole("button", { name: "Open Tree index" });
     fireEvent.click(tree);
     fireEvent.click(within(screen.getByRole("navigation", { name: "Tree index" })).getByRole("link", { name: /Crown/ }));
     expect(tree).toHaveAttribute("aria-expanded", "false");

@@ -313,3 +313,21 @@ html[data-living-parchment] .global-search-overlay button { min-width: 44px; fon
   .parchment-signed-in .parchment-logo { width:28px; height:28px; }
   .parchment-signed-in .parchment-hearth-guide { width:32px; height:32px; }
 }
+
+/* One clear Seed invitation; the Atlas introduction follows its doorway. */
+.s33d-living-scroll .seed-threshold { text-align:center; padding:32px 24px 12px; max-width:760px; }
+.s33d-living-scroll .seed-threshold h2 { font-size:clamp(32px,4vw,46px); margin:12px 0; }
+.s33d-living-scroll .seed-threshold > p { margin:0 auto; font-size:20px; line-height:1.5; max-width:620px; }
+.s33d-living-scroll #teotag-guide { padding:20px 20px 48px; max-width:760px; margin:auto; }
+.s33d-living-scroll #teotag-guide > div { gap:16px; }
+.s33d-living-scroll #teotag-guide button { min-width:220px; border:1px solid hsl(var(--border)/.5); padding:16px 20px; border-radius:22px; background:hsl(var(--card)/.55); }
+.s33d-living-scroll #teotag-guide button span { color:hsl(var(--foreground)) !important; }
+.s33d-living-scroll #teotag-guide button span:last-child { font-size:16px !important; color:hsl(var(--muted-foreground)) !important; }
+.s33d-living-scroll #teotag-guide button span { font-size:22px !important; }
+.s33d-living-scroll #teotag-guide button span:last-child { font-size:16px !important; }
+.parchment-tools .parchment-tree { width:44px; padding:0; }
+
+.s33d-living-scroll .seed-choice-paths { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; width:100%; padding:16px 0; gap:24px; }
+.s33d-living-scroll .seed-choice-paths > div { display:none; }
+.s33d-living-scroll .seed-choice-paths button { min-width:0 !important; justify-content:center; min-height:132px; }
+@media(max-width:640px) { .s33d-living-scroll .seed-choice-paths { grid-template-columns:1fr; gap:12px; } .s33d-living-scroll .seed-threshold > p { font-size:19px; } }

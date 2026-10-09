@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { TeotagMarginNote } from "@/components/parchment/ParchmentGround";
 import { useCallback, useEffect, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
@@ -158,7 +157,7 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
 
         {/* ── SEED — S33D Gateway Hero (the central seed layer) ── */}
         <Suspense fallback={<SectionShimmer />}>
-          <GroundSection threshold={parchment ? <div className="seed-threshold"><span className="parchment-kicker">The Seed · the middle of the living Tree</span><h2>One Tree. Many ways to begin.</h2><p>S33D connects ancient trees, the people who care for them and the stories they carry. You are at the Seed: the Crown, Canopy and Heartwood are above; the Ancient Friends and their roots are below.</p><nav aria-label="Wander up or down the Tree"><button onClick={() => scrollToSection("heartwood")}>↑ Climb into Heartwood</button><button onClick={() => scrollToSection("atlas-content")}>Descend to the Roots ↓</button></nav><TeotagMarginNote>Begin where you are. Let curiosity show you the next door.</TeotagMarginNote><Link className="seed-real-friend" to="/tree/2e4ef3b8-01b7-4f8c-925f-924b259a0df5">Meet a real Ancient Friend · Fortingall Yew →</Link></div> : undefined} />
+          <GroundSection threshold={parchment ? <div className="seed-threshold"><span className="parchment-kicker">The Seed · the middle of the living Tree</span><h2>Welcome to the living Tree.</h2><p>Ancient trees, the people who care for them, and the stories they carry. Wander upward into Heartwood and the Canopy, or downward to the Roots.</p></div> : undefined} />
         </Suspense>
 
         {/* seam — soil dissolving into mycelium */}
