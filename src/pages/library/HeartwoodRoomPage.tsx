@@ -4,7 +4,7 @@
  * Each room is a distinct chamber — not a tab in a monolith.
  */
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,7 +56,6 @@ const VALID_ROOMS = ROOM_KEYS;
  */
 function AncientFriendsWrapper() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [trees, setTrees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
