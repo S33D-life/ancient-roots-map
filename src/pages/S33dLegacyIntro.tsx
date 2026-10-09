@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import "@/components/tree-sections/exterior.css";
 import { useCallback, useEffect, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
@@ -52,9 +53,9 @@ const SectionShimmer = () => (
   </div>
 );
 
-const Index = ({ parchment = false }: { parchment?: boolean }) => {
-  useDocumentTitle("Ancient Friends — A Living Atlas of the World's Oldest Trees");
-  const { showEntrance, dismissEntrance } = useEntranceOnce("index", !parchment);
+const Index = ({ parchment = false, exterior = false }: { parchment?: boolean; exterior?: boolean }) => {
+  useDocumentTitle(exterior ? "TETOL — The Ethereal Tree of Life" : "Ancient Friends — A Living Atlas of the World's Oldest Trees");
+  const { showEntrance, dismissEntrance } = useEntranceOnce("index", !parchment && !exterior);
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
   useEffect(() => {
@@ -94,7 +95,7 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col relative ${parchment ? "s33d-living-scroll" : ""}`} style={{
+    <div className={`min-h-screen flex flex-col relative ${parchment ? "s33d-living-scroll" : ""} ${exterior ? "tetol-exterior" : ""}`} style={{
       background: "linear-gradient(to bottom, hsl(45 30% 92% / 0.04) 0%, transparent 20%, transparent 70%, hsl(25 30% 12% / 0.06) 100%)",
     }}>
       {/* Scroll-driven tree depth background */}
@@ -108,7 +109,7 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
       {/* Continuous tree spine running the full page height —
           quietly orients the visitor (roots ↔ trunk ↔ branches ↔ crown). */}
       <Suspense fallback={null}>
-        {!parchment && <TreeSpine />}
+        {(exterior || !parchment) && <TreeSpine opacity={exterior ? 0.16 : undefined} />}
         {!parchment && <AmbientZoneBadge />}
       </Suspense>
 
@@ -126,30 +127,31 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
 
       <main className="relative z-[1] flex-1" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Beta garden tone-setter */}
-        <BetaGardenBanner />
+        {exterior && <h1 className="sr-only">TETOL — outside the living Tree</h1>}
+        {!exterior && <BetaGardenBanner />}
 
         {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
         <Suspense fallback={<SectionShimmer />}>
           {/* ── CROWN — yOur Golden Dream ── */}
-          <CrownSection />
+          <CrownSection exterior={exterior} />
 
           {/* seam — sunlight bleeding into the canopy */}
-          <AnatomicalSeam variant="crown-canopy" />
+          <AnatomicalSeam className={exterior ? "exterior-seam" : undefined} variant="crown-canopy" />
 
           {/* breath — seed beneath earth */}
           <BreathingChamber whisper="Every root begins in silence." tone="soil" drift={-4} />
 
           {/* ── CANOPY — Council of Life ── */}
-          <CanopySection />
+          <CanopySection exterior={exterior} />
 
           {/* seam — branches tapering into bark */}
-          <AnatomicalSeam variant="canopy-trunk" />
+          <AnatomicalSeam className={exterior ? "exterior-seam" : undefined} variant="canopy-trunk" />
 
           {/* ── TRUNK — HeARTwood Library ── */}
-          <TrunkSection />
+          <TrunkSection exterior={exterior} />
 
           {/* seam — heartwood flaring into soil */}
-          <AnatomicalSeam variant="trunk-ground" />
+          <AnatomicalSeam className={exterior ? "exterior-seam" : undefined} variant="trunk-ground" />
 
           {/* breath — heartwood remembers */}
           <BreathingChamber whisper="The forest remembers slowly." tone="wood" drift={6} />
@@ -157,16 +159,16 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
 
         {/* ── SEED — S33D Gateway Hero (the central seed layer) ── */}
         <Suspense fallback={<SectionShimmer />}>
-          <GroundSection threshold={parchment ? <div className="seed-threshold"><span className="parchment-kicker">The Seed · the middle of the living Tree</span><h2>Welcome to the living Tree.</h2><p>Ancient trees, the people who care for them, and the stories they carry. Wander upward into Heartwood and the Canopy, or downward to the Roots.</p></div> : undefined} />
+          <GroundSection exterior={exterior} threshold={exterior ? <div className="seed-threshold"><span className="parchment-kicker">Outside the Tree · at the Seed</span><h2>TETOL</h2><p>The Ethereal Tree of Life</p><p className="exterior-invitation">One living Tree. Scroll up or down, then enter a level.</p><div className="exterior-seed"><h2>S33D · the Seed</h2><p>The originating commons.</p></div></div> : parchment ? <div className="seed-threshold"><span className="parchment-kicker">The Seed · the middle of the living Tree</span><h2>Welcome to the living Tree.</h2><p>Ancient trees, the people who care for them, and the stories they carry. Wander upward into Heartwood and the Canopy, or downward to the Roots.</p></div> : undefined} />
         </Suspense>
 
         {/* seam — soil dissolving into mycelium */}
         <Suspense fallback={null}>
-          <AnatomicalSeam variant="ground-roots" />
+          <AnatomicalSeam className={exterior ? "exterior-seam" : undefined} variant="ground-roots" />
         </Suspense>
         {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
         <Suspense fallback={<SectionShimmer />}>
-          <ForestInteractionLayers />
+          {!exterior && <ForestInteractionLayers />}
         </Suspense>
 
         {/* breath — light gathers */}
@@ -175,7 +177,7 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
         </Suspense>
 
         {/* ── Discovery shortcuts — Countries & Hives ── */}
-        <DiscoveryRow />
+        {!exterior && <DiscoveryRow />}
 
         {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
         <Suspense fallback={<SectionShimmer />}>
@@ -194,20 +196,20 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
 
             {/* Ancient Friends anchor moved up into GroundSection (above the Living Atlas explanation). */}
 
-            <EcosystemOverview />
+            {exterior ? <div className="exterior-roots"><span className="parchment-kicker">The Roots</span><h2>Ancient Friends</h2><p>Lived encounter. Earth. Place.</p><Link to="/map" state={{ from: "/s33d#atlas-content" }} className="exterior-doorway">Enter the Roots →</Link></div> : <EcosystemOverview />}
             <div className="section-divider max-w-xl mx-auto" />
-            {parchment && <section id="living-thread" className="seed-pathways"><span className="parchment-kicker">Follow a living thread</span><h2>An encounter can travel through the Tree.</h2><p>Meet a tree. Leave an offering. Carry its memory into Heartwood. Bring a question to the Council. Follow what grows in the Crown.</p><nav className="s33d-paths" aria-label="Choose your starting path"><Link to="/map"><strong>I’m here to discover</strong><span>Meet Ancient Friends in the Atlas.</span></Link><Link to="/library"><strong>I’m here to share</strong><span>Find a room for music, stories and memory.</span></Link><Link to="/support"><strong>I’m here to help</strong><span>Find ways to care for the growing grove.</span></Link></nav></section>}
-            <ParticipationSection />
-            <SupportDiscoveryRow />
+            {parchment && !exterior && <section id="living-thread" className="seed-pathways"><span className="parchment-kicker">Follow a living thread</span><h2>An encounter can travel through the Tree.</h2><p>Meet a tree. Leave an offering. Carry its memory into Heartwood. Bring a question to the Council. Follow what grows in the Crown.</p><nav className="s33d-paths" aria-label="Choose your starting path"><Link to="/map"><strong>I’m here to discover</strong><span>Meet Ancient Friends in the Atlas.</span></Link><Link to="/library"><strong>I’m here to share</strong><span>Find a room for music, stories and memory.</span></Link><Link to="/support"><strong>I’m here to help</strong><span>Find ways to care for the growing grove.</span></Link></nav></section>}
+            {!exterior && <ParticipationSection />}
+            {!exterior && <SupportDiscoveryRow />}
             <RootPulse />
-            <WisdomOfTheGrove />
+            {!exterior && <WisdomOfTheGrove />}
           </div>
         </Suspense>
 
       </main>
 
       <Suspense fallback={null}>
-        <TetolBridge />
+        {!exterior && <TetolBridge />}
         {!parchment && <ContextualWhisper
           id="home-explore"
           message="Every ancient tree has a story. Tap the Atlas to discover one near you."

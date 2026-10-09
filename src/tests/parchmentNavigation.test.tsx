@@ -12,6 +12,16 @@ function header(path: string, state?: object) {
 }
 
 describe("internal room navigation", () => {
+  it("keeps the exterior origin and its level when returning after refresh", () => {
+    header("/library", { from: "/s33d#heartwood" });
+    expect(screen.getByRole("link", { name: "Back to the Tree" })).toHaveAttribute("href", "/s33d#heartwood");
+  });
+  it("identifies the exterior as the whole Tree, without a self-return", () => {
+    header("/s33d");
+    expect(screen.getByLabelText("Current place")).toHaveTextContent("TETOL");
+    expect(screen.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/");
+  });
+
   it("names the actual Ancient Friend when returning from Heartwood", () => {
     header("/library", { from: "/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001" });
     expect(screen.getByRole("link", { name: "Back to the Ancient Friend" })).toHaveAttribute("href", "/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001");
@@ -23,7 +33,7 @@ describe("internal room navigation", () => {
   it("keeps public utility pages oriented without adding another navigation system", () => {
     header("/support");
     expect(screen.getByLabelText("Current place")).toHaveTextContent("Care for the Tree");
-    expect(screen.getByRole("link", { name: "Seed" })).toHaveAttribute("href", "/s33d");
+    expect(screen.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/s33d");
   });
   it("keeps search reachable through the mobile Tree index and returns focus on Escape", () => {
     const onSearch = header("/golden-dream");

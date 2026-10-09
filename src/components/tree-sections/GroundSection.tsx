@@ -17,7 +17,7 @@ import TeotagFace from "../TeotagFace";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
 
-const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
+const GroundSection = ({ threshold, exterior = false }: { threshold?: ReactNode; exterior?: boolean }) => {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const depth = useDepthStyle();
@@ -91,7 +91,7 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
               }}
               aria-hidden
             />
-            {/* DOWN — Primary: Enter the Living Atlas */}
+            {/* DOWN — Primary: {exterior ? "See the Roots" : "Enter the Living Atlas"} */}
             <button
               onClick={scrollToRoots}
               className="group flex flex-col items-center gap-2 bg-transparent border-none cursor-pointer transition-all duration-300"
@@ -100,7 +100,7 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
                 className="font-serif text-base md:text-lg tracking-wide transition-colors duration-300 group-hover:text-primary"
                 style={{ color: "hsl(45 70% 70%)" }}
               >
-                Enter the Living Atlas
+                {exterior ? "See the Roots" : "Enter the Living Atlas"}
               </span>
               <span
                 className="seed-doorway-help font-serif text-[11px] max-w-[200px] text-center leading-relaxed"
@@ -154,7 +154,7 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
                 className="seed-doorway-help font-serif text-[10px] max-w-[180px] text-center leading-relaxed"
                 style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
               >
-                Library, Council & your Hearth
+                {exterior ? "Living memory inside the trunk" : "Library, Council & your Hearth"}
               </span>
             </button>
           </motion.div>
@@ -162,6 +162,7 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
       </div>
 
 
+      {!exterior && <>
       {threshold && <Hero quiet />}
 
       {/* ── Ancient Friends anchor — the product, surfaced first ── */}
@@ -249,7 +250,8 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
             ))}
           </motion.div>
         </div>
-      </div>
+      </div>      </>}
+
     </section>
   );
 };

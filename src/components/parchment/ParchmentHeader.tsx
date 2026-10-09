@@ -17,7 +17,7 @@ import Mantle from "./Mantle";
 
 export function internalRealm(path: string) {
   if (path === "/") return "tree";
-  if (path === "/s33d") return "seed";
+  if (path === "/s33d") return "tree";
   if (path === "/golden-dream" || path.startsWith("/golden-dream/")) return "crown";
   if (path === "/library" || path.startsWith("/library/")) return "heartwood";
   if (path === "/council-of-life" || path === "/council" || path.startsWith("/council/")) return "canopy";
@@ -26,7 +26,7 @@ export function internalRealm(path: string) {
 
 const treeLinks = [
   { to: ROUTES.MAP, label: "Roots", sub: "Encounter · Ancient Friends", realm: "roots" },
-  { to: ROUTES.S33D, label: "S33D", sub: "Return to the Seed", realm: "seed" },
+  { to: ROUTES.S33D, label: "S33D", sub: "See the whole Tree", realm: "tree" },
   { to: ROUTES.LIBRARY, label: "Heartwood", sub: "Remember · the living library", realm: "heartwood" },
   { to: ROUTES.COUNCIL, label: "Canopy", sub: "Gather · Council of Life", realm: "canopy" },
   { to: ROUTES.GOLDEN_DREAM, label: "Crown", sub: "Imagine · yOur Golden Dream", realm: "crown" },
@@ -53,14 +53,14 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
   const isFolio = location.pathname.startsWith("/golden-dream/growth/");
   const origin = journeyOrigin(location.state?.from);
   const contextualOrigin = origin && origin.to.split(/[?#]/)[0] !== location.pathname ? origin : undefined;
-  const back = realm === "seed" ? { to: "/", label: "Return to the Tree" } : isFolio ? returnTarget(location.state) : location.pathname.startsWith("/library/")
+  const back = realm === "tree" ? { to: "/", label: "Return to the Tree" } : isFolio ? returnTarget(location.state) : location.pathname.startsWith("/library/")
     ? { to: ROUTES.LIBRARY, label: "Return to the Hall" }
     : contextualOrigin ? contextualOrigin
     : realm === "canopy" ? { to: "/", label: "Return to the Tree" }
     : realm === "heartwood" ? { to: "/", label: "Return to the Tree" }
     : location.pathname.startsWith("/tree/") || location.pathname.startsWith("/hive/")
       ? { to: ROUTES.MAP, label: "Return to the Roots" }
-    : { to: ROUTES.S33D, label: "Return to the Seed" };
+    : { to: ROUTES.S33D, label: "Return to the Tree" };
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
   useEffect(() => {

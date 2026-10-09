@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import { journeyOrigin, hallReturnState } from "@/lib/journeyOrigin";
 
 describe("journey origins", () => {
+  it("names the exterior Tree without losing its level fragment", () => {
+    expect(journeyOrigin("/s33d#council")).toEqual({ to: "/s33d#council", short: "Tree", label: "Back to the Tree" });
+  });
   it("keeps a tree encounter and its reading tab through the Hall", () => {
     const path = "/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001?tab=memory";
     expect(journeyOrigin(path)).toMatchObject({ to: path, label: "Back to the Ancient Friend" });

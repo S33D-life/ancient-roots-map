@@ -314,7 +314,7 @@ const App = () => {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={realm(<TetolHomePage />, "tetol-out")} />
-                <Route path="/s33d" element={realm(<S33dGatewayPage />, "seed")} />
+                <Route path="/s33d" element={realm(<S33dGatewayPage />, "tetol-out")} />
                 <Route path="/ancient-friends" element={<Navigate to="/library/ancient-friends" replace />} />
                 <Route path="/arborium" element={<Navigate to="/library/arborium" replace />} />
                 <Route path="/heartwood/quest-room" element={<Navigate to="/library/quest-cave" replace />} />

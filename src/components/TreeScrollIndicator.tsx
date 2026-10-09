@@ -9,8 +9,7 @@ const INDICATOR_SECTIONS: { id: TreeSection; label: string }[] = [
   { id: "golden-dream", label: "CROWN" },
   { id: "council", label: "CANOPY" },
   { id: "heartwood", label: "TRUNK" },
-  { id: "atlas-hero", label: "─ ─ ─" },
-  { id: "ground", label: "GROUND" },
+  { id: "ground", label: "SEED" },
   { id: "atlas-content", label: "ROOTS" },
 ];
 

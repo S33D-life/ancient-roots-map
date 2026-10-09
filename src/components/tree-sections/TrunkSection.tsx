@@ -47,7 +47,7 @@ const cardVariants = {
   }),
 };
 
-const TrunkSection = () => {
+const TrunkSection = ({ exterior = false }: { exterior?: boolean }) => {
   const depth = useDepthStyle();
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 3 });
 
@@ -102,7 +102,7 @@ const TrunkSection = () => {
               : {}),
           }}
         >
-          <span ref={titleLayout.containerRef as any}>HeARTwood Library</span>
+          <span ref={titleLayout.containerRef as any}>{exterior ? "Heartwood" : "HeARTwood Library"}</span>
         </DepthRevealText>
 
         {/* Anchor sentence */}
@@ -111,7 +111,7 @@ const TrunkSection = () => {
           className="font-serif text-base md:text-lg max-w-md mx-auto"
           style={{ color: "hsl(35 30% 88%)", lineHeight: 1.55 }}
         >
-          The library of every journey, song, and offering left at a tree.
+          {exterior ? "The magical home of what we have lived together." : "The library of every journey, song, and offering left at a tree."}
         </DepthRevealText>
 
         {/* Wonder line */}
@@ -125,6 +125,7 @@ const TrunkSection = () => {
         </DepthRevealText>
 
         {/* Chambers carved into the trunk — doorways with warm interior bleed */}
+        {!exterior && <>
         <div className="depth-reveal-trunk grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 pt-6 max-w-xl mx-auto">
           {LIBRARY_ROOMS.map((room, i) => (
             <motion.div
@@ -161,8 +162,10 @@ const TrunkSection = () => {
           ))}
         </div>
 
+        </>}
         <Link
           to="/library"
+          state={exterior ? { from: "/s33d#heartwood" } : undefined}
           className="inline-flex items-center gap-2 text-[11px] font-serif text-primary/40 hover:text-primary/70 transition-colors duration-300 pt-1"
         >
           Enter the Heartwood <ArrowRight className="w-3 h-3" />

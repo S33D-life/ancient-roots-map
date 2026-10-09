@@ -29,7 +29,7 @@ const cardVariants = {
   }),
 };
 
-const CanopySection = () => {
+const CanopySection = ({ exterior = false }: { exterior?: boolean }) => {
   const depth = useDepthStyle();
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 4, direction: -1 });
 
@@ -93,7 +93,7 @@ const CanopySection = () => {
           className="font-serif text-base md:text-lg max-w-md mx-auto"
           style={{ color: "hsl(140 25% 85%)", lineHeight: 1.55 }}
         >
-          Where the grove gathers to decide what grows next.
+          {exterior ? "Gather, learn and bring life back to the Circle." : "Where the grove gathers to decide what grows next."}
         </DepthRevealText>
 
         {/* Wonder line */}
@@ -107,6 +107,7 @@ const CanopySection = () => {
         </DepthRevealText>
 
         {/* Doorway cards — embedded, organic */}
+        {!exterior && <>
         <div className="grid grid-cols-2 gap-2 pt-4 max-w-md mx-auto">
           {COUNCIL_LINKS.map((item, i) => {
             const Icon = item.icon;
@@ -137,8 +138,10 @@ const CanopySection = () => {
           })}
         </div>
 
+        </>}
         <Link
           to="/council-of-life"
+          state={exterior ? { from: "/s33d#council" } : undefined}
           className="inline-flex items-center gap-2 text-[11px] font-serif text-primary/40 hover:text-primary/70 transition-colors duration-300 pt-1"
         >
           Enter the Council <ArrowRight className="w-3 h-3" />

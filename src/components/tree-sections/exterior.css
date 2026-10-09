@@ -1,0 +1,42 @@
+/* The existing scroll and its continuous Tree spine, viewed from outside. */
+.tetol-exterior main { padding-bottom:80px; }
+.tetol-exterior .tree-spine-svg { width:min(56vw,640px) !important; }
+html.light .tetol-exterior { background:hsl(var(--background)); }
+ .tetol-exterior main :is(h1,h2,p,a) { color:hsl(var(--foreground)); }
+.tetol-exterior .seed-threshold { text-align:center; max-width:680px; margin:auto; padding:32px 24px 8px; }
+.tetol-exterior main .seed-threshold > h2 { font-family:var(--font-realm); font-size:clamp(42px,7vw,70px); letter-spacing:.16em; line-height:1.12; margin:16px 0 8px; }
+.tetol-exterior .seed-threshold > p { font-size:20px; line-height:1.5; margin:8px auto; max-width:550px; }
+.tetol-exterior .seed-threshold .exterior-invitation { font-size:18px; }
+.tetol-exterior .exterior-seed { padding-top:22px; }
+.tetol-exterior .exterior-seed h2 { font-size:24px; margin:0; }
+.tetol-exterior .exterior-seed p { font-size:17px; }
+.tetol-exterior #teotag-guide { padding-bottom:24px; }
+.tetol-exterior #teotag-guide > div { gap:12px; }
+.tetol-exterior #teotag-guide .seed-choice-paths { display:flex; flex-direction:row; justify-content:center; gap:20px; padding:8px; }
+.tetol-exterior #teotag-guide button { min-height:64px; min-width:120px; }
+.tetol-exterior #teotag-guide button .seed-doorway-help { font-size:14px !important; line-height:1.4; }
+.tetol-exterior #teotag-guide .seed-choice-paths > div { display:none; }
+.tetol-exterior :is(#golden-dream,#council,#heartwood,#atlas-content) { scroll-margin-top:85px; }
+.tetol-exterior :is(#golden-dream,#council,#heartwood) { min-height:440px; }
+.tetol-exterior :is(#golden-dream,#council,#heartwood) a,.tetol-exterior .exterior-doorway { display:inline-flex; align-items:center; min-height:48px; padding:8px 16px; font-size:20px; color:hsl(var(--foreground)); text-decoration:underline; text-underline-offset:6px; }
+.tetol-exterior a:focus-visible,.tetol-exterior button:focus-visible { outline:2px solid hsl(var(--foreground)); outline-offset:5px; }
+.tetol-exterior .exterior-roots { position:relative; z-index:2; text-align:center; max-width:600px; margin:0 auto; padding:64px 24px; }
+.tetol-exterior .exterior-roots h2 { font-size:clamp(32px,5vw,48px); margin:18px 0; }
+.tetol-exterior .exterior-roots p { font-size:20px; margin:16px 0; }
+.tetol-exterior nav[aria-label="Tree sections"] button { min-height:48px; min-width:85px; }
+.tetol-exterior nav[aria-label="Tree sections"] button span { color:hsl(var(--foreground)) !important; opacity:.85 !important; font-size:10px !important; }
+@media(max-width:640px) {
+ .tetol-exterior :is(#golden-dream,#council,#heartwood) { padding:64px 24px; min-height:380px; }
+ .tetol-exterior .tree-spine-svg { width:76vw !important; }
+ .tetol-exterior .seed-threshold { padding:24px 18px 8px; }
+ .tetol-exterior .seed-threshold > p { font-size:18px; }
+ .tetol-exterior #teotag-guide .seed-choice-paths { gap:10px; width:100%; }
+ .tetol-exterior #teotag-guide button { min-width:0 !important; flex:1; min-height:90px !important; }
+}
+@media(prefers-reduced-motion:reduce) { .tetol-exterior *, .tetol-exterior *::before { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+
+html.light .tetol-exterior .tree-spine-svg { mask-image:linear-gradient(to right,transparent,black 28%,black 72%,transparent); }
+.tetol-exterior #golden-dream h2 { color:hsl(var(--primary)); }
+
+/* Keep the recovered ring seams, without carrying their night backdrop into daylight. */
+html.light .tetol-exterior .exterior-seam > div:first-child { opacity:.12; mix-blend-mode:multiply; }

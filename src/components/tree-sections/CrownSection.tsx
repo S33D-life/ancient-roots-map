@@ -28,7 +28,7 @@ const cardVariants = {
   }),
 };
 
-const CrownSection = () => {
+const CrownSection = ({ exterior = false }: { exterior?: boolean }) => {
   const depth = useDepthStyle();
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 5, direction: -1 });
 
@@ -85,7 +85,7 @@ const CrownSection = () => {
               : {}),
           }}
         >
-          <span ref={titleLayout.containerRef as any}>Our Vision</span>
+          <span ref={titleLayout.containerRef as any}>{exterior ? "yOur Golden Dream" : "Our Vision"}</span>
         </DepthRevealText>
 
         {/* Anchor sentence — orientation */}
@@ -94,7 +94,7 @@ const CrownSection = () => {
           className="font-serif text-base md:text-lg max-w-md mx-auto"
           style={{ color: "hsl(45 25% 88%)", lineHeight: 1.55 }}
         >
-          A living dream for people, trees, and future generations.
+          {exterior ? "What might the Tree become?" : "A living dream for people, trees, and future generations."}
         </DepthRevealText>
 
         {/* Wonder line */}
@@ -104,7 +104,7 @@ const CrownSection = () => {
           className="font-serif italic text-base md:text-lg mx-auto max-w-xs text-foreground/55"
           style={getWonderLineStyle(depth.zone)}
         >
-          The dream grows with the tree.
+          {exterior ? "Possibilities, not promises." : "The dream grows with the tree."}
         </DepthRevealText>
 
         {/* Threshold whisper — a single quiet invitation into the wood */}
@@ -112,10 +112,11 @@ const CrownSection = () => {
           delay={550}
           className="font-serif italic text-[12px] md:text-[13px] text-muted-foreground/45 max-w-xs mx-auto pt-1"
         >
-          Find a tree. Leave something living behind.
+          {!exterior && "Find a tree. Leave something living behind."}
         </DepthRevealText>
 
         {/* Doorway cards — embedded, not floating */}
+        {!exterior && <>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-4">
           {ROOMS.map((room, i) => {
             const Icon = room.icon;
@@ -141,11 +142,13 @@ const CrownSection = () => {
           })}
         </div>
 
+        </>}
         <Link
           to="/golden-dream"
+          state={exterior ? { from: "/s33d#golden-dream" } : undefined}
           className="inline-flex items-center gap-2 text-[11px] font-serif text-primary/40 hover:text-primary/70 transition-colors duration-300 pt-1"
         >
-          Enter the full Golden Dream <ArrowRight className="w-3 h-3" />
+          Enter the Crown <ArrowRight className="w-3 h-3" />
         </Link>
       </motion.div>
 
