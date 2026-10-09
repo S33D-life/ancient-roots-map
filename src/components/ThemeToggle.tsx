@@ -3,15 +3,12 @@
  * Persists preference to localStorage.
  */
 import { applySiteTheme, useParchmentDark } from "@/hooks/use-parchment-dark";
-import { useLocation } from "react-router-dom";
-import { internalRealm } from "@/components/parchment/ParchmentHeader";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 
 
 const ThemeToggle = () => {
-  const isParchment = Boolean(internalRealm(useLocation().pathname));
   const isDark = useParchmentDark();
 
   return (
@@ -19,8 +16,8 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={() => applySiteTheme(!isDark)}
-      title={isParchment ? (isDark ? "Living Parchment" : "Night Grove") : (isDark ? "Light mode" : "Dark mode")}
-      aria-label={isParchment ? (isDark ? "Use Living Parchment" : "Use Night Grove") : (isDark ? "Use light mode" : "Use dark mode")}
+      title={isDark ? "Living Parchment" : "Night Grove"}
+      aria-label={isDark ? "Use Living Parchment" : "Use Night Grove"}
       className="h-7 w-7 md:h-8 md:w-8 rounded-full hover:bg-accent/20 shrink-0"
     >
       {isDark ? (
