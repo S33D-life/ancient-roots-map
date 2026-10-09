@@ -37,6 +37,12 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
 }) {
   const location = useLocation();
   const realm = internalRealm(location.pathname);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (new URLSearchParams(location.search).get("ink") === "racing") root.dataset.inkReview = "racing";
+    else delete root.dataset.inkReview;
+    return () => { delete root.dataset.inkReview; };
+  }, [location.search]);
   const inRoots = /^\/(map|atlas|tree|hives|hive)(\/|$)/.test(location.pathname);
   const navigationRealm = inRoots ? "roots" : realm;
   const locationLabel = ({ tree: "TETOL", seed: "The Seed", crown: "The Crown", heartwood: "Heartwood", canopy: "The Canopy", roots: "The Roots" } as Record<string, string>)[navigationRealm ?? ""] ?? ({ "/support": "Care for the Tree", "/about": "About S33D", "/press": "Press Room", "/dashboard": "Your Hearth", "/vault": "Your Vault", "/value-tree": "Value Tree" } as Record<string, string>)[location.pathname] ?? "S33D";

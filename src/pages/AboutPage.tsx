@@ -10,7 +10,7 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1" style={{ paddingTop: "var(--content-top)" }}>
+      <main className="parchment-public-type flex-1" style={{ paddingTop: "var(--content-top)" }}>
         <div className="max-w-2xl mx-auto px-4 py-12 space-y-10">
           <div className="text-center space-y-4">
             <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto" style={{ background: "hsl(var(--primary) / 0.1)" }}>

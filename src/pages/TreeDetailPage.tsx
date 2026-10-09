@@ -797,7 +797,7 @@ const TreeDetailPage = () => {
       </AnimatePresence>
 
       <main
-        className="container mx-auto px-4 pb-20 max-w-4xl overflow-x-hidden"
+        className="parchment-tree-reading container mx-auto px-4 pb-20 max-w-4xl overflow-x-hidden"
         style={{ paddingTop: 'var(--content-top)' }}
         data-testid="tree-detail"
       >

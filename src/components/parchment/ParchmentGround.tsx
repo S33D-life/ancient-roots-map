@@ -19,5 +19,5 @@ export function TreePlate({ realm = "crown" }: { realm?: "crown" | "canopy" | "h
 }
 
 export function TeotagMarginNote({ children }: { children: ReactNode }) {
-  return <aside className="teotag-margin" aria-label="A note from TEOTAG"><img src={teotag} alt="" /><div><p>{children}</p><span>TEOTAG, in the margin</span></div></aside>;
+  return <aside className="teotag-margin" aria-label="A note from TEOTAG"><img src={teotag} alt="" /><div><p>{children}</p><span className="teotag-signature">TEOTAG, in the margin</span></div></aside>;
 }

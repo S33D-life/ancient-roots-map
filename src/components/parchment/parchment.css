@@ -440,3 +440,31 @@ html.light[data-living-parchment] .parchment-guidance-note > p { color: hsl(var(
 .parchment-bottom-nav .parchment-add-tree { display:flex; align-items:center; justify-content:center; min-width:48px; min-height:48px; color:#94711c; border-radius:14px; }
 .parchment-bottom-nav .parchment-add-tree:hover { background:rgba(148,113,28,.1); }
 .dark .parchment-bottom-nav .parchment-add-tree { color:#e1bc58; }
+
+/* Shared editorial roles for legacy public information; ceremonial rooms retain their hierarchy. */
+html.light[data-living-parchment] {
+  --type-page: clamp(32px, 4vw, 44px);
+  --type-section: 24px;
+  --type-reading: clamp(17px, 1.6vw, 19px);
+  --type-note: 14px;
+  --type-leading: 1.55;
+}
+html.light[data-living-parchment] .parchment-public-type h1 { font-size:var(--type-page); font-weight:400; line-height:1.12; letter-spacing:normal; text-wrap:balance; }
+html.light[data-living-parchment] .parchment-public-type h2 { font-size:var(--type-section); font-weight:500; line-height:1.25; letter-spacing:normal; text-transform:none; }
+html.light[data-living-parchment] .parchment-public-type p:not(.font-mono) { font-size:var(--type-reading); line-height:var(--type-leading); }
+html.light[data-living-parchment] .parchment-public-type p.text-xs,
+html.light[data-living-parchment] .parchment-public-type p.text-\[10px\] { font-size:var(--type-note); line-height:1.5; color:hsl(var(--muted-foreground)); }
+.tetol-full-name { font-size:16px; line-height:1.5; letter-spacing:.035em; max-width:28ch; margin-inline:auto; }
+.teotag-margin .teotag-signature { font-family:'Cedarville Cursive',cursive; font-size:18px; line-height:1.5; font-style:normal; }
+/* Review-only ink, explicitly selected by ?ink=racing. Never persisted or active in Night Grove. */
+html.light[data-living-parchment][data-ink-review="racing"] {
+  --foreground:160 46% 13%; --card-foreground:160 46% 13%; --popover-foreground:160 46% 13%;
+  --muted-foreground:155 20% 27%; --ink-signature:#61416f;
+}
+html.light[data-ink-review="racing"] .parchment-ground { --paper-ink:hsl(var(--foreground)); --paper-body:hsl(var(--foreground)); --paper-muted:hsl(var(--muted-foreground)); --paper-hair:hsl(var(--foreground)/.2); }
+html.light[data-ink-review="racing"] .tetol-parchment-tree h1 { color:hsl(var(--foreground)) !important; }
+html.light[data-ink-review="racing"] .teotag-signature,
+html.light[data-ink-review="racing"] .tetol-initial { color:var(--ink-signature); }
+html.light[data-ink-review="racing"] .tetol-full-name { color:hsl(var(--foreground)) !important; }
+
+html.light[data-living-parchment] .parchment-tree-reading p.text-\[11px\]:not(.font-mono) { font-size:var(--type-note); line-height:1.5; }

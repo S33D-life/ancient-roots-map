@@ -181,10 +181,10 @@ const TetolHomePage = () => {
               TETOL
             </h1>
             <p
-              className="text-[10px] md:text-xs font-serif tracking-[0.35em] mb-8 text-center uppercase"
+              className="tetol-full-name font-serif mb-8 text-center"
               style={{ color: "hsl(var(--muted-foreground))" }}
             >
-              The Ethereal Tree of Life
+              <span className="tetol-initial">T</span>he <span className="tetol-initial">E</span>thereal <span className="tetol-initial">T</span>ree <span className="tetol-initial">O</span>f <span className="tetol-initial">L</span>ife
             </p>
 
             {isLight && <Link to="/s33d" className="tetol-tree-invitation underline underline-offset-4 decoration-current/30">Step into the living Tree →</Link>}
