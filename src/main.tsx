@@ -3,6 +3,11 @@ import { startSessionEvidence } from "./lib/auth/sessionEvidence";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { applySiteTheme, savedThemeIsDark } from "./hooks/use-parchment-dark";
+
+const initialDark = savedThemeIsDark();
+applySiteTheme(initialDark);
+if (!initialDark) document.documentElement.dataset.livingParchment = "tree";
 
 declare const __BUILD_ID__: string;
 

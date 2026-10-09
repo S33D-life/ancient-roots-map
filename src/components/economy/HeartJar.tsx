@@ -3,6 +3,7 @@
  * Compact header indicator showing hearts + influence + seeds.
  * Expands into a full balance panel on tap.
  */
+import { applySiteTheme } from "@/hooks/use-parchment-dark";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
@@ -377,9 +378,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                       onClick={() => {
                         const root = document.documentElement;
                         const isDark = root.classList.contains("dark");
-                        root.classList.toggle("dark", !isDark);
-                        root.classList.toggle("light", isDark);
-                        localStorage.setItem("s33d-theme", isDark ? "light" : "dark");
+                        applySiteTheme(!isDark);
                         setOpen(o => { setTimeout(() => setOpen(true), 0); return false; });
                       }}
                       className="p-1.5 rounded-full transition-colors hover:bg-accent/20 md:hidden"

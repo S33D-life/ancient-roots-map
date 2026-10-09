@@ -5,6 +5,7 @@
  */
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
+import { useParchmentDark } from "@/hooks/use-parchment-dark";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
   Sprout, Heart, TreeDeciduous, Crown, Leaf,
@@ -92,10 +93,7 @@ const TetolHomePage = () => {
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const { isNewUser } = useIsNewUser();
 
-  const isLight = useMemo(() => {
-    if (typeof document === "undefined") return false;
-    return document.documentElement.classList.contains("light");
-  }, []);
+  const isLight = !useParchmentDark();
 
   const nodeColors = isLight ? nodeColorsLight : nodeColorsDark;
 
@@ -126,7 +124,7 @@ const TetolHomePage = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-x-hidden">
+    <div className={`min-h-screen flex flex-col relative overflow-x-hidden ${isLight ? "tetol-parchment-tree" : ""}`}>
       <Header />
       <BetaGardenBanner />
 
@@ -134,7 +132,7 @@ const TetolHomePage = () => {
         className="flex-1 flex flex-col items-center relative overflow-hidden pt-content px-safe"
         style={{
           background: isLight
-            ? "linear-gradient(180deg, hsl(38 35% 95%) 0%, hsl(40 30% 92%) 40%, hsl(36 28% 94%) 100%)"
+            ? "radial-gradient(ellipse at 70% 10%, #fbf4e2 0%, #f2e8cf 60%, #e4d3ae 100%)"
             : "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))",
         }}
       >
@@ -189,6 +187,7 @@ const TetolHomePage = () => {
               The Ethereal Tree of Life
             </p>
 
+            {isLight && <p className="tetol-tree-invitation">One living Tree. Wander from the Crown to the Roots.</p>}
             {!isNewUser && <div className="mb-8" />}
             {isNewUser && <div className="mb-6" />}
             {/* TEOTAG hover tooltip — hidden for new users */}
