@@ -1,0 +1,19 @@
+/* The field changes atmosphere; the Folio remains a physical reading leaf. */
+.crown-field .crown-attention { margin: 1.6rem 0; padding: 1.1rem 0 1.1rem 1.25rem; border-left: 1px solid var(--lp-muted); display: grid; gap: .6rem; }
+.crown-field .crown-attention .lp-h2 { margin: 0 0 .3rem; }
+.crown-field .crown-thread-field { border-top: 0; }
+.crown-field .lp-row { border-radius: 0; padding: 1.2rem 0; }
+.crown-field .lp-row-sub { font-size: 18px; line-height: 1.5; margin: .5rem 0; }
+.crown-field .crown-relations { font-size: 16px; line-height: 1.5; color: var(--lp-muted); margin: .3rem 0 .5rem; }
+.crown-field .crown-ripening { margin-top: 1.25rem; border-top: 1px solid var(--lp-hair); }
+.crown-field .crown-ripening summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 18px; }
+.crown-field .crown-ripening ol { display: flex; flex-wrap: wrap; gap: 1rem; list-style: none; padding: .6rem 0; margin: 0; }
+.crown-field .crown-ripening li { display: flex; align-items: center; gap: .35rem; font-size: 16px; }
+.crown-field .crown-thresholds { margin-top: 1.25rem; }
+.crown-field .crown-thresholds a { display: flex; align-items: center; min-height: 48px; width: fit-content; color: var(--lp-ink); font-size: 18px; text-decoration: underline; text-underline-offset: .25em; }
+.crown-field :is(a, summary):focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.dark .parchment-ground .crown-field { background: radial-gradient(ellipse at 85% 0%, #263b3a77, transparent 65%); }
+.dark .crown-field .crown-attention { border-color: #afbbb4; }
+.dark .crown-field .crown-thread-field { background: radial-gradient(circle at 95% 12%, #cbd6d3 0 1px, transparent 2px), radial-gradient(circle at 81% 80%, #cbd6d388 0 1px, transparent 2px); }
+@media (max-width: 420px) { .crown-field .crown-attention { padding-left: .8rem; margin: 1.1rem 0; } .crown-field .lp-row { gap: .65rem; } }
+@media (prefers-reduced-motion: no-preference) { .crown-field .lp-row-open { transition: text-underline-offset .15s ease; } .crown-field .lp-row:hover .lp-row-open { text-decoration: underline; text-underline-offset: .25em; } }

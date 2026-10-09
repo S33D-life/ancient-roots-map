@@ -47,7 +47,13 @@ for (const width of [1440, 390, 320]) {
     await page.getByRole("button", { name: "Use Night Grove", exact: true }).click();
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect(folio).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath(`night-crown-${width}.png`), fullPage: true });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await folio.click();
+    await expect(page.locator(".lp-leaf")).toBeVisible();
+    expect(await page.locator(".lp-leaf").evaluate(el => getComputedStyle(el).color)).not.toBe("rgb(255, 255, 255)");
+    await page.screenshot({ path: test.info().outputPath(`night-folio-${width}.png`) });
+    await page.getByRole("link", { name: "↩ Return to the Crown", exact: true }).click();
     await page.getByRole("button", { name: "Use Living Parchment", exact: true }).click();
     await page.reload();
     await expect(title).toBeVisible();
@@ -62,11 +68,20 @@ for (const width of [1440, 390, 320]) {
       expect(boundary).toBeGreaterThan(0);
       await route.fulfill({ response, body: source.slice(0, boundary) });
     });
-    await page.goto("/tetol/circle-235/pre-fire/tetol.html?welcome=0#crown");
+    await page.goto("/tetol/circle-235/pre-fire/tetol.html?welcome=0&from=crown#crown");
     await expect(page.locator("#panel")).toContainText("yOur Golden Dream");
     await expect(page).toHaveURL(/#crown$/);
-    await expect(page.locator("#council-return")).toHaveAttribute("href", "/council-of-life?from=spatial-council#next-gathering");
-    await page.goBack();
+    await expect(page.locator("#crown-return")).toHaveAttribute("href", "/golden-dream");
+    await expect(page.locator("#council-return")).toHaveCount(0);
+    await page.locator("#crown-return").click();
     await expect(title).toBeVisible();
+    await page.goto("/tetol/circle-235/pre-fire/tetol.html?welcome=0&from=https://outside.invalid#crown");
+    await expect(page.locator("#council-return")).toHaveAttribute("href", "/council-of-life?from=spatial-council#next-gathering");
+    await expect(page.locator("#crown-return")).toHaveCount(0);
+    await page.goto("/golden-dream/growth/one-circle-many-surfaces");
+    await expect(page.getByRole("heading", { name: "One Circle · Many Surfaces", exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("link", { name: "↩ Return to the Crown", exact: true })).toHaveAttribute("href", "/golden-dream");
+    expect(errors).toEqual([]);
   });
 }

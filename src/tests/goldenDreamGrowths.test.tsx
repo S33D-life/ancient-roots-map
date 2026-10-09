@@ -38,8 +38,8 @@ describe("Golden Dream · what is asking to grow", () => {
     expect(row).toHaveAttribute("href", ROUTES.CROWN_GROWTH(G.id));
     expect(within(row).getByRole("img", { name: "Maturity: Growing" })).toBeInTheDocument();
     expect(row).toHaveTextContent("Growing · touches 4 realms · a decision is waiting");
-    expect(row).toHaveTextContent("Open its Folio →");
-    expect(row).not.toHaveTextContent(/merged|deployed|verified|approved|gold/i);
+    expect(row).toHaveTextContent("Open a Growth Folio →");
+    expect(row).not.toHaveTextContent(/merged|deployed|verified|gold/i);
   });
 
   it("passes where you came from so the Folio can return there", () => {
@@ -52,11 +52,20 @@ describe("Golden Dream · what is asking to grow", () => {
     renderList([]);
     expect(screen.getByText("Nothing is asking to grow yet.")).toBeInTheDocument();
     expect(screen.getByText("Growths appear here when TEOTAG records them. Nothing is inferred.")).toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open a Growth Folio/ })).not.toBeInTheDocument();
   });
 
   it("omits the waiting decision when none is recorded", () => {
     expect(growthLine({ ...G, nextDecisions: [] })).toBe("Growing · touches 4 realms");
+  });
+
+  it("keeps Gold unset and explains attention separately from maturity", () => {
+    renderList();
+    expect(screen.getByText("No Gold Dream has been named yet.")).toBeInTheDocument();
+    expect(screen.getByText(/These are possibilities, not promises/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Enter the spatial Crown/ })).toHaveAttribute("href", "/tetol/circle-235/pre-fire/tetol.html?welcome=0&from=crown#crown");
+    expect(screen.getByRole("link", { name: /Offer an Ember/ })).toHaveAttribute("href", "mailto:hello@s33d.life?subject=An%20Ember%20for%20the%20Crown");
+    expect(screen.getByText(/Touches Canopy · Taproot · Heartwood · spatial TETOL/)).toBeInTheDocument();
   });
 
   it("offers no controls beyond links", () => {
