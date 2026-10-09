@@ -25,11 +25,11 @@ describe("Golden Dream · what is asking to grow", () => {
   it("renders every growth from the real record, which holds one today", () => {
     renderList();
     expect(screen.getByRole("heading", { name: "What is asking to grow?" })).toBeInTheDocument();
-    expect(screen.getByText(/Reading here changes nothing and approves nothing\./)).toBeInTheDocument();
+    expect(screen.getByText(/Reading does not decide or approve them\./)).toBeInTheDocument();
     const list = screen.getByRole("list", { name: "Growths in the Crown" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(CROWN_GROWTHS.length);
     expect(CROWN_GROWTHS).toHaveLength(1);
-    expect(screen.getByText("1 growth recorded · Weekly Harvests appear here only once recorded")).toBeInTheDocument();
+    expect(screen.getByText("1 growth recorded")).toBeInTheDocument();
   });
 
   it("shows the growth with its glyph, maturity and waiting decision, and links to its Folio", () => {

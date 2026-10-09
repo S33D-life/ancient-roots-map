@@ -20,10 +20,10 @@ export default function CrownGrowths({ growths = CROWN_GROWTHS, headingLevel = 2
     <section aria-labelledby="crown-growths-title" className="lp lp-crown lp-ground-crown">
       <ParchmentGrain id="lp-crown-grain" />
       <div className="lp-crown-text">
-        <span className="lp-kicker">notice · tend</span>
+        <span className="lp-kicker">{headingLevel === 1 ? "Crown · yOur Golden Dream" : "notice · tend"}</span>
         <Heading id="crown-growths-title" className="lp-h1">What is asking to grow?</Heading>
         <p className="lp-lede">
-          The Crown listens to what was lived, not only to what was imagined. Reading here changes nothing and approves nothing.
+          Possibilities grow from what has been lived. Open a Folio to see what has happened and what still needs deciding. Reading does not decide or approve them.
         </p>
         <div className="lp-list" aria-live="polite">
           {n === 0 ? (
@@ -34,7 +34,7 @@ export default function CrownGrowths({ growths = CROWN_GROWTHS, headingLevel = 2
           ) : (
             <>
               <span className="lp-meta pb-1">
-                {n} {n === 1 ? "growth" : "growths"} recorded · Weekly Harvests appear here only once recorded
+                {n} {n === 1 ? "growth" : "growths"} recorded
               </span>
               <ul aria-label="Growths in the Crown" className="m-0 p-0 list-none">
                 {growths.map(g => (

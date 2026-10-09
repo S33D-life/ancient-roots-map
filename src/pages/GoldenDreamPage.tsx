@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
+import { BookOpen, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CrownGrowths from "@/components/crown/CrownGrowths";
 import { Link } from "react-router-dom";
@@ -46,16 +46,9 @@ const goldenDreamRooms: GoldenDreamRoom[] = [
   },
   {
     id: "current",
-    title: "Current Version",
-    description: "The Current S33D Blue Print",
+    title: "Dream notes",
+    description: "The existing notebook · not a release record",
     icon: BookOpen,
-    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd/21615b58480d802187b2cff864277413",
-  },
-  {
-    id: "fruit",
-    title: "Popular Fruit",
-    description: "Next S33D likely to Sprout",
-    icon: Cherry,
     notionUrl: "https://clammy-viscount-ddb.notion.site/ebd/21615b58480d802187b2cff864277413",
   },
   {
