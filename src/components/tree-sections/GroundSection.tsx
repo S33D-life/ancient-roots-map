@@ -7,7 +7,7 @@
  * DEPTH-TEXT: Spacing responds to scroll depth — ground is the equilibrium.
  * WONDER LINE: "mapped by people who walk among them" is the wonder moment.
  */
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronUp, MapPin, ScrollText, Heart, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ import TeotagFace from "../TeotagFace";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
 
-const GroundSection = () => {
+const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
   const depth = useDepthStyle();
@@ -38,6 +38,7 @@ const GroundSection = () => {
   return (
     <section id="ground" className="relative">
       <SectionAtmosphere theme="ground" />
+      {threshold}
       <Hero />
 
       {/* ── Soil-Level TEOTAG Guide — the threshold ── */}

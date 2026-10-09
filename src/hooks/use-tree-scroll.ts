@@ -50,7 +50,7 @@ export function useTreeScroll() {
       const el = document.getElementById("ground");
       if (!el) return false;
       // Position #ground at the top of the viewport, just below the header
-      const headerOffset = 56;
+      const headerOffset = document.querySelector("header")?.getBoundingClientRect().height || 56;
       const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
       window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
       initialScrollDone.current = true;
@@ -80,7 +80,7 @@ export function useTreeScroll() {
     const scrollToHash = () => {
       const el = document.getElementById(hash);
       if (!el) return false;
-      const headerOffset = 56;
+      const headerOffset = document.querySelector("header")?.getBoundingClientRect().height || 56;
       const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
       window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
       setActiveSection(hash);
@@ -152,7 +152,7 @@ export function useTreeScroll() {
     const scrollToSoilLevel = (behavior: ScrollBehavior = "smooth") => {
       const el = document.getElementById("ground");
       if (el) {
-        const headerOffset = 56;
+        const headerOffset = document.querySelector("header")?.getBoundingClientRect().height || 56;
         const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top: Math.max(0, top), behavior });
       }
@@ -185,7 +185,7 @@ export function useTreeScroll() {
     if (section === "ground") {
       const el = document.getElementById("ground");
       if (el) {
-        const headerOffset = 56;
+        const headerOffset = document.querySelector("header")?.getBoundingClientRect().height || 56;
         const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       }

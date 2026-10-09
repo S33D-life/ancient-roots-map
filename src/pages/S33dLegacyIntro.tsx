@@ -1,4 +1,6 @@
-import { useCallback, lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
+import { TeotagMarginNote } from "@/components/parchment/ParchmentGround";
+import { useCallback, useEffect, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -51,11 +53,36 @@ const SectionShimmer = () => (
   </div>
 );
 
-const Index = () => {
+const Index = ({ parchment = false }: { parchment?: boolean }) => {
   useDocumentTitle("Ancient Friends — A Living Atlas of the World's Oldest Trees");
-  const { showEntrance, dismissEntrance } = useEntranceOnce("index");
+  const { showEntrance, dismissEntrance } = useEntranceOnce("index", !parchment);
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
+  useEffect(() => {
+    if (!parchment || window.location.hash) return;
+    const main = document.querySelector(".s33d-living-scroll main");
+    if (!main) return;
+    let active = true;
+    const alignSeed = () => {
+      if (!active) return;
+      const seed = document.getElementById("ground");
+      if (!seed) return;
+      const header = document.querySelector("header")?.getBoundingClientRect().height || 60;
+      window.scrollTo({ top: seed.getBoundingClientRect().top + window.scrollY - header - 8, behavior: "instant" });
+    };
+    const resize = new ResizeObserver(alignSeed);
+    const mutation = new MutationObserver(alignSeed);
+    resize.observe(main);
+    mutation.observe(main, { childList: true, subtree: true });
+    const stop = () => { active = false; resize.disconnect(); mutation.disconnect(); };
+    window.addEventListener("wheel", stop, { once: true, passive: true });
+    window.addEventListener("touchstart", stop, { once: true, passive: true });
+    window.addEventListener("keydown", stop, { once: true });
+    window.addEventListener("pointerdown", stop, { once: true });
+    alignSeed();
+    const timer = window.setTimeout(stop, 3000);
+    return () => { stop(); clearTimeout(timer); window.removeEventListener("wheel", stop); window.removeEventListener("touchstart", stop); window.removeEventListener("keydown", stop); window.removeEventListener("pointerdown", stop); };
+  }, [parchment]);
   useVineFade();
   useTreeDepthChannel();
   useTimeOfDay();
@@ -68,27 +95,27 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{
+    <div className={`min-h-screen flex flex-col relative ${parchment ? "s33d-living-scroll" : ""}`} style={{
       background: "linear-gradient(to bottom, hsl(45 30% 92% / 0.04) 0%, transparent 20%, transparent 70%, hsl(25 30% 12% / 0.06) 100%)",
     }}>
       {/* Scroll-driven tree depth background */}
       <Suspense fallback={null}>
-        <TreeDepthBackground />
-        <HabitatAtmosphere />
-        <ParallaxTextures />
-        <MobileSectionWhisper />
+        {!parchment && <TreeDepthBackground />}
+        {!parchment && <HabitatAtmosphere />}
+        {!parchment && <ParallaxTextures />}
+        {!parchment && <MobileSectionWhisper />}
       </Suspense>
 
       {/* Continuous tree spine running the full page height —
           quietly orients the visitor (roots ↔ trunk ↔ branches ↔ crown). */}
       <Suspense fallback={null}>
-        <TreeSpine />
-        <AmbientZoneBadge />
+        {!parchment && <TreeSpine />}
+        {!parchment && <AmbientZoneBadge />}
       </Suspense>
 
       {/* Network Pulse — the tree's nervous system */}
       <Suspense fallback={null}>
-        <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
+        {!parchment && <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />}
       </Suspense>
       <Header />
 
@@ -131,7 +158,7 @@ const Index = () => {
 
         {/* ── SEED — S33D Gateway Hero (the central seed layer) ── */}
         <Suspense fallback={<SectionShimmer />}>
-          <GroundSection />
+          <GroundSection threshold={parchment ? <div className="seed-threshold"><span className="parchment-kicker">The Seed · the middle of the living Tree</span><h2>One Tree. Many ways to begin.</h2><p>S33D connects ancient trees, the people who care for them and the stories they carry. You are at the Seed: the Crown, Canopy and Heartwood are above; the Ancient Friends and their roots are below.</p><nav aria-label="Wander up or down the Tree"><button onClick={() => scrollToSection("heartwood")}>↑ Climb into Heartwood</button><button onClick={() => scrollToSection("atlas-content")}>Descend to the Roots ↓</button></nav><TeotagMarginNote>Begin where you are. Let curiosity show you the next door.</TeotagMarginNote><Link className="seed-real-friend" to="/tree/2e4ef3b8-01b7-4f8c-925f-924b259a0df5">Meet a real Ancient Friend · Fortingall Yew →</Link></div> : undefined} />
         </Suspense>
 
         {/* seam — soil dissolving into mycelium */}
@@ -170,6 +197,7 @@ const Index = () => {
 
             <EcosystemOverview />
             <div className="section-divider max-w-xl mx-auto" />
+            {parchment && <section className="seed-pathways"><span className="parchment-kicker">Follow a living thread</span><h2>An encounter can travel through the Tree.</h2><p>Meet a tree. Leave an offering. Carry its memory into Heartwood. Bring a question to the Council. Follow what grows in the Crown.</p><nav className="s33d-paths" aria-label="Choose your starting path"><Link to="/map"><strong>I’m here to discover</strong><span>Meet Ancient Friends in the Atlas.</span></Link><Link to="/library"><strong>I’m here to share</strong><span>Find a room for music, stories and memory.</span></Link><Link to="/support"><strong>I’m here to help</strong><span>Find ways to care for the growing grove.</span></Link></nav></section>}
             <ParticipationSection />
             <SupportDiscoveryRow />
             <RootPulse />
@@ -181,13 +209,13 @@ const Index = () => {
 
       <Suspense fallback={null}>
         <TetolBridge />
-        <ContextualWhisper
+        {!parchment && <ContextualWhisper
           id="home-explore"
           message="Every ancient tree has a story. Tap the Atlas to discover one near you."
           cta={{ label: "Open Atlas", to: "/map" }}
           delay={8000}
           position="bottom-center"
-        />
+        />}
       </Suspense>
 
       <Footer />

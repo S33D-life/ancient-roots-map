@@ -262,3 +262,32 @@ html[data-living-parchment] .global-search-overlay button { min-width: 44px; fon
 .s33d-paths a { display:flex; flex-direction:column; gap:12px; padding:24px; border:1px solid var(--paper-hair); border-radius:20px; background:hsl(var(--card)/.5); }
 .s33d-paths strong { font-size:24px; font-weight:500; } .s33d-paths span { font-size:20px; line-height:1.4; }
 @media(max-width:640px) { .s33d-paths,.s33d-real-encounter { grid-template-columns:1fr; } .s33d-tour-realm,.parchment-section,.s33d-real-encounter { padding:24px 20px; } .parchment-header-bar > .parchment-realm { display:none; } }
+
+.parchment-bottom-nav a { display:flex; align-items:center; justify-content:center; min-width:48px; min-height:48px; }
+.parchment-bottom-nav a[aria-current="page"] { background:hsl(var(--primary)/.08); border-radius:14px; }
+
+/* Preserve the original vertical Tree architecture in daylight. */
+.s33d-living-scroll { background:hsl(var(--background)) !important; }
+.s33d-living-scroll main { font-family:'Cormorant Garamond',Georgia,serif; }
+.s33d-living-scroll main section > div[aria-hidden="true"].absolute { opacity:.12; }
+.s33d-living-scroll main :is(h1,h2,h3) { color:hsl(var(--foreground)) !important; text-shadow:none !important; }
+.s33d-living-scroll main p { color:hsl(var(--foreground)) !important; text-shadow:none !important; opacity:1; }
+.s33d-living-scroll main p:not(.parchment-kicker) { font-size:clamp(18px,1.8vw,23px); line-height:1.5; }
+.s33d-living-scroll main a { color:hsl(var(--foreground)); }
+.s33d-living-scroll main section[id] { scroll-margin-top:80px; }
+.s33d-living-scroll #golden-dream,.s33d-living-scroll #council,.s33d-living-scroll #heartwood { background:hsl(var(--card)/.35); border-bottom:1px solid hsl(var(--border)/.3); }
+.s33d-living-scroll #atlas-content { background:hsl(83 24% 88%/.35); }
+.s33d-living-scroll main img { border-radius:24px; }
+.s33d-living-scroll nav[aria-label="Tree sections"] span { color:hsl(var(--foreground)) !important; opacity:1 !important; }
+.seed-threshold,.seed-pathways { max-width:1000px; margin:auto; padding:48px 32px; }
+.seed-threshold h2,.seed-pathways h2 { font-size:clamp(34px,5vw,56px); line-height:1.1; margin:16px 0 24px; }
+.seed-threshold > p,.seed-pathways > p { max-width:720px; }
+.seed-threshold nav { display:flex; flex-wrap:wrap; gap:16px; margin:24px 0; }
+.seed-threshold nav button { border:1px solid hsl(var(--border)); border-radius:20px; padding:14px 22px; background:hsl(var(--card)); color:hsl(var(--foreground)); font-size:21px; }
+.seed-threshold .teotag-margin { max-width:580px; }
+.seed-real-friend { display:inline-flex; min-height:44px; align-items:center; font-size:21px; text-decoration:underline; margin-top:20px; }
+@media(max-width:640px) { .seed-threshold,.seed-pathways { padding:32px 20px; } .seed-threshold nav { flex-direction:column; } }
+
+.s33d-living-scroll main p:not(.parchment-kicker),.s33d-living-scroll main h1,.s33d-living-scroll main h2 { font-family:'Cormorant Garamond',Georgia,serif !important; }
+.s33d-living-scroll main section > .absolute.pointer-events-none:not([aria-hidden]) { opacity:.12; }
+.s33d-living-scroll main .teotag-margin p { font-family:'Cedarville Cursive',cursive !important; }
