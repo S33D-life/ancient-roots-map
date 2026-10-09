@@ -305,3 +305,11 @@ html[data-living-parchment] .global-search-overlay button { min-width: 44px; fon
 @media(max-width:640px) { .parchment-tools { gap:5px; } .parchment-search { display:inline-flex; } }
 
 @media(max-width:640px) { .parchment-signed-in .parchment-back { display:none; } .parchment-signed-in .parchment-header-bar { gap:6px; } .parchment-signed-in .parchment-tools { gap:3px; } }
+
+@media(max-width:420px) {
+  .parchment-signed-in .parchment-tools { gap:0; }
+  .parchment-header-jar > div:last-child { display:none; }
+  .parchment-signed-in .parchment-tree { font-size:0; width:44px; gap:0; }
+  .parchment-signed-in .parchment-logo { width:28px; height:28px; }
+  .parchment-signed-in .parchment-hearth-guide { width:32px; height:32px; }
+}
