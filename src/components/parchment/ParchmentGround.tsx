@@ -15,7 +15,7 @@ export function ParchmentGround({ children, realm, className = "" }: { children:
 }
 
 export function TreePlate({ realm = "crown" }: { realm?: "crown" | "canopy" | "heartwood" }) {
-  return <figure className={`parchment-plate parchment-plate-${realm}`}><img src={oak} alt="An ancient holm oak, sunlight opening through its branches" /><figcaption>A study of the living Tree</figcaption></figure>;
+  return <figure className={`parchment-plate parchment-plate-${realm}`}><img src={oak} alt="An illustrated view of an ancient tree with light opening through its branches" /><figcaption>Illustrated study · {realm === "crown" ? "Light above the canopy" : realm === "canopy" ? "Where branches gather" : "Memory within the trunk"}</figcaption></figure>;
 }
 
 export function TeotagMarginNote({ children }: { children: ReactNode }) {

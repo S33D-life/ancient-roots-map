@@ -324,10 +324,7 @@ html[data-living-parchment] .global-search-overlay button { min-width: 44px; fon
 .s33d-living-scroll #teotag-guide { padding:20px 20px 48px; max-width:760px; margin:auto; }
 .s33d-living-scroll #teotag-guide > div { gap:16px; }
 .s33d-living-scroll #teotag-guide button { min-width:220px; border:1px solid hsl(var(--border)/.5); padding:16px 20px; border-radius:22px; background:hsl(var(--card)/.55); }
-.s33d-living-scroll #teotag-guide button span { color:hsl(var(--foreground)) !important; }
-.s33d-living-scroll #teotag-guide button span:last-child { font-size:16px !important; color:hsl(var(--muted-foreground)) !important; }
-.s33d-living-scroll #teotag-guide button span { font-size:22px !important; }
-.s33d-living-scroll #teotag-guide button span:last-child { font-size:16px !important; }
+.s33d-living-scroll #teotag-guide button span { color:hsl(var(--foreground)) !important; font-size:22px !important; }
 .parchment-tools .parchment-tree { width:44px; padding:0; }
 
 .s33d-living-scroll .seed-choice-paths { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; width:100%; padding:16px 0; gap:24px; }
@@ -395,3 +392,47 @@ html.light .s33d-living-scroll footer :is(a,span,div[class*="text-"]) {
 html.light .s33d-living-scroll main button[class*="text-"] { color: #243e2d !important; }
 html.light .s33d-living-scroll main button :is(span,svg) { color: #334b36 !important; }
 html.light .s33d-living-scroll .seed-pathways > .parchment-kicker { background: rgb(250 245 233 / 94%); border-radius: 8px; padding: 4px 8px; width: fit-content; }
+
+/* A shared reading rhythm and four material roles, using existing content. */
+.parchment-ground {
+  --folio-radius: 16px;
+  --folio-edge: var(--paper-hair);
+  --folio-lift: 0 4px 18px rgb(47 45 29 / 5%);
+  --note-ink: var(--paper-muted);
+}
+.parchment-title { max-width: 15ch; text-wrap: balance; }
+.parchment-lede { max-width: 52ch; line-height: 1.55; }
+.parchment-kicker { font-size: 17px; line-height: 1.45; margin-bottom: 14px; }
+.parchment-section > h2 { line-height: 1.2; margin-bottom: 16px; }
+.parchment-room-content :is(h2,h3) { line-height: 1.25; }
+.parchment-room-content h3 { font-size: 23px; font-weight: 500; letter-spacing: normal; }
+.parchment-room-content p { line-height: 1.55; }
+.parchment-room-content > section > p { max-width: 65ch; }
+.teotag-margin { border-inline-start: 1px solid var(--folio-edge); padding-inline-start: 18px; }
+.teotag-margin span { color: var(--note-ink); line-height: 1.5; }
+.parchment-plate { min-height: 0; }
+.parchment-plate img { border-radius: var(--folio-radius); }
+.parchment-plate figcaption {
+  position: static; padding: 12px 2px 0; background: transparent;
+  color: var(--note-ink); font-size: 16px; line-height: 1.4;
+}
+.parchment-tree-panel { border-radius: 0 0 16px 16px; box-shadow: var(--folio-lift, 0 8px 24px rgb(47 45 29 / 10%)); }
+html.light .parchment-room-content > :is(section,article)[class*="bg-card"] {
+  background: hsl(var(--card)); border-color: var(--folio-edge); border-radius: var(--folio-radius);
+}
+.parchment-two-views > div { padding-block: 8px 24px; }
+.parchment-action { text-decoration-thickness: 1px; }
+@media (prefers-reduced-motion: no-preference) {
+  .parchment-action svg, .parchment-door > svg { transition: transform 180ms ease; }
+  .parchment-action:hover svg, .parchment-door:hover > svg { transform: translateX(3px); }
+  .parchment-desktop-index a { transition: border-color 180ms ease; }
+}
+@media(max-width:640px) {
+  .parchment-kicker { font-size: 16px; }
+  .parchment-lede { line-height: 1.5; }
+  .teotag-margin { padding-inline-start: 12px; }
+  .parchment-room-content h3 { font-size: 22px; }
+}
+html.light[data-living-parchment] .parchment-guidance-note { background: hsl(var(--card)); box-shadow: 0 4px 18px rgb(47 45 29 / 8%); backdrop-filter: none; }
+html.light[data-living-parchment] .parchment-guidance-note p { color: hsl(var(--foreground)); font-size: 15px; line-height: 1.5; }
+html.light[data-living-parchment] .parchment-guidance-note > p { color: hsl(var(--muted-foreground)); font-size: 12px; }

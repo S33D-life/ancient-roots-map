@@ -187,7 +187,7 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
       style={bubbleStyle}
       className={`transition-all duration-400 ${fading ? "opacity-0 translate-y-2" : "opacity-100 animate-fade-in"}`}
     >
-      <div className="bg-card/95 backdrop-blur-md border border-primary/20 rounded-2xl px-3.5 py-2.5 shadow-lg">
+      <div className="parchment-guidance-note bg-card/95 backdrop-blur-md border border-primary/20 rounded-2xl px-3.5 py-2.5 shadow-lg">
         <div className="flex items-start gap-2">
           <span className="text-sm shrink-0">{message.icon || "✦"}</span>
           <p className="text-[11px] font-serif text-foreground/75 leading-relaxed italic">

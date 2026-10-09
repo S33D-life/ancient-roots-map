@@ -104,7 +104,7 @@ const VARIANTS: Record<SkeletonVariant, React.FC> = {
 
 const PageSkeleton = ({ variant = "default" }: PageSkeletonProps) => {
   const Component = VARIANTS[variant];
-  return <Component />;
+  return <div role="status" aria-busy="true" className="contents"><span className="sr-only">{variant === "map" ? "Opening the Atlas…" : variant === "detail" ? "Opening the living record…" : variant === "gallery" ? "Opening the collection…" : variant === "dashboard" ? "Opening your Hearth…" : variant === "ledger" ? "Opening the records…" : "Opening this part of the Tree…"}</span><div aria-hidden="true"><Component /></div></div>;
 };
 
 export { PageSkeleton };

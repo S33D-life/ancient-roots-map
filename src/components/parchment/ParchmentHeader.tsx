@@ -38,6 +38,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
   const realm = internalRealm(location.pathname);
   const inRoots = /^\/(map|atlas|tree|hives|hive)(\/|$)/.test(location.pathname);
   const navigationRealm = inRoots ? "roots" : realm;
+  const locationLabel = ({ tree: "TETOL", seed: "The Seed", crown: "The Crown", heartwood: "Heartwood", canopy: "The Canopy", roots: "The Roots" } as Record<string, string>)[navigationRealm ?? ""] ?? ({ "/support": "Care for the Tree", "/about": "About S33D", "/press": "Press Room", "/dashboard": "Your Hearth", "/vault": "Your Vault", "/value-tree": "Value Tree" } as Record<string, string>)[location.pathname] ?? "S33D";
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -71,7 +72,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
     <div className="parchment-header-bar">
       <Link to="/" className="parchment-logo" aria-label="S33D — Open the TETOL tree browser"><img src={s33dHearthLogo} alt="S33D" /></Link>
       <Link to={back.to} className="parchment-back"><ArrowLeft size={17} aria-hidden="true" /><span>{"short" in back ? back.short : back.label.replace("Return to the ", "")}</span></Link>
-      <span className="parchment-realm">{realm === "tree" ? "TETOL" : realm === "canopy" ? "Canopy" : navigationRealm}</span>
+      <span className="parchment-realm" aria-label="Current place">{locationLabel}</span>
       <nav className="parchment-desktop-index" aria-label="Tree realms">
         {treeLinks.slice(0, 4).map(link => <Link key={link.to} to={link.to} aria-current={navigationRealm === link.realm ? "page" : undefined}>{link.label}</Link>)}
       </nav>

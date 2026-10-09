@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
 import "./mantle.css";
+import oliveTexture from "@/assets/parchment/mantle-olive-v1.jpg";
 
 /** Material threshold. Supply an approved, non-repeating photograph when available. */
-export default function Mantle({ material = "olive", textureUrl }: {
+export default function Mantle({ material = "olive", textureUrl = oliveTexture }: {
   material?: "olive";
   textureUrl?: string;
 }) {

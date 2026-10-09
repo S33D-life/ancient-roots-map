@@ -12,6 +12,11 @@ function header(path: string, state?: object) {
 }
 
 describe("internal room navigation", () => {
+  it("keeps public utility pages oriented without adding another navigation system", () => {
+    header("/support");
+    expect(screen.getByLabelText("Current place")).toHaveTextContent("Care for the Tree");
+    expect(screen.getByRole("link", { name: "Seed" })).toHaveAttribute("href", "/s33d");
+  });
   it("keeps search reachable through the mobile Tree index and returns focus on Escape", () => {
     const onSearch = header("/golden-dream");
     const tree = screen.getByRole("button", { name: "Open Tree index" });

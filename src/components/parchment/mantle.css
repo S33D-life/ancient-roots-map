@@ -7,14 +7,14 @@
   z-index: -1;
   pointer-events: none;
   background-color: var(--mantle-face);
-  background-image: var(--mantle-texture);
+  background-image: linear-gradient(rgb(247 240 220 / 68%), rgb(247 240 220 / 68%)), var(--mantle-texture);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   filter: drop-shadow(0 4px 3px rgb(40 48 31 / 12%));
 }
 .mantle-edge { position: absolute; top: calc(100% - 1px); left: 0; width: 100%; height: 12px; fill: var(--mantle-face); }
-.dark .mantle[data-material="olive"] { --mantle-face: #293024; }
+.dark .mantle[data-material="olive"] { --mantle-face: #293024; background-image: none; }
 @media (max-width: 640px) {
   .mantle-edge { height: 4px; }
   .mantle { background-position: center 45%; }

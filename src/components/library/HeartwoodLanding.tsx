@@ -32,7 +32,7 @@ export default function HeartwoodLanding() {
           <span className="parchment-kicker">remember · follow a living thread</span>
           <h1 className="parchment-title">The Heartwood Hall</h1>
           <p className="parchment-lede">Step into the living library. Here the Tree remembers: encounters, stories, offerings and the paths we have walked.</p>
-          <TeotagMarginNote>The template carries forward; the companions do not have to.</TeotagMarginNote>
+          <TeotagMarginNote>Take your time. There is a room here for what you carry.</TeotagMarginNote>
           <Link className="parchment-action" to={ROUTES.COUNCIL}>Return to the Council above <ArrowRight size={18} aria-hidden="true" /></Link>
         </div>
         <TreePlate realm="heartwood" />
