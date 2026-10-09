@@ -39,3 +39,30 @@
 
 .heartwood-spatial-doorway .parchment-deck-frame>button { scroll-margin-top:88px; }
 .heartwood-spatial-doorway iframe { max-height:calc(100dvh - 240px); }
+
+/* A familiar tree plate becomes a bark threshold; no new texture or scene. */
+.heartwood-living-field>.heartwood-spatial-doorway { grid-column:1/-1; margin:0 0 26px; }
+.heartwood-homecoming { display:grid; grid-template-columns:210px 1fr; gap:32px; align-items:center; padding:12px 0; }
+.heartwood-bark-window { width:210px; height:220px; object-fit:cover; object-position:50% 80%; border-radius:48% 45% 38% 42%; mask-image:radial-gradient(ellipse,black 47%,transparent 73%); }
+.heartwood-welcome { font-size:28px; line-height:1.25; color:var(--paper-ink); margin:0 0 8px; }
+.heartwood-homecoming p:not(.heartwood-welcome) { font-size:18px; }
+.heartwood-two-ways { display:flex; align-items:center; flex-wrap:wrap; gap:12px 28px; margin:16px 0 8px; }
+.heartwood-enter { min-height:52px; padding:12px 24px; border:1px solid var(--paper-hair); border-radius:45% 43% 10px 12px / 18px 20px 10px 12px; background:var(--paper-ink); color:var(--paper-bg,#f4ecd7); font-size:23px; box-shadow:0 3px 12px #493f2420; }
+.heartwood-way-note { color:var(--paper-muted); }
+.heartwood-hollow { padding:16px; border-radius:26px 30px 18px 24px; background:#53442b14; box-shadow:inset 0 0 24px #4b381816; }
+.heartwood-hollow>button { scroll-margin-top:88px; margin-bottom:12px; }
+.heartwood-hollow iframe { display:block; width:100%; height:min(640px,calc(100dvh - 240px)); min-height:300px; border:0; border-radius:20px 22px 12px 16px; background:#1b2118; }
+.heartwood-hollow iframe[hidden] { display:none; }
+#heartwood-direct { scroll-margin-top:96px; }
+.heartwood-enter:focus-visible,.heartwood-two-ways a:focus-visible { outline:2px solid var(--paper-ink); outline-offset:4px; }
+.dark .heartwood-enter { color:#172418; background:#ddd3b7; }
+.dark .heartwood-hollow { background:#bba27610; }
+@media(max-width:767px){
+.heartwood-living-field>.heartwood-spatial-doorway { order:0; margin:0; }
+.heartwood-homecoming { position:relative; grid-template-columns:1fr; padding:8px 0; gap:0; }
+.heartwood-bark-window { position:absolute; width:135px; height:150px; right:-10px; top:-14px; opacity:.16; pointer-events:none; }
+.heartwood-homecoming>div { position:relative; }
+.heartwood-welcome { font-size:23px; max-width:250px; }
+.heartwood-two-ways { gap:6px 16px; }.heartwood-enter { font-size:21px; padding:10px 18px; }
+.heartwood-hollow { padding:8px; }.heartwood-hollow iframe { height:calc(100dvh - 230px); }
+}
