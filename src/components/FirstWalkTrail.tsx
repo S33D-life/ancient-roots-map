@@ -6,6 +6,7 @@
  * Auto-completes steps as the user navigates. Dismissible.
  */
 import { motion, AnimatePresence } from "framer-motion";
+import { useUIFlow } from "@/contexts/UIFlowContext";
 import { useQuietMode } from "@/contexts/QuietModeContext";
 import { Link, useLocation } from "react-router-dom";
 import { MapPin, TreeDeciduous, Gift, Check, X, ChevronRight } from "lucide-react";
@@ -22,6 +23,7 @@ const FirstWalkTrail = () => {
   const { steps, completed, finished, dismissed, dismiss, currentIndex } = useFirstWalk();
   const { showOnboardingNudges } = useQuietMode();
   const location = useLocation();
+  const { context } = useUIFlow();
 
   // Hide entirely during auth flows so the widget doesn't compete with sign-in / verification UI.
   const onAuthRoute =
@@ -32,7 +34,7 @@ const FirstWalkTrail = () => {
 
   // Don't render if finished, dismissed, on auth route, or nudges disabled
   const readingAncientFriend = /^\/tree\/[^/]+/.test(location.pathname);
-  if (finished || dismissed || onAuthRoute || readingAncientFriend || internalRealm(location.pathname) || !showOnboardingNudges) return null;
+  if (context === "map-introduction" || finished || dismissed || onAuthRoute || readingAncientFriend || internalRealm(location.pathname) || !showOnboardingNudges) return null;
 
   const progress = completed.size;
 

@@ -6,8 +6,10 @@
  * - Does NOT block map preloading (map renders behind this overlay).
  * - Accessible again via Settings → "View Welcome".
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+import { useUIFlow } from "@/contexts/UIFlowContext";
 
 const LS_KEY = "s33d-blessing-dismissed";
 
@@ -32,6 +34,12 @@ interface Props {
 }
 
 const PublicTesterBlessing = ({ onComplete }: Props) => {
+  const { enterFlow, exitFlow } = useUIFlow();
+  useEffect(() => {
+    enterFlow("map-introduction");
+    return exitFlow;
+  }, [enterFlow, exitFlow]);
+
   const [leaving, setLeaving] = useState(false);
 
   const handleBegin = useCallback(() => {
@@ -125,7 +133,7 @@ const PublicTesterBlessing = ({ onComplete }: Props) => {
             {/* CTA */}
             <button
               onClick={handleBegin}
-              className="mx-auto block px-8 py-3.5 rounded-xl text-sm font-serif font-semibold tracking-wider transition-all duration-200 active:scale-95 hover:brightness-110"
+              className="mx-auto block min-h-12 px-8 py-3.5 rounded-xl text-sm font-serif font-semibold tracking-wider transition-all duration-200 active:scale-95 hover:brightness-110"
               style={{
                 background:
                   "linear-gradient(135deg, hsl(var(--primary)), hsl(45 100% 60%))",
