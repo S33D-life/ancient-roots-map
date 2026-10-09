@@ -25,11 +25,11 @@ export function internalRealm(path: string) {
 }
 
 const treeLinks = [
-  { to: ROUTES.GOLDEN_DREAM, label: "Crown", sub: "Imagine · yOur Golden Dream", realm: "crown" },
-  { to: ROUTES.COUNCIL, label: "Canopy", sub: "Gather · Council of Life", realm: "canopy" },
-  { to: ROUTES.LIBRARY, label: "Heartwood", sub: "Remember · the living library", realm: "heartwood" },
   { to: ROUTES.MAP, label: "Roots", sub: "Encounter · Ancient Friends", realm: "roots" },
   { to: ROUTES.S33D, label: "S33D", sub: "Return to the Seed", realm: "seed" },
+  { to: ROUTES.LIBRARY, label: "Heartwood", sub: "Remember · the living library", realm: "heartwood" },
+  { to: ROUTES.COUNCIL, label: "Canopy", sub: "Gather · Council of Life", realm: "canopy" },
+  { to: ROUTES.GOLDEN_DREAM, label: "Crown", sub: "Imagine · yOur Golden Dream", realm: "crown" },
 ];
 
 export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }: {
@@ -78,7 +78,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
       <Link to={back.to} state={location.pathname.startsWith("/library/") ? hallReturnState(location.state) : undefined} aria-label={"short" in back && !isFolio ? back.label : undefined} className="parchment-back"><ArrowLeft size={17} aria-hidden="true" /><span>{"short" in back ? back.short : back.label.replace("Return to the ", "")}</span></Link>
       <span className="parchment-realm" aria-label="Current place">{locationLabel}</span>
       <nav className="parchment-desktop-index" aria-label="Tree realms">
-        {treeLinks.slice(0, 4).map(link => <Link key={link.to} to={link.to} state={link.to !== location.pathname ? { from: location.pathname + location.search + location.hash } : location.state} aria-current={navigationRealm === link.realm ? "page" : undefined}>{link.label}</Link>)}
+        {treeLinks.map(link => <Link key={link.to} to={link.to} state={link.to !== location.pathname ? { from: location.pathname + location.search + location.hash } : location.state} aria-current={navigationRealm === link.realm ? "page" : undefined}>{link.label}</Link>)}
       </nav>
       <div className="parchment-tools">
         <button type="button" onClick={onSearch} aria-label="Search the Tree" className="parchment-search"><Search size={18} /></button><ThemeToggle />{signedIn && userId && <><NotificationsBadge /><HeartJar userId={userId ?? null} className="parchment-header-jar" /></>}
