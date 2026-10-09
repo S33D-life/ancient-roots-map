@@ -56,6 +56,7 @@ const VALID_ROOMS = ROOM_KEYS;
  */
 function AncientFriendsWrapper() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [trees, setTrees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -147,6 +148,7 @@ function BookshelfWrapper() {
 const HeartwoodRoomPage = () => {
   const { room: rawRoom } = useParams<{ room: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const resolvedRoom = rawRoom ? (ROOM_ALIASES[rawRoom] || rawRoom) : null;
 
   // Handle redirect aliases (e.g. tree-data-commons → /tree-data-commons)
@@ -161,7 +163,7 @@ const HeartwoodRoomPage = () => {
   const label = ROOM_LABELS[resolvedRoom] || resolvedRoom;
 
   const handleRoomNavigate = (room: string) => {
-    navigate(ROUTES.HEARTWOOD_ROOM(room), { replace: true });
+    navigate(ROUTES.HEARTWOOD_ROOM(room), { replace: true, state: location.state });
   };
 
   return (

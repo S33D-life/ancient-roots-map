@@ -11,12 +11,13 @@ test.beforeEach(async ({ page }) => {
     return route.continue();
   });
 });
-for (const width of [1440, 390]) {
-  test(`Ancient Friend → Hall → Staff → Hall preserves origin at ${width}`, async ({ page }) => {
+for (const width of [1440, 390]) for (const night of [false, true]) {
+  test(`Ancient Friend → Hall → Staff → Hall preserves origin at ${width} (${night ? "Night Grove" : "Living Parchment"})`, async ({ page }) => {
     test.setTimeout(90000);
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001?tab=memory");
     await expect(page.getByRole("heading", { name: "Grandfather Oak", exact: true })).toBeVisible({ timeout: 20000 });
+    if (night) await page.getByRole("button", { name: "Use Night Grove", exact: true }).click();
     await page.getByRole("link", { name: "Enter Heartwood Hall →", exact: true }).click();
     const origin = page.getByRole("link", { name: "Back to the Ancient Friend", exact: true });
     await expect(origin).toHaveAttribute("href", "/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001?tab=memory");

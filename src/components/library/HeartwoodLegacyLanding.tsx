@@ -3,7 +3,8 @@
  * Now navigates to standalone room routes instead of setting internal tab state.
  */
 import { lazy, Suspense, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { journeyOrigin } from "@/lib/journeyOrigin";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Smartphone, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
@@ -31,10 +32,12 @@ const NON_ROOM_ROUTES: Record<string, string> = {
 
 const HeartwoodLegacyLanding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const origin = journeyOrigin(location.state?.from);
 
   const handleRoomSelect = (key: string) => {
     const route = ROOM_ROUTE_MAP[key] ?? NON_ROOM_ROUTES[key] ?? `/library/${key}`;
-    navigate(route);
+    navigate(route, { state: { from: "/library", hallOrigin: origin?.to } });
   };
 
   return (
