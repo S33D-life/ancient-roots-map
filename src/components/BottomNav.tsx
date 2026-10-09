@@ -1,6 +1,6 @@
 import { SAFE_ZONES } from "@/lib/z-index";
 import { memo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Crown, Circle, Sprout } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 import { internalRealm } from "@/components/parchment/ParchmentHeader";
@@ -19,6 +19,7 @@ function RealmSymbol({ realm }: { realm: string }) {
 
 const BottomNav = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const realm = internalRealm(pathname) ?? (/^\/(map|atlas|tree|hives|hive)(\/|$)/.test(pathname) ? "roots" : undefined);
   return <nav className="parchment-bottom-nav" aria-label="Continue through the Tree">{[
     { to: ROUTES.MAP, label: "Roots", description: "Ancient Friends · Roots", realm: "roots" },
@@ -26,7 +27,10 @@ const BottomNav = () => {
     { to: ROUTES.LIBRARY, label: "Heartwood", description: "Heartwood Library · Trunk", realm: "heartwood" },
     { to: ROUTES.COUNCIL, label: "Canopy", description: "Council of Life · Canopy", realm: "canopy" },
     { to: ROUTES.GOLDEN_DREAM, label: "Crown", description: "yOur Golden Dream · Crown", realm: "crown" },
-  ].map(item => <Link key={item.to} to={item.to} aria-current={realm === item.realm ? "page" : undefined} aria-label={item.label} title={item.description}><RealmSymbol realm={item.realm} /></Link>)}</nav>;
+  ].map(item => <Link key={item.to} to={item.to} aria-current={realm === item.realm ? "page" : undefined} aria-label={item.label} title={item.description}><RealmSymbol realm={item.realm} /></Link>)}<button type="button" className="parchment-add-tree" aria-label="Add a tree or encounter" title="Add a tree or encounter" onClick={() => {
+    if (pathname === ROUTES.MAP) window.dispatchEvent(new CustomEvent("s33d-add-tree-chooser"));
+    else navigate(`${ROUTES.MAP}?addTree=true`);
+  }}><svg width="29" height="29" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4 5 14h4l-5 7h7v7h3v-7h6l-5-7h4L12 4Z"/><path d="M25 5v10M20 10h10"/></svg></button></nav>;
 
 };
 

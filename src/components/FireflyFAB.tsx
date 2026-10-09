@@ -31,7 +31,6 @@ import { useHeartSignals } from "@/hooks/use-heart-signals";
 import { useWhisperSignals } from "@/hooks/use-whisper-signals";
 import { SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { supabase } from "@/integrations/supabase/client";
-import { internalRealm } from "@/components/parchment/ParchmentHeader";
 import { useLongPress } from "@/hooks/use-long-press";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
@@ -58,8 +57,8 @@ function loadPos(): StoredPos {
       if (typeof p.y === "number" && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  // Default: right edge, sitting just above the bottom nav so it doesn't cover content.
-  const safeY = Math.max(EDGE_PAD + 56, window.innerHeight - FAB_SIZE - BOTTOM_SAFE_ZONE);
+  // Default: beneath TEOTAG in the Mantle; saved drag positions still take precedence.
+  const safeY = Math.max(84, (document.querySelector(".parchment-header")?.getBoundingClientRect().bottom ?? 60) + 12);
   return { y: safeY, edge: "right" };
 }
 
@@ -304,10 +303,7 @@ const FireflyFAB = () => {
     setDialogOpen(open);
   }, []);
 
-  // In internal rooms the phone orb has its own place beside navigation.
-  // Keep the saved movable position for the rest of the site.
-  const docked = Boolean(internalRealm(location.pathname)) && window.innerWidth < 760;
-  const displayXY = docked ? { x: window.innerWidth - FAB_SIZE - 10, y: window.innerHeight - FAB_SIZE - 8 } : xy;
+  const displayXY = xy;
 
   // Dynamic orb glow based on dominant signal type
   const signalHue = dominantType ? SIGNAL_TYPE_HUE[dominantType] : null;
@@ -326,17 +322,15 @@ const FireflyFAB = () => {
         style={{
           width: FAB_SIZE,
           height: FAB_SIZE,
-          left: docked ? undefined : xy.x,
-          top: docked ? undefined : xy.y,
-          right: docked ? 10 : undefined,
-          bottom: docked ? "calc(env(safe-area-inset-bottom, 0px) + 8px)" : undefined,
+          left: xy.x,
+          top: xy.y,
           zIndex: Z.FLOATING,
-          cursor: docked || anyOpen ? "default" : "grab",
+          cursor: anyOpen ? "default" : "grab",
           pointerEvents: anyOpen ? "none" : "auto",
         }}
-        onPointerDown={docked ? undefined : handlePointerDown}
-        onPointerMove={docked ? undefined : handlePointerMove}
-        onPointerUp={docked ? undefined : handlePointerUp}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
         onClick={handleClick}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

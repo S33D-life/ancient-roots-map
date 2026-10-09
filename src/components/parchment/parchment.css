@@ -144,7 +144,7 @@ html[data-living-parchment] footer a { min-height: 44px; display: inline-flex; a
   .parchment-title,.parchment-ground .lp-crown .lp-h1 { font-size: 52px; }
 }
 @media(max-width:759px) {
-  .parchment-bottom-nav { display: flex; position: fixed; bottom: 0; inset-inline: 0; z-index: 40; background: hsl(var(--background) / .97); border-top: 1px solid hsl(var(--border) / .6); justify-content: space-around; padding: 4px 66px max(8px,env(safe-area-inset-bottom)) 6px; }
+  .parchment-bottom-nav { display: flex; position: fixed; bottom: 0; inset-inline: 0; z-index: 40; background: hsl(var(--background) / .97); border-top: 1px solid hsl(var(--border) / .6); justify-content: space-around; padding: 4px 6px max(8px,env(safe-area-inset-bottom)) 6px; }
   .parchment-bottom-nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 5px; font-size: 16px; color: hsl(var(--muted-foreground)); border-top: 1px solid transparent; }
   .parchment-bottom-nav a[aria-current] { color: hsl(var(--foreground)); border-top-color: hsl(var(--foreground)); }
   .parchment-header-bar { padding-inline: 20px; min-height: 60px; gap: 14px; }
@@ -436,3 +436,7 @@ html.light .parchment-room-content > :is(section,article)[class*="bg-card"] {
 html.light[data-living-parchment] .parchment-guidance-note { background: hsl(var(--card)); box-shadow: 0 4px 18px rgb(47 45 29 / 8%); backdrop-filter: none; }
 html.light[data-living-parchment] .parchment-guidance-note p { color: hsl(var(--foreground)); font-size: 15px; line-height: 1.5; }
 html.light[data-living-parchment] .parchment-guidance-note > p { color: hsl(var(--muted-foreground)); font-size: 12px; }
+
+.parchment-bottom-nav .parchment-add-tree { display:flex; align-items:center; justify-content:center; min-width:48px; min-height:48px; color:#94711c; border-radius:14px; }
+.parchment-bottom-nav .parchment-add-tree:hover { background:rgba(148,113,28,.1); }
+.dark .parchment-bottom-nav .parchment-add-tree { color:#e1bc58; }

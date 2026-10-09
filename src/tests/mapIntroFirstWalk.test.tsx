@@ -19,7 +19,7 @@ describe("Map introduction and First Walk", () => {
   it.each(["Begin the Wander", "Skip introduction"])("defers the trail until %s completes without dismissing it", async button => {
     render(<MemoryRouter initialEntries={["/map"]}><UIFlowProvider><Introduction /></UIFlowProvider></MemoryRouter>);
     expect(screen.queryByRole("button", { name: "Dismiss trail" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: button, exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: button }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Dismiss trail" })).toBeInTheDocument());
     expect(dismiss).not.toHaveBeenCalled();
   });
