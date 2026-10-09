@@ -3,13 +3,15 @@
  * Persists preference to localStorage.
  */
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { internalRealm } from "@/components/parchment/ParchmentHeader";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 
 
 const ThemeToggle = () => {
-  const isParchment = Boolean(document.documentElement.dataset.livingParchment);
+  const isParchment = Boolean(internalRealm(useLocation().pathname));
   const storageKey = isParchment ? "s33d-parchment-theme" : "s33d-theme";
   const [isDark, setIsDark] = useState(() => {
     const stored = localStorage.getItem(storageKey);

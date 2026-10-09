@@ -1,15 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { lazy, Suspense } from "react";
+import LibraryRoomGrid from "@/components/LibraryRoomGrid";
+import HeartwoodLegacyLanding from "./HeartwoodLegacyLanding";
+import { useParchmentDark } from "@/hooks/use-parchment-dark";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { HEARTWOOD_ROOMS, JOURNEY_STAGES } from "@/config/heartwoodRooms";
+import { ROOM_ROUTE_MAP } from "@/config/heartwoodRooms";
 import { ParchmentGround, TreePlate, TeotagMarginNote } from "@/components/parchment/ParchmentGround";
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 import LibraryVaultPreview from "@/components/LibraryVaultPreview";
 import { ROUTES } from "@/lib/routes";
 
+const MantleClock = lazy(() => import("@/components/MantleClock"));
+
 export default function HeartwoodLanding() {
+  const navigate = useNavigate();
+  const dark = useParchmentDark();
+  const otherRooms: Record<string, string> = { atlas: "/atlas", press: "/press", "life-groves": "/heartwood/life-groves", "tree-data-commons": "/tree-data-commons" };
+  const enterRoom = (key: string) => {
+    const route = ROOM_ROUTE_MAP[key] ?? otherRooms[key];
+    if (route) navigate(route, { state: { from: ROUTES.LIBRARY } });
+  };
+  if (dark) return <HeartwoodLegacyLanding />;
   return <ParchmentGround realm="heartwood">
     <Header />
     <main className="parchment-main">
@@ -24,12 +38,9 @@ export default function HeartwoodLanding() {
         <TreePlate realm="heartwood" />
       </div>
       <section className="parchment-section" aria-labelledby="heartwood-rooms">
-        <h2 id="heartwood-rooms">Find your room</h2>
-        <p>Meet, learn, walk, offer, remember, steward and evolve.</p>
-        {JOURNEY_STAGES.map(stage => <section className="parchment-room-group" key={stage.key} aria-label={stage.label}>
-          <h3>{stage.label}</h3>
-          <div className="parchment-doors">{HEARTWOOD_ROOMS.filter(room => room.stage === stage.key).map(room => <Link key={room.key} to={room.route} state={{ from: ROUTES.LIBRARY }} className="parchment-door"><span><strong>{room.label}</strong><em>{room.subtitle}</em></span><ArrowRight aria-hidden="true" /></Link>)}</div>
-        </section>)}
+        <h2 id="heartwood-rooms">Chambers of the Heartwood</h2>
+        <p>Choose a wooden door. Every room holds a different part of the living library.</p>
+        <div className="parchment-hall"><LibraryRoomGrid onRoomSelect={enterRoom} centerSlot={<Suspense fallback={<p>The seasonal clock is opening…</p>}><MantleClock /></Suspense>} /></div>
       </section>
       <section className="parchment-section" aria-labelledby="your-path">
         <h2 id="your-path">Your path through the Tree</h2>

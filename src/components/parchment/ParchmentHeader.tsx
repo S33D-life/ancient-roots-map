@@ -4,11 +4,14 @@ import { ArrowLeft, Search, TreeDeciduous, X } from "lucide-react";
 import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 import { ROUTES } from "@/lib/routes";
 import { returnTarget } from "@/lib/crown/returnPath";
+import teotagPortrait from "@/assets/teotag-small.webp";
+import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
 import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import "./parchment.css";
 
 export function internalRealm(path: string) {
+  if (path === "/s33d") return "seed";
   if (path === "/golden-dream" || path.startsWith("/golden-dream/")) return "crown";
   if (path === "/library" || path.startsWith("/library/")) return "heartwood";
   if (path === "/council-of-life" || path === "/council" || path.startsWith("/council/")) return "canopy";
@@ -33,7 +36,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide }: {
   const trigger = useRef<HTMLButtonElement>(null);
   const close = () => { setOpen(false); trigger.current?.focus(); };
   const isFolio = location.pathname.startsWith("/golden-dream/growth/");
-  const back = isFolio ? returnTarget(location.state) : location.pathname.startsWith("/library/")
+  const back = realm === "seed" ? { to: "/", label: "Return to the Tree" } : isFolio ? returnTarget(location.state) : location.pathname.startsWith("/library/")
     ? { to: ROUTES.LIBRARY, label: "Return to the Hall" }
     : realm === "canopy" ? { to: ROUTES.GOLDEN_DREAM, label: "Return to the Crown" }
     : realm === "heartwood" ? { to: ROUTES.COUNCIL, label: "Return to the Canopy" }
@@ -56,6 +59,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide }: {
 
   return <header className="parchment-header">
     <div className="parchment-header-bar">
+      <Link to="/" className="parchment-logo" aria-label="S33D — Open the TETOL tree browser"><img src={s33dHearthLogo} alt="S33D" /></Link>
       <Link to={back.to} className="parchment-back"><ArrowLeft size={17} aria-hidden="true" /><span>{"short" in back ? back.short : back.label.replace("Return to the ", "")}</span></Link>
       <span className="parchment-realm">{realm === "canopy" ? "Canopy" : realm}</span>
       <nav className="parchment-desktop-index" aria-label="Tree realms">
@@ -64,7 +68,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide }: {
       <div className="parchment-tools">
         <button type="button" onClick={onSearch} aria-label="Search the Tree" className="parchment-search"><Search size={18} /></button>
         <button ref={trigger} type="button" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="parchment-tree-index" className="parchment-tree"><TreeDeciduous size={19} aria-hidden="true" />Tree</button>
-      </div>
+      <Link to="/dashboard" className="parchment-hearth-guide" aria-label="TEOTAG — Go to your Hearth"><img src={teotagPortrait} alt="TEOTAG" /></Link></div>
     </div>
     {open && <div ref={menu} id="parchment-tree-index" className="parchment-tree-panel">
       <div className="parchment-menu-heading"><span className="parchment-realm">One Tree</span><button type="button" onClick={close} aria-label="Close Tree index"><X size={20} /></button></div>

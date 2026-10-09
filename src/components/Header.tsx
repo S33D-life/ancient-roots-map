@@ -16,6 +16,7 @@ import { HEARTWOOD_ROOMS } from "@/config/heartwoodRooms";
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";
 import ThemeToggle from "./ThemeToggle";
+import { useParchmentDark } from "@/hooks/use-parchment-dark";
 import ParchmentHeader, { internalRealm } from "./parchment/ParchmentHeader";
 import NotificationsBadge from "./NotificationsBadge";
 
@@ -124,16 +125,17 @@ const Header = () => {
   const handleLogoClick = () => navigate("/");
 
   const paperRealm = internalRealm(location.pathname);
+  const parchmentDark = useParchmentDark();
   useLayoutEffect(() => {
     const root = document.documentElement;
-    if (paperRealm) root.dataset.livingParchment = paperRealm;
+    if (paperRealm && !((paperRealm === "heartwood" || paperRealm === "seed") && parchmentDark)) root.dataset.livingParchment = paperRealm;
     else delete root.dataset.livingParchment;
     const saved = localStorage.getItem(paperRealm ? "s33d-parchment-theme" : "s33d-theme");
     const dark = saved === "dark" || (!paperRealm && saved !== "light");
     root.classList.toggle("dark", dark);
     root.classList.toggle("light", !dark);
     return () => { delete root.dataset.livingParchment; };
-  }, [paperRealm]);
+  }, [paperRealm, parchmentDark]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -150,7 +152,7 @@ const Header = () => {
 
   
 
-  if (paperRealm) return <>
+  if (paperRealm && !((paperRealm === "heartwood" || paperRealm === "seed") && parchmentDark)) return <>
     <ParchmentHeader onSearch={() => setGlobalSearchOpen(true)} signedIn={Boolean(user)} onGuide={() => { setGuideTab("guide"); setGuideOpen(true); }} />
     <Suspense fallback={null}>{guideOpen && <TeotagGuide open={guideOpen} onClose={() => setGuideOpen(false)} initialTab={guideTab} />}</Suspense>
     <GlobalSearch open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
@@ -290,7 +292,7 @@ const Header = () => {
                 onPointerMove={orbRestore.onPointerMove}
                 onPointerUp={orbRestore.onPointerUp}
                 className="shrink-0 group relative ml-0.5"
-                aria-label="TEOTAG — The Echo of the Ancient Groves. Hold to restore orb."
+                aria-label="TEOTAG — Go to your Hearth. Hold to restore orb."
               >
                 <img
                   src={teotagLogo}

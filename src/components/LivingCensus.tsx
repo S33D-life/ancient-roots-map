@@ -3,7 +3,7 @@
  * new trees are mapped anywhere in the world.
  * "X Ancient Friends mapped by Y Wanderers across Z countries."
  */
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,6 +15,7 @@ interface CensusStats {
 
 const useLivingCensus = () => {
   const [stats, setStats] = useState<CensusStats>({ trees: 0, wanderers: 0, countries: 0 });
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [pulse, setPulse] = useState(false);
 
   const fetchStats = useCallback(async () => {
@@ -23,6 +24,8 @@ const useLivingCensus = () => {
       supabase.from("trees").select("created_by, nation"),
     ]);
 
+    if (treesRes.error || creatorsRes.error) { setStatus("error"); return; }
+    setStatus("ready");
     const treeCount = treesRes.count || 0;
     const data = creatorsRes.data || [];
     const wanderers = new Set(data.map(t => t.created_by).filter(Boolean)).size;
@@ -57,61 +60,18 @@ const useLivingCensus = () => {
     };
   }, [fetchStats]);
 
-  return { stats, pulse };
+  return { stats, pulse, status };
 };
 
 /** Animated number that counts up on mount and pulses on live updates */
-const LiveNumber = ({ value, pulse }: { value: number; pulse: boolean }) => {
-  const [display, setDisplay] = useState(0);
-  const hasAnimated = useRef(false);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  // Initial count-up animation
-  useEffect(() => {
-    if (value === 0 || hasAnimated.current) {
-      // After initial animation, just update directly
-      if (hasAnimated.current) setDisplay(value);
-      return;
-    }
-
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 1500;
-          const start = performance.now();
-          const animate = (now: number) => {
-            const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setDisplay(Math.round(eased * value));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [value]);
-
-  return (
-    <span
-      ref={ref}
-      className={`tabular-nums transition-all duration-300 ${pulse ? "text-accent scale-110" : ""}`}
-      style={{ display: "inline-block" }}
-    >
-      {display.toLocaleString()}
-    </span>
-  );
-};
+const LiveNumber = ({ value, pulse }: { value: number; pulse: boolean }) => (
+  <span className={pulse ? "text-primary" : undefined}>{value.toLocaleString()}</span>
+);
 
 const LivingCensus = () => {
-  const { stats, pulse } = useLivingCensus();
+  const { stats, pulse, status } = useLivingCensus();
 
+  if (status !== "ready") return <p role="status" className="font-serif text-center">{status === "loading" ? "Gathering the grove’s living record…" : "The living count is resting. Explore the Atlas to meet its trees."}</p>;
   return (
     <div className="relative w-full max-w-2xl mx-auto" data-census>
       {/* Pulse ring on live update */}
