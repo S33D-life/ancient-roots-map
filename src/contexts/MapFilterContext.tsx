@@ -111,7 +111,8 @@ const MapFilterContext = createContext<MapFilterContextValue>({
 });
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [filters, setFilters] = useState<MapFilters>(() => ({
@@ -143,8 +144,8 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       return next;
-    }, { replace: true });
-  }, [filters, pathname, setSearchParams]);
+    }, { replace: true, state: location.state });
+  }, [filters, pathname, location.state, setSearchParams]);
 
   const setSpecies = useCallback((v: string) => setFilters(f => ({ ...f, species: v })), []);
   const setCountry = useCallback((v: string) => setFilters(f => ({ ...f, country: v })), []);
