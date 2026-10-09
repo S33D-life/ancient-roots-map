@@ -117,7 +117,7 @@ export function useSpeciesTrees(speciesKey: string | null | undefined, limit = 2
       if (!speciesKey) return [];
       const { data, error } = await supabase
         .from("trees")
-        .select("id, name, species, latitude, longitude, photo_thumb_url, photo_processed_url, variety_name, propagation_type, planted_year, country")
+        .select("id, name, species, latitude, longitude, photo_thumb_url, photo_processed_url, variety_name, propagation_type, planted_year, country:nation")
         .eq("species_key", speciesKey)
         .limit(limit);
       if (error) throw error;
