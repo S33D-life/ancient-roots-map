@@ -259,7 +259,13 @@ for (const width of [1440, 390]) {
     const lib = page.getByTestId("library-life");
     await expect(lib.getByRole("heading", { name: "Silver Birch", exact: true })).toBeVisible();
     await expect(page.locator("header.parchment-header")).toHaveCount(1);
-    await expect(page.getByRole("navigation", { name: "Tree realms" }).getByRole("link", { name: "Heartwood" })).toHaveAttribute("aria-current", "page");
+    if (width === 390) {
+      await page.getByRole("button", { name: "Open Tree index", exact: true }).click();
+      await expect(page.getByRole("navigation", { name: "Tree index" }).getByRole("link", { name: /Heartwood Remember/ })).toHaveAttribute("aria-current", "page");
+      await page.getByRole("button", { name: "Close Tree index", exact: true }).click();
+    } else {
+      await expect(page.getByRole("navigation", { name: "Tree realms" }).getByRole("link", { name: "Heartwood" })).toHaveAttribute("aria-current", "page");
+    }
     await lib.getByRole("link", { name: /Species & distribution/ }).click();
     await page.goBack();
     await expect(lib.getByRole("heading", { name: "Silver Birch", exact: true })).toBeVisible();
