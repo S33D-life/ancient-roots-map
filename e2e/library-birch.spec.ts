@@ -12,12 +12,14 @@ const SPECIES = {
   scientific_name: "Betula pendula", canonical_common_name: "Silver Birch", common_name: "Silver Birch",
   family: "Betulaceae", genus: "Betula", rank: "species",
 };
+const UNKEYED_SILVER = "1163190f-4484-4879-9822-9be59bc8ba56";
 const UNKEYED = "1163190f-4484-4879-9822-9be59bc8ba55";
 // Shaped like the live records: the pilot Birch has no description and no lore.
 const base = { description: null, lore_text: null, latitude: 52.595879, longitude: 0.563677, what3words: null, nation: null, created_at: "2026-02-25T20:42:34Z", updated_at: "2026-04-11T13:06:44Z", photo_status: "none", metadata: {} };
 const TREES: Record<string, Record<string, unknown>> = {
   [T1]: { ...base, id: T1, name: "Birch", species: "Birch", species_key: KEY, accessibility_tier: "public" },
   [T2]: { ...base, id: T2, name: "QA Test Birch #6", species: "Silver Birch", species_key: KEY, accessibility_tier: "public" },
+  [UNKEYED_SILVER]: { ...base, id: UNKEYED_SILVER, name: "Silver Birch", species: "Silver Birch", species_key: null, accessibility_tier: "public" },
   [UNKEYED]: { ...base, id: UNKEYED, name: "Weeping birch", species: "Birch", species_key: null, accessibility_tier: "public" },
 };
 const writes: string[] = [];
@@ -151,6 +153,9 @@ test("Ancient Friend page: the keyed Birch (no story) shows one doorway; an unke
   await expect(page.getByTestId("tree-detail")).toBeVisible({ timeout: 15_000 });
   await page.waitForTimeout(1500);
   await expect(page.getByRole("link", { name: /Library of Life/ })).toHaveCount(0);
+  await page.goto(`/tree/${UNKEYED_SILVER}`);
+  await expect(page.getByTestId("tree-detail")).toBeVisible();
+  await expect(page.getByTestId("library-doorway")).toHaveCount(0);
 });
 
 test("two Ancient Friends of one species open the same identity and each returns to its own tree", async ({ page }) => {
@@ -246,3 +251,27 @@ test("at 390px the return controls and portal stay clear of the fixed TEOTAG orb
   for (const t of [targets[0], targets[1], targets[3]]) await t.click({ trial: true, timeout: 5_000 });
   await page.screenshot({ path: test.info().outputPath("04-orb-clearance-390.png") });
 });
+
+for (const width of [1440, 390]) {
+  test(`shared Mantle, history and Night Grove in Library at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`/library/life/${KEY}${origin(T2)}`);
+    const lib = page.getByTestId("library-life");
+    await expect(lib.getByRole("heading", { name: "Silver Birch", exact: true })).toBeVisible();
+    await expect(page.locator("header.parchment-header")).toHaveCount(1);
+    await expect(page.getByRole("navigation", { name: "Tree realms" }).getByRole("link", { name: "Heartwood" })).toHaveAttribute("aria-current", "page");
+    await lib.getByRole("link", { name: /Species & distribution/ }).click();
+    await page.goBack();
+    await expect(lib.getByRole("heading", { name: "Silver Birch", exact: true })).toBeVisible();
+    await page.goForward();
+    await expect(lib.getByRole("heading", { name: "Species & distribution", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Use Night Grove", exact: true }).click();
+    await expect(page.locator("html")).toHaveClass(/dark/);
+    await page.reload();
+    await expect(lib.getByRole("link", { name: "↩ Return to QA Test Birch #6" }).first()).toHaveAttribute("href", `/tree/${T2}`);
+    expect(await noOverflow(page)).toBe(true);
+    await page.screenshot({ path: test.info().outputPath(`night-species-${width}.png`), fullPage: true });
+    await page.getByRole("button", { name: "Use Living Parchment", exact: true }).click();
+    await expect(page.locator("html")).not.toHaveClass(/dark/);
+  });
+}

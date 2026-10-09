@@ -19,25 +19,12 @@ import { parseOrigin, returnPathFor, withOrigin, type LibraryOrigin } from "@/li
 import { LIBRARY_LIFE_ROUTES } from "@/lib/library/routes";
 import { isPublishable, type LibraryChapter } from "@/data/library/content";
 import { useLibraryContent } from "@/components/library/life/LibraryContentContext";
-import { useParchmentFont } from "@/components/library/life/useParchmentFont";
 import "@/components/library/life/library-parchment.css";
 
 type View = "home" | "species" | "reader";
 
 const displayName = (row: LibraryIdentityRow) => row.canonical_common_name || row.common_name;
 const recordedAs = (row: LibraryIdentityRow) => row.scientific_name || displayName(row);
-
-function Grain() {
-  return (
-    <svg aria-hidden className="llp-grain">
-      <filter id="llp-grain-f">
-        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves={3} stitchTiles="stitch" />
-        <feColorMatrix values="0 0 0 0 0.36 0 0 0 0 0.27 0 0 0 0 0.14 0 0 0 0.5 0" />
-      </filter>
-      <rect width="100%" height="100%" filter="url(#llp-grain-f)" />
-    </svg>
-  );
-}
 
 function Returns({ origin, state, label: navLabel }: { origin: LibraryOrigin | null; state: OriginState; label: string }) {
   if (state.status === "loading") return null;
@@ -178,19 +165,17 @@ export default function LibraryLifePage({ view }: { view: View }) {
   const identity = useLibraryIdentity(speciesKey);
   const originState = useLibraryOrigin(origin);
   const content = useLibraryContent();
-  useParchmentFont();
   const row = identity.status === "ready" ? identity.row : null;
   // An origin that was checked and is unavailable is not carried onward.
   const carried = originState.status === "unavailable" ? null : origin;
   useDocumentTitle(row ? `${displayName(row)} · Library of Life` : "Library of Life");
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="parchment-ground parchment-heartwood">
       <Header />
-      <main className="pt-20">
+      <main className="llp-main">
         <TetolBreadcrumb pageLabel={row ? displayName(row) : "Library of Life"} />
         <div className="llp mt-2" data-testid="library-life">
-          <Grain />
           <div className="llp-page">
             <Returns origin={origin} state={originState} label="Return" />
             {identity.status === "loading" && <span className="llp-meta" aria-live="polite">Opening the Library…</span>}
