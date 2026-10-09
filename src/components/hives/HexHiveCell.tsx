@@ -130,12 +130,14 @@ const HexHiveCell = memo(({
             onClick={onClick}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
-            className="group relative focus:outline-none w-full"
+            className="hex-hive-cell group relative w-full"
+            aria-label={`${name}: ${treeCount} trees, ${offeringCount} offerings, ${heartCount} hearts`}
+            aria-expanded={isExpanded}
             style={{ aspectRatio: "1.1547 / 1" }}
           >
             {/* Activity ring — outer glow border */}
             <div
-              className="absolute transition-all duration-500"
+              className="hex-hive-edge absolute transition-all duration-500"
               style={{
                 inset: "-3px",
                 clipPath: HEX_CLIP,
@@ -148,7 +150,7 @@ const HexHiveCell = memo(({
 
             {/* Gold border layer */}
             <div
-              className="absolute inset-0 transition-all duration-300"
+              className="hex-hive-edge absolute inset-0 transition-all duration-300"
               style={{
                 clipPath: HEX_CLIP,
                 background: isExpanded
@@ -160,7 +162,7 @@ const HexHiveCell = memo(({
 
             {/* Inner hex */}
             <div
-              className="absolute transition-all duration-300"
+              className="hex-hive-inner absolute transition-all duration-300"
               style={{
                 inset: "2px",
                 clipPath: HEX_CLIP,
@@ -190,7 +192,7 @@ const HexHiveCell = memo(({
               )}
 
               {/* Content */}
-              <div className="relative h-full flex flex-col items-center justify-center px-3 gap-0.5">
+              <div className="hex-hive-content relative h-full flex flex-col items-center justify-center px-3 gap-0.5">
                 {/* Activity dot */}
                 <div
                   className="absolute top-[10%] right-[15%] w-1.5 h-1.5 rounded-full"
@@ -238,7 +240,7 @@ const HexHiveCell = memo(({
 
                 {/* Species tags — max 2 */}
                 {topSpecies.length > 0 && (
-                  <div className="flex flex-wrap gap-0.5 justify-center mt-0.5 max-w-[92%]">
+                  <div className="hex-hive-species flex flex-wrap gap-0.5 justify-center mt-0.5 max-w-[92%]">
                     {topSpecies.slice(0, 2).map(sp => (
                       <span
                         key={sp}

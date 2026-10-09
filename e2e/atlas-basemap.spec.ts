@@ -142,3 +142,28 @@ test("live OSM geographic tiles with isolated tree fixtures", async ({ page }) =
   expect(carto).toBe(0);
   await page.screenshot({ path: test.info().outputPath("live-osm-geography.png"), fullPage: true });
 });
+
+
+test("leaving Roots cancels deferred Leaflet work", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.addInitScript(() => {
+    localStorage.setItem("s33d-blessing-dismissed", "1");
+    localStorage.setItem("s33d-map-ritual-seen", "1");
+    localStorage.setItem("ancient-friends-tour-seen", "true");
+  });
+  await page.route("**/*", route => {
+    const url = new URL(route.request().url());
+    return ["127.0.0.1", "localhost"].includes(url.hostname)
+      ? route.continue()
+      : route.fulfill({ contentType: "application/json", body: "[]" });
+  });
+  await page.goto("/map");
+  await expect(page.locator(".leaflet-control-zoom")).toBeAttached();
+  await page.getByRole("link", { name: "S33D — Open the TETOL tree browser", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "TETOL", level: 1, exact: true })).toBeVisible();
+  // Outwait the map's 100/500/1500ms deferred size passes after it was removed.
+  await page.waitForTimeout(1700);
+  expect(errors).toEqual([]);
+});

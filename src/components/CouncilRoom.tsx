@@ -105,14 +105,14 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
         <div className="flex items-center justify-center gap-2">
           <Radio className="w-3 h-3 text-primary animate-pulse" />
           <span className="text-[10px] uppercase tracking-[0.2em] text-primary/60 font-serif">
-            Council room is live
+            Council chamber
           </span>
         </div>
         <h2 className="text-2xl md:text-3xl font-serif tracking-wide text-foreground/90">
           Enter the Council Chamber
         </h2>
         <p className="text-xs md:text-sm text-muted-foreground/60 font-serif max-w-md mx-auto leading-relaxed italic">
-          Gather beneath the branches, listen, share, and leave a trace in the living ledger.
+          Gather beneath the branches, listen, share, and leave a trace in the living ledger. If the chamber cannot open here, use New tab.
         </p>
 
         {/* Future metadata area — collapsible */}

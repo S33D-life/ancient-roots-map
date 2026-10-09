@@ -12,6 +12,7 @@ import NotificationsBadge from "@/components/NotificationsBadge";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import MoonGlyph from "@/components/rhythm/MoonGlyph";
 import "./parchment.css";
+import Mantle from "./Mantle";
 
 export function internalRealm(path: string) {
   if (path === "/") return "tree";
@@ -35,6 +36,8 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
 }) {
   const location = useLocation();
   const realm = internalRealm(location.pathname);
+  const inRoots = /^\/(map|atlas|tree|hives|hive)(\/|$)/.test(location.pathname);
+  const navigationRealm = inRoots ? "roots" : realm;
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -44,6 +47,8 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
     ? { to: ROUTES.LIBRARY, label: "Return to the Hall" }
     : realm === "canopy" ? { to: ROUTES.GOLDEN_DREAM, label: "Return to the Crown" }
     : realm === "heartwood" ? { to: ROUTES.COUNCIL, label: "Return to the Canopy" }
+    : location.pathname.startsWith("/tree/") || location.pathname.startsWith("/hive/")
+      ? { to: ROUTES.MAP, label: "Return to the Roots" }
     : { to: ROUTES.S33D, label: "Return to the Seed" };
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
@@ -62,12 +67,13 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
   }, [open]);
 
   return <header className={`parchment-header ${signedIn ? "parchment-signed-in" : ""}`}>
+    <Mantle material="olive" />
     <div className="parchment-header-bar">
       <Link to="/" className="parchment-logo" aria-label="S33D — Open the TETOL tree browser"><img src={s33dHearthLogo} alt="S33D" /></Link>
       <Link to={back.to} className="parchment-back"><ArrowLeft size={17} aria-hidden="true" /><span>{"short" in back ? back.short : back.label.replace("Return to the ", "")}</span></Link>
-      <span className="parchment-realm">{realm === "tree" ? "TETOL" : realm === "canopy" ? "Canopy" : realm}</span>
+      <span className="parchment-realm">{realm === "tree" ? "TETOL" : realm === "canopy" ? "Canopy" : navigationRealm}</span>
       <nav className="parchment-desktop-index" aria-label="Tree realms">
-        {treeLinks.slice(0, 4).map(link => <Link key={link.to} to={link.to} aria-current={realm === link.realm ? "page" : undefined}>{link.label}</Link>)}
+        {treeLinks.slice(0, 4).map(link => <Link key={link.to} to={link.to} aria-current={navigationRealm === link.realm ? "page" : undefined}>{link.label}</Link>)}
       </nav>
       <div className="parchment-tools">
         <button type="button" onClick={onSearch} aria-label="Search the Tree" className="parchment-search"><Search size={18} /></button><ThemeToggle />{signedIn && userId && <><NotificationsBadge /><HeartJar userId={userId ?? null} className="parchment-header-jar" /></>}
@@ -76,7 +82,7 @@ export default function ParchmentHeader({ onSearch, signedIn, onGuide, userId }:
     </div>
     {open && <div ref={menu} id="parchment-tree-index" className="parchment-tree-panel">
       <div className="parchment-menu-heading"><span className="parchment-realm">One Tree</span><button type="button" onClick={close} aria-label="Close Tree index"><X size={20} /></button></div>
-      <nav aria-label="Tree index" onClick={() => setOpen(false)}>{treeLinks.map(link => <Link key={link.to} to={link.to} aria-current={realm === link.realm ? "page" : undefined}><span>{link.label}</span><em>{link.sub}</em></Link>)}</nav>
+      <nav aria-label="Tree index" onClick={() => setOpen(false)}>{treeLinks.map(link => <Link key={link.to} to={link.to} aria-current={navigationRealm === link.realm ? "page" : undefined}><span>{link.label}</span><em>{link.sub}</em></Link>)}</nav>
       <details><summary>Heartwood rooms</summary><nav aria-label="Heartwood rooms" onClick={() => setOpen(false)}>{HEARTWOOD_ROOMS.map(room => <Link key={room.key} to={room.route}>{room.label}</Link>)}</nav></details>
       <div className="parchment-menu-utilities"><OfflineIndicator /><button type="button" onClick={() => { setOpen(false); onSearch(); }}>Search the Tree</button><MoonGlyph variant="seal" /><button type="button" onClick={() => { setOpen(false); onGuide(); }}>TEOTAG</button><Link to={signedIn ? "/dashboard" : "/auth"}>{signedIn ? "Your Hearth" : "Sign in"}</Link></div>
     </div>}

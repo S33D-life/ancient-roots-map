@@ -20,7 +20,7 @@ const AboutPage = () => {
             <p className="text-muted-foreground text-sm font-serif">EST 2016</p>
           </div>
 
-          <div className="space-y-6 font-serif text-foreground/85 leading-relaxed">
+          <div className="parchment-prose space-y-6 font-serif text-foreground/85 leading-relaxed">
             <p>
               S33D is a living atlas of the world's most ancient and remarkable trees — mapped, storied, and stewarded by a growing community of people who walk among them.
             </p>

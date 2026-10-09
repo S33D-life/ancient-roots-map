@@ -45,7 +45,8 @@ html[data-living-parchment] button:not(.lp button) { min-height: 44px; }
 .parchment-header { position: fixed; top: 0; inset-inline: 0; z-index: 50; padding-top: env(safe-area-inset-top,0px); background: hsl(var(--background) / .97); border-bottom: 1px solid hsl(var(--border) / .65); font-family: 'Cormorant Garamond',Georgia,serif; color: hsl(var(--foreground)); }
 html[data-living-parchment] header.parchment-header > .parchment-tree-panel { background: hsl(var(--background)) !important; }
 .parchment-header-bar { display: flex; align-items: center; gap: 24px; min-height: 64px; padding: 0 36px; }
-html.light[data-living-parchment] header.parchment-header > div:first-child { opacity: 1 !important; background-image: none !important; }
+html[data-living-parchment] header.parchment-header { background: transparent !important; border: 0; box-shadow: none !important; isolation: isolate; }
+html[data-living-parchment] header.parchment-header > .parchment-header-bar { position: relative; background: transparent !important; opacity: 1 !important; }
 .parchment-back { display: inline-flex; align-items: center; min-height: 48px; gap: 10px; font-size: 20px; flex-shrink: 0; }
 .parchment-realm { font-family: Cinzel,Georgia,serif; text-transform: uppercase; font-size: 13px; letter-spacing: .16em; color: hsl(var(--foreground)); }
 .parchment-desktop-index { margin-left: auto; display: flex; gap: 24px; }
@@ -106,7 +107,7 @@ html.light[data-living-parchment] header.parchment-header > div:first-child { op
 .parchment-room-content [class*="text-[10px]"],.parchment-room-content [class*="text-[11px]"] { font-size: 15px; }
 .parchment-room-content [class*="text-muted-foreground"] { color: var(--paper-muted); }
 .parchment-room-content .font-serif { font-family: 'Cormorant Garamond',Georgia,serif; }
-.parchment-room-content :is(.rounded-lg,.rounded-xl,.rounded-2xl) { border-radius: 2px; }
+.parchment-room-content :is(.rounded-lg,.rounded-xl,.rounded-2xl) { border-radius: 12px; }
 .parchment-room-content :is(.shadow-lg,[class*="shadow-"],[class*="backdrop-blur"]) { box-shadow: none; backdrop-filter: none; }
 .parchment-room-content :is(h2,h3) { text-shadow: none; }
 .parchment-room-intro { display: flex; justify-content: space-between; gap: 24px; align-items: start; border-bottom: 1px solid var(--paper-hair); padding-bottom: 20px; }
@@ -165,9 +166,11 @@ html[data-living-parchment] footer a { min-height: 44px; display: inline-flex; a
   .parchment-door { padding: 19px 0; }
   .parchment-door strong { font-size: 24px; }
   .teotag-margin p { font-size: 19px; }
-  .parchment-room-intro { flex-direction: column; gap: 22px; }
+  .parchment-room-intro { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:18px 12px; }
+  .parchment-room-intro > div:first-child { grid-column:1; grid-row:1; }
+  .parchment-room-intro > button { grid-column:2; grid-row:1; align-self:start; }
   .parchment-room-intro h1 { font-size: 36px; }
-  .parchment-room-intro .teotag-margin { margin-top: 22px; }
+  .parchment-room-intro .teotag-margin { grid-column:1 / -1; grid-row:2; margin-top:0; padding-bottom:0; }
   .parchment-journey { flex-direction: column; align-items: start; gap: 12px; }
   .parchment-climb { font-size: 17px; gap: 12px; }
   .parchment-folio-main { padding-top: 76px; }
@@ -334,3 +337,20 @@ html[data-living-parchment] .global-search-overlay button { min-width: 44px; fon
 
 .s33d-living-scroll #teotag-guide button span { font-family:'Cormorant Garamond',Georgia,serif !important; text-transform:none; letter-spacing:0; }
 .s33d-living-scroll #teotag-guide button .seed-doorway-help { font-size:16px !important; line-height:1.4; color:hsl(var(--muted-foreground)) !important; }
+
+/* Reading and wayfinding share ink; ceremonial labels keep their own hierarchy. */
+html.light[data-living-parchment] .font-serif:not(.lp .font-serif) { font-family:'Cormorant Garamond',Georgia,serif; }
+html.light[data-living-parchment] .parchment-prose { font-family:'Cormorant Garamond',Georgia,serif; font-size:20px; line-height:1.6; color:hsl(var(--foreground)); }
+html.light[data-living-parchment] .parchment-prose p { max-width:65ch; }
+.tetol-parchment-tree .tetol-shortcut span { color:hsl(var(--foreground)) !important; font-size:13px; letter-spacing:.02em; line-height:1.2; }
+
+/* Botanical honeycomb keeps its shape, with readable paper interiors in daylight. */
+html.light .hex-hive-inner { background:linear-gradient(160deg,hsl(var(--card)),hsl(var(--secondary))) !important; }
+html.light .hex-hive-edge { background:linear-gradient(135deg,hsl(var(--foreground)/.4),hsl(var(--border))) !important; }
+html.light .hex-hive-cell[aria-expanded="true"] .hex-hive-edge { background:hsl(var(--foreground)) !important; }
+html.light .hex-hive-content p { color:hsl(var(--foreground)); font-size:15px; font-family:'Cormorant Garamond',Georgia,serif; }
+html.light .hex-hive-content span:not(.text-2xl) { color:hsl(var(--foreground)) !important; font-size:11px; }
+html.light .hex-hive-content svg { color:hsl(var(--muted-foreground)); }
+
+html.light .hex-hive-content p { flex-shrink:0; }
+@media(max-width:640px) { html.light .hex-hive-species { display:none; } }

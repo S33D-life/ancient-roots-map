@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Offering } from "@/hooks/use-offerings";
 import { getOfferingPhotos } from "@/utils/offeringPhotos";
+import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
 import { getPublicAppUrl } from "@/utils/ogMeta";
 
 /* ---------- Shared Helpers ---------- */
@@ -59,9 +60,9 @@ export const shareOffering = async (
 };
 
 export const getStaffImageFromCode = (code: string): string | null => {
-  const prefix = code.split("-")[0]?.toLowerCase();
-  if (!prefix) return null;
-  return `/images/staffs/${prefix}.jpeg`;
+  const prefix = code.split("-")[0]?.toUpperCase();
+  if (!prefix || !Object.prototype.hasOwnProperty.call(SPECIES_MAP, prefix)) return null;
+  return SPECIES_MAP[prefix as SpeciesCode].image;
 };
 
 export const SealedByLabel = ({ staff }: { staff: string | null }) => {

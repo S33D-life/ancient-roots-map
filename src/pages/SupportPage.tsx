@@ -454,7 +454,7 @@ const SupportPage = () => {
           <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-foreground leading-snug">
             Nurture the Grove
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+          <p className="parchment-prose text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
             Support the growth of S33D through an offering, monthly support, or crypto contribution.
             Hearts are gifted in gratitude.
           </p>

@@ -154,18 +154,25 @@ export function useMapInit({
 
       container.style.backgroundColor = "hsl(30, 15%, 10%)";
 
-      requestAnimationFrame(() => map.invalidateSize());
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 500);
-      setTimeout(() => {
+      // Deferred work belongs to this map instance and must stop on route exit.
+      const currentMap = () => !disposed && mapRef.current === map;
+      const invalidateCurrentMap = () => { if (currentMap()) map.invalidateSize(); };
+      const pendingTimers: ReturnType<typeof setTimeout>[] = [];
+      const afterInit = (callback: () => void, delay: number) => {
+        pendingTimers.push(setTimeout(() => { if (currentMap()) callback(); }, delay));
+      };
+      const resizeFrame = requestAnimationFrame(invalidateCurrentMap);
+      afterInit(invalidateCurrentMap, 100);
+      afterInit(invalidateCurrentMap, 500);
+      afterInit(() => {
         map.invalidateSize();
         const imgCount = container?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
         setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
         console.info(`${logPrefix} late invalidateSize, ${container?.offsetWidth}x${container?.offsetHeight}, tiles=${imgCount}`);
       }, 1500);
-      const sizeObserver = new ResizeObserver(() => map.invalidateSize());
+      const sizeObserver = new ResizeObserver(invalidateCurrentMap);
       sizeObserver.observe(container);
-      const onResize = () => map.invalidateSize();
+      const onResize = invalidateCurrentMap;
       window.addEventListener('resize', onResize);
 
       const cleanupSeasonalTint = applySeasonalTint(container);
@@ -185,12 +192,12 @@ export function useMapInit({
       let deepLinked = false;
       if (initialLat !== undefined && initialLng !== undefined) {
         deepLinked = true;
-        setTimeout(() => map.setView([initialLat, initialLng], initialZoom ?? 16), 300);
+        afterInit(() => map.setView([initialLat, initialLng], initialZoom ?? 16), 300);
       } else if (initialW3w) {
         deepLinked = true;
         import("@/utils/what3words").then(({ convertToCoordinates }) => {
           convertToCoordinates(initialW3w).then((result) => {
-            if (result && result.coordinates) {
+            if (currentMap() && result && result.coordinates) {
               map.setView([result.coordinates.lat, result.coordinates.lng], initialZoom ?? 16);
             }
           }).catch(() => {});
@@ -200,7 +207,7 @@ export function useMapInit({
       if (!deepLinked) {
         const memory = restoreMapMemory();
         if (memory) {
-          setTimeout(() => map.setView([memory.lat, memory.lng], memory.zoom, { animate: true }), 300);
+          afterInit(() => map.setView([memory.lat, memory.lng], memory.zoom, { animate: true }), 300);
         }
       }
 
@@ -225,6 +232,8 @@ export function useMapInit({
       }
 
       mapCleanupRef.current = () => {
+        cancelAnimationFrame(resizeFrame);
+        pendingTimers.forEach(clearTimeout);
         clearTimeout(saveTimer);
         map.off("moveend", onMoveEndSave);
         cleanupSeasonalTint();

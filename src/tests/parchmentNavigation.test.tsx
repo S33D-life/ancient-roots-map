@@ -36,6 +36,16 @@ describe("internal room navigation", () => {
     header("/library/staff-room");
     expect(screen.getByRole("link", { name: "Hall" })).toHaveAttribute("href", "/library");
   });
+  it.each(["/map", "/atlas", "/atlas/united-kingdom", "/tree/record", "/hives", "/hive/yew"])("marks Roots consistently on %s", path => {
+    header(path);
+    const realms = screen.getByRole("navigation", { name: "Tree realms" });
+    expect(within(realms).getByRole("link", { name: "Roots" })).toHaveAttribute("aria-current", "page");
+    expect(within(realms).getByRole("link", { name: "Crown" })).not.toHaveAttribute("aria-current");
+  });
+  it("returns an Ancient Friend to Roots without changing the Folio return contract", () => {
+    header("/tree/record");
+    expect(screen.getAllByRole("link", { name: "Roots" }).find(link => link.classList.contains("parchment-back"))!).toHaveAttribute("href", "/map");
+  });
   it("keeps a contextual Folio return compact enough for the phone shell", () => {
     header("/golden-dream/growth/one-circle-many-surfaces", { from: "/agent-garden" });
     expect(screen.getByRole("link", { name: "Garden" })).toHaveAttribute("href", "/agent-garden");

@@ -2154,7 +2154,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       {/* Loading overlay — warm screen shown until tiles are ready */}
       <MapLoadingOverlay ready={renderDebug.tileStatus === "loaded" || renderDebug.tileStatus === "failed" || renderDebug.tileLoads > 3} />
       {renderDebug.tileStatus === "failed" && (
-        <div role="status" className="absolute left-3 right-3 top-24 z-[1002] mx-auto max-w-sm rounded-lg border border-border bg-background/95 p-3 text-sm shadow-lg">
+        <div role="status" className="absolute left-3 right-3 bottom-28 z-[1002] mx-auto max-w-sm rounded-lg border border-border bg-background/95 p-3 text-sm shadow-lg">
           <p>Map background unavailable. You can still explore tree markers.</p>
           <button className="mt-2 min-h-11 underline" onClick={retryTiles}>Retry map background</button>
         </div>

@@ -67,11 +67,18 @@ test("at 390px the growth row stays clear of the fixed TEOTAG orb (geometric)", 
   for (const part of await parts.all()) {
     const o0 = (await orb.boundingBox())!;
     const p0 = (await part.boundingBox())!;
-    await page.evaluate(dy => window.scrollBy(0, dy), (p0.y + p0.height / 2) - (o0.y + o0.height / 2));
+    const alignment = await page.evaluate(dy => {
+      const target = window.scrollY + dy;
+      const maximum = document.documentElement.scrollHeight - window.innerHeight;
+      window.scrollTo({ top: Math.max(0, Math.min(target, maximum)), behavior: "instant" });
+      return target >= 0 && target <= maximum;
+    }, (p0.y + p0.height / 2) - (o0.y + o0.height / 2));
     const o = (await orb.boundingBox())!;
     const p = (await part.boundingBox())!;
     const verticalOverlap = p.y < o.y + o.height && o.y < p.y + p.height;
-    expect(verticalOverlap, "the line was brought level with the orb").toBe(true);
+    // A line above the orb at the page's top cannot be moved downward by scrolling.
+    // Check its actual non-intersection instead of assuming negative scroll is possible.
+    if (alignment) expect(verticalOverlap, "the line was brought level with the orb").toBe(true);
     const intersects = p.x < o.x + o.width && o.x < p.x + p.width && verticalOverlap;
     expect(intersects, `${await part.innerText()} [${p.x},${p.y},${p.width}x${p.height}] vs orb [${o.x},${o.y},${o.width}x${o.height}]`).toBe(false);
   }
