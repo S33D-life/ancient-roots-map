@@ -1,14 +1,14 @@
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, cleanup } from "@testing-library/react";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 
 describe("Circle 235 open doorway", () => {
   it("offers the public hosted journey without advertising an elapsed Fire", () => {
     render(<NextCouncilCard onJoinCouncil={vi.fn()} />);
-    expect(screen.getByText("The Circle is open now. Times will be shared in the group as each fire is lit.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Explore Circle 235 in 3D TETOL" })).toHaveAttribute("href", "/tetol/circle-235/pre-fire/tetol.html");
+    expect(screen.getByText(/The Circle is open now. Times will be shared/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Enter the Circle →" })).toBeInTheDocument();
     expect(screen.queryByText(/Tuesday|19:30|4th May/)).not.toBeInTheDocument();
     expect(screen.getByText(/open seventh seat/)).toBeInTheDocument();
     expect(screen.getByText("What is already blooming in us that we haven’t noticed yet?")).toBeInTheDocument();
@@ -17,6 +17,24 @@ describe("Circle 235 open doorway", () => {
 });
 
 
+describe("gathered companion reading", () => {
+  it("opens only an existing appearance and retains care", () => {
+    const open = vi.fn();
+    render(<NextCouncilCard onJoinCouncil={vi.fn()} onMeetCompanion={open} />);
+    fireEvent.click(screen.getByRole("button", { name: "Fly Agaric" }));
+    expect(screen.getByRole("button", { name: "Fly Agaric" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Toxic · Meet with care · Never eat.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Follow this companion in the Circle →" }));
+    expect(open).toHaveBeenCalledWith("c235_flyagaric");
+    fireEvent.click(screen.getByRole("button", { name: "Fly Agaric" }));
+    expect(screen.queryByRole("button", { name: "Follow this companion in the Circle →" })).not.toBeInTheDocument();
+  });
+  it("does not offer a spatial doorway when unavailable", () => {
+    cleanup();
+    render(<NextCouncilCard onJoinCouncil={vi.fn()} deckAvailable={false} />);
+    expect(screen.queryByRole("button", { name: "Enter the Circle →" })).not.toBeInTheDocument();
+  });
+});
 describe("Circle 235 CSP-compatible package", () => {
   it("serves every executable script from the package without inline code or an import map", () => {
     const root = path.resolve("public/tetol/circle-235/pre-fire");
