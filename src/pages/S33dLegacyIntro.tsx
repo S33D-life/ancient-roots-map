@@ -196,7 +196,7 @@ const Index = ({ parchment = false }: { parchment?: boolean }) => {
 
             <EcosystemOverview />
             <div className="section-divider max-w-xl mx-auto" />
-            {parchment && <section className="seed-pathways"><span className="parchment-kicker">Follow a living thread</span><h2>An encounter can travel through the Tree.</h2><p>Meet a tree. Leave an offering. Carry its memory into Heartwood. Bring a question to the Council. Follow what grows in the Crown.</p><nav className="s33d-paths" aria-label="Choose your starting path"><Link to="/map"><strong>I’m here to discover</strong><span>Meet Ancient Friends in the Atlas.</span></Link><Link to="/library"><strong>I’m here to share</strong><span>Find a room for music, stories and memory.</span></Link><Link to="/support"><strong>I’m here to help</strong><span>Find ways to care for the growing grove.</span></Link></nav></section>}
+            {parchment && <section id="living-thread" className="seed-pathways"><span className="parchment-kicker">Follow a living thread</span><h2>An encounter can travel through the Tree.</h2><p>Meet a tree. Leave an offering. Carry its memory into Heartwood. Bring a question to the Council. Follow what grows in the Crown.</p><nav className="s33d-paths" aria-label="Choose your starting path"><Link to="/map"><strong>I’m here to discover</strong><span>Meet Ancient Friends in the Atlas.</span></Link><Link to="/library"><strong>I’m here to share</strong><span>Find a room for music, stories and memory.</span></Link><Link to="/support"><strong>I’m here to help</strong><span>Find ways to care for the growing grove.</span></Link></nav></section>}
             <ParticipationSection />
             <SupportDiscoveryRow />
             <RootPulse />

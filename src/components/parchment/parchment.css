@@ -354,3 +354,44 @@ html.light .hex-hive-content svg { color:hsl(var(--muted-foreground)); }
 
 html.light .hex-hive-content p { flex-shrink:0; }
 @media(max-width:640px) { html.light .hex-hive-species { display:none; } }
+
+/* Seed folio: keep the descent luminous; Night Grove retains its deeper atmosphere. */
+html.light .s33d-living-scroll #atlas-content {
+  background: #f8f2e3;
+  color: #243e2d;
+}
+html.light .s33d-living-scroll #atlas-content > [aria-hidden="true"].absolute { opacity: .025; }
+html.light .s33d-living-scroll main :is(span, a, button, label, summary)[class*="text-"] {
+  color: #334b36 !important;
+}
+html.light .s33d-living-scroll main :is(span, a, button, label)[class*="text-["] {
+  font-size: max(14px, 1em);
+}
+html.light .s33d-living-scroll .seed-pathways {
+  position: relative;
+  margin-block: 40px;
+  border-radius: 20px;
+  background-color: #faf5e9;
+  background-image: url('/images/parchment/seed-folio-v1.jpg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 64px 56px;
+  border: 1px solid #d7cdb4;
+}
+html.light .s33d-living-scroll .seed-pathways > * { position: relative; }
+html.light .s33d-living-scroll .seed-pathways :is(p,h2,nav) {
+  background: rgb(250 245 233 / 92%);
+  border-radius: 12px;
+}
+html.light .s33d-living-scroll footer { color: #334b36; background: #f1e8d1; }
+@media(max-width:640px) {
+  html.light .s33d-living-scroll .seed-pathways { margin-inline: 12px; padding: 48px 20px; background-size: 100% 100%; background-position: center; }
+}
+html.light .s33d-living-scroll > div.max-w-4xl :is(p,svg),
+html.light .s33d-living-scroll footer :is(a,span,div[class*="text-"]) {
+  color: #334b36 !important;
+  font-size: 14px;
+}
+html.light .s33d-living-scroll main button[class*="text-"] { color: #243e2d !important; }
+html.light .s33d-living-scroll main button :is(span,svg) { color: #334b36 !important; }
+html.light .s33d-living-scroll .seed-pathways > .parchment-kicker { background: rgb(250 245 233 / 94%); border-radius: 8px; padding: 4px 8px; width: fit-content; }
