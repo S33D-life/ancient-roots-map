@@ -127,37 +127,15 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
     return pool[Math.floor(Math.random() * pool.length)];
   }, [location.pathname, userId, seedsRemaining, seasonal]);
 
-  // Show a guidance whisper periodically
+  // Offer one quiet note when the wanderer deliberately rests on the orb.
   useEffect(() => {
-    if (!visible) {
-      setShowing(false);
-      return;
-    }
-
-    const showGuidance = () => {
-      const msg = pickMessage();
-      if (!msg) return;
-      setMessage(msg);
+    if (!visible) { setShowing(false); return; }
+    const timer = setTimeout(() => {
+      setMessage(pickMessage());
       setFading(false);
       setShowing(true);
-
-      // Auto-dismiss after 5s
-      setTimeout(() => {
-        setFading(true);
-        setTimeout(() => setShowing(false), 400);
-      }, 5000);
-    };
-
-    // Initial delay
-    const initialTimer = setTimeout(showGuidance, 8000);
-
-    // Repeat every 45-60s
-    const interval = setInterval(showGuidance, 45000 + Math.random() * 15000);
-
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(interval);
-    };
+    }, 700);
+    return () => clearTimeout(timer);
   }, [visible, pickMessage]);
 
   // Reset on route change

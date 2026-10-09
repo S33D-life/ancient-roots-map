@@ -1817,6 +1817,11 @@ const TreeDetailPage = () => {
           </TabsContent>
         </Tabs>
 
+        <div className="mt-12 border-t border-border pt-6 font-serif">
+          <p className="text-muted-foreground mb-3">Carry this encounter into the Tree’s living memory.</p>
+          <Link to={ROUTES.LIBRARY} state={{ from: `/tree/${id}` }} className="inline-flex min-h-12 items-center text-lg text-foreground underline underline-offset-4">Enter Heartwood Hall →</Link>
+        </div>
+
         {/* ── Closing rhythm whisper — anchors this tree to the current lunation ── */}
         <div className="mt-10 mb-2 flex justify-center">
           <MoonGlyph variant="whisper" />

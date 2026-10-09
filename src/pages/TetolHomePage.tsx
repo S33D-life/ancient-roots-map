@@ -3,7 +3,7 @@
  * Users navigate the ecosystem by clicking tree nodes.
  * Light mode: warm botanical canopy experience with layered leaves and sunlight.
  */
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import { useParchmentDark } from "@/hooks/use-parchment-dark";
 import { useDocumentTitle } from "@/hooks/use-document-title";
@@ -187,7 +187,7 @@ const TetolHomePage = () => {
               The Ethereal Tree of Life
             </p>
 
-            {isLight && <p className="tetol-tree-invitation">One living Tree. Wander from the Crown to the Roots.</p>}
+            {isLight && <Link to="/s33d" className="tetol-tree-invitation underline underline-offset-4 decoration-current/30">Step into the living Tree →</Link>}
             {!isNewUser && <div className="mb-8" />}
             {isNewUser && <div className="mb-6" />}
             {/* TEOTAG hover tooltip — hidden for new users */}
@@ -203,7 +203,7 @@ const TetolHomePage = () => {
               >
                 <img src={teotag} alt="TEOTAG" className="w-10 h-10 rounded-full border border-primary/40 shrink-0" />
                 <p className="text-xs font-serif leading-relaxed" style={{ color: "hsl(var(--foreground) / 0.85)" }}>
-                  I am <span className="text-primary font-bold">TEOTAG</span> — The Echo of the Ancient Groves and your guide around The Ethereal Tree of Life.
+                  I am <span className="text-primary font-bold">TEOTAG</span> — your guide through the living Tree.
                 </p>
               </div>
             </div>

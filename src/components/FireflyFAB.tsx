@@ -94,6 +94,7 @@ const FireflyFAB = () => {
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
   const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [longPressProgress, setLongPressProgress] = useState(0);
 
@@ -337,6 +338,8 @@ const FireflyFAB = () => {
         onPointerMove={docked ? undefined : handlePointerMove}
         onPointerUp={docked ? undefined : handlePointerUp}
         onClick={handleClick}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         aria-label="TEOTAG's guiding orb — explore, contribute, and discover"
@@ -489,7 +492,7 @@ const FireflyFAB = () => {
       </AnimatePresence>
 
       {/* Contextual guidance whispers from TEOTAG */}
-      <FireflyGuidance fabPosition={displayXY} visible={!anyOpen} />
+      <FireflyGuidance fabPosition={displayXY} visible={!anyOpen && window.innerWidth >= 760 && (hovered || focused)} />
 
       {/* Staff Constellation — radial actions around the Orb */}
       <OrbConstellation

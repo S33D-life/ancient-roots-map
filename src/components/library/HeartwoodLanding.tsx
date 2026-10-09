@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { lazy, Suspense } from "react";
 import LibraryRoomGrid from "@/components/LibraryRoomGrid";
@@ -11,17 +11,20 @@ import { ParchmentGround, TreePlate, TeotagMarginNote } from "@/components/parch
 import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import BorrowedStaffCard from "@/components/staff/BorrowedStaffCard";
 import LibraryVaultPreview from "@/components/LibraryVaultPreview";
+import { journeyOrigin } from "@/lib/journeyOrigin";
 import { ROUTES } from "@/lib/routes";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
 export default function HeartwoodLanding() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const origin = journeyOrigin(location.state?.from);
   const dark = useParchmentDark();
   const otherRooms: Record<string, string> = { atlas: "/atlas", press: "/press", "life-groves": "/heartwood/life-groves", "tree-data-commons": "/tree-data-commons" };
   const enterRoom = (key: string) => {
     const route = ROOM_ROUTE_MAP[key] ?? otherRooms[key];
-    if (route) navigate(route, { state: { from: ROUTES.LIBRARY } });
+    if (route) navigate(route, { state: { from: ROUTES.LIBRARY, hallOrigin: origin?.to } });
   };
   if (dark) return <HeartwoodLegacyLanding />;
   return <ParchmentGround realm="heartwood">
@@ -33,7 +36,6 @@ export default function HeartwoodLanding() {
           <h1 className="parchment-title">The Heartwood Hall</h1>
           <p className="parchment-lede">Step into the living library. Here the Tree remembers: encounters, stories, offerings and the paths we have walked.</p>
           <TeotagMarginNote>Take your time. There is a room here for what you carry.</TeotagMarginNote>
-          <Link className="parchment-action" to={ROUTES.COUNCIL}>Return to the Council above <ArrowRight size={18} aria-hidden="true" /></Link>
         </div>
         <TreePlate realm="heartwood" />
       </div>

@@ -58,13 +58,6 @@ const TrunkSection = () => {
     zone: depth.zone,
   });
 
-  const descLayout = useDepthBalancedText({
-    text: "The living centre. Stories, offerings, and the fire that burns quietly — where your journey is remembered and the grove grows from every heart.",
-    font: '400 clamp(14px, 2vw, 16px) ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 28,
-    zone: depth.zone,
-  });
-
   return (
     <section
       ref={sectionRef}
@@ -119,22 +112,6 @@ const TrunkSection = () => {
           style={{ color: "hsl(35 30% 88%)", lineHeight: 1.55 }}
         >
           The library of every journey, song, and offering left at a tree.
-        </DepthRevealText>
-
-        <DepthRevealText
-          delay={250}
-          className="text-foreground/65 font-serif text-sm md:text-base max-w-sm mx-auto"
-          style={{
-            lineHeight: depth.lineHeight,
-            ...(descLayout.ready && descLayout.balancedWidth
-              ? { maxWidth: descLayout.balancedWidth }
-              : {}),
-          }}
-        >
-          <span ref={descLayout.containerRef as any}>
-            The living centre. Stories, offerings, and the fire that burns quietly —
-            where your journey is remembered and the grove grows from every heart.
-          </span>
         </DepthRevealText>
 
         {/* Wonder line */}

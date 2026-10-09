@@ -40,13 +40,6 @@ const CanopySection = () => {
     zone: depth.zone,
   });
 
-  const descLayout = useDepthBalancedText({
-    text: "Where the grove gathers. Community governance, ecological councils, and the voice of every wanderer who walks beneath the canopy.",
-    font: '400 clamp(14px, 2vw, 16px) ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 28,
-    zone: depth.zone,
-  });
-
   return (
     <section
       ref={sectionRef}
@@ -101,22 +94,6 @@ const CanopySection = () => {
           style={{ color: "hsl(140 25% 85%)", lineHeight: 1.55 }}
         >
           Where the grove gathers to decide what grows next.
-        </DepthRevealText>
-
-        <DepthRevealText
-          delay={250}
-          className="text-foreground/65 font-serif text-sm md:text-base max-w-sm mx-auto"
-          style={{
-            lineHeight: depth.lineHeight,
-            ...(descLayout.ready && descLayout.balancedWidth
-              ? { maxWidth: descLayout.balancedWidth }
-              : {}),
-          }}
-        >
-          <span ref={descLayout.containerRef as any}>
-            Where the grove gathers. Community governance, ecological councils,
-            and the voice of every wanderer who walks beneath the canopy.
-          </span>
         </DepthRevealText>
 
         {/* Wonder line */}

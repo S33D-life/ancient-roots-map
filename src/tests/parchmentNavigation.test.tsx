@@ -12,6 +12,14 @@ function header(path: string, state?: object) {
 }
 
 describe("internal room navigation", () => {
+  it("names the actual Ancient Friend when returning from Heartwood", () => {
+    header("/library", { from: "/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001" });
+    expect(screen.getByRole("link", { name: "Back to the Ancient Friend" })).toHaveAttribute("href", "/tree/a1b2c3d4-1111-4aaa-bbbb-000000000001");
+  });
+  it("does not imply a Council origin for a directly entered Hall", () => {
+    header("/library");
+    expect(screen.getByRole("link", { name: "Tree" })).toHaveAttribute("href", "/");
+  });
   it("keeps public utility pages oriented without adding another navigation system", () => {
     header("/support");
     expect(screen.getByLabelText("Current place")).toHaveTextContent("Care for the Tree");

@@ -39,13 +39,6 @@ const CrownSection = () => {
     zone: depth.zone,
   });
 
-  const descLayout = useDepthBalancedText({
-    text: "A living vision shaped by every wanderer who passes through the grove.",
-    font: '400 clamp(14px, 2vw, 16px) ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 28,
-    zone: depth.zone,
-  });
-
   return (
     <section
       ref={sectionRef}
@@ -102,21 +95,6 @@ const CrownSection = () => {
           style={{ color: "hsl(45 25% 88%)", lineHeight: 1.55 }}
         >
           A living dream for people, trees, and future generations.
-        </DepthRevealText>
-
-        <DepthRevealText
-          delay={250}
-          className="text-foreground/65 font-serif text-sm md:text-base max-w-sm mx-auto"
-          style={{
-            lineHeight: depth.lineHeight,
-            ...(descLayout.ready && descLayout.balancedWidth
-              ? { maxWidth: descLayout.balancedWidth }
-              : {}),
-          }}
-        >
-          <span ref={descLayout.containerRef as any}>
-            A living vision shaped by every wanderer who passes through the grove.
-          </span>
         </DepthRevealText>
 
         {/* Wonder line */}

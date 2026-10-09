@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { hallReturnState } from "@/lib/journeyOrigin";
+import { Link, useLocation } from "react-router-dom";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Header from "@/components/Header";
@@ -15,6 +16,8 @@ interface HeartwoodRoomShellProps {
 }
 
 export default function HeartwoodRoomShell({ roomLabel, children, currentRoom, roomSequence = [], roomLabels = {}, onNavigateRoom }: HeartwoodRoomShellProps) {
+  const location = useLocation();
+  const returnState = hallReturnState(location.state);
   const reduced = useReducedMotion();
   const canSwipe = roomSequence.length > 1 && currentRoom && onNavigateRoom;
   const index = currentRoom ? roomSequence.indexOf(currentRoom) : -1;
@@ -25,7 +28,7 @@ export default function HeartwoodRoomShell({ roomLabel, children, currentRoom, r
     <Header />
     <main className="parchment-main parchment-room-main">
       <div className="parchment-room-intro">
-        <div><Link className="parchment-kicker" to={ROUTES.LIBRARY}>Heartwood Hall</Link><h1>{roomLabel}</h1></div>
+        <div><Link className="parchment-kicker" to={ROUTES.LIBRARY} state={returnState}>Heartwood Hall</Link><h1>{roomLabel}</h1></div>
         <TeotagMarginNote>One Tree. Each room holds a different part of its living memory.</TeotagMarginNote>
         <CompanionPairDialog />
       </div>
@@ -34,7 +37,7 @@ export default function HeartwoodRoomShell({ roomLabel, children, currentRoom, r
         <button type="button" disabled={!next} onClick={() => next && onNavigateRoom?.(next)} aria-label={next ? `Climb to ${roomLabels[next] || next}` : "No higher room"}><span>{next ? roomLabels[next] || next : "Crown reached"}</span><ChevronUp size={18} aria-hidden="true" /></button>
       </nav>}
       <div className="parchment-room-content">{reduced || !canSwipe ? children : <AnimatePresence mode="wait"><motion.div key={currentRoom} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .15 }}>{children}</motion.div></AnimatePresence>}</div>
-      <div className="parchment-journey"><span>Keep your place in the living library.</span><Link to={ROUTES.LIBRARY}>Return to Heartwood Hall →</Link></div>
+      <div className="parchment-journey"><span>Keep your place in the living library.</span><Link to={ROUTES.LIBRARY} state={returnState}>Return to Heartwood Hall →</Link></div>
     </main>
     <Footer />
   </ParchmentGround>;
