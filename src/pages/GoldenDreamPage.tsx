@@ -5,10 +5,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BookOpen, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CrownTreeFrame from "@/components/crown/CrownTreeFrame";
 import CrownGrowths from "@/components/crown/CrownGrowths";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { ParchmentGround, TreePlate, TeotagMarginNote } from "@/components/parchment/ParchmentGround";
+import { ParchmentGround, TeotagMarginNote } from "@/components/parchment/ParchmentGround";
 import { ROUTES } from "@/lib/routes";
 
 import { useFullscreen } from "@/hooks/use-fullscreen";
@@ -182,7 +183,7 @@ const GoldenDreamPage = () => {
             <CrownGrowths headingLevel={1} />
             <TeotagMarginNote>Everything you will meet up here began in something lived.</TeotagMarginNote>
           </div>
-          <TreePlate />
+          <CrownTreeFrame />
         </div>
         <section className="parchment-section" aria-labelledby="dream-reading">
           <h2 id="dream-reading">Read the Golden Dream</h2>

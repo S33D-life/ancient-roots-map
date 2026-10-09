@@ -27,7 +27,18 @@ for (const width of [1440, 390, 320]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: test.info().outputPath(`after-crown-${width}.png`) });
     await page.screenshot({ path: test.info().outputPath(`after-crown-full-${width}.png`), fullPage: true });
-    await folio.click();
+    const fieldImage = await page.locator('.crown-tree-frame--field img').getAttribute('src');
+    if (width <= 390) {
+      const invitation = page.locator('.lp-row-open');
+      const box = (await invitation.boundingBox())!;
+      const imageBox = (await page.locator('.crown-tree-frame--field').boundingBox())!;
+      expect(imageBox.y).toBeGreaterThan(box.y + box.height);
+      expect(imageBox.height).toBeLessThan(180);
+    }
+    await folio.focus();
+    await expect(folio).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.crown-tree-frame--folio img')).toHaveAttribute('src', fieldImage!);
     await expect(page.getByRole("heading", { name: "One Circle · Many Surfaces", exact: true })).toBeVisible();
     await expect(page.getByText("recorded evidence, not proof of deployment", { exact: true })).toBeVisible();
     await expect(page.getByText("Growing, fourth of six", { exact: true })).toBeVisible();
@@ -44,6 +55,7 @@ for (const width of [1440, 390, 320]) {
     await expect(page.locator('iframe[title="Dream notes"]')).toBeVisible();
     await page.getByRole("button", { name: "← Back to Golden Dream", exact: true }).click();
     await expect(title).toBeVisible();
+    await expect(page.getByRole("link", { name: /Open a Growth Folio/ })).toBeVisible();
     await page.getByRole("button", { name: "Use Night Grove", exact: true }).click();
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect(folio).toBeVisible();
@@ -51,7 +63,9 @@ for (const width of [1440, 390, 320]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await folio.click();
     await expect(page.locator(".lp-leaf")).toBeVisible();
+    expect(await page.locator('.crown-tree-frame--folio').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
     expect(await page.locator(".lp-leaf").evaluate(el => getComputedStyle(el).color)).not.toBe("rgb(255, 255, 255)");
+    await page.evaluate(async () => { await document.fonts.ready; await Promise.all([...document.images].map(image => image.decode().catch(() => {}))); });
     await page.screenshot({ path: test.info().outputPath(`night-folio-${width}.png`) });
     await page.getByRole("link", { name: "↩ Return to the Crown", exact: true }).click();
     await page.getByRole("button", { name: "Use Living Parchment", exact: true }).click();

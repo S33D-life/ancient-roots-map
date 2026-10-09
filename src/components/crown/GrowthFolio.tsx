@@ -10,6 +10,7 @@
  * here writes, votes, endorses or publishes.
  */
 import { useId, useState } from "react";
+import CrownTreeFrame from "./CrownTreeFrame";
 import { Link } from "react-router-dom";
 import {
   GROWTH_MATURITY, IMPLEMENTATION_LABEL, MATURITY_LABEL,
@@ -185,6 +186,8 @@ export default function GrowthFolio({ growth, build = servingBuild(), returnTo =
           <p className="lp-subtitle">{growth.subtitle}</p>
           {growth.titleNote && <span className="text-[17px] text-[color:var(--lp-muted)]">{growth.titleNote}</span>}
         </div>
+
+        <CrownTreeFrame depth="folio" />
 
         <section aria-label="In short" className="lp-inshort">
           <div className="flex gap-3 items-center">

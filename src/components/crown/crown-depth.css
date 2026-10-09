@@ -1,0 +1,19 @@
+/* Shared plate: full field, then a closer branch fragment beside the reading leaf.
+   No travel animation: direct entry and reduced motion use the same framing. */
+.crown-tree-frame { margin: 0; pointer-events: none; }
+.crown-tree-frame img { display: block; width: 100%; height: 100%; object-fit: cover; mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 88%, transparent); mask-composite: intersect; }
+.crown-tree-frame--field img { height: 480px; object-position: 52% 42%; }
+.crown-tree-frame figcaption { margin-top: .7rem; font-size: 15px; font-style: italic; color: var(--paper-muted); }
+.lp-leaf > .crown-tree-frame--folio { position: absolute; left: calc(100% - 12px); top: 0; width: clamp(100px, 16vw, 240px); height: 540px; opacity: .65; }
+.crown-tree-frame--folio img { object-position: 58% 30%; }
+.dark .crown-tree-frame--field img { filter: brightness(.62) saturate(.7); }
+.dark .lp-leaf > .crown-tree-frame--folio { opacity: .48; filter: brightness(.65) saturate(.65); }
+@media (max-width: 1100px) {
+  .lp-leaf > .crown-tree-frame--folio { position: relative; left: auto; top: auto; width: 100%; height: 100px; opacity: .85; margin: -10px 0; }
+  .crown-tree-frame--folio img { object-position: 58% 33%; }
+  .dark .lp-leaf > .crown-tree-frame--folio { opacity: .8; filter: brightness(.75) saturate(.7); }
+}
+@media (max-width: 600px) {
+  .crown-tree-frame--field img { height: 130px; object-position: 52% 33%; }
+  .lp-leaf > .crown-tree-frame--folio { height: 72px; }
+}
