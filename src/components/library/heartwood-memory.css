@@ -1,0 +1,41 @@
+.heartwood-arrival { padding-right:52px; max-width:760px; }
+.heartwood-arrival .parchment-kicker { margin-bottom:12px; }
+.heartwood-arrival h1 { color:var(--paper-ink); font-size:clamp(32px,4vw,52px); line-height:1.12; font-weight:400; text-wrap:balance; }
+.heartwood-arrival p { font-size:21px; margin:14px 0 26px; }
+.heartwood-living-field { position:relative; border-block:1px solid var(--paper-hair); padding:24px 0 28px; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); column-gap:64px; }
+.heartwood-field-heading { grid-column:1/-1; display:flex; align-items:baseline; gap:20px; margin-bottom:20px; }
+.heartwood-field-heading h2 { font-size:24px; color:var(--paper-ink); }
+.heartwood-field-heading>span,.heartwood-field-label { color:var(--paper-muted); font-size:17px; }
+.heartwood-current-memory h3 { font-size:30px; font-weight:400; line-height:1.2; color:var(--paper-ink); margin:12px 0; }
+.heartwood-current-memory p { font-size:18px; line-height:1.5; margin:12px 0; }
+.heartwood-consult { display:flex; flex-direction:column; align-items:flex-start; padding-left:28px; border-left:1px solid var(--paper-hair); }
+.heartwood-consult button { font-size:26px; margin:8px 0; }.heartwood-consult p { font-size:18px; line-height:1.4; }
+.heartwood-recorded-identity { display:flex; min-height:48px; align-items:center; margin-top:16px; font-size:18px; text-decoration:underline; text-underline-offset:4px; }
+.heartwood-web-state { font-size:16px; color:var(--paper-muted); margin-top:8px; }
+.heartwood-returning,.heartwood-lore,.heartwood-descent,.heartwood-thresholds { margin-top:44px; }
+.heartwood-memory main section>h2 { font-size:28px; color:var(--paper-ink); margin-bottom:12px; }
+.heartwood-primary-rooms,.heartwood-passages { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+.heartwood-room-link { display:flex; flex-direction:column; min-height:64px; padding:14px 0; border-bottom:1px solid var(--paper-hair); }
+.heartwood-room-link strong { font-size:24px; color:var(--paper-ink); font-weight:400; }.heartwood-room-link span { font-size:18px; margin-top:4px; color:var(--paper-muted); }
+.heartwood-descent { padding:20px 24px; border-left:2px solid var(--paper-hair); background:rgba(93,70,39,.04); }.heartwood-descent p { font-size:20px; }
+.heartwood-disclosure { margin-top:28px; border-top:1px solid var(--paper-hair); }.heartwood-disclosure summary { min-height:48px; padding:14px 0; font-size:23px; cursor:pointer; color:var(--paper-ink); }
+.heartwood-quiet-links { display:flex; flex-direction:column; gap:12px; padding:12px 0; }.heartwood-quiet-links>a { min-height:48px; font-size:20px; }
+.heartwood-wooden-doors { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; max-width:700px; margin:20px 0; }
+.heartwood-spatial-doorway { margin-top:24px; }.heartwood-memory :is(.parchment-action,button,summary) { min-height:48px !important; }
+.dark .heartwood-memory { background:radial-gradient(ellipse at 50% 35%,#30271b 0%,#1b2118 70%); }
+@media(max-width:767px){
+.heartwood-arrival .parchment-kicker { margin-bottom:8px; }.heartwood-arrival p { font-size:18px; margin:12px 0 20px; }
+.heartwood-living-field { display:flex; flex-direction:column; padding:18px 0; gap:20px; }
+.heartwood-field-heading { display:block; margin:0; }.heartwood-field-heading h2 { font-size:22px; }.heartwood-field-heading>span { font-size:15px; }
+.heartwood-consult { order:0; padding:0; border:0; }.heartwood-current-memory { order:1; }.heartwood-current-memory h3 { font-size:25px; }
+.heartwood-primary-rooms,.heartwood-passages { grid-template-columns:1fr; gap:4px; }
+.heartwood-returning,.heartwood-lore,.heartwood-descent,.heartwood-thresholds { margin-top:28px; }
+.heartwood-room-link strong { font-size:23px; }.heartwood-descent { padding:16px; }
+.heartwood-wooden-doors { grid-template-columns:1fr 1fr; gap:14px; }
+}
+
+.heartwood-ring-mark { width:34px; height:34px; flex-shrink:0; color:var(--paper-muted); }
+@media(max-width:767px){.heartwood-field-heading { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; }.heartwood-field-heading>span { flex-basis:100%; }.heartwood-ring-mark { width:28px; height:28px; }}
+
+.heartwood-spatial-doorway .parchment-deck-frame>button { scroll-margin-top:88px; }
+.heartwood-spatial-doorway iframe { max-height:calc(100dvh - 240px); }

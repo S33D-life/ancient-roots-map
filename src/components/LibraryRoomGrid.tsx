@@ -831,9 +831,12 @@ interface Props {
   /** Slot rendered between the Central and Deep chambers — used for the Blooming Clock,
    *  positioned where seasonal sap-flow lives between hearth and roots. */
   centerSlot?: ReactNode;
+  /** Presentation-only selection; default historical grid is unchanged. */
+  roomKeys?: readonly string[];
+  compact?: boolean;
 }
 
-export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
+export default function LibraryRoomGrid({ onRoomSelect, centerSlot, roomKeys, compact = false }: Props) {
   const seasonShift = useMemo(() => getSeasonalShift(), []);
   const prefersReduced = useReducedMotion();
 
@@ -842,6 +845,8 @@ export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
     { layer: "central", rooms: CENTRAL_CHAMBERS },
     { layer: "deep",    rooms: DEEP_CHAMBERS },
   ];
+
+  for (const group of layers) if (roomKeys) group.rooms = group.rooms.filter(room => roomKeys.includes(room.key));
 
   // Track which rooms have entered the viewport for the chamber progress indicator.
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
@@ -876,6 +881,8 @@ export default function LibraryRoomGrid({ onRoomSelect, centerSlot }: Props) {
     el.classList.add("ring-2", "ring-amber-400/40");
     window.setTimeout(() => el.classList.remove("ring-2", "ring-amber-400/40"), 1200);
   };
+
+  if (compact) return <div className="heartwood-wooden-doors">{layers.flatMap(group => group.rooms.map((room, idx) => <RoomTile key={room.key} room={room} idx={idx} seasonShift={seasonShift} layer={group.layer} onSelect={onRoomSelect} />))}</div>;
 
   let runningIdx = 0;
 
