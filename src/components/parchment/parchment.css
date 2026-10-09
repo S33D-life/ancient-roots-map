@@ -331,3 +331,6 @@ html[data-living-parchment] .global-search-overlay button { min-width: 44px; fon
 .s33d-living-scroll .seed-choice-paths > div { display:none; }
 .s33d-living-scroll .seed-choice-paths button { min-width:0 !important; justify-content:center; min-height:132px; }
 @media(max-width:640px) { .s33d-living-scroll .seed-choice-paths { grid-template-columns:1fr; gap:12px; } .s33d-living-scroll .seed-threshold > p { font-size:19px; } }
+
+.s33d-living-scroll #teotag-guide button span { font-family:'Cormorant Garamond',Georgia,serif !important; text-transform:none; letter-spacing:0; }
+.s33d-living-scroll #teotag-guide button .seed-doorway-help { font-size:16px !important; line-height:1.4; color:hsl(var(--muted-foreground)) !important; }

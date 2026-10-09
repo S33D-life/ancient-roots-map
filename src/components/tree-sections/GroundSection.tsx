@@ -103,7 +103,7 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
                 Enter the Living Atlas
               </span>
               <span
-                className="font-serif text-[11px] max-w-[200px] text-center leading-relaxed"
+                className="seed-doorway-help font-serif text-[11px] max-w-[200px] text-center leading-relaxed"
                 style={{ color: "hsl(var(--foreground) / 0.55)" }}
               >
                 Meet Ancient Friends near you
@@ -151,7 +151,7 @@ const GroundSection = ({ threshold }: { threshold?: ReactNode }) => {
                 Explore Heartwood
               </span>
               <span
-                className="font-serif text-[10px] max-w-[180px] text-center leading-relaxed"
+                className="seed-doorway-help font-serif text-[10px] max-w-[180px] text-center leading-relaxed"
                 style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
               >
                 Library, Council & your Hearth
