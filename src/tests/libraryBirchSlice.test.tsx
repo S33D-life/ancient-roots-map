@@ -234,7 +234,7 @@ describe("5 · slug mismatch = STOP", () => {
 });
 
 describe("6–7 · one species identity, each tree keeps its own return and its offerings", () => {
-  it("6 · two Ancient Friends open the same species identity but return to their own tree", async () => {
+  it("6 · two mapped tree origins open the same species identity but return to their own tree", async () => {
     for (const [id, name] of [[T1, "Birch"], [T2, "QA Test Birch #6"]] as const) {
       renderPage(`/library/life/${KEY}${originQ(id)}`);
       expect(await screen.findByRole("heading", { level: 1, name: "Silver Birch" })).toBeInTheDocument();
@@ -242,6 +242,8 @@ describe("6–7 · one species identity, each tree keeps its own return and its 
       for (const l of links) expect(l).toHaveAttribute("href", `/tree/${id}`);
       expect(screen.getByRole("link", { name: /Species & distribution/ })).toHaveAttribute("href", `/library/life/${KEY}/species-distribution${originQ(id)}`);
       expect(screen.getByTestId("library-arrival")).toHaveTextContent(`You came from ${name}`);
+      expect(screen.getByTestId("library-arrival")).toHaveTextContent("a mapped tree recorded in S33D");
+      expect(screen.getByTestId("library-arrival")).not.toHaveTextContent("an Ancient Friend");
       cleanup();
     }
   });

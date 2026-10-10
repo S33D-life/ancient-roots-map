@@ -37,7 +37,7 @@ export default function SpeciesPage() {
   const { data: species, isLoading } = useSpeciesBySlug(slug);
   const { data: names = [] } = useSpeciesNames(species?.id);
   const { data: lore = [] } = useSpeciesLore(species?.id);
-  const { data: trees = [] } = useSpeciesTrees(species?.species_key);
+  const { data: trees = [], isPending: treesPending, isError: treesError } = useSpeciesTrees(species?.species_key);
   const hive = species?.family ? getHiveInfo(species.family) : null;
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function SpeciesPage() {
             )}
             <span className="inline-flex items-center gap-1.5">
               <TreeDeciduous className="w-3.5 h-3.5" />
-              {trees.length} mapped {trees.length === 1 ? "tree" : "trees"}
+              {treesError ? "Mapped trees unavailable" : treesPending ? "Loading mapped trees…" : `${trees.length} mapped ${trees.length === 1 ? "tree" : "trees"} shown`}
             </span>
           </div>
 
@@ -243,17 +243,21 @@ export default function SpeciesPage() {
             <MapPin className="w-4 h-4 text-primary/70" />
             <h2 className="font-serif text-lg text-foreground tracking-wide">Mapped trees of this species</h2>
           </div>
-          {trees.length === 0 ? (
+          {treesError || treesPending ? (
+            <p role="status" className="font-serif text-sm text-muted-foreground">
+              {treesError ? "Mapped trees could not be loaded. Please try again later." : "Loading mapped trees…"}
+            </p>
+          ) : trees.length === 0 ? (
             <Card className="border-dashed border-border/40 bg-transparent">
               <CardContent className="p-4">
                 <p className="font-serif text-sm text-muted-foreground italic">
-                  No trees of this species have been mapped yet.
+                  No mapped trees to show here yet.
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {trees.map((t: any) => (
+              {trees.map((t) => (
                 <Link key={t.id} to={`/tree/${t.id}`} className="group">
                   <Card className="border-border/40 bg-card/40 hover:border-primary/40 transition-colors overflow-hidden">
                     <CardContent className="p-3 flex items-center gap-3">
@@ -274,7 +278,7 @@ export default function SpeciesPage() {
                         </p>
                         <p className="text-[11px] text-muted-foreground font-serif truncate">
                           {t.variety_name && <span className="italic">{t.variety_name} · </span>}
-                          {t.country || `${t.latitude?.toFixed(2)}, ${t.longitude?.toFixed(2)}`}
+                          {t.nation || (t.latitude != null && t.longitude != null ? `${t.latitude.toFixed(2)}, ${t.longitude.toFixed(2)}` : "Location not recorded")}
                         </p>
                       </div>
                     </CardContent>

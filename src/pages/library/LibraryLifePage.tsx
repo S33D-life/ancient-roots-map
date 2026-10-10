@@ -43,7 +43,7 @@ function Arrival({ row, state }: { row: LibraryIdentityRow; state: OriginState }
   return (
     <div className="llp-arrival" data-testid="library-arrival">
       <span>
-        You came from {state.tree.name}, an Ancient Friend recorded in S33D as <em>{recordedAs(row)}</em>.
+        You came from {state.tree.name}, a mapped tree recorded in S33D as <em>{recordedAs(row)}</em>.
         That tree remains its own being; this is the species its record names.
       </span>
     </div>

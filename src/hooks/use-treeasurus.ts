@@ -9,6 +9,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { isQaSeedTree } from "@/lib/library/relatedTrees";
 
 export type SpeciesRow = Database["public"]["Tables"]["species_index"]["Row"];
 export type SpeciesName = Database["public"]["Tables"]["tree_species_names"]["Row"];
@@ -110,18 +111,18 @@ export function useSpeciesAlternateNames(speciesId: string | undefined, limit = 
 /** Mapped trees (user trees) of this species — by species_key. */
 export function useSpeciesTrees(speciesKey: string | null | undefined, limit = 24) {
   return useQuery({
-    queryKey: ["species-trees", speciesKey, limit],
+    queryKey: ["species-trees", "mapped-v2", speciesKey, limit],
     enabled: !!speciesKey,
     staleTime: 60_000,
     queryFn: async () => {
       if (!speciesKey) return [];
       const { data, error } = await supabase
         .from("trees")
-        .select("id, name, species, latitude, longitude, photo_thumb_url, photo_processed_url, variety_name, propagation_type, planted_year, country:nation")
+        .select("id, name, species, latitude, longitude, photo_thumb_url, photo_processed_url, variety_name, propagation_type, planted_year, nation, what3words")
         .eq("species_key", speciesKey)
         .limit(limit);
       if (error) throw error;
-      return data || [];
+      return (data || []).filter(tree => !isQaSeedTree(tree));
     },
   });
 }
