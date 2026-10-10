@@ -21,13 +21,13 @@ export default function CrownGrowths({ growths = CROWN_GROWTHS, headingLevel = 2
     <section aria-labelledby="crown-growths-title" className="lp lp-crown lp-ground-crown crown-field">
       <ParchmentGrain id="lp-crown-grain" />
       <div className="lp-crown-text">
-        <span className="lp-kicker">{headingLevel === 1 ? "Crown · yOur Golden Dream" : "notice · tend"}</span>
+        <span className="lp-kicker">{headingLevel === 1 ? "The Crown · dreaming" : "notice · tend"}</span>
         <Heading id="crown-growths-title" className="lp-h1">What is asking to grow?</Heading>
         <p className="lp-lede">
           These are possibilities, not promises. Possibilities grow from what has been lived. Reading does not decide or approve them.
         </p>
         <div className="crown-attention" aria-label="Dream attention">
-          <div><h2 className="lp-h2">Gold Dream</h2><p className="lp-p">No Gold Dream has been named yet.</p></div>
+          <div><h2 className="lp-h2">A growing Crown</h2><p className="lp-p">This public entrance is still growing.</p></div>
         </div>
         <div className="lp-list crown-thread-field" aria-live="polite">
           {n === 0 ? (

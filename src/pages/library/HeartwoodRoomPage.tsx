@@ -9,6 +9,7 @@ import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
 import { HEARTWOOD_ROOMS, ROOM_LABEL_MAP, ROOM_KEYS, JOURNEY_ROOM_SEQUENCE } from "@/config/heartwoodRooms";
+import HeartwoodAccessGate from "@/components/library/HeartwoodAccessGate";
 import { ROUTES } from "@/lib/routes";
 
 // Lazy room components — each loads independently
@@ -173,6 +174,7 @@ const HeartwoodRoomPage = () => {
       roomLabels={ROOM_LABELS}
       onNavigateRoom={handleRoomNavigate}
     >
+      <HeartwoodAccessGate key={resolvedRoom} access={HEARTWOOD_ROOMS.find(room => room.key === resolvedRoom)!.access}>
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
         {resolvedRoom === "quest-cave" && <QuestCaveRoom />}
@@ -189,6 +191,7 @@ const HeartwoodRoomPage = () => {
         {resolvedRoom === "rhythms" && <CycleMarketRoom />}
         {resolvedRoom === "tap-root" && <DevRoom />}
       </Suspense>
+      </HeartwoodAccessGate>
     </HeartwoodRoomShell>
   );
 };

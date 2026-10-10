@@ -59,9 +59,9 @@ describe("Golden Dream · what is asking to grow", () => {
     expect(growthLine({ ...G, nextDecisions: [] })).toBe("Growing · touches 4 realms");
   });
 
-  it("keeps Gold unset and explains attention separately from maturity", () => {
+  it("labels the unfinished public entrance and keeps attention separate from maturity", () => {
     renderList();
-    expect(screen.getByText("No Gold Dream has been named yet.")).toBeInTheDocument();
+    expect(screen.getByText("This public entrance is still growing.")).toBeInTheDocument();
     expect(screen.getByText(/These are possibilities, not promises/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Enter the spatial Crown/ })).toHaveAttribute("href", "/tetol/circle-235/pre-fire/tetol.html?welcome=0&from=crown#crown");
     expect(screen.getByRole("link", { name: /Offer an Ember/ })).toHaveAttribute("href", "mailto:hello@s33d.life?subject=An%20Ember%20for%20the%20Crown");
