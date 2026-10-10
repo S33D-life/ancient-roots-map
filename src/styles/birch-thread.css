@@ -1,0 +1,32 @@
+.birch-thread { color: hsl(var(--foreground)); min-height:100svh; }
+.birch-threshold { display:flex; justify-content:space-between; gap:1rem; padding:1.2rem clamp(1rem,5vw,4rem); }
+.birch-threshold a,.birch-threshold button { min-height:44px; display:flex; align-items:center; }
+.birch-thread button,.birch-thread a { touch-action:manipulation; }
+.birch-thread button { font:inherit; color:inherit; }
+.birch-thread button:focus-visible,.birch-thread a:focus-visible { outline:3px solid hsl(var(--primary)); outline-offset:5px; }
+.birch-paper { max-width:54rem; margin:auto; padding:1rem clamp(1rem,5vw,3rem) 10rem; overflow-wrap:anywhere; }
+.birch-paper h1 { font-family:var(--font-serif,Georgia,serif); font-size:clamp(2.4rem,7vw,4.4rem); line-height:1.1; margin:.8rem 0; }
+.birch-paper h2 { font-family:Georgia,serif; font-size:1.75rem; margin:.5rem 0 1rem; }
+.birch-paper h3 { font-family:Georgia,serif; font-size:1.3rem; }
+.birch-paper p { line-height:1.7; margin:.7rem 0; }
+.birch-paper section { margin:2.5rem 0; }
+.birch-paper a { text-decoration:underline; text-underline-offset:4px; }
+.birch-kicker { font-size:.8rem; letter-spacing:.13em; text-transform:uppercase; }
+.birch-lead { font-family:Georgia,serif; font-size:1.35rem; }
+.birch-status { font-size:.9rem; color:hsl(var(--muted-foreground)); }
+.birch-action,.birch-return,.birch-mode a { display:inline-block; padding:.8rem .4rem; min-height:48px; cursor:pointer; border-bottom:1px solid hsl(var(--border)); }
+.birch-mode { display:flex; gap:1.5rem; flex-wrap:wrap; }
+.birch-mode a[aria-current=page] { font-weight:bold; border-bottom:2px solid hsl(var(--primary)); }
+.birch-clearing { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items:center; gap:2rem; }
+.birch-portrait { width:100%; padding:12px; background:#eee8d5; border:1px solid #b2ab8d; box-shadow:4px 8px 16px #3333; border-radius:42% 28% 4% 3% / 5% 7% 3% 4%; cursor:pointer; }
+.birch-portrait img { width:100%; display:block; border:1px solid #a9a286; }
+.birch-spatial { height:340px; width:100%; min-width:0; }
+.birch-records { list-style:none; padding:0; }
+.birch-records li { border-bottom:1px solid hsl(var(--border)); }
+.birch-records button { display:flex; width:100%; justify-content:space-between; gap:1rem; text-align:left; padding:1rem 0; min-height:56px; }
+.birch-records span { font-size:.85rem; }
+.birch-field-record { border-left:2px solid hsl(var(--primary)); padding:1rem; background:hsl(var(--card)/.35); }
+.birch-paper details { padding:1rem 0; border-top:1px solid hsl(var(--border)); }
+.birch-paper summary { cursor:pointer; min-height:44px; }
+@media(max-width:540px) { .birch-clearing { grid-template-columns:1fr; gap:1rem; } .birch-portrait { max-width:270px; margin:auto; } .birch-spatial { height:300px; } .birch-threshold { font-size:.9rem; } .birch-records button { flex-direction:column; gap:.25rem; } }
+@media(prefers-reduced-motion:reduce) { .birch-thread * { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }

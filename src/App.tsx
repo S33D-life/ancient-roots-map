@@ -22,6 +22,12 @@ import { CompanionProvider } from "@/contexts/CompanionContext";
 import { QuietModeProvider } from "@/contexts/QuietModeContext";
 import CompanionBridge from "@/components/companion/CompanionBridge";
 
+function ReviewAmbientControls() {
+  const { pathname } = useLocation();
+  const isThreadReview = BIRCH_REVIEW_ENABLED && /^\/review\/(council|library)\//.test(pathname);
+  return isThreadReview ? null : <><FireflyFAB /><Suspense fallback={null}><FirstWalkTrail /></Suspense></>;
+}
+
 function AuthRouteEvidence() {
   const { pathname } = useLocation();
   useEffect(() => { void recordRouteSession(); }, [pathname]);
@@ -56,6 +62,7 @@ import { useTreeCelebration } from "@/hooks/use-tree-celebration";
 import { useCaptureRef } from "@/hooks/use-capture-ref";
 import { useContributionCelebration } from "@/hooks/use-contribution-celebration";
 import { LIBRARY_LIFE_PATTERNS } from "@/lib/library/routes";
+import { BIRCH_REVIEW_ENABLED, THREAD_PATTERNS } from "@/data/library/birchThread";
 const ContributionCelebration = lazy(() => import("@/components/growth/ContributionCelebration"));
 
 // Attach offline auto-sync listener once at app startup
@@ -206,6 +213,8 @@ const SeedPlanGeneratorPage = lazyImportWithRetry(() => import("./pages/SeedPlan
 const CanopyProjectionPage = lazyImportWithRetry(() => import("./pages/CanopyProjectionPage"), "canopy-projection");
 const TelegramHandoffPage = lazyImportWithRetry(() => import("./pages/TelegramHandoffPage"), "telegram-handoff");
 const LibraryLifePage = lazyImportWithRetry(() => import("./pages/library/LibraryLifePage"), "library-life");
+const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "birch-preparation");
+const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -303,11 +312,10 @@ const App = () => {
             <RefCapture />
             <CompanionBridge />
             <BottomNav />
-            <FireflyFAB />
+            <ReviewAmbientControls />
             <CelebrationOverlay />
             <Suspense fallback={null}>
               <ProximityNudge />
-              <FirstWalkTrail />
               <DailySeedRitual />
               <BotContinuationBanner />
             </Suspense>
@@ -349,6 +357,8 @@ const App = () => {
                 <Route path={LIBRARY_LIFE_PATTERNS.HOME} element={realm(<LibraryLifePage view="home" />, "trunk")} />
                 <Route path={LIBRARY_LIFE_PATTERNS.SPECIES} element={realm(<LibraryLifePage view="species" />, "trunk")} />
                 <Route path={LIBRARY_LIFE_PATTERNS.READER} element={realm(<LibraryLifePage view="reader" />, "trunk")} />
+                {BIRCH_REVIEW_ENABLED && <Route path={THREAD_PATTERNS.CIRCLE} element={<BirchPreparationPage />} />}
+                {BIRCH_REVIEW_ENABLED && <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />}
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
