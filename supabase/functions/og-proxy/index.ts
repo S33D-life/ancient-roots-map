@@ -318,6 +318,7 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
         .from("trees")
         .select("id, name, species, nation, latitude, longitude, description, updated_at")
         .eq("id", id)
+        .eq("accessibility_tier", "public")
         .maybeSingle(),
       supabase
         .from("chain_anchors")
@@ -472,6 +473,7 @@ async function fetchOfferingMeta(treeId: string, offeringId: string): Promise<Me
         .from("trees")
         .select("id, name, species, nation, state, latitude, longitude")
         .eq("id", treeId)
+        .eq("accessibility_tier", "public")
         .maybeSingle(),
     ]);
 
