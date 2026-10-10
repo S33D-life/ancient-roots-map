@@ -30,6 +30,10 @@ describe("Roots exterior discovery", () => {
     fireEvent.click(screen.getByRole("button", { name: "Look closer at the Roots" }));
     expect(await screen.findByRole("link", { name: "Meet Olive" })).toHaveAttribute("href", `/tree/${id}`);
     expect(screen.getByText("789 Ancient Friends recorded in the shared atlas.")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Open the World Atlas →" })).toHaveAttribute("href", "/atlas");
+    expect(screen.getByRole("link", { name: "Follow a species Hive →" })).toHaveAttribute("href", "/hives");
+    expect(screen.getByRole("link", { name: "Look for Whispers on the Map →" })).toHaveAttribute("href", "/map");
+    expect(screen.getByRole("link", { name: "Find a Friend to offer with →" })).toHaveAttribute("href", "/map");
     expect(mocks.from).toHaveBeenCalledTimes(2);
     const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     fireEvent.click(screen.getAllByRole("button", { name: /Return to the wider Tree/ })[1]);

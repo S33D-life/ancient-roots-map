@@ -5,6 +5,8 @@ import { readRootsPresence } from "./roots-presence";
 import { ROUTES } from "@/lib/routes";
 import TreeSpine from "./TreeSpine";
 import "./roots-discovery.css";
+import { ExteriorMaterial } from "./ExteriorHeartwood";
+import atlasIllustration from "@/assets/atlas-landing-bg.jpeg";
 
 const origin = { from: "/s33d#atlas-content" };
 
@@ -50,6 +52,7 @@ export default function RootsDiscovery() {
     <section id="roots-discovery" aria-label="Life among the Roots" hidden={!open}>
       {open && <>
         <div className="roots-near-layer" aria-hidden="true"><TreeSpine opacity={0.14} /></div>
+        <ExteriorMaterial region="roots" />
         <div className="roots-life">
           <p className="roots-field-note">Among the Roots · still outside the Tree</p>
           {isPending && <p role="status">Looking for a remembered tree…</p>}
@@ -65,6 +68,21 @@ export default function RootsDiscovery() {
           </figure>}
           {!isPending && (!data?.friend || photoFailed) && <p>No photographed Friend to reveal here just now.</p>}
           {data?.count != null && data.count > 0 && <p className="roots-evidence">{data.count.toLocaleString()} Ancient Friends recorded in the shared atlas.</p>}
+          <div className="roots-found-paths">
+            <div className="roots-atlas-fragment">
+              <img src={atlasIllustration} alt="" width="1086" height="720" loading="lazy" />
+              <p className="roots-field-note">An illustrated Atlas fragment · not a live map</p>
+              <Link to={ROUTES.ATLAS} state={origin}>Open the World Atlas →</Link>
+              <Link to={ROUTES.MAP} state={origin}>Find a tree on the Map →</Link>
+            </div>
+            <div className="roots-encounter-invitations">
+              <p><strong>Offerings</strong> A word, a song, a gesture carried to a tree.</p>
+              <Link to={ROUTES.MAP} state={origin}>Find a Friend to offer with →</Link>
+              <p><strong>Whispers</strong> Listen for what has been left nearby. Each whisper keeps its own visibility.</p>
+              <Link to={ROUTES.MAP} state={origin}>Look for Whispers on the Map →</Link>
+              <p className="roots-hive-thread"><Link to={ROUTES.HIVES} state={origin}>Follow a species Hive →</Link><span>Meet the wider family. A Hive is another way into the living world.</span></p>
+            </div>
+          </div>
           <p className="roots-invitation">Begin with a tree near you. Notice, listen, and carry something back.</p>
           <button type="button" className="roots-fold" onClick={close}>Return to the wider Tree ↑</button>
         </div>

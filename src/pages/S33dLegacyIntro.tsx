@@ -14,6 +14,7 @@ import { useTreeDepthChannel } from "@/hooks/use-tree-depth-channel";
 import TreeScrollIndicator from "@/components/TreeScrollIndicator";
 import CrownSection from "@/components/tree-sections/CrownSection";
 import RootsDiscovery from "@/components/tree-sections/RootsDiscovery";
+import ExteriorHeartwood from "@/components/tree-sections/ExteriorHeartwood";
 import { useTimeOfDay } from "@/hooks/use-time-of-day";
 import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
 import { useNetworkPulse } from "@/hooks/use-network-pulse";
@@ -149,7 +150,7 @@ const Index = ({ parchment = false, exterior = false }: { parchment?: boolean; e
           <AnatomicalSeam className={exterior ? "exterior-seam" : undefined} variant="canopy-trunk" />
 
           {/* ── TRUNK — HeARTwood Library ── */}
-          <TrunkSection exterior={exterior} />
+          {exterior ? <ExteriorHeartwood /> : <TrunkSection />}
 
           {/* seam — heartwood flaring into soil */}
           <AnatomicalSeam className={exterior ? "exterior-seam" : undefined} variant="trunk-ground" />

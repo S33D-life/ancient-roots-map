@@ -18,6 +18,7 @@ interface Props {
   title: string;
   description: string;
   to: string;
+  state?: { from: string; hallOrigin?: string };
   /** Tonal hue for the interior glow (degrees). 38 amber, 128 green, 205 blue, 268 violet, 22 ember */
   tempH?: number;
   /** Where the chamber sits in the trunk — shifts wood lightness so depth feels real */
@@ -32,7 +33,7 @@ function depthOffset(depth: ChamberDepth) {
   }
 }
 
-const TrunkChamberDoor = memo(({ icon: Icon, title, description, to, tempH = 38, depth = "heartwood" }: Props) => {
+const TrunkChamberDoor = memo(({ icon: Icon, title, description, to, state, tempH = 38, depth = "heartwood" }: Props) => {
   const d = depthOffset(depth);
   const wood1 = `hsl(28 38% ${d.l1}%)`;
   const wood2 = `hsl(26 42% ${d.l2}%)`;
@@ -45,6 +46,7 @@ const TrunkChamberDoor = memo(({ icon: Icon, title, description, to, tempH = 38,
   return (
     <Link
       to={to}
+      state={state}
       className="group relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md"
       aria-label={`Enter ${title}`}
     >
