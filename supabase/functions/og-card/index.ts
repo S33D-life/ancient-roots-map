@@ -321,7 +321,7 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     const [treeRes, photoRes, mintRes, staffRes] = await Promise.all([
-      supabase.from("trees").select("name, species, nation").eq("id", id).maybeSingle(),
+      supabase.from("trees").select("name, species, nation").eq("id", id).eq("accessibility_tier", "public").maybeSingle(),
       supabase
         .from("offerings").select("media_url")
         .eq("tree_id", id).eq("type", "photo")
@@ -340,6 +340,13 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
         .limit(1).maybeSingle(),
     ]);
 
+    if (!treeRes.data) {
+      return {
+        name: "Ancient Friend", species: "Unknown species",
+        location: "Unknown location", isMinted: false,
+        staffCode: null, staffName: null, staffSpecies: null, photoUrl: null,
+      };
+    }
     let photoUrl = photoRes.data?.media_url || null;
     if (photoUrl && !photoUrl.startsWith("http")) {
       photoUrl = `${APP_URL}${photoUrl.startsWith("/") ? "" : "/"}${photoUrl}`;
