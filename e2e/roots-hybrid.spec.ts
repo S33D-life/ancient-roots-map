@@ -1,0 +1,57 @@
+import { test, expect } from '@playwright/test';
+const out = '/Users/ed/.codex/.chatgpt-projects/g-p-683c5647f32881918e942590972e90ee/output/roots-hybrid-proof-20261010';
+for (const width of [1440, 390, 320]) test(`Roots glimpse/discover/enter ${width}`, async ({ page }) => {
+  test.setTimeout(120000);
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.setViewportSize({ width, height: 844 });
+  await page.addInitScript(() => { localStorage.setItem('s33d-theme', 'light'); localStorage.setItem('entrance_seen_index', '1'); });
+  await page.route('**/*', r => {
+    const q = r.request(), u = new URL(q.url());
+    if (!['localhost','127.0.0.1'].includes(u.hostname) && (!['GET','HEAD'].includes(q.method()) || /\/rpc\/|\/functions\//.test(u.pathname))) return r.fulfill({ contentType:'application/json', body:'[]' });
+    return r.continue();
+  });
+  await page.goto('/s33d#atlas-content');
+  const reveal = page.locator('.roots-reveal');
+  await reveal.scrollIntoViewIfNeeded(); await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${out}/glimpse-${width}.png` });
+  const y = await page.evaluate(() => window.scrollY);
+  await reveal.click();
+  await expect(reveal).toHaveAttribute('aria-expanded','true');
+  const friend = page.locator('#roots-discovery figure a');
+  await expect(friend).toBeVisible({ timeout:20000 });
+  await expect(page.locator('#roots-discovery img')).toHaveJSProperty('complete', true);
+  expect(await page.locator('#roots-discovery img').evaluate((e:HTMLImageElement) => e.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator('.roots-evidence')).toContainText('Ancient Friends recorded');
+  expect(Math.abs(await page.evaluate(() => window.scrollY) - y)).toBeLessThan(3);
+  await page.locator('.roots-life').scrollIntoViewIfNeeded(); await page.waitForTimeout(500);
+  await page.screenshot({ path:`${out}/discover-${width}.png` });
+  for (const el of [reveal, page.getByRole('link',{ name:'Enter the Roots →',exact:true }), page.locator('.roots-fold')]) expect((await el.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  await page.locator('.roots-fold').click();
+  await expect(reveal).toBeFocused(); await expect(reveal).toHaveAttribute('aria-expanded','false');
+  expect(Math.abs(await page.evaluate(() => window.scrollY) - y)).toBeLessThan(3);
+  await reveal.focus(); await page.keyboard.press('Enter'); await expect(reveal).toHaveAttribute('aria-expanded','true');
+  await friend.click(); await expect(page).toHaveURL(/\/tree\/[0-9a-f-]+$/);
+  await page.reload(); await page.goBack(); await expect(page).toHaveURL(/\/s33d#atlas-content$/);
+  const enter = page.getByRole('link',{ name:'Enter the Roots →',exact:true });
+  await enter.click(); await expect(page).toHaveURL(/\/map$/); await page.reload();
+  await expect(page.getByRole('main',{name:'Ancient Friends Atlas map'})).toBeVisible();
+  if (width < 1440) {
+    const skip = page.getByRole('button',{name:'Skip introduction',exact:true}); if (await skip.isVisible()) await skip.click();
+    const back = page.getByRole('navigation',{name:'Continue through the Tree'}).getByRole('link',{name:'Tree',exact:true});
+    await expect(back).toHaveAttribute('href','/s33d#atlas-content'); await back.click();
+  } else await page.goBack();
+  await expect(page).toHaveURL(/\/s33d#atlas-content$/);
+  if (width < 1440) { await page.goBack(); await expect(page).toHaveURL(/\/map$/); await page.goForward(); } else { await page.goForward(); await expect(page).toHaveURL(/\/map$/); await page.goBack(); }
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.getByRole('button',{name:'Look closer at the Roots',exact:true}).click();
+  expect(await page.locator('.roots-life').evaluate(e => getComputedStyle(e).animationName)).toBe('none');
+  await page.locator('.roots-life').scrollIntoViewIfNeeded();
+  await page.screenshot({path:`${out}/reduced-motion-${width}.png`});
+  await page.locator('header').getByRole('button',{name:/Night Grove|dark mode/i}).click();
+  await page.waitForTimeout(300);
+  await page.screenshot({path:`${out}/night-${width}.png`});
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  expect(errors).toEqual([]);
+});

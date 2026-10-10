@@ -13,6 +13,7 @@ import { useTreeScroll } from "@/hooks/use-tree-scroll";
 import { useTreeDepthChannel } from "@/hooks/use-tree-depth-channel";
 import TreeScrollIndicator from "@/components/TreeScrollIndicator";
 import CrownSection from "@/components/tree-sections/CrownSection";
+import RootsDiscovery from "@/components/tree-sections/RootsDiscovery";
 import { useTimeOfDay } from "@/hooks/use-time-of-day";
 import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
 import { useNetworkPulse } from "@/hooks/use-network-pulse";
@@ -196,7 +197,7 @@ const Index = ({ parchment = false, exterior = false }: { parchment?: boolean; e
 
             {/* Ancient Friends anchor moved up into GroundSection (above the Living Atlas explanation). */}
 
-            {exterior ? <div className="exterior-roots"><span className="parchment-kicker">The Roots</span><h2>Ancient Friends</h2><p>Lived encounter. Earth. Place.</p><Link to="/map" state={{ from: "/s33d#atlas-content" }} className="exterior-doorway">Enter the Roots →</Link></div> : <EcosystemOverview />}
+            {exterior ? <RootsDiscovery /> : <EcosystemOverview />}
             <div className="section-divider max-w-xl mx-auto" />
             {parchment && !exterior && <section id="living-thread" className="seed-pathways"><span className="parchment-kicker">Follow a living thread</span><h2>An encounter can travel through the Tree.</h2><p>Meet a tree. Leave an offering. Carry its memory into Heartwood. Bring a question to the Council. Follow what grows in the Crown.</p><nav className="s33d-paths" aria-label="Choose your starting path"><Link to="/map"><strong>I’m here to discover</strong><span>Meet Ancient Friends in the Atlas.</span></Link><Link to="/library"><strong>I’m here to share</strong><span>Find a room for music, stories and memory.</span></Link><Link to="/support"><strong>I’m here to help</strong><span>Find ways to care for the growing grove.</span></Link></nav></section>}
             {!exterior && <ParticipationSection />}
