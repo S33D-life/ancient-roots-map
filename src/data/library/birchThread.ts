@@ -5,7 +5,7 @@ import { contextualReturnTarget, type ContextualAppearance, type ReturnContext }
 import { sameIdentity, type IdentityRef, type IdentitySources } from "@/lib/library/recordIdentity";
 import { isQaSeedTree } from "@/lib/library/relatedTrees";
 
-export const BIRCH_REVIEW_ENABLED = import.meta.env.DEV || import.meta.env.VITE_BIRCH_REVIEW === "true";
+export const BIRCH_REVIEW_ENABLED = true;
 export const BIRCH_REF = { source: "notion", id: "3f315b58-480d-814c-a056-cb6c7b4f7f33" } as const satisfies IdentityRef;
 export const SILVER_BIRCH_REF = { source: "species-index", id: "496f464d-7f8e-4501-8313-f638a8498550", speciesKey: "betula-pendula" } as const satisfies IdentityRef;
 export const BIRCH_PREPARATION_SOURCE = "https://app.notion.com/p/3f315b58480d81df9016f42bb3d803ef";
