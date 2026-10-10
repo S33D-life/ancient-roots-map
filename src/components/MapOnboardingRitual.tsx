@@ -34,19 +34,19 @@ const MapOnboardingRitual = () => {
     {
       icon: <MapPin className="w-5 h-5" />,
       title: "You've arrived.",
-      message: "Every glowing marker is an Ancient Friend — a tree someone has loved enough to place on this living atlas.",
+      message: "The Map shows trees and research candidates. A marker gives a place to seek; encounter begins a relationship.",
       cta: "Show me",
     },
     {
       icon: <TreeDeciduous className="w-5 h-5" />,
       title: "Tap any tree.",
-      message: "Meet the tree, plant a seed, or leave a photo, poem, or song. Your actions become part of its living story.",
+      message: "Open its record, find its location, and decide whether to visit. Recording and Offering use their existing gates.",
       cta: "I understand",
     },
     {
       icon: <Sparkles className="w-5 h-5" />,
       title: "Your actions echo.",
-      message: "Every offering plants seeds, grows hearts, and deepens the roots of this world. The atlas changes because of you.",
+      message: "Return with what you actually encountered. Browsing a record does not record a visit.",
       cta: "Begin exploring",
     },
   ];

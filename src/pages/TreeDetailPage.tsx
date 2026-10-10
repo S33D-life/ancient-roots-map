@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
+import OutwardJourney from "@/components/tree-sections/OutwardJourney";
 import { BottomNavSpacer } from "@/components/BottomNav";
 import AncestralInscriptions from "@/components/tree-sections/AncestralInscriptions";
 import LibraryDoorway from "@/components/library/life/LibraryDoorway";
@@ -338,7 +339,7 @@ const TreeDetailPage = () => {
   const handleShareTreeLink = useCallback(async () => {
     if (!tree) return;
     const url = getPublicAppUrl(`/tree/${tree.id}`);
-    const title = tree.name || "An Ancient Friend";
+    const title = tree.name || "A mapped tree";
     const text = `Meet ${title} on S33D`;
     try {
       if (typeof navigator !== "undefined" && (navigator as any).share) {
@@ -631,7 +632,7 @@ const TreeDetailPage = () => {
           <div className="space-y-2">
             <h2 className="font-serif text-lg text-foreground/90">Records Merged</h2>
             <p className="text-sm text-muted-foreground font-serif">
-              This Ancient Friend has been merged with another record to maintain an accurate atlas.
+              This tree has been merged with another record to maintain an accurate atlas.
             </p>
           </div>
           <Link
@@ -658,7 +659,7 @@ const TreeDetailPage = () => {
         >
           <div className="mb-2 text-4xl" aria-hidden="true">🌿</div>
           <p className="font-serif text-muted-foreground">
-            This Ancient Friend could not be reached. Your place in the forest is unchanged.
+            This tree could not be reached. Your place in the forest is unchanged.
           </p>
           <Button
             type="button"
@@ -689,7 +690,7 @@ const TreeDetailPage = () => {
         >
           <div className="text-4xl mb-2">🌿</div>
           <p className="text-muted-foreground font-serif">
-            This Ancient Friend could not be found — it may have moved to another part of the forest.
+            This tree could not be found — it may have moved to another part of the forest.
           </p>
           <Link to={ROUTES.MAP} className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm transition-colors">
             <Map className="h-4 w-4" />
@@ -802,6 +803,13 @@ const TreeDetailPage = () => {
         data-testid="tree-detail"
       >
         <ContextBackButton fallback={ROUTES.MAP} className="-ml-3 mb-3" />
+
+        <OutwardJourney key={tree.id} treeId={tree.id} name={tree.name} species={tree.species}
+          lat={tree.latitude} lng={tree.longitude} signedIn={Boolean(userId)}
+          encounterOpen={canopyCheckinOpen} offeringUnlocked={proximityGate.isUnlocked} onEncounter={tryOpenCheckin}
+          onOffering={openOfferingGateway} onMap={() => goToTreeOnMap(navigate, {
+            treeId: tree.id, lat: tree.latitude, lng: tree.longitude, w3w: tree.what3words, source: "tree",
+          })} />
 
         {/* ══════ MASTER TEMPLATE: Sacred Hero ══════ */}
         <TreePageHero
@@ -1332,7 +1340,7 @@ const TreeDetailPage = () => {
             <div className="flex flex-col gap-3 rounded-md border border-border/35 bg-card/25 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 text-center sm:text-left">
                 <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Encounters with {tree.name}</h3>
-                <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
+                <p className="text-xs text-muted-foreground font-serif">Moments of being with this tree</p>
               </div>
               <EncounterTreeChangeAction
                 tree={tree}
@@ -1531,14 +1539,14 @@ const TreeDetailPage = () => {
             {/* Offerings intro — always visible */}
             <div className="text-center py-4">
               <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Offerings</h3>
-              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, stories, seeds, and whispers placed at this Ancient Friend</p>
+              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, stories, seeds, and whispers placed at this tree</p>
             </div>
 
             {/* Auth / meeting gate — subtle inline hint, not a blocking wall */}
             {!userId && (
               <div className="p-3 rounded-lg border border-border/30 bg-secondary/10 text-center">
                 <p className="text-xs text-muted-foreground font-serif">
-                  Sign in to leave offerings at this Ancient Friend.
+                  Sign in to leave offerings at this tree.
                 </p>
               </div>
             )}
@@ -1823,7 +1831,7 @@ const TreeDetailPage = () => {
         </Tabs>
 
         <div className="mt-12 border-t border-border pt-6 font-serif">
-          <p className="text-muted-foreground mb-3">Carry this encounter into the Tree’s living memory.</p>
+          <p className="text-muted-foreground mb-3">Return toward the Tree’s living memory. Opening the Hall does not create a memory record.</p>
           <Link to={ROUTES.LIBRARY} state={{ from: `/tree/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ""}` }} className="inline-flex min-h-12 items-center text-lg text-foreground underline underline-offset-4">Enter Heartwood Hall →</Link>
         </div>
 

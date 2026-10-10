@@ -438,6 +438,9 @@ export default function CanopyCheckinModal({
     <TreeAnchoredSheet
       open={open}
       onOpenChange={onOpenChange}
+      snapPoints={[1]}
+      defaultSnapPoint={1}
+      contentClassName="h-[90dvh] max-h-[90dvh]"
       title={
         <span className="font-serif text-primary tracking-wide flex items-center gap-2">
           <TreeDeciduous className="h-5 w-5 text-primary" />

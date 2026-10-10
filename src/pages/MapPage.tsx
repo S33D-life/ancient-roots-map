@@ -127,7 +127,7 @@ const MapPageFull = () => {
           <MapOnboardingRitual />
           <ContextualWhisper
             id="map-first-tree"
-            message="Tap any marker to meet an Ancient Friend, or long-press the map to claim a new encounter."
+            message="Find a tree to visit. Tap a marker to explore its record, or long-press to add a mapped tree."
             delay={8000}
             position="bottom-center"
           />
