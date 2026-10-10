@@ -1,7 +1,7 @@
 import { normaliseReturnPath } from "@/lib/crown/returnPath";
 
 const places: Record<string, string> = {
-  "/": "Tree", "/s33d": "Tree", "/map": "Roots", "/library": "Hall",
+  "/": "Tree", "/s33d": "Tree", "/tetol": "Tree", "/map": "Roots", "/library": "Hall",
   "/council-of-life": "Canopy", "/golden-dream": "Crown",
 };
 

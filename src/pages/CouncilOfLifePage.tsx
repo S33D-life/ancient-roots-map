@@ -9,6 +9,7 @@ import { CURRENT_CIRCLE, approvedCircleUrl } from "../../supabase/functions/_sha
 import EmbeddedCouncilDeck from "@/components/council/EmbeddedCouncilDeck";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import "@/components/council/canopy.css";
+import { BIRCH_REVIEW_ENABLED, THREAD_ROUTES } from "@/data/library/birchThread";
 
 const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
@@ -46,7 +47,8 @@ const CouncilOfLifePage = () => {
         <EmbeddedCouncilDeck src={localDeckUrl} onReturn={returnToCircle} />
         <a href={localDeckUrl} target="_blank" rel="noopener noreferrer" className="parchment-action">Open this place in its own tab →</a>
       </section>}
-      <section className="canopy-field-note" aria-labelledby="field-invitation"><h2 id="field-invitation">Take this week’s question outside.</h2><p>Meet a companion — or notice what answers it where you are. Come back in your own time.</p><Link className="parchment-action" to={ROUTES.MAP}>Meet an Ancient Friend →</Link></section>
+      {BIRCH_REVIEW_ENABLED && <div className="parchment-journey"><span>Circle 236 is preparing. It has not opened.</span><Link to={THREAD_ROUTES.circle(236)}>Follow the Birch preparation thread →</Link></div>}
+      <section className="canopy-field-note" aria-labelledby="field-invitation"><h2 id="field-invitation">Take this week’s question outside.</h2><p>Meet a companion — or notice what answers it where you are. Come back in your own time.</p><Link className="parchment-action" to={ROUTES.MAP}>Find a tree to visit →</Link></section>
       <div className="canopy-lineage"><p>Every Moon, the trunk grows one ring.<br />What the Circle learns becomes living memory.</p><Link className="parchment-action" to={ROUTES.COUNCIL_RECORDS}>Follow the Council’s records →</Link></div>
       <div className="parchment-journey"><span>Continue through the same Tree.</span><Link to={ROUTES.LIBRARY} state={{ from: ROUTES.COUNCIL }}>Descend to Heartwood Hall →</Link></div>
     </main><Footer />

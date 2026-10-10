@@ -51,6 +51,7 @@ export function BirchPreparationPage() {
     <h1>A place for Birch.</h1>
     <p className="birch-lead">One companion. One living thread.</p>
     <p className="birch-status">Not an opened Circle or a record of a gathering.</p>
+    <details><summary>The preparing constellation</summary><p>Birch · Bishop of Ely’s Plane Tree · Rose · Tomato · Bay Bolete · Toucan · Winnie-the-Pooh.</p><p>Companion choices are confirmed. Their shared question, public invitation and full wanderable deck are still being tended. Only Birch’s source-linked thread is available in this study.</p></details>
     <div className="birch-mode" aria-label="Companion view"><Link aria-current={mode === "2d" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=2d`}>Companion</Link><Link aria-current={mode === "spatial" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=spatial`}>Framed spatial study</Link></div>
     <section className="birch-clearing" aria-labelledby="birch-name">
       {mode === "spatial" ? <FrameBoundary><Suspense fallback={<p>Opening the framed study…</p>}><FrameStudy onOpen={open} /></Suspense></FrameBoundary> : <button className="birch-portrait" aria-label="Approach Birch" onClick={open}><img src={BIRCH_ARTIFACT} alt="Illustrative Birch presence with pale bark and leaves; not a photograph" /></button>}

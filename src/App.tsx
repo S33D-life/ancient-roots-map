@@ -25,7 +25,12 @@ import CompanionBridge from "@/components/companion/CompanionBridge";
 function ReviewAmbientControls() {
   const { pathname } = useLocation();
   const isThreadReview = BIRCH_REVIEW_ENABLED && /^\/review\/(council|library)\//.test(pathname);
-  return isThreadReview ? null : <><FireflyFAB /><Suspense fallback={null}><FirstWalkTrail /></Suspense></>;
+  return isThreadReview || pathname === ROUTES.TETOL ? null : <><FireflyFAB /><Suspense fallback={null}><FirstWalkTrail /></Suspense></>;
+}
+
+function WebsiteChrome({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  return pathname === ROUTES.TETOL ? null : <>{children}</>;
 }
 
 function AuthRouteEvidence() {
@@ -120,6 +125,7 @@ const LifeGroveInvitePage = lazyImportWithRetry(() => import("./pages/heartwood/
 const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"), "dashboard");
 const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "welcome");
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
+const SpatialTetolPage = lazyImportWithRetry(() => import("./pages/SpatialTetolPage"), "spatial-tetol");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
 const GrowthFolioPage = lazyImportWithRetry(() => import("./pages/GrowthFolioPage"), "growth-folio");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
@@ -311,7 +317,7 @@ const App = () => {
           <TeotagProvider>
             <RefCapture />
             <CompanionBridge />
-            <BottomNav />
+            <WebsiteChrome><BottomNav />
             <ReviewAmbientControls />
             <CelebrationOverlay />
             <Suspense fallback={null}>
@@ -319,9 +325,11 @@ const App = () => {
               <DailySeedRitual />
               <BotContinuationBanner />
             </Suspense>
+            </WebsiteChrome>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={realm(<TetolHomePage />, "tetol-out")} />
+                <Route path={ROUTES.TETOL} element={<SpatialTetolPage />} />
                 <Route path="/s33d" element={realm(<S33dGatewayPage />, "tetol-out")} />
                 <Route path="/ancient-friends" element={<Navigate to="/library/ancient-friends" replace />} />
                 <Route path="/arborium" element={<Navigate to="/library/arborium" replace />} />

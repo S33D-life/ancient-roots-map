@@ -10,6 +10,8 @@
 export const ROUTES = {
   /** TETOL homepage / navigation compass */
   HOME: "/",
+  /** Fullscreen doorway into the existing Spatial Tree. */
+  TETOL: "/tetol",
   /** S33D gateway page (former homepage) */
   S33D: "/s33d",
   /** Main interactive map view */

@@ -188,6 +188,7 @@ const TetolHomePage = () => {
             </p>
 
             {isLight && <Link to="/s33d" className="tetol-tree-invitation underline underline-offset-4 decoration-current/30">Step into the living Tree →</Link>}
+            <Link to="/tetol" className="tetol-tree-invitation underline underline-offset-4 block mt-4">Enter Spatial TETOL →</Link>
             {!isNewUser && <div className="mb-8" />}
             {isNewUser && <div className="mb-6" />}
             {/* TEOTAG hover tooltip — hidden for new users */}
