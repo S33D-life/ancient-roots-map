@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 const ZONES: { id: string; label: string }[] = [
-  { id: "golden-dream",  label: "In the Golden Dream" },
+  { id: "golden-dream",  label: "In the Crown" },
   { id: "council",       label: "In the Council" },
   { id: "heartwood",     label: "In the Heartwood" },
   { id: "ground",        label: "At the Threshold" },

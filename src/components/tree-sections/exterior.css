@@ -40,3 +40,23 @@ html.light .tetol-exterior .tree-spine-svg { mask-image:linear-gradient(to right
 
 /* Keep the recovered ring seams, without carrying their night backdrop into daylight. */
 html.light .tetol-exterior .exterior-seam > div:first-child { opacity:.12; mix-blend-mode:multiply; }
+
+/* Crown approach only. Controls stay on parchment; scenery can travel independently. */
+.tetol-exterior #golden-dream.exterior-crown-approach { min-height:650px; padding:72px 24px 160px; isolation:isolate; }
+.exterior-crown-world { position:absolute; inset:0; pointer-events:none; overflow:hidden; transition:transform .6s ease-out; }
+.exterior-crown-distance { position:absolute; width:140%; max-width:none; height:100%; left:-20%; bottom:-20%; object-fit:cover; object-position:50% 20%; opacity:.65; mask-image:linear-gradient(transparent 5%,black 65%,transparent 100%); }
+.exterior-crown-world::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 30%,hsl(var(--background)) 12%,hsl(var(--background) / .9) 35%,transparent 78%); }
+.exterior-crown-bough { position:absolute; width:110%; height:30%; max-width:none; bottom:-5%; left:-5%; color:#695438; opacity:.25; z-index:1; }
+.tetol-exterior #golden-dream .exterior-crown-glimpse { display:flex; justify-content:center; align-items:center; gap:10px; margin:24px auto 8px; font-size:14px; line-height:1.5; }
+.exterior-crown-glimpse > span > span { font-size:17px; }
+html.dark .exterior-crown-distance { opacity:.35; filter:brightness(.65) saturate(.65); }
+html.dark .exterior-crown-bough { color:#ac9670; opacity:.25; }
+@media(max-width:640px) {
+ .tetol-exterior #golden-dream.exterior-crown-approach { min-height:640px; padding:64px 24px 160px; }
+ .exterior-crown-distance { width:240%; left:-70%; bottom:-15%; object-position:55% 30%; }
+ .exterior-crown-bough { width:200%; left:-50%; height:30%; bottom:-5%; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .exterior-crown-world { transform:none !important; }
+ .tetol-exterior #golden-dream.exterior-crown-approach .relative.z-10 :is(p,h2) { opacity:1 !important; transform:none !important; }
+}
