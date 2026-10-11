@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 /**
  * AncientFriendsRoom — the "gallery" tab content for the Heartwood Library.
  * Shows tree cards with filtering, explorer overlay, and offering dialogs.
@@ -74,6 +75,7 @@ const AncientFriendsRoom = ({
   const [discoveryChip, setDiscoveryChip] = useState<DiscoveryChip>("all");
 
   const { offerings } = useOfferings({ treeId: null });
+  const mediaUrls = useOrdinaryMediaUrls(offerings);
 
   // Presence lookup for tree cards
   const allTreeIds = useMemo(() => trees.map(t => t.id), [trees]);
@@ -323,7 +325,7 @@ const AncientFriendsRoom = ({
                 variant="gallery"
                 cluster={cluster}
                 offeringCount={treeOfferingCount}
-                heroPhotoUrl={photoOffering?.media_url}
+                heroPhotoUrl={displayMediaUrl(photoOffering?.media_url, mediaUrls)}
                 whisperCount={whisperCounts[tree.id] || 0}
                 wishlistPulseActive={wishlistPulseId === tree.id}
                 presence={presenceByTreeId[tree.id] || null}

@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 /**
  * TreeDetailSubComponents — Extracted sub-components from TreeDetailPage
  * to reduce the monolith file size.
@@ -104,6 +105,7 @@ export const findFlatPhotoIndex = (
 };
 
 export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; onImageClick: (index: number) => void }) => {
+  const urls = useOrdinaryMediaUrls(offerings);
   const flat = flattenOfferingPhotos(offerings);
   const offeringsWithPhotos = offerings.filter((o) => getOfferingPhotos(o).length > 0);
 
@@ -111,7 +113,7 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
     <motion.div className="grid grid-cols-2 md:grid-cols-3 gap-3" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.08 } } }}>
       {offeringsWithPhotos.map((offering) => {
         const photos = getOfferingPhotos(offering);
-        const cover = photos[0];
+        const cover = displayMediaUrl(photos[0], urls);
         const extra = photos.length - 1;
         return (
           <motion.div
@@ -164,6 +166,7 @@ export const PhotoGrid = ({ offerings, onImageClick }: { offerings: Offering[]; 
 
 export const Lightbox = ({ offerings, index, onClose, onChange, treeName }: { offerings: Offering[]; index: number; onClose: () => void; onChange: (i: number) => void; treeName?: string }) => {
   const flat = flattenOfferingPhotos(offerings);
+  const urls = useOrdinaryMediaUrls(offerings);
   const current = flat[index];
   if (!current) return null;
   const photosForCurrent = getOfferingPhotos(current.offering);
@@ -199,7 +202,7 @@ export const Lightbox = ({ offerings, index, onClose, onChange, treeName }: { of
         </>
       )}
       <div className="max-w-4xl max-h-[85vh] px-4" onClick={(e) => e.stopPropagation()}>
-        <img src={current.url} alt={current.offering.title} className="max-w-full max-h-[75vh] object-contain rounded-lg mx-auto" />
+        <img src={displayMediaUrl(current.url, urls) ?? undefined} alt={current.offering.title} className="max-w-full max-h-[75vh] object-contain rounded-lg mx-auto" />
         <div className="text-center mt-4">
           <p className="font-serif text-lg text-primary">{current.offering.title}</p>
           {current.offering.content && <p className="text-sm text-muted-foreground font-serif mt-1">{current.offering.content}</p>}

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadOfferingMedia } from "@/utils/offeringMedia";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ---------- Types ---------- */
@@ -19,6 +20,7 @@ export interface VoiceOfferingData {
 interface VoiceOfferingFlowProps {
   /** Ancient Friend id. Optional so Life Groves can reuse this recorder. */
   treeId?: string;
+  visibility?: string;
   meetingExpired?: boolean;
   onComplete: (data: VoiceOfferingData) => void;
   onCancel: () => void;
@@ -129,7 +131,7 @@ const TimerDisplay = ({ seconds }: { seconds: number }) => {
 
 const MAX_DURATION = 300; // 5 minutes
 
-const VoiceOfferingFlow = ({ treeId, meetingExpired, onComplete, onCancel }: VoiceOfferingFlowProps) => {
+const VoiceOfferingFlow = ({ treeId, meetingExpired, visibility = "public", onComplete, onCancel }: VoiceOfferingFlowProps) => {
   const [step, setStep] = useState<FlowStep>("idle");
   const [duration, setDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -275,20 +277,11 @@ const VoiceOfferingFlow = ({ treeId, meetingExpired, onComplete, onCancel }: Voi
 
       // Upload to offerings bucket
       const fileName = `${user.id}/${treeId ?? "grove"}/${Date.now()}-voice.webm`;
-      const { error: uploadErr } = await supabase.storage
-        .from("offerings")
-        .upload(fileName, audioBlob, {
-          cacheControl: "3600",
-          contentType: audioBlob.type,
-          upsert: false,
-        });
-      if (uploadErr) throw uploadErr;
-
-      const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(fileName);
+      const audioUrl = await uploadOfferingMedia(fileName, audioBlob, visibility, { contentType: audioBlob.type });
 
       setUploadProgress(100);
       onComplete({
-        audioUrl: urlData.publicUrl,
+        audioUrl,
         duration,
         message: message.trim(),
       });

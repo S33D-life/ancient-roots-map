@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 /**
  * OfferingHero — sacred postcard view that appears at the top of the
  * tree page when a shared offering link is opened (?offering=<id>).
@@ -58,7 +59,8 @@ const OfferingHero = ({
 }: OfferingHeroProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const photos = useMemo(() => getOfferingPhotos(offering), [offering]);
-  const heroImage = photos[0] || offering.media_url || offering.thumbnail_url;
+  const urls = useOrdinaryMediaUrls([offering]);
+  const heroImage = displayMediaUrl(photos[0] || offering.media_url || offering.thumbnail_url, urls);
   const date = new Date(offering.created_at).toLocaleDateString("en-GB", {
     day: "numeric", month: "long", year: "numeric",
   });

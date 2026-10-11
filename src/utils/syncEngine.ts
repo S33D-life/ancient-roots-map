@@ -14,6 +14,8 @@ import {
   removeAction,
   type PendingAction,
 } from "@/utils/offlineSync";
+import { uploadOfferingMedia } from "@/utils/offeringMedia";
+import { assertMediaAudience } from "@/utils/ordinaryOfferingMedia";
 import { toast } from "sonner";
 
 const MAX_RETRIES = 3;
@@ -23,20 +25,21 @@ function emitChange() {
   window.dispatchEvent(new CustomEvent("s33d-queue-change"));
 }
 
+function uploadAudience(action: PendingAction): string {
+  if (action.table !== "offerings") return "public";
+  if (action.payload.visibility == null) return "tribe";
+  if (typeof action.payload.visibility !== "string") throw new Error("Invalid Offering audience. Your queued record has been kept.");
+  return action.payload.visibility;
+}
+
 /** Upload a base64 photo to Supabase Storage */
 async function uploadOfflinePhoto(action: PendingAction): Promise<string | null> {
   if (!action.photoDataUrl || !action.photoStoragePath) return null;
   try {
     const blob = await fetch(action.photoDataUrl).then((r) => r.blob());
-    const { data } = await supabase.storage
-      .from("offerings")
-      .upload(action.photoStoragePath, blob, { contentType: "image/jpeg", upsert: true });
-    if (data) {
-      const { data: urlData } = supabase.storage
-        .from("offerings")
-        .getPublicUrl(data.path);
-      return urlData.publicUrl;
-    }
+    return await uploadOfferingMedia(action.photoStoragePath, blob,
+      uploadAudience(action),
+      { contentType: "image/jpeg", upsert: true });
   } catch (err) {
     console.warn("[SyncEngine] Photo upload failed:", err);
   }
@@ -47,17 +50,15 @@ async function uploadOfflinePhoto(action: PendingAction): Promise<string | null>
 async function uploadOfflinePhotos(action: PendingAction): Promise<string[]> {
   const urls = action.photoDataUrls || [];
   const paths = action.photoStoragePaths || [];
-  if (urls.length === 0 || urls.length !== paths.length) return [];
+  if (urls.length === 0) return [];
+  if (urls.length !== paths.length) throw new Error("Incomplete queued photo references. Your Offering has been kept.");
   try {
     const uploaded = await Promise.all(
       urls.map(async (dataUrl, i) => {
         const blob = await fetch(dataUrl).then((r) => r.blob());
-        const { data, error } = await supabase.storage
-          .from("offerings")
-          .upload(paths[i], blob, { contentType: "image/jpeg", upsert: true });
-        if (error || !data) throw error || new Error("Upload returned no data");
-        const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(data.path);
-        return urlData.publicUrl;
+        return uploadOfferingMedia(paths[i], blob,
+          uploadAudience(action),
+          { contentType: "image/jpeg", upsert: true });
       }),
     );
     return uploaded;
@@ -86,7 +87,8 @@ async function processAction(action: PendingAction): Promise<boolean> {
       }
     } else if (action.photoDataUrl) {
       const photoUrl = await uploadOfflinePhoto(action);
-      if (photoUrl && action.payload) {
+      if (!photoUrl) throw new Error("Photo upload did not complete. Your queued Offering has been kept for retry.");
+      if (action.payload) {
         action.payload.media_url = photoUrl;
         action.payload.photo_url = photoUrl;
       }
@@ -95,6 +97,12 @@ async function processAction(action: PendingAction): Promise<boolean> {
     // Remove offline-only fields from payload
     const payload = { ...action.payload };
     delete payload._offlinePhotoDataUrl;
+
+    if (action.table === "offerings") {
+      if (payload.visibility == null) payload.visibility = uploadAudience(action);
+      const refs = [payload.media_url, payload.thumbnail_url, ...(Array.isArray(payload.photos) ? payload.photos : [])];
+      assertMediaAudience(uploadAudience(action), refs.filter((url): url is string => typeof url === "string"));
+    }
 
     // Insert into the target table
     const { error } = await supabase.from(action.table as any).insert(payload as any);

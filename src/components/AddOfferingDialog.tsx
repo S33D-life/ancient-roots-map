@@ -18,6 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicOfferingFlow, { type SelectedSongData } from "@/components/MusicOfferingFlow";
+import { uploadOfferingMedia } from "@/utils/offeringMedia";
+import { assertMediaAudience } from "@/utils/ordinaryOfferingMedia";
 import VoiceOfferingFlow, { type VoiceOfferingData } from "@/components/VoiceOfferingFlow";
 import BookOfferingFlow, { type BookOfferingData } from "@/components/BookOfferingFlow";
 import OfferingCelebration from "@/components/OfferingCelebration";
@@ -183,6 +185,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showRewardReceipt, setShowRewardReceipt] = useState(false);
   const [visibility, setVisibility] = useState<OfferingVisibility>(initialType === "photo" ? "public" : "tribe");
+  const [uploadAudience, setUploadAudience] = useState<string | null>(null);
   const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
   const [quote, setQuote] = useState<QuoteData>({ text: "", author: "", source: "" });
 
@@ -287,12 +290,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   };
 
   const uploadFile = async (file: File, userId: string): Promise<string> => {
+    setUploadAudience(activeType === "photo" ? "public" : visibility);
     const ext = file.name.split(".").pop() || "jpg";
     const fileName = `${userId}/${treeId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("offerings").upload(fileName, file, { cacheControl: "3600", upsert: false });
-    if (error) throw error;
-    const { data } = supabase.storage.from("offerings").getPublicUrl(fileName);
-    return data.publicUrl;
+    return uploadOfferingMedia(fileName, file, activeType === "photo" ? "public" : visibility);
   };
 
   /**
@@ -343,6 +344,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   };
 
   const resetForm = () => {
+    setUploadAudience(null);
     setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearAllPhotos();
     setOriginalArtistName(""); setOriginalArtworkYear(""); setSourceUrl(""); setInstitutionName(""); setRightsStatus(""); setMedium(""); setArtTags("");
     setFieldErrors({});
@@ -615,6 +617,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const quoteAuthor = quoteText ? (quote.author.trim() || null) : null;
       const quoteSource = quoteText ? (quote.source.trim() || null) : null;
 
+      assertMediaAudience(activeType === "photo" ? "public" : visibility, [finalMediaUrl, ...uploadedPhotos].filter((url): url is string => !!url));
       const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
         tree_id: treeId,
         type: activeType,
@@ -738,6 +741,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
+      assertMediaAudience(visibility, [data.audioUrl]);
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
         tree_id: treeId, type: "voice" as const,
         title: `Voice Offering (${Math.floor(data.duration / 60)}:${(data.duration % 60).toString().padStart(2, "0")})`,
@@ -865,7 +869,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               </div>
             </div>
           )}
-          <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+          <VoiceOfferingFlow treeId={treeId} visibility={visibility} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
         </div>
       </ResponsiveDialog>
     );
@@ -1339,7 +1343,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
               {/* Visibility (not for photos) */}
               {activeType !== "photo" && (
-                <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading} />
+                <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading || uploadAudience !== null} />
               )}
 
               {/* Staff seal */}

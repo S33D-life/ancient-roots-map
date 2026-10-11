@@ -25,6 +25,8 @@ import { Loader2, Save, X } from "lucide-react";
 import OfferingPhotoTray, { type PhotoSlot } from "@/components/offering/OfferingPhotoTray";
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
 import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
+import { uploadOfferingMedia } from "@/utils/offeringMedia";
+import { assertMediaAudience, mediaReferences, useOrdinaryMediaUrls, displayMediaUrl } from "@/utils/ordinaryOfferingMedia";
 import { MAX_OFFERING_PHOTOS, getOfferingPhotos } from "@/utils/offeringPhotos";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -60,6 +62,7 @@ const extractYouTubeId = (url: string): string | null => {
 
 const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) => {
   const { toast } = useToast();
+  const displayUrls = useOrdinaryMediaUrls([offering]);
   const [saving, setSaving] = useState(false);
 
   // ── Form state ──
@@ -136,25 +139,20 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
       id: `existing-${url}`,
       // Tray expects File; pass an empty placeholder — only previewUrl is used for display
       file: new File([], "existing.jpg", { type: "image/jpeg" }),
-      previewUrl: url,
+      previewUrl: displayMediaUrl(url, displayUrls) ?? "",
     }));
     return [...existing, ...newPhotos];
-  }, [existingUrls, newPhotos]);
+  }, [existingUrls, newPhotos, displayUrls]);
 
   // Upload any new photos, return final ordered URL array (existing first, then new)
   const uploadNewPhotos = async (): Promise<string[]> => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user || user.id !== offering.created_by) throw new Error("Please sign in as this Offering's author.");
     const uploaded: string[] = [];
     for (const slot of newPhotos) {
       const ext = slot.file.name.split(".").pop() || "jpg";
-      const path = `offerings/${offering.tree_id}/${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 9)}.${ext}`;
-      const { error } = await supabase.storage
-        .from("offerings")
-        .upload(path, slot.file, { cacheControl: "3600", upsert: false });
-      if (error) throw new Error(`Upload failed: ${error.message}`);
-      const { data: pub } = supabase.storage.from("offerings").getPublicUrl(path);
-      uploaded.push(pub.publicUrl);
+      const path = `${user.id}/${offering.tree_id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+      uploaded.push(await uploadOfferingMedia(path, slot.file, visibility));
     }
     return [...existingUrls, ...uploaded];
   };
@@ -167,6 +165,15 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
     }
     setSaving(true);
     try {
+      // Changing metadata cannot revoke an already public storage object.
+      // A separate protected migration must retire old public copies first.
+      if (offering.visibility === "public" && visibility !== "public") {
+        assertMediaAudience(visibility, mediaReferences(offering));
+      }
+      const photosChanged = newPhotos.length > 0 || JSON.stringify(existingUrls) !== JSON.stringify(getOfferingPhotos(offering));
+      if (photosChanged || visibility !== offering.visibility) {
+        assertMediaAudience(visibility, [...existingUrls, offering.media_url, offering.thumbnail_url].filter((url): url is string => !!url));
+      }
       const photoUrls = await uploadNewPhotos();
 
       const update: Record<string, any> = {
@@ -176,12 +183,12 @@ const EditOfferingDialog = ({ open, onOpenChange, offering, onSaved }: Props) =>
         quote_author: quote.author.trim() || null,
         quote_source: quote.source.trim() || null,
         visibility,
-        photos: photoUrls,
       };
 
       // Keep media_url in sync for legacy single-photo readers (don't touch
       // for voice/song where media_url holds audio).
-      if (offering.type !== "voice" && offering.type !== "song") {
+      if (photosChanged) update.photos = photoUrls;
+      if (photosChanged && offering.type !== "voice" && offering.type !== "song") {
         update.media_url = photoUrls[0] || null;
       }
 

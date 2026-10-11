@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 import { useEffect, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
@@ -257,6 +258,8 @@ const TreeDetailPage = () => {
   const [showAnchored, setShowAnchored] = useState(false);
   // Brief highlight ring on an offering card when arriving from the Ethereal Tree.
   const [highlightedOfferingId, setHighlightedOfferingId] = useState<string | null>(null);
+  const mediaUrls = useOrdinaryMediaUrls(offerings);
+
   // Derived: photo offerings (memoized so deep-link effect deps stay stable)
   const photoOfferings = useMemo(
     () => getOfferingsByType("photo").filter((o) => o.media_url),
@@ -805,7 +808,7 @@ const TreeDetailPage = () => {
         {/* ══════ MASTER TEMPLATE: Sacred Hero ══════ */}
         <TreePageHero
           tree={tree}
-          photoUrl={getOfferingsByType("photo")[0]?.media_url || null}
+          photoUrl={displayMediaUrl(getOfferingsByType("photo")[0]?.media_url, mediaUrls)}
           onMakeOffering={openOfferingGateway}
           onAddPhoto={() => handleAddOffering("photo")}
           onAddSong={() => handleAddOffering("song")}
@@ -889,7 +892,7 @@ const TreeDetailPage = () => {
               id: tree.id,
               name: tree.name,
               species: tree.species,
-              imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
+              imageUrl: getOfferingsByType("photo").find(off => off.visibility === "public")?.media_url || null,
               location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
             }}
           />
@@ -902,7 +905,7 @@ const TreeDetailPage = () => {
             tree={{
               name: tree.name,
               species: tree.species,
-              imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
+              imageUrl: getOfferingsByType("photo").find(off => off.visibility === "public")?.media_url || null,
               location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
             }}
             whispers={availableWhispers.map((w) => w.message_content)}
@@ -1772,7 +1775,7 @@ const TreeDetailPage = () => {
                           <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
                             <CardContent className="p-3 flex items-center gap-3">
                               {off.media_url && off.type === "photo" && (
-                                <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
+                                <img src={displayMediaUrl(off.media_url, mediaUrls) ?? undefined} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
                               )}
                               <div className="flex-1 min-w-0">
                                 <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>

@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 /**
  * TreeOfferingsPreview — Shows recent offerings with heart counters
  * and an "Add Your Voice to the Canopy" CTA. Used in the master tree template.
@@ -44,6 +45,7 @@ const TYPE_LABELS: Record<string, string> = {
 const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay = 6 }: Props) => {
   const [expandedYT, setExpandedYT] = useState<string | null>(null);
   const recent = offerings.slice(0, maxDisplay);
+  const urls = useOrdinaryMediaUrls(recent);
   const typeCounts = offerings.reduce(
     (acc, o) => {
       acc[o.type] = (acc[o.type] || 0) + 1;
@@ -113,7 +115,7 @@ const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay =
                         className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0"
                       >
                         <img
-                          src={(off as any).thumbnail_url || `https://img.youtube.com/vi/${(off as any).youtube_video_id}/hqdefault.jpg`}
+                          src={displayMediaUrl(off.thumbnail_url, urls) || `https://img.youtube.com/vi/${(off as any).youtube_video_id}/hqdefault.jpg`}
                           alt={off.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
@@ -125,7 +127,7 @@ const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay =
                     )}
                     {/* Photo thumbnail (cover + +N badge for multi-photo offerings) */}
                     {(() => {
-                      const cover = getOfferingCover(off);
+                      const cover = displayMediaUrl(getOfferingCover(off), urls);
                       const extra = getOfferingPhotos(off).length - 1;
                       return cover && off.type === "photo" ? (
                         <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">

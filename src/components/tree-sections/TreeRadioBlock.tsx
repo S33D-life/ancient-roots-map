@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 /**
  * TreeRadioBlock — Mini radio section embedded in tree profile.
  * Shows a single-track player or placeholder if no audio exists.
@@ -18,6 +19,7 @@ interface Props {
 }
 
 interface RadioSong {
+  id: string;
   title: string;
   artist: string | null;
   previewUrl: string | null;
@@ -27,7 +29,9 @@ interface RadioSong {
 }
 
 const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
-  const [song, setSong] = useState<RadioSong | null>(null);
+  const [songRecord, setSong] = useState<RadioSong | null>(null);
+  const mediaUrls = useOrdinaryMediaUrls(songRecord ? [{ id: songRecord.id, media_url: songRecord.previewUrl, thumbnail_url: songRecord.thumbnailUrl }] : []);
+  const song = songRecord ? { ...songRecord, previewUrl: displayMediaUrl(songRecord.previewUrl, mediaUrls), thumbnailUrl: displayMediaUrl(songRecord.thumbnailUrl, mediaUrls) } : null;
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -38,7 +42,7 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
     const fetchSong = async () => {
       const { data } = await (supabase
         .from("offerings")
-        .select("title, content, media_url, youtube_embed_url, youtube_video_id, thumbnail_url") as any)
+        .select("id, title, content, media_url, youtube_embed_url, youtube_video_id, thumbnail_url") as any)
         .eq("tree_id", treeId)
         .eq("type", "song")
         .order("created_at", { ascending: false })
@@ -50,6 +54,7 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
         // If this is a YouTube offering, use it directly
         if (s.youtube_video_id) {
           setSong({
+            id: s.id,
             title: s.title,
             artist: s.content,
             previewUrl: null,
@@ -68,6 +73,7 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
           const json = await res.json();
           if (json.results?.length) {
             setSong({
+              id: s.id,
               title: json.results[0].trackName,
               artist: json.results[0].artistName,
               previewUrl: json.results[0].previewUrl,
@@ -77,6 +83,7 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
             });
           } else {
             setSong({
+              id: s.id,
               title: s.title,
               artist: s.content,
               previewUrl: s.media_url,
@@ -87,6 +94,7 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
           }
         } catch {
           setSong({
+            id: s.id,
             title: s.title,
             artist: s.content,
             previewUrl: s.media_url,

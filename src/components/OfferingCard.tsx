@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 /**
  * OfferingCard — unified offering card used across Tree, Hive, Atlas, and Dashboard pages.
  * Renders literary (poem/story), song, nft, voice, and compact list variants.
@@ -701,27 +702,35 @@ const CompactRow = ({
    ══════════════════════════════════════════ */
 
 const OfferingCard = (props: OfferingCardProps) => {
-  const { offering, variant = "full" } = props;
+  const urls = useOrdinaryMediaUrls([props.offering]);
+  const offering = {
+    ...props.offering,
+    media_url: displayMediaUrl(props.offering.media_url, urls),
+    thumbnail_url: displayMediaUrl(props.offering.thumbnail_url, urls),
+    photos: props.offering.photos?.map(url => displayMediaUrl(url, urls)).filter((url): url is string => !!url) ?? null,
+  };
+  const viewProps = { ...props, offering };
+  const { variant = "full" } = props;
 
   if (variant === "compact") {
-    return <CompactRow {...props} />;
+    return <CompactRow {...viewProps} />;
   }
 
   // Full variant — pick by type
   switch (offering.type) {
     case "poem":
     case "story":
-      return <LiteraryFull {...props} />;
+      return <LiteraryFull {...viewProps} />;
     case "song":
-      return <SongFull {...props} />;
+      return <SongFull {...viewProps} />;
     case "nft":
-      return <NftFull {...props} />;
+      return <NftFull {...viewProps} />;
     case "photo":
     case "art":
-      return <PhotoFull {...props} />;
+      return <PhotoFull {...viewProps} />;
 
     default:
-      return <GenericFull {...props} />;
+      return <GenericFull {...viewProps} />;
   }
 };
 

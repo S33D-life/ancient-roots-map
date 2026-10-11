@@ -1,3 +1,5 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
+import { isPrivateOfferingMedia } from "@/utils/offeringMedia";
 /**
  * MusicRoom — A living room inside the HeARTwood Library.
  *
@@ -71,7 +73,7 @@ function parseArtist(content: string | null): string {
 }
 
 function resolveArtwork(s: { thumbnail_url: string | null; youtube_video_id: string | null }): string | null {
-  if (s.thumbnail_url) return s.thumbnail_url.replace("100x100", "600x600");
+  if (s.thumbnail_url) return isPrivateOfferingMedia(s.thumbnail_url) ? s.thumbnail_url : s.thumbnail_url.replace("100x100", "600x600");
   if (s.youtube_video_id) return `https://i.ytimg.com/vi/${s.youtube_video_id}/hqdefault.jpg`;
   return null;
 }
@@ -727,6 +729,8 @@ function SongCard({
   emphasised: boolean;
   onOpen: () => void;
 }) {
+  const mediaUrls = useOrdinaryMediaUrls([song]);
+  const artwork = displayMediaUrl(song.artwork, mediaUrls);
   const scale = scaleFor(song.id);
   return (
     <motion.button
@@ -747,9 +751,9 @@ function SongCard({
             : "0 2px 14px hsl(0 0% 0% / 0.18)",
         }}
       >
-        {song.artwork ? (
+        {artwork ? (
           <img
-            src={song.artwork}
+            src={artwork}
             alt=""
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
@@ -807,6 +811,8 @@ function SongDetail({
   onClose: () => void;
   onGoToTree: (treeId: string) => void;
 }) {
+  const mediaUrls = useOrdinaryMediaUrls(song ? [song] : []);
+  const artwork = displayMediaUrl(song?.artwork, mediaUrls);
   const open = !!song;
   return (
     <ResponsiveDialog
@@ -824,8 +830,8 @@ function SongDetail({
               background: "linear-gradient(155deg, hsl(var(--muted) / 0.4), hsl(var(--card) / 0.6))",
             }}
           >
-            {song.artwork ? (
-              <img src={song.artwork} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            {artwork ? (
+              <img src={artwork} alt="" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               <BotanicalRecord song={song} />
             )}

@@ -8,6 +8,7 @@
  *   4. derives the storage object path from the stored record (never from the
  *      caller), and only then issues a short-lived signed URL.
  */
+import { registeredPrivatePath } from "../_shared/ordinaryOfferingMedia.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.0";
 
 const corsHeaders = {
@@ -22,19 +23,8 @@ const EXPIRES_IN = 60 * 10;
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "private, no-store", "Vary": "Authorization" },
   });
-}
-
-/** Object path inside the private bucket, taken from the stored media URL. */
-export function privateObjectPath(mediaUrl: string | null): string | null {
-  if (!mediaUrl) return null;
-  const marker = `/${PRIVATE_BUCKET}/`;
-  const idx = mediaUrl.indexOf(marker);
-  if (idx === -1) return null;
-  const path = mediaUrl.slice(idx + marker.length).split("?")[0];
-  if (!path || path.includes("..")) return null;
-  return decodeURIComponent(path);
 }
 
 Deno.serve(async (req) => {
@@ -72,11 +62,19 @@ Deno.serve(async (req) => {
 
     const { data: offering } = await admin
       .from("life_grove_offerings")
-      .select("media_url")
+      .select("media_url,contributor_user_id,life_grove_id")
       .eq("id", offeringId)
       .maybeSingle();
 
-    const path = privateObjectPath(offering?.media_url ?? null);
+    // Bind the authorized Grove appearance to its contributor's own object.
+    // An authored Grove row must not sign another person's ordinary media.
+    const path = offering ? registeredPrivatePath(offering.media_url, {
+      created_by: offering.contributor_user_id,
+      tree_id: offering.life_grove_id,
+      media_url: offering.media_url,
+      photos: null,
+      thumbnail_url: null,
+    }, url) : null;
     if (!path) return json({ error: "no private media" }, 404);
 
     const { data: signed, error: signError } = await admin.storage

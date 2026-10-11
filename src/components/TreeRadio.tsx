@@ -1,3 +1,4 @@
+import { displayMediaUrl, useOrdinaryMediaUrls } from "@/utils/ordinaryOfferingMedia";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -241,6 +242,8 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   }, [playlist.length]);
 
   const currentSong = playlist[currentIndex];
+  const mediaUrls = useOrdinaryMediaUrls(currentSong ? [currentSong] : []);
+  const thumbnail = displayMediaUrl(currentSong?.thumbnail_url, mediaUrls);
   const stationName = activeFilter === "all" ? "TETOL" : activeFilter;
 
   return (
@@ -395,10 +398,10 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                     >
                       {previewLoading ? (
                         <div className="w-4 h-4 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
-                      ) : currentSong?.thumbnail_url ? (
+                      ) : thumbnail ? (
                         <div className="relative w-full h-full">
-                          <img src={currentSong.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                          {currentSong.youtube_video_id && (
+                          <img src={thumbnail} alt="" className="w-full h-full object-cover" />
+                          {currentSong?.youtube_video_id && (
                             <div className="absolute bottom-0.5 right-0.5">
                               <Youtube className="w-3 h-3 text-white drop-shadow" />
                             </div>
