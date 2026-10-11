@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 480 600">
+  <defs><linearGradient id="paper" x2="0" y2="1"><stop stop-color="#f6edd7"/><stop offset="1" stop-color="#d9d3b5"/></linearGradient></defs>
+  <rect width="480" height="600" fill="url(#paper)"/>
+  <path d="M247 574C247 458 259 333 236 136L263 98C280 280 269 450 281 579Z" fill="#f6f2df" stroke="#7c806c" stroke-width="3"/>
+  <g fill="none" stroke="#454d41" stroke-width="4"><path d="M245 491l24-3m-22-83l16 1m-16-74l27-4m-32-81l18-2m-23-72l22 1"/><path d="M250 298C207 242 161 221 104 185M252 262C310 204 350 167 399 125M250 184C211 128 185 93 138 63" stroke-width="6"/></g>
+  <g fill="#879265" opacity=".8"><ellipse cx="115" cy="170" rx="15" ry="30" transform="rotate(-35 115 170)"/><ellipse cx="175" cy="210" rx="15" ry="29" transform="rotate(-40 175 210)"/><ellipse cx="314" cy="206" rx="14" ry="29" transform="rotate(40 314 206)"/><ellipse cx="377" cy="142" rx="16" ry="31" transform="rotate(35 377 142)"/><ellipse cx="159" cy="93" rx="16" ry="32" transform="rotate(-35 159 93)"/></g>
+  <path d="M93 577C176 562 322 565 393 579" stroke="#9eab73" stroke-width="12" fill="none" opacity=".6"/>
+</svg>

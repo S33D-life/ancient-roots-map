@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import Header from "@/components/Header";
@@ -16,6 +16,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
+import { THREAD_ROUTES } from "@/data/library/birchThread";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import CouncilDeckDoorway from "@/components/council/CouncilDeckDoorway";
 import CuratorEditor from "@/components/council/CuratorEditor";
@@ -121,6 +122,7 @@ const CouncilOfLifePage = () => {
               onEditCouncil={() => setCuratorOpen(true)}
             />
             <CouncilDeckDoorway />
+            <Link className="block mt-4 py-3 text-center underline underline-offset-4" to={THREAD_ROUTES.circle(236)}>Circle 236 · Preparing — meet the companions →</Link>
           </section>
 
           {/* ── 2. Reflection — heart of the Council experience ── */}

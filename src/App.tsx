@@ -45,6 +45,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
+import { THREAD_PATTERNS } from "@/data/library/birchThread";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
@@ -114,6 +115,8 @@ const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "we
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
 const GrowthFolioPage = lazyImportWithRetry(() => import("./pages/GrowthFolioPage"), "growth-folio");
+const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "circle236-preparation");
+const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
 const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/CouncilRecordsPage"), "council-records");
 const CouncilSessionPage = lazyImportWithRetry(() => import("./pages/council/CouncilSessionPage"), "council-session");
@@ -357,6 +360,8 @@ const App = () => {
                 <Route path="/email-confirmed" element={<Navigate to="/welcome" replace />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
                 <Route path="/golden-dream/growth/:growthId" element={realm(<GrowthFolioPage />, "crown")} />
+                <Route path={THREAD_PATTERNS.CIRCLE} element={<BirchPreparationPage />} />
+                <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
                 <Route path="/council/records/:id" element={realm(<CouncilSessionPage />, "canopy")} />
