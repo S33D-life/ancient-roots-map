@@ -1,32 +1,29 @@
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, type Ref } from "react";
 import { CIRCLE_235_DOORWAY as circle } from "@/data/council/circle235Doorway";
+import { COMPANION_READING_235 } from "@/data/council/companionReading";
+import { approvedCircleUrl } from "../../../supabase/functions/_shared/currentCircle";
 
 interface NextCouncilCardProps {
-  onJoinCouncil: () => void;
-  refreshKey?: number;
-  onEditCouncil?: () => void;
+  onJoinCouncil: () => void; refreshKey?: number; onEditCouncil?: () => void;
+  onMeetCompanion?: (node: string) => void; doorwayRef?: Ref<HTMLButtonElement>; deckAvailable?: boolean;
 }
-
-const NextCouncilCard = (_props: NextCouncilCardProps) => (
-  <Card className="relative bg-card/70 backdrop-blur-sm border-primary/30 overflow-hidden">
-    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
-    <CardHeader className="p-5 md:p-6 space-y-4">
-      <Badge variant="outline" className="w-fit text-[10px] border-primary/40 text-primary">{circle.weekState}</Badge>
-      <CardTitle className="text-xl md:text-2xl font-serif tracking-wide">{circle.title}</CardTitle>
-      <p className="text-sm font-serif">{circle.openLine}</p>
-      <p className="text-lg font-serif italic">{circle.question}</p>
-      <p className="text-sm font-serif">{circle.companionsLabel}: {circle.companions.join(" · ")}. {circle.peopleSeat}</p>
-      <p className="text-xs text-muted-foreground">{circle.safetyLabel}: {circle.safety}</p>
-      <p className="text-sm font-serif">Enter the Tree, wander through the Canopy, meet a companion, follow its learning and remembered relationships, then return to the Circle and the living world.</p>
-      <div className="flex flex-col sm:flex-row gap-2 pt-1">
-        <Button asChild className="font-serif"><a href={circle.tetolUrl} target="_blank" rel="noopener noreferrer">Explore Circle {circle.number} in 3D TETOL</a></Button>
-        <Button asChild variant="secondary" className="font-serif"><a href={circle.groupUrl} target="_blank" rel="noopener noreferrer">Council group · Fire times</a></Button>
-      </div>
-      <p className="text-xs text-muted-foreground">Different places. Different moments. One living Council.</p>
-    </CardHeader>
-  </Card>
-);
-
-export default NextCouncilCard;
+export default function NextCouncilCard({ onJoinCouncil, onMeetCompanion, doorwayRef, deckAvailable = !!approvedCircleUrl(circle.links.councilDeck) }: NextCouncilCardProps) {
+  const [selected, setSelected] = useState<string | null>(null);
+  // Fail closed for unapproved or another Circle; never carry 235 appearances into a future week.
+  if (circle.approval !== "approved") return null;
+  const reading = selected && circle.number === 235 ? COMPANION_READING_235[selected] : undefined;
+  const groupUrl = approvedCircleUrl(circle.links.group);
+  return <article className="parchment-current-circle canopy-current-circle">
+    <span className="canopy-week"><span className="canopy-week-title">{circle.title} · </span><span className="canopy-week-number">Circle {circle.number} · </span><span>{circle.weekState}</span></span>
+    <h2 className="canopy-question">{circle.question}</h2>
+    <p className="canopy-open">The live fires come and go; the Circle does not close. Come in your own time.</p>
+    <div className="canopy-gathered"><h3>{circle.companionsLabel}</h3>
+      <div className="canopy-companions" aria-label="Gathered companions">{circle.companions.map(name => <button key={name} type="button" aria-pressed={selected === name} aria-controls="companion-reading" onClick={() => setSelected(selected === name ? null : name)}>{name}</button>)}</div>
+      {selected && <div id="companion-reading" className="canopy-companion-reading" aria-live="polite"><h4>{selected}</h4><p>{reading?.line || "A companion gathered in this Circle."}</p>{reading && onMeetCompanion && deckAvailable && <button type="button" className="parchment-action" onClick={() => onMeetCompanion(reading.node)}>Follow this companion in the Circle →</button>}{selected === "Fly Agaric" && <p className="parchment-safety">{circle.safety}</p>}</div>}
+    </div>
+    <p className="canopy-open-seat">People · an open place for you.<span className="sr-only"> {circle.peopleSeat}</span></p>
+    <p className="canopy-fire">{circle.openLine} {groupUrl && <a href={groupUrl} target="_blank" rel="noopener noreferrer">Fire times in the Council group ↗</a>}</p>
+    {deckAvailable && <button ref={doorwayRef} type="button" className="parchment-action canopy-enter" aria-controls="council-deck-preview" onClick={onJoinCouncil}>Enter the Circle →</button>}
+    <p className="parchment-safety">{circle.safetyLabel}: {circle.safety}</p>
+  </article>;
+}

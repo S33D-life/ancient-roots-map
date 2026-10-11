@@ -1,0 +1,16 @@
+{
+  "src/pages/Index.tsx": "c9dfdcee8fd5c009a4de3f982bc872152b4847f6536e7b142e4e692612721b5f",
+  "src/pages/TetolHomePage.tsx": "92c05291ed1be8ff378b97e675e520fbd797303f67c27a1f8af295f46d9ae024",
+  "src/pages/GalleryPage.tsx": "1295a4f4f59871cd41b231d0a675e910e7d7c706f7ab5ae11b63d2442a9ae682",
+  "src/pages/library/HeartwoodRoomPage.tsx": "5d1abe6c212953a79af0e5403d28fdfb7cae8dec9b147a4c867036a03aeba4fa",
+  "src/config/heartwoodRooms.ts": "31a51465762b7c8fa0c393405fcd9656df5bbb8386f4a5916c8f26b803168b54",
+  "src/components/Header.tsx": "56511b35419f926ed991747c4a1b88bb2d8df30207ab10fc3cffa576914ac42f",
+  "src/components/BottomNav.tsx": "68e860b7dd50b8fe3012dc26fe1d409db63da4fb8e4cb5b8f9731de2927f649a",
+  "src/main.tsx": "a6546608e8ca36dcf1ae7c65deda4df6c5c17e1696c42b1f82fd99e091d9dd90",
+  "src/index.css": "c0e44897a0232183ffe87cc555db57d35c87cd709703d1a80107e30912bc795d",
+  "src/pages/GoldenDreamPage.tsx": "0d7b56e09dab55af1267db2889070b8aee3ee454afad44bfd9bb4f121e0aadde",
+  "src/pages/GrowthFolioPage.tsx": "373598d0c0e251a7c42a2ea6dbdc11243d2a98e5cfcd7bc2b29c89adcb55cfe2",
+  "src/components/crown/GrowthFolio.tsx": "c60c74fefc1208b05d0fb4fddffff3319d65be394421e3d3ed79a2aadf70be94",
+  "src/integrations/supabase/client.ts": "dbf5eee0072785f704cb4ca99a36033fdda12209b4cf5acd09f9e337c7122f79",
+  "src/pages/AuthPage.tsx": "b1a4fa9ed2f86bfbd8f5030369b7e51834aeceb3bcd93898bd8054304c71832c"
+}

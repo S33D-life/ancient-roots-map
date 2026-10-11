@@ -1,0 +1,46 @@
+.canopy-orientation { margin-bottom:20px; }
+.canopy-orientation .parchment-kicker { margin:0 0 4px; }
+.canopy-orientation p,.canopy-week { color:var(--paper-muted); font-size:17px; }
+.canopy-arrival { display:grid; grid-template-columns:minmax(0,700px) minmax(0,1fr); gap:48px; align-items:center; }
+.canopy-arrival .parchment-plate { margin:0; }
+#next-gathering { scroll-margin-top:100px; }
+.canopy-current-circle { border:0; padding:0; }
+.canopy-current-circle .canopy-question { color:var(--paper-ink); font-size:clamp(32px,3.2vw,48px); line-height:1.12; font-weight:400; margin:12px 0 16px; text-wrap:balance; }
+.canopy-current-circle .canopy-open { font-size:20px; max-width:550px; }
+.canopy-current-circle .canopy-gathered h3 { font-size:16px; color:var(--paper-muted); margin:20px 0 6px; }
+.canopy-companions { display:flex; flex-wrap:wrap; gap:0 16px; }
+.canopy-companions button { text-align:left; min-height:48px !important; padding:8px 0; font-size:18px; border-bottom:1px solid var(--paper-hair); color:var(--paper-ink); }
+.canopy-companions button[aria-pressed="true"] { border-bottom:2px solid var(--paper-ink); }
+.canopy-companion-reading { border-left:2px solid var(--paper-hair); padding:12px 20px; margin-top:12px; }
+.canopy-companion-reading h4 { font-size:22px; }.canopy-current-circle .canopy-companion-reading p { font-size:18px; }
+.canopy-current-circle .canopy-open-seat { font-size:20px; font-style:italic; margin:16px 0 12px; }
+.canopy-current-circle .canopy-fire { font-size:17px; max-width:570px; }
+.canopy-fire a { display:inline-flex; min-height:48px; align-items:center; text-decoration:underline; text-underline-offset:4px; }
+.canopy-current-circle .canopy-enter { font-size:23px; min-height:48px; margin:0 0 8px; }
+.canopy-field-note { margin-top:64px; padding-block:24px; border-block:1px solid var(--paper-hair); max-width:700px; }
+.canopy-field-note h2 { font-size:30px; color:var(--paper-ink); }.canopy-field-note p,.canopy-lineage p { font-size:21px; line-height:1.5; margin:12px 0; }
+.canopy-lineage { margin-top:40px; max-width:700px; }
+.canopy-clearing .parchment-deck-frame { margin-top:32px; }
+@media(max-width:767px){
+.canopy-clearing .parchment-main { padding-top:90px; }
+.canopy-orientation { margin-bottom:16px; }.canopy-orientation p { font-size:15px; }
+.canopy-arrival { display:block; }.canopy-arrival .parchment-plate { display:none; }
+.canopy-current-circle .canopy-question { font-size:32px; margin:8px 0 12px; }
+.canopy-current-circle .canopy-open { font-size:18px; margin:8px 0; }
+.canopy-current-circle .canopy-gathered h3 { margin:12px 0 4px; font-size:15px; }
+.canopy-companions { gap:0 14px; }.canopy-companions button { font-size:17px; }
+.canopy-current-circle .canopy-open-seat { margin:12px 0 8px; font-size:18px; }
+.canopy-current-circle .canopy-fire { font-size:16px; margin:8px 0; }
+.canopy-field-note { margin-top:36px; }.canopy-field-note h2 { font-size:26px; }
+}
+
+.canopy-clearing #council-deck-preview { scroll-margin-top:100px; }
+
+.canopy-clearing :is(.parchment-action,.canopy-fire a) { min-height:48px !important; }
+
+.canopy-week-number { display:none; }
+@media(max-width:767px){
+.canopy-week-title { display:none; }.canopy-week-number { display:inline; }
+.canopy-orientation { padding-right:56px; margin-bottom:12px; }
+.canopy-current-circle .canopy-question { font-size:30px; }
+}
