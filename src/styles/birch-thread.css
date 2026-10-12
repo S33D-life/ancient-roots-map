@@ -30,3 +30,17 @@
 .birch-paper summary { cursor:pointer; min-height:44px; }
 @media(max-width:540px) { .birch-clearing { grid-template-columns:1fr; gap:1rem; } .birch-portrait { max-width:270px; margin:auto; } .birch-spatial { height:300px; } .birch-threshold { font-size:.9rem; } .birch-records button { flex-direction:column; gap:.25rem; } }
 @media(prefers-reduced-motion:reduce) { .birch-thread * { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+
+.circle-companion-frames { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:2rem; margin:2rem 0; }
+.circle-companion-frames figure { min-width:0; margin:0; }
+.circle-companion-frames figure>a,.circle-companion-frames figure>button { display:block; width:100%; padding:0; background:none; border:0; cursor:pointer; }
+.circle-companion-frames img { display:block; width:100%; height:auto; }
+.circle-companion-frames h2 { font-size:1.3rem; margin:.7rem 0 0; }
+.circle-companion-frames p { margin:.25rem 0; }
+.circle-spatial-room { width:100%; height: min(75svh,700px); min-height:420px; border:1px solid hsl(var(--border)); margin:1rem 0; }
+@media(max-width:600px) { .circle-companion-frames { grid-template-columns:1fr; } }
+
+.circle-artwork-dialog { width:min(1100px,100vw); max-height:95svh; padding:1rem; background:hsl(var(--background)); color:hsl(var(--foreground)); overflow:auto; border:1px solid hsl(var(--border)); }
+.circle-artwork-dialog::backdrop { background:#000b; }
+.circle-artwork-dialog img { width:100%; height:auto; }
+.circle-artwork-dialog button { min-height:48px; }

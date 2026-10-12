@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
@@ -12,12 +12,8 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { identityRefSchema } from "@/lib/library/recordIdentity";
 import "@/styles/birch-thread.css";
 
-const FrameStudy = lazy(() => import("@/components/council/BirchFrameStudy"));
-class FrameBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <p>The spatial frame is unavailable here. The doorway below opens the same Birch.</p> : this.props.children; }
-}
+import circleFrames from "../../../public/council/circle-236/companions.json";
+
 function Shell({ children }: { children: ReactNode }) {
   return <div className="birch-thread bg-background text-foreground">
     <Header />
@@ -35,6 +31,12 @@ export function BirchPreparationPage() {
   const mode = params.get("mode") === "spatial" ? "spatial" : "2d";
   const appearance = useMemo(() => birchAppearance(mode), [mode]);
   const opening = identityOpening(appearance)!;
+  const artworkDialog = useRef<HTMLDialogElement>(null);
+  const [viewedArtwork, setViewedArtwork] = useState(circleFrames.companions[0]);
+  const viewArtwork = (companion: typeof viewedArtwork) => {
+    setViewedArtwork(companion);
+    artworkDialog.current?.showModal();
+  };
   const open = () => {
     navigate({ pathname: location.pathname, search: `?mode=${mode}&returned=1` }, { replace: true, state: { libraryReturn: appearance.returnContext } });
     navigate({ pathname: THREAD_ROUTES.identity(opening.identity), search: `?${returnContextParams(opening.returnContext)}` });
@@ -55,15 +57,18 @@ export function BirchPreparationPage() {
     <p className="birch-status">Not an opened Circle or a record of a gathering.</p>
     <Circle236Fire />
     <section aria-labelledby="preparing-companions"><h2 id="preparing-companions">The companions</h2>
-      <ul><li>Birch · <em>Betula</em> · genus</li><li>Bishop of Ely’s Plane Tree · a particular tree</li><li>Rose · broad Rose identity</li><li>Tomato</li><li>Bay Bolete</li><li>Toucan · broad group</li><li><em>Winnie-the-Pooh</em> · the literary work</li></ul>
-      <p>Companion choices are confirmed. The shared question, public invitation and full wanderable deck are still being tended. Birch’s source-linked thread is available below; the other companion doorways are not yet available here.</p>
+      <p>The companions are confirmed; the Circle is preparing. Birch’s source-linked study is available. The other Living Record doorways are not ready.</p>
     </section>
-    <div className="birch-mode" aria-label="Companion view"><Link aria-current={mode === "2d" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=2d`}>Companion</Link><Link aria-current={mode === "spatial" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=spatial`}>Framed spatial study</Link></div>
-    <section className="birch-clearing" aria-labelledby="birch-name">
-      {mode === "spatial" ? <FrameBoundary><Suspense fallback={<p>Opening the framed study…</p>}><FrameStudy onOpen={open} /></Suspense></FrameBoundary> : <button className="birch-portrait" aria-label="Approach Birch" onClick={open}><img src={BIRCH_ARTIFACT} alt="Illustrative Birch presence with pale bark and leaves; not a photograph" /></button>}
-      <div className="birch-recognition"><p className="birch-kicker">Tree companion</p><h2 id="birch-name">Birch</h2><p><em>Betula</em> · genus</p><p>{appearance.contextNote}</p><button className="birch-action" id="birch-companion" onClick={open}>Look closer at Birch →</button></div>
-    </section>
-    <p className="birch-status">Illustrative artifact · pale-bark frame study. Neither a specific tree nor documentary evidence.</p>
+    <div className="birch-mode" aria-label="Companion view"><Link aria-current={mode === "2d" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=2d`}>Companion frames</Link><Link aria-current={mode === "spatial" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=spatial`}>Enter the spatial Council</Link></div>
+    {mode === "spatial" && <iframe className="circle-spatial-room" title="Circle 236 companion frames in the existing Council room" src={`/tetol/circle-235/pre-fire/tetol.html?circle=236#${params.get("returned") === "1" ? "birch-companion" : "croom"}`} />}
+    <div className="circle-companion-frames">
+      {circleFrames.companions.map(companion => <figure key={companion.id}>
+        {companion.reader ? <button id={companion.id} onClick={open} aria-label="Look closer at Birch →"><img src={companion.artwork} alt="Birch · supplied Circle artwork" width="1280" height="853" loading="lazy" /></button> : <button id={companion.id} onClick={() => viewArtwork(companion)} aria-label={`View ${companion.label} artwork`}><img src={companion.artwork} alt={`${companion.label} · supplied Circle artwork`} width="1280" height="853" loading="lazy" /></button>}
+        <figcaption><h2>{companion.label}</h2><p>{companion.kind}</p><p className="birch-status">{companion.reader ? "Open the Living Record study →" : "Artwork available · Living Record not ready"}</p></figcaption>
+      </figure>)}
+    </div>
+    <dialog ref={artworkDialog} className="circle-artwork-dialog" aria-label={`${viewedArtwork.label} artwork`}><button autoFocus onClick={() => artworkDialog.current?.close()}>Return to the companions</button><h2>{viewedArtwork.label}</h2><img src={viewedArtwork.artwork} alt={`${viewedArtwork.label} · supplied Circle artwork`} /><p>Circle artwork · Living Record doorway not ready.</p></dialog>
+    <p className="birch-status">Supplied Circle artwork · not documentary photographs or Ancient Friend verification. Knowledge and identity remain in the Living Records.</p>
     <details><summary>The Ely encounter</summary><p>Ed visited the Great London Plane of Ely on 11 October 2026. The trunk could not be reached, and there is a wish to return. Its canonical Atlas identity is still to be confirmed; this page creates no tree record or Ancient Friend recognition.</p><p>No private encounter notes or photographs are published here.</p></details>
     <details><summary>Where this preparation comes from</summary><p>The companion choice is confirmed in <a href={BIRCH_PREPARATION_SOURCE}>Circle 236 preparation</a>. This review projection creates no Council history.</p></details>
   </Shell>;

@@ -1,0 +1,44 @@
+[
+  {
+    "companion": "Birch",
+    "path": "/council/circle-236/birch.jpg",
+    "sha256": "aa566c2be6db42af871820af9cd356754c0f408eb66b1727c7c9edb6968868ca",
+    "bytes": 540455
+  },
+  {
+    "companion": "Bishop of Ely’s Plane Tree",
+    "path": "/council/circle-236/ely-plane.jpg",
+    "sha256": "6c22536507d1ca764bfecd234e04c010ae669e075de0956ff70d35608cade3ca",
+    "bytes": 548168
+  },
+  {
+    "companion": "Rose",
+    "path": "/council/circle-236/rose.jpg",
+    "sha256": "ff5fd26528f822bcbb412c685ee0b7e18514b27ce3098949fbf41009621fcb12",
+    "bytes": 469183
+  },
+  {
+    "companion": "Tomato",
+    "path": "/council/circle-236/tomato.jpg",
+    "sha256": "6225fadee225aea975bce226cdc5e61ed6038b6fa656e7d2e1ef7c96ffd743d7",
+    "bytes": 476535
+  },
+  {
+    "companion": "Bay Bolete",
+    "path": "/council/circle-236/bay-bolete.jpg",
+    "sha256": "d53865c5c3f3a2baf4d31b7876c0ac5b663f0cfc08af3f775a607ce1b5aff328",
+    "bytes": 487076
+  },
+  {
+    "companion": "Toucan",
+    "path": "/council/circle-236/toucan.jpg",
+    "sha256": "d2731d3f52fa73ef65c3219d441dc73eee745d5f272797160022158a88371354",
+    "bytes": 484819
+  },
+  {
+    "companion": "Winnie-the-Pooh",
+    "path": "/council/circle-236/winnie-the-pooh.jpg",
+    "sha256": "32d3c50b10d35834b0cdf0935507e9e99edc9c30ca133a75ba9af130135c0f00",
+    "bytes": 486299
+  }
+]
