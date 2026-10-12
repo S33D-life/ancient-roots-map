@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -11912,6 +11912,7 @@ export type Database = {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
       }
+      can_read_tree_record: { Args: { p_tree_id: string }; Returns: boolean }
       can_view_life_grove: {
         Args: { _grove_id: string; _user_id: string }
         Returns: boolean
