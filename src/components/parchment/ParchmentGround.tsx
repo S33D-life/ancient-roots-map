@@ -13,7 +13,7 @@ export function ParchmentGround({ children, realm, className = "" }: { children:
 }
 
 export function TreePlate({ realm = "canopy" }: { realm?: "canopy" }) {
-  return <figure className={`parchment-plate parchment-plate-${realm}`}><img src={oak} alt="An illustrated view of an ancient tree with light opening through its branches" /><figcaption>Illustrated study · {realm === "crown" ? "Light above the canopy" : realm === "canopy" ? "Where branches gather" : "Where branches gather"}</figcaption></figure>;
+  return <figure className={`parchment-plate parchment-plate-${realm}`}><img src={oak} alt="An illustrated view of an ancient tree with light opening through its branches" /><figcaption>Illustrated study · Where branches gather</figcaption></figure>;
 }
 
 /** Existing reviewed paper texture, local to the promoted Canopy. */

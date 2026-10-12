@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useEffect, useMemo, useRef, type ReactNode }
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
+import Circle236Fire from "@/components/council/Circle236Fire";
 import Footer from "@/components/Footer";
 import { ROUTES } from "@/lib/routes";
 import { identityOpening, parseReturnContext, returnContextParams, restoreAppearanceFocus } from "@/lib/library/contextualReturn";
@@ -52,6 +53,7 @@ export function BirchPreparationPage() {
     <h1>Circle 236</h1>
     <p className="birch-lead">Meet the preparing constellation.</p>
     <p className="birch-status">Not an opened Circle or a record of a gathering.</p>
+    <Circle236Fire />
     <section aria-labelledby="preparing-companions"><h2 id="preparing-companions">The companions</h2>
       <ul><li>Birch · <em>Betula</em> · genus</li><li>Bishop of Ely’s Plane Tree · a particular tree</li><li>Rose · broad Rose identity</li><li>Tomato</li><li>Bay Bolete</li><li>Toucan · broad group</li><li><em>Winnie-the-Pooh</em> · the literary work</li></ul>
       <p>Companion choices are confirmed. The shared question, public invitation and full wanderable deck are still being tended. Birch’s source-linked thread is available below; the other companion doorways are not yet available here.</p>

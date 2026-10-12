@@ -12,7 +12,7 @@ describe("selective Canopy promotion", () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
     expect(screen.getByRole("link", {name:/Circle 236 · Preparing/})).toHaveAttribute("href","/review/council/236");
     const doorway=screen.getByRole("button",{name:"Enter the Circle →"});
-    fireEvent.click(screen.getByRole("button",{name:"Fly Agaric",exact:true}));
+    fireEvent.click(screen.getByRole("button",{name:"Fly Agaric"}));
     fireEvent.click(screen.getByRole("button",{name:"Follow this companion in the Circle →"}));
     expect(screen.getByRole("button",{name:"Deck return"})).toHaveAttribute("data-src",expect.stringContaining("#c235_flyagaric"));
     fireEvent.click(screen.getByRole("button",{name:"Deck return"}));

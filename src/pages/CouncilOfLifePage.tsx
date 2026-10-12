@@ -9,6 +9,7 @@ import { ParchmentGround, TreePlate } from "@/components/parchment/ParchmentGrou
 import { CURRENT_CIRCLE, approvedCircleUrl } from "../../supabase/functions/_shared/currentCircle";
 import EmbeddedCouncilDeck from "@/components/council/EmbeddedCouncilDeck";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
+import Circle236Fire from "@/components/council/Circle236Fire";
 import "@/components/council/canopy.css";
 
 const CouncilOfLifePage = () => {
@@ -36,6 +37,13 @@ const CouncilOfLifePage = () => {
     <Header />
     <main className="parchment-main">
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
+      <section className="canopy-field-note" aria-labelledby="circle236-arrival">
+        <p className="parchment-kicker">PREPARING</p>
+        <h2 id="circle236-arrival">Circle 236</h2>
+        <p>Birch · Bishop of Ely’s Plane · Rose · Tomato · Bay Bolete · Toucan · <em>Winnie-the-Pooh</em></p>
+        <Link className="parchment-action" to={THREAD_ROUTES.circle(236)}>Circle 236 · Preparing · meet its companions →</Link>
+        <Circle236Fire className="parchment-action" />
+      </section>
       <div className="canopy-arrival">
         <section id="next-gathering" aria-label="Current Circle">
           <NextCouncilCard onJoinCouncil={() => setDeckNode("croom")} onMeetCompanion={setDeckNode} doorwayRef={doorway} deckAvailable={!!deckUrl} />
@@ -47,7 +55,6 @@ const CouncilOfLifePage = () => {
         <EmbeddedCouncilDeck src={localDeckUrl} onReturn={returnToCircle} />
         <a href={localDeckUrl} target="_blank" rel="noopener noreferrer" className="parchment-action">Open this place in its own tab →</a>
       </section>}
-      <p className="canopy-field-note"><Link className="parchment-action" to={THREAD_ROUTES.circle(236)}>Circle 236 · Preparing · meet its companions →</Link></p>
       <section className="canopy-field-note" aria-labelledby="field-invitation"><h2 id="field-invitation">Take this week’s question outside.</h2><p>Meet a companion — or notice what answers it where you are. Come back in your own time.</p><Link className="parchment-action" to={ROUTES.MAP}>Meet an Ancient Friend →</Link></section>
       <div className="canopy-lineage"><p>Every Moon, the trunk grows one ring.<br />What the Circle learns becomes living memory.</p><Link className="parchment-action" to={ROUTES.COUNCIL_RECORDS}>Follow the Council’s records →</Link></div>
       <div className="parchment-journey"><span>Continue through the same Tree.</span><Link to={ROUTES.LIBRARY} state={{ from: ROUTES.COUNCIL }}>Descend to Heartwood Hall →</Link></div>
