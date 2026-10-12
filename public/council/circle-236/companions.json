@@ -7,49 +7,87 @@
       "label": "Birch",
       "kind": "Tree · genus Betula",
       "artwork": "/council/circle-236/birch.jpg",
-      "reader": true
+      "reader": true,
+      "presence": {
+        "form": "sapling",
+        "leaf": 7574351,
+        "bark": 15064784
+      }
     },
     {
       "id": "ely-plane-companion",
       "label": "Bishop of Ely’s Plane Tree",
       "kind": "Individual tree · Platanus × hispanica",
       "artwork": "/council/circle-236/ely-plane.jpg",
-      "reader": false
+      "reader": false,
+      "presence": {
+        "form": "sapling",
+        "leaf": 6324807,
+        "bark": 10195581
+      }
     },
     {
       "id": "rose-companion",
       "label": "Rose",
       "kind": "Flower · Rosa",
       "artwork": "/council/circle-236/rose.jpg",
-      "reader": false
+      "reader": false,
+      "presence": {
+        "form": "flower",
+        "count": 9,
+        "petals": 13327232,
+        "centre": 9385292
+      }
     },
     {
       "id": "tomato-companion",
       "label": "Tomato",
       "kind": "Plant · Solanum lycopersicum",
       "artwork": "/council/circle-236/tomato.jpg",
-      "reader": false
+      "reader": false,
+      "presence": {
+        "form": "herb",
+        "shape": "pointed",
+        "leaf": 4682810,
+        "fruit": 14109487
+      }
     },
     {
       "id": "bay-bolete-companion",
       "label": "Bay Bolete",
       "kind": "Fungi · Imleria badia",
       "artwork": "/council/circle-236/bay-bolete.jpg",
-      "reader": false
+      "reader": false,
+      "presence": {
+        "form": "fungus",
+        "cap": 8540462,
+        "scales": 8540462,
+        "stem": 11701080,
+        "count": 2
+      }
     },
     {
       "id": "toucan-companion",
       "label": "Toucan",
       "kind": "Bird · Ramphastidae",
       "artwork": "/council/circle-236/toucan.jpg",
-      "reader": false
+      "reader": false,
+      "presence": {
+        "form": "toucan"
+      }
     },
     {
       "id": "winnie-the-pooh-companion",
       "label": "Winnie-the-Pooh",
       "kind": "Book · A. A. Milne",
       "artwork": "/council/circle-236/winnie-the-pooh.jpg",
-      "reader": false
+      "reader": false,
+      "presence": {
+        "form": "book",
+        "cover": 11901537,
+        "ink": "#3a2819",
+        "title": "Winnie-the-Pooh"
+      }
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
+import * as THREE from 'three';
 import frames from '../../public/council/circle-236/companions.json';
 import { BIRCH_ARTIFACT, birchAppearance } from '@/data/library/birchThread';
 
@@ -30,5 +31,30 @@ describe('one Circle companion manifest, two surfaces', () => {
       expect(companionPanel(D, 'winnie-the-pooh-companion', (s: string) => s)).not.toContain('data-circle-reader');
       expect(companionPanel(D, 'croom', (s: string) => s)).toContain('PREPARING');
     } finally { vi.unstubAllGlobals(); }
+  });
+});
+
+describe('companion presence uses the existing appearance and picking contract', () => {
+  it('reuses existing builders and keeps every model mesh on its frame identity', async () => {
+    const { buildCompanionPresence } = await import('../../public/tetol/circle-235/pre-fire/runtime/companion-frames.js');
+    const pickables: THREE.Mesh[] = [];
+    const add = (mesh: THREE.Mesh, name: string, id: string, parent: THREE.Group) => { mesh.name = name; mesh.userData.node = id; parent.add(mesh); pickables.push(mesh); return mesh; };
+    const builder = vi.fn((group: THREE.Group, _r: unknown, id: string) => { add(new THREE.Mesh(new THREE.BoxGeometry(.1,.3,.1), new THREE.MeshStandardMaterial()), id + '_stem', id, group).position.y = .6; });
+    const BUILD = { sapling: builder, flower: builder, herb: builder, fungus: builder, book: builder };
+    for (const c of frames.companions) {
+      const group = new THREE.Group(); const start = pickables.length;
+      const presence = buildCompanionPresence({ THREE, add, std: (p: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial(p), BUILD }, group, { presence: c.presence }, c.id);
+      expect(presence.parent).toBe(group);
+      expect(pickables.length).toBeGreaterThan(start);
+      expect(pickables.slice(start).every(m => m.userData.node === c.id)).toBe(true);
+    }
+    expect(builder).toHaveBeenCalledTimes(6);
+    expect(frames.companions[6].presence.form).toBe('book');
+    // A real Three ray through the symbolic bird resolves the same ID as its frame.
+    const bird = pickables.find(m => m.name === 'toucan-companion_body')!;
+    bird.parent!.updateMatrixWorld(true);
+    const center = bird.getWorldPosition(new THREE.Vector3());
+    const ray = new THREE.Raycaster(center.clone().add(new THREE.Vector3(0,0,2)), new THREE.Vector3(0,0,-1));
+    expect(ray.intersectObject(bird)[0].object.userData.node).toBe('toucan-companion');
   });
 });

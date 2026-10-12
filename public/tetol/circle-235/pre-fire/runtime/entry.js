@@ -850,9 +850,10 @@ if (D.ext && D.ext.forms) for (const [k, f] of Object.entries(D.ext.forms)) BUIL
 BUILD.circleFrame = (g, repr, id) => {
   const texture = new THREE.TextureLoader().load(repr.artwork);
   texture.colorSpace = THREE.SRGBColorSpace;
-  const frame = new THREE.Group(); frame.position.y = 1.25; g.add(frame);
+  const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
   add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), mat.limbBark), id + '_frame', id, frame);
   add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * 853 / 1280), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  companionFrames?.buildCompanionPresence({ THREE, add, std, BUILD }, g, repr, id);
   return 1.25;
 };
 function buildCircle(num) {
