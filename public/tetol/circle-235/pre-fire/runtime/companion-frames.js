@@ -21,8 +21,17 @@ export async function installCompanionFrames(D) {
     const params = new URLSearchParams({ recordReturn: JSON.stringify({ route: 'council', realm: 'canopy', contextId: 'council-of-life/circle-236', appearanceId: 'birch-companion', mode: 'spatial', focusTarget: 'birch-companion' }) });
     window.parent.location.assign('/review/library/notion/3f315b58-480d-814c-a056-cb6c7b4f7f33?' + params);
   });
+  // Circle 236 only: the legacy desktop peek handler (classic-1) consumes the first click
+  // on #panel.peek in document capture. Window capture runs first, so open the panel here
+  // and let that same click reach the companion action.
+  window.addEventListener('click', event => {
+    const panel = event.target instanceof Element && event.target.closest('#panel.peek');
+    if (panel && event.target.closest('button, a, [data-circle-reader]')) panel.classList.remove('peek');
+  }, true);
+  // The stillness pause (entry.js startQuiet) sets body[data-q], which makes every panel
+  // control invisible and untappable until the 3D canvas is touched. Keep companion controls live.
   const style = document.createElement('style');
-  style.textContent = '#tetol-welcome{display:none!important}#council-return{left:16px!important;right:auto!important;bottom:16px!important;width:max-content;max-width:calc(100vw - 32px)}body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}' + (window.parent !== window ? '#council-return{display:none!important}' : ''); document.head.append(style);
+  style.textContent = 'body.grace-p.g-arriving aside#panel,body[data-q] aside#panel #grab,body[data-q] aside#panel .pbody>*{opacity:1!important;pointer-events:auto!important}#tetol-welcome{display:none!important}#council-return{left:16px!important;right:auto!important;bottom:16px!important;width:max-content;max-width:calc(100vw - 32px)}body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}' + (window.parent !== window ? '#council-return{display:none!important}' : ''); document.head.append(style);
   document.title = 'Circle 236 · PREPARING · Spatial Council';
   const brand = document.getElementById('brandline'); if (brand) { const label = 'Circle 236 · PREPARING · supplied companion artwork'; brand.textContent = label; new MutationObserver(() => { if (brand.textContent !== label) brand.textContent = label; }).observe(brand, { childList: true }); }
   D.circleFrameCompanions = circle.companions;
