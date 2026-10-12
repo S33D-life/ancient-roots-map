@@ -2,6 +2,9 @@
 if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
 const D = window.TETOL;
+const framedCircle = new URLSearchParams(location.search).get('circle') === '236';
+const companionFrames = framedCircle ? await import('./companion-frames.js') : null;
+if (companionFrames) await companionFrames.installCompanionFrames(D);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const state = { thread: null, current: 'overview', history: [], mode: '3d', motion: !matchMedia('(prefers-reduced-motion: reduce)').matches };
@@ -94,6 +97,8 @@ function renderTime(num, compact) {
 }
 function renderPanel() {
   const id = state.current, n = D.nodes[id];
+  const framedPanel = companionFrames?.companionPanel(D, id, esc);
+  if (framedPanel) { $('#panel').innerHTML = framedPanel; $('#panel').scrollTop = 0; return; }
   const crumbs = pathOf(id).map((p, i, a) => i === a.length - 1
     ? `<span aria-current="location">${esc(shortName(p))}</span>`
     : `<button type="button" data-go="${p}">${esc(shortName(p))}</button><span aria-hidden="true">›</span>`).join('');
@@ -842,6 +847,15 @@ const BUILD = {
   },
 };
 if (D.ext && D.ext.forms) for (const [k, f] of Object.entries(D.ext.forms)) BUILD[k] = (g, r, id, p) => f({ THREE, V, W, add, std, ctex, hex, mat, taperTube, g, r, id, p }); // 0.9.7 Circle layer hook
+BUILD.circleFrame = (g, repr, id) => {
+  const texture = new THREE.TextureLoader().load(repr.artwork);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
+  add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), mat.limbBark), id + '_frame', id, frame);
+  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * 853 / 1280), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  companionFrames?.buildCompanionPresence({ THREE, add, std, BUILD }, g, repr, id);
+  return 1.25;
+};
 function buildCircle(num) {
   const C = D.council.circles[num], grp = new THREE.Group(); grp.name = 'circle_' + num + '_companions'; room.add(grp); circleGroups[num] = grp; curGrp = grp;
   C.companions.forEach((cm) => { const a = cm.seat, rr = cm.repr.form === 'word' ? 1.45 : CR, p = V(Math.sin(a) * rr, 0, Math.cos(a) * rr), g = new THREE.Group(); g.name = cm.id + '_place'; g.position.copy(p); grp.add(g); g.lookAt(W(0, 0, 0));
@@ -850,6 +864,7 @@ function buildCircle(num) {
     const ay = BUILD[cm.repr.form](tg, cm.repr, cm.id, p) + (tg === g ? 0 : 0.43);
     roomAnchors[cm.id] = W(p.x, ay, p.z);
     roomViews[cm.id] = cm.repr.form === 'word' ? [W(p.x, ay, p.z), W(0.3, 1.3, 1.6)] : [W(p.x, 0.5, p.z), W(p.x * 0.3 + Math.cos(a) * 0.5, 1.05, p.z * 0.3 - Math.sin(a) * 0.5)];
+    if (cm.repr.form === 'circleFrame') roomViews[cm.id] = [W(p.x, 1.25, p.z), W(p.x * .25, 1.25, p.z * .25)];
     if (cm.id === 'yewc233') roomViews[cm.id] = [W(p.x * 1.15, 0.8, p.z * 1.15), W(p.x * 0.2 + 0.5, 1.3, p.z * 0.2 + 1.0)]; });
   grp.visible = num === D.council.active;
 }
@@ -1263,7 +1278,7 @@ function crossTo(want, then) {
   veil.classList.add('on'); setTimeout(() => { swap(); setTimeout(() => veil.classList.remove('on'), 60); }, 620);
 }
 scene3d = { circle: applyCircle, select(id, prev) {
-  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
+  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? 236 : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
   drawThreads(id);
   const n = D.nodes[id], want = placeOf(id);
   if (want !== place) {

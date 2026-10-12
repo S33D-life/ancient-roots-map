@@ -152,6 +152,44 @@ function adminClient() {
   );
 }
 
+/** Service-role reads must enforce the same boundary as can_read_tree_record.
+ * userId is established by authenticate(), never taken from query parameters.
+ * Resolve curator/grants from the database, including for authenticated agents.
+ */
+async function readableTrees(
+  db: ReturnType<typeof adminClient>, auth: AuthResult, query: any,
+): Promise<{ query: any }> {
+  // Wrap the query: Supabase builders are thenables and must not execute here.
+  if (!auth.userId) return { query: query.eq("accessibility_tier", "public") };
+
+  const { data: curator, error: roleError } = await db.from("user_roles")
+    .select("role").eq("user_id", auth.userId).eq("role", "curator").maybeSingle();
+  if (roleError) throw new Error("Tree access check failed");
+  if (curator) return { query };
+
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuid.test(auth.userId)) throw new Error("Invalid authenticated tree reader");
+  const ids: string[] = [];
+  // Continue until an empty page, including when the server caps page size.
+  let offset = 0;
+  for (;;) {
+    const { data: grants, error: grantError } = await db.from("tree_access_grants")
+      .select("tree_id").eq("user_id", auth.userId).order("tree_id")
+      .range(offset, offset + 499);
+    if (grantError || !grants) throw new Error("Tree access check failed");
+    if (!grants.length) break;
+    ids.push(...grants.map((grant: { tree_id: string }) => grant.tree_id));
+    offset += grants.length;
+  }
+  if (ids.some((id: string) => !uuid.test(id))) throw new Error("Invalid tree access grant");
+  const permitted = ["accessibility_tier.eq.public", `created_by.eq.${auth.userId}`];
+  if (ids.length) permitted.push(`id.in.(${ids.join(",")})`);
+  return { query: query.or(permitted.join(",")) };
+}
+
+// Authorised responses must never be replayed to another visitor by a CDN.
+const TREE_READ_CACHE = { "Cache-Control": "private, no-store" };
+
 /* ------------------------------------------------------------------ */
 /*  Route matching                                                     */
 /* ------------------------------------------------------------------ */
@@ -240,7 +278,7 @@ route("GET", "/api/v1/meta/me", async (_req, auth) => {
 route("GET", "/api/v1/trees", async (_req, auth, _params, url) => {
   const { limit, offset } = parseQuery(url);
   const db = adminClient();
-  let query = db.from("trees").select("id, name, species, latitude, longitude, nation, state, bioregion, estimated_age, girth_cm, what3words, is_churchyard_tree, description, created_at", { count: "exact" });
+  let { query } = await readableTrees(db, auth, db.from("trees").select("id, name, species, latitude, longitude, nation, state, bioregion, estimated_age, girth_cm, what3words, is_churchyard_tree, description, created_at", { count: "exact" }));
 
   // Filters
   const country = url.searchParams.get("country");
@@ -278,15 +316,16 @@ route("GET", "/api/v1/trees", async (_req, auth, _params, url) => {
   return json({
     data,
     pagination: { limit, offset, total: count, next_cursor: (offset + limit < (count ?? 0)) ? offset + limit : null },
-  }, 200, { "Cache-Control": "public, max-age=60" });
+  }, 200, TREE_READ_CACHE);
 });
 
 // ── Trees: Get by ID ──
-route("GET", "/api/v1/trees/:id", async (_req, _auth, params) => {
+route("GET", "/api/v1/trees/:id", async (_req, auth, params) => {
   const db = adminClient();
-  const { data, error } = await db.from("trees").select("*").eq("id", params.id).single();
+  const { query } = await readableTrees(db, auth, db.from("trees").select("*"));
+  const { data, error } = await query.eq("id", params.id).single();
   if (error || !data) return err("NOT_FOUND", "Tree not found", 404);
-  return json({ data }, 200, { "Cache-Control": "public, max-age=60" });
+  return json({ data }, 200, TREE_READ_CACHE);
 });
 
 // ── Trees: Offerings for a tree ──
@@ -394,7 +433,7 @@ route("GET", "/api/v1/offerings/:id", async (_req, auth, params) => {
 });
 
 // ── Search ──
-route("GET", "/api/v1/search", async (_req, _auth, _params, url) => {
+route("GET", "/api/v1/search", async (_req, auth, _params, url) => {
   const q = url.searchParams.get("q");
   if (!q || q.length < 2) return err("INVALID_QUERY", "Query must be at least 2 characters");
 
@@ -403,11 +442,12 @@ route("GET", "/api/v1/search", async (_req, _auth, _params, url) => {
   const results: any[] = [];
 
   if (types.includes("trees")) {
-    const { data } = await db.from("trees")
-      .select("id, name, species, nation, latitude, longitude")
+    const { query } = await readableTrees(db, auth, db.from("trees").select("id, name, species, nation, latitude, longitude"));
+    const { data, error } = await query
       .or(`name.ilike.%${q}%,species.ilike.%${q}%,nation.ilike.%${q}%`)
       .limit(10);
-    (data ?? []).forEach(t => results.push({
+    if (error) throw new Error("Tree search failed");
+    (data ?? []).forEach((t: { id: string; name: string; species: string; nation: string | null; latitude: number | null; longitude: number | null }) => results.push({
       type: "tree", id: t.id, title: t.name, snippet: `${t.species} — ${t.nation ?? "Unknown"}`,
       url: `/tree/${t.id}`, latitude: t.latitude, longitude: t.longitude,
     }));
@@ -425,7 +465,7 @@ route("GET", "/api/v1/search", async (_req, _auth, _params, url) => {
     }));
   }
 
-  return json({ data: results, query: q }, 200, { "Cache-Control": "public, max-age=30" });
+  return json({ data: results, query: q }, 200, TREE_READ_CACHE);
 });
 
 // ── Species Vision ──

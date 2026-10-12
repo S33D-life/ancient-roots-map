@@ -35,6 +35,6 @@ it("projects weekly labels, number and state without Circle-235 UI constants", (
   expect(screen.getByText("Gathering")).toBeInTheDocument();
   expect(screen.getByText(/chosen together/)).toBeInTheDocument();
   expect(screen.getByText("Weekly care: Meet thoughtfully")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "Explore Circle 999 in 3D TETOL" })).toHaveAttribute("href", "/existing-tree");
+  expect(screen.getByRole("button", { name: "Enter the Circle →" })).toBeInTheDocument();
   expect(screen.queryByText(/Fly Agaric:|chosen by Leo/)).not.toBeInTheDocument();
 });
