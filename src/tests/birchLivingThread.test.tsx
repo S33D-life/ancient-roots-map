@@ -27,13 +27,13 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe("one living Birch thread", () => {
-  it("exposes only a preparing Circle and the confirmed constellation", async () => {
+  it("exposes an open Circle and the confirmed constellation", async () => {
     mount(THREAD_ROUTES.circle(236));
     expect(screen.getByRole("heading", { name: "Circle 236" })).toBeTruthy();
-    expect(screen.getByText("Canopy · PREPARING")).toBeTruthy();
+    expect(screen.getByText("Canopy · OPEN")).toBeTruthy();
     for (const name of ["Bishop of Ely’s Plane Tree", "Rose", "Tomato", "Bay Bolete", "Toucan"]) expect(screen.getByText(name)).toBeTruthy();
     expect(screen.getByText("Winnie-the-Pooh")).toBeTruthy();
-    expect(screen.getByText("Not an opened Circle or a record of a gathering.")).toBeTruthy();
+    expect(screen.getByText("The Circle is open. Fires come and go; the Circle remains.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /claim|submit|upload/i })).toBeNull();
   });
   it("resolves the existing broad reference without replacing it with its species strand", async () => {

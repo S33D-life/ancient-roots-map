@@ -8,9 +8,9 @@ vi.mock("@/components/council/EmbeddedCouncilDeck", () => ({ default: ({src,onRe
 import CouncilOfLifePage from "@/pages/CouncilOfLifePage";
 describe("selective Canopy promotion", () => {
   beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); window.scrollTo = vi.fn(); });
-  it("keeps the approved Circle separate from 236 preparation and returns from its existing appearance", async () => {
+  it("keeps historical Circle 235 separate from current Circle 236 and returns from its existing appearance", async () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
-    expect(screen.getByRole("link", {name:/Circle 236 · Preparing/})).toHaveAttribute("href","/review/council/236");
+    expect(screen.getByRole("link", {name:/Circle 236 · Open/})).toHaveAttribute("href","/review/council/236");
     const doorway=screen.getByRole("button",{name:"Enter the Circle →"});
     fireEvent.click(screen.getByRole("button",{name:"Fly Agaric"}));
     fireEvent.click(screen.getByRole("button",{name:"Follow this companion in the Circle →"}));
