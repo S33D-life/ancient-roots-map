@@ -8,17 +8,31 @@ vi.mock("@/components/council/EmbeddedCouncilDeck", () => ({ default: ({src,onRe
 import CouncilOfLifePage from "@/pages/CouncilOfLifePage";
 describe("selective Canopy promotion", () => {
   beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); window.scrollTo = vi.fn(); });
-  it("keeps the approved Circle separate from 236 preparation and returns from its existing appearance", async () => {
+  it("keeps historical Circle 235 separate from current Circle 236 and returns from its existing appearance", async () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
-    expect(screen.getByRole("link", {name:/Circle 236 · Preparing/})).toHaveAttribute("href","/review/council/236");
+    expect(screen.getByRole("link", {name:/Circle 236 · Open/})).toHaveAttribute("href","/review/council/236");
     const doorway=screen.getByRole("button",{name:"Enter the Circle →"});
     fireEvent.click(screen.getByRole("button",{name:"Fly Agaric"}));
     fireEvent.click(screen.getByRole("button",{name:"Follow this companion in the Circle →"}));
     expect(screen.getByRole("button",{name:"Deck return"})).toHaveAttribute("data-src",expect.stringContaining("#c235_flyagaric"));
     fireEvent.click(screen.getByRole("button",{name:"Deck return"}));
     await waitFor(()=>expect(doorway).toHaveFocus());
+    expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ block: "start", behavior: "instant" });
+    const scrollMock = vi.mocked(Element.prototype.scrollIntoView);
+    expect(scrollMock.mock.contexts.at(-1)).toBe(screen.getByRole("region", { name: "Previous Circle 235" }));
+    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "Circle 236" }));
     expect(screen.queryByRole("button",{name:"Deck return"})).not.toBeInTheDocument();
     expect(screen.getByRole("link",{name:"Descend to Heartwood Hall →"})).toHaveAttribute("href","/library");
+  });
+  it("presents 235 historically without rewriting its question or companions", () => {
+    render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
+    const previous = screen.getByRole("region", { name: "Previous Circle 235" });
+    expect(previous).toHaveTextContent("Previous Circle · last week");
+    expect(previous).toHaveTextContent("Circle 235 companions, chosen by Leo");
+    expect(previous).toHaveTextContent("What is already blooming in us that we haven’t noticed yet?");
+    expect(previous).toHaveTextContent("Fulham Palace Holm Oak");
+    expect(previous).not.toHaveTextContent("This week’s companions");
+    expect(previous).not.toHaveTextContent("The Circle is open now");
   });
   it("does not import global theme or held-realm CSS",()=>{
     const css=readFileSync("src/components/parchment/parchment.css","utf8");

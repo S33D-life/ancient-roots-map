@@ -6,7 +6,7 @@ import { BIRCH_ARTIFACT, birchAppearance } from '@/data/library/birchThread';
 
 describe('one Circle companion manifest, two surfaces', () => {
   it('keeps the seven approved associations and distinguishes the book and individual tree', () => {
-    expect(frames.status).toBe('PREPARING');
+    expect(frames.status).toBe('OPEN');
     expect(frames.companions.map(c => c.id)).toEqual(['birch-companion','ely-plane-companion','rose-companion','tomato-companion','bay-bolete-companion','toucan-companion','winnie-the-pooh-companion']);
     expect(frames.companions.filter(c => c.reader).map(c => c.id)).toEqual(['birch-companion']);
     expect(frames.companions[1].kind).toContain('Individual tree');
@@ -29,7 +29,7 @@ describe('one Circle companion manifest, two surfaces', () => {
       expect(D.nodes['ely-plane-companion'].lives).toEqual([]);
       expect(companionPanel(D, 'birch-companion', (s: string) => s)).toContain('data-circle-reader');
       expect(companionPanel(D, 'winnie-the-pooh-companion', (s: string) => s)).not.toContain('data-circle-reader');
-      expect(companionPanel(D, 'croom', (s: string) => s)).toContain('PREPARING');
+      expect(companionPanel(D, 'croom', (s: string) => s)).toContain('OPEN');
     } finally { vi.unstubAllGlobals(); }
   });
 });

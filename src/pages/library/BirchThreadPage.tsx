@@ -24,7 +24,7 @@ function Shell({ children }: { children: ReactNode }) {
 }
 
 export function BirchPreparationPage() {
-  useDocumentTitle("Circle 236 · Preparing");
+  useDocumentTitle("Circle 236 · Open");
   const { circleNumber } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate(), location = useLocation();
@@ -51,13 +51,13 @@ export function BirchPreparationPage() {
   }, [location.key, params, appearance.id, appearance.returnContext]);
   if (circleNumber !== "236") return <Shell><h1>Preparation unavailable</h1><Link to={ROUTES.COUNCIL}>Return to Council</Link></Shell>;
   return <Shell>
-    <p className="birch-kicker">Canopy · PREPARING</p>
+    <p className="birch-kicker">Canopy · OPEN</p>
     <h1>Circle 236</h1>
-    <p className="birch-lead">Meet the preparing constellation.</p>
-    <p className="birch-status">Not an opened Circle or a record of a gathering.</p>
+    <p className="birch-lead">Meet this week’s companion constellation.</p>
+    <p className="birch-status">The Circle is open. Fires come and go; the Circle remains.</p>
     <Circle236Fire />
     <section aria-labelledby="preparing-companions"><h2 id="preparing-companions">The companions</h2>
-      <p>The companions are confirmed; the Circle is preparing. Birch’s source-linked study is available. The other Living Record doorways are not ready.</p>
+      <p>The companions are confirmed; the Circle is open. Birch’s source-linked study is available. The other Living Record doorways are not ready.</p>
     </section>
     <div className="birch-mode" aria-label="Companion view"><Link aria-current={mode === "2d" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=2d`}>Companion frames</Link><Link aria-current={mode === "spatial" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=spatial`}>Enter the spatial Council</Link></div>
     {mode === "spatial" && <iframe className="circle-spatial-room" title="Circle 236 companion frames in the existing Council room" src={`/tetol/circle-235/pre-fire/tetol.html?circle=236#${params.get("returned") === "1" ? "birch-companion" : "croom"}`} />}
