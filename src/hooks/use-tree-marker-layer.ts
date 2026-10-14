@@ -299,7 +299,7 @@ export function useTreeMarkerLayer({
       const toAdd: L.Marker[] = [];
       const treeMap = new Map(filteredTrees.map((t) => [t.id, t]));
       newTreeIds.forEach((id) => {
-        if (!existingIds.has(id) || currentMarkers.get(id)?.options.title !== satelliteMarkerOptions(treeMap.get(id)!).title) {
+        if (!existingIds.has(id) || (currentMarkers.get(id)?.options.title ?? "") !== (satelliteMarkerOptions(treeMap.get(id)!).title ?? "")) {
           const previous = currentMarkers.get(id);
           if (previous) toRemove.push(previous);
           const tree = treeMap.get(id);
