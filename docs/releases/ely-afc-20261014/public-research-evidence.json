@@ -28,5 +28,18 @@
   "trees": {
     "public_name_search": "no Ely individual match; unrelated substring result excluded",
     "scope": "anonymous only; all-tier duplicate check still required"
-  }
+  },
+  "original_source_row_verified": [
+    [
+      "437",
+      "9",
+      "Ely",
+      "Bishop's Plane",
+      "London plane",
+      "Platanus x hispanica",
+      "Ely Cathedral, Chapter House, The College, Ely CB7 4DL",
+      "///park.heckler.expecting\n52.398245, 0.261422",
+      ""
+    ]
+  ]
 }

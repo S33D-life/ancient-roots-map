@@ -10,7 +10,7 @@ The prepared Codex patch was local-only on codex/ely-public-access-wording-20261
 ## Research reconciliation — do not promote yet
 Public research_trees contains fc085265-5a4f-46f0-a616-f3b869bea8b0, Bishop’s Plane, Platanus x hispanica, coordinates 52.398245,0.261422, provenance Paul Wood — Tree Hunting (2025), source document and locality in attached public-research-evidence.json. linked_tree_id/converted_tree_id null, research_only. Preserve all fields/ID and its recorded geo_precision exact as source assertion, not proof of surveying.
 
-This is a strong same-tree candidate: taxon, Ely cathedral precinct locality and name all fit the witnessed tree. Original referenced source row could not be independently opened in this pass. No name/proximity-only identity merge. Request source row/entry or steward confirmation before recording a verified same-individual relationship. Public trees name search finds no actual Ely individual; all-tier fresh duplicate check remains necessary via Lovable read-only backend tools before insertion.
+This is a strong same-tree candidate: taxon, Ely cathedral precinct locality and name all fit the witnessed tree. Original public spreadsheet CSV row #437 independently retrieved and matches the imported name/taxon/locality/coordinates and source what3words. This verifies imported provenance, not by itself the same-individual relationship. No name/proximity-only identity merge. Request source row/entry or steward confirmation before recording a verified same-individual relationship. Public trees name search finds no actual Ely individual; all-tier fresh duplicate check remains necessary via Lovable read-only backend tools before insertion.
 
 Existing species_index UUID 32e5a004-f8c5-45eb-a74f-8e6d1f205a68 verified: species_key platanus-acerifolia, stored scientific name Platanus × acerifolia; accepted human content Platanus × hispanica uses existing identity, no new species. trees uses species_key, not a new species UUID column.
 
@@ -59,3 +59,5 @@ Noku untouched; plan only after Ely verified live. No sensitive/private data in 
 
 ## Local verification receipt
 Complete release-check: 534/534 tests across 69 files, typecheck/build/security/asset/duplicate/Council checks passed. Lint: 0 errors, 179 existing warnings. Config churn guard passed. Production-build Playwright release-reconciliation smoke: 4/4, desktop 1280 and mobile 390, external requests intercepted; not live authenticated proof. Earlier isolated location fixture reviewed at 320/390/1440; no actual Ely live profile exists yet. Private-photo hash/metadata checks are separate from application build.
+
+Additional responsive smoke: 4/4 at 320/1440 using an uncommitted temporary copy of the same read-only smoke; temporary file removed. Total local navigation checks 8/8 across 320/390/1280/1440. No authenticated live Ely assertion.
