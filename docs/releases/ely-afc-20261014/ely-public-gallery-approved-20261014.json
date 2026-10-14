@@ -1,0 +1,100 @@
+{
+  "provenance": "User-supplied encounter photographs from the visit reported as 11 October 2026; not independently verified untouched camera originals",
+  "order": [
+    1,
+    3,
+    2,
+    5,
+    6,
+    4,
+    7,
+    8
+  ],
+  "photos": [
+    {
+      "position": 1,
+      "photo_number": 1,
+      "filename": "1-Photo-1.jpg",
+      "sha256": "79e7003ff3180e71fe4eb18cf3bfb39ce82e2dbb05e80a8a3a10cff63363aca7",
+      "caption": "The Great London Plane of Ely, photographed during our 11 October 2026 visit; viewed from outside the roped boundary.",
+      "alt": "The Great London Plane of Ely, photographed during our 11 October 2026 visit; viewed from outside the roped boundary.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 2,
+      "photo_number": 3,
+      "filename": "3-Photo-3.jpg",
+      "sha256": "34a61f9167a991dad663c3d775cfe2e82d305cc036a397fe8d811276abebebf9",
+      "caption": "The trunk and canopy from our permitted viewing position.",
+      "alt": "The trunk and canopy from our permitted viewing position.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 3,
+      "photo_number": 2,
+      "filename": "2-Photo-2.jpg",
+      "sha256": "d30746967686912da6edf63f25bcd89da5837b2b59740bd091bfe080ad1049dc",
+      "caption": "Lower trunk and branches behind the visitor boundary.",
+      "alt": "Lower trunk and branches behind the visitor boundary.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 4,
+      "photo_number": 5,
+      "filename": "5-Photo-5.jpg",
+      "sha256": "a9e312d35027ced26c629ec4ac06ed0b081c10446cb0ae0d2443437f37a3a1a8",
+      "caption": "Branching structure and foliage, photographed from a distance.",
+      "alt": "Branching structure and foliage, photographed from a distance.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 5,
+      "photo_number": 6,
+      "filename": "6-Photo-6.jpg",
+      "sha256": "1adb2d45fb8012c5401bdd438c345372d1cb2a8cd25827da501ac8b8aad1f115",
+      "caption": "Trunk and exposed root flare from the accessible viewing area.",
+      "alt": "Trunk and exposed root flare from the accessible viewing area.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 6,
+      "photo_number": 4,
+      "filename": "4-Photo-4.jpg",
+      "sha256": "4dbc848c94debc908d556afd5c13a7511e6c833ecc537397826fdc3abac22b24",
+      "caption": "Trunk detail and a visible opening; this photograph does not establish a diagnosis.",
+      "alt": "Trunk detail and a visible opening; this photograph does not establish a diagnosis.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 7,
+      "photo_number": 7,
+      "filename": "7-Photo-7.jpg",
+      "sha256": "93f39ca7763e29955f72983b87cc78059b9e8a4285fbbaf29942e8e6f33db951",
+      "caption": "The tree in its garden setting, with buildings and Ely Cathedral visible beyond.",
+      "alt": "The tree in its garden setting, with buildings and Ely Cathedral visible beyond.",
+      "status": "public content approved; upload not authorised"
+    },
+    {
+      "position": 8,
+      "photo_number": 8,
+      "filename": "8-Photo-8.jpg",
+      "sha256": "48909fba8370f63719f3a8dea547cb399bddc8b43126b9edf7688510161bdee5",
+      "caption": "The Tree Council commemorative plaque, dated June 2002, recognising the London Plane of Ely among fifty Great British Trees for Queen Elizabeth II\u2019s Golden Jubilee.",
+      "alt": "The Tree Council commemorative plaque, dated June 2002, recognising the London Plane of Ely among fifty Great British Trees for Queen Elizabeth II\u2019s Golden Jubilee.",
+      "status": "public content approved; upload not authorised"
+    }
+  ],
+  "withheld": [
+    {
+      "photo": 9,
+      "reason": "recognisable child reflection; private only; no redaction authorised"
+    },
+    {
+      "photo": 10,
+      "reason": "Council illustration; not documentary photography"
+    }
+  ],
+  "conservation_text": "During our visit, conservation signage identified King\u2019s Ely, Barcham, the University of Cambridge and Heritage Fund support. It directed visitors to project information and a tree webcam. These are documented project leads, not evidence of a partnership with S33D.",
+  "location_label": "Satellite-derived estimate \u2014 trunk position unverified",
+  "original_camera_filenames": "Not inferred or assigned"
+}

@@ -2,6 +2,7 @@
  * Map popup HTML builders — extracted from LeafletFallbackMap for
  * maintainability and to allow caching/memoization.
  */
+import { treeLocationLabel } from "@/lib/treeLocationEvidence";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { resolveSpeciesSync } from "@/services/speciesResolver";
@@ -57,6 +58,9 @@ function cacheKey(treeId: string, offerings: number, age: number, birdsongCount:
 }
 
 export interface PopupTree {
+  location_confidence?: string | null;
+  location_basis?: string | null;
+  metadata?: unknown;
   id: string;
   name: string;
   species: string;
@@ -86,7 +90,8 @@ export function buildPopupHtml(
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
 
   const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
-  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount, presenceSignal);
+  const locationLabel = treeLocationLabel(tree);
+  const key = (locationLabel ?? "") + ":" + cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount, presenceSignal);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
@@ -203,6 +208,7 @@ export function buildPopupHtml(
       ${locationLine}
 
       <!-- Description -->
+      ${locationLabel ? `<p style="font-size:11px;line-height:1.5;margin:6px 0;color:hsl(42,65%,62%);">${escapeHtml(locationLabel)}</p>` : ""}
       ${desc}
     </div>
 

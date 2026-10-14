@@ -19,6 +19,7 @@
  *   /staff/<code>            → Staff detail page (static data)
  *   *                        → fallback with S33D branding
  */
+import { treeLocationLabel, treeGeographicMetadata } from "../_shared/treeLocationEvidence.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -316,7 +317,7 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const [treeRes, mintedRes, staffRes] = await Promise.all([
       supabase
         .from("trees")
-        .select("id, name, species, nation, latitude, longitude, description, updated_at")
+        .select("id, name, species, nation, latitude, longitude, description, updated_at, location_confidence, location_basis:metadata->location_provenance->>basis")
         .eq("id", id)
         .eq("accessibility_tier", "public")
         .maybeSingle(),
@@ -376,13 +377,12 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
 
     return {
       title,
-      description: desc,
+      description: [treeLocationLabel(tree), desc].filter(Boolean).join(". "),
       image,
       url: `${APP_URL}/tree/${tree.id}`,
       imageWidth: 1200,
       imageHeight: 630,
-      geoLat: tree.latitude,
-      geoLon: tree.longitude,
+      ...treeGeographicMetadata(tree),
     };
   } catch (err) {
     console.error(`[og-proxy] fetchTreeMeta error for ${id}:`, err);
@@ -471,7 +471,7 @@ async function fetchOfferingMeta(treeId: string, offeringId: string): Promise<Me
         .maybeSingle(),
       supabase
         .from("trees")
-        .select("id, name, species, nation, state, latitude, longitude")
+        .select("id, name, species, nation, state, latitude, longitude, location_confidence, location_basis:metadata->location_provenance->>basis")
         .eq("id", treeId)
         .eq("accessibility_tier", "public")
         .maybeSingle(),
@@ -503,13 +503,12 @@ async function fetchOfferingMeta(treeId: string, offeringId: string): Promise<Me
 
     return {
       title: title.length > 90 ? title.slice(0, 87) + "…" : title,
-      description: desc,
+      description: [treeLocationLabel(tree), desc].filter(Boolean).join(". "),
       image,
       url: `${APP_URL}/tree/${tree.id}?offering=${offering.id}`,
       imageWidth: 1200,
       imageHeight: 1200,
-      geoLat: tree.latitude,
-      geoLon: tree.longitude,
+      ...treeGeographicMetadata(tree),
     };
   } catch (err) {
     console.error(`[og-proxy] fetchOfferingMeta error:`, err);

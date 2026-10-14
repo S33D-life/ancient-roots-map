@@ -1,3 +1,4 @@
+import { treeLocationLabel } from "@/lib/treeLocationEvidence";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -385,6 +386,8 @@ const TreeCard = ({
                 Known since {knownSince}
               </p>
             )}
+
+            {treeLocationLabel(tree) && <p className="text-xs leading-relaxed text-primary">{treeLocationLabel(tree)}</p>}
 
             {/* Line 2: Grounding — w3w only (hive + age moved to identity cluster) */}
             {tree.what3words && (

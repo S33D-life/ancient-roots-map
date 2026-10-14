@@ -1,3 +1,4 @@
+import { treeLocationLabel, treeGeographicMetadata } from "@/lib/treeLocationEvidence";
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -97,7 +98,7 @@ describe("actual OG metadata fetchers", () => {
       return q;
     } });
     const source = fs.readFileSync("supabase/functions/og-proxy/index.ts", "utf8").replace(/^import[\s\S]*?;\n/gm, "");
-    const context: Record<string, unknown> = { createClient, Deno: { env: { get: () => "https://test.invalid" }, serve: () => {} }, console };
+    const context: Record<string, unknown> = { treeLocationLabel, treeGeographicMetadata, createClient, Deno: { env: { get: () => "https://test.invalid" }, serve: () => {} }, console };
     runInNewContext(ts.transpileModule(source + `\n globalThis.fetchMeta = ${fn};`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, context);
     const result = await (context.fetchMeta as (tree: string, offering: string) => Promise<Record<string, unknown> | null>)(privateId, publicId);
     expect(queries.some(q => q.eq.some(([k,v]) => k === "accessibility_tier" && v === "public"))).toBe(true);
@@ -120,7 +121,7 @@ describe("actual OG metadata fetchers", () => {
     } });
     const file = fn === "fetchTreeData" ? "og-card" : "og-proxy";
     const source = fs.readFileSync(`supabase/functions/${file}/index.ts`, "utf8").replace(/^import[\s\S]*?;\n/gm, "");
-    const context: Record<string, unknown> = { createClient, Deno: { env: { get: () => "https://test.invalid" }, serve: () => {} }, console };
+    const context: Record<string, unknown> = { treeLocationLabel, treeGeographicMetadata, createClient, Deno: { env: { get: () => "https://test.invalid" }, serve: () => {} }, console };
     runInNewContext(ts.transpileModule(source + `\n globalThis.fetchMeta = ${fn};`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, context);
     const fetch = context.fetchMeta as (tree: string, offering: string) => Promise<Record<string, unknown> | null>;
     const visible = await fetch(publicId, publicId);

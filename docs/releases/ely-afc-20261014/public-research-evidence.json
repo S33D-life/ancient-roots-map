@@ -1,0 +1,32 @@
+{
+  "research_trees": [
+    {
+      "id": "fc085265-5a4f-46f0-a616-f3b869bea8b0",
+      "tree_name": "Bishop's Plane",
+      "species_scientific": "Platanus x hispanica",
+      "latitude": 52.398245,
+      "longitude": 0.261422,
+      "locality_text": "Ely Cathedral, Chapter House, The College, Ely CB7 4DL, Ely",
+      "source_doc_title": "Tree Hunting: 1,000 Trees to Find in Britain and Ireland's Towns and Cities",
+      "source_doc_url": "https://docs.google.com/spreadsheets/d/1Kfud8f85FTHIXY6KKeygubIGosKGQTggupqIZmfzT7w/edit?gid=1465196549#gid=1465196549",
+      "source_doc_year": 2025,
+      "source_program": "Paul Wood \u2014 Tree Hunting",
+      "geo_precision": "exact",
+      "linked_tree_id": null,
+      "converted_tree_id": null,
+      "conversion_status": "research_only",
+      "record_status": "research"
+    }
+  ],
+  "species_index": [
+    {
+      "id": "32e5a004-f8c5-45eb-a74f-8e6d1f205a68",
+      "species_key": "platanus-acerifolia",
+      "scientific_name": "Platanus \u00d7 acerifolia"
+    }
+  ],
+  "trees": {
+    "public_name_search": "no Ely individual match; unrelated substring result excluded",
+    "scope": "anonymous only; all-tier duplicate check still required"
+  }
+}
