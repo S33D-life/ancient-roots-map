@@ -31,8 +31,8 @@ describe("one living Birch thread", () => {
     mount(THREAD_ROUTES.circle(236));
     expect(screen.getByRole("heading", { name: "Circle 236" })).toBeTruthy();
     expect(screen.getByText("Canopy · OPEN")).toBeTruthy();
-    for (const name of ["Bishop of Ely’s Plane Tree", "Rose", "Tomato", "Bay Bolete", "Toucan"]) expect(screen.getByText(name)).toBeTruthy();
-    expect(screen.getByText("Winnie-the-Pooh")).toBeTruthy();
+    for (const name of ["The Great London Plane of Ely", "Rose", "Tomato", "Bay Bolete", "Toucan"]) expect(screen.getByRole("heading", { name })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Winnie-the-Pooh" })).toBeTruthy();
     expect(screen.getByText("The Circle is open. Fires come and go; the Circle remains.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /claim|submit|upload/i })).toBeNull();
   });

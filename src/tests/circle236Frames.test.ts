@@ -30,6 +30,8 @@ describe('one Circle companion manifest, two surfaces', () => {
       expect(D.council.circles[233]).toBe(previous);
       expect(D.council.circles[236].companions.map((c: any) => c.id)).toEqual(frames.companions.map(c => c.id));
       expect(D.nodes['ely-plane-companion'].lives).toEqual([]);
+      expect(D.council.circles[236].companions[6].repr.artwork).toBeNull();
+      expect(D.council.circles[236].companions[6].repr.textLabel).toContain('Winnie-the-Pooh');
       expect(companionPanel(D, 'birch-companion', (s: string) => s)).toContain('data-circle-reader');
       expect(companionPanel(D, 'winnie-the-pooh-companion', (s: string) => s)).not.toContain('data-circle-reader');
       expect(companionPanel(D, 'croom', (s: string) => s)).toContain('OPEN');

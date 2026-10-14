@@ -848,7 +848,11 @@ const BUILD = {
 };
 if (D.ext && D.ext.forms) for (const [k, f] of Object.entries(D.ext.forms)) BUILD[k] = (g, r, id, p) => f({ THREE, V, W, add, std, ctex, hex, mat, taperTube, g, r, id, p }); // 0.9.7 Circle layer hook
 BUILD.circleFrame = (g, repr, id) => {
-  const texture = new THREE.TextureLoader().load(repr.artwork);
+  const texture = repr.artwork ? new THREE.TextureLoader().load(repr.artwork) : ctex(512, 342, (x, w, h) => {
+    x.fillStyle = '#e8ddbc'; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#3a2819'; x.textAlign = 'center'; x.font = '28px Georgia';
+    repr.textLabel.forEach((line, i) => x.fillText(line, w / 2, 130 + i * 48, w - 40));
+  });
   texture.colorSpace = THREE.SRGBColorSpace;
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
   add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), mat.limbBark), id + '_frame', id, frame);

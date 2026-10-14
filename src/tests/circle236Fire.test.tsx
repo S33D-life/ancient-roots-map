@@ -6,7 +6,7 @@ describe("Circle 236 invitation doorway", () => {
   it("shows the confirmed UK gathering without exposing or inventing a meeting URL", () => {
     render(<Circle236Fire />);
     expect(screen.getByText("Tuesday 13 October · 19:30 UK")).toHaveAttribute("datetime", "2026-10-13T19:30:00+01:00");
-    expect(screen.getByRole("link", { name: "Gather at the Fire · Council group →" })).toHaveAttribute("href", "https://t.me/s33dlife");
+    expect(screen.getByRole("link", { name: "Fire times are shared in the Council group →" })).toHaveAttribute("href", "https://t.me/s33dlife");
     expect(screen.queryByRole("link", { name: /Google Meet/ })).not.toBeInTheDocument();
   });
 });

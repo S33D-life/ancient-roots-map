@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 for (const width of [320, 390, 1440]) test(`Circle 236 OPEN 2D and spatial at ${width}`, async ({ page }) => {
   test.setTimeout(120_000);
   await page.setViewportSize({ width, height: 900 });
+  const bookImageRequests: string[] = [];
+  page.on("request", request => { if (request.url().includes("/circle-236/winnie-the-pooh.jpg")) bookImageRequests.push(request.url()); });
   await page.route("**/*", route => {
     const u = new URL(route.request().url());
     return ["127.0.0.1", "localhost"].includes(u.hostname) ? route.continue() : route.fulfill({ contentType: "application/json", body: "[]" });
@@ -9,10 +11,28 @@ for (const width of [320, 390, 1440]) test(`Circle 236 OPEN 2D and spatial at ${
   await page.goto("/council-of-life");
   await expect(page.getByRole("region", { name: "Circle 236", exact: true })).toContainText("OPEN");
   await expect(page.getByRole("region", { name: "Previous Circle 235" })).toContainText("What is already blooming in us");
+  const trail = page.getByRole("button", { name: /Your First Walk/ });
+  await expect(trail).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("link", { name: /Visit the Map/ })).toHaveCount(0);
   await page.getByRole("link", { name: "Circle 236 · Open · meet its companions →" }).click();
   await expect(page.getByText("Canopy · OPEN")).toBeVisible();
   await expect(page.locator(".circle-companion-frames figure")).toHaveCount(7);
+  for (const caption of await page.locator(".circle-companion-frames figcaption").all()) await expect(caption.locator("li")).toHaveCount(6);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.getByText("Fire reference · past date.", { exact: false })).toBeVisible();
+  await expect(page.locator('.circle-companion-frames img[src$="winnie-the-pooh.jpg"]')).toHaveCount(0);
+  const bolete = page.locator("figure").filter({ has: page.getByRole("heading", { name: "Bay Bolete", exact: true }) });
+  await expect(bolete).toContainText("Never eat a wild mushroom on the strength of a picture.");
+  await bolete.getByRole("button").click();
+  await expect(page.getByRole("dialog")).toContainText("Never eat a wild mushroom on the strength of a picture.");
+  await expect(page.getByRole("dialog").locator(".circle-care")).toBeInViewport();
+  await page.getByRole("button", { name: "Return to the companions" }).click();
+  await expect(bolete.getByRole("button")).toBeFocused();
+  const book = page.locator("figure").filter({ has: page.getByRole("heading", { name: "Winnie-the-Pooh", exact: true }) });
+  await book.getByRole("button").click();
+  await expect(page.getByRole("dialog").locator("img")).toHaveCount(0);
+  await page.getByRole("button", { name: "Return to the companions" }).click();
+  await page.screenshot({ path: test.info().outputPath(`circle-${width}.png`), fullPage: true });
   await page.reload();
   await expect(page.getByText("Canopy · OPEN")).toBeVisible();
   await page.getByRole("link", { name: "Enter the spatial Council", exact: true }).click();
@@ -20,6 +40,8 @@ for (const width of [320, 390, 1440]) test(`Circle 236 OPEN 2D and spatial at ${
   await expect(room.locator("#brandline")).toContainText("Circle 236 · OPEN", { timeout: 60000 });
   await expect(room.locator("#panel")).toContainText("OPEN", { timeout: 60000 });
   await expect(room.locator("#panel")).toContainText("Fire reference");
+  expect(bookImageRequests).toHaveLength(0);
+  await page.screenshot({ path: test.info().outputPath(`spatial-${width}.png`), fullPage: true });
 });
 
 test.describe("direct mobile spatial return", () => {

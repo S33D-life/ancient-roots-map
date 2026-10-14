@@ -5,6 +5,7 @@
  * Steps: Visit Map → Explore a Tree → Contribute (add tree or offering).
  * Auto-completes steps as the user navigates. Dismissible.
  */
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuietMode } from "@/contexts/QuietModeContext";
 import { Link, useLocation } from "react-router-dom";
@@ -21,6 +22,10 @@ const FirstWalkTrail = () => {
   const { steps, completed, finished, dismissed, dismiss, currentIndex } = useFirstWalk();
   const { showOnboardingNudges } = useQuietMode();
   const location = useLocation();
+  // Council-only preview: collapsing here never dismisses or completes the global trail.
+  const onCouncilRoute = location.pathname === "/council-of-life" || /^\/review\/council\/\d+$/.test(location.pathname);
+  const [expandedCouncilPath, setExpandedCouncilPath] = useState<string | null>(null);
+  const showSteps = !onCouncilRoute || expandedCouncilPath === location.pathname;
 
   // Hide entirely during auth flows so the widget doesn't compete with sign-in / verification UI.
   const onAuthRoute =
@@ -41,7 +46,7 @@ const FirstWalkTrail = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 16 }}
         transition={{ duration: 0.5, delay: 1.5 }}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+72px)] md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[55]"
+        className={`fixed ${onCouncilRoute ? "bottom-[calc(env(safe-area-inset-bottom,0px)+96px)]" : "bottom-[calc(env(safe-area-inset-bottom,0px)+72px)]"} md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[55]`}
       >
         <div
           className="rounded-2xl border backdrop-blur-md shadow-xl overflow-hidden"
@@ -53,7 +58,7 @@ const FirstWalkTrail = () => {
           {/* Header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-serif text-foreground/80">Your First Walk</span>
+              {onCouncilRoute ? <button type="button" className="text-xs font-serif text-foreground/80 min-h-11" aria-expanded={showSteps} aria-controls="first-walk-steps" onClick={() => setExpandedCouncilPath(showSteps ? null : location.pathname)}>Your First Walk · {showSteps ? "collapse" : "show steps"}</button> : <span className="text-xs font-serif text-foreground/80">Your First Walk</span>}
               <span
                 className="text-[9px] px-1.5 py-0.5 rounded-full font-sans"
                 style={{
@@ -74,7 +79,7 @@ const FirstWalkTrail = () => {
           </div>
 
           {/* Progress bar */}
-          <div className="px-4 pb-2">
+          <div className="px-4 pb-2" hidden={!showSteps}>
             <div className="h-1 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted) / 0.5)" }}>
               <motion.div
                 className="h-full rounded-full"
@@ -87,7 +92,7 @@ const FirstWalkTrail = () => {
           </div>
 
           {/* Steps */}
-          <div className="px-3 pb-3 space-y-1">
+          <div id="first-walk-steps" className="px-3 pb-3 space-y-1" hidden={!showSteps}>
             {steps.map((step, i) => {
               const meta = STEP_META[step];
               const Icon = meta.icon;
