@@ -31,7 +31,7 @@ const CouncilOfLifePage = () => {
   }, []);
   const returnToCircle = () => {
     setDeckNode(null);
-    requestAnimationFrame(() => { doorway.current?.focus({ preventScroll: true }); document.getElementById("next-gathering")?.scrollIntoView({ block: "start", behavior: "instant" }); });
+    requestAnimationFrame(() => { doorway.current?.focus({ preventScroll: true }); document.getElementById("previous-circle-235")?.scrollIntoView({ block: "start", behavior: "instant" }); });
   };
   return <ParchmentGround realm="canopy" className="canopy-clearing">
     <Header />
@@ -45,9 +45,9 @@ const CouncilOfLifePage = () => {
         <Circle236Fire className="parchment-action" />
       </section>
       <div className="canopy-arrival">
-        <section aria-label="Previous Circle 235">
+        <section id="previous-circle-235" aria-label="Previous Circle 235">
           <h2>Previous Circle · 235</h2>
-          <NextCouncilCard onJoinCouncil={() => setDeckNode("croom")} onMeetCompanion={setDeckNode} doorwayRef={doorway} deckAvailable={!!deckUrl} />
+          <NextCouncilCard historical onJoinCouncil={() => setDeckNode("croom")} onMeetCompanion={setDeckNode} doorwayRef={doorway} deckAvailable={!!deckUrl} />
         </section>
         <TreePlate realm="canopy" />
       </div>
