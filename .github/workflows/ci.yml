@@ -58,12 +58,31 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Record artifact provenance
+        env:
+          REVIEWED_PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          mkdir -p release-evidence
+          git rev-parse HEAD > release-evidence/SOURCE_SHA
+          printf '%s\n' "$REVIEWED_PR_HEAD" > release-evidence/PR_HEAD_SHA
+          printf '%s\n' "$PR_BASE_SHA" > release-evidence/PR_BASE_SHA
+          printf '%s\n' "$EVENT_NAME" > release-evidence/EVENT
+          printf '%s\n' "$GITHUB_SHA" > release-evidence/GITHUB_SHA
+          printf '%s\n' "$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT" > release-evidence/RUN
+          (cd dist && find . -type f -print0 | sort -z | xargs -0 sha256sum) > release-evidence/SHA256SUMS
+          (cd release-evidence && sha256sum SHA256SUMS > MANIFEST.sha256)
+          (cd dist && sha256sum -c ../release-evidence/SHA256SUMS)
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
-          retention-days: 1
+          path: |
+            dist
+            release-evidence
+          retention-days: 30
           if-no-files-found: error
 
   e2e-smoke:
@@ -88,7 +107,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist
+          path: artifact
+
+      - name: Verify and use the recorded artifact
+        run: |
+          (cd artifact/release-evidence && sha256sum -c MANIFEST.sha256)
+          test "$(git rev-parse HEAD)" = "$(cat artifact/release-evidence/SOURCE_SHA)"
+          (cd artifact/dist && sha256sum -c ../release-evidence/SHA256SUMS)
+          cp -a artifact/dist ./dist
 
       - name: Install Playwright (chromium only)
         run: npx playwright install --with-deps chromium
