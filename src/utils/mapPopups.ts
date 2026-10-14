@@ -2,7 +2,7 @@
  * Map popup HTML builders — extracted from LeafletFallbackMap for
  * maintainability and to allow caching/memoization.
  */
-import { treeLocationLabel } from "@/lib/treeLocationEvidence";
+import { treeLocationLabel, isManagedPublicRecord } from "@/lib/treeLocationEvidence";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { resolveSpeciesSync } from "@/services/speciesResolver";
@@ -60,6 +60,9 @@ function cacheKey(treeId: string, offerings: number, age: number, birdsongCount:
 export interface PopupTree {
   location_confidence?: string | null;
   location_basis?: string | null;
+  visiting_access_basis?: string | null;
+  accessibility_tier?: string | null;
+  access_notes?: string | null;
   metadata?: unknown;
   id: string;
   name: string;
@@ -91,7 +94,8 @@ export function buildPopupHtml(
 
   const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
   const locationLabel = treeLocationLabel(tree);
-  const key = (locationLabel ?? "") + ":" + cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount, presenceSignal);
+  const managedPublicRecord = isManagedPublicRecord(tree);
+  const key = JSON.stringify([locationLabel, managedPublicRecord, managedPublicRecord ? tree.access_notes : null]) + ":" + cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount, presenceSignal);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
@@ -209,6 +213,7 @@ export function buildPopupHtml(
 
       <!-- Description -->
       ${locationLabel ? `<p style="font-size:11px;line-height:1.5;margin:6px 0;color:hsl(42,65%,62%);">${escapeHtml(locationLabel)}</p>` : ""}
+      ${managedPublicRecord ? `<p style="font-size:11px;line-height:1.5;margin:6px 0;">Public record — check visiting arrangements${tree.access_notes ? `<br>${escapeHtml(tree.access_notes)}` : ""}</p>` : ""}
       ${desc}
     </div>
 

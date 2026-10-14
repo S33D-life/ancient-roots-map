@@ -69,6 +69,10 @@
           "date": "2026-10-11",
           "trunk_reached": false,
           "evidence": "user-supplied encounter photographs"
+        },
+        "visiting_access": {
+          "kind": "managed_grounds",
+          "source": "approved King\u2019s Ely managed-access note"
         }
       }
     },

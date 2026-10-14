@@ -14,12 +14,14 @@ This is a strong same-tree candidate: taxon, Ely cathedral precinct locality and
 
 Existing species_index UUID 32e5a004-f8c5-45eb-a74f-8e6d1f205a68 verified: species_key platanus-acerifolia, stored scientific name Platanus × acerifolia; accepted human content Platanus × hispanica uses existing identity, no new species. trees uses species_key, not a new species UUID column.
 
-## Source delta / production effects
-Presentation-only helper uses existing location_confidence and location_provenance.basis. Map query retrieves only basis, not full metadata. Map popups, marker accessibility, tree cards/profile, Map navigation and share text show satellite estimate warning. Popup cache/marker refresh account for changed labels. Profile warning sits outside bounded hero to avoid mobile clipping. Shared public access label becomes Public record; headline Public record — check visiting arrangements. This affects public-tree wording generally, not RLS.
+## Source delta / production effects — revised after Lovable review
+Frontend-only candidate: only explicit location_provenance.basis = satellite_estimate triggers the warning. location_confidence = approximate alone never triggers text or marker changes. Ordinary/public map/access wording is preserved, including original Open path labels. Only explicit metadata.visiting_access.kind = managed_grounds on an effective public record triggers Public record / check visiting arrangements. It is presentation only, never a permission/visibility grant. The exact approved access_notes text appears in its public popup/profile; outside the height-limited hero to prevent mobile clipping. Notes are escaped in popups and included in cache keys.
 
-Proposed UNDEPLOYED og-proxy changes read confidence/basis; prepend uncertainty and omit geo tags for approximate positions on public tree/Offering metadata. Shared pure helper; private parent filters unchanged. No og-card/api-gateway changes, migrations, schema, RLS, authority, dependencies, held realms or Council source changes.
+Map query projects only required provenance basis/access note fields, never full metadata. Private tiers/grants remain authoritative; explicit metadata cannot override private/garden/visible/granted wording or permissions. No broad rewrite of existing records, no coordinate writes, no private encounter GPS.
 
-CRITICAL: repo og-proxy/og-card match the function source at a43da190; those sources still contain the global Staff-binding query. Thus source preservation does NOT prove the independently repaired live functions are represented. Do NOT deploy this snapshot: reconcile location-only hunks against actual live privacy-safe recovery source. The Staff patch is not bundled or reimplemented here. Backend status RECOVERY HOLD.
+ZERO deployable Edge Function diff from main. supabase/functions/og-proxy/index.ts, og-card, api-gateway and shared backend source remain identical to baseline. The frontend helper now lives entirely in src/lib/treeLocationEvidence.ts. Independently reviewable, BLOCKED Edge location proposal is stored only as docs/releases/ely-afc-20261014/BLOCKED_EDGE_PROPOSAL.patch. It recognises explicit satellite basis only; it must be reconciled with captured privacy-safe deployed source before any separate approval. The unsafe global Staff lookup is not fixed or deployed by this PR. Backend RECOVERY HOLD remains.
+
+No migrations, schema, RLS, authority, dependencies, held realms or Council source changes. Do not publish frontend as evidence that geographic social metadata is fixed: live Edge output remains a separate release gate.
 
 ## Assets and consent
 Eight approved gallery files, order 1,3,2,5,6,4,7,8; final captions and derivative hashes in gallery JSON. Images intentionally NOT committed/uploaded. Exact files remain privately under notes/ely/private-photo-review-20261014/approved-public-gallery in Codex’s project workspace. Lovable lacks these assets until a separately approved transfer/upload. Photo 9 remains private, Photo 10 remains existing Council illustration. No camera filename assignments, private original GPS or raw originals in this branch. Copy derivative bytes unchanged and validate hashes before/after approved handoff. Photos are user-supplied encounter evidence, not independently verified untouched camera originals.
@@ -63,3 +65,16 @@ Complete release-check: 534/534 tests across 69 files, typecheck/build/security/
 Additional responsive smoke: 4/4 at 320/1440 using an uncommitted temporary copy of the same read-only smoke; temporary file removed. Total local navigation checks 8/8 across 320/390/1280/1440. No authenticated live Ely assertion.
 
 Do not use Lovable’s suggested a43da19 redeployment as a recovery shortcut: matching editor code still contains the unrelated global Staff-binding query and does not establish a privacy-safe live recovery checkpoint. Source-equivalent recovery requires independently reviewed privacy-safe source, complete inputs and credible restoration procedure accepted by Ed; hash equality alone is insufficient.
+
+## Before/after scope correction
+| Record | Previous PR | Revised frontend |
+|---|---|---|
+| Ely with explicit satellite + managed markers | Satellite warning; globally neutralised public wording | Same satellite warning; scoped managed note/wording only |
+| Unrelated public tree | Public record wording applied globally | Original Open path wording, no warning absent explicit marker |
+| Existing approximate tree | Generic unverified-trunk warning inferred from approximate | No new warning or marker text from approximate alone |
+| Private tree | Generic warning if approximate; private tier otherwise unchanged | No inferred warning; tier/grants/denial remain unchanged |
+
+Counts 791 total/671 public are Lovable-reported review context, not rewritten by this change. Current Circle 235 pointer/Circle 236 PREPARING preserved. Fire/Harvest copy and permanent route remain separate proposals, not implemented here.
+
+## Revised regression receipt
+Complete release-check passed: 539 tests across 69 files, typecheck/build/security/assets/duplicates/Council checks; lint zero errors with 179 warnings. Exact managed-note/explicit-satellite local fixture checks passed 3/3 at 320/390/1440 with external requests intercepted, no live writes. Initial fixture attempt was refused because its local server was stopped; server started and tests passed. Existing privacy test file and deployable functions are restored byte-for-byte to main. Revised CI receipt belongs to this new PR head, not the previous head.

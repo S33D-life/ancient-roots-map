@@ -20,7 +20,7 @@ import { resolveSpeciesSync } from "@/services/speciesResolver";
 import { buildPopupHtml, getPopupStatusLight, type PopupPresenceSignal } from "@/utils/mapPopups";
 import { haversineKm } from "@/utils/mapGeometry";
 
-import { treeMarkerDescription } from "@/lib/treeLocationEvidence";
+import { satelliteMarkerOptions } from "@/lib/treeLocationEvidence";
 
 interface Tree {
   location_confidence?: string | null;
@@ -106,7 +106,7 @@ export function useTreeMarkerLayer({
       const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue, hCount);
       const wCount = refs.whisperCounts[tree.id] || 0;
 
-      const marker = L.marker([tree.latitude, tree.longitude], { icon, title: treeMarkerDescription(tree), alt: treeMarkerDescription(tree) });
+      const marker = L.marker([tree.latitude, tree.longitude], { icon, ...satelliteMarkerOptions(tree) });
       marker.on("add", () => {
         const el = (marker as any)._icon;
         if (!el) return;
@@ -299,7 +299,7 @@ export function useTreeMarkerLayer({
       const toAdd: L.Marker[] = [];
       const treeMap = new Map(filteredTrees.map((t) => [t.id, t]));
       newTreeIds.forEach((id) => {
-        if (!existingIds.has(id) || currentMarkers.get(id)?.options.title !== treeMarkerDescription(treeMap.get(id)!)) {
+        if (!existingIds.has(id) || currentMarkers.get(id)?.options.title !== satelliteMarkerOptions(treeMap.get(id)!).title) {
           const previous = currentMarkers.get(id);
           if (previous) toRemove.push(previous);
           const tree = treeMap.get(id);

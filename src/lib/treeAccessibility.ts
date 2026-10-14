@@ -32,8 +32,8 @@ export const ACCESSIBILITY_VISUALS: Record<EffectiveAccessibilityTier, Accessibi
     border: "hsl(140, 55%, 45%)",
     glow:   "hsla(140, 55%, 45%, 0.18)",
     text:   "hsl(140, 50%, 55%)",
-    label:  "Public record",
-    strip:  "Public record — check visiting arrangements",
+    label:  "Open path",
+    strip:  "Open path — freely accessible",
     emoji:  "🟢",
   },
   visible: {
