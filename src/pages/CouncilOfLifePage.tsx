@@ -42,7 +42,7 @@ const CouncilOfLifePage = () => {
         <h2 id="circle236-arrival">Circle 236</h2>
         <p>{CURRENT_WEBSITE_CIRCLE.companions.map(companion => companion.label).join(" · ")}</p>
         <Link className="parchment-action" to={CURRENT_WEBSITE_CIRCLE.route}>Circle 236 · Open · meet its companions →</Link>
-        <Link className="parchment-action" to="/ancient-friends/ely/folio?from=2d">Explore the Great London Plane of Ely’s folio →</Link>
+        <a className="parchment-action" href="/ancient-friends/bishop-of-elys-plane.html?from=2d">Meet Bishop of Ely’s Plane →</a>
         <Circle236Fire className="parchment-action" />
       </section>
       <div className="canopy-arrival">
