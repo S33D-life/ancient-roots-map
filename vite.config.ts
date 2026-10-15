@@ -70,9 +70,9 @@ async function loadPwaPlugin() {
       injectRegister: false,
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
-        navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//],
+        navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//, /^\/ancient-friends\/bishop-of-elys-plane\.html$/],
         // Never precache version.json — always fetch fresh
-        globIgnores: ["**/version.json", "tetol/circle-235/pre-fire/**"],
+        globIgnores: ["**/version.json", "tetol/circle-235/pre-fire/**", "ancient-friends/bishop-of-elys-plane.*"],
         runtimeCaching: [
           {
             // Always fetch live deployment version metadata

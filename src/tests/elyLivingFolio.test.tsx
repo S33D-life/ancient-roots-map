@@ -31,13 +31,28 @@ describe("Ely public-safe folio — isolated recovery of PR #102", () => {
     expect(live.getAttribute("href")).toBe("https://treecouncil.org.uk/science-and-research/the-london-plane-of-ely/");
     expect(live.getAttribute("rel")).toContain("noopener");
     expect(document.querySelector("iframe")).toBeNull();
-    expect(screen.getAllByRole("link",{name:/Return to Ely in Circle 236/})[0].getAttribute("href")).toBe(elyFolioReturn("spatial"));
+    expect(screen.getAllByRole("link",{name:/Return to Bishop of Ely’s Plane in Circle 236/})[0].getAttribute("href")).toBe(elyFolioReturn("spatial"));
     const source=readFileSync("src/pages/review/ElyLivingFolioPage.tsx","utf8");
     expect(source).not.toMatch(/supabase|research_trees|\.from\(|fetch\(/);
   });
+  it("provides a direct publicly servable Bishop of Ely's Plane page without trusting a stale SPA", () => {
+    const html = readFileSync("public/ancient-friends/bishop-of-elys-plane.html", "utf8");
+    const js = readFileSync("public/ancient-friends/bishop-of-elys-plane.js", "utf8");
+    const vite = readFileSync("vite.config.ts", "utf8");
+    const redirects = readFileSync("public/_redirects", "utf8");
+    expect(ELY_FOLIO.name).toBe("Bishop of Ely’s Plane");
+    expect(html).toContain("<h1>Bishop of Ely’s Plane</h1>");
+    expect(html).toContain("Paul Wood’s Bishop’s Plane, research record #437");
+    expect(html).toContain("/ancient-friends/bishop-of-elys-plane.js");
+    expect(js).toContain('fetch("/review/ely-folio.json"');
+    expect(js).not.toMatch(/supabase|\.from\(|service_role|localStorage/);
+    expect(redirects).toContain("/ancient-friends/ely/folio /ancient-friends/bishop-of-elys-plane.html 200");
+    expect(vite).toContain("bishop-of-elys-plane");
+  });
+
   it("keeps the spatial link inside the existing Circle 236 panel", () => {
     const runtime=readFileSync("public/tetol/circle-235/pre-fire/runtime/companion-frames.js","utf8");
-    expect(runtime).toContain("/ancient-friends/ely/folio?from=spatial");
+    expect(runtime).toContain("/ancient-friends/bishop-of-elys-plane.html?from=spatial");
     expect(runtime).toContain("data-circle-reader");
     expect(runtime).not.toContain("afcPreview");
   });

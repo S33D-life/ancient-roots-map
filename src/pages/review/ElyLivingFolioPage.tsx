@@ -8,7 +8,7 @@ import "@/styles/afc-folio.css";
 
 /** Public-safe Ely-only extraction from PR #102. No remote research requests or Atlas claims. */
 export default function ElyLivingFolioPage() {
-  useDocumentTitle("Great London Plane of Ely · Living Ancient Friend");
+  useDocumentTitle("Bishop of Ely’s Plane · Living Ancient Friend");
   const [params] = useSearchParams();
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); }, []);
@@ -17,12 +17,12 @@ export default function ElyLivingFolioPage() {
   return <ParchmentGround realm="canopy" className="afc-folio">
     <a className="afc-skip" href="#folio-reading">Skip to reading</a>
     <nav className="afc-nav" aria-label="Living folio navigation">
-      <a href={returnUrl}>← Return to Ely in Circle 236</a>
+      <a href={returnUrl}>← Return to Bishop of Ely’s Plane in Circle 236</a>
       <Link to={ROUTES.COUNCIL}>Council of Life</Link>
     </nav>
     <div className="afc-review-note">Living Ancient Friend · curated research folio · Atlas identity pending</div>
     <main id="folio-reading" className="afc-paper">
-      <a className="afc-return" href={returnUrl}>← Return to Ely in Circle 236</a>
+      <a className="afc-return" href={returnUrl}>← Return to Bishop of Ely’s Plane in Circle 236</a>
       <header className="afc-title">
         <p className="afc-eyebrow">Ancient Friends · one tree, many encounters</p>
         <h1 tabIndex={-1} ref={heading}>{folio.name}</h1>
@@ -32,7 +32,7 @@ export default function ElyLivingFolioPage() {
       </header>
       <div className="afc-spread">
         <figure className="afc-portrait">
-          <img src={folio.artwork} alt="Great London Plane of Ely · illustrated Council portrait, not field photography" width="1280" height="853"/>
+          <img src={folio.artwork} alt="Bishop of Ely’s Plane · illustrated Council portrait, not field photography" width="1280" height="853"/>
           <figcaption>{folio.artworkCaption}</figcaption>
         </figure>
         <section className="afc-identity">
@@ -64,7 +64,7 @@ export default function ElyLivingFolioPage() {
         <p>The full research-screen doorway and permanent Atlas conversion remain held pending separate privacy and identity checks.</p>
         <Link to={ROUTES.LIBRARY}>Visit the PLANeTarry Library →</Link>
       </section>
-      <a className="afc-return" href={returnUrl}>← Return to Ely in Circle 236</a>
+      <a className="afc-return" href={returnUrl}>← Return to Bishop of Ely’s Plane in Circle 236</a>
     </main>
   </ParchmentGround>;
 }

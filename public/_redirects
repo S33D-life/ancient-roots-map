@@ -1,4 +1,6 @@
 /version.json /version.json 200
+/ancient-friends/ely/folio /ancient-friends/bishop-of-elys-plane.html 200
+/ancient-friends/bishop-of-elys-plane /ancient-friends/bishop-of-elys-plane.html 200
 /assets/* /assets/:splat 200
 /api/identify-tree https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/identify-tree 200
 /api/* /api/:splat 200
