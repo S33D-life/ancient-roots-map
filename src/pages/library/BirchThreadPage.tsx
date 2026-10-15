@@ -44,8 +44,10 @@ export function BirchPreparationPage() {
   useEffect(() => {
     if (params.get("returned") !== "1") return;
     const frame = requestAnimationFrame(() => {
-      if (appearance.returnContext.route === "council") restoreAppearanceFocus(appearance.returnContext);
-      document.getElementById(appearance.id)?.scrollIntoView({ block: "center", behavior: "instant" });
+      const focusId = params.get("companion") === "ely-plane-companion" ? "ely-plane-companion" : appearance.id;
+      if (focusId === appearance.id && appearance.returnContext.route === "council") restoreAppearanceFocus(appearance.returnContext);
+      else document.getElementById(focusId)?.focus({ preventScroll: true });
+      document.getElementById(focusId)?.scrollIntoView({ block: "center", behavior: "instant" });
     });
     return () => cancelAnimationFrame(frame);
   }, [location.key, params, appearance.id, appearance.returnContext]);
@@ -57,14 +59,14 @@ export function BirchPreparationPage() {
     <p className="birch-status">The Circle is open. Fires come and go; the Circle remains.</p>
     <Circle236Fire />
     <section aria-labelledby="preparing-companions"><h2 id="preparing-companions">The companions</h2>
-      <p>The companions are confirmed; the Circle is open. Birch’s source-linked study is available. The other Living Record doorways are not ready.</p>
+      <p>The companions are confirmed; the Circle is open. Birch’s source-linked study and Ely’s researched Ancient Friend folio are available. Other deeper doorways remain in preparation.</p>
     </section>
     <div className="birch-mode" aria-label="Companion view"><Link aria-current={mode === "2d" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=2d`}>Companion frames</Link><Link aria-current={mode === "spatial" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=spatial`}>Enter the spatial Council</Link></div>
     {mode === "spatial" && <iframe className="circle-spatial-room" title="Circle 236 companion frames in the existing Council room" src={`/tetol/circle-235/pre-fire/tetol.html?circle=236#${params.get("returned") === "1" ? "birch-companion" : "croom"}`} />}
     <div className="circle-companion-frames">
       {circleFrames.companions.map(companion => <figure key={companion.id}>
-        {companion.reader ? <button id={companion.id} onClick={open} aria-label="Look closer at Birch →"><img src={companion.artwork} alt="Birch · supplied Circle artwork" width="1280" height="853" loading="lazy" /></button> : <button id={companion.id} onClick={() => viewArtwork(companion)} aria-label={`View ${companion.label} artwork`}><img src={companion.artwork} alt={`${companion.label} · supplied Circle artwork`} width="1280" height="853" loading="lazy" /></button>}
-        <figcaption><h2>{companion.label}</h2><p>{companion.kind}</p><p className="birch-status">{companion.reader ? "Open the Living Record study →" : "Artwork available · Living Record not ready"}</p></figcaption>
+        {companion.reader ? <button id={companion.id} onClick={open} aria-label="Look closer at Birch →"><img src={companion.artwork} alt="Birch · supplied Circle artwork" width="1280" height="853" loading="lazy" /></button> : companion.id === "ely-plane-companion" ? <Link id={companion.id} to="/ancient-friends/ely/folio?from=2d" aria-label="Read Ely Plane’s living folio →"><img src={companion.artwork} alt={`${companion.label} · supplied Circle illustration`} width="1280" height="853" loading="lazy" /></Link> : <button id={companion.id} onClick={() => viewArtwork(companion)} aria-label={`View ${companion.label} artwork`}><img src={companion.artwork} alt={`${companion.label} · supplied Circle artwork`} width="1280" height="853" loading="lazy" /></button>}
+        <figcaption><h2>{companion.label}</h2><p>{companion.kind}</p><p className="birch-status">{companion.reader ? "Open the Living Record study →" : companion.id === "ely-plane-companion" ? "Read the source-attributed Ely folio →" : "Artwork available · Living Record not ready"}</p></figcaption>
       </figure>)}
     </div>
     <dialog ref={artworkDialog} className="circle-artwork-dialog" aria-label={`${viewedArtwork.label} artwork`}><button autoFocus onClick={() => artworkDialog.current?.close()}>Return to the companions</button><h2>{viewedArtwork.label}</h2><img src={viewedArtwork.artwork} alt={`${viewedArtwork.label} · supplied Circle artwork`} /><p>Circle artwork · Living Record doorway not ready.</p></dialog>
