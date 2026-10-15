@@ -34,6 +34,7 @@ import {
 } from "@/config/staffContract";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { staffRoom3DHref } from "@/lib/tetolStaffRoom";
 import { format } from "date-fns";
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -442,6 +443,12 @@ export default function StaffDetailPage() {
               >
                 🌳 Value Tree — Origin Staff
               </Link>
+              <a
+                href={staffRoom3DHref(staff.code)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/20 text-[10px] font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+              >
+                🪵 Meet this staff in the 3D Staff Room
+              </a>
               {linkedTrees.length > 0 && (
                 <Link
                   to={`/map?treeId=${linkedTrees[0].id}&arrival=tree`}
