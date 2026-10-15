@@ -72,7 +72,7 @@ async function loadPwaPlugin() {
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//, /^\/ancient-friends\/bishop-of-elys-plane\.html$/],
         // Never precache version.json — always fetch fresh
-        globIgnores: ["**/version.json", "tetol/circle-235/pre-fire/**"],
+        globIgnores: ["**/version.json", "tetol/circle-235/pre-fire/**", "ancient-friends/bishop-of-elys-plane.*"],
         runtimeCaching: [
           {
             // Always fetch live deployment version metadata
