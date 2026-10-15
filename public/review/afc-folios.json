@@ -1,0 +1,45 @@
+{
+  "ely": {
+    "key": "ely", "name": "The Great London Plane of Ely", "shortName": "Ely Plane",
+    "identity": {"source": "research-trees", "id": "fc085265-5a4f-46f0-a616-f3b869bea8b0"},
+    "identityNote": "Paul Wood research record #437 · Bishop’s Plane. Ed confirmed the same individual. A permanent Atlas profile has not been created.",
+    "species": "Platanus × hispanica", "speciesNote": "London plane · research attribution: Paul Wood",
+    "place": "King’s Ely Old Palace garden, Ely",
+    "companionId": "ely-plane-companion", "circles": [236], "circleStatus": "OPEN · historical appearance",
+    "artwork": "/council/circle-236/ely-plane.jpg", "artworkCaption": "Supplied Council illustration · not a documentary photograph or proof of encounter.",
+    "lead": "A living tree, held through research, encounter and the continuing work of care.",
+    "sections": [
+      {"title":"One tree, many names", "status":"Identity confirmed by Ed", "text":"The Great London Plane of Ely and Paul Wood’s Bishop’s Plane refer to the same individual. The research identity and original provenance remain intact; this folio creates no new tree."},
+      {"title":"An encounter at the garden", "status":"User-supplied encounter · 11 October 2026", "text":"Ed visited on 11 October 2026 but could not reach the trunk. Documentary photographs remain separate from the Council illustration and are held for approved import."},
+      {"title":"A tree being cared for", "status":"Source-attributed · The Tree Council", "text":"The conservation project brings arborists and Cambridge engineers together to study and support the tree. Follow the credited source for the project’s research and photographs."},
+      {"title":"Visiting with care", "status":"Approved managed-access note", "text":"Managed Old Palace garden. Confirm visiting arrangements with King’s Ely before travelling. Follow posted restrictions and staff instructions; do not cross barriers to reach the trunk. This record does not grant access. We could not reach the trunk on 11 October 2026."}
+    ],
+    "timeline": [
+      {"date":"June 2002", "text":"The encounter plaque records Tree Council recognition among fifty Great British Trees.", "status":"User-supplied plaque photograph"},
+      {"date":"October / December 2025", "text":"The Tree Council documents staged pruning.", "status":"Source-attributed conservation record"},
+      {"date":"April 2026", "text":"The Tree Council documents new bracing.", "status":"Source-attributed conservation record"},
+      {"date":"11 October 2026", "text":"Encounter witnessed; trunk not reached.", "status":"Ed’s account"}
+    ],
+    "sources": [{"label":"The Tree Council · conservation and livestream", "url":"https://treecouncil.org.uk/science-and-research/the-london-plane-of-ely/"}, {"label":"University of Cambridge · engineering research", "url":"https://www.eng.cam.ac.uk/news/cambridge-engineers-lend-support-uk-first-conservation-ancient-trees"}],
+    "livestream": "https://treecouncil.org.uk/science-and-research/the-london-plane-of-ely/",
+    "hold": "Gallery import, permanent Atlas profile and public release remain on HOLD. No precise coordinates or private encounter location are included."
+  },
+  "noku": {
+    "key":"noku", "name":"Nokuphila · the Ubuntu Tree", "shortName":"Noku",
+    "identity":{"source":"trees", "id":"59eb1fe8-3c29-4696-ae00-f42edeb1c886"},
+    "identityNote":"Existing public Atlas record: Unabantu Nokuphila. One Cape Town individual, remembered in Circle 234 and chosen for a planned Circle 237 appearance. Distinct from the Camp Unicorn fig.",
+    "species":"Ficus natalensis", "speciesNote":"As recorded in the Atlas and Ian’s material; taxon reconciliation remains open.",
+    "place":"Cape Town, South Africa", "companionId":"noku-companion", "circles":[234,237], "circleStatus":"PREPARING · planned appearance",
+    "artwork":null, "artworkCaption":"A typographic portrait while permission-cleared photographs are prepared. No generated documentary image.",
+    "lead":"One living tree. A biography carried through guardianship, gathering and continuing relationship.",
+    "sections":[
+      {"title":"A remembered companion", "status":"Council relationship", "text":"Noku’s Circle 234 history is preserved. Ed has chosen her return for Circle 237; its wider constellation, question and Fire details remain undecided."},
+      {"title":"The guardian’s account", "status":"Attributed source · Ian · 23 September 2026", "text":"Ian’s material describes Noku as a gathering place and an ongoing relationship of care. This preview keeps his account separate from independently verified botanical and historical claims."},
+      {"title":"A biography with room to grow", "status":"Source and permission review pending", "text":"Age, water lineage, naming traditions and ceremonial accounts need their own attribution and verification. They are not presented here as established facts. Guardian approval and image rights remain release gates."},
+      {"title":"The tree and the proposal", "status":"Existing tree ≠ proposed Pod", "text":"Noku is an existing Ancient Friend. Ubuntu Pod 0.1 is a separate co-design proposal; neither that room nor a digital-twin study is field evidence or a finished physical Pod."}
+    ],
+    "timeline":[{"date":"Circle 234", "text":"Earlier Council appearance retained as history.", "status":"Council record · detailed memory links pending"},{"date":"23 September 2026", "text":"Ian’s source material preserved as attributed biography.", "status":"Guardian-source summary"},{"date":"Circle 237", "text":"Noku’s return chosen by Ed. No other companions or Fire invented.", "status":"PREPARING · planned"}],
+    "sources":[], "livestream":null,
+    "hold":"Guardian consent, original source permissions and photographs remain under review. No private guardian details, location or private Notion links are published in this specimen."
+  }
+}

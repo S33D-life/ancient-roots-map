@@ -37,10 +37,16 @@ export async function installCompanionFrames(D) {
   D.circleFrameCompanions = circle.companions;
   const returnLink = document.getElementById('council-return');
   if (returnLink) { returnLink.href = '/review/council/236?mode=spatial'; returnLink.target = '_top'; returnLink.textContent = 'Return to Circle 236'; }
+  const preview = new URLSearchParams(location.search).get("afcPreview");
+  if (["234", "236", "237"].includes(preview)) {
+    const { installAfcPreview } = await import("./afc-folio-preview.js");
+    await installAfcPreview(D, circle, Number(preview));
+  }
   return circle;
 }
 
 export function companionPanel(D, id, esc) {
+  if (D.afcPreview) return D.afcPreview.panel(id, esc);
   const items = D.circleFrameCompanions;
   const c = items.find(c => c.id === id);
   if (!c && id !== 'croom' && id !== 'c236') return null;
