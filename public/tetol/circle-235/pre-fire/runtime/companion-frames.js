@@ -36,7 +36,7 @@ export async function installCompanionFrames(D) {
   const brand = document.getElementById('brandline'); if (brand) { const label = 'Circle 236 · OPEN · supplied companion artwork'; brand.textContent = label; new MutationObserver(() => { if (brand.textContent !== label) brand.textContent = label; }).observe(brand, { childList: true }); }
   D.circleFrameCompanions = circle.companions;
   const returnLink = document.getElementById('council-return');
-  if (returnLink) { returnLink.href = '/review/council/236?mode=spatial'; returnLink.target = '_top'; returnLink.textContent = 'Return to Circle 236'; }
+  if (returnLink) { returnLink.href = '/council-of-life?from=spatial-council#next-gathering'; returnLink.target = '_top'; returnLink.textContent = 'Return to Circle 236'; }
   return circle;
 }
 
