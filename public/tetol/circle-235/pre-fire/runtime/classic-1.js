@@ -1227,7 +1227,7 @@ window.STAFFROOM_URL="./staffroom.html";
     .tetol-interior.on{opacity:1}
     .tetol-interior iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#15110c}
     @media (prefers-reduced-motion: reduce){.tetol-interior{transition:none}}
-    body.ininterior #council-return,body.ininterior #__claude_design_branding{display:none!important}`; // the room's own ← returns to the Tree; nothing floats over it
+    #__claude_design_branding,body.ininterior #council-return{display:none!important}`; // Keep the export overlay off S33D public TETOL; preserve source attribution in docs and the room's own return.
   document.head.appendChild(css);
 
   const place = () => dispatchEvent(new CustomEvent('tetol:place', { detail: { interior: cur && { id: cur.id, state: cur.state } } }));
