@@ -45,6 +45,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
+import { AFC_REVIEW_ROUTES } from "@/lib/afcFolioRoutes";
 import { THREAD_PATTERNS } from "@/data/library/birchThread";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
@@ -115,6 +116,8 @@ const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "we
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
 const GrowthFolioPage = lazyImportWithRetry(() => import("./pages/GrowthFolioPage"), "growth-folio");
+const AncientFriendFolioPage = lazyImportWithRetry(() => import("./pages/review/AncientFriendFolioPage").then(m => ({ default: m.AncientFriendFolioPage })), "afc-folio-review");
+const AfcCouncilReviewPage = lazyImportWithRetry(() => import("./pages/review/AncientFriendFolioPage").then(m => ({ default: m.AfcCouncilReviewPage })), "afc-council-review");
 const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "circle236-preparation");
 const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
@@ -232,6 +235,12 @@ const PatronsPortalRedirect = () => {
 
 const PageLoader = () => <PageSkeleton variant="default" />;
 
+/** Keep the existing onboarding unchanged outside the isolated folio studies. */
+function FolioReviewFirstWalk() {
+  const { pathname } = useLocation();
+  return /^\/review\/(ancient-friends|afc)(\/|$)/.test(pathname) ? null : <FirstWalkTrail />;
+}
+
 const App = () => {
   // Authentication enhances the public world; it never gates the initial render.
   const authState = useSessionState();
@@ -308,7 +317,7 @@ const App = () => {
             <CelebrationOverlay />
             <Suspense fallback={null}>
               <ProximityNudge />
-              <FirstWalkTrail />
+              <FolioReviewFirstWalk />
               <DailySeedRitual />
               <BotContinuationBanner />
             </Suspense>
@@ -360,6 +369,8 @@ const App = () => {
                 <Route path="/email-confirmed" element={<Navigate to="/welcome" replace />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
                 <Route path="/golden-dream/growth/:growthId" element={realm(<GrowthFolioPage />, "crown")} />
+                <Route path={AFC_REVIEW_ROUTES.FOLIO} element={<AncientFriendFolioPage />} />
+                <Route path={AFC_REVIEW_ROUTES.COUNCIL} element={<AfcCouncilReviewPage />} />
                 <Route path={THREAD_PATTERNS.CIRCLE} element={<BirchPreparationPage />} />
                 <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />

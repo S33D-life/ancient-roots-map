@@ -1278,7 +1278,7 @@ function crossTo(want, then) {
   veil.classList.add('on'); setTimeout(() => { swap(); setTimeout(() => veil.classList.remove('on'), 60); }, 620);
 }
 scene3d = { circle: applyCircle, select(id, prev) {
-  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? 236 : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
+  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? (D.afcPreview?.circleNumber || 236) : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
   drawThreads(id);
   const n = D.nodes[id], want = placeOf(id);
   if (want !== place) {
