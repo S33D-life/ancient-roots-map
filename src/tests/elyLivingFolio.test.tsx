@@ -31,13 +31,13 @@ describe("Ely public-safe folio — isolated recovery of PR #102", () => {
     expect(live.getAttribute("href")).toBe("https://treecouncil.org.uk/science-and-research/the-london-plane-of-ely/");
     expect(live.getAttribute("rel")).toContain("noopener");
     expect(document.querySelector("iframe")).toBeNull();
-    expect(screen.getAllByRole("link",{name:/Return to Ely in Circle 236/})[0].getAttribute("href")).toBe(elyFolioReturn("spatial"));
+    expect(screen.getAllByRole("link",{name:/Return to Bishop of Ely’s Plane in Circle 236/})[0].getAttribute("href")).toBe(elyFolioReturn("spatial"));
     const source=readFileSync("src/pages/review/ElyLivingFolioPage.tsx","utf8");
     expect(source).not.toMatch(/supabase|research_trees|\.from\(|fetch\(/);
   });
   it("keeps the spatial link inside the existing Circle 236 panel", () => {
     const runtime=readFileSync("public/tetol/circle-235/pre-fire/runtime/companion-frames.js","utf8");
-    expect(runtime).toContain("/ancient-friends/ely/folio?from=spatial");
+    expect(runtime).toContain("/ancient-friends/bishop-of-elys-plane.html?from=spatial");
     expect(runtime).toContain("data-circle-reader");
     expect(runtime).not.toContain("afcPreview");
   });
