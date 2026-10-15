@@ -7,6 +7,12 @@
 /index.html
   Cache-Control: no-cache, must-revalidate
 
+# Bishop of Ely's Plane — read directly from the origin, never keep an old HTML response
+/ancient-friends/bishop-of-elys-plane.html
+  Cache-Control: no-cache, must-revalidate
+/review/ely-folio.json
+  Cache-Control: no-cache, must-revalidate
+
 # Service worker — always revalidate
 /sw.js
   Cache-Control: no-cache, must-revalidate
