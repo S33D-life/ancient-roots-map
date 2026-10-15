@@ -252,6 +252,7 @@ export default defineConfig(async ({ mode }) => {
     target: "es2022",
     cssCodeSplit: true,
     rollupOptions: {
+      input: { app: path.resolve(__dirname, "index.html"), ...(process.env.S33D_ROOTS_REVIEW === "1" ? { rootsReview: path.resolve(__dirname, "review/ancestral-roots.html") } : {}) },
       output: {
         manualChunks(id: string) {
           // Core React runtime
