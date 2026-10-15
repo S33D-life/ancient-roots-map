@@ -49,28 +49,32 @@ export function BirchPreparationPage() {
     });
     return () => cancelAnimationFrame(frame);
   }, [location.key, params, appearance.id, appearance.returnContext]);
-  if (circleNumber !== "236") return <Shell><h1>Preparation unavailable</h1><Link to={ROUTES.COUNCIL}>Return to Council</Link></Shell>;
+  if (circleNumber !== "236") return <Shell><h1>Circle unavailable</h1><Link to={ROUTES.COUNCIL}>Return to Council</Link></Shell>;
   return <Shell>
     <p className="birch-kicker">Canopy · OPEN</p>
     <h1>Circle 236</h1>
-    <p className="birch-lead">Meet this week’s companion constellation.</p>
+    <p className="birch-lead">Meet this week’s seven companions.</p>
+    <p className="birch-status" data-copy-review="pending-ed-approval">Copy preview · pending Ed approval</p>
+    <p>{circleFrames.welcome}</p>
     <p className="birch-status">The Circle is open. Fires come and go; the Circle remains.</p>
     <Circle236Fire />
     <section aria-labelledby="preparing-companions"><h2 id="preparing-companions">The companions</h2>
-      <p>The companions are confirmed; the Circle is open. Birch’s source-linked study is available. The other Living Record doorways are not ready.</p>
+      <p>Seven companions gather in this Circle. Birch has a source-linked study; the others can be met through their artwork or readable text for now.</p>
     </section>
     <div className="birch-mode" aria-label="Companion view"><Link aria-current={mode === "2d" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=2d`}>Companion frames</Link><Link aria-current={mode === "spatial" ? "page" : undefined} to={`${THREAD_ROUTES.circle(236)}?mode=spatial`}>Enter the spatial Council</Link></div>
     {mode === "spatial" && <iframe className="circle-spatial-room" title="Circle 236 companion frames in the existing Council room" src={`/tetol/circle-235/pre-fire/tetol.html?circle=236#${params.get("returned") === "1" ? "birch-companion" : "croom"}`} />}
     <div className="circle-companion-frames">
       {circleFrames.companions.map(companion => <figure key={companion.id}>
-        {companion.reader ? <button id={companion.id} onClick={open} aria-label="Look closer at Birch →"><img src={companion.artwork} alt="Birch · supplied Circle artwork" width="1280" height="853" loading="lazy" /></button> : <button id={companion.id} onClick={() => viewArtwork(companion)} aria-label={`View ${companion.label} artwork`}><img src={companion.artwork} alt={`${companion.label} · supplied Circle artwork`} width="1280" height="853" loading="lazy" /></button>}
-        <figcaption><h2>{companion.label}</h2><p>{companion.kind}</p><p className="birch-status">{companion.reader ? "Open the Living Record study →" : "Artwork available · Living Record not ready"}</p></figcaption>
+        <button id={companion.id} onClick={companion.reader ? open : () => viewArtwork(companion)} aria-label={companion.reader ? "Look closer at Birch →" : `View ${companion.label} ${companion.presentation === "text-only" ? "book companion" : "artwork"}`}>
+          {companion.presentation === "text-only" ? <span className="circle-book-fallback"><strong>Winnie-the-Pooh</strong><span>A. A. Milne · Book · 1926</span></span> : <img src={companion.artwork} alt={`${companion.label} · supplied Circle artwork`} width="1280" height="853" loading="lazy" />}
+        </button>
+        <figcaption><h2>{companion.label}</h2><p>{companion.kind}</p><p>{companion.artworkCaption}</p>{companion.safety && <p className="circle-care">{companion.safety}</p>}<p>{companion.readableText}</p><ul>{companion.details.map(detail => <li key={detail}>{detail}</li>)}</ul><p className="birch-status">{companion.reader ? "Open the Living Record study →" : companion.presentation === "text-only" ? "Meet the book through its text" : "Meet through its artwork"}</p></figcaption>
       </figure>)}
     </div>
-    <dialog ref={artworkDialog} className="circle-artwork-dialog" aria-label={`${viewedArtwork.label} artwork`}><button autoFocus onClick={() => artworkDialog.current?.close()}>Return to the companions</button><h2>{viewedArtwork.label}</h2><img src={viewedArtwork.artwork} alt={`${viewedArtwork.label} · supplied Circle artwork`} /><p>Circle artwork · Living Record doorway not ready.</p></dialog>
+    <dialog ref={artworkDialog} className="circle-artwork-dialog" aria-label={`${viewedArtwork.label} companion`}><button autoFocus onClick={() => artworkDialog.current?.close()}>Return to the companions</button><h2>{viewedArtwork.label}</h2>{viewedArtwork.safety && <p className="circle-care">{viewedArtwork.safety}</p>}{viewedArtwork.presentation !== "text-only" && <img src={viewedArtwork.artwork} alt={`${viewedArtwork.label} · supplied Circle artwork`} />}<p>{viewedArtwork.artworkCaption}</p><p>{viewedArtwork.readableText}</p><ul>{viewedArtwork.details.map(detail => <li key={detail}>{detail}</li>)}</ul><p>Its Living Record is still to grow.</p></dialog>
     <p className="birch-status">Supplied Circle artwork · not documentary photographs or Ancient Friend verification. Knowledge and identity remain in the Living Records.</p>
-    <details><summary>The Ely encounter</summary><p>Ed visited the Great London Plane of Ely on 11 October 2026. The trunk could not be reached, and there is a wish to return. Its canonical Atlas identity is still to be confirmed; this page creates no tree record or Ancient Friend recognition.</p><p>No private encounter notes or photographs are published here.</p></details>
-    <details><summary>Where this preparation comes from</summary><p>The companion choice is confirmed in <a href={BIRCH_PREPARATION_SOURCE}>Circle 236 preparation</a>. This review projection creates no Council history.</p></details>
+    <details><summary>The Ely encounter</summary><p>Ed visited the Great London Plane of Ely on 11 October 2026. The trunk could not be reached, and there is a wish to return. Ed confirmed its identity against Paul Wood’s Bishop’s Plane research entry 437. Its permanent S33D Ancient Friend profile is still to come; this page creates no tree record.</p><p>No private encounter notes or photographs are published here.</p></details>
+    <details><summary>Where this Circle comes from</summary><p>The companion choice is confirmed in <a href={BIRCH_PREPARATION_SOURCE}>Circle 236 preparation</a>. This review projection creates no Council history.</p></details>
   </Shell>;
 }
 

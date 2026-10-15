@@ -12,11 +12,23 @@
         "form": "sapling",
         "leaf": 7574351,
         "bark": 15064784
-      }
+      },
+      "readableText": "Birch is the Betula genus, a lineage of trees associated with light, renewal and new beginnings. This companion is a genus study, not one individual tree.",
+      "details": [
+        "Bud and catkin · spring",
+        "Leaf and light · summer",
+        "Bark and pattern · all year",
+        "Seasonal transformation · autumn",
+        "Roots and soil · underground",
+        "New life and pioneer growth"
+      ],
+      "artworkCaption": "Supplied Circle artwork · genus study, not documentary photography.",
+      "safety": "",
+      "presentation": "artwork"
     },
     {
       "id": "ely-plane-companion",
-      "label": "Bishop of Ely’s Plane Tree",
+      "label": "The Great London Plane of Ely",
       "kind": "Individual tree · Platanus × hispanica",
       "artwork": "/council/circle-236/ely-plane.jpg",
       "reader": false,
@@ -24,7 +36,19 @@
         "form": "sapling",
         "leaf": 6324807,
         "bark": 10195581
-      }
+      },
+      "readableText": "The Great London Plane of Ely is an individual Platanus × hispanica. Research alias: Bishop’s Plane, recorded by Paul Wood, entry 437. Ed confirmed the same-tree identity from the supplied research records. No permanent S33D Ancient Friend profile has been created.",
+      "details": [
+        "Leaves and seasons",
+        "Seed balls",
+        "Bark and pattern",
+        "Buds and new growth",
+        "Canopy and shelter",
+        "Place and people"
+      ],
+      "artworkCaption": "Council illustration · its printed Ancient Friend heading does not establish a published Atlas profile. Research alias: Bishop’s Plane (Paul Wood).",
+      "safety": "",
+      "presentation": "artwork"
     },
     {
       "id": "rose-companion",
@@ -37,7 +61,19 @@
         "count": 9,
         "petals": 13327232,
         "centre": 9385292
-      }
+      },
+      "readableText": "Rose is the Rosa genus. This flower companion invites attention to beauty, relationship, pollen, shelter and hips.",
+      "details": [
+        "Bud and promise · spring",
+        "Flower and pollination · spring to summer",
+        "Pollinators and partners",
+        "Hip and seed · late summer",
+        "Leaves and seasons",
+        "Thorns and protection"
+      ],
+      "artworkCaption": "Supplied Circle artwork · the plate’s nectar wording is awaiting correction; this text uses pollen.",
+      "safety": "",
+      "presentation": "artwork"
     },
     {
       "id": "tomato-companion",
@@ -50,7 +86,19 @@
         "shape": "pointed",
         "leaf": 4682810,
         "fruit": 14109487
-      }
+      },
+      "readableText": "Tomato, Solanum lycopersicum, is a cultivated plant whose flowers and developing fruit invite attention to care, nourishment and seasonal change.",
+      "details": [
+        "Flower and pollination",
+        "Fruit development",
+        "Ripening and harvest",
+        "Inside and seeds",
+        "Leaves and growth",
+        "Cultivation and new plants"
+      ],
+      "artworkCaption": "Supplied Circle artwork · plant study, not an identification guide.",
+      "safety": "",
+      "presentation": "artwork"
     },
     {
       "id": "bay-bolete-companion",
@@ -64,7 +112,19 @@
         "scales": 8540462,
         "stem": 11701080,
         "count": 2
-      }
+      },
+      "readableText": "Bay Bolete, Imleria badia, is a woodland fungus living in partnership with tree roots. This illustration is not an identification or foraging guide.",
+      "details": [
+        "Button and emergence",
+        "Cap and colour",
+        "Pores, not gills",
+        "Stem and texture",
+        "Roots and relationships",
+        "Woodland and habitat"
+      ],
+      "artworkCaption": "Supplied Circle artwork · the plate’s Edible label is awaiting correction and must not be used as eating advice.",
+      "safety": "Look closely, leave it growing. Never eat a wild mushroom on the strength of a picture.",
+      "presentation": "artwork"
     },
     {
       "id": "toucan-companion",
@@ -74,7 +134,19 @@
       "reader": false,
       "presence": {
         "form": "toucan"
-      }
+      },
+      "readableText": "Toucan names the bird family Ramphastidae. The companion explores forest life, seed dispersal, movement and relationships with trees.",
+      "details": [
+        "Bill and balance",
+        "Diet and seed dispersal",
+        "Flight and movement",
+        "Sight and sensory worlds",
+        "Nesting and life cycle",
+        "Forests and habitat"
+      ],
+      "artworkCaption": "Supplied Circle artwork · family-level companion, not a verified species record.",
+      "safety": "",
+      "presentation": "artwork"
     },
     {
       "id": "winnie-the-pooh-companion",
@@ -87,7 +159,21 @@
         "cover": 11901537,
         "ink": "#3a2819",
         "title": "Winnie-the-Pooh"
-      }
+      },
+      "readableText": "Winnie-the-Pooh is the book by A. A. Milne, first published in 1926. It joins the Circle as a literary work, with themes of friendship, imagination, play and place.",
+      "details": [
+        "The book",
+        "A woodland setting",
+        "Play",
+        "Reading together",
+        "Friendship",
+        "Imagination"
+      ],
+      "artworkCaption": "Book companion · text-only presentation while replacement artwork is reviewed. No character image or quotation is shown.",
+      "safety": "",
+      "presentation": "text-only"
     }
-  ]
+  ],
+  "copyReview": "PENDING_ED_APPROVAL",
+  "welcome": "Come as you are: listen, wander, meet a companion, or simply sit by the Fire. Nothing is asked of you."
 }

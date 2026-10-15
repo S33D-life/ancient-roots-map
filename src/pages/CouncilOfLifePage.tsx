@@ -9,6 +9,7 @@ import { CURRENT_CIRCLE, approvedCircleUrl } from "../../supabase/functions/_sha
 import EmbeddedCouncilDeck from "@/components/council/EmbeddedCouncilDeck";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import { CURRENT_WEBSITE_CIRCLE } from "@/data/council/currentWebsiteCircle";
+import circleFrames from "../../public/council/circle-236/companions.json";
 import Circle236Fire from "@/components/council/Circle236Fire";
 import "@/components/council/canopy.css";
 
@@ -38,8 +39,9 @@ const CouncilOfLifePage = () => {
     <main className="parchment-main">
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
       <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle" aria-labelledby="circle236-arrival">
-        <p className="parchment-kicker">{CURRENT_WEBSITE_CIRCLE.status}</p>
+        <p className="parchment-kicker">{CURRENT_WEBSITE_CIRCLE.status} · THIS WEEK</p>
         <h2 id="circle236-arrival">Circle 236</h2>
+        <p data-copy-review="pending-ed-approval">Copy preview · pending Ed approval</p><p>{circleFrames.welcome}</p>
         <p>{CURRENT_WEBSITE_CIRCLE.companions.map(companion => companion.label).join(" · ")}</p>
         <Link className="parchment-action" to={CURRENT_WEBSITE_CIRCLE.route}>Circle 236 · Open · meet its companions →</Link>
         <Circle236Fire className="parchment-action" />

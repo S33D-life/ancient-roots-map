@@ -16,17 +16,22 @@ describe('one Circle companion manifest, two surfaces', () => {
     expect(birchAppearance('spatial').artifactRef).toBe(BIRCH_ARTIFACT);
   });
   it('installs seven appearances without replacing the room, earlier Circle or canonical content', async () => {
-    const room = { name: 'Council of Life', sub: 'Earlier Circle', purpose: 'Persistent room', relations: [] };
+    const room = { name: 'Council of Life', sub: 'Earlier Circle', purpose: 'Persistent room', question: 'LAST WEEK QUESTION', relations: [] };
     const previous = { node: 'c233', number: 233, companions: [{ id: 'historical-model' }] };
-    const D = { nodes: { croom: room, c233: { name: 'Earlier Circle' }, yewc233: { lives: ['historical'], actions: ['historical'], status: 'REMEMBERED' } } as Record<string, any>, council: { circles: { 233: previous } as Record<number, any>, active: 233, current: 'c233' } };
+    const D = { nodes: { croom: room, c233: { name: 'Earlier Circle', question: 'HISTORICAL QUESTION' }, yewc233: { lives: ['historical'], actions: ['historical'], status: 'REMEMBERED' } } as Record<string, any>, council: { circles: { 233: previous } as Record<number, any>, active: 233, current: 'c233' } };
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => frames }));
     try {
       const { installCompanionFrames, companionPanel } = await import('../../public/tetol/circle-235/pre-fire/runtime/companion-frames.js');
       await installCompanionFrames(D);
       expect(D.nodes.croom).toBe(room);
+      expect(D.nodes.croom.question).toBeNull();
+      expect(D.nodes.c236.question).toBeNull();
+      expect(D.nodes.c233.question).toBe("HISTORICAL QUESTION");
       expect(D.council.circles[233]).toBe(previous);
       expect(D.council.circles[236].companions.map((c: any) => c.id)).toEqual(frames.companions.map(c => c.id));
       expect(D.nodes['ely-plane-companion'].lives).toEqual([]);
+      expect(D.council.circles[236].companions[6].repr.artwork).toBeNull();
+      expect(D.council.circles[236].companions[6].repr.textLabel).toContain('Winnie-the-Pooh');
       expect(companionPanel(D, 'birch-companion', (s: string) => s)).toContain('data-circle-reader');
       expect(companionPanel(D, 'winnie-the-pooh-companion', (s: string) => s)).not.toContain('data-circle-reader');
       expect(companionPanel(D, 'croom', (s: string) => s)).toContain('OPEN');

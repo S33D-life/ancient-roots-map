@@ -5,13 +5,14 @@ export async function installCompanionFrames(D) {
   const circle = await response.json();
   if (circle.number !== 236 || circle.status !== 'OPEN' || circle.companions.length !== 7) throw new Error('Invalid open Circle');
   const base = D.nodes.yewc233;
-  D.nodes.c236 = { ...D.nodes.c233, name: 'Circle 236', sub: 'OPEN · Fire reference · Tuesday 13 October · 19:30 UK', stateShort: 'OPEN', circle: 236, parent: 'croom', lives: [], actions: [], relations: [], purpose: 'An open Circle. Fire history is separate from the weekly Circle.' };
+  D.nodes.c236 = { ...D.nodes.c233, name: 'Circle 236', sub: 'OPEN · Circle 236', stateShort: 'OPEN', circle: 236, parent: 'croom', lives: [], actions: [], relations: [], question: null, purpose: 'An open Circle. Fire history is separate from the weekly Circle.' };
   D.council.circles[236] = { node: 'c236', number: 236, status: 'open', companions: circle.companions.map((c, i) => {
-    D.nodes[c.id] = { ...base, name: c.label, sub: c.kind + ' · Circle 236', circle: 236, parent: 'croom', status: 'LIVE', statusNote: 'Open Circle companion artwork; no attendance claimed.', part: c.kind + ' · Circle 236', practical: 'Supplied Circle artwork · not documentary evidence.', purpose: c.reader ? 'Birch’s source-linked Living Record study is available.' : 'Its Living Record doorway is not ready. The artwork can be encountered here.', stateShort: 'OPEN', lives: [], actions: [], relations: [{ to: 'croom', dim: 'place', text: 'Return to the same Council' }], sources: ['Ed / TEOTAG supplied Circle 236 artwork'], location: 'A companion frame around the existing Council fire.' };
-    return { id: c.id, kind: c.kind, seat: Math.PI / 2 + i * Math.PI / 6, repr: { form: 'circleFrame', artwork: c.artwork, presence: c.presence } };
+    D.nodes[c.id] = { ...base, name: c.label, sub: c.kind + ' · Circle 236', circle: 236, parent: 'croom', status: 'LIVE', statusNote: 'Open Circle companion artwork; no attendance claimed.', part: c.kind + ' · Circle 236', practical: c.artworkCaption, purpose: c.reader ? 'Birch’s source-linked Living Record study is available.' : 'Its Living Record doorway is not ready. The artwork can be encountered here.', stateShort: 'OPEN', lives: [], actions: [], relations: [{ to: 'croom', dim: 'place', text: 'Return to the same Council' }], sources: ['Ed / TEOTAG supplied Circle 236 artwork'], location: 'A companion frame around the existing Council fire.' };
+    return { id: c.id, kind: c.kind, seat: Math.PI / 2 + i * Math.PI / 6, repr: { form: 'circleFrame', artwork: c.presentation === 'text-only' ? null : c.artwork, textLabel: c.presentation === 'text-only' ? [c.label, 'A. A. Milne', 'Book · 1926'] : null, presence: c.presence } };
   }) };
   D.council.active = 236;
   D.council.current = 'c236';
+  D.nodes.croom.question = null;
   D.nodes.croom.sub = 'Circle 236 · OPEN';
   D.nodes.croom.purpose = 'The Council room persists. These companions belong to the open Circle 236. Council Fire: Fire reference · Tuesday 13 October · 19:30 UK.';
   D.nodes.croom.relations = circle.companions.map(c => ({ to: c.id, dim: 'place', text: c.label }));
@@ -31,10 +32,11 @@ export async function installCompanionFrames(D) {
   // The stillness pause (entry.js startQuiet) sets body[data-q], which makes every panel
   // control invisible and untappable until the 3D canvas is touched. Keep companion controls live.
   const style = document.createElement('style');
-  style.textContent = 'body.grace-p.g-arriving aside#panel,body[data-q] aside#panel #grab,body[data-q] aside#panel .pbody>*{opacity:1!important;pointer-events:auto!important}#tetol-welcome{display:none!important}#council-return{left:16px!important;right:auto!important;bottom:16px!important;width:max-content;max-width:calc(100vw - 32px)}body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}' + (window.parent !== window ? '#council-return{display:none!important}' : ''); document.head.append(style);
+  style.textContent = 'body.grace-p.g-arriving aside#panel,body[data-q] aside#panel #grab,body[data-q] aside#panel .pbody>*{opacity:1!important;pointer-events:auto!important}#tetol-welcome{display:none!important}#council-return{left:16px!important;right:auto!important;bottom:16px!important;width:max-content;max-width:calc(100vw - 32px)}body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}body.phone #council-return{top:128px!important;bottom:auto!important}' + (window.parent !== window ? '#council-return{display:none!important}' : ''); document.head.append(style);
   document.title = 'Circle 236 · OPEN · Spatial Council';
   const brand = document.getElementById('brandline'); if (brand) { const label = 'Circle 236 · OPEN · supplied companion artwork'; brand.textContent = label; new MutationObserver(() => { if (brand.textContent !== label) brand.textContent = label; }).observe(brand, { childList: true }); }
   D.circleFrameCompanions = circle.companions;
+  D.circleCopyWelcome = circle.welcome;
   const returnLink = document.getElementById('council-return');
   if (returnLink) { returnLink.href = '/review/council/236?mode=spatial'; returnLink.target = '_top'; returnLink.textContent = 'Return to Circle 236'; }
   return circle;
@@ -44,7 +46,8 @@ export function companionPanel(D, id, esc) {
   const items = D.circleFrameCompanions;
   const c = items.find(c => c.id === id);
   if (!c && id !== 'croom' && id !== 'c236') return null;
-  return `<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Show more about this place"><i></i></button><div class="pbody"><h2 class="pname">${c ? esc(c.label) : 'Circle 236'}</h2><p class="psub">OPEN · Fire reference · Tuesday 13 October · 19:30 UK</p>${c ? `<img data-circle-artwork="${c.id}" src="${c.artwork}" alt="${esc(c.label)} · supplied Circle artwork" style="width:100%;height:auto"><p>${esc(c.kind)} · artwork, not documentary evidence.</p>${c.reader ? '<button class="act" data-circle-reader>Open Birch’s Living Record study</button>' : '<p>Living Record doorway not ready.</p>'}<button class="act" data-go="croom">Return to Council</button>` : items.map(c => `<button class="act" data-go="${c.id}">${esc(c.label)}</button>`).join('')}<a class="act" href="https://t.me/s33dlife" target="_blank" rel="noopener">Gather at the Fire · Council group</a></div>`;
+  const readable = c ? `${c.safety ? `<p class="circle-care"><strong>${esc(c.safety)}</strong></p>` : ''}${c.presentation === 'text-only' ? '' : `<img data-circle-artwork="${esc(c.id)}" src="${esc(c.artwork)}" alt="${esc(c.label)} · supplied Circle artwork" style="width:100%;height:auto">`}<p>${esc(c.kind)}</p><p>${esc(c.artworkCaption)}</p><p>${esc(c.readableText)}</p><ul>${c.details.map(t => `<li>${esc(t)}</li>`).join('')}</ul>${c.reader ? '<button class="act" data-circle-reader>Open Birch’s Living Record study</button>' : '<p>Its Living Record is still to grow.</p>'}<button class="act" data-go="croom">Return to Council</button>` : `<p>Copy preview · pending Ed approval</p><p>${esc(D.circleCopyWelcome)}</p>${items.map(c => `<button class="act" data-go="${esc(c.id)}">${esc(c.label)}</button>`).join('')}`;
+  return `<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Show more about this place"><i></i></button><div class="pbody"><h2 class="pname">${c ? esc(c.label) : 'Circle 236'}</h2><p class="psub">OPEN · Fire reference · past date · Tuesday 13 October · 19:30 UK</p>${readable}<a class="act" href="https://t.me/s33dlife" target="_blank" rel="noopener">Council group · fire times are shared there</a></div>`;
 }
 
 /** Symbolic presence, separate from the supplied frame; every mesh uses the same appearance ID. */

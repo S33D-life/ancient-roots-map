@@ -2,14 +2,18 @@
   {
     "companion": "Birch",
     "path": "/council/circle-236/birch.jpg",
-    "sha256": "aa566c2be6db42af871820af9cd356754c0f408eb66b1727c7c9edb6968868ca",
-    "bytes": 540455
+    "sha256": "7cc65937ad3fa5111a7c6d3b6bee4fe65a10c8ce66914425c412a13e72ad6a62",
+    "bytes": 495809,
+    "originalSuppliedSha256": "aa566c2be6db42af871820af9cd356754c0f408eb66b1727c7c9edb6968868ca",
+    "originalSuppliedBytes": 540455
   },
   {
     "companion": "Bishop of Ely’s Plane Tree",
     "path": "/council/circle-236/ely-plane.jpg",
-    "sha256": "6c22536507d1ca764bfecd234e04c010ae669e075de0956ff70d35608cade3ca",
-    "bytes": 548168
+    "sha256": "402aa64eee253e4135790ee348f6a910443711d111fdb73014a1e7636ea770ba",
+    "bytes": 494609,
+    "originalSuppliedSha256": "6c22536507d1ca764bfecd234e04c010ae669e075de0956ff70d35608cade3ca",
+    "originalSuppliedBytes": 548168
   },
   {
     "companion": "Rose",
