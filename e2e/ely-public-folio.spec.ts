@@ -10,7 +10,7 @@ for (const width of [390,1440]) test(`Ely Circle 236 folio and return — ${widt
   await page.getByRole("link",{name:"Read Ely Plane’s living folio →"}).click();
   await expect(page).toHaveURL(/\/ancient-friends\/ely\/folio/);
   await expect(page.getByRole("heading",{name:"The Great London Plane of Ely"})).toBeVisible();
-  await expect(page.getByText(/could not reach the trunk/)).toBeVisible();
+  await expect(page.getByText(/Ed visited on 11 October 2026 but could not reach the trunk/)).toBeVisible();
   await expect(page.getByRole("link",{name:"Watch this tree live ↗"})).toHaveAttribute("href",/treecouncil\.org\.uk/);
   await page.reload();
   await expect(page.getByRole("heading",{name:"The Great London Plane of Ely"})).toBeVisible();
