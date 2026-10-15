@@ -115,6 +115,7 @@ const WelcomePage = lazyImportWithRetry(() => import("./pages/WelcomePage"), "we
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
 const GrowthFolioPage = lazyImportWithRetry(() => import("./pages/GrowthFolioPage"), "growth-folio");
+const ElyLivingFolioPage = lazyImportWithRetry(() => import("./pages/review/ElyLivingFolioPage"), "ely-living-folio");
 const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "circle236-preparation");
 const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
@@ -232,6 +233,12 @@ const PatronsPortalRedirect = () => {
 
 const PageLoader = () => <PageSkeleton variant="default" />;
 
+/** An authored reading folio does not need to replay First Walk. */
+function FolioFirstWalk() {
+  const { pathname } = useLocation();
+  return pathname === "/ancient-friends/ely/folio" ? null : <FirstWalkTrail />;
+}
+
 const App = () => {
   // Authentication enhances the public world; it never gates the initial render.
   const authState = useSessionState();
@@ -308,7 +315,7 @@ const App = () => {
             <CelebrationOverlay />
             <Suspense fallback={null}>
               <ProximityNudge />
-              <FirstWalkTrail />
+              <FolioFirstWalk />
               <DailySeedRitual />
               <BotContinuationBanner />
             </Suspense>
@@ -360,6 +367,7 @@ const App = () => {
                 <Route path="/email-confirmed" element={<Navigate to="/welcome" replace />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
                 <Route path="/golden-dream/growth/:growthId" element={realm(<GrowthFolioPage />, "crown")} />
+                <Route path="/ancient-friends/ely/folio" element={<ElyLivingFolioPage />} />
                 <Route path={THREAD_PATTERNS.CIRCLE} element={<BirchPreparationPage />} />
                 <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
