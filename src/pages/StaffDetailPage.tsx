@@ -92,6 +92,9 @@ function SectionDivider({ title, icon }: { title: string; icon: React.ReactNode 
 /* ═══════════════════════════════════════════════════════════════
    STAFF DETAIL PAGE — Identity Vessel
    ═══════════════════════════════════════════════════════════════ */
+// Hold all token-specific links until the independent chain crosswalk is verified.
+const SHOW_ONCHAIN_VIEWER = false;
+
 export default function StaffDetailPage() {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
@@ -426,7 +429,7 @@ export default function StaffDetailPage() {
               <Button variant="ghost" size="sm" className="gap-1.5 text-xs font-serif text-muted-foreground hover:text-primary" onClick={handleShare}>
                 <Share2 className="w-3.5 h-3.5" /> Share
               </Button>
-              {isContractConfigured() && (
+              {SHOW_ONCHAIN_VIEWER && isContractConfigured() && (
                 <Button variant="ghost" size="sm" className="gap-1.5 text-xs font-serif text-muted-foreground hover:text-primary"
                   onClick={() => window.open(getBaseScanUrl(staff.tokenId), "_blank")}>
                   <Eye className="w-3.5 h-3.5" /> On-Chain

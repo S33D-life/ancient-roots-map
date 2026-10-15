@@ -18,5 +18,8 @@ describe("Staff Spiral numbering is never presented as an NFT token", () => {
       expect(src, f).not.toMatch(/Token #|label="Token"/);
     }
     expect(readFileSync("src/components/StaffRoomGallery.tsx", "utf8")).toContain("const SHOW_ONCHAIN_VIEWER = false;");
+    const detail = readFileSync("src/pages/StaffDetailPage.tsx", "utf8");
+    expect(detail).toContain("const SHOW_ONCHAIN_VIEWER = false;");
+    expect(detail).toContain("SHOW_ONCHAIN_VIEWER && isContractConfigured() && (");
   });
 });
