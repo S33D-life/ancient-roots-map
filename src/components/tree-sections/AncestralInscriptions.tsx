@@ -39,7 +39,9 @@ export default function AncestralInscriptions({ treeId, showEmpty = false, previ
   const { userId } = useCurrentUser();
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
-  const { data: marks = [], isLoading, isError } = useTreeInscriptions(treeId, preview?.marks);
+  const { data: cachedMarks = [], isLoading, isError, isFetching } = useTreeInscriptions(treeId, preview?.marks);
+  // A cached entry capability is not a fresh permission check.
+  const marks = !preview && (isError || isFetching) ? [] : cachedMarks;
   const portal = marks.find((mark) => mark.root_id === params.get("root")) ?? null;
   const setPortal = (mark: TreeInscription | null) => {
     const previousId = params.get("root");
@@ -47,14 +49,16 @@ export default function AncestralInscriptions({ treeId, showEmpty = false, previ
     if (!mark && previousId) requestAnimationFrame(() => document.getElementById(`root-mark-${previousId}`)?.focus());
   };
 
-  const { data: isAuthority = false } = useQuery({
+  const { data: cachedAuthority = false, isFetching: authorityFetching, isError: authorityError } = useQuery({
     queryKey: ["tree-root-authority", treeId, userId],
     queryFn: () => isTreeRootAuthority(treeId, userId),
     enabled: !!userId && !preview,
   });
 
+  const isAuthority = cachedAuthority && !authorityFetching && !authorityError;
+
   const { data: waiting = [] } = useQuery({
-    queryKey: ["tree-roots-pending", treeId],
+    queryKey: ["tree-roots-pending", treeId, userId],
     queryFn: () => listPendingTreeRoots(treeId),
     enabled: isAuthority && !preview,
   });
@@ -180,21 +184,26 @@ function RootPortal({
   const groveId = mark?.life_grove_id;
   const canEnter = !!mark?.can_enter;
 
-  const { data: grove, isError: groveError } = useQuery({
+  const { data: cachedGrove, isError: groveError, isFetching: groveFetching } = useQuery({
     queryKey: ["root-portal-grove", groveId, userId],
     queryFn: () => (groveId ? getLifeGrove(groveId) : null),
     enabled: !!groveId && canEnter && !preview,
+    refetchOnMount: "always",
     ...(preview ? { initialData: preview.grove } : {}),
   });
 
+  const grove = !preview && (groveError || groveFetching) ? null : cachedGrove;
+  const groveUnavailable = canEnter && !grove && !groveFetching;
   const entered = requestedEntry && !!grove;
 
-  const { data: offerings = [] } = useQuery({
+  const { data: cachedOfferings = [], isError: offeringsError, isFetching: offeringsFetching } = useQuery({
     queryKey: ["root-portal-offerings", groveId, userId],
     queryFn: () => (groveId ? listOfferings(groveId) : []),
     enabled: !!groveId && canEnter && !!grove && !preview,
     ...(preview ? { initialData: preview.offerings } : {}),
   });
+
+  const offerings = !preview && (offeringsError || offeringsFetching) ? [] : cachedOfferings;
 
   useEffect(() => {
     if (mark && !canEnter && params.has("rootView")) setParams(rootPortalParams(params, mark.root_id), { replace: true });
@@ -250,14 +259,14 @@ function RootPortal({
               )}
 
               <div className="mt-7">
-                {canEnter && (groveError || (preview && !grove)) && <p role="status" className="mb-3 text-sm text-muted-foreground">This Grove is unavailable or your permission has changed. Its memories have not been opened.</p>}
+                {groveUnavailable && <p role="status" className="mb-3 text-sm text-muted-foreground">This Grove is unavailable or your permission has changed. Its memories have not been opened.</p>}
                 {canEnter ? (
                   <Button
                     className="h-14 px-8 font-serif text-xs uppercase tracking-[0.3em]"
                     disabled={!grove}
                     onClick={() => setEntered(true)}
                   >
-                    {grove ? "Enter the Ethereal Tree" : groveError || preview ? "Grove unavailable" : "Opening…"}
+                    {grove ? "Enter the Ethereal Tree" : groveUnavailable ? "Grove unavailable" : "Opening…"}
                   </Button>
                 ) : (
                   <p className="font-serif text-sm italic text-muted-foreground/80">

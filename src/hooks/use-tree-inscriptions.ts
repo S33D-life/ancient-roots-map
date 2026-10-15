@@ -4,10 +4,12 @@ import { listTreeInscriptions, type TreeInscription } from '@/repositories/grove
 /** Server-filtered active marks; scope cached responses to the current viewer. */
 export function useTreeInscriptions(treeId: string, previewMarks?: TreeInscription[], enabled = true) {
   const { userId } = useCurrentUser();
-  return useQuery({
+  const query = useQuery({
     queryKey: ['tree-inscriptions', treeId, userId],
     queryFn: () => listTreeInscriptions(treeId),
+    refetchOnMount: 'always',
     enabled: enabled && !!treeId && previewMarks === undefined,
     ...(previewMarks !== undefined ? { initialData: previewMarks } : {}),
   });
+  return { ...query, data: previewMarks ?? (query.isFetching || query.isError ? undefined : query.data) };
 }

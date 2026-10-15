@@ -6,12 +6,12 @@ import { ancestralRootsParams, rootPortalParams, treeMemoryState } from '@/lib/a
 import AncestralInscriptions from '@/components/tree-sections/AncestralInscriptions';
 import { getLifeGrove, listOfferings } from '@/repositories/life-groves';
 import { listTreeInscriptions } from '@/repositories/grove-roots';
+vi.mock('@/components/life-groves/FullscreenTreeView',()=>({default:({open,groveTitle}:{open:boolean;groveTitle:string})=>open?<h2>{groveTitle}</h2>:null}));
 vi.mock('@/hooks/use-current-user',()=>({useCurrentUser:()=>({userId:null})}));
 vi.mock('@/repositories/life-groves',()=>({getLifeGrove:vi.fn(),listOfferings:vi.fn()}));
 vi.mock('@/repositories/grove-roots',()=>({listTreeInscriptions:vi.fn(),isTreeRootAuthority:vi.fn(),listPendingTreeRoots:vi.fn(),reviewGroveRoot:vi.fn(),rootTypeLabel:()=> 'Ancestral'}));
 const mark={root_id:'mark-1',life_grove_id:'private-grove',root_type:'ancestral',inscription_text:'A little name',signature_strokes:null,remembered_name:null,grove_title:null,dedication:null,rooted_year:2026,can_enter:false};
-function show(path='/?tab=memory&view=archive&category=ancestral-roots'){
- const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+function show(path='/?tab=memory&view=archive&category=ancestral-roots',client=new QueryClient({defaultOptions:{queries:{retry:false}}})){
  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[path]}><AncestralInscriptions treeId="tree-1" showEmpty/></MemoryRouter></QueryClientProvider>);
 }
 describe('Ancestral Roots relationship navigation',()=>{
@@ -44,4 +44,24 @@ describe('Ancestral Roots relationship navigation',()=>{
   show();await waitFor(()=>expect(screen.getByRole('status')).toHaveTextContent('could not be opened'));
   expect(screen.queryByText('No Ancestral Roots resting here yet.')).not.toBeInTheDocument();
  });
+ it.each(['error','missing'])('does not reopen cached private content after a %s Grove response',async(response)=>{
+  const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+  client.setQueryData(['root-portal-grove','private-grove',null],{id:'private-grove',grove_title:'Private cached family',tree_archetype_species:'oak'});
+  vi.mocked(listTreeInscriptions).mockResolvedValue([{...mark,can_enter:true} as never]);
+  if(response==='error') vi.mocked(getLifeGrove).mockRejectedValue(new Error('permission changed'));
+  else vi.mocked(getLifeGrove).mockResolvedValue(null);
+  vi.mocked(listOfferings).mockClear();
+  show('/?root=mark-1&rootView=grove',client);
+  expect(await screen.findByText(/This Grove is unavailable/)).toBeVisible();
+  expect(screen.queryByRole('heading',{name:'Private cached family'})).not.toBeInTheDocument();
+  expect(listOfferings).not.toHaveBeenCalled();
+ });
+ it('allows an authorised Grove to open after a successful fresh read',async()=>{
+  vi.mocked(listTreeInscriptions).mockResolvedValue([{...mark,can_enter:true} as never]);
+  vi.mocked(getLifeGrove).mockResolvedValue({id:'private-grove',grove_title:'Permitted Grove',tree_archetype_species:'oak'} as never);
+  vi.mocked(listOfferings).mockResolvedValue([]);
+  show('/?root=mark-1&rootView=grove');
+  expect(await screen.findByRole('heading',{name:'Permitted Grove'})).toBeVisible();
+ });
+
 });
