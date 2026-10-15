@@ -32,6 +32,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getPublicAppUrl } from "@/utils/ogMeta";
+import { staffRoom3DHref } from "@/lib/tetolStaffRoom";
 
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
@@ -817,6 +818,13 @@ export default function StaffRoomGallery() {
           <p className="text-sm font-serif text-muted-foreground max-w-lg mx-auto leading-relaxed">
             Home of the 144 Ancient Friends staffs — hand-crafted from fallen wood, each carrying the spirit of its species.
           </p>
+          <a
+            href={staffRoom3DHref()}
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-4 rounded-full border border-primary/30 bg-card/30 text-xs font-serif text-foreground hover:border-primary/60 transition-all"
+          >
+            <span aria-hidden="true">🪵</span> Step inside the 3D Staff Room
+            <span className="text-muted-foreground">· the roundhouse in TETOL</span>
+          </a>
           <div className="h-px max-w-xs mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(42 85% 55% / 0.4), transparent)" }} />
         </motion.div>
 
