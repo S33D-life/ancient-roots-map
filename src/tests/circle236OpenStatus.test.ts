@@ -21,5 +21,7 @@ describe("Circle 236 website weekly status", () => {
     expect(runtime).toContain("circle.status !== 'OPEN'");
     expect(runtime).not.toContain("PREPARING");
     expect(runtime).toContain("Fire reference · Tuesday 13 October · 19:30 UK");
+    expect(runtime).toContain("returnLink.href = \'/council-of-life?from=spatial-council#next-gathering\'");
+    expect(runtime).not.toContain("returnLink.href = \'/review/council/236?mode=spatial\'");
   });
 });
