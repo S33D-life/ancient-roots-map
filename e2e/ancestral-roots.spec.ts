@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 const entry='/review/ancestral-roots.html';
 for (const width of [320,390,1440]) {
  test(`Root relationship and exact return at ${width}px`,async({browser},testInfo)=>{
+  test.skip(process.env.S33D_ROOTS_REVIEW !== '1', 'Fictional review entry is intentionally excluded from ordinary builds.');
   const context=await browser.newContext({viewport:{width,height:900},isMobile:width<500,hasTouch:width<500});
   const page=await context.newPage();const errors:string[]=[];const external:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -36,6 +37,7 @@ for (const width of [320,390,1440]) {
   await context.close();
  });
  test(`Anonymous, revoked and empty Roots at ${width}px`,async({page},testInfo)=>{
+  test.skip(process.env.S33D_ROOTS_REVIEW !== '1', 'Fictional review entry is intentionally excluded from ordinary builds.');
   await page.setViewportSize({width,height:900});const remote:string[]=[];
   await page.route('**/*',route=>{const u=new URL(route.request().url());if(!['127.0.0.1','localhost'].includes(u.hostname)){remote.push(u.hostname);return route.abort();}return route.continue();});
   await page.goto(`${entry}?visitor=outsider&tab=memory&category=ancestral-roots`);

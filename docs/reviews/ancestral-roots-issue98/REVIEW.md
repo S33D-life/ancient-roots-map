@@ -52,3 +52,7 @@ Rollback: do not merge to cancel this candidate. Later frontend rollback restore
 - Browser: 17/17 PASS: nine new Roots scenarios plus eight existing auth/navigation/public-route regression checks. Touch-enabled contexts used at 320/390; desktop 1440. Fictional memory opened and closed through the reused viewer.
 - Initial failures retained separately: inherited First Walk interception on mobile; test selector ambiguity for two existing memory-close controls. No force-click or weakened permission assertion used to pass.
 - No GitHub CI (local branch only). No actual family-account, native iPhone Safari, media revocation or restore acceptance claimed.
+
+
+## Shipping-sprint CI clarification
+Preserve 70322bf3 as the accepted local interface checkpoint. This follow-up only makes six standalone fictional-review browser cases opt-in with S33D_ROOTS_REVIEW=1, matching the existing build-entry gate. Three actual TreeDetail integration cases still run in ordinary CI. For the full nine-case local preview run, both build and Playwright need that flag. No application behaviour or permission is changed. GitHub CI will be reported separately from the prior local results.
