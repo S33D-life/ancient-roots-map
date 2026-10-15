@@ -11,7 +11,8 @@ export default function ElyLivingFolioPage() {
   useDocumentTitle("Bishop of Ely’s Plane · Living Ancient Friend");
   const [params] = useSearchParams();
   const heading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { heading.current?.focus({ preventScroll: true }); }, []);
+  // Open at the top: the previous page's scroll position must not carry over into the folio.
+  useEffect(() => { window.scrollTo(0, 0); heading.current?.focus({ preventScroll: true }); }, []);
   const folio = ELY_FOLIO;
   const returnUrl = elyFolioReturn(params.get("from"));
   return <ParchmentGround realm="canopy" className="afc-folio">

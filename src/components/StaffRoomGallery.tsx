@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import {
   getSpiralStaffs, getGridStaffs, getSpeciesStaffCounts,
-  getCircleDescription, isContractConfigured, getBaseScanUrl,
+  getCircleDescription, isContractConfigured, getBaseScanUrl, spiralPositionLabel,
   type SpiralStaff, type GridStaff,
 } from "@/utils/staffRoomData";
 import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
@@ -33,6 +33,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getPublicAppUrl } from "@/utils/ogMeta";
 import { staffRoom3DHref } from "@/lib/tetolStaffRoom";
+
+const SHOW_ONCHAIN_VIEWER = false;
 
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
@@ -223,7 +225,7 @@ function StaffDetailContent({ staff, onViewOnChain, onViewLegend, onNavigate }: 
       <div className="space-y-2 text-sm">
         <Row label="Code" value={<span className="font-mono text-xs">{staff.code}</span>} />
         <Row label="Species" value={staff.speciesName} />
-        <Row label="Token" value={`#${String(staff.tokenId).padStart(3, "0")}`} />
+        {spiralPositionLabel(staff) && <Row label="Spiral" value={spiralPositionLabel(staff)!.replace("Spiral ", "")} />}
         {staff.length && <Row label="Length" value={staff.length} />}
         {staff.weight && <Row label="Weight" value={staff.weight} />}
         <Row label="Collection" value={`${total} staff${total > 1 ? "s" : ""}`} />
@@ -293,9 +295,13 @@ function StaffDetailContent({ staff, onViewOnChain, onViewLegend, onNavigate }: 
         }>
           <Share2 className="w-3.5 h-3.5" /> Share
         </Button>
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs h-9 touch-manipulation" onClick={onViewOnChain}>
-          <Eye className="w-3.5 h-3.5" /> On-Chain
-        </Button>
+        {/* On-Chain viewer held: it looked up IPFS metadata by Spiral position, which is not the NFT token
+            (e.g. YEW showed token 1 = Goat Willow). Re-enable once the Spiral ↔ token crosswalk is verified on chain. */}
+        {SHOW_ONCHAIN_VIEWER && (
+          <Button variant="outline" size="sm" className="gap-2 font-serif text-xs h-9 touch-manipulation" onClick={onViewOnChain}>
+            <Eye className="w-3.5 h-3.5" /> On-Chain
+          </Button>
+        )}
       </div>
 
       <CuratorAssignPanel staffCode={staff.code} />
@@ -581,7 +587,7 @@ export default function StaffRoomGallery() {
                         <h4 className="font-serif text-sm text-foreground truncate">{staff.speciesName}</h4>
                         {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
                       </div>
-                      <p className="text-[10px] text-muted-foreground font-mono">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">{[staff.code, spiralPositionLabel(staff)].filter(Boolean).join(" · ")}</p>
                       {staff.length && (
                         <p className="text-[10px] text-muted-foreground">{staff.length} · {staff.weight}</p>
                       )}
@@ -643,7 +649,7 @@ export default function StaffRoomGallery() {
               <p className="font-serif text-sm text-foreground truncate">{staff.speciesName}</p>
               {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
             </div>
-            <p className="text-xs text-muted-foreground font-mono mt-0.5">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{[staff.code, spiralPositionLabel(staff)].filter(Boolean).join(" · ")}</p>
           </div>
           {staff.length && (
             <div className="hidden sm:block text-right">
@@ -694,7 +700,7 @@ export default function StaffRoomGallery() {
               {staff.speciesName}
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-              {staff.code} · #{String(staff.tokenId).padStart(3, "0")}
+              {[staff.code, spiralPositionLabel(staff)].filter(Boolean).join(" · ")}
             </p>
           </CardContent>
         </Card>
@@ -756,7 +762,7 @@ export default function StaffRoomGallery() {
               </div>
               <div className="mt-5 text-center">
                 <h3 className="font-serif text-2xl text-primary tracking-wide">{activeStaff.speciesName}</h3>
-                <p className="text-sm text-muted-foreground font-mono mt-1">{activeStaff.code} · #{String(activeStaff.tokenId).padStart(3, "0")}</p>
+                <p className="text-sm text-muted-foreground font-mono mt-1">{[activeStaff.code, spiralPositionLabel(activeStaff)].filter(Boolean).join(" · ")}</p>
                 {activeStaff.length && <p className="text-xs text-muted-foreground mt-1">{activeStaff.length} · {activeStaff.weight}</p>}
               </div>
             </motion.div>

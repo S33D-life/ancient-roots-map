@@ -190,6 +190,16 @@ export function getGridStaffs(): GridStaff[] {
   return grid;
 }
 
+/**
+ * Public position label for a Staff in the 2D Staff Room.
+ * The 36 Origin Staffs are numbered by their place in the visible Spiral (YEW = 1). That number is NOT the
+ * NFT token ID: the contract's source order (SPECIES_CODES, used by the 3D room's wall frames) differs in
+ * 34 of 36 positions (YEW is token 15). Circle staffs get no number until a chain crosswalk is verified.
+ */
+export function spiralPositionLabel(staff: { tokenId: number }): string | null {
+  return staff.tokenId >= 1 && staff.tokenId <= 36 ? `Spiral #${staff.tokenId}` : null;
+}
+
 /** Check if the contract address is configured (not demo mode). */
 export function isContractConfigured(): boolean {
   return !!STAFF_CONTRACT_ADDRESS;

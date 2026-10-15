@@ -1088,7 +1088,6 @@ function ConstellationDetail({
                   }}
                 >
                   <p className="text-[8px] font-serif font-medium" style={{ color: colors.core }}>{staff.code}</p>
-                  <p className="text-[6px]" style={{ color: "hsl(42, 20%, 45%)" }}>Token #{staff.tokenId}</p>
                 </div>
               </div>
             </motion.div>

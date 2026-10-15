@@ -392,7 +392,7 @@ export default function StaffDetailPage() {
               {staff.speciesName}
             </h1>
             <p className="text-muted-foreground font-mono text-sm mt-1">
-              {staff.code} · Token #{String(staff.tokenId).padStart(3, "0")}
+              {staff.code}
             </p>
 
             {/* Badges — minimal */}
