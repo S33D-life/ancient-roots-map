@@ -35,6 +35,21 @@ describe("Ely public-safe folio — isolated recovery of PR #102", () => {
     const source=readFileSync("src/pages/review/ElyLivingFolioPage.tsx","utf8");
     expect(source).not.toMatch(/supabase|research_trees|\.from\(|fetch\(/);
   });
+  it("provides a direct publicly servable Bishop of Ely's Plane page without trusting a stale SPA", () => {
+    const html = readFileSync("public/ancient-friends/bishop-of-elys-plane.html", "utf8");
+    const js = readFileSync("public/ancient-friends/bishop-of-elys-plane.js", "utf8");
+    const vite = readFileSync("vite.config.ts", "utf8");
+    const redirects = readFileSync("public/_redirects", "utf8");
+    expect(ELY_FOLIO.name).toBe("Bishop of Ely’s Plane");
+    expect(html).toContain("<h1>Bishop of Ely’s Plane</h1>");
+    expect(html).toContain("Paul Wood’s Bishop’s Plane, research record #437");
+    expect(html).toContain("/ancient-friends/bishop-of-elys-plane.js");
+    expect(js).toContain('fetch("/review/ely-folio.json"');
+    expect(js).not.toMatch(/supabase|\.from\(|service_role|localStorage/);
+    expect(redirects).toContain("/ancient-friends/ely/folio /ancient-friends/bishop-of-elys-plane.html 200");
+    expect(vite).toContain("bishop-of-elys-plane");
+  });
+
   it("keeps the spatial link inside the existing Circle 236 panel", () => {
     const runtime=readFileSync("public/tetol/circle-235/pre-fire/runtime/companion-frames.js","utf8");
     expect(runtime).toContain("/ancient-friends/bishop-of-elys-plane.html?from=spatial");
