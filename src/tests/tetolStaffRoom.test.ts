@@ -44,6 +44,11 @@ describe("TETOL Staff Room restoration", () => {
     }
   });
 
+  it("keeps the public TETOL scene clear of the exported design overlay", () => {
+    const bridge = read("runtime/classic-1.js");
+    expect(bridge).toContain("#__claude_design_branding,body.ininterior #council-return{display:none!important}");
+  });
+
   it("points the Tree's doorway at the same-origin room, not a bare asset id", () => {
     const bridge = read("runtime/classic-1.js");
     expect(bridge).toContain('window.STAFFROOM_URL="./staffroom.html";');
