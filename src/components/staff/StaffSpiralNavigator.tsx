@@ -411,7 +411,6 @@ function CircleDetailView({
                 <div className="bg-card border border-border rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl text-center">
                   <p className="text-[8px] font-serif text-foreground font-medium">{staff.code}</p>
                   <p className="text-[7px] font-serif text-muted-foreground">{staff.speciesName}</p>
-                  <p className="text-[6px] font-serif text-primary/50 mt-0.5">Token #{staff.tokenId}</p>
                 </div>
               </div>
             </motion.div>

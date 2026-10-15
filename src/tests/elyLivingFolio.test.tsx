@@ -56,4 +56,11 @@ describe("Ely public-safe folio — isolated recovery of PR #102", () => {
     expect(runtime).toContain("data-circle-reader");
     expect(runtime).not.toContain("afcPreview");
   });
+  it("keeps the in-app folio fallback readable and opens it at the top", () => {
+    expect(readFileSync("src/styles/afc-folio.css","utf8")).toContain(".afc-folio h1,.afc-folio h2,.afc-folio h3{color:inherit}");
+    render(<MemoryRouter initialEntries={[ELY_FOLIO_PATH]}><Routes>
+      <Route path={ELY_FOLIO_PATH} element={<ElyLivingFolioPage />}/>
+    </Routes></MemoryRouter>);
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+  });
 });
