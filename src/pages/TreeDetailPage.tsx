@@ -49,6 +49,7 @@ import { useTreePresence } from "@/hooks/use-tree-presence";
 import { useSingleTreePresence } from "@/hooks/use-single-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
 import { useTreeProximityGate } from "@/hooks/use-tree-proximity-gate";
+import { treeLocationLabel } from "@/lib/treeLocationEvidence";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import { getPublicAppUrl } from "@/utils/ogMeta";
 import OfferingCard from "@/components/OfferingCard";
@@ -338,7 +339,7 @@ const TreeDetailPage = () => {
     if (!tree) return;
     const url = getPublicAppUrl(`/tree/${tree.id}`);
     const title = tree.name || "An Ancient Friend";
-    const text = `Meet ${title} on S33D`;
+    const text = [`Meet ${title} on S33D`, treeLocationLabel(tree)].filter(Boolean).join("\n");
     try {
       if (typeof navigator !== "undefined" && (navigator as any).share) {
         await (navigator as any).share({ title, text, url });
@@ -887,6 +888,8 @@ const TreeDetailPage = () => {
             onOpenChange={setShareCardOpen}
             tree={{
               id: tree.id,
+              metadata: tree.metadata,
+              location_confidence: tree.location_confidence,
               name: tree.name,
               species: tree.species,
               imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
@@ -1150,6 +1153,7 @@ const TreeDetailPage = () => {
             <TreeMapJourneyAnchor
               treeId={tree.id}
               treeName={tree.name}
+              locationLabel={treeLocationLabel(tree)}
               lat={tree.latitude}
               lng={tree.longitude}
               w3w={tree.what3words}

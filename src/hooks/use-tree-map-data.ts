@@ -27,6 +27,11 @@ export interface MapTree {
   lineage?: string;
   project_name?: string;
   girth_cm?: number | null;
+  location_confidence?: string | null;
+  location_basis?: string | null;
+  visiting_access_basis?: string | null;
+  accessibility_tier?: string | null;
+  access_notes?: string | null;
 }
 
 export interface BirdsongCounts {
@@ -57,17 +62,17 @@ const STALE_TIME = 10 * 60 * 1000; // 10 minutes
 
 /* ── Fetch functions (split for independent caching) ── */
 async function fetchTrees(): Promise<MapTree[]> {
+  // Project only the presentation basis, never the rest of a record’s metadata.
+  const projection: string = "id,name,species,latitude,longitude,created_by,nation,estimated_age,what3words,lineage,project_name,girth_cm,location_confidence,location_basis:metadata->location_provenance->>basis,accessibility_tier,access_notes,visiting_access_basis:metadata->visiting_access->>kind";
   const { data, error } = await supabase
     .from("trees")
-    .select(
-      "id,name,species,latitude,longitude,created_by,nation,estimated_age,what3words,lineage,project_name,girth_cm"
-    )
+    .select(projection)
     .not("latitude", "is", null)
     .not("longitude", "is", null)
     .is("merged_into_tree_id", null);
 
   if (error) console.error("Tree fetch error:", error.message);
-  return (data ?? []) as MapTree[];
+  return (data ?? []) as unknown as MapTree[];
 }
 
 async function fetchBirdsongData(trees: MapTree[]) {
