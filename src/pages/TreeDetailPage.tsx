@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import { BottomNavSpacer } from "@/components/BottomNav";
+import { ancestralRootsParams, treeMemoryState } from "@/lib/ancestralRootNavigation";
+import { useTreeInscriptions } from "@/hooks/use-tree-inscriptions";
 import AncestralInscriptions from "@/components/tree-sections/AncestralInscriptions";
 import {
   TreePageHero,
@@ -178,22 +180,29 @@ const TreeDetailPage = () => {
   const [proposeEditOpen, setProposeEditOpen] = useState(false);
   const [birdsongOpen, setBirdsongOpen] = useState(false);
   const [birdsongCount, setBirdsongCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<string>("photo");
+  const [activeTab, setActiveTab] = useState<string>(() => treeMemoryState(searchParams).category);
+  const { data: rootMarks = [] } = useTreeInscriptions(id ?? "", undefined, !!tree && tree.id === id);
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [artOriginFilter, setArtOriginFilter] = useState<"all" | "created_by_user" | "inspired_by_existing_art">("all");
-  const [sectionTab, setSectionTab] = useState<string>(() => {
-    const tabParam = searchParams.get("tab");
-    if (tabParam === "encounters") return "encounters";
-    if (tabParam === "offerings" || tabParam === "ethereal" || tabParam === "memory" || tabParam === "living") return "memory";
-    return "overview";
-  });
-  // Memory sub-mode: "living" = Ethereal canopy, "list" = catalogued offerings.
-  // Both belong to the single "Memory" tab so the tree's remembering feels
-  // like one place with two ways of looking.
-  const [memoryMode, setMemoryMode] = useState<string>(() => {
-    const tabParam = searchParams.get("tab");
-    return tabParam === "living" ? "living" : "list";
-  });
+  const [sectionTab, setSectionTab] = useState<string>(() => treeMemoryState(searchParams).section);
+  const [memoryMode, setMemoryMode] = useState<string>(() => treeMemoryState(searchParams).mode);
+  useEffect(() => {
+    const state = treeMemoryState(searchParams);
+    setSectionTab(state.section); setMemoryMode(state.mode); setActiveTab(state.category);
+  }, [searchParams]);
+  const openRoots = () => setSearchParams(ancestralRootsParams(searchParams));
+  const handleMemoryModeChange = (mode: string) => {
+    setMemoryMode(mode);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", "memory"); next.set("view", mode === "living" ? "living" : "archive");
+    setSearchParams(next);
+  };
+  const handleArchiveCategory = (category: string) => {
+    setActiveTab(category);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", "memory"); next.set("view", "archive"); next.set("category", category);
+    next.delete("root"); next.delete("rootView"); setSearchParams(next);
+  };
   const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [greetingCardOpen, setGreetingCardOpen] = useState(false);
@@ -217,7 +226,7 @@ const TreeDetailPage = () => {
     const next = new URLSearchParams(searchParams);
     if (nextTab === "overview") next.delete("tab");
     else next.set("tab", nextTab);
-    setSearchParams(next, { replace: true });
+    setSearchParams(next);
   }, [searchParams, setSearchParams]);
 
   // Capture arrival context from shared links
@@ -1046,7 +1055,7 @@ const TreeDetailPage = () => {
                 Two ways of looking at the same remembering — drifting in the canopy, or set down in rows.
               </p>
             </div>
-            <Tabs value={memoryMode} onValueChange={setMemoryMode} className="w-full">
+            <Tabs value={memoryMode} onValueChange={handleMemoryModeChange} className="w-full">
               <TabsList className="w-full max-w-xs mx-auto grid grid-cols-2 bg-secondary/20 border border-border/30 mb-4 h-8 rounded-md">
                 <TabsTrigger value="living" className="font-serif text-[11px] tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
                   Living
@@ -1336,6 +1345,11 @@ const TreeDetailPage = () => {
               />
             </div>
 
+            <div className="rounded-lg border border-border/40 bg-card/30 p-4 font-serif">
+              <p className="text-sm text-muted-foreground">Names remembered in the bark · Ancestral Roots{rootMarks.length > 0 ? ` (${rootMarks.length} visible to you)` : ""}</p>
+              <Button variant="ghost" className="min-h-11 mt-2 text-primary" onClick={openRoots}>Open Ancestral Roots</Button>
+            </div>
+
             {/* Plant / collect / whisper actions now live in the unified
                 Seeds & Hearts panel above the tabs. Encounters keeps the
                 dev-only debug panel for inspecting presence state. */}
@@ -1518,7 +1532,7 @@ const TreeDetailPage = () => {
 
           {/* ── ARCHIVE — second half of Memory tab ── */}
           <TabsContent value="memory">
-            <Tabs value={memoryMode} onValueChange={setMemoryMode}>
+            <Tabs value={memoryMode} onValueChange={handleMemoryModeChange}>
               <TabsContent value="list" className="space-y-6">
             <TabErrorBoundary tabName="Offerings">
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
@@ -1567,7 +1581,7 @@ const TreeDetailPage = () => {
 
             {/* Blooms Nearby now appears as the "Blooms" tab in the offering categories below. */}
             {/* Empty state — only when truly no offerings, no birdsong */}
-            {offerings.length === 0 && birdsongCount === 0 && (
+            {offerings.length === 0 && birdsongCount === 0 && activeTab !== "ancestral-roots" && (
               <div className="py-6 text-center">
                 <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
                 <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
@@ -1593,7 +1607,7 @@ const TreeDetailPage = () => {
 
 
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <Tabs value={activeTab} onValueChange={handleArchiveCategory} className="w-full">
                   <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
                     {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
                       <TabsTrigger
@@ -1623,7 +1637,11 @@ const TreeDetailPage = () => {
                       <Flower2 className="h-4 w-4" />
                       Blooms
                     </TabsTrigger>
+                    <TabsTrigger value="ancestral-roots" className="min-h-11 font-serif text-xs tracking-wider data-[state=active]:text-primary">
+                      Ancestral Roots <span className="ml-1 opacity-60">({rootMarks.length})</span>
+                    </TabsTrigger>
                   </TabsList>
+                  <TabsContent value="ancestral-roots"><AncestralInscriptions treeId={tree.id} showEmpty /></TabsContent>
 
                   {(Object.keys(offeringLabels) as OfferingType[]).map((type) => {
                     const canAdd = meetingStatus === "active" || meetingStatus === "expiring";

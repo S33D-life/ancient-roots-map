@@ -7,16 +7,19 @@
  *
  * The living tree is never carved. The digital twin remembers.
  */
-import { useState } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useTreeInscriptions } from "@/hooks/use-tree-inscriptions";
+import { rootPortalParams } from "@/lib/ancestralRootNavigation";
+import type { LifeGrove, LifeGroveOffering } from "@/lib/life-groves/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import {
   isTreeRootAuthority,
   listPendingTreeRoots,
-  listTreeInscriptions,
   reviewGroveRoot,
   rootTypeLabel,
   type TreeInscription,
@@ -25,30 +28,39 @@ import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
 import FullscreenTreeView from "@/components/life-groves/FullscreenTreeView";
 import { SignatureMark } from "@/components/life-groves/RootSignaturePad";
 
-interface Props {
-  treeId: string;
+export interface RootPreview {
+  marks: TreeInscription[];
+  grove: Pick<LifeGrove, "id" | "grove_title" | "tree_name" | "remembered_or_celebrated_name" | "tree_archetype_species"> | null;
+  offerings: LifeGroveOffering[];
 }
+interface Props { treeId: string; showEmpty?: boolean; preview?: RootPreview; }
 
-export default function AncestralInscriptions({ treeId }: Props) {
+export default function AncestralInscriptions({ treeId, showEmpty = false, preview }: Props) {
   const { userId } = useCurrentUser();
   const qc = useQueryClient();
-  const [portal, setPortal] = useState<TreeInscription | null>(null);
+  const [params, setParams] = useSearchParams();
+  const { data: cachedMarks = [], isLoading, isError, isFetching } = useTreeInscriptions(treeId, preview?.marks);
+  // A cached entry capability is not a fresh permission check.
+  const marks = !preview && (isError || isFetching) ? [] : cachedMarks;
+  const portal = marks.find((mark) => mark.root_id === params.get("root")) ?? null;
+  const setPortal = (mark: TreeInscription | null) => {
+    const previousId = params.get("root");
+    setParams(rootPortalParams(params, mark?.root_id ?? null));
+    if (!mark && previousId) requestAnimationFrame(() => document.getElementById(`root-mark-${previousId}`)?.focus());
+  };
 
-  const { data: marks = [] } = useQuery({
-    queryKey: ["tree-inscriptions", treeId],
-    queryFn: () => listTreeInscriptions(treeId),
-  });
-
-  const { data: isAuthority = false } = useQuery({
+  const { data: cachedAuthority = false, isFetching: authorityFetching, isError: authorityError } = useQuery({
     queryKey: ["tree-root-authority", treeId, userId],
     queryFn: () => isTreeRootAuthority(treeId, userId),
-    enabled: !!userId,
+    enabled: !!userId && !preview,
   });
 
+  const isAuthority = cachedAuthority && !authorityFetching && !authorityError;
+
   const { data: waiting = [] } = useQuery({
-    queryKey: ["tree-roots-pending", treeId],
+    queryKey: ["tree-roots-pending", treeId, userId],
     queryFn: () => listPendingTreeRoots(treeId),
-    enabled: isAuthority,
+    enabled: isAuthority && !preview,
   });
 
   const review = useMutation({
@@ -63,10 +75,18 @@ export default function AncestralInscriptions({ treeId }: Props) {
       toast.error((e as { message?: string })?.message || "That could not be settled."),
   });
 
-  if (marks.length === 0 && waiting.length === 0) return null;
+  if (!showEmpty && marks.length === 0 && waiting.length === 0) return null;
 
   return (
     <section aria-label="Roots in the digital bark" className="my-10">
+      {showEmpty && <div className="text-center mb-6">
+        <h3 className="font-serif text-xl text-primary">Ancestral Roots</h3>
+        <p className="font-serif text-sm text-muted-foreground mt-2">A name resting in the digital bark. A doorway to a Life Grove, where its people permit.</p>
+        <p className="text-xs text-muted-foreground mt-2">The Root is a relationship. Family memories stay in their Grove.</p>
+      </div>}
+      {showEmpty && isLoading && <p role="status">Following the roots…</p>}
+      {showEmpty && isError && <p role="status">These roots could not be opened. Please try again later.</p>}
+      {showEmpty && !isLoading && !isError && !marks.length && <p className="text-center font-serif text-muted-foreground">No Ancestral Roots resting here yet.</p>}
       <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60 text-center">
         Names in the bark
       </p>
@@ -76,6 +96,7 @@ export default function AncestralInscriptions({ treeId }: Props) {
           {marks.map((m) => (
             <button
               key={m.root_id}
+              id={`root-mark-${m.root_id}`}
               type="button"
               onClick={() => setPortal(m)}
               aria-label={`Open the ${rootTypeLabel(m.root_type).toLowerCase()} root ${m.inscription_text ?? ""}`}
@@ -140,7 +161,7 @@ export default function AncestralInscriptions({ treeId }: Props) {
         </div>
       )}
 
-      <RootPortal mark={portal} onClose={() => setPortal(null)} />
+      <RootPortal key={`${portal?.root_id ?? "closed"}-${userId ?? "anonymous"}`} mark={portal} onClose={() => setPortal(null)} preview={preview} />
     </section>
   );
 }
@@ -150,25 +171,43 @@ export default function AncestralInscriptions({ treeId }: Props) {
 function RootPortal({
   mark,
   onClose,
+  preview,
 }: {
   mark: TreeInscription | null;
   onClose: () => void;
+  preview?: RootPreview;
 }) {
-  const [entered, setEntered] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const { userId } = useCurrentUser();
+  const requestedEntry = params.get("rootView") === "grove" && !!mark?.can_enter;
+  const setEntered = (value: boolean) => setParams(rootPortalParams(params, mark?.root_id ?? null, value));
   const groveId = mark?.life_grove_id;
   const canEnter = !!mark?.can_enter;
 
-  const { data: grove } = useQuery({
-    queryKey: ["life-grove", groveId],
+  const { data: cachedGrove, isError: groveError, isFetching: groveFetching } = useQuery({
+    queryKey: ["root-portal-grove", groveId, userId],
     queryFn: () => (groveId ? getLifeGrove(groveId) : null),
-    enabled: !!groveId && canEnter,
+    enabled: !!groveId && canEnter && !preview,
+    refetchOnMount: "always",
+    ...(preview ? { initialData: preview.grove } : {}),
   });
 
-  const { data: offerings = [] } = useQuery({
-    queryKey: ["life-grove-offerings", groveId],
+  const grove = !preview && (groveError || groveFetching) ? null : cachedGrove;
+  const groveUnavailable = canEnter && !grove && !groveFetching;
+  const entered = requestedEntry && !!grove;
+
+  const { data: cachedOfferings = [], isError: offeringsError, isFetching: offeringsFetching } = useQuery({
+    queryKey: ["root-portal-offerings", groveId, userId],
     queryFn: () => (groveId ? listOfferings(groveId) : []),
-    enabled: !!groveId && canEnter && !!grove,
+    enabled: !!groveId && canEnter && !!grove && !preview,
+    ...(preview ? { initialData: preview.offerings } : {}),
   });
+
+  const offerings = !preview && (offeringsError || offeringsFetching) ? [] : cachedOfferings;
+
+  useEffect(() => {
+    if (mark && !canEnter && params.has("rootView")) setParams(rootPortalParams(params, mark.root_id), { replace: true });
+  }, [mark, canEnter, params, setParams]);
 
   return (
     <>
@@ -178,7 +217,9 @@ function RootPortal({
           if (!o) onClose();
         }}
       >
-        <SheetContent side="bottom" className="rounded-t-3xl border-border/40 pb-10">
+        <SheetContent side="bottom" className="rounded-t-3xl border-border/40 pb-10 max-h-[85dvh] overflow-y-auto">
+          <SheetTitle className="sr-only">Ancestral Root portal</SheetTitle>
+          <SheetDescription className="sr-only">An inscription may be public while the Life Grove remains private.</SheetDescription>
           {mark && (
             <div className="max-w-md mx-auto text-center pt-2">
               {mark.signature_strokes?.length ? (
@@ -218,13 +259,14 @@ function RootPortal({
               )}
 
               <div className="mt-7">
+                {groveUnavailable && <p role="status" className="mb-3 text-sm text-muted-foreground">This Grove is unavailable or your permission has changed. Its memories have not been opened.</p>}
                 {canEnter ? (
                   <Button
                     className="h-14 px-8 font-serif text-xs uppercase tracking-[0.3em]"
                     disabled={!grove}
                     onClick={() => setEntered(true)}
                   >
-                    {grove ? "Enter the Ethereal Tree" : "Opening…"}
+                    {grove ? "Enter the Ethereal Tree" : groveUnavailable ? "Grove unavailable" : "Opening…"}
                   </Button>
                 ) : (
                   <p className="font-serif text-sm italic text-muted-foreground/80">
@@ -237,11 +279,10 @@ function RootPortal({
         </SheetContent>
       </Sheet>
 
-      {grove && (
+      {canEnter && grove && (
         <FullscreenTreeView
           open={entered}
           onClose={() => {
-            setEntered(false);
             onClose();
           }}
           archetype={grove.tree_archetype_species}
