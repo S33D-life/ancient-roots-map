@@ -43,3 +43,6 @@ public/version.json
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Standalone TETOL bridge build (scripts/build-tetol-bridge.mjs)
+dist-tetol-bridge
