@@ -50,26 +50,26 @@ export function appearance(key: PilotKey, mode: Mode): ContextualAppearance {
     returnContext: { route: 'council', realm: 'canopy', contextId: CONTEXT, appearanceId: `${key}-companion`, mode, focusTarget: `${key}-companion` } };
 }
 /** The caller cannot supply routes, selectors, private record IDs or an external return URL. */
-export function pilotState(search: string) {
+export function pilotState(search: string, viewParam: 'view' | 'c237view' = 'view') {
   const params = new URLSearchParams(search);
   const mode: Mode = params.get('mode') === 'spatial' ? 'spatial' : '2d';
   const key = isCompanionKey(params.get('companion')) ? params.get('companion') as CompanionKey : null;
-  const requested = params.get('view');
+  const requested = params.get(viewParam);
   const view = requested === 'invitation' ? 'invitation' : key && ['encounter', ...(isPilotKey(key) ? ['record', 'harvest'] : []), ...(key === 'noku' ? ['twin'] : [])].includes(requested ?? '') ? requested! : 'council';
   const returned = isCompanionKey(params.get('returned')) ? params.get('returned') as CompanionKey : null;
   return { mode, key, view, returned };
 }
-export function pilotHref(mode: Mode, view = 'council', key?: CompanionKey) {
+export function pilotHref(mode: Mode, view = 'council', key?: CompanionKey, basePath = PILOT_PATH) {
   const p = new URLSearchParams({ mode });
   if (key) p.set('companion', key);
-  if (view !== 'council') p.set('view', view);
-  return `${PILOT_PATH}?${p}`;
+  if (view !== 'council') p.set(basePath === PILOT_PATH ? 'view' : 'c237view', view);
+  return `${basePath}?${p}`;
 }
-export function returnHref(key: CompanionKey, mode: Mode) {
+export function returnHref(key: CompanionKey, mode: Mode, basePath = PILOT_PATH) {
   if(!isCompanionKey(key))throw new Error('Unregistered companion');
   // An encounter can return without inventing an enduring identity for it.
   const context = returnContextSchema.parse({ route:'council',realm:'canopy',contextId:CONTEXT,appearanceId:`${key}-companion`,mode,focusTarget:`${key}-companion` });
   if (context.route !== 'council' || context.contextId !== CONTEXT) throw new Error('Unregistered return');
-  return `${pilotHref(mode)}&returned=${key}`;
+  return `${pilotHref(mode, 'council', undefined, basePath)}&returned=${key}`;
 }
 export const NokuTwinReference = 'https://claude.ai/artifact/VMPrXsQ7ALdTL9nN67UFqp';

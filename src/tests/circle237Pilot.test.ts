@@ -33,20 +33,21 @@ describe('Circle 237 isolated portal contract',()=>{
   it('keeps the invitation unapproved with no inherited event details',()=>{
     expect(invitation.approved).toBe(false);
     expect(invitation.approvedQuestion).toBeNull();
-    expect(invitation.openingFireDate).toBeNull();
-    expect(invitation.openingFireTimeUK).toBeNull();
+    expect(invitation.openingFireDate).toBe('2026-10-20');
+    expect(invitation.openingFireTimeUK).toBe('19:30 UK (BST)');
+    expect(invitation.communityLink).toBe('https://t.me/s33dlife');
     expect(invitation.joiningLink).toBeNull();
     expect(publicationBlockers()).toHaveLength(5);
     expect(pilotState('?view=invitation').view).toBe('invitation');
     expect(JSON.stringify(invitation)).not.toMatch(/13 October|235|236/);
   });
   it('keeps source boundaries in executable projection',()=>{
-    const source=readFileSync('src/review/circle237/main.tsx','utf8');
+    const source=readFileSync('src/components/council/Circle237Experience.tsx','utf8');
     expect(source).toContain('distinct from the Camp Unicorn fig');
     expect(source).toContain('Circle 234: remembered appearance');
     expect(source).toContain('taxonomy-index binding remains unresolved');
     expect(source).toContain('not surveyed field geometry');
-    expect(source).toContain('encounter / gathering date unconfirmed');
+    expect(source).toContain('no completed encounter or physical visit is asserted');
     expect(source).not.toMatch(/supabase|fetch\(|localStorage|serviceWorker/);
   });
 });

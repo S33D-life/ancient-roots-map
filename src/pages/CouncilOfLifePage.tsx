@@ -45,6 +45,14 @@ const CouncilOfLifePage = () => {
         <a className="parchment-action" href="/ancient-friends/bishop-of-elys-plane.html?from=2d">Meet Bishop of Ely’s Plane →</a>
         <Circle236Fire className="parchment-action" />
       </section>
+      <section className="canopy-field-note" aria-labelledby="circle237-draft">
+        <p className="parchment-kicker">Next Circle · editorial draft</p>
+        <h2 id="circle237-draft">Circle 237</h2>
+        <p>Opening Fire · Tuesday 20 October 2026 · 19:30 UK (BST). Companion portraits and the central question await approval.</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE237}>Meet the ten proposed companions →</Link>
+        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Circle 237 · spatial Council draft →</Link>
+        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?c237view=invitation`}>Circle 237 · draft invitation →</Link>
+      </section>
       <div className="canopy-arrival">
         <section id="previous-circle-235" aria-label="Previous Circle 235">
           <h2>Previous Circle · 235</h2>
