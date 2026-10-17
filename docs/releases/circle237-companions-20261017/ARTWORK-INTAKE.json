@@ -1,0 +1,117 @@
+{
+  "status": "HOLD",
+  "source": "Ed Circle 237 roster; exact ten portraits not located",
+  "frameSpecification": "Hawthorn live-edge frame with metal plaque; lettering pending actual file inspection",
+  "files": [
+    {
+      "companionKey": "noku",
+      "displayName": "Noku / Nokuphila",
+      "category": "Ancient Friend",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "hawthorn",
+      "displayName": "Hawthorn",
+      "category": "Tree Species",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "jade",
+      "displayName": "Jade / Money Plant",
+      "category": "Plant",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "broad-bean",
+      "displayName": "Broad Bean",
+      "category": "Seed",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "wild-raspberry",
+      "displayName": "Wild Raspberry",
+      "category": "Leaf",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "sunflower",
+      "displayName": "Teddy Bear Sunflower",
+      "category": "Flower",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "quince",
+      "displayName": "Quince",
+      "category": "Fruit",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "fly-agaric",
+      "displayName": "Fly Agaric",
+      "category": "Fungi",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "faraway-tree",
+      "displayName": "The Magic Faraway Tree",
+      "category": "Book",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    },
+    {
+      "companionKey": "boobook",
+      "displayName": "Boobook Owl",
+      "category": "Bird",
+      "file": null,
+      "sha256": null,
+      "source": null,
+      "rightsApproval": null,
+      "editorialApproval": null,
+      "status": "missing-exact-reviewed-file"
+    }
+  ]
+}

@@ -7,8 +7,8 @@ export default defineConfig({
   publicDir: false,
   envPrefix: 'CIRCLE237_UNUSED_',
   resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
-  server: { host: '127.0.0.1', port: 4237 },
-  preview: { host: '127.0.0.1', port: 4237, headers: {
+  server: { host: '127.0.0.1', port: 4238, strictPort:true },
+  preview: { host: '127.0.0.1', port: 4238, strictPort:true, headers: {
     'Content-Security-Policy': "default-src 'self'; connect-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'",
     'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
   } },
