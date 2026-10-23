@@ -1,36 +1,24 @@
-# Provider safety answer: frontend-only publish and exact rollback (Circle 237, PR #111)
+# Circle 237 release safety: read-only review (23 Oct 2026)
 
-Written analysis only. Nothing was published, deployed, reverted or changed. Approving this card does not start any action. It only records the answer.
+Analysis only. Approving this card does not start any action.
 
-## Verdict: NO-GO for a provider-guaranteed, independently testable, frontend-only release and rollback inside this Lovable project
+## Verified (observed this turn)
+- Live site `/version.json`: build `9503b07`, generated 2026-10-15 21:31 UTC.
+- Editor workspace branch: `edit/edt-7a44d166…`, HEAD `b8b0bf56`. The only commit since the last sync is this plan note.
+- The editor's git remote is Lovable's internal mirror, not GitHub. **I cannot see which GitHub branch is synced.** That setting lives only in Project settings → Git.
 
-## What the provider does document (platform statement, not observed proof)
-- Publish builds and serves the website. Backend changes (functions, migrations) deploy separately and immediately when they are edited or explicitly deployed, not through Publish. Source: Lovable deployment docs ("Frontend vs Backend Deployment").
-- Git sync on Lovable Cloud never deploys edge functions, and it never applies migration files. Source: Lovable Git sync docs. So merging PR #111 into the synced branch does not, by documented design, redeploy functions.
-- History/chat Revert restores the whole project state. When restored files include `supabase/functions/`, those functions redeploy, and stored data is not rolled back. This matches Issue #103. Revert is not a frontend-only rollback.
+## Unverified (from docs only, no observation)
+- A push to a non-synced feature branch does not reach the editor or the live site (Git sync docs: only the synced branch syncs). If someone has switched the synced branch to PR #111's branch, the push WOULD change the editor. Check Project settings → Git before pushing.
+- Git sync on Lovable Cloud never deploys Edge Functions or migrations (docs).
+- Publish ships only the website (docs). You cannot see deployed-function version IDs, so you can't prove before and after that they are unchanged.
+- History Revert restores the whole project, redeploys functions and does not roll back data (docs, Issue #103).
 
-## What does not exist (UNKNOWN or absent)
-- No documented frontend-only Publish mode or "website only" switch. Publish separates frontend from backend by design, but you cannot set or confirm that per release.
-- No documented way to re-serve the exact earlier website bytes by deployment ID (for example the current `x-deployment-id`) without a project Revert. The only documented rollback is History Revert, which carries the backend risk above.
-- No user-visible deployed-function version IDs, bundle hashes or deployment history. You can't independently prove that function identities stayed the same before and after. Read-only function logs and test calls show behaviour, not identity.
-- No isolated preview backend. Preview and production share one backend.
+## Verdict: NO-GO for a provider-supported, frontend-only publish plus exact-byte restore
+Lovable has no documented way to re-serve an earlier website deployment by ID, and no frontend-only rollback. The only rollback is Revert, which is unsafe here.
 
-So the guarantee you asked for (an official process that is testable and covers both publish and exact-byte restore with zero backend effect) cannot be shown from the documented features of this project.
+## Recommended: isolated static staging off production (3 steps)
+1. **Build:** CI builds the exact Codex commit and the current live commit `9503b07`, then stores both `dist/` artifacts with SHA-256 manifests.
+2. **Stage:** deploy both artifacts to a separate static host on a throwaway URL (Cloudflare Pages, Netlify or Vercel), never the s33d.life domain. Port `_redirects` and `_headers`. Run signed-out checks only, so there are no writes to the shared backend.
+3. **Rehearse recovery:** on that host, promote the candidate, then roll back to the `9503b07` deploy. Compare served asset hashes with the manifests. Receipts: the host's deploy IDs, matching hashes, and the deploy log showing static uploads only. That host never has backend access.
 
-## Least-risk path inside Lovable, if a human accepts the residual risk
-1. Merge PR #111 only if its diff against the published build has zero changes under `supabase/`. Git sync does not deploy functions on Cloud.
-2. Before publishing, record `/version.json`, the `x-deployment-id` header, asset filenames and their SHA-256 hashes, plus read-only probes of key function responses.
-3. Publish. Then compare `/version.json`, the assets and the same probes.
-4. For rollback, do NOT use History Revert. Fix forward instead: put a commit on main that restores the earlier frontend files, keep `supabase/` unchanged, then Publish. The result is a rebuild, not the exact earlier bytes.
-This proves behaviour, not provider-level identity. Lovable support would need to give before/after function deployment versions to close that gap.
-
-## Only path that fully meets the requirement: separate static hosting
-- Build `dist/` from the exact PR #111 commit in CI (already produced as an artifact by `.github/workflows/ci.yml`). Host it on an independent static host that supports immutable deploys and instant rollback to an earlier deploy (for example Cloudflare Pages, Netlify or Vercel). Point the domain there. The app still calls the same backend through its public key, and no function, schema, RLS, auth or data is touched.
-- Rehearsal: deploy the earlier artifact (`6d4071d` or the current build) and the candidate to a preview URL on that host. Switch between them, and check byte hashes against the artifact checksums. No backend write is needed for signed-out checks. Signed-in checks write to the shared backend, so limit them to read-only views.
-- Proof that backend function identities stayed the same: by construction the host has no access to the backend. Its deploy log shows static uploads only.
-- Things to account for: `public/_redirects` (og-proxy proxy rules and SPA fallback) and `public/_headers` (CSP) must be ported to the new host's format. Auth redirect URLs for the new origin must be allowed. Moving the custom domain away from Lovable hosting changes DNS, and that needs its own approval.
-
-## Support items needed to make the in-Lovable path GO
-1. Written confirmation that Publish never deploys edge functions, migrations, auth or RLS for this project.
-2. A supported way to re-serve an earlier website deployment by ID without Revert.
-3. Before/after deployed-function version identifiers.
+Moving the production domain to that host later is a separate, approved DNS decision.
