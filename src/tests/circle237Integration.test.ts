@@ -11,7 +11,8 @@ describe('Circle 237 application integration without a public Circle transition'
     expect(invitation.openingFireTimeUK).toBe('15:30 UK (BST)');
     expect(invitation.joiningLink).toBeNull();
     expect(invitation.communityLink).toBe('https://t.me/s33dlife');
-    expect(invitation.approvedQuestion).toBeNull();
+    expect(invitation.approvedQuestion).toBe('What is life teaching us through the beings we encounter?');
+    expect(invitation.approved).toBe(false);
     for (const file of ['src/pages/CouncilOfLifePage.tsx', 'src/components/council/Circle237Experience.tsx']) {
       const source = readFileSync(file, 'utf8');
       expect(source).not.toMatch(/20 October|2026-10-20/);
