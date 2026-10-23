@@ -44,9 +44,8 @@ const CouncilOfLifePage = () => {
         <p>What is life teaching us through the beings we encounter?</p>
         <p>Ten companions are gathered, with ten illustrated scenes. Visit any time — there is no fixed Fire gathering this week.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE237}>Enter Circle 237 · meet its companions →</Link>
-        <a className="parchment-action" href={`${TETOL_PAGE}#croom`}>Enter the original 3D TETOL · historical Council 235 →</a>
-        <p>The current Circle 237 has not yet been woven into the original Spatial Tree. The separate ten-frame experiment is not the TETOL Canopy.</p>
-        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>View experimental Circle 237 companion frames →</Link>
+        <a className="parchment-action" href="/tetol/circle-237/pre-fire/tetol.html#croom">Enter Circle 237 in the original 3D TETOL Canopy →</a>
+        <a className="parchment-action" href={`${TETOL_PAGE}#croom`}>Remember Circle 235 in the historical 3D TETOL →</a>
       </section>
       <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">
         <p className="parchment-kicker">Previous Circle · 236</p>

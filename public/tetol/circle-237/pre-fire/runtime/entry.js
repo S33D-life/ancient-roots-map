@@ -2,8 +2,8 @@
 if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
 const D = window.TETOL;
-const framedCircle = new URLSearchParams(location.search).get('circle') === '236';
-const companionFrames = framedCircle ? await import('./companion-frames.js') : null;
+const framedCircle = true; // Versioned Circle 237 edition only; historical Circle 235 remains unchanged.
+const companionFrames = await import('./companion-frames-237.js');
 if (companionFrames) await companionFrames.installCompanionFrames(D);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -851,8 +851,8 @@ BUILD.circleFrame = (g, repr, id) => {
   const texture = new THREE.TextureLoader().load(repr.artwork);
   texture.colorSpace = THREE.SRGBColorSpace;
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
-  add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), mat.limbBark), id + '_frame', id, frame);
-  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * 853 / 1280), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  add(new THREE.Mesh(new THREE.BoxGeometry(1.12, 1.06 * (repr.height || 645) / (repr.width || 1024) + .10, .08), mat.limbBark), id + '_frame', id, frame);
+  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * (repr.height || 645) / (repr.width || 1024)), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
   companionFrames?.buildCompanionPresence({ THREE, add, std, BUILD }, g, repr, id);
   return 1.25;
 };
@@ -1278,7 +1278,7 @@ function crossTo(want, then) {
   veil.classList.add('on'); setTimeout(() => { swap(); setTimeout(() => veil.classList.remove('on'), 60); }, 620);
 }
 scene3d = { circle: applyCircle, select(id, prev) {
-  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? 236 : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
+  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(id === 'croom' ? 237 : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
   drawThreads(id);
   const n = D.nodes[id], want = placeOf(id);
   if (want !== place) {
