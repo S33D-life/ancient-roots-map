@@ -29,7 +29,7 @@ describe("selective Canopy promotion", () => {
   it("presents 235 historically without rewriting its question or companions", () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
     const previous = screen.getByRole("region", { name: "Previous Circle 235" });
-    expect(previous).toHaveTextContent("Previous Circle · last week");
+    expect(previous).toHaveTextContent("Earlier Circle · remembered");
     expect(previous).toHaveTextContent("Circle 235 companions");
     expect(previous).toHaveTextContent("What is already blooming in us that we haven’t noticed yet?");
     expect(previous).toHaveTextContent("Fulham Palace Holm Oak");
