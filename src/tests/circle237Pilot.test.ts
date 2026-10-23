@@ -7,7 +7,7 @@ import { sameIdentity } from '@/lib/library/recordIdentity';
 describe('Circle 237 isolated portal contract',()=>{
   it('keeps ten unique appearances with cleared scenes, held art and the agreed roles',()=>{
     expect(roster).toHaveLength(10); expect(new Set(roster.map(c=>c.appearanceId)).size).toBe(10);
-    expect(roster.filter(c=>c.artwork)).toHaveLength(7); expect(roster.filter(c=>!c.artwork).map(c=>c.key)).toEqual(['noku','sunflower','faraway-tree']);
+    expect(roster.filter(c=>c.artwork)).toHaveLength(10); expect(roster.filter(c=>!c.artwork)).toHaveLength(0);
     expect(roster.map(c=>c.category)).toEqual(['Ancient Friend','Tree Species','Plant','Seed','Leaf','Flower','Fruit','Fungi','Book','Bird']);
   });
   it.each(['noku','fly-agaric'] as const)('preserves one identity for both modes: %s',key=>{
