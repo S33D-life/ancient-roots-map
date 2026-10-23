@@ -1,0 +1,2 @@
+// Preserved from the TETOL Staff Room interior (5eaf7c1e-2b0d-4c3a-9f61-7a1d3b8e0c42); see scripts/tetol-staffroom.mjs.
+(function(){var f=/[?&]frame=(\d+)x(\d+)/.exec(location.search);if(!f)return;document.body.classList.add('m');var w=+f[1],hh=+f[2],s=Math.min(1,innerHeight/hh);document.write('<style>body.m three-d-stage,body.m #ui{width:'+w+'px;height:'+hh+'px;transform:scale('+s+')}body{background:#000}<\/style>');})();
