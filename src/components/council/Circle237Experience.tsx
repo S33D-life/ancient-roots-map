@@ -48,9 +48,9 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <small>Hawthorn live-edge frame specification · exact artwork and engraved lettering awaiting file review</small>
       </article>)}</section>
     </> : state.view==='invitation'?<section aria-label="Invitation editorial review">
-      <p className="eyebrow">Draft for Ed’s approval · not ready to send</p>
+      <p className="eyebrow">Draft · publication HOLD · not ready to send</p>
       <p>{invitation.copy}</p>
-      <h2>Proposed central question</h2><p>{invitation.proposedQuestion}</p><p>Awaiting Ed’s approval. No approved question has been assigned.</p>
+      <h2>Central question · approved 23 October 2026</h2><p>{invitation.approvedQuestion}</p><p>Publication review is still required before this invitation can be shared.</p>
       <h2>Opening Fire</h2><p><time dateTime="2026-10-23T15:30:00+01:00">Friday 23 October 2026 · {invitation.openingFireTimeUK}</time></p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>The community link is not a verified direct Fire-room URL.</p>
       <p>No Circle 236 question, Fire date or joining link has been carried forward.</p>
       <details><summary>Publication checklist</summary><ul>{publicationBlockers().map(reason=><li key={reason}>{reason}</li>)}</ul></details>
