@@ -41,7 +41,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       {invitation.approved && link(href(state.mode,'invitation'),'Read the Council invitation')}
       {state.mode==='spatial'&&<SpatialBoundary><Suspense fallback={<p role="status">Preparing the spatial study…</p>}><SpatialCouncil open={open}/></Suspense></SpatialBoundary>}
       <section className="gallery" aria-label="Ten companion constellation">{roster.map(c=><article className="portrait" key={c.key}>
-        <p className="eyebrow">{c.category}</p><h2>{c.name}</h2>{c.artwork ? <img className="companion-scene" src={c.artwork} width={1024} height={645} loading="lazy" alt={`${c.name} · curated Council illustration, not field evidence`} /> : <p className="fallback">Portrait withheld pending clearance</p>}
+        <p className="eyebrow">{c.category}</p><h2>{c.name}</h2>{c.artwork ? <img className="companion-scene" src={c.artwork} width={c.artworkWidth} height={c.artworkHeight} loading="lazy" alt={`${c.name} · curated Council illustration, not field evidence`} /> : <p className="fallback">Portrait withheld pending clearance</p>}
         <p className="plaque">{c.plaque}</p>
         {c.key==='sunflower' && <p className="muted">Illustrative sunflower scene — not a botanically exact depiction of the double-flowered Teddy Bear cultivar.</p>}
         {c.key==='faraway-tree' && <p className="muted">Independent imaginative tree-house illustration; not official book-cover artwork.</p>}
