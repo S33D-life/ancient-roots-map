@@ -14,7 +14,7 @@ export const invitation = {
 export function publicationBlockers() {
   return [
     'Telegram invitation and illustrated PDF have not yet been approved for sharing',
-    'Noku and Faraway Tree imagery remain held for independent permissions; Teddy Bear Sunflower needs accurate artwork',
+    'The Teddy Bear Sunflower illustration is labelled illustrative rather than botanically exact',
     'No live Fire is scheduled this week; Telegram is the community link, not a meeting URL',
   ];
 }

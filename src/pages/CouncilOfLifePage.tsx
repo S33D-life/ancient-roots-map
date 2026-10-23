@@ -41,7 +41,7 @@ const CouncilOfLifePage = () => {
         <p className="parchment-kicker">OPEN · yOur Blooming Week</p>
         <h2 id="circle237-arrival">Circle 237</h2>
         <p>What is life teaching us through the beings we encounter?</p>
-        <p>Ten companions are gathered: seven illustrated scenes and three portraits held until ready. Visit any time — there is no fixed Fire gathering this week.</p>
+        <p>Ten companions are gathered, with ten illustrated scenes. Visit any time — there is no fixed Fire gathering this week.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE237}>Enter Circle 237 · meet its companions →</Link>
         <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Enter Circle 237 · TETOL spatial Council →</Link>
       </section>
