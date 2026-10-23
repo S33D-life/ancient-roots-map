@@ -27,7 +27,7 @@ describe('Circle 237 as the open current Canopy Council, with historical Circles
     expect(app).toContain('path={THREAD_PATTERNS.CIRCLE}');
     const canopy = readFileSync('src/pages/CouncilOfLifePage.tsx', 'utf8');
     expect(canopy).toContain('id="next-gathering"');
-    expect(canopy).toContain('aria-labelledby="circle237-arrival"');
+    expect(canopy).toContain('aria-label="Current Circle"');
     expect(canopy).toContain('id="previous-circle-236"');
     expect(canopy).toContain('id="previous-circle-235"');
     expect(canopy.indexOf('id="circle237-arrival"')).toBeLessThan(canopy.indexOf('id="circle236-arrival"'));
