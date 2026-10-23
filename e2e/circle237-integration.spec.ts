@@ -33,7 +33,9 @@ for(const width of [320,390,1440]){
   await page.getByRole('link',{name:'Read the draft invitation'}).click();
   await expect(page.locator('.circle237 time')).toHaveAttribute('datetime','2026-10-23T15:30:00+01:00');
   await expect(page.getByText('15:30 UK (BST)',{exact:false})).toBeVisible();
-  await expect(page.getByText('Awaiting Ed’s approval. No approved question has been assigned.')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Central question · approved 23 October 2026'})).toBeVisible();
+  await expect(page.getByText('What is life teaching us through the beings we encounter?',{exact:true})).toBeVisible();
+  await expect(page.getByText('Publication review is still required before this invitation can be shared.')).toBeVisible();
   await expect(page.getByRole('link',{name:'Council community · Telegram'})).toHaveAttribute('href','https://t.me/s33dlife');
   await expect(page.getByText('The community link is not a verified direct Fire-room URL.')).toBeVisible();
   await page.screenshot({path:`output/playwright/circle237-integration/${test.info().project.name}-invitation-${width}.png`});
