@@ -155,7 +155,7 @@ window.TETOL = (() => {
       practical: 'Open the living Circle record',
       parent: 'canopy', spatial: true,
       location: 'A lantern in the canopy — this week’s gathering',
-      purpose: 'The second weekly Circle of the September New Moon chapter. Tuesday 22 September 2026, 7:30–8:30pm BST, curated by Ed and Leo. No preparation needed.',
+      purpose: 'The second weekly Circle of the September New Moon chapter. Tuesday 22 September 2026, 7:30–8:30pm BST, curated by the Council. No preparation needed.',
       status: 'LIVE', statusNote: 'The record exists and keeps growing. Live notes are still empty — the gathering is tonight.',
       placement: 'PROPOSED', placementNote: 'The invitation asks friends to “gather around the fire”; a lit lantern in the canopy marks a Circle that is alive now.',
       lives: [
@@ -541,7 +541,7 @@ window.TETOL = (() => {
   n.ring.lives = n.ring.lives.map((l) => (l.text.startsWith('Circle 233') ? { text: 'Circle 233 traces — empty until the Circle gathers', status: 'CONNECTED', to: 'traces' } : l));
 
   Object.assign(n.c233, {
-    purpose: 'The second weekly Circle of the September New Moon chapter, curated by Ed and Leo. The invitation was sent; the gathering is being rescheduled to 23, 24 or 25 September. No preparation needed.',
+    purpose: 'The second weekly Circle of the September New Moon chapter, curated by the Council. The invitation was sent; the gathering is being rescheduled to 23, 24 or 25 September. No preparation needed.',
     statusNote: 'The record exists. It has not gathered yet, so live notes are empty.',
     location: 'A lantern in the canopy, banked and waiting for its gathering',
   });
@@ -1088,7 +1088,7 @@ window.TETOL_ARCHETYPES = {
   const cycles = {
     233: {
       drafted: null, shared: null, held: null,
-      planned: { iso: '2026-09-22', note: 'Tue 22 Sep, 7:30–8:30pm BST, curated by Ed and Leo (Notion snapshot, 22 Sep 2026). Being reset.' },
+      planned: { iso: '2026-09-22', note: 'Tue 22 Sep, 7:30–8:30pm BST, curated by the Council (Notion snapshot, 22 Sep 2026). Being reset.' },
       node: 'c233now', explored: ['2026-09-23', '2026-09-24', '2026-09-25'], exploredNote: 'Named as the reset window. Not confirmed as meeting times.',
       // Person → conversation → thread → possible contribution. Contributors only; no calendar meanings assigned.
       people: [
@@ -1123,7 +1123,7 @@ window.TETOL_ARCHETYPES = {
   });
   const cy = D.time && D.time.cycles[233];
   if (cy) {
-    cy.planned.note = 'Tue 22 Sep, 7:30–8:30pm BST, curated by Ed and Leo (Notion snapshot, 22 Sep 2026). It did not gather that evening.';
+    cy.planned.note = 'Tue 22 Sep, 7:30–8:30pm BST, curated by the Council (Notion snapshot, 22 Sep 2026). It did not gather that evening.';
     cy.exploredNote = 'Explored as possible gathering dates. None is confirmed.';
   }
 

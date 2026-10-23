@@ -12,6 +12,8 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Standalone pilot needs its own build; integrated237 has a disconnected test server.
+  testIgnore: ["**/circle237-pilot.spec.ts", "**/circle237-integration.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

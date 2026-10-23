@@ -36,7 +36,7 @@
   }
 
   // static-council-runtime.js
-  var circle = { "number": 235, "title": "Circle 235 \xB7 yOur Blooming Week", "question": "What is already blooming in us that we haven\u2019t noticed yet?", "weekState": "Open Circle", "openLine": "The Circle is open now. Times will be shared in the group as each fire is lit.", "companionsLabel": "This week\u2019s companions, chosen by Leo", "revision": "circle-235-ce9bab5", "links": { "council": "https://www.s33d.life/council-of-life", "tetol": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", "group": "https://t.me/s33dlife", "councilDeck": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom" } };
+  var circle = { "number": 235, "title": "Circle 235 \xB7 yOur Blooming Week", "question": "What is already blooming in us that we haven\u2019t noticed yet?", "weekState": "Open Circle", "openLine": "The Circle is open now. Times will be shared in the group as each fire is lit.", "companionsLabel": "Circle 235 companions, chosen by the Council", "revision": "circle-235-ce9bab5", "links": { "council": "https://www.s33d.life/council-of-life", "tetol": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", "group": "https://t.me/s33dlife", "councilDeck": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom" } };
   window.S33D_APPLY_CURRENT_CIRCLE = (registry) => applyStaticCouncil(registry, circle);
   window.addEventListener("tetol:current-circle", () => {
     const href = councilReturnUrl(circle);

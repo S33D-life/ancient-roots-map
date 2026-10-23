@@ -18,7 +18,7 @@ export default function NextCouncilCard({ historical = false, onJoinCouncil, onM
     <span className="canopy-week"><span className="canopy-week-title">{circle.title} · </span><span className="canopy-week-number">Circle {circle.number} · </span><span>{historical ? "Previous Circle · last week" : circle.weekState}</span></span>
     <h2 className="canopy-question">{circle.question}</h2>
     <p className="canopy-open">{historical ? "Revisit last week’s Circle and its companions." : "The live fires come and go; the Circle does not close. Come in your own time."}</p>
-    <div className="canopy-gathered"><h3>{historical ? "Circle 235 companions, chosen by Leo" : circle.companionsLabel}</h3>
+    <div className="canopy-gathered"><h3>{historical ? "Circle 235 companions" : circle.companionsLabel}</h3>
       <div className="canopy-companions" aria-label="Gathered companions">{circle.companions.map(name => <button key={name} type="button" aria-pressed={selected === name} aria-controls="companion-reading" onClick={() => setSelected(selected === name ? null : name)}>{name}</button>)}</div>
       {selected && <div id="companion-reading" className="canopy-companion-reading" aria-live="polite"><h4>{selected}</h4><p>{reading?.line || "A companion gathered in this Circle."}</p>{reading && onMeetCompanion && deckAvailable && <button type="button" className="parchment-action" onClick={() => onMeetCompanion(reading.node)}>Follow this companion in the Circle →</button>}{selected === "Fly Agaric" && <p className="parchment-safety">{circle.safety}</p>}</div>}
     </div>

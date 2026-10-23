@@ -43,3 +43,7 @@ public/version.json
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Isolated Circle 237 private pilot artifacts
+/dist-circle237/
+/test-results-circle237/

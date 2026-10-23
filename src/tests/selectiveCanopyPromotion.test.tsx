@@ -28,7 +28,7 @@ describe("selective Canopy promotion", () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
     const previous = screen.getByRole("region", { name: "Previous Circle 235" });
     expect(previous).toHaveTextContent("Previous Circle · last week");
-    expect(previous).toHaveTextContent("Circle 235 companions, chosen by Leo");
+    expect(previous).toHaveTextContent("Circle 235 companions");
     expect(previous).toHaveTextContent("What is already blooming in us that we haven’t noticed yet?");
     expect(previous).toHaveTextContent("Fulham Palace Holm Oak");
     expect(previous).not.toHaveTextContent("This week’s companions");
