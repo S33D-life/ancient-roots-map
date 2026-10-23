@@ -7,9 +7,10 @@ for (const width of [320, 390, 1440]) test(`Circle 236 OPEN 2D and spatial at ${
     return ["127.0.0.1", "localhost"].includes(u.hostname) ? route.continue() : route.fulfill({ contentType: "application/json", body: "[]" });
   });
   await page.goto("/council-of-life");
-  await expect(page.getByRole("region", { name: "Circle 236", exact: true })).toContainText("OPEN");
+  await expect(page.getByRole("region", { name: "Current Circle" })).toContainText("Circle 237");
+  await expect(page.getByRole("region", { name: "Previous Circle 236" })).toContainText("Circle 236");
   await expect(page.getByRole("region", { name: "Previous Circle 235" })).toContainText("What is already blooming in us");
-  await page.getByRole("link", { name: "Circle 236 · Open · meet its companions →" }).click();
+  await page.getByRole("link", { name: "Revisit Circle 236 · meet its companions →" }).click();
   await expect(page.getByText("Canopy · OPEN")).toBeVisible();
   await expect(page.locator(".circle-companion-frames figure")).toHaveCount(7);
   await expect(page.getByText("Fire reference · past date.", { exact: false })).toBeVisible();
