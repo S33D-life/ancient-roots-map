@@ -7,7 +7,7 @@ test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=237#croom');
  await expect(page.locator('#brandline')).toContainText('Circle 237 · OPEN',{timeout:90000});
  await expect(page.locator('#panel')).toContainText('Circle 237');
- const d=await page.evaluate(()=>{const d=(window as any).TETOL;return{active:d?.council?.active,question:d?.nodes?.croom?.question,names:d?.council?.circles?.[237]?.companions.map((x:any)=>x.id),old:!!d?.council?.circles?.[235]};});
+ const d=await page.evaluate(()=>{const d=(window as any).TETOL;return{active:d?.council?.active,question:d?.nodes?.croom?.question,names:d?.council?.circles?.[237]?.companions.map((x:any)=>x.id),old:!!d?.council?.circles?.[233]};});
  expect(d.active).toBe(237);expect(d.question).toBe(manifest.question);expect(d.names).toEqual(roster.map(x=>x.key+'-companion'));expect(d.old).toBe(true);
  for(const c of roster){await page.locator('#panel button[data-go="'+c.key+'-companion"]').click();await expect(page.locator('#panel img[data-circle-artwork]')).toHaveAttribute('src',manifest.sceneAssets[c.key as keyof typeof manifest.sceneAssets].path);await page.locator('#panel button[data-go="croom"]').click()}
  await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council#next-gathering');
