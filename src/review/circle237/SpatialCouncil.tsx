@@ -22,6 +22,7 @@ export function SpatialCouncil({ open }: { open: (key: CompanionKey) => void }) 
     const material = (color: number) => new THREE.MeshStandardMaterial({ color, roughness: .92 });
     const wood = material(0x795a3c), green = material(0x527d54), red = material(0xa74335), cream = material(0xf0debd), fieldMaterial=material(0x23392e);
     const hits: THREE.Mesh[] = [];
+    let disposed=false; const textures: THREE.Texture[]=[]; const loader=new THREE.TextureLoader();
     function mesh(geometry: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, key: CompanionKey) {
       const m = new THREE.Mesh(geometry, mat); m.position.set(x,y,z); m.userData.key=key; scene.add(m); hits.push(m); return m;
     }
@@ -29,6 +30,12 @@ export function SpatialCouncil({ open }: { open: (key: CompanionKey) => void }) 
       const x=(index%5-2)*2, y=index<5?2.6:0, key=c.key as CompanionKey;
       mesh(new THREE.BoxGeometry(1.85,2.1,.09),wood,x,y,-.72,key);
       mesh(new THREE.BoxGeometry(1.63,1.88,.1),fieldMaterial,x,y,-.65,key);
+      if(c.artwork) loader.load(c.artwork,texture=>{
+        if(disposed){texture.dispose();return;}
+        texture.colorSpace=THREE.SRGBColorSpace; textures.push(texture);
+        mesh(new THREE.PlaneGeometry(1.63,1.63*645/1024),new THREE.MeshBasicMaterial({map:texture}),x,y,-.58,key);
+        renderer.render(scene,camera);
+      });
       // Reuse the two reviewed pilot presences; no new portraits or bespoke models.
       if(key==='noku'){
         mesh(new THREE.CylinderGeometry(.12,.2,1.05,10),wood,x,y-.15,0,key);
@@ -55,11 +62,11 @@ export function SpatialCouncil({ open }: { open: (key: CompanionKey) => void }) 
     renderer.domElement.addEventListener('click',select);
     setStatus('Spatial study ready · ten companion frames. Tap a frame or a presence.');
     return () => {
-      observer.disconnect(); renderer.domElement.removeEventListener('click',select);
+      disposed=true; textures.forEach(t=>t.dispose()); observer.disconnect(); renderer.domElement.removeEventListener('click',select);
       const materials=new Set<THREE.Material>();
       scene.traverse(o=>{ if(o instanceof THREE.Mesh) {o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));} });
       materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();
     };
   }, [open]);
-  return <><div className="spatial" ref={host} data-testid="spatial-council" /><p role="status">{status}</p><p className="muted">Plain frames awaiting approved portraits, with the existing two interpretive presences. All ten named doorways and readable introductions follow.</p></>;
+  return <><div className="spatial" ref={host} data-testid="spatial-council" /><p role="status">{status}</p><p className="muted">Seven cleared scene illustrations; three frames remain without images, with the existing two interpretive presences. All ten named doorways and readable introductions follow.</p></>;
 }

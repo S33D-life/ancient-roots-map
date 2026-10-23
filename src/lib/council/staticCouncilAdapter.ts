@@ -4,7 +4,7 @@ import { CURRENT_CIRCLE, approvedCircleUrl, type CurrentCircle } from "../../../
 export function staticCouncilProjection(circle: CurrentCircle = CURRENT_CIRCLE) {
   if (circle.approval !== "approved") return null;
   return { number: circle.number, title: circle.title, question: circle.question, weekState: circle.weekState,
-    openLine: circle.openLine, companionsLabel: circle.companionsLabel, revision: circle.revision,
+    openLine: circle.openLine, companionsLabel: circle.number === 235 ? "Circle 235 companions, chosen by the Council" : circle.companionsLabel, revision: circle.revision,
     links: Object.fromEntries(Object.entries(circle.links).flatMap(([key, link]) => {
       const url = approvedCircleUrl(link); return url ? [[key, url]] : [];
     })) };

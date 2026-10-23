@@ -1,0 +1,81 @@
+{
+  "circle": 237,
+  "version": "237-scenes-review-20261023.1",
+  "state": "draft",
+  "question": "What is life teaching us through the beings we encounter?",
+  "fire": {
+    "scheduledAt": "2026-10-23T15:30:00+01:00",
+    "state": "planned",
+    "gatheringUrl": null,
+    "communityUrl": "https://t.me/s33dlife"
+  },
+  "routes": {
+    "chapter": "/council/237",
+    "spatial": "/council/237?mode=spatial"
+  },
+  "sceneAssets": {
+    "hawthorn": {
+      "path": "/council/circle-237/portraits/hawthorn.jpeg",
+      "sha256": "46bb159506f6c95534f773496f11245a17163e2bcf0045c96977842362211f90",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    },
+    "jade": {
+      "path": "/council/circle-237/portraits/jade.jpeg",
+      "sha256": "e54270a6c2f46f4afe3b912596bfe3e76c73d7967076aaa9092a77731c11f052",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    },
+    "broad-bean": {
+      "path": "/council/circle-237/portraits/broad-bean.jpeg",
+      "sha256": "8f1fb2d0e3515de394bd7a55998ed0d809b82d94397e9098ed907baa3c90a9b3",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    },
+    "wild-raspberry": {
+      "path": "/council/circle-237/portraits/wild-raspberry.jpeg",
+      "sha256": "df93b29a13e38bbb59cab58918364028fc230b3ff79b0e0c9d15aa91440a6c4e",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    },
+    "quince": {
+      "path": "/council/circle-237/portraits/quince.jpeg",
+      "sha256": "3caa8952198e9fc13ca6afd160041a147a5e4ba2a245163a00545a21dfee6976",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    },
+    "fly-agaric": {
+      "path": "/council/circle-237/portraits/fly-agaric.jpeg",
+      "sha256": "73d3123998924ad6e2c8a23b9e792325c6983b4e70aba1d67a3a81d5a60c8fc0",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    },
+    "boobook": {
+      "path": "/council/circle-237/portraits/boobook.jpeg",
+      "sha256": "3dab5e8c3af198eb5ca5043f08ab7c69a4da0ac59436dcdb47c2a5498d34b60d",
+      "width": 1024,
+      "height": 645,
+      "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
+      "kind": "illustration"
+    }
+  },
+  "heldKeys": [
+    "noku",
+    "faraway-tree",
+    "sunflower"
+  ],
+  "pdf": null,
+  "publicationApproved": false
+}

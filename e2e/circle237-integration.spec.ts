@@ -22,7 +22,9 @@ for(const width of [320,390,1440]){
   await dismissTrail(page);
   await page.getByRole('link',{name:'Meet the ten proposed companions →'}).click();
   await expect(page).toHaveURL(/\/council\/237$/);
-  await expect(page.getByText('Portrait pending intake',{exact:true})).toHaveCount(10);
+  await expect(page.locator('img.companion-scene')).toHaveCount(7);
+  await expect(page.getByText('Portrait withheld pending clearance',{exact:true})).toHaveCount(3);
+  for(const image of await page.locator('img.companion-scene').all()) { await image.scrollIntoViewIfNeeded(); await expect(image).toHaveJSProperty('naturalWidth',1024); }
   for(const c of roster){
    await page.getByRole('button',{name:`Meet ${c.name}`,exact:true}).click();
    await expect(page.getByRole('heading',{name:`${c.name} · Council appearance`,exact:true})).toBeVisible();

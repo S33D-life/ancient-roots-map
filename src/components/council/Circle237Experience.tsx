@@ -33,7 +33,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
     {basePath !== PILOT_PATH && <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.HOME}>TETOL</Link></nav>}
     <header><p className="eyebrow">Council of Life · 237 / yOur Blooming Week</p>
       <h1 tabIndex={-1}>{state.view==='invitation'?invitation.title:state.view==='council' ? 'Companions, connected' : `${item?.name} · ${state.view==='record'?'Living Library':state.view==='harvest'?'Future Heartwood':state.view==='twin'?'Spatial twin reference':'Council appearance'}`}</h1>
-      <p>{state.view==='council'?'Ten proposed companions. Noku returns; new threads gather around her. Introductions and portraits await editorial approval.':'A weekly doorway into a continuing living thread.'}</p>
+      <p>{state.view==='council'?'Ten companions. Noku returns; new threads gather around her. Seven cleared scenes are available; three images remain withheld. Publication review continues.':'A weekly doorway into a continuing living thread.'}</p>
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>
@@ -41,11 +41,11 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       {link(href(state.mode,'invitation'),'Read the draft invitation')}
       {state.mode==='spatial'&&<SpatialBoundary><Suspense fallback={<p role="status">Preparing the spatial study…</p>}><SpatialCouncil open={open}/></Suspense></SpatialBoundary>}
       <section className="gallery" aria-label="Ten companion constellation">{roster.map(c=><article className="portrait" key={c.key}>
-        <p className="eyebrow">{c.category}</p><h2>{c.name}</h2><p className="fallback">Portrait pending intake</p>
+        <p className="eyebrow">{c.category}</p><h2>{c.name}</h2>{c.artwork ? <img className="companion-scene" src={c.artwork} width={1024} height={645} loading="lazy" alt={`${c.name} · curated Council illustration, not field evidence`} /> : <p className="fallback">Portrait withheld pending clearance</p>}
         <p className="plaque">{c.plaque}</p>
         <p>{introductions[c.key as CompanionKey]}</p>
         <button id={c.appearanceId} onClick={()=>open(c.key as CompanionKey)}>Meet {c.name}</button>
-        <small>Hawthorn live-edge frame specification · exact artwork and engraved lettering awaiting file review</small>
+        <small>Hawthorn frame family · scene-only illustration; original text panels withheld</small>
       </article>)}</section>
     </> : state.view==='invitation'?<section aria-label="Invitation editorial review">
       <p className="eyebrow">Draft · publication HOLD · not ready to send</p>
@@ -59,7 +59,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       <nav aria-label="Return">{link(returnHref(key,state.mode,basePath),`Return to Circle 237 · ${item.name}`)}</nav>
       {state.view==='encounter'&&<section>
         <p className="eyebrow">{item.category} · Circle appearance, not a new identity</p>
-        <h2>{item.name}</h2><p>{item.plaque}</p><p>Artwork pending intake. No image has been generated or substituted.</p>
+        <h2>{item.name}</h2><p>{item.plaque}</p><p>Scene-only artwork is shown where cleared. Unresolved images remain withheld.</p>
         <p>{introductions[key]}</p>
         <p>Portal proposal recorded <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Opening Fire scheduled for 23 October 2026 at 15:30 UK (BST); no completed encounter or physical visit is asserted.</p>
         <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This is a proposed Council appearance. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
