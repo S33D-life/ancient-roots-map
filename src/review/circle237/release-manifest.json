@@ -1,6 +1,6 @@
 {
   "circle": 237,
-  "version": "237-canopy-open-20261023.1",
+  "version": "237-ten-scenes-review-20261023.2",
   "state": "website-open",
   "question": "What is life teaching us through the beings we encounter?",
   "fire": {
@@ -70,16 +70,39 @@
       "height": 645,
       "approval": "scene-only Ed approval23Oct2026; no further per-image hold in reconciled intake",
       "kind": "illustration"
+    },
+    "noku": {
+      "path": "/council/circle-237/portraits/noku.jpeg",
+      "sha256": "c9a639031bbd9945eec00621ad6a2296c368fda6fc2880acc47e91689e4deb9f",
+      "width": 1024,
+      "height": 645,
+      "approval": "User confirms generated scene artwork approved 23Oct2026; no claim of independently verified guardian permission",
+      "kind": "illustration"
+    },
+    "sunflower": {
+      "path": "/council/circle-237/portraits/sunflower.jpeg",
+      "sha256": "6b2b15fbc78a71feb087df891faeb3241183416f169657254954272d22483279",
+      "width": 1024,
+      "height": 645,
+      "approval": "User approves illustrative scene 23Oct2026; this is NOT botanical evidence of double Teddy Bear cultivar",
+      "kind": "illustration",
+      "accuracyNote": "Illustrative sunflower, not a botanically exact Teddy Bear cultivar"
+    },
+    "faraway-tree": {
+      "path": "/council/circle-237/portraits/faraway-tree.jpeg",
+      "sha256": "69ff2ae8e1fbb1f48326bc9d925d24ead91d029bc25813716729d8569554045c",
+      "width": 1024,
+      "height": 645,
+      "approval": "User-approved generated tree-house scene-only crop 23Oct2026; imitation book-cover artwork excluded; not official book art",
+      "kind": "illustration",
+      "accuracyNote": "Independent imaginative illustration, not official book-cover artwork"
     }
   },
-  "heldKeys": [
-    "noku",
-    "faraway-tree",
-    "sunflower"
-  ],
+  "heldKeys": [],
   "pdf": null,
   "publicationApproved": false,
   "websiteOpenApproved": true,
   "invitationSent": false,
-  "pdfApprovedForSharing": false
+  "pdfApprovedForSharing": false,
+  "imageEditorialApproval": "All ten generated scene-only artworks cleared by Ed for public illustration on 23 October 2026; original text and child nameplates excluded."
 }
