@@ -33,7 +33,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
     {basePath !== PILOT_PATH && <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.HOME}>TETOL</Link></nav>}
     <header><p className="eyebrow">Council of Life · 237 / yOur Blooming Week</p>
       <h1 tabIndex={-1}>{state.view==='invitation'?invitation.title:state.view==='council' ? 'Companions, connected' : `${item?.name} · ${state.view==='record'?'Living Library':state.view==='harvest'?'Future Heartwood':state.view==='twin'?'Spatial twin reference':'Council appearance'}`}</h1>
-      <p>{state.view==='council'?'Ten companions. Noku returns; new threads gather around her. Seven illustrated scenes are here; three images remain respectfully withheld. Visit freely, without a fixed Fire time this week.':'A weekly doorway into a continuing living thread.'}</p>
+      <p>{state.view==='council'?'Ten companions and ten illustrated scenes. Noku returns; new threads gather around her. Visit freely, without a fixed Fire time this week.':'A weekly doorway into a continuing living thread.'}</p>
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>
@@ -43,6 +43,8 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       <section className="gallery" aria-label="Ten companion constellation">{roster.map(c=><article className="portrait" key={c.key}>
         <p className="eyebrow">{c.category}</p><h2>{c.name}</h2>{c.artwork ? <img className="companion-scene" src={c.artwork} width={1024} height={645} loading="lazy" alt={`${c.name} · curated Council illustration, not field evidence`} /> : <p className="fallback">Portrait withheld pending clearance</p>}
         <p className="plaque">{c.plaque}</p>
+        {c.key==='sunflower' && <p className="muted">Illustrative sunflower scene — not a botanically exact depiction of the double-flowered Teddy Bear cultivar.</p>}
+        {c.key==='faraway-tree' && <p className="muted">Independent imaginative tree-house illustration; not official book-cover artwork.</p>}
         <p>{introductions[c.key as CompanionKey]}</p>
         <button id={c.appearanceId} onClick={()=>open(c.key as CompanionKey)}>Meet {c.name}</button>
         <small>Hawthorn frame family · scene-only illustration; original text panels withheld</small>
@@ -59,7 +61,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       <nav aria-label="Return">{link(returnHref(key,state.mode,basePath),`Return to Circle 237 · ${item.name}`)}</nav>
       {state.view==='encounter'&&<section>
         <p className="eyebrow">{item.category} · Circle appearance, not a new identity</p>
-        <h2>{item.name}</h2><p>{item.plaque}</p><p>Scene-only artwork is shown where cleared. Unresolved images remain withheld.</p>
+        <h2>{item.name}</h2><p>{item.plaque}</p><p>These approved scene illustrations are artistic interpretations, not photographic or field evidence. The Sunflower scene is illustrative rather than a botanically exact Teddy Bear cultivar.</p>
         <p>{introductions[key]}</p>
         <p>Companion doorway first prepared <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Circle 237 is open for exploration; no completed encounter or physical visit is asserted.</p>
         <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This Council appearance is now open to explore. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
