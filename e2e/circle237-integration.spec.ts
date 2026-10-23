@@ -25,7 +25,7 @@ for(const width of [320,390,1440]){
   await expect(page).toHaveURL(/\/council\/237$/);
   await expect(page.locator('img.companion-scene')).toHaveCount(10);
   await expect(page.getByText('Portrait withheld pending clearance',{exact:true})).toHaveCount(0);
-  for(const image of await page.locator('img.companion-scene').all()) { await image.scrollIntoViewIfNeeded(); await expect(image).toHaveJSProperty('naturalWidth',1024); }
+  for(const image of await page.locator('img.companion-scene').all()) { await image.scrollIntoViewIfNeeded(); await expect(image).toHaveJSProperty('naturalWidth', Number(await image.getAttribute('width'))); await expect(image).toHaveJSProperty('naturalHeight', Number(await image.getAttribute('height'))); }
   for(const c of roster){
    await page.getByRole('button',{name:`Meet ${c.name}`,exact:true}).click();
    await expect(page.getByRole('heading',{name:`${c.name} · Council appearance`,exact:true})).toBeVisible();
