@@ -29,16 +29,16 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
   const item=roster.find(v=>v.key===key);
   function link(href: string, text: string) { return <a href={href} onClick={e=>{e.preventDefault();go(href);}}>{text}</a>; }
   return <main className="circle237">
-    <aside className="review">CIRCLE 237 · EDITORIAL DRAFT · Publication HOLD · No contributions are saved here</aside>
+    <aside className="review">CIRCLE 237 · OPEN COUNCIL · Explore freely · Offerings are not collected on this page yet</aside>
     {basePath !== PILOT_PATH && <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.HOME}>TETOL</Link></nav>}
     <header><p className="eyebrow">Council of Life · 237 / yOur Blooming Week</p>
       <h1 tabIndex={-1}>{state.view==='invitation'?invitation.title:state.view==='council' ? 'Companions, connected' : `${item?.name} · ${state.view==='record'?'Living Library':state.view==='harvest'?'Future Heartwood':state.view==='twin'?'Spatial twin reference':'Council appearance'}`}</h1>
-      <p>{state.view==='council'?'Ten companions. Noku returns; new threads gather around her. Seven cleared scenes are available; three images remain withheld. Publication review continues.':'A weekly doorway into a continuing living thread.'}</p>
+      <p>{state.view==='council'?'Ten companions. Noku returns; new threads gather around her. Seven illustrated scenes are here; three images remain respectfully withheld. Visit freely, without a fixed Fire time this week.':'A weekly doorway into a continuing living thread.'}</p>
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>
       <nav aria-label="Council mode">{link(href('2d'),'2D Council')}{link(href('spatial'),'3D TETOL study')}</nav>
-      {link(href(state.mode,'invitation'),'Read the draft invitation')}
+      {invitation.approved && link(href(state.mode,'invitation'),'Read the Council invitation')}
       {state.mode==='spatial'&&<SpatialBoundary><Suspense fallback={<p role="status">Preparing the spatial study…</p>}><SpatialCouncil open={open}/></Suspense></SpatialBoundary>}
       <section className="gallery" aria-label="Ten companion constellation">{roster.map(c=><article className="portrait" key={c.key}>
         <p className="eyebrow">{c.category}</p><h2>{c.name}</h2>{c.artwork ? <img className="companion-scene" src={c.artwork} width={1024} height={645} loading="lazy" alt={`${c.name} · curated Council illustration, not field evidence`} /> : <p className="fallback">Portrait withheld pending clearance</p>}
@@ -48,11 +48,11 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <small>Hawthorn frame family · scene-only illustration; original text panels withheld</small>
       </article>)}</section>
     </> : state.view==='invitation'?<section aria-label="Invitation editorial review">
-      <p className="eyebrow">Draft · publication HOLD · not ready to send</p>
+      <p className="eyebrow">Invitation preview · not yet sent to Telegram</p>
       <p>{invitation.copy}</p>
-      <h2>Central question · approved 23 October 2026</h2><p>{invitation.approvedQuestion}</p><p>Publication review is still required before this invitation can be shared.</p>
-      <h2>Opening Fire</h2><p><time dateTime="2026-10-23T15:30:00+01:00">Friday 23 October 2026 · {invitation.openingFireTimeUK}</time></p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>The community link is not a verified direct Fire-room URL.</p>
-      <p>No Circle 236 question, Fire date or joining link has been carried forward.</p>
+      <h2>Our Council question</h2><p>{invitation.approvedQuestion}</p><p>We will share the illustrated PDF and Telegram invitation after reviewing the open Council.</p>
+      <h2>Come as you are</h2><p>Circle 237 is open to explore at any time this week. No live Fire gathering is scheduled.</p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>Telegram is our Council community, not a direct live Fire-room link.</p>
+      <p>This week's gathering does not need a meeting time. You are welcome to listen, discover and return.</p>
       <details><summary>Publication checklist</summary><ul>{publicationBlockers().map(reason=><li key={reason}>{reason}</li>)}</ul></details>
       {link(href(state.mode),'Return to Circle 237')}
     </section>:key&&item ? <>
@@ -61,8 +61,8 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <p className="eyebrow">{item.category} · Circle appearance, not a new identity</p>
         <h2>{item.name}</h2><p>{item.plaque}</p><p>Scene-only artwork is shown where cleared. Unresolved images remain withheld.</p>
         <p>{introductions[key]}</p>
-        <p>Portal proposal recorded <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Opening Fire scheduled for 23 October 2026 at 15:30 UK (BST); no completed encounter or physical visit is asserted.</p>
-        <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This is a proposed Council appearance. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
+        <p>Companion doorway first prepared <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Circle 237 is open for exploration; no completed encounter or physical visit is asserted.</p>
+        <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This Council appearance is now open to explore. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
         {isPilotKey(key)?link(href(state.mode,'record',key),'Open enduring Library identity'):<p className="muted">Living Library connection awaiting record reconciliation.</p>}
       </section>}
       {state.view==='record'&&identity&&<section>
@@ -70,7 +70,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <p className="identifier">{identity.source}:{identity.id}</p>
         {key==='noku'?<>
           <h2>One Cape Town Ancient Friend</h2><p>The existing Atlas identity is retained. Live availability is not checked in this pilot; no record is created.</p>
-          <p>Circle 234: remembered appearance. Circle 237: proposed return. Original Circle 234 history remains unchanged.</p>
+          <p>Circle 234: remembered appearance. Circle 237: an open return. Original Circle 234 history remains unchanged.</p>
           <p>Guardian-source biography, photographs, cultural accounts and public permissions require reconciliation; no private documents or guardian details are loaded here.</p>
           <p>Ficus natalensis is a source-attributed working identity. The older ledger says “Fig”; this pilot does not silently settle that difference.</p>
           <p className="identifier">Existing Atlas path: /tree/{identities.noku.id} · not fetched here</p>
@@ -87,6 +87,6 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       {state.view==='harvest'&&<section><h2>Remember what is ready</h2><p>Future reviewed Heartwood pathway · not yet connected. Nothing is saved or published.</p><p>A harvest will reference approved knowledge and permissioned contributions without copying private memories or changing their visibility.</p>{link(href(state.mode,'record',key),'Return to enduring identity')}</section>}
       <p className="muted">Council appearance: {isPilotKey(key)?appearance(key,state.mode).id:item.appearanceId} · mode: {state.mode}</p>
     </> : null}
-    <footer>Local review only · existing Councils, Library records and experimental artifacts remain unchanged.</footer>
+    <footer>Circle 237 · a living weekly doorway · past Councils and Library records remain preserved.</footer>
   </main>;
 }

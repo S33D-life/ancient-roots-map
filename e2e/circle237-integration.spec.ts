@@ -15,12 +15,13 @@ test.beforeEach(async({context})=>{
  await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4240'?route.continue():route.abort());
 });
 for(const width of [320,390,1440]){
- test(`Canopy, ten encounters, confirmed invitation, refresh and history at ${width}`,async({page})=>{
+ test(`Open 237 first, ten encounters, invitation preview, refresh and history at ${width}`,async({page})=>{
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
-  await expect(page.getByRole('heading',{name:'Circle 236',exact:true})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 237');
+  await expect(page.getByRole('region',{name:'Previous Circle 236'})).toContainText('Circle 236');
   await expect(page.getByRole('heading',{name:'Previous Circle · 235'})).toBeVisible();
   await dismissTrail(page);
-  await page.getByRole('link',{name:'Meet the ten proposed companions →'}).click();
+  await page.getByRole('link',{name:'Enter Circle 237 · meet its companions →'}).click();
   await expect(page).toHaveURL(/\/council\/237$/);
   await expect(page.locator('img.companion-scene')).toHaveCount(7);
   await expect(page.getByText('Portrait withheld pending clearance',{exact:true})).toHaveCount(3);
@@ -32,14 +33,13 @@ for(const width of [320,390,1440]){
    await page.getByRole('link',{name:`Return to Circle 237 · ${c.name}`,exact:true}).click();
    await expect(page.getByRole('button',{name:`Meet ${c.name}`,exact:true})).toBeFocused();
   }
-  await page.getByRole('link',{name:'Read the draft invitation'}).click();
-  await expect(page.locator('.circle237 time')).toHaveAttribute('datetime','2026-10-23T15:30:00+01:00');
-  await expect(page.getByText('15:30 UK (BST)',{exact:false})).toBeVisible();
-  await expect(page.getByRole('heading',{name:'Central question · approved 23 October 2026'})).toBeVisible();
+  // The invitation preview remains addressable for editors but is not promoted before sharing approval.
+  await page.goto('/council/237?c237view=invitation');
+  await expect(page.getByRole('heading',{name:'Our Council question'})).toBeVisible();
   await expect(page.getByText('What is life teaching us through the beings we encounter?',{exact:true})).toBeVisible();
-  await expect(page.getByText('Publication review is still required before this invitation can be shared.')).toBeVisible();
+  await expect(page.getByText('No live Fire gathering is scheduled.',{exact:false})).toBeVisible();
+  await expect(page.getByText('We will share the illustrated PDF and Telegram invitation after reviewing the open Council.')).toBeVisible();
   await expect(page.getByRole('link',{name:'Council community · Telegram'})).toHaveAttribute('href','https://t.me/s33dlife');
-  await expect(page.getByText('The community link is not a verified direct Fire-room URL.')).toBeVisible();
   await page.screenshot({path:`output/playwright/circle237-integration/${test.info().project.name}-invitation-${width}.png`});
   await page.getByRole('link',{name:'Return to Circle 237',exact:true}).click();
   await page.getByRole('button',{name:'Meet Noku / Nokuphila',exact:true}).click();
@@ -47,7 +47,7 @@ for(const width of [320,390,1440]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:`output/playwright/circle237-integration/${test.info().project.name}-2d-${width}.png`});
   await page.getByRole('link',{name:'Return to the Council Canopy'}).click();
-  await expect(page.getByRole('heading',{name:'Circle 236',exact:true})).toBeVisible();
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 237');
  });
 }
 test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',async({browser})=>{
@@ -57,7 +57,7 @@ test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',asyn
  const page=await context.newPage();const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.getByRole('button',{name:'Dismiss trail',exact:true}).click({timeout:3000}).catch(()=>{});
  await page.getByRole('button',{name:'Council of Life The Canopy'}).click();
- await page.getByRole('link',{name:'Circle 237 · spatial Council draft →'}).click();
+ await page.getByRole('link',{name:'Enter Circle 237 · TETOL spatial Council →'}).click();
  for(const [index,c] of roster.entries()){
   await expect(page.getByText('Spatial study ready',{exact:false})).toBeVisible();await dismissTrail(page);
   const p=await point(page,index);await page.touchscreen.tap(p.x,p.y);
@@ -83,7 +83,7 @@ test('unknown identity and return URL cannot open private material; loaded2D sur
 for (const width of [320,390,1440]) test(`Circle236 remains OPEN with seven companions at ${width}`,async({page})=>{
  await page.setViewportSize({width,height:900});await page.goto('/council-of-life');await dismissTrail(page);
  await expect(page.getByRole('region',{name:'Previous Circle 235'})).toContainText('What is already blooming in us');
- await page.getByRole('link',{name:'Circle 236 · Open · meet its companions →'}).click();
+ await page.getByRole('link',{name:'Revisit Circle 236 · meet its companions →'}).click();
  await expect(page.getByText('Canopy · OPEN')).toBeVisible();
  await expect(page.locator('.circle-companion-frames figure')).toHaveCount(7);
  await expect(page.getByText('Fire reference · past date.',{exact:false})).toBeVisible();

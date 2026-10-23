@@ -26,7 +26,7 @@ export const ROUTES = {
   HEARTWOOD_ROOM: (room: string) => `/library/${room}` as const,
   /** Council of Life */
   COUNCIL: "/council-of-life",
-  /** Circle 237 editorial draft; does not advance the current Circle. */
+  /** Open Council of Life · Circle 237 (digital Canopy doorway). */
   CIRCLE237: "/council/237",
   /** Council Records archive */
   COUNCIL_RECORDS: "/council/records",

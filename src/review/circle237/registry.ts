@@ -19,7 +19,7 @@ export const roster = [
   ['boobook', 'Boobook Owl', 'Bird'],
 ].map(([key, name, category]) => ({ key, name, category, appearanceId: `${key}-companion`,
   plaque: `${name} · ${category} · yOur Blooming Week · Council of Life · 237`,
-  artwork: releaseManifest.sceneAssets[key as keyof typeof releaseManifest.sceneAssets]?.path ?? null, artworkStatus: 'Exact portrait pending intake' as const,
+  artwork: releaseManifest.sceneAssets[key as keyof typeof releaseManifest.sceneAssets]?.path ?? null, artworkStatus: 'Seven scene-only illustrations; three held until ready' as const,
 }));
 export type PilotKey = 'noku' | 'fly-agaric';
 export type CompanionKey = 'noku' | 'hawthorn' | 'jade' | 'broad-bean' | 'wild-raspberry' | 'sunflower' | 'quince' | 'fly-agaric' | 'faraway-tree' | 'boobook';

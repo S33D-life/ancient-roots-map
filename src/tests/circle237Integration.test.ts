@@ -5,10 +5,10 @@ import { ROUTES } from '@/lib/routes';
 import { pilotHref, returnHref, pilotState } from '@/review/circle237/registry';
 import current236 from '../../public/council/circle-236/companions.json';
 
-describe('Circle 237 application integration without a public Circle transition', () => {
-  it('uses only the superseding human-confirmed Fire schedule across the application', () => {
-    expect(invitation.openingFireDate).toBe('2026-10-23');
-    expect(invitation.openingFireTimeUK).toBe('15:30 UK (BST)');
+describe('Circle 237 as the open current Canopy Council, with historical Circles preserved', () => {
+  it('opens the Council without advertising an unconfirmed live Fire or an unsent invitation', () => {
+    expect(invitation.openingFireDate).toBeNull();
+    expect(invitation.openingFireTimeUK).toBeNull();
     expect(invitation.joiningLink).toBeNull();
     expect(invitation.communityLink).toBe('https://t.me/s33dlife');
     expect(invitation.approvedQuestion).toBe('What is life teaching us through the beings we encounter?');
@@ -16,7 +16,6 @@ describe('Circle 237 application integration without a public Circle transition'
     for (const file of ['src/pages/CouncilOfLifePage.tsx', 'src/components/council/Circle237Experience.tsx']) {
       const source = readFileSync(file, 'utf8');
       expect(source).not.toMatch(/20 October|2026-10-20/);
-      expect(source).toMatch(/23 October 2026/);
     }
     expect(readFileSync('src/components/council/Circle237Experience.tsx', 'utf8')).toContain('no completed encounter or physical visit is asserted');
   });
@@ -28,7 +27,10 @@ describe('Circle 237 application integration without a public Circle transition'
     expect(app).toContain('path={THREAD_PATTERNS.CIRCLE}');
     const canopy = readFileSync('src/pages/CouncilOfLifePage.tsx', 'utf8');
     expect(canopy).toContain('id="next-gathering"');
+    expect(canopy).toContain('aria-label="Current Circle"');
+    expect(canopy).toContain('id="previous-circle-236"');
     expect(canopy).toContain('id="previous-circle-235"');
+    expect(canopy.indexOf('id="circle237-arrival"')).toBeLessThan(canopy.indexOf('id="circle236-arrival"'));
     expect(canopy).toContain('CURRENT_WEBSITE_CIRCLE.route');
   });
   it('keeps integrated returns on the numbered route in both modes', () => {

@@ -33,11 +33,11 @@ describe('Circle 237 isolated portal contract',()=>{
   it('keeps the invitation unapproved with no inherited event details',()=>{
     expect(invitation.approved).toBe(false);
     expect(invitation.approvedQuestion).toBe('What is life teaching us through the beings we encounter?');
-    expect(invitation.openingFireDate).toBe('2026-10-23');
-    expect(invitation.openingFireTimeUK).toBe('15:30 UK (BST)');
+    expect(invitation.openingFireDate).toBeNull();
+    expect(invitation.openingFireTimeUK).toBeNull();
     expect(invitation.communityLink).toBe('https://t.me/s33dlife');
     expect(invitation.joiningLink).toBeNull();
-    expect(publicationBlockers()).toHaveLength(4);
+    expect(publicationBlockers()).toHaveLength(3);
     expect(pilotState('?view=invitation').view).toBe('invitation');
     expect(JSON.stringify(invitation)).not.toMatch(/13 October|235|236/);
   });

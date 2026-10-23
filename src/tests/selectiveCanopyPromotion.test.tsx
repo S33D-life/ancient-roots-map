@@ -8,9 +8,11 @@ vi.mock("@/components/council/EmbeddedCouncilDeck", () => ({ default: ({src,onRe
 import CouncilOfLifePage from "@/pages/CouncilOfLifePage";
 describe("selective Canopy promotion", () => {
   beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); window.scrollTo = vi.fn(); });
-  it("keeps historical Circle 235 separate from current Circle 236 and returns from its existing appearance", async () => {
+  it("puts the open Circle 237 first and preserves both historical Circle 236 and Circle 235", async () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
-    expect(screen.getByRole("link", {name:/Circle 236 · Open/})).toHaveAttribute("href","/review/council/236");
+    expect(screen.getByRole("link", {name:/Enter Circle 237 · meet its companions/})).toHaveAttribute("href","/council/237");
+    expect(screen.getByRole("region",{name:"Current Circle"})).toContainElement(screen.getByRole("heading", {name:"Circle 237"}));
+    expect(screen.getByRole("region",{name:"Previous Circle 236"})).toContainElement(screen.getByRole("heading", {name:"Circle 236"}));
     const doorway=screen.getByRole("button",{name:"Enter the Circle →"});
     fireEvent.click(screen.getByRole("button",{name:"Fly Agaric"}));
     fireEvent.click(screen.getByRole("button",{name:"Follow this companion in the Circle →"}));
@@ -20,14 +22,14 @@ describe("selective Canopy promotion", () => {
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ block: "start", behavior: "instant" });
     const scrollMock = vi.mocked(Element.prototype.scrollIntoView);
     expect(scrollMock.mock.contexts.at(-1)).toBe(screen.getByRole("region", { name: "Previous Circle 235" }));
-    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "Circle 236" }));
+    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "Circle 237" }));
     expect(screen.queryByRole("button",{name:"Deck return"})).not.toBeInTheDocument();
     expect(screen.getByRole("link",{name:"Descend to Heartwood Hall →"})).toHaveAttribute("href","/library");
   });
   it("presents 235 historically without rewriting its question or companions", () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
     const previous = screen.getByRole("region", { name: "Previous Circle 235" });
-    expect(previous).toHaveTextContent("Previous Circle · last week");
+    expect(previous).toHaveTextContent("Earlier Circle · remembered");
     expect(previous).toHaveTextContent("Circle 235 companions");
     expect(previous).toHaveTextContent("What is already blooming in us that we haven’t noticed yet?");
     expect(previous).toHaveTextContent("Fulham Palace Holm Oak");

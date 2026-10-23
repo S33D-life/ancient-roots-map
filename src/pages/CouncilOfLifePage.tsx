@@ -37,21 +37,21 @@ const CouncilOfLifePage = () => {
     <Header />
     <main className="parchment-main">
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
-      <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle" aria-labelledby="circle236-arrival">
-        <p className="parchment-kicker">{CURRENT_WEBSITE_CIRCLE.status}</p>
+      <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
+        <p className="parchment-kicker">OPEN · yOur Blooming Week</p>
+        <h2 id="circle237-arrival">Circle 237</h2>
+        <p>What is life teaching us through the beings we encounter?</p>
+        <p>Ten companions are gathered: seven illustrated scenes and three portraits held until ready. Visit any time — there is no fixed Fire gathering this week.</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE237}>Enter Circle 237 · meet its companions →</Link>
+        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Enter Circle 237 · TETOL spatial Council →</Link>
+      </section>
+      <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">
+        <p className="parchment-kicker">Previous Circle · 236</p>
         <h2 id="circle236-arrival">Circle 236</h2>
         <p>{CURRENT_WEBSITE_CIRCLE.companions.map(companion => companion.label).join(" · ")}</p>
-        <Link className="parchment-action" to={CURRENT_WEBSITE_CIRCLE.route}>Circle 236 · Open · meet its companions →</Link>
+        <Link className="parchment-action" to={CURRENT_WEBSITE_CIRCLE.route}>Revisit Circle 236 · meet its companions →</Link>
         <a className="parchment-action" href="/ancient-friends/bishop-of-elys-plane.html?from=2d">Meet Bishop of Ely’s Plane →</a>
         <Circle236Fire className="parchment-action" />
-      </section>
-      <section className="canopy-field-note" aria-labelledby="circle237-draft">
-        <p className="parchment-kicker">Next Circle · editorial draft</p>
-        <h2 id="circle237-draft">Circle 237</h2>
-        <p>Opening Fire · Friday 23 October 2026 · 15:30 UK (BST). Companion portraits and the central question await approval.</p>
-        <Link className="parchment-action" to={ROUTES.CIRCLE237}>Meet the ten proposed companions →</Link>
-        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Circle 237 · spatial Council draft →</Link>
-        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?c237view=invitation`}>Circle 237 · draft invitation →</Link>
       </section>
       <div className="canopy-arrival">
         <section id="previous-circle-235" aria-label="Previous Circle 235">

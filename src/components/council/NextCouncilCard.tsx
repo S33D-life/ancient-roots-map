@@ -15,7 +15,7 @@ export default function NextCouncilCard({ historical = false, onJoinCouncil, onM
   const reading = selected && circle.number === 235 ? COMPANION_READING_235[selected] : undefined;
   const groupUrl = approvedCircleUrl(circle.links.group);
   return <article className="parchment-current-circle canopy-current-circle">
-    <span className="canopy-week"><span className="canopy-week-title">{circle.title} · </span><span className="canopy-week-number">Circle {circle.number} · </span><span>{historical ? "Previous Circle · last week" : circle.weekState}</span></span>
+    <span className="canopy-week"><span className="canopy-week-title">{circle.title} · </span><span className="canopy-week-number">Circle {circle.number} · </span><span>{historical ? "Earlier Circle · remembered" : circle.weekState}</span></span>
     <h2 className="canopy-question">{circle.question}</h2>
     <p className="canopy-open">{historical ? "Revisit last week’s Circle and its companions." : "The live fires come and go; the Circle does not close. Come in your own time."}</p>
     <div className="canopy-gathered"><h3>{historical ? "Circle 235 companions" : circle.companionsLabel}</h3>
