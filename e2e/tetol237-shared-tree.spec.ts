@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import manifest from '../src/review/circle237/release-manifest.json';
+import manifest from '../src/review/circle237/release-manifest.json' with { type: 'json' };
 import {roster} from '../src/review/circle237/registry';
 test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async({page,context})=>{
  test.setTimeout(120_000);await page.setViewportSize({width:390,height:844});
