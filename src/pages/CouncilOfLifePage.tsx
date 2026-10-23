@@ -10,6 +10,7 @@ import EmbeddedCouncilDeck from "@/components/council/EmbeddedCouncilDeck";
 import NextCouncilCard from "@/components/council/NextCouncilCard";
 import { CURRENT_WEBSITE_CIRCLE } from "@/data/council/currentWebsiteCircle";
 import Circle236Fire from "@/components/council/Circle236Fire";
+import { TETOL_PAGE } from "@/lib/tetolStaffRoom";
 import "@/components/council/canopy.css";
 
 const CouncilOfLifePage = () => {
@@ -43,7 +44,9 @@ const CouncilOfLifePage = () => {
         <p>What is life teaching us through the beings we encounter?</p>
         <p>Ten companions are gathered: seven illustrated scenes and three portraits held until ready. Visit any time — there is no fixed Fire gathering this week.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE237}>Enter Circle 237 · meet its companions →</Link>
-        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Enter Circle 237 · TETOL spatial Council →</Link>
+        <a className="parchment-action" href={`${TETOL_PAGE}#croom`}>Enter the original 3D TETOL · historical Council 235 →</a>
+        <p>The current Circle 237 has not yet been woven into the original Spatial Tree. The separate ten-frame experiment is not the TETOL Canopy.</p>
+        <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>View experimental Circle 237 companion frames →</Link>
       </section>
       <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">
         <p className="parchment-kicker">Previous Circle · 236</p>
