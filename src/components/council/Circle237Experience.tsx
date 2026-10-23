@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
+import { TETOL_PAGE } from '@/lib/tetolStaffRoom';
 import { appearance, identities, introductions, isPilotKey, PILOT_PATH, PILOT_REVIEW_DATE, pilotHref, pilotState, returnHref, roster, type CompanionKey } from '@/review/circle237/registry';
 import { invitation, publicationBlockers } from '@/review/circle237/invitation';
 import '@/review/circle237/pilot.css';
@@ -37,9 +38,10 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>
-      <nav aria-label="Council mode">{link(href('2d'),'2D Council')}{link(href('spatial'),'3D TETOL study')}</nav>
+      <nav aria-label="Council mode">{link(href('2d'),'2D Council')}<a href={`${TETOL_PAGE}#croom`}>Original 3D TETOL · historical Council 235</a>{link(href('spatial'),'Experimental 3D companion frames')}</nav>
       {invitation.approved && link(href(state.mode,'invitation'),'Read the Council invitation')}
-      {state.mode==='spatial'&&<SpatialBoundary><Suspense fallback={<p role="status">Preparing the spatial study…</p>}><SpatialCouncil open={open}/></Suspense></SpatialBoundary>}
+      {state.mode==='spatial'&&<p className="review">This simple 3D frame gallery is an experimental companion study, not the original TETOL Canopy or Council Deck.</p>}
+{state.mode==='spatial'&&<SpatialBoundary><Suspense fallback={<p role="status">Preparing the spatial study…</p>}><SpatialCouncil open={open}/></Suspense></SpatialBoundary>}
       <section className="gallery" aria-label="Ten companion constellation">{roster.map(c=><article className="portrait" key={c.key}>
         <p className="eyebrow">{c.category}</p><h2>{c.name}</h2>{c.artwork ? <img className="companion-scene" src={c.artwork} width={c.artworkWidth} height={c.artworkHeight} loading="lazy" alt={`${c.name} · curated Council illustration, not field evidence`} /> : <p className="fallback">Portrait withheld pending clearance</p>}
         <p className="plaque">{c.plaque}</p>

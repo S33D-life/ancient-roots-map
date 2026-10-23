@@ -57,8 +57,10 @@ test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',asyn
  const page=await context.newPage();const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.getByRole('button',{name:'Dismiss trail',exact:true}).click({timeout:3000}).catch(()=>{});
  await page.getByRole('button',{name:'Council of Life The Canopy'}).click();
- await page.getByRole('link',{name:'Enter Circle 237 · TETOL spatial Council →'}).click();
+ await expect(page.getByRole('link',{name:'Enter the original 3D TETOL · historical Council 235 →'})).toHaveAttribute('href','/tetol/circle-235/pre-fire/tetol.html#croom');
+ await page.getByRole('link',{name:'View experimental Circle 237 companion frames →'}).click();
  for(const [index,c] of roster.entries()){
+  await expect(page.getByText('This simple 3D frame gallery is an experimental companion study',{exact:false})).toBeVisible();
   await expect(page.getByText('Spatial study ready',{exact:false})).toBeVisible();await dismissTrail(page);
   const p=await point(page,index);await page.touchscreen.tap(p.x,p.y);
   await expect(page.getByRole('heading',{name:`${c.name} · Council appearance`,exact:true})).toBeVisible();
