@@ -26,6 +26,21 @@ export async function installCompanionFrames(D) {
   D.nodes.croom.purpose = QUESTION + ' No scheduled live Fire is asserted this week.';
   D.nodes.croom.relations = circle.companions.map(c=>({to:c.id,dim:'place',text:c.label}));
   D.circleFrameCompanions = circle.companions;
+  // Mobile native-touch fallback: the old shared TETOL sheet sometimes ignores
+  // pointerup on its grab handle (the 237 phone-browser acceptance caught this).
+  // If the existing handler already opened the sheet, do nothing: never double-toggle.
+  // Kept in the 237 edition only, leaving historic 235/236 touch mechanics intact.
+  document.addEventListener('click', (event) => {
+    if (!document.body.classList.contains('phone')) return;
+    if (!(event.target instanceof Element) || !event.target.closest('#grab')) return;
+    if (document.body.dataset.sheet !== 'peek') return;
+    document.body.dataset.sheet = 'mid';
+    const grab = document.getElementById('grab');
+    if (grab) {
+      grab.setAttribute('aria-expanded', 'true');
+      grab.setAttribute('aria-label', 'Show the full companion panel');
+    }
+  }, true);
   const style = document.createElement('style');
   style.textContent = 'body.grace-p.g-arriving aside#panel,body[data-q] aside#panel #grab,body[data-q] aside#panel .pbody>*{opacity:1!important;pointer-events:auto!important}#tetol-welcome{display:none!important}#council-return{left:16px!important;right:auto!important;bottom:16px!important;max-width:calc(100vw - 32px)}body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}' + (window.parent!==window?'#council-return{display:none!important}':'');
   document.head.append(style);
