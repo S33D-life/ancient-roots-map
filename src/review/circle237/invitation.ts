@@ -1,9 +1,9 @@
-/** Editorial proposal only. Never inherit question, Fire or lifecycle from 235/236. */
+/** Circle 237 central question approved 23 October 2026. All other release gates remain in force. */
 export const invitation = {
   title: 'An invitation to Council of Life · 237',
   copy: 'Come and meet ten companions: a returning Ancient Friend, a tree species, a plant, a seed, a leaf, a flower, a fruit, a fungus, a book and a bird. We will make room to notice them together.',
-  proposedQuestion: 'What can these companions teach us about growing together?',
-  approvedQuestion: null,
+  proposedQuestion: 'What is life teaching us through the beings we encounter?',
+  approvedQuestion: 'What is life teaching us through the beings we encounter?',
   openingFireDate: '2026-10-23',
   openingFireTimeUK: '15:30 UK (BST)',
   joiningLink: null, // No verified direct Fire-room URL.
