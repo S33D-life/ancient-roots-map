@@ -1,72 +1,36 @@
-# S33D / TETOL — Read-only release-safety audit (2026-10-14)
+# Provider safety answer: frontend-only publish and exact rollback (Circle 237, PR #111)
 
-Nothing was changed. Evidence comes from read-only checks run in this turn, unless marked otherwise.
+Written analysis only. Nothing was published, deployed, reverted or changed. Approving this card does not start any action. It only records the answer.
 
-## Verified evidence
-- Live `www.s33d.life/version.json`: build `6d4071d`, generated 2026-10-12T23:25Z.
-- Live `/council/circle-236/companions.json`: `status: "PREPARING"`.
-- GitHub main HEAD: `5643b9f6` (merge of PR #94, Circle 236 OPEN).
-- Lovable editor HEAD: `5643b9f6`, the same as GitHub main. The editor sets 236 to OPEN.
-- Neither the live nor the editor `companion-frames.js` clears `question`. That means the "clear 235 question in 3D" fix is NOT on main or live.
+## Verdict: NO-GO for a provider-guaranteed, independently testable, frontend-only release and rollback inside this Lovable project
 
-## 1. Published revision
-- Published: `6d4071d` (verified). Latest edited: `5643b9f6` (verified). They differ.
-- Last publish operation: we inferred it was the 6d4071d build on 12 Oct from the version.json timestamp. The publish log itself was UNKNOWN.
-- Pushing or merging to GitHub syncs the editor. It does NOT publish the website automatically: the site only changes when someone clicks Publish/Update. The live 6d4071d build after the #94 merge confirms this.
+## What the provider does document (platform statement, not observed proof)
+- Publish builds and serves the website. Backend changes (functions, migrations) deploy separately and immediately when they are edited or explicitly deployed, not through Publish. Source: Lovable deployment docs ("Frontend vs Backend Deployment").
+- Git sync on Lovable Cloud never deploys edge functions, and it never applies migration files. Source: Lovable Git sync docs. So merging PR #111 into the synced branch does not, by documented design, redeploy functions.
+- History/chat Revert restores the whole project state. When restored files include `supabase/functions/`, those functions redeploy, and stored data is not rolled back. This matches Issue #103. Revert is not a frontend-only rollback.
 
-## 2. What Publish does
-- Publish builds and serves the website (frontend) only.
-- Edge functions deploy separately, when function files are edited or deployed explicitly. Migrations, RLS, auth settings, records and storage are not touched by Publish.
-- Risk: function files edited in the editor auto-deploy to the shared backend whether or not anyone publishes. Preview and production share one backend.
-- Proving a publish was frontend-only:
-  - diff the backend paths (`supabase/`) between the last deployed checkpoint and the candidate, and require an empty diff;
-  - after publishing, confirm version.json shows the expected SHA;
-  - check that function "last updated" times did not change.
-- Vendor-level proof that functions were not redeployed: UNKNOWN. Only Lovable support can confirm it.
+## What does not exist (UNKNOWN or absent)
+- No documented frontend-only Publish mode or "website only" switch. Publish separates frontend from backend by design, but you cannot set or confirm that per release.
+- No documented way to re-serve the exact earlier website bytes by deployment ID (for example the current `x-deployment-id`) without a project Revert. The only documented rollback is History Revert, which carries the backend risk above.
+- No user-visible deployed-function version IDs, bundle hashes or deployment history. You can't independently prove that function identities stayed the same before and after. Read-only function logs and test calls show behaviour, not identity.
+- No isolated preview backend. Preview and production share one backend.
 
-## 3. Comparison (236)
+So the guarantee you asked for (an official process that is testable and covers both publish and exact-byte restore with zero backend effect) cannot be shown from the documented features of this project.
 
-| Item | GitHub main | Lovable editor | Live |
-|---|---|---|---|
-| Status | OPEN | OPEN | PREPARING |
-| 3D old question cleared | NO | NO | NO |
-| First-tap fixes (1d941de) | present | present | present (6d4071d contains them) |
-| #council-return mobile move | partial (left/bottom; hidden on mid/full sheet) | same | same |
-| Archived 235 | preserved | preserved | preserved |
+## Least-risk path inside Lovable, if a human accepts the residual risk
+1. Merge PR #111 only if its diff against the published build has zero changes under `supabase/`. Git sync does not deploy functions on Cloud.
+2. Before publishing, record `/version.json`, the `x-deployment-id` header, asset filenames and their SHA-256 hashes, plus read-only probes of key function responses.
+3. Publish. Then compare `/version.json`, the assets and the same probes.
+4. For rollback, do NOT use History Revert. Fix forward instead: put a commit on main that restores the earlier frontend files, keep `supabase/` unchanged, then Publish. The result is a rebuild, not the exact earlier bytes.
+This proves behaviour, not provider-level identity. Lovable support would need to give before/after function deployment versions to close that gap.
 
-Whether 235's question actually renders in 236's 3D view at runtime was not checked: UNKNOWN until a browser check is run.
+## Only path that fully meets the requirement: separate static hosting
+- Build `dist/` from the exact PR #111 commit in CI (already produced as an artifact by `.github/workflows/ci.yml`). Host it on an independent static host that supports immutable deploys and instant rollback to an earlier deploy (for example Cloudflare Pages, Netlify or Vercel). Point the domain there. The app still calls the same backend through its public key, and no function, schema, RLS, auth or data is touched.
+- Rehearsal: deploy the earlier artifact (`6d4071d` or the current build) and the candidate to a preview URL on that host. Switch between them, and check byte hashes against the artifact checksums. No backend write is needed for signed-out checks. Signed-in checks write to the shared backend, so limit them to read-only views.
+- Proof that backend function identities stayed the same: by construction the host has no access to the backend. Its deploy log shows static uploads only.
+- Things to account for: `public/_redirects` (og-proxy proxy rules and SPA fallback) and `public/_headers` (CSP) must be ported to the new host's format. Auth redirect URLs for the new origin must be allowed. Moving the custom domain away from Lovable hosting changes DNS, and that needs its own approval.
 
-## 4. Live protection state
-- og-proxy: no verified deployed-source checkpoint exists. The editor source still emits exact coordinates for public trees and does a global Staff lookup (earlier audit). HOLD.
-- Private tree coordinates and creator identity for signed-out visitors: the RLS policy split was verified in the earlier audit. The Staff identity exposure finding is still open. HOLD.
-- Signing in and reading back your own records: owner read-back is verified by policy. A real-device check on the real site is UNKNOWN.
-- Backup/rollback: the website can roll back to `6d4071d`. CSV, inventory and schema export done 14 Oct. A full database backup was not taken, and there is no rollback for functions: UNKNOWN/HOLD.
-
-## 5. Smallest release sequence (no backend changes)
-1. Candidate patch on a branch: clear the `croom`/`c236` question in 3D, plus the council-return fix, plus a test.
-2. Independent PR CI is green, and the `supabase/` diff against 6d4071d is empty.
-3. Merge only after review.
-4. Publication safety proof per section 2.
-5. Explicit human production GO.
-6. Publish. Record the version.json SHA and the rollback target `6d4071d`.
-7. Checks on the real site: signed out and signed in, on mobile and desktop.
-
-An isolated Lovable preview without writes to the shared backend is NOT possible. The preview uses the same live backend, so preview sign-ins and actions write live data.
-
-## 6. Ely Phase 0
-Not ready, not merged. A separate HOLD stands on research-page network and location privacy.
-
-## P0/P1 checklist
-- P0: published SHA identified (6d4071d): PASS
-- P0: 236 OPEN live: HOLD (live is PREPARING)
-- P0: 3D 235 question cleared: HOLD (not in main)
-- P0: Publish is frontend-only: PASS by platform design; vendor-level proof UNKNOWN
-- P0: og-proxy recovery checkpoint: HOLD
-- P0: anonymous private coordinates and identity exposure: HOLD (Staff finding open)
-- P1: first-tap fixes: PASS
-- P1: archived 235 intact: PASS
-- P1: mobile council-return: UNKNOWN (needs a real device)
-- P1: isolated preview: not possible
-- P1: full database backup: HOLD
-
-Next safe step: write the 3D question patch on a branch, with CI and the empty backend diff, before any publish GO.
+## Support items needed to make the in-Lovable path GO
+1. Written confirmation that Publish never deploys edge functions, migrations, auth or RLS for this project.
+2. A supported way to re-serve an earlier website deployment by ID without Revert.
+3. Before/after deployed-function version identifiers.
