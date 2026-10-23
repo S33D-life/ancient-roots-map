@@ -30,6 +30,22 @@ export async function installCompanionFrames(D) {
   // pointerup on its grab handle (the 237 phone-browser acceptance caught this).
   // If the existing handler already opened the sheet, do nothing: never double-toggle.
   // Kept in the 237 edition only, leaving historic 235/236 touch mechanics intact.
+  let grabTapStartY = null;
+  document.addEventListener('pointerdown', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('#grab')) return;
+    grabTapStartY = event.clientY;
+  }, true);
+  document.addEventListener('pointerup', (event) => {
+    const startedOnGrab = grabTapStartY !== null;
+    const tapDistance = startedOnGrab ? Math.abs(event.clientY - grabTapStartY) : Infinity;
+    grabTapStartY = null;
+    if (!startedOnGrab || tapDistance > 16 || !document.body.classList.contains('phone')) return;
+    if (!(event.target instanceof Element) || !event.target.closest('#grab')) return;
+    if (document.body.dataset.sheet !== 'peek') return;
+    document.body.dataset.sheet = 'mid';
+    const grab = document.getElementById('grab');
+    if (grab) { grab.setAttribute('aria-expanded','true'); grab.setAttribute('aria-label','Show the full companion panel'); }
+  }, true);
   document.addEventListener('click', (event) => {
     if (!document.body.classList.contains('phone')) return;
     if (!(event.target instanceof Element) || !event.target.closest('#grab')) return;
