@@ -33,8 +33,8 @@ describe('Circle 237 isolated portal contract',()=>{
   it('keeps the invitation unapproved with no inherited event details',()=>{
     expect(invitation.approved).toBe(false);
     expect(invitation.approvedQuestion).toBeNull();
-    expect(invitation.openingFireDate).toBe('2026-10-20');
-    expect(invitation.openingFireTimeUK).toBe('19:30 UK (BST)');
+    expect(invitation.openingFireDate).toBe('2026-10-23');
+    expect(invitation.openingFireTimeUK).toBe('15:30 UK (BST)');
     expect(invitation.communityLink).toBe('https://t.me/s33dlife');
     expect(invitation.joiningLink).toBeNull();
     expect(publicationBlockers()).toHaveLength(5);

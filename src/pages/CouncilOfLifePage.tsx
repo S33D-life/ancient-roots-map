@@ -48,7 +48,7 @@ const CouncilOfLifePage = () => {
       <section className="canopy-field-note" aria-labelledby="circle237-draft">
         <p className="parchment-kicker">Next Circle · editorial draft</p>
         <h2 id="circle237-draft">Circle 237</h2>
-        <p>Opening Fire · Tuesday 20 October 2026 · 19:30 UK (BST). Companion portraits and the central question await approval.</p>
+        <p>Opening Fire · Friday 23 October 2026 · 15:30 UK (BST). Companion portraits and the central question await approval.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE237}>Meet the ten proposed companions →</Link>
         <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Circle 237 · spatial Council draft →</Link>
         <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?c237view=invitation`}>Circle 237 · draft invitation →</Link>

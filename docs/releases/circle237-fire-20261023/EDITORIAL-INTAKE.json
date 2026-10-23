@@ -1,0 +1,113 @@
+{
+  "status": "HOLD \u2014 exact curated portrait files not received",
+  "curation": "Ed confirmed joint companion/artwork curation on 23 October 2026; no substitute imagery authorised",
+  "searched": [
+    "Recovered3831a711 source and current GitHub main9503b07d",
+    "Lovable editor latest9503b07d",
+    "Connected Drive names237/Noku/Agaric/Boobook and recent images after16 October",
+    "Connected Council/Notion references and local Downloads/Visual Library filenames"
+  ],
+  "files": [
+    {
+      "key": "noku",
+      "companion": "Noku / Nokuphila",
+      "category": "Ancient Friend",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "hawthorn",
+      "companion": "Hawthorn",
+      "category": "Tree Species",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "jade",
+      "companion": "Jade / Money Plant",
+      "category": "Plant",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "broad-bean",
+      "companion": "Broad Bean",
+      "category": "Seed",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "wild-raspberry",
+      "companion": "Wild Raspberry",
+      "category": "Leaf",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "sunflower",
+      "companion": "Teddy Bear Sunflower",
+      "category": "Flower",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "quince",
+      "companion": "Quince",
+      "category": "Fruit",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "fly-agaric",
+      "companion": "Fly Agaric",
+      "category": "Fungi",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "faraway-tree",
+      "companion": "The Magic Faraway Tree",
+      "category": "Book",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    },
+    {
+      "key": "boobook",
+      "companion": "Boobook Owl",
+      "category": "Bird",
+      "curationConfirmed": true,
+      "exactAssetPath": null,
+      "sha256": null,
+      "fileToCompanionMappingVerified": false,
+      "publicDisplay": "text fallback only until exact curated bytes can be inspected"
+    }
+  ],
+  "pdf": "No Circle237 PDF/reference in this candidate or accessible237-named Drive results. No PDF created, attached or approved by inference."
+}

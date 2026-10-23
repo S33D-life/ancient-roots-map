@@ -4,8 +4,8 @@ export const invitation = {
   copy: 'Come and meet ten companions: a returning Ancient Friend, a tree species, a plant, a seed, a leaf, a flower, a fruit, a fungus, a book and a bird. We will make room to notice them together.',
   proposedQuestion: 'What can these companions teach us about growing together?',
   approvedQuestion: null,
-  openingFireDate: '2026-10-20',
-  openingFireTimeUK: '19:30 UK (BST)',
+  openingFireDate: '2026-10-23',
+  openingFireTimeUK: '15:30 UK (BST)',
   joiningLink: null, // No verified direct Fire-room URL.
   communityLink: 'https://t.me/s33dlife',
   approved: false,

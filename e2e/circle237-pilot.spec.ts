@@ -102,9 +102,9 @@ for(const width of [320,390,1440]){
    }
    await page.getByRole('link',{name:'Read the draft invitation'}).click();
    await expect(page.getByText('Draft for Ed’s approval · not ready to send')).toBeVisible();
-   await expect(page.getByText('Tuesday 20 October 2026',{exact:false})).toBeVisible();
+   await expect(page.getByText('Friday 23 October 2026',{exact:false})).toBeVisible();
    await expect(page.getByRole('link',{name:'Council community · Telegram'})).toHaveAttribute('href','https://t.me/s33dlife');
-   await expect(page.locator('time')).toHaveAttribute('datetime','2026-10-20T19:30:00+01:00');
+   await expect(page.locator('time')).toHaveAttribute('datetime','2026-10-23T15:30:00+01:00');
    await expect(page.getByRole('link',{name:/join|fire/i})).toHaveCount(0);
    await page.screenshot({path:`test-results-circle237/invitation-${mode}-${width}.png`,fullPage:true});
    await page.getByRole('link',{name:'Return to Circle 237',exact:true}).click();

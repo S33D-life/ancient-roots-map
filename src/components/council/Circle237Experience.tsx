@@ -51,7 +51,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       <p className="eyebrow">Draft for Ed’s approval · not ready to send</p>
       <p>{invitation.copy}</p>
       <h2>Proposed central question</h2><p>{invitation.proposedQuestion}</p><p>Awaiting Ed’s approval. No approved question has been assigned.</p>
-      <h2>Opening Fire</h2><p><time dateTime="2026-10-20T19:30:00+01:00">Tuesday 20 October 2026 · {invitation.openingFireTimeUK}</time></p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>The community link is not a verified direct Fire-room URL.</p>
+      <h2>Opening Fire</h2><p><time dateTime="2026-10-23T15:30:00+01:00">Friday 23 October 2026 · {invitation.openingFireTimeUK}</time></p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>The community link is not a verified direct Fire-room URL.</p>
       <p>No Circle 236 question, Fire date or joining link has been carried forward.</p>
       <details><summary>Publication checklist</summary><ul>{publicationBlockers().map(reason=><li key={reason}>{reason}</li>)}</ul></details>
       {link(href(state.mode),'Return to Circle 237')}
@@ -61,7 +61,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <p className="eyebrow">{item.category} · Circle appearance, not a new identity</p>
         <h2>{item.name}</h2><p>{item.plaque}</p><p>Artwork pending intake. No image has been generated or substituted.</p>
         <p>{introductions[key]}</p>
-        <p>Portal proposal recorded <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Opening Fire scheduled for 20 October 2026 at 19:30 UK (BST); no completed encounter or physical visit is asserted.</p>
+        <p>Portal proposal recorded <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Opening Fire scheduled for 23 October 2026 at 15:30 UK (BST); no completed encounter or physical visit is asserted.</p>
         <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This is a proposed Council appearance. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
         {isPilotKey(key)?link(href(state.mode,'record',key),'Open enduring Library identity'):<p className="muted">Living Library connection awaiting record reconciliation.</p>}
       </section>}
