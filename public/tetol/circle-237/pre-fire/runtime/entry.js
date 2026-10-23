@@ -853,6 +853,12 @@ BUILD.circleFrame = (g, repr, id) => {
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
   add(new THREE.Mesh(new THREE.BoxGeometry(1.12, 1.06 * (repr.height || 645) / (repr.width || 1024) + .10, .08), mat.limbBark), id + '_frame', id, frame);
   add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * (repr.height || 645) / (repr.width || 1024)), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  // Two visible suspending cords make these actual hanging portraits in the original Council room.
+  const frameHeight = 1.06 * (repr.height || 645) / (repr.width || 1024) + .1;
+  for (const side of [-.38, .38]) {
+    const cord = add(new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .65, 6), mat.iron), id + '_hanging_cord', id, frame);
+    cord.position.set(side, frameHeight / 2 + .30, 0);
+  }
   companionFrames?.buildCompanionPresence({ THREE, add, std, BUILD }, g, repr, id);
   return 1.25;
 };
