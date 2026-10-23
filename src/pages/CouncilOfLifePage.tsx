@@ -37,7 +37,7 @@ const CouncilOfLifePage = () => {
     <Header />
     <main className="parchment-main">
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
-      <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle" aria-labelledby="circle237-arrival">
+      <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
         <p className="parchment-kicker">OPEN · yOur Blooming Week</p>
         <h2 id="circle237-arrival">Circle 237</h2>
         <p>What is life teaching us through the beings we encounter?</p>
@@ -45,7 +45,7 @@ const CouncilOfLifePage = () => {
         <Link className="parchment-action" to={ROUTES.CIRCLE237}>Enter Circle 237 · meet its companions →</Link>
         <Link className="parchment-action" to={`${ROUTES.CIRCLE237}?mode=spatial`}>Enter Circle 237 · TETOL spatial Council →</Link>
       </section>
-      <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236" aria-labelledby="circle236-arrival">
+      <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">
         <p className="parchment-kicker">Previous Circle · 236</p>
         <h2 id="circle236-arrival">Circle 236</h2>
         <p>{CURRENT_WEBSITE_CIRCLE.companions.map(companion => companion.label).join(" · ")}</p>
