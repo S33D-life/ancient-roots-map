@@ -1,13 +1,14 @@
 {
   "circle": 237,
-  "version": "237-scenes-review-20261023.1",
-  "state": "draft",
+  "version": "237-canopy-open-20261023.1",
+  "state": "website-open",
   "question": "What is life teaching us through the beings we encounter?",
   "fire": {
-    "scheduledAt": "2026-10-23T15:30:00+01:00",
-    "state": "planned",
+    "scheduledAt": null,
+    "state": "no-fixed-session-this-week",
     "gatheringUrl": null,
-    "communityUrl": "https://t.me/s33dlife"
+    "communityUrl": "https://t.me/s33dlife",
+    "previousUnconfirmedProposalAt": "2026-10-23T15:30:00+01:00"
   },
   "routes": {
     "chapter": "/council/237",
@@ -77,5 +78,8 @@
     "sunflower"
   ],
   "pdf": null,
-  "publicationApproved": false
+  "publicationApproved": false,
+  "websiteOpenApproved": true,
+  "invitationSent": false,
+  "pdfApprovedForSharing": false
 }
