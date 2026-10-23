@@ -92,7 +92,7 @@ for(const width of [320,390,1440]){
  test(`ten companion encounters and invitation review at ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});await page.goto(path);
   for(const mode of ['2d','spatial'] as const){
-   await page.getByRole('link',{name:mode==='2d'?'2D Council':'3D TETOL study',exact:true}).click();
+   await page.getByRole('link',{name:mode==='2d'?'2D Council':'Experimental 3D companion frames',exact:true}).click();
    for(const c of roster){
     await page.getByRole('button',{name:`Meet ${c.name}`,exact:true}).click();
     await expect(page.getByRole('heading',{name:`${c.name} · Council appearance`,exact:true})).toBeVisible();
@@ -126,7 +126,7 @@ test('all ten spatial frames are real touch doorways at 390px',async({browser})=
 });
 test('offline spatial chunk failure keeps all named doorways usable',async({page,context})=>{
  await page.goto(path);await context.setOffline(true);
- await page.getByRole('link',{name:'3D TETOL study',exact:true}).click();
+ await page.getByRole('link',{name:'Experimental 3D companion frames',exact:true}).click();
  await expect(page.getByRole('button',{name:/^Meet /})).toHaveCount(10);
  await page.getByRole('button',{name:'Meet Broad Bean',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Broad Bean · Council appearance'})).toBeVisible();
