@@ -38,7 +38,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>
-      <nav aria-label="Council mode">{link(href('2d'),'2D Council')}<a href={`${TETOL_PAGE}#croom`}>Original 3D TETOL · historical Council 235</a>{link(href('spatial'),'Experimental 3D companion frames')}</nav>
+      <nav aria-label="Council mode">{link(href('2d'),'2D Council')}<a href="/tetol/circle-235/pre-fire/tetol.html?circle=237#croom">3D TETOL · Circle 237 Council Deck</a><a href={`${TETOL_PAGE}#croom`}>Historical Circle 235 TETOL</a>{link(href('spatial'),'Experimental frame study')}</nav>
       {invitation.approved && link(href(state.mode,'invitation'),'Read the Council invitation')}
       {state.mode==='spatial'&&<p className="review">This simple 3D frame gallery is an experimental companion study, not the original TETOL Canopy or Council Deck.</p>}
 {state.mode==='spatial'&&<SpatialBoundary><Suspense fallback={<p role="status">Preparing the spatial study…</p>}><SpatialCouncil open={open}/></Suspense></SpatialBoundary>}
