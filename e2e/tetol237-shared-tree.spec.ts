@@ -20,7 +20,16 @@ test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async
    const encounter = page.locator('#panel button[data-go="'+c.key+'-companion"]');
    await expect(encounter).toBeVisible({timeout:12000});
    await encounter.tap();
-   await expect(page.locator('#panel img[data-circle-artwork]')).toHaveAttribute('src',manifest.sceneAssets[c.key as keyof typeof manifest.sceneAssets].path);
+   const observed = await page.evaluate(() => ({
+     hash: location.hash,
+     sheet: document.body.dataset.sheet,
+     title: document.querySelector('#panel h2')?.textContent,
+     image: document.querySelector('#panel img[data-circle-artwork]')?.getAttribute('src') || null,
+     buttons: [...document.querySelectorAll('#panel [data-go]')].map(x => x.getAttribute('data-go')).slice(0,12),
+     node: (window as any).TETOL?.nodes?.[location.hash.slice(1)]?.name,
+   }));
+   console.log('CIRCLE237 TAP RESULT', c.key, JSON.stringify(observed));
+   await expect(page.locator('#panel img[data-circle-artwork]')).toHaveAttribute('src',manifest.sceneAssets[c.key as keyof typeof manifest.sceneAssets].path,{timeout:6500});
    if(await page.locator('body').getAttribute('data-sheet') === 'peek') await page.locator('#grab').tap();
    await page.locator('#panel button[data-go="croom"]').tap();
  }
