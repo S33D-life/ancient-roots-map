@@ -42,7 +42,7 @@ export async function installTimeTree(D, number) {
     new MutationObserver(() => { if (brand.textContent !== label) brand.textContent = label; }).observe(brand,{childList:true});
   }
   const ret = document.getElementById('council-return');
-  if (ret) { ret.href = '/council-of-life?from=spatial-council#' + (number === 238 ? 'next-gathering' : number === 234 ? 'historical-circle-234' : `previous-circle-${number}`); ret.textContent = `Return to Circle ${number}`; ret.target = '_top'; }
+  if (ret) { ret.href = '/council-of-life?from=spatial-council&circle=' + number + '#' + (number === 238 ? 'next-gathering' : number === 234 ? 'historical-circle-234' : `previous-circle-${number}`); ret.textContent = `Return to Circle ${number}`; ret.target = '_top'; }
   const nav = document.createElement('nav'); nav.id = 'council-time-tree'; nav.setAttribute('aria-label','Council Time Tree');
   const link = (n,text,rel='') => n ? `<a href="${editionUrl(n)}" target="_top" ${rel}>${text}</a>` : `<span aria-disabled="true">${text}</span>`;
   const i = tree.editions.indexOf(edition);

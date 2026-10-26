@@ -1,3 +1,4 @@
+import timeTree from '../../public/council/time-tree.json';
 import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -18,7 +19,8 @@ import "@/components/council/canopy.css";
 const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
   const location = useLocation();
-  const selectedEdition = Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237)/)?.[1] || 238);
+  const returnEdition = Number(new URLSearchParams(location.search).get('circle'));
+  const selectedEdition = timeTree.editions.some(e => e.number === returnEdition) ? returnEdition : Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237)/)?.[1] || timeTree.current);
   const [deckNode, setDeckNode] = useState<string | null>(null);
   const doorway = useRef<HTMLButtonElement>(null);
   const closeDeck = useRef<HTMLButtonElement>(null);
@@ -31,9 +33,10 @@ const CouncilOfLifePage = () => {
   const localDeckUrl = deckUrl ? `${new URL(deckUrl).pathname}?circle=235&welcome=0#${deckNode || "croom"}` : undefined;
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("from") !== "spatial-council") return;
-    const frame = requestAnimationFrame(() => document.getElementById(/^#(?:previous-circle-(?:235|236|237)|historical-circle-234)$/.test(window.location.hash) ? window.location.hash.slice(1) : "next-gathering")?.scrollIntoView({ block: "start" }));
+    const section = selectedEdition === timeTree.current ? "next-gathering" : selectedEdition === 234 ? "historical-circle-234" : `previous-circle-${selectedEdition}`;
+    const frame = requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [selectedEdition]);
   const returnToCircle = () => {
     setDeckNode(null);
     requestAnimationFrame(() => { doorway.current?.focus({ preventScroll: true }); document.getElementById("previous-circle-235")?.scrollIntoView({ block: "start", behavior: "instant" }); });

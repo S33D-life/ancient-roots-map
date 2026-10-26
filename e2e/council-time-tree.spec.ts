@@ -2,6 +2,12 @@ import {test,expect} from '@playwright/test';
 import {disconnectedTransport} from './fixtures/circle237-disconnected-transport';
 const root='/tetol/circle-235/pre-fire/tetol.html';
 test.use({hasTouch:true});
+test.setTimeout(90_000);
+async function waitForScene(page:any){
+ await page.waitForFunction((bound:boolean)=>{const stage=document.querySelector('three-d-stage') as any;if(!(window as any).__tetol||!stage?._renderer)return false;if(bound)stage._renderer.render=()=>{};return true;},!!process.env.CI);
+}
+// CI checks the actual initial scene, then bounds drawing while checking URL/UI contracts.
+// Local acceptance retains drawing through touch and screenshots. Neither is native iPhone proof.
 test.beforeEach(async({context,page})=>{
  await context.addInitScript(disconnectedTransport);
  await context.route('**/*',r=>['localhost','127.0.0.1'].includes(new URL(r.request().url()).hostname)?r.continue():r.abort());
@@ -23,7 +29,7 @@ for(const n of [238,237,236,235,234])test(`Circle ${n}: original sign, companion
  await page.setViewportSize({width:390,height:844});
  const failed:string[]=[];page.on('response',r=>{if(r.url().includes('/council/')&&!r.ok())failed.push(r.url())});
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(`${root}?circle=${n}#croom`);await page.waitForFunction(()=>!!(window as any).__tetol);
+ await page.goto(`${root}?circle=${n}#croom`);await waitForScene(page);
  await assertEdition(page,n);
  // Native touch opens the actual shared sheet; this is browser emulation, not real iPhone proof.
  if(await page.locator('body').getAttribute('data-sheet')==='peek')await page.locator('#grab').tap();
@@ -35,14 +41,14 @@ for(const n of [238,237,236,235,234])test(`Circle ${n}: original sign, companion
  await expect(page.locator('#panel h2')).not.toBeEmpty();
  await page.goBack();await expect(page).toHaveURL(/#croom$/);await assertEdition(page,n);
  await page.goForward();await expect(page).toHaveURL(new RegExp('#'+first+'$'));
- await page.reload();await page.waitForFunction(()=>!!(window as any).__tetol);await expect(page).toHaveURL(new RegExp('#'+first+'$'));
+ await page.reload();await waitForScene(page);await expect(page).toHaveURL(new RegExp('#'+first+'$'));
  // The exact legacy hotspot that used to switch 238 to slot 233 / Circle 235.
  await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','c233now'));await assertEdition(page,n);
  if(await page.locator('body').getAttribute('data-sheet')==='peek')await page.locator('#grab').tap();
  await expect(page.locator('body')).toHaveAttribute('data-sheet',/mid|full/);
  await expect(page.locator('#council-time-tree select')).toBeVisible();
  await page.screenshot({path:`output/playwright/time-tree/${test.info().project.name}-${n}-390.png`});
- // Bound software rendering only AFTER the real scene, touch, navigation and screenshot.
+ // Local runs bound drawing here, after the real scene, touch and screenshot; CI bounds it earlier.
  await page.evaluate(()=>{(document.querySelector('three-d-stage') as any)._renderer.render=()=>{}});
  await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','staff'));await expect(page.locator('#panel')).toContainText('Staff Room');
  await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','croom'));await assertEdition(page,n);
@@ -51,15 +57,15 @@ for(const n of [238,237,236,235,234])test(`Circle ${n}: original sign, companion
 test('Time Tree walks 238 → 234 → 238, with browser Back/Forward and current return',async({page})=>{
  test.setTimeout(180000);await page.setViewportSize({width:390,height:844});await page.goto(`${root}?circle=238#croom`);
  for(const [index,n] of [238,237,236,235,234,235,236,237,238].entries()){
-  await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,n);
+  await waitForScene(page);await assertEdition(page,n);
   await page.evaluate(()=>{(document.querySelector('three-d-stage') as any)._renderer.render=()=>{}});
   if(await page.locator('body').getAttribute('data-sheet')==='peek')await page.locator('#grab').tap();
   if(n===234){await page.locator('#council-time-tree a[rel=next]').tap();continue;}
   if(index<4)await page.locator('#council-time-tree a[rel=prev]').tap();
   else if(index<8)await page.locator('#council-time-tree a[rel=next]').tap();
  }
- await page.goBack();await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,237);
- await page.goForward();await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,238);
+ await page.goBack();await waitForScene(page);await assertEdition(page,237);
+ await page.goForward();await waitForScene(page);await assertEdition(page,238);
 });
 test('2D entry and selector agree with the original Tree at phone and desktop widths',async({page})=>{
  test.setTimeout(180000);
@@ -68,7 +74,7 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
   await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
   const entry=page.getByRole('link',{name:'Enter Circle 238 in the original 3D TETOL Council Deck →'});
   await expect(entry).toHaveAttribute('href',`${root}?circle=238#croom`);await entry.click();
-  await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,238);
+  await waitForScene(page);await assertEdition(page,238);
   await page.goto('/council/238');await page.getByRole('combobox',{name:'Choose a Council Circle'}).selectOption('237');
   await expect(page).toHaveURL(/\/council\/237$/);await expect(page.locator('.council-time-tree')).toContainText('PREVIOUS');
   await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/\/review\/council\/236$/);
@@ -82,7 +88,7 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
   else await historical.locator('#panel').hover();
   await historical.locator('#council-time-tree a[rel=next]').click();
   await expect(page).toHaveURL(/tetol\.html\?circle=236#croom$/);
-  await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,236);
+  await waitForScene(page);await assertEdition(page,236);
 
  }
 });

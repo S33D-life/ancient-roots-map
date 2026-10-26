@@ -38,6 +38,7 @@ Both images below are local Chromium reproductions at 390×844, with reduced mot
 - Reuse the original 234 forms already retained in the engine; no replacement renderer or new artwork.
 - Circle 236 keeps its unapproved question null; the legacy 235 question is not carried into its presentation.
 - Historical presentation for 234–236, PREVIOUS for 237 and CURRENT / OPEN for 238. Frozen historical OPEN values remain untouched.
+- Return links retain the edition in a validated query as well as its fragment, so clearing a fragment cannot silently return 235 to current 238.
 - Browser history entries for internal journeys, popstate restoration, canonical legacy deep links, honest unavailable state on failed edition loading.
 - The old automatic 235 welcome invitation is hidden by the edition presentation; its original record is preserved.
 - Shared mobile grab handler with a visible “Circles” affordance; controls stay in the existing sheet, not over the art.
@@ -59,7 +60,7 @@ No-query TETOL remains historical 235 for compatibility. Companion deep links re
 
 ## CI budget and merge overlap
 
-The browser job retains all checks and raises its wall-clock budget from 12 to 20 minutes for cold Playwright/OS installation plus the expanded original-Tree journey. The same timeout increase is already proposed in the separate Atlas PR #124; reconcile that identical hunk once when merging. No tests, security gates, backend or deployment steps are removed or added.
+The browser job retains all checks and raises its wall-clock budget from 12 to 20 minutes for cold Playwright/OS installation plus the expanded original-Tree journey. CI uses one worker for the original Tree software renderer, and the new tests explicitly retain the same 90-second per-case budget used by local acceptance. CI checks the initial real scene and then bounds drawing for URL/UI contracts; local acceptance retains drawing through touch and screenshots. Failure uploads include the actual test-results directory. The same timeout increase is already proposed in the separate Atlas PR #124; reconcile that identical hunk once when merging. No tests, security gates, backend or deployment steps are removed or added.
 
 ## Acceptance and human gates
 
