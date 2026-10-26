@@ -232,6 +232,15 @@ export default defineConfig(async ({ mode }) => {
   },
   plugins: [
     react(),
+    {
+      name: 'public-council-attribution',
+      enforce: 'pre' as const,
+      // Frontend projection only. Never rewrite the shared backend source on disk.
+      transform(code: string, id: string) {
+        if (!id.split('?')[0].endsWith('/supabase/functions/_shared/currentCircle.ts')) return null;
+        return code.replace(/chosen by Leo/g, 'chosen by the Council');
+      },
+    },
     mcpPlugin(),
     pwaPlugin,
     patronsPortalPreviewPlugin,

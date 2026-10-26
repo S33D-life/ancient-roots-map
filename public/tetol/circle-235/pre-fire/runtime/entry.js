@@ -3,8 +3,8 @@ if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle pr
 
 const D = window.TETOL;
 const circleEdition = new URLSearchParams(location.search).get('circle');
-const framedCircle = circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : null;
-const companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : null;
+const framedCircle = circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : circleEdition === '238' ? 238 : null;
+const companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -849,12 +849,12 @@ const BUILD = {
 };
 if (D.ext && D.ext.forms) for (const [k, f] of Object.entries(D.ext.forms)) BUILD[k] = (g, r, id, p) => f({ THREE, V, W, add, std, ctex, hex, mat, taperTube, g, r, id, p }); // 0.9.7 Circle layer hook
 BUILD.circleFrame = (g, repr, id) => {
-  const texture = new THREE.TextureLoader().load(repr.artwork);
-  texture.colorSpace = THREE.SRGBColorSpace;
+  const texture = repr.artwork ? new THREE.TextureLoader().load(repr.artwork) : null;
+  if (texture) texture.colorSpace = THREE.SRGBColorSpace;
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
-  add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), mat.limbBark), id + '_frame', id, frame);
-  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * (framedCircle === 237 ? (repr.height || 645) / (repr.width || 1024) : 853 / 1280)), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
-  if (framedCircle === 237) for (const side of [-.38,.38]) {
+  add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), (framedCircle === 238 ? new THREE.MeshStandardMaterial({color:0x79543b,roughness:.95}) : mat.limbBark)), id + '_frame', id, frame);
+  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * ((framedCircle === 237 || framedCircle === 238) ? (repr.height || 645) / (repr.width || 1024) : 853 / 1280)), new THREE.MeshBasicMaterial({ map: texture, color:texture?0xffffff:0x314333, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  if (framedCircle === 237 || framedCircle === 238) for (const side of [-.38,.38]) {
     const hanger = add(new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.65,6), mat.iron), id + '_hanging_cord', id, frame);
     hanger.position.set(side, (1.06 * (repr.height || 645) / (repr.width || 1024) + .1)/2 + .30, 0);
   }

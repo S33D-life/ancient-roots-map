@@ -58,6 +58,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify Council public artifact privacy
+        run: node scripts/check-council-public-bytes.mjs
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -71,7 +74,7 @@ jobs:
     needs: validate
     # Playwright 1.59.1 supports Ubuntu 24.04; latest selected unsupported 26.04.
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4

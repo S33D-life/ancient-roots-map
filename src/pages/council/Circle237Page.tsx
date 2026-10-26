@@ -3,6 +3,6 @@ import { ROUTES } from '@/lib/routes';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 
 export default function Circle237Page() {
-  useDocumentTitle('Council of Life · 237 · Open');
+  useDocumentTitle('Council of Life · 237 · Previous');
   return <Circle237Experience basePath={ROUTES.CIRCLE237} />;
 }

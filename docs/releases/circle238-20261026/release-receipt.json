@@ -1,0 +1,67 @@
+{
+  "circle238ManifestSha256": "29b53eada0e63c7111af2d4f7a3a7014c165e8d9feab949fde0fa395a487d44c",
+  "circle238Source": "https://app.notion.com/p/40415b58480d81a9b10accf992b12cb1",
+  "circle238Artwork": {
+    "verifiedImages": 10,
+    "expectedImages": 10,
+    "status": "Ten supplied PNG cards received in canonical intake during task; ten NEW 1120\u00d7730 scene-only JPEG derivatives visually reviewed. Full cards remain private. Not the missing ZIP derivatives. Publication and Hobbit rights review pending.",
+    "hashes": {
+      "bishop-ely-plane": "41d5f7f9d308527d46991a0af9dffce69e4ffa587a55740ef5aa5922a251a276",
+      "fig": "31e88f1fa2831e8fe2357392aa43f3a169a407499ec1f7b6a80b1e9cb7f7dd7d",
+      "peace-lily": "801f06bc15025de2706b1c856bb1f8650e38b45c1149f3e416eb5389cb53aba7",
+      "goji-seed": "e78f5274c58a3c2db1d421c78a4fca57bc4fb2d9ee975d657ed8ad218ad2ec4a",
+      "english-oak-leaf": "9107b3a5b503a53f6076227054217ca9aa49c76ec2b77849287fecb34bd03486",
+      "saffron": "233d918c41969dafbdf4b674504d797cddfcc510191b41dc2cac4086a09729da",
+      "goji-fruit": "a15138cc9bd5bf2c716beccf04565d818bb4d3d699e3fe8cbb4aef758a63a9be",
+      "hen-of-the-woods": "2faa1ff0777f2cd41e02035fe06eb706cbf9fc9eaa852fe45b0f10f98565926d",
+      "the-hobbit": "5f737a6286e482277e639d05e1e976f49fe5fb9e8c947c53b831ec656a723ce3",
+      "hoopoe": "7ad8038cecbb2dc4f594d3b2a9915be108c2ceb25ec0375c53f3a0f6f4396d14"
+    },
+    "derivation": {
+      "crop": {
+        "left": 1,
+        "top": 1,
+        "width": 1120,
+        "height": 730
+      },
+      "encoder": "macOS sips JPEG quality 80; all APP/COM metadata stripped",
+      "originalBytes": {
+        "hen-of-the-woods": "5fba637d2909e6cfc3c004567291e33cd32e0fd620c61e0fbd9ac33834d739b7",
+        "fig": "5b1a2fc58ff39fdca8fbba6551c127b967c1ac1042c7dabab444e0c9cd78c5c4",
+        "english-oak-leaf": "b7ff2e6c3cda276c6308d9a2d8a2e049b3c8c6ba9b4ca10dec364d94becc0f30",
+        "saffron": "6f662ade5a92a3037a5c5267863efa12c892942be2c24268529eb3075c04c547",
+        "goji-fruit": "fd06b0a7d154ccf709a8f44e08f455f145dc2cbbb45c8824481a400dd56c2926",
+        "the-hobbit": "1d4af7759c43f7f007f535bc6a5e651480ea4c2bf641afb1ab77b905eb10f68d",
+        "goji-seed": "72886e6df4fe7d1a28f16d9c007db96fa43a69006b9b10ddcca023015020079b",
+        "hoopoe": "4dc6bced6800cb244b230a87d9a9792f53a223ce251f9132f22fbb5c22487a92",
+        "peace-lily": "c016d5b702a4686ae8a5d4f4182cc62d69d3b1fd6fa6c9e6f1452b53f8d42d34",
+        "bishop-ely-plane": "ef1643a4249a2d264a22027ee95eaaf501e12ac470ec8dbbe1782a22895844d0"
+      }
+    }
+  },
+  "circle237Archive": {
+    "presentation": "PREVIOUS",
+    "sourceCommit": "758739eaa36c5250e2ab031adb10c531eaae6fdd",
+    "rosterSha256": "6e3f22be00b77dcc000c64da0ccbe3e83ce2d0bdcd5ef2ced0919c1d3be3f63d",
+    "portraits": {
+      "noku": "c9a639031bbd9945eec00621ad6a2296c368fda6fc2880acc47e91689e4deb9f",
+      "hawthorn": "46bb159506f6c95534f773496f11245a17163e2bcf0045c96977842362211f90",
+      "jade": "e54270a6c2f46f4afe3b912596bfe3e76c73d7967076aaa9092a77731c11f052",
+      "broad-bean": "8f1fb2d0e3515de394bd7a55998ed0d809b82d94397e9098ed907baa3c90a9b3",
+      "wild-raspberry": "df93b29a13e38bbb59cab58918364028fc230b3ff79b0e0c9d15aa91440a6c4e",
+      "sunflower": "6b2b15fbc78a71feb087df891faeb3241183416f169657254954272d22483279",
+      "quince": "3caa8952198e9fc13ca6afd160041a147a5e4ba2a245163a00545a21dfee6976",
+      "fly-agaric": "73d3123998924ad6e2c8a23b9e792325c6983b4e70aba1d67a3a81d5a60c8fc0",
+      "faraway-tree": "69ff2ae8e1fbb1f48326bc9d925d24ead91d029bc25813716729d8569554045c",
+      "boobook": "3dab5e8c3af198eb5ca5043f08ab7c69a4da0ac59436dcdb47c2a5498d34b60d"
+    },
+    "attendedFire": null,
+    "harvest": null,
+    "pdf": "Existing REVIEW remains restricted"
+  },
+  "nativeIPhoneSafari": "UNVERIFIED",
+  "pdfManifestAcknowledgement": "PENDING; no illustrated PDF bytes available in this session",
+  "backendChanges": false,
+  "circle238Question": "What is taking root, ripening, or asking to be tended this week?",
+  "editorialRevision": "Approved question reconciliation; scene bytes unchanged from c5209aaca06eba9db8e6de014b220a07ec12f262"
+}
