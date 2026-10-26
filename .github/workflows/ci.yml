@@ -69,7 +69,8 @@ jobs:
   e2e-smoke:
     name: E2E smoke (Playwright)
     needs: validate
-    runs-on: ubuntu-latest
+    # Playwright 1.59.1 supports Ubuntu 24.04; latest selected unsupported 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
       - name: Checkout
