@@ -3,7 +3,13 @@ import manifest from '../src/review/circle237/release-manifest.json' with { type
 import {roster} from '../src/review/circle237/registry';
 test.use({ hasTouch: true, isMobile: true, viewport: { width:390, height:844 } });
 test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async({page,context})=>{
- test.setTimeout(240_000); // Software WebGL in GitHub CI needs longer for ten complete Council encounters.await page.setViewportSize({width:390,height:844});
+ test.setTimeout(90_000);
+ // Test-only render pacing: preserve actual WebGL and touch/navigation while avoiding
+ // continuous software rendering starving Playwright's event loop on CI.
+ await page.addInitScript(() => {
+   window.requestAnimationFrame = callback => window.setTimeout(() => callback(performance.now()), 250);
+   window.cancelAnimationFrame = handle => window.clearTimeout(handle);
+ });
  await page.emulateMedia({reducedMotion:'reduce'}); // Test accessible motion setting; native touch still exercised.
  await context.route('**/*',r=>['127.0.0.1','localhost'].includes(new URL(r.request().url()).hostname)?r.continue():r.abort());
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=237#croom');
