@@ -253,7 +253,7 @@ $('#reset').onclick = () => scene3d?.select(state.current, true);
   document.addEventListener('keydown', () => { swallowGrabClick = false; });
   // Opening the sheet moves buttons under the finger before the compatibility click.
   // Consume only that gesture's click; a new pointerdown immediately re-arms normal actions.
-  document.addEventListener('click', (e) => {
+  window.addEventListener('click', (e) => {
     if (!e.isTrusted || !swallowGrabClick) return;
     swallowGrabClick = false; e.preventDefault(); e.stopImmediatePropagation();
   }, true);
