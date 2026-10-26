@@ -55,6 +55,10 @@ Every immersive route starts `/tetol/circle-235/pre-fire/tetol.html`.
 
 No-query TETOL remains historical 235 for compatibility. Companion deep links retain their original IDs after `#`; Staff Room is `#staff` in every edition. Older `mem231`, records chest, lineage and Staff Room remain in the original engine; the new selector begins at 234 because that is the scope of this release. No 234 photographic set or deeper companion research is fabricated. Available historical learning studies retain their existing limitations.
 
+## CI budget and merge overlap
+
+The browser job retains all checks and raises its wall-clock budget from 12 to 20 minutes for cold Playwright/OS installation plus the expanded original-Tree journey. The same timeout increase is already proposed in the separate Atlas PR #124; reconcile that identical hunk once when merging. No tests, security gates, backend or deployment steps are removed or added.
+
 ## Acceptance and human gates
 
 Automated: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run security:check`, `node scripts/check-council-public-bytes.mjs`, then `npx playwright test --config playwright.time-tree.config.ts`.
