@@ -27,6 +27,7 @@ import {
   ACCESSIBILITY_VISUALS,
   type EffectiveAccessibilityTier,
 } from "@/lib/treeAccessibility";
+import { treeLocationLabel, isManagedPublicRecord } from "@/lib/treeLocationEvidence";
 import AccessibilityStrip from "@/components/AccessibilityStrip";
 
 const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
@@ -235,13 +236,13 @@ const TreePageHero = ({
           </div>
 
           {/* Accessibility strip — how can wanderers reach this tree? */}
-          <div className="flex justify-center mb-3">
+          {!isManagedPublicRecord(tree, accessibilityTier) && <div className="flex justify-center mb-3">
             <AccessibilityStrip
               tier={accessibilityTier}
               notes={accessibilityNotes}
               className="max-w-md"
             />
-          </div>
+          </div>}
 
           {/* Subtitle / Archetype */}
           {(tree as any).archetype && (
@@ -373,7 +374,7 @@ const TreePageHero = ({
             <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onAddWish}>
               <Heart className="h-3 w-3" /> Wish
             </Button>
-            <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onViewMap}>
+            <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onViewMap} aria-label={["View tree on Atlas", treeLocationLabel(tree)].filter(Boolean).join(" — ")}>
               <Map className="h-3 w-3" /> Atlas
             </Button>
             <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onShare}>
@@ -394,6 +395,9 @@ const TreePageHero = ({
         style={{ background: "linear-gradient(transparent, hsl(var(--background)))" }}
       />
     </motion.div>
+
+    {isManagedPublicRecord(tree, accessibilityTier) && <AccessibilityStrip tier={accessibilityTier} publicRecordOnly notes={accessibilityNotes} className="mb-6" />}
+    {treeLocationLabel(tree) && <p className="mb-6 text-sm leading-relaxed text-primary">{treeLocationLabel(tree)}</p>}
 
     {/* Fullscreen image viewer */}
     <FullscreenShell active={imageFullscreen} tone="dark">
