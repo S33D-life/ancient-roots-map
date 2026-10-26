@@ -58,6 +58,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify Council public artifact privacy
+        run: node scripts/check-council-public-bytes.mjs
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

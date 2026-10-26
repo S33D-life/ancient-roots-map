@@ -33,6 +33,8 @@ Original TETOL review routes (local candidate only until public served verificat
 - /tetol/circle-235/pre-fire/tetol.html?circle=236#croom
 - /tetol/circle-235/pre-fire/tetol.html#staff
 
+Raw-byte privacy review also found a legacy private attribution hidden behind visible adapters. The original static projection is neutralised, and a Vite transform neutralises the frontend copy of the shared Council constant without modifying its backend source. CI scans the entire built dist for the known sensitive media hash and private attribution/reference strings. This protects new frontend artifacts; it does not contain older hosted copies.
+
 No source or deployment changes under supabase/ are included. Vite may generate LOCAL MCP source during build: restore that drift before committing. Never publish backend output, run History Revert or use Lovable AI prompts. Old-host sensitive-image containment remains separate and unresolved by this branch.
 
 After human review/merge of both exact green heads, verify main/Lovable source sync. Prepare a reviewed frontend-only publish operation and privacy-safe recovery package; use the standard Publish dialog only after its backend scope is verified. Read back the actual served version/routes/assets, check device acceptance and backend invariance, then consider announcement. Do not advertise these routes as newly live from a successful source merge alone. The Circle 238 text/placeholder doorway can be reviewed independently of the PDF and illustrated edition; none of those later approvals is implied by this candidate.
