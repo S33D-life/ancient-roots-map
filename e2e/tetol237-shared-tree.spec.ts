@@ -45,6 +45,20 @@ test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async
    // Validate the shared return action, without making CI wait for 10 spatial motion sequences.
    await page.locator('#panel button[data-go="croom"]').evaluate((el:HTMLElement)=>el.click());
    await expect(page.locator('#panel h2')).toContainText('yOur Blooming Week');
+   if(index === 0){
+     // The real scene and first native-touch journey have rendered. Assert all ten
+     // actual scene meshes, then pause drawing for nine panel/return checks only.
+     // This avoids software GPU cost dominating CI; it is not camera-motion acceptance.
+     const missing = await page.evaluate((ids) => {
+       const stage = document.querySelector('three-d-stage') as any;
+       if(!stage?._renderer || !stage?._scene) throw Error('Original TETOL renderer unavailable');
+       const names = new Set<string>(); stage._scene.traverse((mesh:any) => names.add(mesh.name));
+       const missing = ids.filter(id => !names.has(id+'_frame') || !names.has(id+'_artwork'));
+       stage._renderer.render = () => {};
+       return missing;
+     }, roster.map(c => c.key+'-companion'));
+     expect(missing).toEqual([]);
+   }
  }
  await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council#next-gathering');
 });
