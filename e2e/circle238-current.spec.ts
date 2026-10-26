@@ -28,6 +28,11 @@ test('original immersive 238 Canopy, mobile sheet, ten encounters, Staff Room an
   const door=page.locator('#panel button[data-go="'+c.id+'"]');if(i===0)await door.tap();else await door.evaluate((el:HTMLElement)=>el.click());
   await expect(page.locator('#panel h2')).toHaveText(c.label);await expect(page.locator('#panel [data-artwork-pending]')).toHaveText('Scene illustration awaiting verification');if(i===0){await page.locator('#grab').tap();await expect(page.locator('#panel [data-artwork-pending]')).toBeVisible();}await expect(page.locator('#panel img')).toHaveCount(0);
   await page.locator('#panel button[data-go="croom"]').evaluate((el:HTMLElement)=>el.click());await expect(page.locator('#panel h2')).toHaveText('Fig-wood Council');
+  if(i===0){
+   // Initial scene + native touch were exercised. Remaining nine checks cover panels/returns;
+   // don't repeatedly draw the entire Tree on a software-only CI renderer.
+   const missing=await page.evaluate(ids=>{const stage=document.querySelector('three-d-stage') as any;if(!stage?._scene||!stage?._renderer)throw Error('Original Tree renderer unavailable');const names=new Set<string>();stage._scene.traverse((m:any)=>names.add(m.name));stage._renderer.render=()=>{};return ids.filter(id=>!names.has(id+'_frame')||!names.has(id+'_artwork'));},manifest.companions.map(c=>c.id));expect(missing).toEqual([]);
+  }
  }
  await page.screenshot({path:'output/playwright/circle238/original-tetol-390.png'});
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=238#staff');await expect(page.locator('#panel')).toContainText('Staff Room');
