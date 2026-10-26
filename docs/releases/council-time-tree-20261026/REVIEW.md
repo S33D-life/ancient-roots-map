@@ -10,13 +10,25 @@ A fresh live entry from the 2D Canopy was observed to preserve `/tetol/circle-23
 
 **Confirmed source/runtime fault:** the `c233now` hotspot unconditionally selected drawing slot 233. That slot actually contains edition **235**. Reproduction on the current-main TETOL changes `D.council.active` from 238 to 233, `D.council.current` from `c238` to `c233`, and paints Circle 235 while retaining `circle=238` and the 238 return control. The legacy `c233` doorway also retained a Circle 235 panel. This establishes a reproducible cause of the observed class of mismatch, not proof of which precise tap happened on the user's phone.
 
-**Confirmed mobile interaction fault:** pointer-up on the grab opens the sheet, moving a companion button under the finger before the compatibility click. Instrumentation observed pointerdown/up on `BUTTON#grab`, followed by a click on a different button. That activated an unintended companion and collapsed the sheet. Adapter fallback listeners also competed with shared grab handling. One shared handler now owns the gesture and consumes only its follow-up click; the next pointerdown restores normal actions.
+**Confirmed mobile interaction fault:** pointer-up on the grab opens the sheet, moving a companion button under the finger before the compatibility click. Instrumentation observed pointerdown/up on `BUTTON#grab`, followed by a click on a different button. That activated an unintended companion and collapsed the sheet. Adapter fallback listeners also competed with shared grab handling. One shared handler now owns the gesture and consumes only its trusted browser follow-up click (not programmatic navigation); the next pointerdown restores normal actions.
+
+**Confirmed 2D return fault:** the global map-filter provider unconditionally synchronised query parameters on Council pages. React Router’s `setSearchParams` discarded historical fragments such as `#previous-circle-235`, resetting the edition selector to 238. Council routes now retain ownership of their URL; filter state still resumes on Atlas. The existing auth-route guard is unchanged.
 
 **Legacy embed:** `CouncilOfLifePage` still embeds the archived 235 card intentionally. It now supplies `circle=235` explicitly. Its “Return to Circle 235” and `previous-circle-235` focus restoration remain scoped to that historical embed, rather than being repurposed as the current doorway. Weekly 237/238 links use their own explicit edition query.
 
 **Live HTTP verification:** the loader, entry, 238 adapter, manifest and all ten approved scene assets returned HTTP 200 and matched main exactly. The served HTML is not byte-identical to raw Git source; its response hash is recorded without attributing that difference to a cause. The actual fresh browser entry nonetheless selected 238 correctly. See `LIVE-HTTP.json`.
 
 **Cache investigation:** the existing service-worker configuration excludes the TETOL package from precache and app-shell navigation fallback. Council JSON/art may still be revision-cached by the app worker. The approved 237/238 JSON/art bytes are unchanged by this patch. The changed entry module receives a release query from the loader. The original iPhone HTTP cache, old tabs/BFCache and its service-worker state remain uninspected; no claim is made that clearing caches alone fixes this bug. Review must verify the actual candidate asset versions after any separately approved publication.
+
+## Before / after screenshots
+
+Both images below are local Chromium reproductions at 390×844, with reduced motion. They are not native iPhone acceptance evidence. The before run used the exact main loader, entry and 238 adapter; the after run used the candidate. No supplied phone metadata or profile image was uploaded.
+
+| Main reproduction: 235 sign/panel with Return 238 | Candidate: 238 and the Time Tree |
+|---|---|
+| ![Main edition mismatch](screenshots/before-main-mismatch.png) | ![Candidate Circle 238 Time Tree](screenshots/after-time-tree.png) |
+
+`REPRODUCTION.json` records the actual engine slots, real edition, room, panel, sign canvas text and visible frame group. It also records successful existing Circle 233, records chest, Staff Room and return-to-current checks.
 
 ## Change scope
 

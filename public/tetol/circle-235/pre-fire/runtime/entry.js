@@ -253,7 +253,7 @@ $('#reset').onclick = () => scene3d?.select(state.current, true);
   // Opening the sheet moves buttons under the finger before the compatibility click.
   // Consume only that gesture's click; a new pointerdown immediately re-arms normal actions.
   document.addEventListener('click', (e) => {
-    if (!swallowGrabClick || performance.now() - lastGrabPointer > 500) return;
+    if (!e.isTrusted || !swallowGrabClick || performance.now() - lastGrabPointer > 500) return;
     swallowGrabClick = false; e.preventDefault(); e.stopImmediatePropagation();
   }, true);
   document.addEventListener('click', (e) => { if (e.target.closest('#grab') && e.detail === 0 && performance.now() - lastGrabPointer > 500) { const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek')); setSheet(SHEET[(i + 1) % 3]); }

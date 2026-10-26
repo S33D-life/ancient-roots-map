@@ -131,6 +131,9 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     // setSearchParams drops the fragment, including while SDK startup waits
     // for a browser lock. Keep map-filter navigation out of the auth lifecycle.
     if (/^\/(?:auth|reset-password)(?:\/|$)/.test(pathname)) return;
+    // Council fragments and companion queries belong to its edition/return journey.
+    // Filter synchronisation otherwise drops the historical Circle fragment.
+    if (pathname === '/council-of-life' || /^\/(?:council|review\/council)(?:\/|$)/.test(pathname)) return;
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       for (const [key, param] of Object.entries(PARAM_MAP)) {
