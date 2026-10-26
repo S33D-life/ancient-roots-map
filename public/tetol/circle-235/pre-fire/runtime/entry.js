@@ -246,17 +246,18 @@ $('#reset').onclick = () => scene3d?.select(state.current, true);
   $('#mark').onclick = () => menu(!document.body.classList.contains('menuopen'));
   document.addEventListener('pointerdown', (e) => { if (document.body.classList.contains('menuopen') && !e.target.closest('header, #mark, #xpanel')) menu(false); });
   ['#m3d', '#mlist', '#reset'].forEach((s) => $(s).addEventListener('click', () => mobileSheet() && menu(false)));
-  let gy = null, lastGrabPointer = -Infinity, swallowGrabClick = false;
+  let gy = null, swallowGrabClick = false;
   document.addEventListener('pointerdown', (e) => { swallowGrabClick = false; if (e.target.closest('#grab')) { gy = e.clientY; e.preventDefault(); } });
-  document.addEventListener('pointerup', (e) => { if (gy == null) return; const dy = e.clientY - gy; gy = null; lastGrabPointer = performance.now(); swallowGrabClick = true; const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek'));
+  document.addEventListener('pointerup', (e) => { if (gy == null) return; const dy = e.clientY - gy; gy = null; swallowGrabClick = true; const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek'));
     setSheet(SHEET[Math.abs(dy) < 12 ? (i + 1) % 3 : dy < 0 ? Math.min(2, i + (dy < -200 ? 2 : 1)) : Math.max(0, i - (dy > 200 ? 2 : 1))]); });
+  document.addEventListener('keydown', () => { swallowGrabClick = false; });
   // Opening the sheet moves buttons under the finger before the compatibility click.
   // Consume only that gesture's click; a new pointerdown immediately re-arms normal actions.
   document.addEventListener('click', (e) => {
-    if (!e.isTrusted || !swallowGrabClick || performance.now() - lastGrabPointer > 500) return;
+    if (!e.isTrusted || !swallowGrabClick) return;
     swallowGrabClick = false; e.preventDefault(); e.stopImmediatePropagation();
   }, true);
-  document.addEventListener('click', (e) => { if (e.target.closest('#grab') && e.detail === 0 && performance.now() - lastGrabPointer > 500) { const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek')); setSheet(SHEET[(i + 1) % 3]); }
+  document.addEventListener('click', (e) => { if (e.target.closest('#grab') && e.detail === 0) { const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek')); setSheet(SHEET[(i + 1) % 3]); }
     if (mobileSheet() && e.target.closest('#pname') && (document.body.dataset.sheet || 'peek') === 'peek') setSheet('mid'); });
   if (X.D) document.body.dataset.sheet = 'peek'; }
 

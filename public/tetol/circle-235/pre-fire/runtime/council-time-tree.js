@@ -48,6 +48,7 @@ export async function installTimeTree(D, number) {
   nav.innerHTML = `<div>${link(tree.editions[i-1]?.number,'← Previous Circle','rel="prev"')}<label>Circle <select aria-label="Choose a Council Circle">${tree.editions.map(e=>`<option value="${e.number}" ${e.number===number?'selected':''}>${e.number} · ${e.state}</option>`).join('')}</select></label>${link(tree.editions[i+1]?.number,'Next Circle →','rel="next"')}</div><small>Circle ${number} · ${edition.state}${number!==tree.current ? ` · <a href="${editionUrl(tree.current)}">Return to current · ${tree.current}</a>` : ''}</small>`;
   nav.querySelector('select').addEventListener('change',e=>location.assign(editionUrl(Number(e.target.value))));
   const style = document.createElement('style'); style.textContent = `
+    #tetol-welcome{display:none!important}
     body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}
     body.phone #grab{min-height:44px;height:44px;gap:10px;font:11px var(--sans,sans-serif);color:var(--ink2,#d0cbb0)}
     #council-time-tree{color:var(--ink,#f0eadb);background:var(--bg,#1a1f14);border-bottom:1px solid var(--line,#6b633e);padding:6px 12px;font:13px var(--sans,sans-serif)}
