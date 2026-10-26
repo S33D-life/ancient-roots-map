@@ -1,3 +1,4 @@
+import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
@@ -30,6 +31,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
   const item=roster.find(v=>v.key===key);
   function link(href: string, text: string) { return <a href={href} onClick={e=>{e.preventDefault();go(href);}}>{text}</a>; }
   return <main className="circle237">
+    <CouncilTimeTree number={237} />
     <aside className="review">CIRCLE 237 · PREVIOUS COUNCIL · Explore freely · Offerings are not collected on this page yet</aside>
     {basePath !== PILOT_PATH && <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.HOME}>TETOL</Link></nav>}
     <header><p className="eyebrow">Council of Life · 237 / yOur Blooming Week</p>

@@ -1,11 +1,25 @@
 // Never render stale weekly labels if the approved static adapter fails.
 if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
+import { installTimeTree } from './council-time-tree.js';
 const D = window.TETOL;
 const circleEdition = new URLSearchParams(location.search).get('circle');
+const selectedCircle = circleEdition === null ? 235 : Number(circleEdition);
 const framedCircle = circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : circleEdition === '238' ? 238 : null;
-const companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : null;
+let companionFrames;
+let timeTree;
+try {
+if (![234,235,236,237,238].includes(selectedCircle)) throw new Error('Unsupported Council edition');
+companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
+timeTree = await installTimeTree(D, selectedCircle);
+} catch (error) {
+  document.body.replaceChildren();
+  const message = document.createElement('p'); message.setAttribute('role','alert');
+  message.textContent = 'This Council edition is unavailable. Please reload, or return to the Council Canopy. No other edition has been substituted.';
+  const link = document.createElement('a'); link.href='/council-of-life'; link.textContent='Return to the Council Canopy';
+  document.body.append(message,link); throw error;
+}
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const state = { thread: null, current: 'overview', history: [], mode: '3d', motion: !matchMedia('(prefers-reduced-motion: reduce)').matches };
@@ -98,8 +112,8 @@ function renderTime(num, compact) {
 }
 function renderPanel() {
   const id = state.current, n = D.nodes[id];
-  const framedPanel = companionFrames?.companionPanel(D, id, esc);
-  if (framedPanel) { $('#panel').innerHTML = framedPanel; $('#panel').scrollTop = 0; return; }
+  const framedPanel = timeTree.historicalPanel(id, esc) || companionFrames?.companionPanel(D, id, esc);
+  if (framedPanel) { $('#panel').innerHTML = framedPanel; timeTree.decoratePanel(); $('#panel').scrollTop = 0; return; }
   const crumbs = pathOf(id).map((p, i, a) => i === a.length - 1
     ? `<span aria-current="location">${esc(shortName(p))}</span>`
     : `<button type="button" data-go="${p}">${esc(shortName(p))}</button><span aria-hidden="true">›</span>`).join('');
@@ -161,6 +175,7 @@ function renderPanel() {
     <p class="copied" id="copied" aria-live="polite"></p>
   </div>`;
   $('#panel').scrollTop = 0;
+  timeTree.decoratePanel();
 }
 const SHEET = ['peek', 'mid', 'full'];
 function setSheet(s) { document.body.dataset.sheet = s; const g = $('#grab'); if (g) { g.setAttribute('aria-expanded', s !== 'peek'); g.setAttribute('aria-label', s === 'full' ? 'Lower the panel' : 'Show more about this place'); } }
@@ -182,13 +197,14 @@ function renderLineage() {
 }
 
 function go(id, { push = true, focus = true } = {}) {
-  if (!D.nodes[id]) return;
+  id = timeTree.resolveNode(id);
+  if (!id || !D.nodes[id]) return;
   if (quietEnd) quietEnd();
   if (X.D) document.body.dataset.sheet = 'peek';
   const prev = state.current;
   if (state.thread != null) { const st = D.thread.steps; const next = st.findIndex((step, i) => i > state.thread && step.id === id); if (next !== -1) state.thread = next; }
   if (id !== 'overview') $('#hint')?.classList.add('gone');
-  setRealm(id); syncHash(id);
+  setRealm(id); syncHash(id, push);
   if (push && id !== state.current) state.history.push(state.current);
   state.current = id;
   renderPanel(); renderList(); renderLineage(); scene3d?.select(id, prev);
@@ -230,11 +246,17 @@ $('#reset').onclick = () => scene3d?.select(state.current, true);
   $('#mark').onclick = () => menu(!document.body.classList.contains('menuopen'));
   document.addEventListener('pointerdown', (e) => { if (document.body.classList.contains('menuopen') && !e.target.closest('header, #mark, #xpanel')) menu(false); });
   ['#m3d', '#mlist', '#reset'].forEach((s) => $(s).addEventListener('click', () => mobileSheet() && menu(false)));
-  let gy = null;
-  document.addEventListener('pointerdown', (e) => { if (e.target.closest('#grab')) { gy = e.clientY; e.preventDefault(); } });
-  document.addEventListener('pointerup', (e) => { if (gy == null) return; const dy = e.clientY - gy; gy = null; const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek'));
+  let gy = null, lastGrabPointer = -Infinity, swallowGrabClick = false;
+  document.addEventListener('pointerdown', (e) => { swallowGrabClick = false; if (e.target.closest('#grab')) { gy = e.clientY; e.preventDefault(); } });
+  document.addEventListener('pointerup', (e) => { if (gy == null) return; const dy = e.clientY - gy; gy = null; lastGrabPointer = performance.now(); swallowGrabClick = true; const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek'));
     setSheet(SHEET[Math.abs(dy) < 12 ? (i + 1) % 3 : dy < 0 ? Math.min(2, i + (dy < -200 ? 2 : 1)) : Math.max(0, i - (dy > 200 ? 2 : 1))]); });
-  document.addEventListener('click', (e) => { if (e.target.closest('#grab') && e.detail === 0) { const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek')); setSheet(SHEET[(i + 1) % 3]); }
+  // Opening the sheet moves buttons under the finger before the compatibility click.
+  // Consume only that gesture's click; a new pointerdown immediately re-arms normal actions.
+  document.addEventListener('click', (e) => {
+    if (!swallowGrabClick || performance.now() - lastGrabPointer > 500) return;
+    swallowGrabClick = false; e.preventDefault(); e.stopImmediatePropagation();
+  }, true);
+  document.addEventListener('click', (e) => { if (e.target.closest('#grab') && e.detail === 0 && performance.now() - lastGrabPointer > 500) { const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek')); setSheet(SHEET[(i + 1) % 3]); }
     if (mobileSheet() && e.target.closest('#pname') && (document.body.dataset.sheet || 'peek') === 'peek') setSheet('mid'); });
   if (X.D) document.body.dataset.sheet = 'peek'; }
 
@@ -252,9 +274,10 @@ const SEASON = (() => { const x = Date.now() + AT, y = new Date(x).getUTCFullYea
 $('#brandline').textContent = `TETOL 0.9.15-dev · Circle ${(D.councilPresent && D.councilPresent.number) || 234} · not published · ${SEASON} · not canonical`;
 let circleKey = circle().key;
 setInterval(() => { const k = circle().key; if (k !== circleKey) { circleKey = k; renderPanel(); renderLineage(); scene3d?.circle(); } }, 20000);
-const hashId = () => { const h = decodeURIComponent(location.hash.slice(1)); return D.nodes[h] ? h : null; };
-function syncHash(id) { const want = id === 'overview' ? '' : '#' + id; if (location.hash !== want) history.replaceState(null, '', location.pathname + location.search + want); }
-window.addEventListener('hashchange', () => { const h = hashId() || 'overview'; if (h !== state.current) go(h); });
+const hashId = () => { const h = decodeURIComponent(location.hash.slice(1)); return D.nodes[h] ? timeTree.resolveNode(h) : null; };
+function syncHash(id, push = false) { const want = id === 'overview' ? '' : '#' + id; if (location.hash !== want) history[push ? 'pushState' : 'replaceState'](null, '', location.pathname + location.search + want); }
+window.addEventListener('hashchange', () => { const h = hashId() || 'overview'; if (h !== state.current) go(h, {push:false}); });
+window.addEventListener('popstate', () => { const h = hashId() || 'overview'; if (h !== state.current) go(h, {push:false}); });
 document.addEventListener('click', async (e) => {
   if (!e.target.closest('#copylink')) return;
   syncHash(state.current);
@@ -291,7 +314,7 @@ function setRealm(id) {
 state.realm = null; setRealm('overview');
 let scene3d = null; const stage = document.querySelector('three-d-stage');
 const startAt = hashId();
-if (startAt) { state.current = startAt; setRealm(startAt); }
+if (startAt) { state.current = startAt; syncHash(startAt); setRealm(startAt); }
 renderPanel(); renderList(); renderLineage();
 if (!window.WebGLRenderingContext) setMode('list');
 
@@ -1283,7 +1306,7 @@ function crossTo(want, then) {
   veil.classList.add('on'); setTimeout(() => { swap(); setTimeout(() => veil.classList.remove('on'), 60); }, 620);
 }
 scene3d = { circle: applyCircle, select(id, prev) {
-  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? framedCircle : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
+  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(timeTree.slot); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
   drawThreads(id);
   const n = D.nodes[id], want = placeOf(id);
   if (want !== place) {

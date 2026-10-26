@@ -1,3 +1,4 @@
+import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import manifest from '../../../public/council/circle-238/companions.json';
@@ -11,6 +12,7 @@ export default function Circle238Page(){
  useEffect(()=>{const key=query.get('returned');const target=key?document.getElementById(key+'-companion'):document.querySelector('h1');if(target instanceof HTMLElement)target.focus();},[query]);
  const spatial='/tetol/circle-235/pre-fire/tetol.html?circle=238#croom';
  return <main className="circle237">
+  <CouncilTimeTree number={238} />
   <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.CIRCLE237}>Previous Circle · 237</Link></nav>
   <header><p className="eyebrow">CURRENT / OPEN · Monday 26 October 2026 · Europe/London</p><h1 tabIndex={-1}>Circle 238 · Fig-wood Council</h1><p>Ten companions to notice and learn with. Visit at your own pace.</p><p>{manifest.question}</p><p>Open all week · no scheduled Fire.</p></header>
   <a href={spatial}>Enter the original immersive TETOL Canopy →</a>

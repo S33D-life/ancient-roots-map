@@ -305,6 +305,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       const s = document.createElement('script');
       for (const a of old.attributes) s.setAttribute(a.name, a.value);
       s.textContent = old.textContent;
+      if (s.type === 'module' && /\/runtime\/entry\.js$/.test(s.src)) s.src += '?v=time-tree-20261026';
       // text/babel scripts with a src: read and inline. transformScriptTags
       // does XHR against the src, but blob:null/ from a file:// origin is
       // silently dropped. Inlining makes it a plain inline babel script,
