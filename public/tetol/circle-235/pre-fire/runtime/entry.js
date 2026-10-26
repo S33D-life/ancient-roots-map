@@ -2,8 +2,9 @@
 if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
 const D = window.TETOL;
-const framedCircle = new URLSearchParams(location.search).get('circle') === '236';
-const companionFrames = framedCircle ? await import('./companion-frames.js') : null;
+const circleEdition = new URLSearchParams(location.search).get('circle');
+const framedCircle = circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : null;
+const companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -852,7 +853,11 @@ BUILD.circleFrame = (g, repr, id) => {
   texture.colorSpace = THREE.SRGBColorSpace;
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
   add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), mat.limbBark), id + '_frame', id, frame);
-  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * 853 / 1280), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * (framedCircle === 237 ? (repr.height || 645) / (repr.width || 1024) : 853 / 1280)), new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  if (framedCircle === 237) for (const side of [-.38,.38]) {
+    const hanger = add(new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.65,6), mat.iron), id + '_hanging_cord', id, frame);
+    hanger.position.set(side, (1.06 * (repr.height || 645) / (repr.width || 1024) + .1)/2 + .30, 0);
+  }
   companionFrames?.buildCompanionPresence({ THREE, add, std, BUILD }, g, repr, id);
   return 1.25;
 };
@@ -1278,7 +1283,7 @@ function crossTo(want, then) {
   veil.classList.add('on'); setTimeout(() => { swap(); setTimeout(() => veil.classList.remove('on'), 60); }, 620);
 }
 scene3d = { circle: applyCircle, select(id, prev) {
-  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? 236 : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
+  if (id === 'c232') setCircle(232); else if (id === 'c233now' || id === 'croom') setCircle(framedCircle && id === 'croom' ? framedCircle : 233); else if (D.nodes[id]?.circle && D.nodes[id].circle !== D.council.active && placeOf(id) === 'croom') setCircle(D.nodes[id].circle);
   drawThreads(id);
   const n = D.nodes[id], want = placeOf(id);
   if (want !== place) {

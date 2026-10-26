@@ -1,0 +1,119 @@
+{
+  "number": 237,
+  "status": "OPEN",
+  "question": "What is life teaching us through the beings we encounter?",
+  "fire": "No scheduled live Fire",
+  "sourceEdition": "237-ten-scenes-review-20261023.2",
+  "companions": [
+    {
+      "id": "noku-companion",
+      "key": "noku",
+      "label": "Noku / Nokuphila",
+      "kind": "Ancient Friend",
+      "artwork": "/council/circle-237/portraits/noku.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "c9a639031bbd9945eec00621ad6a2296c368fda6fc2880acc47e91689e4deb9f",
+      "accuracyNote": null
+    },
+    {
+      "id": "hawthorn-companion",
+      "key": "hawthorn",
+      "label": "Hawthorn",
+      "kind": "Tree Species",
+      "artwork": "/council/circle-237/portraits/hawthorn.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "46bb159506f6c95534f773496f11245a17163e2bcf0045c96977842362211f90",
+      "accuracyNote": null
+    },
+    {
+      "id": "jade-companion",
+      "key": "jade",
+      "label": "Jade / Money Plant",
+      "kind": "Plant",
+      "artwork": "/council/circle-237/portraits/jade.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "e54270a6c2f46f4afe3b912596bfe3e76c73d7967076aaa9092a77731c11f052",
+      "accuracyNote": null
+    },
+    {
+      "id": "broad-bean-companion",
+      "key": "broad-bean",
+      "label": "Broad Bean",
+      "kind": "Seed",
+      "artwork": "/council/circle-237/portraits/broad-bean.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "8f1fb2d0e3515de394bd7a55998ed0d809b82d94397e9098ed907baa3c90a9b3",
+      "accuracyNote": null
+    },
+    {
+      "id": "wild-raspberry-companion",
+      "key": "wild-raspberry",
+      "label": "Wild Raspberry",
+      "kind": "Leaf",
+      "artwork": "/council/circle-237/portraits/wild-raspberry.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "df93b29a13e38bbb59cab58918364028fc230b3ff79b0e0c9d15aa91440a6c4e",
+      "accuracyNote": null
+    },
+    {
+      "id": "sunflower-companion",
+      "key": "sunflower",
+      "label": "Teddy Bear Sunflower",
+      "kind": "Flower",
+      "artwork": "/council/circle-237/portraits/sunflower.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "6b2b15fbc78a71feb087df891faeb3241183416f169657254954272d22483279",
+      "accuracyNote": "Illustrative sunflower, not a botanically exact Teddy Bear cultivar"
+    },
+    {
+      "id": "quince-companion",
+      "key": "quince",
+      "label": "Quince",
+      "kind": "Fruit",
+      "artwork": "/council/circle-237/portraits/quince.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "3caa8952198e9fc13ca6afd160041a147a5e4ba2a245163a00545a21dfee6976",
+      "accuracyNote": null
+    },
+    {
+      "id": "fly-agaric-companion",
+      "key": "fly-agaric",
+      "label": "Fly Agaric",
+      "kind": "Fungi",
+      "artwork": "/council/circle-237/portraits/fly-agaric.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "73d3123998924ad6e2c8a23b9e792325c6983b4e70aba1d67a3a81d5a60c8fc0",
+      "accuracyNote": null
+    },
+    {
+      "id": "faraway-tree-companion",
+      "key": "faraway-tree",
+      "label": "The Magic Faraway Tree",
+      "kind": "Book",
+      "artwork": "/council/circle-237/portraits/faraway-tree.jpeg",
+      "width": 470,
+      "height": 385,
+      "sha256": "69ff2ae8e1fbb1f48326bc9d925d24ead91d029bc25813716729d8569554045c",
+      "accuracyNote": "Independent imaginative illustration, not official book-cover artwork"
+    },
+    {
+      "id": "boobook-companion",
+      "key": "boobook",
+      "label": "Boobook Owl",
+      "kind": "Bird",
+      "artwork": "/council/circle-237/portraits/boobook.jpeg",
+      "width": 1024,
+      "height": 645,
+      "sha256": "3dab5e8c3af198eb5ca5043f08ab7c69a4da0ac59436dcdb47c2a5498d34b60d",
+      "accuracyNote": null
+    }
+  ]
+}
