@@ -1,6 +1,6 @@
 {
   "number": 238,
-  "edition": "238-figwood-intake-20261026.1",
+  "edition": "238-figwood-scenes-review-20261026.2",
   "status": "OPEN",
   "publicationApproved": false,
   "openingDate": "2026-10-26",
@@ -8,7 +8,7 @@
   "question": null,
   "fire": null,
   "pdf": null,
-  "artworkState": "AWAITING_VERIFIED_SCENE_INTAKE",
+  "artworkState": "TEN_SCENE_DERIVATIVES_IN_REVIEW",
   "frameFamily": "Fig wood",
   "companions": [
     {
@@ -18,12 +18,12 @@
       "kind": "Ancient Friend",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "An individual Ancient Friend. Its Atlas identity remains unverified."
+      "artwork": "/council/circle-238/portraits/bishop-ely-plane.jpeg",
+      "sha256": "41d5f7f9d308527d46991a0af9dffce69e4ffa587a55740ef5aa5922a251a276",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Imaginative plane-tree scene. The depicted cathedral and garden are not a verified location or documentary view of this individual tree. Atlas identity remains unverified."
     },
     {
       "key": "fig",
@@ -32,12 +32,12 @@
       "kind": "Tree Species",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "Notice the tree, its leaves and its fruit."
+      "artwork": "/council/circle-238/portraits/fig.jpeg",
+      "sha256": "31e88f1fa2831e8fe2357392aa43f3a169a407499ec1f7b6a80b1e9cb7f7dd7d",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Generated fig-tree illustration, not a species identification guide or field observation."
     },
     {
       "key": "peace-lily",
@@ -46,12 +46,12 @@
       "kind": "Plant",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "Notice its leaves and growing form. No health or air-purification claim is made."
+      "artwork": "/council/circle-238/portraits/peace-lily.jpeg",
+      "sha256": "801f06bc15025de2706b1c856bb1f8650e38b45c1149f3e416eb5389cb53aba7",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Generated plant illustration. No health or indoor air-purification claim is made; text panels are excluded."
     },
     {
       "key": "goji-seed",
@@ -60,12 +60,12 @@
       "kind": "Seed",
       "speciesKey": "goji-berry",
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "A seed and germination thread, connected to the same species as the fruit."
+      "artwork": "/council/circle-238/portraits/goji-seed.jpeg",
+      "sha256": "e78f5274c58a3c2db1d421c78a4fca57bc4fb2d9ee975d657ed8ad218ad2ec4a",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Seed/germination doorway linked to the fruit’s editorial species identity. The illustrated cross-section is not verified germination or food guidance."
     },
     {
       "key": "english-oak-leaf",
@@ -74,12 +74,12 @@
       "kind": "Leaf",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "Follow a leaf into the life of an English Oak."
+      "artwork": "/council/circle-238/portraits/english-oak-leaf.jpeg",
+      "sha256": "9107b3a5b503a53f6076227054217ca9aa49c76ec2b77849287fecb34bd03486",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Generated oak-tree scene for the leaf thread; not an identification diagram."
     },
     {
       "key": "saffron",
@@ -88,12 +88,12 @@
       "kind": "Flower",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "Notice the flower and its seasonal thread."
+      "artwork": "/council/circle-238/portraits/saffron.jpeg",
+      "sha256": "233d918c41969dafbdf4b674504d797cddfcc510191b41dc2cac4086a09729da",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Generated flower illustration, not harvesting, identification or medical guidance."
     },
     {
       "key": "goji-fruit",
@@ -102,12 +102,12 @@
       "kind": "Fruit",
       "speciesKey": "goji-berry",
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "A fruit thread, connected to the same species as the seed."
+      "artwork": "/council/circle-238/portraits/goji-fruit.jpeg",
+      "sha256": "a15138cc9bd5bf2c716beccf04565d818bb4d3d699e3fe8cbb4aef758a63a9be",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Fruit doorway linked to the seed’s editorial species identity. Illustration, not nutrition or health advice."
     },
     {
       "key": "hen-of-the-woods",
@@ -116,12 +116,12 @@
       "kind": "Fungi",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "Do not identify or eat wild fungi from an illustration or this page."
+      "artwork": "/council/circle-238/portraits/hen-of-the-woods.jpeg",
+      "sha256": "2faa1ff0777f2cd41e02035fe06eb706cbf9fc9eaa852fe45b0f10f98565926d",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Stylised generated fungus illustration, not an identification guide. Do not identify or eat wild fungi from this image or page."
     },
     {
       "key": "the-hobbit",
@@ -130,12 +130,12 @@
       "kind": "Book",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "A book doorway. Illustration and imitation-cover rights review remain pending; no excerpt is reproduced."
+      "artwork": "/council/circle-238/portraits/the-hobbit.jpeg",
+      "sha256": "5f737a6286e482277e639d05e1e976f49fe5fb9e8c947c53b831ec656a723ce3",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Generated imitation-cover scene, not a photograph of an authentic licensed edition. Rights and attribution review remain pending; no book excerpt is reproduced."
     },
     {
       "key": "hoopoe",
@@ -144,12 +144,12 @@
       "kind": "Bird",
       "speciesKey": null,
       "atlasId": null,
-      "artwork": null,
-      "sha256": null,
-      "width": null,
-      "height": null,
-      "artworkStatus": "Awaiting verified scene-only artwork",
-      "accuracyNote": "A bird to notice and learn about; no local sighting is asserted."
+      "artwork": "/council/circle-238/portraits/hoopoe.jpeg",
+      "sha256": "7ad8038cecbb2dc4f594d3b2a9915be108c2ceb25ec0375c53f3a0f6f4396d14",
+      "width": 1120,
+      "height": 730,
+      "artworkStatus": "Scene-only derivative visually reviewed for candidate; publication pending",
+      "accuracyNote": "Generated bird illustration. No local sighting or field observation is asserted."
     }
   ]
 }

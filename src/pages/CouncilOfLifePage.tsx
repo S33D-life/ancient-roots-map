@@ -42,7 +42,7 @@ const CouncilOfLifePage = () => {
         <p className="parchment-kicker">CURRENT / OPEN · Monday 26 October 2026</p>
         <h2>Circle 238 · Fig-wood Council</h2>
         <p>Ten companions, with two distinct Goji doors for seed and fruit. The question and Fire time await approval.</p>
-        <p>Scene illustrations await verified intake; named companion doorways are available.</p>
+        <p>Ten scene-only Fig-wood illustrations are ready to review; publication and illustrated-PDF review continue.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE238}>Enter Circle 238 · meet its companions →</Link>
         <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=238#croom">Enter Circle 238 in the original 3D TETOL Council Deck →</a>
       </section>

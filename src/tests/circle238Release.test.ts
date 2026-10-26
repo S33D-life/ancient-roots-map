@@ -8,7 +8,7 @@ describe('Circle 238 source, privacy and archive contract',()=>{
   expect(new Set(manifest.companions.map(c=>c.id)).size).toBe(10);
   expect(manifest.companions[3].speciesKey).toBe(manifest.companions[6].speciesKey);
   expect(manifest.companions[0].atlasId).toBeNull();expect(manifest.question).toBeNull();expect(manifest.fire).toBeNull();
-  for(const c of manifest.companions){expect(c.artwork).toBeNull();expect(c.sha256).toBeNull();}
+  for(const c of manifest.companions){expect(c.artwork).toMatch(/^\/council\/circle-238\/portraits\//);expect(createHash('sha256').update(readFileSync('public'+c.artwork)).digest('hex')).toBe(c.sha256);expect(c.width).toBe(1120);expect(c.height).toBe(730);}
   expect(manifest.publicationApproved).toBe(false);
  });
  it('pins unchanged 237 roster and every actual approved image byte',()=>{

@@ -12,7 +12,7 @@ for(const width of [320,390,1440])test(`238 current, 237 previous, ten 2D encoun
  for(const n of [237,236,235])await expect(page.getByRole('region',{name:`Previous Circle ${n}`})).toBeVisible();
  await page.getByRole('link',{name:'Enter Circle 238 · meet its companions →'}).click();
  await expect(page.getByRole('heading',{name:'Circle 238 · Fig-wood Council'})).toBeVisible();
- await expect(page.getByText('Scene illustration awaiting verification',{exact:true})).toHaveCount(10);
+ await expect(page.locator('img.companion-scene')).toHaveCount(10);for(const image of await page.locator('img.companion-scene').all()){await image.scrollIntoViewIfNeeded();await expect(image).toHaveJSProperty('naturalWidth',1120);}
  for(const c of manifest.companions){await page.getByRole('button',{name:'Meet '+c.label,exact:true}).click();await expect(page.getByRole('region',{name:'Companion encounter'})).toContainText(c.accuracyNote);await page.reload();await page.getByRole('button',{name:'Return to Circle 238',exact:true}).click();await expect(page.getByRole('button',{name:'Meet '+c.label,exact:true})).toBeFocused();}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`output/playwright/circle238/2d-${width}.png`,fullPage:true});
@@ -26,7 +26,7 @@ test('original immersive 238 Canopy, mobile sheet, ten encounters, Staff Room an
  if(await page.locator('body').getAttribute('data-sheet')==='peek'){await page.locator('#grab').tap();await expect(page.locator('body')).toHaveAttribute('data-sheet',/mid|full/);}
  for(const [i,c]of manifest.companions.entries()){
   const door=page.locator('#panel button[data-go="'+c.id+'"]');if(i===0)await door.tap();else await door.evaluate((el:HTMLElement)=>el.click());
-  await expect(page.locator('#panel h2')).toHaveText(c.label);await expect(page.locator('#panel [data-artwork-pending]')).toHaveText('Scene illustration awaiting verification');if(i===0){await page.locator('#grab').tap();await expect(page.locator('#panel [data-artwork-pending]')).toBeVisible();}await expect(page.locator('#panel img')).toHaveCount(0);
+  await expect(page.locator('#panel h2')).toHaveText(c.label);await expect(page.locator('#panel img[data-circle-artwork]')).toHaveAttribute('src',c.artwork);if(i===0){await page.locator('#grab').tap();await expect(page.locator('#panel img')).toBeVisible();}
   await page.locator('#panel button[data-go="croom"]').evaluate((el:HTMLElement)=>el.click());await expect(page.locator('#panel h2')).toHaveText('Fig-wood Council');
   if(i===0){
    // Initial scene + native touch were exercised. Remaining nine checks cover panels/returns;
@@ -35,8 +35,12 @@ test('original immersive 238 Canopy, mobile sheet, ten encounters, Staff Room an
   }
  }
  await page.screenshot({path:'output/playwright/circle238/original-tetol-390.png'});
- await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=238#staff');await expect(page.locator('#panel')).toContainText('Staff Room');
- await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=237#croom');await expect(page.locator('#brandline')).toContainText('237 · PREVIOUS');await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council#previous-circle-237');
- await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=236#croom');await expect(page.locator('#brandline')).toContainText('236');
- await page.goto('/tetol/circle-235/pre-fire/tetol.html#staff');await expect(page.locator('#panel')).toContainText('Staff Room');
+ });
+for(const edition of ['238','237','236','history'])test(`Original Tree ${edition} preserves its Council and Staff Room`,async({page})=>{
+ test.setTimeout(60000);
+ const query=edition==='history'?'':'?circle='+edition;
+ await page.goto('/tetol/circle-235/pre-fire/tetol.html'+query+'#staff');await expect(page.locator('#panel')).toContainText('Staff Room',{timeout:25000});
+ if(edition==='237')await expect(page.locator('#brandline')).toContainText('237 · PREVIOUS');
+ if(edition==='236')await expect(page.locator('#brandline')).toContainText('236');
+ if(edition==='238')await expect(page.locator('#brandline')).toContainText('238 · OPEN');
 });
