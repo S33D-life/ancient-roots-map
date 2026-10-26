@@ -1,7 +1,7 @@
 .council-time-tree{margin:1rem 0;padding:.5rem;border:1px solid currentColor;border-radius:8px;font:14px/1.4 system-ui,sans-serif}
 .council-time-tree>div{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .council-time-tree a,.council-time-tree label,.council-time-tree span[aria-disabled]{display:inline-flex;align-items:center;min-height:44px;gap:4px;color:inherit}
-.council-time-tree select{min-height:44px;max-width:190px;font:inherit;color:inherit;background:var(--parchment-bg,#19291c);border:1px solid currentColor;border-radius:6px}
+.council-time-tree select{min-height:44px;max-width:190px;font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px}
 .council-time-tree p{margin:0;font:inherit}.council-time-tree [aria-disabled]{opacity:.5}
 .council-time-tree :focus-visible{outline:2px solid #d9b951;outline-offset:3px}
 @media(max-width:480px){.council-time-tree{font-size:12px}.council-time-tree>div{gap:4px}.council-time-tree select{max-width:160px}}
