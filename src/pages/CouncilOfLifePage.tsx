@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import circle238 from '../../public/council/circle-238/companions.json';
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { ROUTES } from "@/lib/routes";
 import Header from "@/components/Header";
@@ -41,7 +42,7 @@ const CouncilOfLifePage = () => {
       <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
         <p className="parchment-kicker">CURRENT / OPEN · Monday 26 October 2026</p>
         <h2>Circle 238 · Fig-wood Council</h2>
-        <p>Ten companions, with two distinct Goji doors for seed and fruit. The question and Fire time await approval.</p>
+        <p>{circle238.question}</p><p>Ten companions, with two distinct Goji doors for seed and fruit. Open all week · no scheduled Fire.</p>
         <p>Ten scene-only Fig-wood illustrations are ready to review; publication and illustrated-PDF review continue.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE238}>Enter Circle 238 · meet its companions →</Link>
         <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=238#croom">Enter Circle 238 in the original 3D TETOL Council Deck →</a>

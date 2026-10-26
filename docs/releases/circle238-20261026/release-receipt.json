@@ -1,5 +1,5 @@
 {
-  "circle238ManifestSha256": "923004fefe0ae708956e736af6fcd361bb4fa2e750a93aa871bca401622f97a2",
+  "circle238ManifestSha256": "29b53eada0e63c7111af2d4f7a3a7014c165e8d9feab949fde0fa395a487d44c",
   "circle238Source": "https://app.notion.com/p/40415b58480d81a9b10accf992b12cb1",
   "circle238Artwork": {
     "verifiedImages": 10,
@@ -61,5 +61,7 @@
   },
   "nativeIPhoneSafari": "UNVERIFIED",
   "pdfManifestAcknowledgement": "PENDING; no illustrated PDF bytes available in this session",
-  "backendChanges": false
+  "backendChanges": false,
+  "circle238Question": "What is taking root, ripening, or asking to be tended this week?",
+  "editorialRevision": "Approved question reconciliation; scene bytes unchanged from c5209aaca06eba9db8e6de014b220a07ec12f262"
 }

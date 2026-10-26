@@ -7,7 +7,7 @@ Execution brief: https://github.com/S33D-life/ancient-roots-map/issues/119#issue
 
 ## Source-of-truth decisions
 
-The public manifest is public/council/circle-238/companions.json. Its exact SHA256 is recorded in release-receipt.json. The question, Fire time and Plane Atlas UUID remain null. Goji seed and fruit are distinct appearances sharing the same editorial species key; no scientific taxon is invented. Publication approval and PDF remain unset.
+The public manifest is public/council/circle-238/companions.json. Its exact SHA256 is recorded in release-receipt.json. The approved question is “What is taking root, ripening, or asking to be tended this week?” Fire and the unverified Plane Atlas UUID remain null. Goji seed and fruit are distinct appearances sharing the same editorial species key; no scientific taxon is invented. Publication approval and PDF remain unset.
 
 237’s original roster and ten source scene bytes remain unchanged; the receipt pins an immutable source commit and actual hashes. Presentation labels change to PREVIOUS and the original TETOL return targets #previous-circle-237. No attended Fire, Harvest or final PDF is fabricated. The old REVIEW PDF remains restricted.
 
@@ -21,7 +21,7 @@ All ten scenes appear in the 2D Council and the original TETOL hanging portraits
 
 ## Claude / illustrated PDF contract
 
-Use the exact scene-review manifest edition and digest in the receipt, all ten exact scene hashes and the same null question/Fire/Atlas-ID values. This supersedes the earlier intake-only manifest with null artwork. The original full cards remain outside the repository. Claude’s A5 PRE-FIRE REVIEW needs an explicit acknowledgment of this new digest and scene inventory in its derivation receipt. No final PDF bytes/hash acknowledgment have been received in this session; no public PDF URL or Telegram send is invented. PDF completion does not block review of the web candidate.
+Use the exact scene-review manifest edition and digest in the receipt, all ten exact scene hashes and the same approved question and null Fire/Atlas-ID values. This supersedes the earlier intake-only manifest with null artwork. The original full cards remain outside the repository. Claude’s A5 PRE-FIRE REVIEW needs an explicit acknowledgment of this new digest and scene inventory in its derivation receipt. No final PDF bytes/hash acknowledgment have been received in this session; no public PDF URL or Telegram send is invented. PDF completion does not block review of the web candidate.
 
 ## Validation and release order
 

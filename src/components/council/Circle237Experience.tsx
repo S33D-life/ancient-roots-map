@@ -52,10 +52,10 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <small>Hawthorn frame family · scene-only illustration; original text panels withheld</small>
       </article>)}</section>
     </> : state.view==='invitation'?<section aria-label="Invitation editorial review">
-      <p className="eyebrow">Invitation preview · not yet sent to Telegram</p>
+      <p className="eyebrow">Previous Circle · historical invitation preview</p>
       <p>{invitation.copy}</p>
-      <h2>Our Council question</h2><p>{invitation.approvedQuestion}</p><p>We will share the illustrated PDF and Telegram invitation after reviewing the open Council.</p>
-      <h2>Come as you are</h2><p>Circle 237 is open to explore at any time this week. No live Fire gathering is scheduled.</p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>Telegram is our Council community, not a direct live Fire-room link.</p>
+      <h2>Our Council question</h2><p>{invitation.approvedQuestion}</p><p>The historical invitation is retained for review; no PDF publication or Telegram send is asserted.</p>
+      <h2>Come as you are</h2><p>Circle 237 was open without a scheduled Fire. It is now Previous and remains available to explore; whether any informal gathering occurred is unverified.</p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>Telegram is our Council community, not a direct live Fire-room link.</p>
       <p>This week's gathering does not need a meeting time. You are welcome to listen, discover and return.</p>
       <details><summary>Publication checklist</summary><ul>{publicationBlockers().map(reason=><li key={reason}>{reason}</li>)}</ul></details>
       {link(href(state.mode),'Return to Circle 237')}
@@ -65,8 +65,8 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <p className="eyebrow">{item.category} · Circle appearance, not a new identity</p>
         <h2>{item.name}</h2><p>{item.plaque}</p><p>These approved scene illustrations are artistic interpretations, not photographic or field evidence. The Sunflower scene is illustrative rather than a botanically exact Teddy Bear cultivar.</p>
         <p>{introductions[key]}</p>
-        <p>Companion doorway first prepared <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Circle 237 is open for exploration; no completed encounter or physical visit is asserted.</p>
-        <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This Council appearance is now open to explore. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
+        <p>Companion doorway first prepared <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Circle 237 is Previous and remains available for exploration; no completed encounter or physical visit is asserted.</p>
+        <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This previous Council appearance remains available to explore. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
         {isPilotKey(key)?link(href(state.mode,'record',key),'Open enduring Library identity'):<p className="muted">Living Library connection awaiting record reconciliation.</p>}
       </section>}
       {state.view==='record'&&identity&&<section>
@@ -74,7 +74,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <p className="identifier">{identity.source}:{identity.id}</p>
         {key==='noku'?<>
           <h2>One Cape Town Ancient Friend</h2><p>The existing Atlas identity is retained. Live availability is not checked in this pilot; no record is created.</p>
-          <p>Circle 234: remembered appearance. Circle 237: an open return. Original Circle 234 history remains unchanged.</p>
+          <p>Circle 234: remembered appearance. Circle 237: a remembered return. Original Circle 234 history remains unchanged.</p>
           <p>Guardian-source biography, photographs, cultural accounts and public permissions require reconciliation; no private documents or guardian details are loaded here.</p>
           <p>Ficus natalensis is a source-attributed working identity. The older ledger says “Fig”; this pilot does not silently settle that difference.</p>
           <p className="identifier">Existing Atlas path: /tree/{identities.noku.id} · not fetched here</p>
@@ -91,6 +91,6 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       {state.view==='harvest'&&<section><h2>Remember what is ready</h2><p>Future reviewed Heartwood pathway · not yet connected. Nothing is saved or published.</p><p>A harvest will reference approved knowledge and permissioned contributions without copying private memories or changing their visibility.</p>{link(href(state.mode,'record',key),'Return to enduring identity')}</section>}
       <p className="muted">Council appearance: {isPilotKey(key)?appearance(key,state.mode).id:item.appearanceId} · mode: {state.mode}</p>
     </> : null}
-    <footer>Circle 237 · a living weekly doorway · past Councils and Library records remain preserved.</footer>
+    <footer>Circle 237 · Previous · a preserved weekly doorway · past Councils and Library records remain preserved.</footer>
   </main>;
 }

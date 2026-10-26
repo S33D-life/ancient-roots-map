@@ -4,8 +4,8 @@
  */
 const EXPECTED = 238;
 const CIRCLE_URL = '/council/circle-238/companions.json';
-const QUESTION = null;
-const QUESTION_COPY = 'Question awaiting approval · Fire time awaiting approval';
+const QUESTION = "What is taking root, ripening, or asking to be tended this week?";
+const QUESTION_COPY = QUESTION;
 export async function installCompanionFrames(D) {
   const response = await fetch(CIRCLE_URL, {cache:'no-store'});
   if (!response.ok) throw new Error('Circle 238 Council companion roster unavailable');
@@ -13,7 +13,7 @@ export async function installCompanionFrames(D) {
   if (circle.number !== EXPECTED || circle.status !== 'OPEN' || circle.companions.length !== 10 || circle.question !== QUESTION)
     throw new Error('Circle 238 edition/roster does not match this versioned TETOL Tree');
   const base = D.nodes.yewc233;
-  D.nodes.c238 = { ...D.nodes.c233, name:'Circle 238', sub:'OPEN · Fig-wood Council · Fire time pending', circle:238, parent:'croom', status:'LIVE', stateShort:'OPEN', lives:[], actions:[], relations:[], question:QUESTION_COPY, purpose:QUESTION_COPY };
+  D.nodes.c238 = { ...D.nodes.c233, name:'Circle 238', sub:'CURRENT / OPEN · Fig-wood Council · no scheduled Fire', circle:238, parent:'croom', status:'LIVE', stateShort:'OPEN', lives:[], actions:[], relations:[], question:QUESTION_COPY, purpose:QUESTION_COPY };
   D.council.circles[238] = { node:'c238', number:238, status:'open', companions:circle.companions.map((c,i) => {
     D.nodes[c.id] = { ...base, name:c.label, sub:c.kind+' · Circle 238', circle:238, parent:'croom', status:'LIVE', statusNote:'Generated illustration, not field evidence or an attendance claim', stateShort:'OPEN', part:c.kind+' · Circle 238', practical:c.accuracyNote || 'This is a living invitation to notice and learn, not field evidence.', purpose:'Meet this companion in the open weekly Council and follow the thread into life.', lives:[], actions:[], relations:[{to:'croom',dim:'place',text:'Return to Circle 238'}], sources:['Circle 238 supplied artwork; scene-only derivative reviewed 26 October 2026; publication pending'], location:'A hanging portrait and encounter in the established Canopy Council room.' };
     return {id:c.id,kind:c.kind,seat:Math.PI/2+i*2*Math.PI/10,repr:{form:'circleFrame',artwork:c.artwork,width:c.width,height:c.height,frameFamily:'fig-wood'}};
