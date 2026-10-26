@@ -38,9 +38,9 @@ interface CountryStats {
   sourceCount: number;
   withCoordinates: number;
   missingCoordinates: number;
-  openVerificationTasks: number;
-  completedVerificationTasks: number;
-  dataConfidenceScore: number;
+  openVerificationTasks: number | null;
+  completedVerificationTasks: number | null;
+  dataConfidenceScore: number | null;
   status: "active" | "growing" | "proposed";
   groveCount: number;
   dominantSpecies?: string;
@@ -183,7 +183,7 @@ const CountryCard = ({ stat, isPioneer }: { stat: CountryStats; isPioneer?: bool
             </span>
             {stat.verifiedCount > 0 && (
               <span className="flex items-center gap-1">
-                <Heart className="w-3 h-3 text-primary/50" /> {stat.verifiedCount} verified
+                <Heart className="w-3 h-3 text-primary/50" /> {stat.verifiedCount} linked
               </span>
             )}
             {stat.groveCount > 0 && (
@@ -283,7 +283,7 @@ type FilterType = "all" | "active" | "with-groves" | "pulse";
 
 /* ─── Main Page ─── */
 const WorldAtlasPage = () => {
-  const { data: atlasStats = [], isLoading: atlasStatsLoading } = useAtlasCountryStats();
+  const { data: atlasStats = [], isLoading: atlasStatsLoading, isError: atlasStatsError, refetch: retryAtlasStats } = useAtlasCountryStats();
   const [groveCountMap, setGroveCountMap] = useState<Map<string, number>>(new Map());
   const [groveLoading, setGroveLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -469,14 +469,17 @@ const WorldAtlasPage = () => {
               Each country, a chapter. Each tree, a living witness.
             </p>
 
-            {/* Summary stats — compact */}
-            <div className="flex flex-wrap justify-center gap-3 mb-3 text-[11px] text-muted-foreground">
+            {atlasStatsError && <div role="alert" className="mb-3 text-sm"><p>Research counts unavailable. Retrieval failed; this does not mean the archive is empty.</p><Button variant="outline" size="sm" onClick={() => retryAtlasStats()}>Retry research counts</Button></div>}
+            {atlasStatsLoading && <p role="status">Loading research counts…</p>}
+            {!atlasStatsLoading && !atlasStatsError && atlasStats.length === 0 && <p role="status">No public research records returned.</p>}
+            {/* Summary stats — only confirmed successful data */}
+            {!atlasStatsError && !atlasStatsLoading && <div className="flex flex-wrap justify-center gap-3 mb-3 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1"><Globe className="w-3 h-3 text-primary/60" /> {activeCount} countries</span>
               <span className="flex items-center gap-1"><TreeDeciduous className="w-3 h-3 text-primary/60" /> {totalRecords.toLocaleString()} records</span>
               {totalVerified > 0 && <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-primary/60" /> {totalVerified.toLocaleString()} linked</span>}
               {totalRecords > 0 && <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" /> {coordinateCoverage}% mapped</span>}
               {totalGroves > 0 && <span className="flex items-center gap-1"><Network className="w-3 h-3 text-emerald-500/60" /> {totalGroves} groves</span>}
-            </div>
+            </div>}
 
             <div className="flex flex-wrap justify-center gap-2">
               <Button variant="mystical" size="sm" asChild>
@@ -521,7 +524,7 @@ const WorldAtlasPage = () => {
                           <span className="text-lg">{c.flag}</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-serif text-foreground truncate">{c.country}</p>
-                            <p className="text-[10px] text-muted-foreground">{c.treeCount} records · {c.status}</p>
+                            <p className="text-[10px] text-muted-foreground">{atlasStatsError ? 'Research counts unavailable' : atlasStatsLoading ? 'Loading research counts…' : `${c.treeCount} records · ${c.status}`}</p>
                           </div>
                           {c.status !== "proposed" && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />}
                         </Link>
@@ -581,7 +584,7 @@ const WorldAtlasPage = () => {
             <div className="text-left">
               <h2 className="text-lg font-serif font-bold text-foreground">Country Chapters</h2>
               <p className="text-xs text-muted-foreground">
-                {activeCount} active · {totalRecords.toLocaleString()} research records
+                {atlasStatsError ? 'Research counts unavailable' : atlasStatsLoading ? 'Loading research counts…' : `${activeCount} active · ${totalRecords.toLocaleString()} research records`}
                 {totalGroves > 0 && ` · ${totalGroves} groves`}
               </p>
             </div>
@@ -649,7 +652,9 @@ const WorldAtlasPage = () => {
 
                 {/* Country Grid */}
                 <div className="mb-6">
-                  {loading ? (
+                  {atlasStatsError ? (
+                    <nav aria-label="Country chapters"><p className="text-sm mb-3">Country chapters remain available. Research counts could not be verified.</p><div className="flex flex-wrap gap-3">{countryStats.filter(c=>c.status !== 'proposed').map(c=><Link key={c.slug} to={`/atlas/${c.slug}`}>{c.flag} {c.country}</Link>)}</div></nav>
+                  ) : loading ? (
                     <p className="text-center py-12 text-muted-foreground text-sm font-serif italic">Gathering chapters…</p>
                   ) : displayedStats.length === 0 ? (
                     <Card className="border-primary/10">

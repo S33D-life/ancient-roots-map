@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchCountryResearch } from '@/lib/atlas-research';
 import { useAtlasCountryStats } from "@/hooks/use-atlas-country-stats";
 import { useCountrySpeciesActivity } from "@/hooks/useCountrySpeciesActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -262,6 +263,8 @@ const CountryPortalPage = () => {
 
   const [trees, setTrees] = useState<ResearchTree[]>([]);
   const [loading, setLoading] = useState(true);
+  const [researchError, setResearchError] = useState(false);
+  const [researchRetry, setResearchRetry] = useState(0);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [pilgrimagePreset, setPilgrimagePreset] = useState<string>("first-steps");
   const [activeTab, setActiveTab] = useState("overview");
@@ -274,7 +277,7 @@ const CountryPortalPage = () => {
 
   // Species activity for the spiral
   const { data: speciesActivity, isLoading: speciesLoading } = useCountrySpeciesActivity(config.country);
-  const { data: atlasCountryStats = [] } = useAtlasCountryStats(config.country, !!entry);
+  const { data: atlasCountryStats = [], isError: statsError, refetch: retryStats } = useAtlasCountryStats(config.country, !!entry);
   const atlasCountryStat = atlasCountryStats[0] || null;
   const countryRootstones = useMemo(
     () => getRootstonesByCountrySlug(countrySlug || ""),
@@ -287,17 +290,17 @@ const CountryPortalPage = () => {
 
   useEffect(() => {
     if (!entry) return;
+    let cancelled = false;
+    setTrees([]); setResearchError(false); setLoading(true);
     const fetchTrees = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("research_trees")
-        .select("*")
-        .eq("country", config.country)
-        .order("species_scientific");
-      if (!error && data) setTrees(data as ResearchTree[]);
-      setLoading(false);
+      try {
+        const data = await fetchCountryResearch(config.country);
+        if (!cancelled) setTrees((data as ResearchTree[]).sort((a,b)=>a.species_scientific.localeCompare(b.species_scientific)));
+      } catch {
+        if (!cancelled) { setTrees([]); setResearchError(true); }
+      } finally { if (!cancelled) setLoading(false); }
     };
-    fetchTrees();
+    void fetchTrees();
 
     // Fetch overlapping bio-regions for this country
     const fetchBioRegions = async () => {
@@ -305,14 +308,15 @@ const CountryPortalPage = () => {
         .from("bio_regions")
         .select("id, name, type, countries")
         .order("name");
-      if (data) {
+      if (!cancelled && data) {
         const matching = (data as Array<{ id: string; name: string; type: string; countries: string[] }>)
           .filter(br => br.countries.includes(config.country));
         setOverlappingBioRegions(matching);
       }
     };
     fetchBioRegions();
-  }, [config.country, entry]);
+    return () => { cancelled = true; };
+  }, [config.country, entry, researchRetry]);
 
   /* ─── Computed stats ─── */
   const filteredTrees = useMemo(() => {
@@ -325,8 +329,8 @@ const CountryPortalPage = () => {
   const withCoords = atlasCountryStat?.research_records_with_coordinates ?? trees.filter(t => t.latitude != null && t.longitude != null).length;
   const missingCoords = atlasCountryStat?.research_records_missing_coordinates ?? trees.filter(t => t.latitude == null || t.longitude == null).length;
   const verifiedCount = atlasCountryStat?.linked_ancient_friends_count ?? trees.filter(t => t.status === "verified_linked").length;
-  const openVerificationCount = atlasCountryStat?.verification_task_open_count ?? 0;
-  const dataConfidenceScore = atlasCountryStat?.data_confidence_score ?? 0;
+  const openVerificationCount = atlasCountryStat?.verification_task_open_count ?? "Unavailable";
+  const dataConfidenceScore = atlasCountryStat?.data_confidence_score;
   const precisionCounts = useMemo(() => {
     if (atlasCountryStat) {
       return {
@@ -495,10 +499,12 @@ const CountryPortalPage = () => {
               {config.subtitle}
             </p>
 
+            {researchError && <div role="alert" className="my-4"><p>Research records unavailable. Retrieval failed; no empty archive is confirmed.</p><Button variant="outline" onClick={() => { setResearchRetry(n=>n+1); void retryStats(); }}>Retry research records</Button></div>}
+            {statsError && <p role="status">Country summary unavailable. Any records below come from a separate successful public research read.</p>}
             {/* Badge row */}
             <div className="flex flex-wrap justify-center gap-2 mb-6">
               {/* Innovation #4: Dataset Coverage Badge */}
-              {totalCount > 0 && (
+              {!researchError && !loading && totalCount > 0 && (
                 <Badge variant="outline" className={`text-xs ${
                   verifiedCount > 0
                     ? "border-primary/50 bg-primary/10 text-primary"
@@ -506,9 +512,9 @@ const CountryPortalPage = () => {
                 }`}>
                   <TreeDeciduous className="w-3 h-3 mr-1" />
                   {verifiedCount > 0
-                    ? `${verifiedCount} Verified · ${totalCount} Research`
+                    ? `${verifiedCount} Linked · ${totalCount} Research`
                     : `${totalCount} Research Trees`}
-                  {totalCount > 0 && (
+                  {!researchError && !loading && totalCount > 0 && (
                     <span className="ml-1 opacity-70">
                       ({Math.round((withCoords / totalCount) * 100)}% mapped)
                     </span>
@@ -703,20 +709,21 @@ const CountryPortalPage = () => {
         )}
 
         <section className="px-4 max-w-3xl mx-auto mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {!researchError && !loading && <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <StatTile label="Records" value={totalCount} icon={TreeDeciduous} />
             <StatTile label="Distinct Species" value={speciesCount} icon={BarChart3} />
             <StatTile label="With Coordinates" value={withCoords} icon={MapPin} />
             <StatTile label="Missing Coordinates" value={missingCoords} icon={Compass} />
             <StatTile label="Exact Precision" value={precisionCounts.exact} icon={Compass} />
             <StatTile label="Approx Precision" value={precisionCounts.approx} icon={Eye} />
-            <StatTile label="Verified Linked" value={verifiedCount} icon={Heart} />
+            <StatTile label="Linked records" value={verifiedCount} icon={Heart} />
             <StatTile label="Open Verification" value={openVerificationCount} icon={Shield} />
-            <StatTile label="Data Confidence" value={`${dataConfidenceScore}%`} icon={Sparkles} />
-          </div>
+            <StatTile label="Data Confidence" value={dataConfidenceScore == null ? "Unavailable" : `${dataConfidenceScore}%`} icon={Sparkles} />
+          </div>}
         </section>
 
         {/* ─── Species Spiral + Map Preview ─── */}
+        {!researchError && !loading && <>
         <section className="px-4 max-w-5xl mx-auto mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
@@ -773,6 +780,7 @@ const CountryPortalPage = () => {
           </ScrollArea>
         </section>
 
+        </>}
         {/* ─── Tabs: Overview / Species / Pilgrimages ─── */}
         <section className="px-4 max-w-3xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -787,10 +795,10 @@ const CountryPortalPage = () => {
 
             {/* ─── All Trees ─── */}
             <TabsContent value="overview">
-              {loading ? (
+              {researchError ? <p role="status">Research list unavailable. Use Retry research records above.</p> : loading ? (
                 <p className="text-center py-12 text-muted-foreground">Loading research records…</p>
               ) : filteredTrees.length === 0 ? (
-                <p className="text-center py-12 text-muted-foreground">No records found for this filter.</p>
+                <p className="text-center py-12 text-muted-foreground">No public research records found for this filter.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {filteredTrees.map(tree => (
@@ -817,6 +825,7 @@ const CountryPortalPage = () => {
             <TabsContent value="immutable">
               {(() => {
                 const immutableTrees = trees.filter(t => (t as any).record_status === "immutable");
+                if (researchError) return <p>Research records unavailable.</p>;
                 if (loading) return <p className="text-center py-12 text-muted-foreground">Loading…</p>;
                 if (immutableTrees.length === 0) return (
                   <Card className="border-[hsl(42_80%_50%/0.2)] bg-[hsl(42_30%_12%/0.3)]">
@@ -846,7 +855,7 @@ const CountryPortalPage = () => {
                   <CardTitle className="text-sm font-serif">Top Species by Count</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {speciesRanking.length === 0 ? (
+                  {researchError ? <p role="status">Research records unavailable.</p> : loading ? <p>Loading research records…</p> : speciesRanking.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4">No species data available.</p>
                   ) : (
                     speciesRanking.slice(0, 12).map(s => (
@@ -892,7 +901,7 @@ const CountryPortalPage = () => {
                   {PILGRIMAGE_PRESETS.find(p => p.key === pilgrimagePreset)?.desc}
                 </p>
 
-                {pilgrimageList.length === 0 ? (
+                {researchError ? <p role="status">Research records unavailable.</p> : loading ? <p>Loading research records…</p> : pilgrimageList.length === 0 ? (
                   <Card className="border-primary/10">
                     <CardContent className="py-8 text-center text-muted-foreground text-sm">
                       {pilgrimagePreset === "verified"
