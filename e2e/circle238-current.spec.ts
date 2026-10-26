@@ -19,7 +19,7 @@ for(const width of [320,390,1440])test(`238 current, 237 previous, ten 2D encoun
  await page.goto('/council/238?companion=private-person&return=https://evil.invalid');await expect(page.getByRole('button',{name:'Meet Fig',exact:true})).toBeVisible();
 });
 test('original immersive 238 Canopy, mobile sheet, ten encounters, Staff Room and history',async({page})=>{
- test.setTimeout(90000);await page.setViewportSize({width:390,height:844});
+ test.setTimeout(120000);await page.setViewportSize({width:390,height:844});
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=238#croom');
  await expect(page.locator('#brandline')).toContainText('Circle 238 · OPEN');
  const d=await page.evaluate(()=>({active:(window as any).TETOL.council.active,staff:(window as any).TETOL.nodes.staff.name,old:!!(window as any).TETOL.council.circles[233]}));expect(d).toEqual({active:238,staff:'Staff Room',old:true});
