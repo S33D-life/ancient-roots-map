@@ -10,7 +10,7 @@ A fresh live entry from the 2D Canopy was observed to preserve `/tetol/circle-23
 
 **Confirmed source/runtime fault:** the `c233now` hotspot unconditionally selected drawing slot 233. That slot actually contains edition **235**. Reproduction on the current-main TETOL changes `D.council.active` from 238 to 233, `D.council.current` from `c238` to `c233`, and paints Circle 235 while retaining `circle=238` and the 238 return control. The legacy `c233` doorway also retained a Circle 235 panel. This establishes a reproducible cause of the observed class of mismatch, not proof of which precise tap happened on the user's phone.
 
-**Confirmed mobile interaction fault:** pointer-up on the grab opens the sheet, moving a companion button under the finger before the compatibility click. Instrumentation observed pointerdown/up on `BUTTON#grab`, followed by a click on a different button. That activated an unintended companion and collapsed the sheet. Adapter fallback listeners also competed with shared grab handling. The guard is gesture-based rather than timed, so slow rendering cannot let a delayed compatibility click through. One shared handler now owns the gesture and consumes only its trusted browser follow-up click (not programmatic navigation); the next pointerdown or keydown restores normal actions.
+**Confirmed mobile interaction fault:** pointer-up on the grab opens the sheet, moving a companion button under the finger before the compatibility click. Instrumentation observed pointerdown/up on `BUTTON#grab`, followed by a click on a different button. That activated an unintended companion and collapsed the sheet. Adapter fallback listeners also competed with shared grab handling. The guard is gesture-based rather than timed, so slow rendering cannot let a delayed compatibility click through. An early loader handler runs before the legacy window-capture learning handlers. Loader/runtime readiness is checked so mixed versions fail unavailable. One shared handler now owns the gesture and consumes only its trusted browser follow-up click (not programmatic navigation); the next pointerdown or keydown restores normal actions.
 
 **Confirmed 2D return fault:** the global map-filter provider unconditionally synchronised query parameters on Council pages. React Router’s `setSearchParams` discarded historical fragments such as `#previous-circle-235`, resetting the edition selector to 238. Council routes now retain ownership of their URL; filter state still resumes on Atlas. The existing auth-route guard is unchanged.
 
@@ -33,9 +33,10 @@ Both images below are local Chromium reproductions at 390×844, with reduced mot
 ## Change scope
 
 - One public edition index and equivalent accessible 2D / original TETOL navigators.
-- Explicit Previous / Next / selector / current-return links using real edition queries.
+- Explicit Previous / Next / selector / current-return links using real edition queries. Edition changes leave historical iframes into the full original Tree, keeping the outer page from showing another edition.
 - Resolve legacy current hotspots within the selected edition; old “previous” hotspot follows the immediately preceding edition.
 - Reuse the original 234 forms already retained in the engine; no replacement renderer or new artwork.
+- Circle 236 keeps its unapproved question null; the legacy 235 question is not carried into its presentation.
 - Historical presentation for 234–236, PREVIOUS for 237 and CURRENT / OPEN for 238. Frozen historical OPEN values remain untouched.
 - Browser history entries for internal journeys, popstate restoration, canonical legacy deep links, honest unavailable state on failed edition loading.
 - The old automatic 235 welcome invitation is hidden by the edition presentation; its original record is preserved.

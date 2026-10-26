@@ -15,7 +15,8 @@ test.beforeEach(async({context,page})=>{
 async function assertEdition(page:any,n:number){
  await expect(page.locator('#council-time-tree')).toContainText(`Circle ${n}`);
  await expect(page.locator('#panel h2')).toContainText(n===238?'Fig-wood':n===237?'Blooming':`Circle ${n}`);
- const state=await page.evaluate(()=>{const D=(window as any).TETOL,stage=document.querySelector('three-d-stage') as any,groups:any[]=[],signs:any[]=[];stage._scene.traverse((m:any)=>{if(/^circle_\d+_companions$/.test(m.name)&&m.visible)groups.push(m.name);if(m.name==='current_circle_identity_at_doorway')signs.push(m.material.map.image.__paintedText);});return {active:D.council.circles[D.council.active].number,current:D.nodes[D.council.current].name,groups,signs};});
+ const state=await page.evaluate(()=>{const D=(window as any).TETOL,stage=document.querySelector('three-d-stage') as any,groups:any[]=[],signs:any[]=[];stage._scene.traverse((m:any)=>{if(/^circle_\d+_companions$/.test(m.name)&&m.visible)groups.push(m.name);if(m.name==='current_circle_identity_at_doorway')signs.push(m.material.map.image.__paintedText);});return {active:D.council.circles[D.council.active].number,current:D.nodes[D.council.current].name,question:D.nodes.croom.question,groups,signs};});
+ if(n===236)expect(state.question).toBeNull();
  expect(state.active).toBe(n);expect(state.current).toBe(`Circle ${n}`);expect(state.groups).toHaveLength(1);expect(state.signs.flat()).toContain(`CIRCLE ${n}`);
 }
 for(const n of [238,237,236,235,234])test(`Circle ${n}: original sign, companions, legacy current ring, refresh and Staff Room`,async({page})=>{
@@ -61,6 +62,7 @@ test('Time Tree walks 238 → 234 → 238, with browser Back/Forward and current
  await page.goForward();await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,238);
 });
 test('2D entry and selector agree with the original Tree at phone and desktop widths',async({page})=>{
+ test.setTimeout(180000);
  for(const width of [320,1440]){
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
   await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
@@ -73,9 +75,25 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
   await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/#previous-circle-235$/);
   await expect(page.locator('.council-time-tree').first().getByRole('combobox')).toHaveValue('235');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.getByRole('button',{name:'Enter the Circle →',exact:true}).click();
+  const historical=page.frameLocator('#council-deck-preview iframe');
+  await expect(historical.locator('#council-time-tree')).toContainText('Circle 235',{timeout:30000});
+  if(await historical.locator('#grab').isVisible())await historical.locator('#grab').click();
+  else await historical.locator('#panel').hover();
+  await historical.locator('#council-time-tree a[rel=next]').click();
+  await expect(page).toHaveURL(/tetol\.html\?circle=236#croom$/);
+  await page.waitForFunction(()=>!!(window as any).__tetol);await assertEdition(page,236);
+
  }
 });
 test('failed edition manifest is unavailable, never a silent Circle 235 substitute',async({page})=>{
  await page.route('**/council/circle-238/companions.json',r=>r.fulfill({status:503,body:'Unavailable'}));
  await page.goto(`${root}?circle=238#croom`);await expect(page.getByRole('alert')).toContainText('No other edition has been substituted');await expect(page.locator('canvas')).toHaveCount(0);
+});
+
+test('loader/runtime version mismatch is unavailable instead of substituting a historical edition',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(window,'S33D_SHEET_GESTURE_READY',{get:()=>false,set:()=>{},configurable:true}));
+ await page.goto(`${root}?circle=238#croom`);
+ await expect(page.getByRole('alert')).toContainText('No other edition has been substituted');
+ expect(await page.evaluate(()=>!!(window as any).__tetol)).toBe(false);
 });

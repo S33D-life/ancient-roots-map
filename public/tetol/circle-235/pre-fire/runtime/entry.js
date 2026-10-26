@@ -9,6 +9,7 @@ const framedCircle = circleEdition === '236' ? 236 : circleEdition === '237' ? 2
 let companionFrames;
 let timeTree;
 try {
+if (!window.S33D_SHEET_GESTURE_READY) throw new Error('Council loader and runtime versions do not match');
 if (![234,235,236,237,238].includes(selectedCircle)) throw new Error('Unsupported Council edition');
 companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
@@ -246,17 +247,10 @@ $('#reset').onclick = () => scene3d?.select(state.current, true);
   $('#mark').onclick = () => menu(!document.body.classList.contains('menuopen'));
   document.addEventListener('pointerdown', (e) => { if (document.body.classList.contains('menuopen') && !e.target.closest('header, #mark, #xpanel')) menu(false); });
   ['#m3d', '#mlist', '#reset'].forEach((s) => $(s).addEventListener('click', () => mobileSheet() && menu(false)));
-  let gy = null, swallowGrabClick = false;
-  document.addEventListener('pointerdown', (e) => { swallowGrabClick = false; if (e.target.closest('#grab')) { gy = e.clientY; e.preventDefault(); } });
-  document.addEventListener('pointerup', (e) => { if (gy == null) return; const dy = e.clientY - gy; gy = null; swallowGrabClick = true; const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek'));
+  let gy = null;
+  document.addEventListener('pointerdown', (e) => { if (e.target.closest('#grab')) { gy = e.clientY; e.preventDefault(); } });
+  document.addEventListener('pointerup', (e) => { if (gy == null) return; const dy = e.clientY - gy; gy = null; window.dispatchEvent(new Event('tetol:sheet-gesture')); const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek'));
     setSheet(SHEET[Math.abs(dy) < 12 ? (i + 1) % 3 : dy < 0 ? Math.min(2, i + (dy < -200 ? 2 : 1)) : Math.max(0, i - (dy > 200 ? 2 : 1))]); });
-  document.addEventListener('keydown', () => { swallowGrabClick = false; });
-  // Opening the sheet moves buttons under the finger before the compatibility click.
-  // Consume only that gesture's click; a new pointerdown immediately re-arms normal actions.
-  window.addEventListener('click', (e) => {
-    if (!e.isTrusted || !swallowGrabClick) return;
-    swallowGrabClick = false; e.preventDefault(); e.stopImmediatePropagation();
-  }, true);
   document.addEventListener('click', (e) => { if (e.target.closest('#grab') && e.detail === 0) { const i = Math.max(0, SHEET.indexOf(document.body.dataset.sheet || 'peek')); setSheet(SHEET[(i + 1) % 3]); }
     if (mobileSheet() && e.target.closest('#pname') && (document.body.dataset.sheet || 'peek') === 'peek') setSheet('mid'); });
   if (X.D) document.body.dataset.sheet = 'peek'; }

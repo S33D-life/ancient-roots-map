@@ -1,5 +1,6 @@
 // Edition presentation only. Frozen Council records and artwork are never rewritten.
 export const TREE_PAGE = '/tetol/circle-235/pre-fire/tetol.html';
+const visitEdition = (number, node = 'croom') => window.top.location.assign(editionUrl(number, node));
 export const editionUrl = (number, node = 'croom') => `${TREE_PAGE}?circle=${number}#${encodeURIComponent(node)}`;
 export async function installTimeTree(D, number) {
   const response = await fetch('/council/time-tree.json', {cache:'no-store'});
@@ -26,7 +27,7 @@ export async function installTimeTree(D, number) {
     current.sub = `${edition.state} · ${source?.title || ''}`;
     current.stateShort = edition.state;
   }
-  if (number === 236) { current.sub = 'HISTORICAL · Circle 236'; current.stateShort = edition.state; }
+  if (number === 236) { current.sub = 'HISTORICAL · Circle 236'; current.stateShort = edition.state; current.question = null; D.nodes.croom.question = null; }
   // These are live doorway projections, not the immutable registry records.
   if (number !== 235) for (const id of ['c233','c233now']) Object.assign(D.nodes[id], {
     name:`Circle ${number}`, sub:edition.state, practical:D.nodes.croom.question,
@@ -43,10 +44,10 @@ export async function installTimeTree(D, number) {
   const ret = document.getElementById('council-return');
   if (ret) { ret.href = '/council-of-life?from=spatial-council#' + (number === 238 ? 'next-gathering' : number === 234 ? 'historical-circle-234' : `previous-circle-${number}`); ret.textContent = `Return to Circle ${number}`; ret.target = '_top'; }
   const nav = document.createElement('nav'); nav.id = 'council-time-tree'; nav.setAttribute('aria-label','Council Time Tree');
-  const link = (n,text,rel='') => n ? `<a href="${editionUrl(n)}" ${rel}>${text}</a>` : `<span aria-disabled="true">${text}</span>`;
+  const link = (n,text,rel='') => n ? `<a href="${editionUrl(n)}" target="_top" ${rel}>${text}</a>` : `<span aria-disabled="true">${text}</span>`;
   const i = tree.editions.indexOf(edition);
-  nav.innerHTML = `<div>${link(tree.editions[i-1]?.number,'← Previous Circle','rel="prev"')}<label>Circle <select aria-label="Choose a Council Circle">${tree.editions.map(e=>`<option value="${e.number}" ${e.number===number?'selected':''}>${e.number} · ${e.state}</option>`).join('')}</select></label>${link(tree.editions[i+1]?.number,'Next Circle →','rel="next"')}</div><small>Circle ${number} · ${edition.state}${number!==tree.current ? ` · <a href="${editionUrl(tree.current)}">Return to current · ${tree.current}</a>` : ''}</small>`;
-  nav.querySelector('select').addEventListener('change',e=>location.assign(editionUrl(Number(e.target.value))));
+  nav.innerHTML = `<div>${link(tree.editions[i-1]?.number,'← Previous Circle','rel="prev"')}<label>Circle <select aria-label="Choose a Council Circle">${tree.editions.map(e=>`<option value="${e.number}" ${e.number===number?'selected':''}>${e.number} · ${e.state}</option>`).join('')}</select></label>${link(tree.editions[i+1]?.number,'Next Circle →','rel="next"')}</div><small>Circle ${number} · ${edition.state}${number!==tree.current ? ` · <a href="${editionUrl(tree.current)}" target="_top">Return to current · ${tree.current}</a>` : ''}</small>`;
+  nav.querySelector('select').addEventListener('change',e=>visitEdition(Number(e.target.value)));
   const style = document.createElement('style'); style.textContent = `
     #tetol-welcome{display:none!important}
     body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}
@@ -77,11 +78,11 @@ export async function installTimeTree(D, number) {
     if (id === 'c233' || id === 'c233now' || (id === 'people' && number >= 236)) return 'croom';
     if (id === 'c232') {
       if (number === 234) return 'croom';
-      location.assign(editionUrl(number-1)); return null;
+      visitEdition(number-1); return null;
     }
     const node = D.nodes[id], group = node?.circle && D.council.circles[node.circle];
     if (node?.room === true && group && group.number !== number && tree.editions.some(e=>e.number===group.number)) {
-      location.assign(editionUrl(group.number,id)); return null;
+      visitEdition(group.number,id); return null;
     }
     return id;
   }

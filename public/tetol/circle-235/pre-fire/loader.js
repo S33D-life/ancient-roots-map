@@ -1,6 +1,17 @@
 
     
 document.addEventListener('DOMContentLoaded', async function() {
+  // Install before any legacy window-capture handler: the sheet can reflow under a finger.
+  // This state survives the document-element swap below.
+  let swallowSheetClick = false;
+  window.S33D_SHEET_GESTURE_READY = true;
+  window.addEventListener('tetol:sheet-gesture', () => { swallowSheetClick = true; });
+  window.addEventListener('pointerdown', () => { swallowSheetClick = false; }, true);
+  window.addEventListener('keydown', () => { swallowSheetClick = false; }, true);
+  window.addEventListener('click', event => {
+    if (!event.isTrusted || !swallowSheetClick) return;
+    swallowSheetClick = false; event.preventDefault(); event.stopImmediatePropagation();
+  }, true);
   const loading = document.getElementById('__bundler_loading');
   function setStatus(msg) { if (loading) loading.textContent = msg; }
 
