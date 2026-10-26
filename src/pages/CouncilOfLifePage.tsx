@@ -27,7 +27,7 @@ const CouncilOfLifePage = () => {
   const localDeckUrl = deckUrl ? `${new URL(deckUrl).pathname}?welcome=0#${deckNode || "croom"}` : undefined;
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("from") !== "spatial-council") return;
-    const frame = requestAnimationFrame(() => document.getElementById("next-gathering")?.scrollIntoView({ block: "start" }));
+    const frame = requestAnimationFrame(() => document.getElementById(window.location.hash === "#previous-circle-237" ? "previous-circle-237" : "next-gathering")?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(frame);
   }, []);
   const returnToCircle = () => {
@@ -39,12 +39,20 @@ const CouncilOfLifePage = () => {
     <main className="parchment-main">
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
       <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
-        <p className="parchment-kicker">OPEN · yOur Blooming Week</p>
+        <p className="parchment-kicker">CURRENT / OPEN · Monday 26 October 2026</p>
+        <h2>Circle 238 · Fig-wood Council</h2>
+        <p>Ten companions, with two distinct Goji doors for seed and fruit. The question and Fire time await approval.</p>
+        <p>Scene illustrations await verified intake; named companion doorways are available.</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE238}>Enter Circle 238 · meet its companions →</Link>
+        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=238#croom">Enter Circle 238 in the original 3D TETOL Council Deck →</a>
+      </section>
+      <section id="previous-circle-237" className="canopy-field-note" aria-label="Previous Circle 237">
+        <p className="parchment-kicker">PREVIOUS · Circle 237</p>
         <h2 id="circle237-arrival">Circle 237</h2>
         <p>What is life teaching us through the beings we encounter?</p>
-        <p>Ten companions are gathered, with ten illustrated scenes. Visit any time — there is no fixed Fire gathering this week.</p>
-        <Link className="parchment-action" to={ROUTES.CIRCLE237}>Enter Circle 237 · meet its companions →</Link>
-        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=237#croom">Enter Circle 237 in the original 3D TETOL Council Deck →</a>
+        <p>The previous Circle’s ten companions and illustrated scenes remain available. No attended Fire or Harvest is asserted.</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE237}>Revisit Circle 237 · meet its companions →</Link>
+        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=237#croom">Revisit Circle 237 in the original 3D TETOL Council Deck →</a>
         <a className="parchment-action" href={`${TETOL_PAGE}#croom`}>Remember the historical Circle 235 TETOL →</a>
       </section>
       <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">

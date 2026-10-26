@@ -8,10 +8,10 @@ vi.mock("@/components/council/EmbeddedCouncilDeck", () => ({ default: ({src,onRe
 import CouncilOfLifePage from "@/pages/CouncilOfLifePage";
 describe("selective Canopy promotion", () => {
   beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); window.scrollTo = vi.fn(); });
-  it("puts the open Circle 237 first and preserves both historical Circle 236 and Circle 235", async () => {
+  it("puts the open Circle 238 first and preserves both historical Circle 236 and Circle 235", async () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
-    expect(screen.getByRole("link", {name:/Enter Circle 237 · meet its companions/})).toHaveAttribute("href","/council/237");
-    expect(screen.getByRole("region",{name:"Current Circle"})).toContainElement(screen.getByRole("heading", {name:"Circle 237"}));
+    expect(screen.getByRole("link", {name:/Enter Circle 238 · meet its companions/})).toHaveAttribute("href","/council/238");
+    expect(screen.getByRole("region",{name:"Current Circle"})).toContainElement(screen.getByRole("heading", {name:"Circle 238 · Fig-wood Council"}));
     expect(screen.getByRole("region",{name:"Previous Circle 236"})).toContainElement(screen.getByRole("heading", {name:"Circle 236"}));
     const doorway=screen.getByRole("button",{name:"Enter the Circle →"});
     fireEvent.click(screen.getByRole("button",{name:"Fly Agaric"}));
@@ -22,7 +22,7 @@ describe("selective Canopy promotion", () => {
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ block: "start", behavior: "instant" });
     const scrollMock = vi.mocked(Element.prototype.scrollIntoView);
     expect(scrollMock.mock.contexts.at(-1)).toBe(screen.getByRole("region", { name: "Previous Circle 235" }));
-    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "Circle 237" }));
+    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "Circle 238 · Fig-wood Council" }));
     expect(screen.queryByRole("button",{name:"Deck return"})).not.toBeInTheDocument();
     expect(screen.getByRole("link",{name:"Descend to Heartwood Hall →"})).toHaveAttribute("href","/library");
   });

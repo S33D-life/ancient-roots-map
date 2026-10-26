@@ -30,11 +30,11 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
   const item=roster.find(v=>v.key===key);
   function link(href: string, text: string) { return <a href={href} onClick={e=>{e.preventDefault();go(href);}}>{text}</a>; }
   return <main className="circle237">
-    <aside className="review">CIRCLE 237 · OPEN COUNCIL · Explore freely · Offerings are not collected on this page yet</aside>
+    <aside className="review">CIRCLE 237 · PREVIOUS COUNCIL · Explore freely · Offerings are not collected on this page yet</aside>
     {basePath !== PILOT_PATH && <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.HOME}>TETOL</Link></nav>}
     <header><p className="eyebrow">Council of Life · 237 / yOur Blooming Week</p>
       <h1 tabIndex={-1}>{state.view==='invitation'?invitation.title:state.view==='council' ? 'Companions, connected' : `${item?.name} · ${state.view==='record'?'Living Library':state.view==='harvest'?'Future Heartwood':state.view==='twin'?'Spatial twin reference':'Council appearance'}`}</h1>
-      <p>{state.view==='council'?'Ten companions and ten illustrated scenes. Noku returns; new threads gather around her. Visit freely, without a fixed Fire time this week.':'A weekly doorway into a continuing living thread.'}</p>
+      <p>{state.view==='council'?'Ten companions and ten illustrated scenes. Noku returns; new threads gather around her. Previous Circle · no attended Fire or Harvest is asserted.':'A weekly doorway into a continuing living thread.'}</p>
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>

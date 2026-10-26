@@ -13,7 +13,7 @@ test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async
  await page.emulateMedia({reducedMotion:'reduce'}); // Test accessible motion setting; native touch still exercised.
  await context.route('**/*',r=>['127.0.0.1','localhost'].includes(new URL(r.request().url()).hostname)?r.continue():r.abort());
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=237#croom');
- await expect(page.locator('#brandline')).toContainText('Circle 237 · OPEN',{timeout:90000});
+ await expect(page.locator('#brandline')).toContainText('Circle 237 · PREVIOUS',{timeout:90000});
  await expect(page.locator('#panel')).toContainText('Circle 237');
  const d=await page.evaluate(()=>{const d=(window as any).TETOL;return{active:d?.council?.active,question:d?.nodes?.croom?.question,names:d?.council?.circles?.[237]?.companions.map((x:any)=>x.id),old:!!d?.council?.circles?.[233]};});
  expect(d.active).toBe(237);expect(d.question).toBe(manifest.question);expect(d.names).toEqual(roster.map(x=>x.key+'-companion'));expect(d.old).toBe(true);
@@ -46,5 +46,5 @@ test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async
    await page.locator('#panel button[data-go="croom"]').evaluate((el:HTMLElement)=>el.click());
    await expect(page.locator('#panel h2')).toContainText('yOur Blooming Week');
  }
- await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council#next-gathering');
+ await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council#previous-circle-237');
 });

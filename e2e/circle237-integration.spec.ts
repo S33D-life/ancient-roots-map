@@ -17,11 +17,11 @@ test.beforeEach(async({context})=>{
 for(const width of [320,390,1440]){
  test(`Open 237 first, ten encounters, invitation preview, refresh and history at ${width}`,async({page})=>{
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 237');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
   await expect(page.getByRole('region',{name:'Previous Circle 236'})).toContainText('Circle 236');
   await expect(page.getByRole('heading',{name:'Previous Circle · 235'})).toBeVisible();
   await dismissTrail(page);
-  await page.getByRole('link',{name:'Enter Circle 237 · meet its companions →'}).click();
+  await page.getByRole('link',{name:'Revisit Circle 237 · meet its companions →'}).click();
   await expect(page).toHaveURL(/\/council\/237$/);
   await expect(page.locator('img.companion-scene')).toHaveCount(10);
   await expect(page.getByText('Portrait withheld pending clearance',{exact:true})).toHaveCount(0);
@@ -47,7 +47,7 @@ for(const width of [320,390,1440]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:`output/playwright/circle237-integration/${test.info().project.name}-2d-${width}.png`});
   await page.getByRole('link',{name:'Return to the Council Canopy'}).click();
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 237');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
  });
 }
 test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',async({browser})=>{
@@ -57,7 +57,7 @@ test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',asyn
  const page=await context.newPage();const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.getByRole('button',{name:'Dismiss trail',exact:true}).click({timeout:3000}).catch(()=>{});
  await page.getByRole('button',{name:'Council of Life The Canopy'}).click();
- await expect(page.getByRole('link',{name:'Enter Circle 237 in the original 3D TETOL Council Deck →'})).toHaveAttribute('href','/tetol/circle-235/pre-fire/tetol.html?circle=237#croom');
+ await expect(page.getByRole('link',{name:'Revisit Circle 237 in the original 3D TETOL Council Deck →'})).toHaveAttribute('href','/tetol/circle-235/pre-fire/tetol.html?circle=237#croom');
  await expect(page.getByRole('link',{name:'Remember the historical Circle 235 TETOL →'})).toHaveAttribute('href','/tetol/circle-235/pre-fire/tetol.html#croom');
  await page.goto('/council/237?mode=spatial'); // Legacy experimental study tested separately from real TETOL.
  for(const [index,c] of roster.entries()){
