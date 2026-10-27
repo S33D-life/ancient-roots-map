@@ -1,5 +1,7 @@
+import timeTree from '../../public/council/time-tree.json';
+import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import circle238 from '../../public/council/circle-238/companions.json';
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { ROUTES } from "@/lib/routes";
@@ -16,6 +18,9 @@ import "@/components/council/canopy.css";
 
 const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
+  const location = useLocation();
+  const returnEdition = Number(new URLSearchParams(location.search).get('circle'));
+  const selectedEdition = timeTree.editions.some(e => e.number === returnEdition) ? returnEdition : Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237)/)?.[1] || timeTree.current);
   const [deckNode, setDeckNode] = useState<string | null>(null);
   const doorway = useRef<HTMLButtonElement>(null);
   const closeDeck = useRef<HTMLButtonElement>(null);
@@ -25,12 +30,13 @@ const CouncilOfLifePage = () => {
     return () => cancelAnimationFrame(frame);
   }, [deckNode]);
   const deckUrl = CURRENT_CIRCLE.approval === "approved" ? approvedCircleUrl(CURRENT_CIRCLE.links.councilDeck) : undefined;
-  const localDeckUrl = deckUrl ? `${new URL(deckUrl).pathname}?welcome=0#${deckNode || "croom"}` : undefined;
+  const localDeckUrl = deckUrl ? `${new URL(deckUrl).pathname}?circle=235&welcome=0#${deckNode || "croom"}` : undefined;
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("from") !== "spatial-council") return;
-    const frame = requestAnimationFrame(() => document.getElementById(window.location.hash === "#previous-circle-237" ? "previous-circle-237" : "next-gathering")?.scrollIntoView({ block: "start" }));
+    const section = selectedEdition === timeTree.current ? "next-gathering" : selectedEdition === 234 ? "historical-circle-234" : `previous-circle-${selectedEdition}`;
+    const frame = requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [selectedEdition]);
   const returnToCircle = () => {
     setDeckNode(null);
     requestAnimationFrame(() => { doorway.current?.focus({ preventScroll: true }); document.getElementById("previous-circle-235")?.scrollIntoView({ block: "start", behavior: "instant" }); });
@@ -38,6 +44,7 @@ const CouncilOfLifePage = () => {
   return <ParchmentGround realm="canopy" className="canopy-clearing">
     <Header />
     <main className="parchment-main">
+      <CouncilTimeTree number={selectedEdition} />
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
       <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
         <p className="parchment-kicker">CURRENT / OPEN · Monday 26 October 2026</p>
@@ -57,7 +64,7 @@ const CouncilOfLifePage = () => {
         <a className="parchment-action" href={`${TETOL_PAGE}#croom`}>Remember the historical Circle 235 TETOL →</a>
       </section>
       <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">
-        <p className="parchment-kicker">Previous Circle · 236</p>
+        <p className="parchment-kicker">Historical Circle · 236</p>
         <h2 id="circle236-arrival">Circle 236</h2>
         <p>{CURRENT_WEBSITE_CIRCLE.companions.map(companion => companion.label).join(" · ")}</p>
         <Link className="parchment-action" to={CURRENT_WEBSITE_CIRCLE.route}>Revisit Circle 236 · meet its companions →</Link>
@@ -66,9 +73,10 @@ const CouncilOfLifePage = () => {
       </section>
       <div className="canopy-arrival">
         <section id="previous-circle-235" aria-label="Previous Circle 235">
-          <h2>Previous Circle · 235</h2>
+          <h2>Historical Circle · 235</h2>
           <NextCouncilCard historical onJoinCouncil={() => setDeckNode("croom")} onMeetCompanion={setDeckNode} doorwayRef={doorway} deckAvailable={!!deckUrl} />
         </section>
+        <section id="historical-circle-234" aria-label="Historical Circle 234"><h2>Historical Circle · 234</h2><p>Its original companion forms remain in the same Tree. No new encounter, attendance or Fire record is asserted.</p><a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=234#croom">Revisit Circle 234 in the original TETOL →</a></section>
         <TreePlate realm="canopy" />
       </div>
       {deckNode && localDeckUrl && <section className="parchment-deck-frame" id="council-deck-preview" aria-label="Inside the Circle">

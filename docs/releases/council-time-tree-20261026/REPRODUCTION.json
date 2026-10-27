@@ -1,0 +1,62 @@
+[
+  {
+    "baseline": true,
+    "url": "http://127.0.0.1:4178/tetol/circle-235/pre-fire/tetol.html?circle=238#c233now",
+    "active": 233,
+    "realEdition": 235,
+    "current": "c233",
+    "room": "The Council Deck · Circle 238",
+    "panel": "Circle 235",
+    "returnText": "Return to Circle 238",
+    "groups": [
+      "circle_233_companions"
+    ],
+    "signs": [
+      [
+        "CIRCLE 235",
+        "yOur Blooming Week",
+        "The Circle is open now. Times will be shared in the group as each fire is lit. · the Circle is open"
+      ]
+    ]
+  },
+  {
+    "baseline": false,
+    "url": "http://127.0.0.1:4178/tetol/circle-235/pre-fire/tetol.html?circle=238#croom",
+    "active": 238,
+    "realEdition": 238,
+    "current": "c238",
+    "room": "The Council Deck · Circle 238",
+    "panel": "Fig-wood Council",
+    "returnText": "Return to Circle 238",
+    "groups": [
+      "circle_238_companions"
+    ],
+    "signs": [
+      [
+        "CIRCLE 238",
+        "CURRENT / OPEN · Fig-wood Council · no scheduled Fire",
+        "OPEN"
+      ]
+    ]
+  },
+  {
+    "supplemental": "mem231",
+    "hash": "#mem231",
+    "title": "Circle 233"
+  },
+  {
+    "supplemental": "c_records",
+    "hash": "#c_records",
+    "title": "Records chest"
+  },
+  {
+    "supplemental": "staff",
+    "hash": "#staff",
+    "title": "Staff Room"
+  },
+  {
+    "supplemental": "return-current",
+    "url": "http://127.0.0.1:4178/tetol/circle-235/pre-fire/tetol.html?circle=238#croom",
+    "edition": 238
+  }
+]

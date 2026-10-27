@@ -1,0 +1,196 @@
+[
+  {
+    "path": "/tetol/circle-235/pre-fire/tetol.html?circle=238",
+    "status": 200,
+    "url": "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html?circle=238",
+    "sha256": "c44b470f1dac5f863061f19326165b30de6471b13b3b088acf1b435b0efe942d",
+    "bytes": 668914,
+    "headers": {
+      "Content-Type": "text/html; charset=utf-8"
+    },
+    "matchesCurrentWorkingBytes": false,
+    "matchesMain4b": false
+  },
+  {
+    "path": "/tetol/circle-235/pre-fire/loader.js",
+    "status": 200,
+    "url": "https://www.s33d.life/tetol/circle-235/pre-fire/loader.js",
+    "sha256": "12aa7cd564fc6ec54817c6f8dd6972b9d7a60a49df9cfff3c423bbbd531a9cff",
+    "bytes": 16269,
+    "headers": {
+      "Content-Type": "text/javascript; charset=utf-8",
+      "ETag": "\"f4fd677d86dfcb8b9f4e6516f2f727f3\""
+    },
+    "matchesCurrentWorkingBytes": false,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/tetol/circle-235/pre-fire/runtime/entry.js",
+    "status": 200,
+    "url": "https://www.s33d.life/tetol/circle-235/pre-fire/runtime/entry.js",
+    "sha256": "8b2c2db6288470c0a6c1960a49fccb879cfb3a4977c6446e50e6bc325856cb9a",
+    "bytes": 144584,
+    "headers": {
+      "Content-Type": "text/javascript; charset=utf-8",
+      "ETag": "\"6c3b1e4ee63604eb4ab410077063766d\""
+    },
+    "matchesCurrentWorkingBytes": false,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/tetol/circle-235/pre-fire/runtime/companion-frames-238.js",
+    "status": 200,
+    "url": "https://www.s33d.life/tetol/circle-235/pre-fire/runtime/companion-frames-238.js",
+    "sha256": "4114a65866cb34d25835191bca8ca99fe4d33cea3b4bd356468924bd38b6dec9",
+    "bytes": 7371,
+    "headers": {
+      "Content-Type": "text/javascript; charset=utf-8",
+      "ETag": "\"c07c8dcdabb55aeceb3dba6fc8b11f4a\""
+    },
+    "matchesCurrentWorkingBytes": false,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/companions.json",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/companions.json",
+    "sha256": "29b53eada0e63c7111af2d4f7a3a7014c165e8d9feab949fde0fa395a487d44c",
+    "bytes": 6574,
+    "headers": {
+      "Content-Type": "application/json",
+      "ETag": "\"76ca8ec51a789da5f67654c7ab163d00\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/bishop-ely-plane.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/bishop-ely-plane.jpeg",
+    "sha256": "41d5f7f9d308527d46991a0af9dffce69e4ffa587a55740ef5aa5922a251a276",
+    "bytes": 476385,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"1ac68bf41c58e1b214a19538bc7ca6d9\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/fig.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/fig.jpeg",
+    "sha256": "31e88f1fa2831e8fe2357392aa43f3a169a407499ec1f7b6a80b1e9cb7f7dd7d",
+    "bytes": 447465,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"1474c1da066d361e6dcf8151851ebf2e\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/peace-lily.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/peace-lily.jpeg",
+    "sha256": "801f06bc15025de2706b1c856bb1f8650e38b45c1149f3e416eb5389cb53aba7",
+    "bytes": 348031,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"d6e77ead981c08377b1ba31234a6c018\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/goji-seed.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/goji-seed.jpeg",
+    "sha256": "e78f5274c58a3c2db1d421c78a4fca57bc4fb2d9ee975d657ed8ad218ad2ec4a",
+    "bytes": 345540,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"13e7c001b9360d0dcf27fce0eb57c026\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/english-oak-leaf.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/english-oak-leaf.jpeg",
+    "sha256": "9107b3a5b503a53f6076227054217ca9aa49c76ec2b77849287fecb34bd03486",
+    "bytes": 463294,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"6e90d0eea083e09af53fd136ec4420b0\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/saffron.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/saffron.jpeg",
+    "sha256": "233d918c41969dafbdf4b674504d797cddfcc510191b41dc2cac4086a09729da",
+    "bytes": 358703,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"cfe01281f114f11caca4581e229a2e23\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/goji-fruit.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/goji-fruit.jpeg",
+    "sha256": "a15138cc9bd5bf2c716beccf04565d818bb4d3d699e3fe8cbb4aef758a63a9be",
+    "bytes": 368154,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"5412ab0e02f42d8c528d12542a7a1a87\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/hen-of-the-woods.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/hen-of-the-woods.jpeg",
+    "sha256": "2faa1ff0777f2cd41e02035fe06eb706cbf9fc9eaa852fe45b0f10f98565926d",
+    "bytes": 438128,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"50b792606593cfede8871a651b506279\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/the-hobbit.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/the-hobbit.jpeg",
+    "sha256": "5f737a6286e482277e639d05e1e976f49fe5fb9e8c947c53b831ec656a723ce3",
+    "bytes": 392279,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"d92bcf97d38d46c00c7f1ae1395bd960\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  },
+  {
+    "path": "/council/circle-238/portraits/hoopoe.jpeg",
+    "status": 200,
+    "url": "https://www.s33d.life/council/circle-238/portraits/hoopoe.jpeg",
+    "sha256": "7ad8038cecbb2dc4f594d3b2a9915be108c2ceb25ec0375c53f3a0f6f4396d14",
+    "bytes": 342748,
+    "headers": {
+      "Content-Type": "image/jpeg",
+      "ETag": "\"934562825bd151f626d3685680c4f827\""
+    },
+    "matchesCurrentWorkingBytes": true,
+    "matchesMain4b": true
+  }
+]

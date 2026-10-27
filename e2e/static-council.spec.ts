@@ -12,7 +12,7 @@ for (const width of [1280, 390]) test(`static Council Deck arrival and return at
     return ["127.0.0.1", "localhost"].includes(url.hostname) ? route.continue() : route.abort();
   });
   if (!process.env.STATIC_COUNCIL_FULL_RENDERER) {
-    await page.route("**/runtime/entry.js", async route => {
+    await page.route("**/runtime/entry.js*", async route => {
       const response = await route.fetch();
       const source = await response.text();
       const boundary = source.indexOf("/* ---------- 3D rendering layer ---------- */");
@@ -22,7 +22,7 @@ for (const width of [1280, 390]) test(`static Council Deck arrival and return at
   }
   await page.goto("/tetol/circle-235/pre-fire/tetol.html?welcome=0#croom");
   const back = page.locator("#council-return");
-  await expect(back).toHaveAttribute("href", "/council-of-life?from=spatial-council#next-gathering");
+  await expect(back).toHaveAttribute("href", "/council-of-life?from=spatial-council&circle=235#previous-circle-235");
   await expect(page.locator("#panel")).toContainText("What is already blooming in us");
   await expect(page).toHaveURL(/#croom$/);
   const join = await page.evaluate(() => (window as any).S33D_COUNCIL.circles[235].join_link.href);
@@ -30,5 +30,5 @@ for (const width of [1280, 390]) test(`static Council Deck arrival and return at
   await expect(back).toBeVisible();
   await back.click();
   await expect(page).toHaveURL(/council-of-life\?from=spatial-council/);
-  await expect(page.locator("#next-gathering")).toBeInViewport();
+  await expect(page.locator("#previous-circle-235")).toBeInViewport();
 });
