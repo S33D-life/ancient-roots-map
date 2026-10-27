@@ -84,8 +84,14 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
   await page.getByRole('button',{name:'Enter the Circle →',exact:true}).click();
   const historical=page.frameLocator('#council-deck-preview iframe');
   await expect(historical.locator('#council-time-tree')).toContainText('Circle 235',{timeout:30000});
+  const treeFrame=page.frames().find(f=>f.url().includes('tetol.html'))!;await waitForScene(treeFrame);
   if(await historical.locator('#grab').isVisible())await historical.locator('#grab').click();
-  else await historical.locator('#panel').hover();
+  else {
+   // The preserved desktop Grace arrival hides the panel until a deliberate gesture.
+   // A real key wakes it; do not force a click through the original Tree.
+   await historical.locator('body').press('Tab');
+   await historical.locator('#panel').hover();
+  }
   await historical.locator('#council-time-tree a[rel=next]').click();
   await expect(page).toHaveURL(/tetol\.html\?circle=236#croom$/);
   await waitForScene(page);await assertEdition(page,236);
