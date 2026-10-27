@@ -115,5 +115,6 @@ jobs:
           name: playwright-report
           path: |
             test-results
+            output/playwright/circle237-integration
             playwright-report
           retention-days: 7

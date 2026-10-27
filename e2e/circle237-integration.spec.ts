@@ -19,7 +19,7 @@ for(const width of [320,390,1440]){
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
   await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
   await expect(page.getByRole('region',{name:'Previous Circle 236'})).toContainText('Circle 236');
-  await expect(page.getByRole('heading',{name:'Previous Circle · 235'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Historical Circle · 235'})).toBeVisible();
   await dismissTrail(page);
   await page.getByRole('link',{name:'Revisit Circle 237 · meet its companions →'}).click();
   await expect(page).toHaveURL(/\/council\/237$/);await expect(page).toHaveTitle(/237 · Previous/);await expect(page.locator('aside.review')).toContainText('PREVIOUS COUNCIL');
@@ -83,12 +83,12 @@ test('unknown identity and return URL cannot open private material; loaded2D sur
  await page.getByRole('link',{name:'Return to Circle 237 · Fly Agaric'}).click();
  await expect(page.getByRole('button',{name:'Meet Fly Agaric',exact:true})).toBeFocused();
 });
-for (const width of [320,390,1440]) test(`Circle236 remains OPEN with seven companions at ${width}`,async({page})=>{
+for (const width of [320,390,1440]) test(`Circle236 preserves its historical OPEN status with seven companions at ${width}`,async({page})=>{
  await page.setViewportSize({width,height:900});await page.goto('/council-of-life');await dismissTrail(page);
  await expect(page.getByRole('region',{name:'Previous Circle 235'})).toContainText('What is already blooming in us');
  await page.getByRole('link',{name:'Revisit Circle 236 · meet its companions →'}).click();
- await expect(page.getByText('Canopy · OPEN')).toBeVisible();
+ await expect(page.getByText('Canopy · HISTORICAL · OPEN at the time')).toBeVisible();
  await expect(page.locator('.circle-companion-frames figure')).toHaveCount(7);
  await expect(page.getByText('Fire reference · past date.',{exact:false})).toBeVisible();
- await page.reload();await expect(page.getByText('Canopy · OPEN')).toBeVisible();
+ await page.reload();await expect(page.getByText('Canopy · HISTORICAL · OPEN at the time')).toBeVisible();
 });
