@@ -23,7 +23,7 @@ async function assertEdition(page:any,n:number){
  await expect(page.locator('#panel h2')).toContainText(n===238?'The Council of Life':n===237?'Blooming':`Circle ${n}`);
  const state=await page.evaluate(()=>{const D=(window as any).TETOL,stage=document.querySelector('three-d-stage') as any,groups:any[]=[],signs:any[]=[];stage._scene.traverse((m:any)=>{if(/^circle_\d+_companions$/.test(m.name)&&m.visible)groups.push(m.name);if(m.name==='current_circle_identity_at_doorway')signs.push(m.material.map.image.__paintedText);});return {active:D.council.circles[D.council.active].number,current:D.nodes[D.council.current].name,question:D.nodes.croom.question,groups,signs};});
  if(n===236)expect(state.question).toBeNull();
- expect(state.active).toBe(n);expect(state.current).toBe(`Circle ${n}`);expect(state.groups).toHaveLength(1);expect(state.signs.flat()).toContain(`CIRCLE ${n}`);
+ expect(state.active).toBe(n);expect(state.current).toBe(n===238?'StarPod Circle 238':`Circle ${n}`);expect(state.groups).toHaveLength(1);expect(state.signs.flat()).toContain(n===238?'STARPOD CIRCLE 238':`CIRCLE ${n}`);
 }
 for(const n of [238,237,236,235,234])test(`Circle ${n}: original sign, companions, legacy current ring, refresh and Staff Room`,async({page})=>{
  await page.setViewportSize({width:390,height:844});
