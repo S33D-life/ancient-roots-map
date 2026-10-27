@@ -48,7 +48,7 @@ const CouncilOfLifePage = () => {
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
       <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
         <p className="parchment-kicker">CURRENT / OPEN · Monday 26 October 2026</p>
-        <h2>Circle 238 · Fig-wood Council</h2>
+        <h2>The Council of Life · yOur Blooming Week · StarPod Circle 238</h2>
         <p>{circle238.question}</p><p>Ten companions, with two distinct Goji doors for seed and fruit. Open all week · no scheduled Fire.</p>
         <p>Ten scene-only Fig-wood illustrations are ready to review; publication and illustrated-PDF review continue.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE238}>Enter Circle 238 · meet its companions →</Link>
