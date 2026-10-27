@@ -90,6 +90,10 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
    // The preserved desktop Grace arrival hides the panel until a deliberate gesture.
    // A real key wakes it; do not force a click through the original Tree.
    await historical.locator('body').press('Tab');
+   // After an idle software-rendered arrival, move the real pointer into the frame
+   // before hover's actionability check: the preserved stillness hides hit targets.
+   const box=await historical.locator('#panel').boundingBox();expect(box).not.toBeNull();
+   await page.mouse.move(box!.x+20,box!.y+20);
    await historical.locator('#panel').hover();
   }
   await historical.locator('#council-time-tree a[rel=next]').click();
