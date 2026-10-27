@@ -1,6 +1,6 @@
 /**
- * ImmutableTreeCard — sacred, permanent display for trees
- * that have been anchored as Immutable Ancient Friends.
+ * ImmutableTreeCard — displays existing records with stored immutable status.
+ * Stored identifiers are not independently verified anchor evidence.
  */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,7 +71,7 @@ const ImmutableTreeCard = ({ tree, onMapNavigate }: ImmutableTreeProps) => {
             <div className="flex items-center gap-2 mb-1">
               <Lock className="w-3.5 h-3.5 text-[hsl(42_80%_55%)] shrink-0" />
               <Badge className="text-[9px] px-1.5 py-0 bg-[hsl(42_80%_50%/0.15)] text-[hsl(42_80%_55%)] border-[hsl(42_80%_50%/0.3)]">
-                Immutable Ancient Friend
+                Recorded status: immutable
               </Badge>
             </div>
             <CardTitle className="text-base font-serif text-foreground truncate">
@@ -115,10 +115,13 @@ const ImmutableTreeCard = ({ tree, onMapNavigate }: ImmutableTreeProps) => {
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(42_80%_55%)]" />
             <p className="text-[10px] font-serif font-medium text-[hsl(42_80%_55%)] tracking-wider uppercase">
-              Recorded in the Eternal Grove
+              Stored record metadata
             </p>
           </div>
 
+          <p className="text-[10px] text-muted-foreground">
+            Anchor proof has not been verified by this interface. Existing metadata is retained for review.
+          </p>
           <div className="grid grid-cols-1 gap-1.5 text-[11px]">
             {tree.immutable_record_id && (
               <div className="flex items-center gap-2">
@@ -133,7 +136,7 @@ const ImmutableTreeCard = ({ tree, onMapNavigate }: ImmutableTreeProps) => {
             {anchorDate && (
               <div className="flex items-center gap-2">
                 <Calendar className="w-3 h-3 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">Anchored:</span>
+                <span className="text-muted-foreground">Stored anchor date:</span>
                 <span className="text-foreground">{anchorDate}</span>
               </div>
             )}
