@@ -7,7 +7,7 @@ const show=(id:string)=>{const d=data();document.body.innerHTML='<a id="council-
 afterEach(()=>{document.body.replaceChildren();document.body.className='';delete document.body.dataset.sheet;vi.restoreAllMocks();});
 describe('Current Council companion navigation',()=>{
  it('uses the canonical ten identities in manifest order with a direct non-WebGL choice',()=>{
-  show('croom');expect([...document.querySelectorAll('select option')].slice(1).map(o=>(o as HTMLOptionElement).value)).toEqual(manifest.companions.map(c=>c.id));
+  show('croom');expect(document.querySelector('#pname')?.textContent).toBe('The Council of Life');expect(document.querySelector('.psub')?.textContent).toBe('yOur Blooming Week · StarPod Circle 238 · CURRENT / OPEN');expect([...document.querySelectorAll('select option')].slice(1).map(o=>(o as HTMLOptionElement).value)).toEqual(manifest.companions.map(c=>c.id));
   expect(document.querySelector('#companion-start')?.getAttribute('data-go')).toBe(manifest.companions[0].id);
   expect(document.querySelector('.companion-question')?.textContent).toBe(manifest.question);
  });

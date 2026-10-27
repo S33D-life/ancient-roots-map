@@ -14,7 +14,7 @@ export default function Circle238Page(){
  return <main className="circle237">
   <CouncilTimeTree number={238} />
   <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.CIRCLE237}>Previous Circle · 237</Link></nav>
-  <header><p className="eyebrow">CURRENT / OPEN · Monday 26 October 2026 · Europe/London</p><h1 tabIndex={-1}>Circle 238 · Fig-wood Council</h1><p>Ten companions to notice and learn with. Visit at your own pace.</p><p>{manifest.question}</p><p>Open all week · no scheduled Fire.</p></header>
+  <header><p className="eyebrow">CURRENT / OPEN · Monday 26 October 2026 · Europe/London</p><h1 tabIndex={-1}>The Council of Life · yOur Blooming Week · StarPod Circle 238</h1><p>Ten companions to notice and learn with. Visit at your own pace.</p><p>{manifest.question}</p><p>Open all week · no scheduled Fire.</p></header>
   <a href={spatial}>Enter the original immersive TETOL Canopy →</a>
   <p role="status">Ten scene-only illustrations are available for review. Original text panels and nameplates remain excluded; publication review continues.</p>
   {selected?<section aria-label="Companion encounter"><h2 tabIndex={-1}>{selected.label}</h2><p>{selected.kind}</p><p>{selected.accuracyNote}</p><img className="companion-scene" src={selected.artwork} width={selected.width} height={selected.height} alt={selected.label+" — generated scene illustration"} style={{width:"100%",height:"auto"}} /><button onClick={()=>setQuery({returned:selected.key})}>Return to Circle 238</button><a href={spatial.replace('#croom','#'+selected.id)}>Meet this companion in the original TETOL →</a></section>:
