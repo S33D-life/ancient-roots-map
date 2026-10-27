@@ -30,7 +30,7 @@ for (const width of [1280, 390]) {
     await page.getByRole("link", { name: "Revisit Circle 236 · meet its companions →" }).click();
     await expect(page).toHaveURL(/\/review\/council\/236$/);
     await expect(page.getByRole("heading", { name: "Circle 236" })).toBeVisible();
-    await expect(page.getByText("Canopy · OPEN")).toBeVisible();
+    await expect(page.getByText("Canopy · HISTORICAL · OPEN at the time")).toBeVisible();
     const fire = page.getByRole("region", { name: "Circle 236 Council Fire" });
     await expect(fire.getByText("Tuesday 13 October · 19:30 UK")).toBeVisible();
     await expect(fire.getByRole("link", { name: "Gather at the Fire · Council group →" })).toBeVisible();

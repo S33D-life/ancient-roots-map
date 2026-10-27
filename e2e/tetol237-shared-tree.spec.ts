@@ -60,5 +60,5 @@ test('The ORIGINAL TETOL Tree opens Circle 237 with ten hanging portraits',async
      expect(missing).toEqual([]);
    }
  }
- await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council#previous-circle-237');
+ await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council&circle=237#previous-circle-237');
 });
