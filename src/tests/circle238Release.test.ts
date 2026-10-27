@@ -33,6 +33,6 @@ describe('Circle 238 source, privacy and archive contract',()=>{
   expect(runtime).not.toMatch(/remains open for visits all week|asserted this week/);
  });
  it('uses the original shared engine and keeps placeholders out of texture loading',()=>{
-  const source=readFileSync('public/tetol/circle-235/pre-fire/runtime/entry.js','utf8');expect(source).toContain("import('./companion-frames-238.js')");expect(source).toContain('repr.artwork ? new THREE.TextureLoader()');
+  const source=readFileSync('public/tetol/circle-235/pre-fire/runtime/entry.js','utf8');expect(source).toMatch(/import\('\.\/companion-frames-238\.js(?:\?v=[^']+)?'\)/);expect(source).toContain('repr.artwork ? new THREE.TextureLoader()');
  });
 });

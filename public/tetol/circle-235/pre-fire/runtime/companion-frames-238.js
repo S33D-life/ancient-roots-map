@@ -1,3 +1,5 @@
+import {renderCompanionPanel, installCompanionNavigation} from './companion-navigation-238.js?v=companion-nav-126-20261027';
+export {decoratePanel, labelGrab, setNavigationContext, afterNavigation} from './companion-navigation-238.js?v=companion-nav-126-20261027';
 /** Circle 238 inside the original immersive TETOL Tree (not the isolated frame-gallery experiment).
  *  The original Circle 235 directory remains immutable and visitable as history.
  *  The 10 scene-only crops are read from the same approved 2D release manifest's exported static roster.
@@ -37,17 +39,10 @@ export async function installCompanionFrames(D) {
   if(brand){const label='TETOL · Circle 238 · OPEN · ten companions';brand.textContent=label;new MutationObserver(()=>{if(brand.textContent!==label)brand.textContent=label;}).observe(brand,{childList:true});}
   const ret=document.getElementById('council-return');
   if(ret){ret.href='/council-of-life?from=spatial-council#next-gathering';ret.target='_top';ret.textContent='Return to Circle 238';}
+  installCompanionNavigation();
   return circle;
 }
-export function companionPanel(D,id,esc) {
-  const items=D.circleFrameCompanions||[];
-  const c=items.find(c=>c.id===id);
-  if(!c && id!=='croom' && id!=='c238') return null;
-  const link=(id,label)=>'<button type="button" class="act" data-go="'+id+'">'+esc(label)+'</button>';
-  return '<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Explore Council 238"><i></i></button><div class="pbody"><p class="eyebrow">Circle 238 · Open Council</p><h2 class="pname">'+(c?esc(c.label):'Fig-wood Council')+'</h2><p class="psub">'+esc(QUESTION_COPY)+'</p>'
-    +(c?(c.artwork?'<img data-circle-artwork="'+c.id+'" src="'+c.artwork+'" alt="'+esc(c.label)+' — illustrated companion" style="width:100%;height:auto;border-radius:8px">':'<p data-artwork-pending>Scene illustration awaiting verification</p>')+'<p>'+esc(c.kind)+' · Artistic interpretation, not field evidence.</p>'+(c.accuracyNote?'<p>'+esc(c.accuracyNote)+'</p>':'')+link('croom','Return to the Council Deck'):items.map(c=>link(c.id,c.label)).join(''))
-    +'<a class="act" target="_top" href="/council/238">Visit the 2D Circle 238 →</a><a class="act" target="_top" href="/council-of-life">Return to the Canopy →</a><a class="act" href="https://t.me/s33dlife" target="_blank" rel="noopener noreferrer">Council community · Telegram (not a Fire room)</a></div>';
-}
+export function companionPanel(D,id,esc) { return renderCompanionPanel(D,id,esc); }
 // Hanging scene portraits are the companion representations in this edition.
 // Earlier Circle-specific symbolic presences are preserved in historical editions.
 export function buildCompanionPresence(){return null;}

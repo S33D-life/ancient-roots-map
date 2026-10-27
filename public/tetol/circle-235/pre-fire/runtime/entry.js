@@ -11,7 +11,7 @@ let timeTree;
 try {
 if (!window.S33D_SHEET_GESTURE_READY) throw new Error('Council loader and runtime versions do not match');
 if (![234,235,236,237,238].includes(selectedCircle)) throw new Error('Unsupported Council edition');
-companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : null;
+companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js?v=companion-nav-126-20261027') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
 timeTree = await installTimeTree(D, selectedCircle);
 } catch (error) {
@@ -113,8 +113,9 @@ function renderTime(num, compact) {
 }
 function renderPanel() {
   const id = state.current, n = D.nodes[id];
+  companionFrames?.setNavigationContext?.(D,id);
   const framedPanel = timeTree.historicalPanel(id, esc) || companionFrames?.companionPanel(D, id, esc);
-  if (framedPanel) { $('#panel').innerHTML = framedPanel; timeTree.decoratePanel(); $('#panel').scrollTop = 0; return; }
+  if (framedPanel) { $('#panel').innerHTML = framedPanel; timeTree.decoratePanel(); companionFrames?.decoratePanel?.(D,id); $('#panel').scrollTop = 0; return; }
   const crumbs = pathOf(id).map((p, i, a) => i === a.length - 1
     ? `<span aria-current="location">${esc(shortName(p))}</span>`
     : `<button type="button" data-go="${p}">${esc(shortName(p))}</button><span aria-hidden="true">›</span>`).join('');
@@ -179,7 +180,7 @@ function renderPanel() {
   timeTree.decoratePanel();
 }
 const SHEET = ['peek', 'mid', 'full'];
-function setSheet(s) { document.body.dataset.sheet = s; const g = $('#grab'); if (g) { g.setAttribute('aria-expanded', s !== 'peek'); g.setAttribute('aria-label', s === 'full' ? 'Lower the panel' : 'Show more about this place'); } }
+function setSheet(s) { document.body.dataset.sheet = s; const g = $('#grab'); if (g) { g.setAttribute('aria-expanded', s !== 'peek'); g.setAttribute('aria-label', s === 'full' ? 'Lower the panel' : 'Show more about this place'); } companionFrames?.labelGrab?.(D,state.current); }
 
 function renderList() {
   const item = (id) => { const n = D.nodes[id];
@@ -202,7 +203,7 @@ function go(id, { push = true, focus = true } = {}) {
   if (!id || !D.nodes[id]) return;
   if (quietEnd) quietEnd();
   if (X.D) document.body.dataset.sheet = 'peek';
-  const prev = state.current;
+  const prev = state.current, previousFocus = document.activeElement?.id;
   if (state.thread != null) { const st = D.thread.steps; const next = st.findIndex((step, i) => i > state.thread && step.id === id); if (next !== -1) state.thread = next; }
   if (id !== 'overview') $('#hint')?.classList.add('gone');
   setRealm(id); syncHash(id, push);
@@ -210,6 +211,7 @@ function go(id, { push = true, focus = true } = {}) {
   state.current = id;
   renderPanel(); renderList(); renderLineage(); scene3d?.select(id, prev);
   if (focus && !mobileSheet()) $('#pname')?.focus({ preventScroll: true });
+  companionFrames?.afterNavigation?.(D,id,prev,setSheet,previousFocus);
 }
 function back() { if (state.history.length) go(state.history.pop(), { push: false }); }
 
@@ -221,6 +223,9 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#home')) go('overview');
   if (e.target.closest('#startthread')) { state.thread = 0; renderPanel(); $('#panel .next')?.focus(); }
   if (e.target.closest('#leavethread') || e.target.closest('#endthread')) { state.thread = null; renderPanel(); }
+});
+document.addEventListener('change', (e) => {
+  if (e.target instanceof Element && e.target.matches('[data-companion-choice]') && D.circleFrameCompanions?.some(c => c.id === e.target.value)) go(e.target.value);
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') back(); });
 
@@ -311,6 +316,7 @@ let scene3d = null; const stage = document.querySelector('three-d-stage');
 const startAt = hashId();
 if (startAt) { state.current = startAt; syncHash(startAt); setRealm(startAt); }
 renderPanel(); renderList(); renderLineage();
+companionFrames?.afterNavigation?.(D,state.current,null,setSheet,null);
 if (!window.WebGLRenderingContext) setMode('list');
 
 /* ---------- 3D rendering layer ---------- */
