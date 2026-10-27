@@ -20,7 +20,7 @@ test.beforeEach(async({context,page})=>{
 });
 async function assertEdition(page:any,n:number){
  await expect(page.locator('#council-time-tree')).toContainText(`Circle ${n}`);
- await expect(page.locator('#panel h2')).toContainText(n===238?'Fig-wood':n===237?'Blooming':`Circle ${n}`);
+ await expect(page.locator('#panel h2')).toContainText(n===238?'The Council of Life':n===237?'Blooming':`Circle ${n}`);
  const state=await page.evaluate(()=>{const D=(window as any).TETOL,stage=document.querySelector('three-d-stage') as any,groups:any[]=[],signs:any[]=[];stage._scene.traverse((m:any)=>{if(/^circle_\d+_companions$/.test(m.name)&&m.visible)groups.push(m.name);if(m.name==='current_circle_identity_at_doorway')signs.push(m.material.map.image.__paintedText);});return {active:D.council.circles[D.council.active].number,current:D.nodes[D.council.current].name,question:D.nodes.croom.question,groups,signs};});
  if(n===236)expect(state.question).toBeNull();
  expect(state.active).toBe(n);expect(state.current).toBe(`Circle ${n}`);expect(state.groups).toHaveLength(1);expect(state.signs.flat()).toContain(`CIRCLE ${n}`);
