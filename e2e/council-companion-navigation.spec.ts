@@ -1,3 +1,4 @@
+import {companionLore} from '../public/tetol/circle-235/pre-fire/runtime/companion-lore-238.js';
 import {test,expect,type Page} from '@playwright/test';
 import manifest from '../public/council/circle-238/companions.json' with {type:'json'};
 import {disconnectedTransport} from './fixtures/circle237-disconnected-transport';
@@ -14,7 +15,7 @@ async function encounter(page:Page,index:number){
  const c=manifest.companions[index];await expect(page).toHaveURL(new RegExp('#'+c.id+'$'));
  await expect(page.locator('#panel h2')).toHaveText(c.label);await expect(page.locator('#panel .psub')).toHaveText(`${index+1} of 10 · ${c.kind} · Illustration`);
  await expect(page.locator('#panel img[data-circle-artwork]')).toHaveAttribute('src',c.artwork);
- await expect(page.locator('#panel')).toContainText(c.accuracyNote);await expect(page.locator('body')).toHaveAttribute('data-sheet','mid');
+ await expect(page.locator('#panel')).toContainText(companionLore[c.key].text);await expect(page.locator('body')).toHaveAttribute('data-sheet','mid');
 }
 for(const [width,height] of [[320,844],[390,844],[430,932],[844,390],[1440,900]])test(`Clear entrance and bounded companion navigation at ${width}×${height}`,async({page},info)=>{
  if(width===390)test.setTimeout(150_000);

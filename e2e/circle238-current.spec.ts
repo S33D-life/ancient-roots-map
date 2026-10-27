@@ -1,3 +1,4 @@
+import {companionLore} from '../public/tetol/circle-235/pre-fire/runtime/companion-lore-238.js';
 import {test,expect} from '@playwright/test';
 import manifest from '../public/council/circle-238/companions.json' with {type:'json'};
 import {disconnectedTransport} from './fixtures/circle237-disconnected-transport';
@@ -13,7 +14,7 @@ for(const width of [320,390,1440])test(`238 current, 237 previous, ten 2D encoun
  await page.getByRole('link',{name:'Enter Circle 238 · meet its companions →'}).click();
  await expect(page.getByRole('heading',{name:'The Council of Life · yOur Blooming Week · StarPod Circle 238'})).toBeVisible();await expect(page.locator('header')).toContainText(manifest.question);await expect(page.locator('header')).toContainText('no scheduled Fire');
  await expect(page.locator('img.companion-scene')).toHaveCount(10);for(const image of await page.locator('img.companion-scene').all()){await image.scrollIntoViewIfNeeded();await expect(image).toHaveJSProperty('naturalWidth',1120);}
- for(const c of manifest.companions){await page.getByRole('button',{name:'Meet '+c.label,exact:true}).click();await expect(page.getByRole('region',{name:'Companion encounter'})).toContainText(c.accuracyNote);await page.reload();await page.getByRole('button',{name:'Return to Circle 238',exact:true}).click();await expect(page.getByRole('button',{name:'Meet '+c.label,exact:true})).toBeFocused();}
+ for(const c of manifest.companions){await page.getByRole('button',{name:'Meet '+c.label,exact:true}).click();await expect(page.getByRole('region',{name:'Companion encounter'})).toContainText(companionLore[c.key].text);await page.reload();await page.getByRole('button',{name:'Return to Circle 238',exact:true}).click();await expect(page.getByRole('button',{name:'Meet '+c.label,exact:true})).toBeFocused();}
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`output/playwright/circle238/2d-${width}.png`,fullPage:true});
  await page.goto('/council/238?companion=private-person&return=https://evil.invalid');await expect(page.getByRole('button',{name:'Meet Fig',exact:true})).toBeVisible();

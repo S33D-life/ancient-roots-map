@@ -1,3 +1,4 @@
+import {companionLore} from '../../public/tetol/circle-235/pre-fire/runtime/companion-lore-238.js';
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import manifest from '../../public/council/circle-238/companions.json';
 import {renderCompanionPanel,decoratePanel,labelGrab,setNavigationContext,afterNavigation} from '../../public/tetol/circle-235/pre-fire/runtime/companion-navigation-238.js';
@@ -6,6 +7,10 @@ const esc=(s:string)=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>
 const show=(id:string)=>{const d=data();document.body.innerHTML='<a id="council-return" href="/council-of-life?from=spatial-council&circle=238#next-gathering"></a><aside id="panel">'+renderCompanionPanel(d,id,esc)+'</aside>';return d;};
 afterEach(()=>{document.body.replaceChildren();document.body.className='';delete document.body.dataset.sheet;vi.restoreAllMocks();});
 describe('Current Council companion navigation',()=>{
+ it('gives all ten companions shared names and lore while keeping review metadata separate',()=>{
+  expect(Object.keys(companionLore)).toEqual(manifest.companions.map(c=>c.key));
+  for(const c of manifest.companions){show(c.id);expect(document.querySelector('#panel')?.textContent).toContain(companionLore[c.key].name);expect(document.querySelector('#panel')?.textContent).not.toContain(c.accuracyNote);expect(c.accuracyNote).toBeTruthy();}
+ });
  it('uses the canonical ten identities in manifest order with a direct non-WebGL choice',()=>{
   show('croom');expect(document.querySelector('#pname')?.textContent).toBe('The Council of Life');expect(document.querySelector('.psub')?.textContent).toBe('yOur Blooming Week · StarPod Circle 238 · CURRENT / OPEN');expect([...document.querySelectorAll('select option')].slice(1).map(o=>(o as HTMLOptionElement).value)).toEqual(manifest.companions.map(c=>c.id));
   expect(document.querySelector('#companion-start')?.getAttribute('data-go')).toBe(manifest.companions[0].id);
@@ -18,7 +23,7 @@ describe('Current Council companion navigation',()=>{
    expect(document.querySelector('#companion-next')?.getAttribute('data-go')).toBe(manifest.companions[i+1]?.id||null);
    expect((document.querySelector('#companion-previous') as HTMLButtonElement).disabled).toBe(i===0);
    expect((document.querySelector('#companion-next') as HTMLButtonElement).disabled).toBe(i===9);
-   expect(document.querySelector('img')?.getAttribute('src')).toBe(c.artwork);expect(document.querySelector('#panel')?.textContent).toContain(c.accuracyNote);
+   expect(document.querySelector('img')?.getAttribute('src')).toBe(c.artwork);expect(document.querySelector('#panel')?.textContent).toContain(companionLore[c.key].text);
    expect(document.querySelector('#companion-gathering')?.getAttribute('data-go')).toBe('croom');
   }
  });

@@ -1,5 +1,5 @@
-import {renderCompanionPanel, installCompanionNavigation} from './companion-navigation-238.js?v=companion-nav-126-20261027';
-export {decoratePanel, labelGrab, setNavigationContext, afterNavigation} from './companion-navigation-238.js?v=companion-nav-126-20261027';
+import {renderCompanionPanel, installCompanionNavigation} from './companion-navigation-238.js?v=companion-lore-238-20261027';
+export {decoratePanel, labelGrab, setNavigationContext, afterNavigation} from './companion-navigation-238.js?v=companion-lore-238-20261027';
 /** Circle 238 inside the original immersive TETOL Tree (not the isolated frame-gallery experiment).
  *  The original Circle 235 directory remains immutable and visitable as history.
  *  The 10 scene-only crops are read from the same approved 2D release manifest's exported static roster.

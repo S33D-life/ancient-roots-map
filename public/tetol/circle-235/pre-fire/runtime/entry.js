@@ -11,7 +11,7 @@ let timeTree;
 try {
 if (!window.S33D_SHEET_GESTURE_READY) throw new Error('Council loader and runtime versions do not match');
 if (![234,235,236,237,238].includes(selectedCircle)) throw new Error('Unsupported Council edition');
-companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js?v=companion-nav-126-20261027') : null;
+companionFrames = framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js?v=companion-lore-238-20261027') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
 timeTree = await installTimeTree(D, selectedCircle);
 } catch (error) {
