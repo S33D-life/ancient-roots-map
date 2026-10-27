@@ -868,7 +868,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "rootstones", label: "🪨 Rootstones", active: showRootstones, toggle: () => toggle("rootstones"), extra: showRootstones ? `${rootstoneCount}` : "198" },
         { key: "rootstones-trees", label: "🌳 Rootstone Trees", active: showRootstoneTrees, toggle: () => toggle("rootstoneTrees"), extra: "33x3" },
         { key: "rootstones-groves", label: "🌲 Rootstone Groves", active: showRootstoneGroves, toggle: () => toggle("rootstoneGroves"), extra: "33x3" },
-        { key: "immutable", label: "🔱 Minted Sigils", active: showImmutableLayer, toggle: () => toggle("immutableLayer"), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
+        { key: "immutable", label: "🔱 Legacy Immutable Status", active: showImmutableLayer, toggle: () => toggle("immutableLayer"), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
         { key: "external", label: "🗺️ Distant Groves", active: showExternalTrees, toggle: () => toggle("externalTrees"), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
         { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { toggle("waterways"); if (!showWatersCommons) setLayer("watersCommons", true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "210, 35%, 75%" },
         { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => toggle("watersCommons"), accent: "145, 50%, 50%" },
@@ -1750,7 +1750,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           <div style="padding:10px 14px 6px;background:linear-gradient(135deg,hsla(42,50%,30%,0.2),hsla(42,60%,20%,0.05));">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
               <span style="font-size:16px;">🔱</span>
-              <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,55%);border:1px solid hsla(42,80%,50%,0.3);">Immutable Ancient Friend</span>
+              <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,55%);border:1px solid hsla(42,80%,50%,0.3);">Stored status: immutable · proof unverified</span>
             </div>
             <h3 style="margin:0;font-size:15px;color:hsl(42,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(name)}</h3>
             <p style="margin:2px 0 0;font-size:11px;color:hsl(42,50%,50%);font-style:italic;">${escapeHtml(rt.species_scientific)}</p>
@@ -1759,9 +1759,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             <p style="margin:0;font-size:10px;color:hsl(35,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(rt.locality_text)}${rt.province ? `, ${escapeHtml(rt.province)}` : ''}</p>
             ${rt.description ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(rt.description.substring(0, 150))}</p>` : ''}
             <div style="margin-top:6px;padding:6px 8px;background:hsla(42,30%,15%,0.4);border-radius:6px;border:1px solid hsla(42,80%,50%,0.2);">
-              <p style="margin:0;font-size:9px;color:hsl(42,80%,55%);font-family:sans-serif;">✦ Recorded in the Eternal Grove</p>
+              <p style="margin:0;font-size:9px;color:hsl(42,80%,55%);font-family:sans-serif;">✦ Stored metadata · anchor proof unverified</p>
               ${rt.immutable_record_id ? `<p style="margin:2px 0 0;font-size:9px;color:hsl(42,50%,50%);font-family:monospace;">Record: ${escapeHtml(rt.immutable_record_id)}</p>` : ''}
-              ${anchorDate ? `<p style="margin:2px 0 0;font-size:9px;color:hsl(42,50%,50%);font-family:sans-serif;">Anchored: ${anchorDate}</p>` : ''}
+              ${anchorDate ? `<p style="margin:2px 0 0;font-size:9px;color:hsl(42,50%,50%);font-family:sans-serif;">Stored anchor date: ${anchorDate}</p>` : ''}
             </div>
           </div>
         </div>`;
