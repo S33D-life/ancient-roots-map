@@ -1,6 +1,8 @@
 import {test,expect} from '@playwright/test';
 test.beforeEach(async({context})=>{await context.route('**/*',r=>{const u=new URL(r.request().url());return u.hostname==='127.0.0.1'&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort();});});
 for(const host of ['2d','deck'])test(`${host}: ring, separate privacy, honest receipt, focus and next companion`,async({page},info)=>{
+ // Two complete Deck offering/return journeys plus screenshots exceed 90s on CI software WebGL.
+ if(host==='deck')test.setTimeout(180_000);
  await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
  const writes:string[]=[],errors:string[]=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`/review/council-offerings.html?companion=bishop-ely-plane${host==='deck'?'&view=deck':''}`);
