@@ -11,7 +11,14 @@ test.beforeEach(async({context,page})=>{
  await context.route('**/*',r=>['127.0.0.1','localhost'].includes(new URL(r.request().url()).hostname)&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort());
  await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),100);window.cancelAnimationFrame=id=>clearTimeout(id);});
 });
-async function ready(page:Page){await page.waitForFunction(()=>!!(window as any).__tetol);await page.waitForFunction(()=>document.body.classList.contains('inroom')&&!document.body.classList.contains('moving')&&!document.body.dataset.q);}
+async function ready(page:Page){
+ await page.waitForFunction(()=>!!(window as any).__tetol);
+ await page.waitForFunction(()=>document.body.classList.contains('inroom')&&!document.body.classList.contains('moving')&&!document.body.dataset.q);
+ // Static/reduced-motion layout checks do not need repeated software-GPU draws.
+ // Keep camera/layout ticks and ray checks running; render the real scene for every capture.
+ await page.evaluate(()=>{const w=window as any,stage=document.querySelector('three-d-stage') as any,draw=stage._renderer.render.bind(stage._renderer);w.__frameCapture=()=>{w.__tetol.step();draw(stage._scene,w.__tetol.cam);};stage._renderer.render=()=>{};});
+}
+async function capture(page:Page,path:string){await page.evaluate(()=>(window as any).__frameCapture());await page.screenshot({path});}
 async function bounds(page:Page,id:string){return page.evaluate(id=>{
  const {cam,THREE}= (window as any).__tetol,s=(document.querySelector('three-d-stage') as any)._scene;s.updateMatrixWorld(true);cam.updateMatrixWorld();
  const art=s.getObjectByName(id+'_artwork'),board=s.getObjectByName(id+'_frame'),d=board.parent.userData.layout;
@@ -32,7 +39,7 @@ test('all ten approved scenes fit at phone, landscape and desktop widths; sheet 
  for(const size of [{width:390,height:844},{width:844,height:390},{width:1440,height:900}]){
   await page.setViewportSize(size);
   for(const c of manifest.companions){await page.evaluate(id=>(window as any).TETOL_NAV.do('goTo',id),c.id);await expect(page.locator('#panel h2')).toHaveText(c.label);receipt.push({size,id:c.id,...await contained(page,c.id)});}
-  await page.screenshot({path:`output/playwright/adaptive-frames/${info.project.name}-${size.width}-actual.png`});
+  await capture(page,`output/playwright/adaptive-frames/${info.project.name}-${size.width}-actual.png`);
  }
  await page.setViewportSize({width:390,height:844});await page.evaluate(id=>(window as any).TETOL_NAV.do('goTo',id),manifest.companions[0].id);
  for(const sheet of ['peek','full','mid']){await page.locator('body').evaluate((el,s)=>{(el as HTMLElement).dataset.sheet=s;},sheet);await contained(page,manifest.companions[0].id);}
@@ -47,7 +54,7 @@ test('actual decoder and layout preserve edge-marked portrait, landscape, square
  for(const [name,w,h] of [['portrait',640,960],['landscape',960,640],['square',800,800],['extreme-wide',1600,160],['extreme-tall',160,1600]] as const){
   const pattern='**'+c.artwork;await page.route(pattern,r=>r.fulfill({contentType:'image/svg+xml',body:`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#efe6bf"/><rect width="100%" height="8%" fill="red"/><rect y="92%" width="100%" height="8%" fill="blue"/><rect width="8%" height="100%" fill="green"/><rect x="92%" width="8%" height="100%" fill="purple"/><text x="15%" y="50%" font-size="${Math.min(w,h)/8}">${name}</text></svg>`}));
   await page.setViewportSize({width:390,height:844});await page.goto(route+'&frame-fixture='+name+'#'+c.id);await ready(page);
-  for(const size of [{width:390,height:844},{width:844,height:390},{width:1440,height:900}]){await page.setViewportSize(size);const decoded=await contained(page,c.id);expect(decoded.image).toEqual([w,h]);await page.screenshot({path:`output/playwright/adaptive-frames/${info.project.name}-${name}-${size.width}.png`});}
+  for(const size of [{width:390,height:844},{width:844,height:390},{width:1440,height:900}]){await page.setViewportSize(size);const decoded=await contained(page,c.id);expect(decoded.image).toEqual([w,h]);await capture(page,`output/playwright/adaptive-frames/${info.project.name}-${name}-${size.width}.png`);}
   await page.unroute(pattern);
  }
 });
