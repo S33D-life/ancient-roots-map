@@ -15,11 +15,14 @@ async function bounds(page:Page,id:string){return page.evaluate(id=>{
  const corners=(mesh:any)=>{const {width:w,height:h}=mesh.geometry.parameters;return [[-w/2,-h/2],[w/2,-h/2],[-w/2,h/2],[w/2,h/2]].map(([x,y])=>{const v=new THREE.Vector3(x,y,0).applyMatrix4(mesh.matrixWorld).project(cam);return {x:(v.x+1)*innerWidth/2,y:(1-v.y)*innerHeight/2,z:v.z};});};
  const p=document.querySelector('#panel')!.getBoundingClientRect(),exit=document.querySelector('#council-return')!.getBoundingClientRect();
  const cords=s.getObjectsByProperty('name',id+'_hanging_cord').map((cord:any)=>{const v=new THREE.Vector3(0,.5,0).applyMatrix4(cord.matrixWorld).project(cam);return {x:(v.x+1)*innerWidth/2,y:(1-v.y)*innerHeight/2,z:v.z};});
- return {cords,cameraHeight:cam.position.y,art:corners(art),board:corners(board),panel:{left:p.left,top:p.top},phone:document.body.classList.contains('phone'),exitBottom:exit.top<innerHeight/3?exit.bottom:0,uv:Array.from(art.geometry.attributes.uv.array),size:[art.geometry.parameters.width,art.geometry.parameters.height],image:[art.material.map.image.width,art.material.map.image.height],d};
+ const center=new THREE.Vector3(0,0,0).applyMatrix4(art.matrixWorld).project(cam),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2(center.x,center.y),cam);
+ const visible=(o:any)=>{for(;o;o=o.parent)if(!o.visible)return false;return true;};
+ const hit=ray.intersectObjects(s.children,true).find((h:any)=>visible(h.object)&&h.object.isMesh&&h.object.material?.opacity!==0);
+ return {firstHit:hit?.object.name,cords,cameraHeight:cam.position.y,art:corners(art),board:corners(board),panel:{left:p.left,top:p.top},phone:document.body.classList.contains('phone'),exitBottom:exit.top<innerHeight/3?exit.bottom:0,uv:Array.from(art.geometry.attributes.uv.array),size:[art.geometry.parameters.width,art.geometry.parameters.height],image:[art.material.map.image.width,art.material.map.image.height],d};
 },id);}
 async function contained(page:Page,id:string){await expect.poll(async()=>{
  const b=await bounds(page,id);return b.cameraHeight>.43&&[...b.board,...b.cords].every(p=>p.x>=10&&p.x<= (b.phone? (page.viewportSize()!.width-10):b.panel.left-10)&&p.y>=Math.max(10,b.exitBottom+10)&&p.y<=(b.phone?b.panel.top-10:page.viewportSize()!.height-10)&&p.z>0&&p.z<1);
-},{timeout:15000}).toBe(true);const b=await bounds(page,id);expect(b.size[0]/b.size[1]).toBeCloseTo(b.image[0]/b.image[1],5);expect(b.uv).toEqual([0,1,1,1,0,0,1,0]);return b;}
+},{timeout:15000}).toBe(true);const b=await bounds(page,id);expect(b.firstHit).toBe(id+'_artwork');expect(b.size[0]/b.size[1]).toBeCloseTo(b.image[0]/b.image[1],5);expect(b.uv).toEqual([0,1,1,1,0,0,1,0]);return b;}
 test('all ten approved scenes fit at phone, landscape and desktop widths; sheet changes refit',async({page},info)=>{
  await page.setViewportSize({width:390,height:844});await page.goto(route+'#croom');await ready(page);
  const receipt=[];

@@ -1275,12 +1275,14 @@ function adaptiveView(id) {
   // Off-axis projection keeps the camera above the Deck, rather than moving it
   // below the floor to place a portrait above a tall sheet. Picking uses this matrix too.
   const tan = Math.tan(cam.fov*Math.PI/360);
+  const distance = Math.min(2,fit.distance);
+  cam.zoom = distance/fit.distance; // Stay inside the ring; do not look through another frame's back.
   cam.setViewOffset(innerWidth,innerHeight,fit.shiftX/(fit.distance*tan*cam.aspect)*innerWidth/2,-fit.shiftY/(fit.distance*tan)*innerHeight/2,innerWidth,innerHeight);
-  return [center,center.clone().addScaledVector(normal,fit.distance)];
+  return [center,center.clone().addScaledVector(normal,distance)];
 }
 let frameViewportKey = '';
 function refitAdaptiveFrame() {
-  const selected = adaptiveFrames.get(state.current); if (!selected || D.council.active !== 238) { frameViewportKey=''; if (cam.view?.enabled) cam.clearViewOffset(); return; }
+  const selected = adaptiveFrames.get(state.current); if (!selected || D.council.active !== 238) { frameViewportKey=''; if (cam.view?.enabled) { cam.zoom=1; cam.clearViewOffset(); } return; }
   const r = usableFrameRect(), key = [state.current,innerWidth,innerHeight,cam.aspect,selected.userData.fitRevision,...Object.values(r).map(v=>Math.round(v))].join(':');
   if (key === frameViewportKey) return; frameViewportKey = key;
   const v = adaptiveView(state.current);
@@ -1289,7 +1291,7 @@ function refitAdaptiveFrame() {
 }
 function fitView(id, v) {
   const adaptive = adaptiveView(id); if (adaptive) return adaptive;
-  if (cam.view?.enabled) cam.clearViewOffset(); // narrow portrait screens: step back a little so places are not cropped (the seat view keeps its intimacy)
+  if (cam.view?.enabled) { cam.zoom=1; cam.clearViewOffset(); } // narrow portrait screens: step back a little so places are not cropped (the seat view keeps its intimacy)
   if (!v) return v; const a = cam.aspect; if (a >= 0.72) return v;
   if (X.B && id === 'croom') return (D.ext && D.ext.portraitCroom) || [W(0, 0.85, -1.0), W(0.05, 1.0, 2.9)]; // portrait: the seat in line with the door, so fire, door and name stack
   const k = Math.min(1.55, Math.pow(0.72 / a, 0.75)); return [v[0], v[0].clone().add(v[1].clone().sub(v[0]).multiplyScalar(k))]; }
