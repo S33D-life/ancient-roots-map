@@ -2,6 +2,9 @@ import {test,expect,type Page} from '@playwright/test';
 import manifest from '../public/council/circle-238/companions.json' with {type:'json'};
 import {disconnectedTransport} from './fixtures/circle237-disconnected-transport';
 const route='/tetol/circle-235/pre-fire/tetol.html?circle=238';
+// The multi-scene WebGL matrix also runs under the full smoke config (30s default).
+// Keep its bounded budget identical to the dedicated frame job.
+test.setTimeout(180_000);
 test.beforeEach(async({context,page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  await context.addInitScript(disconnectedTransport);
