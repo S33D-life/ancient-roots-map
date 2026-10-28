@@ -8,7 +8,7 @@ test.beforeEach(async({context,page})=>{
  await context.route('**/*',r=>['127.0.0.1','localhost'].includes(new URL(r.request().url()).hostname)&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort());
  await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),100);window.cancelAnimationFrame=id=>clearTimeout(id);});
 });
-async function ready(page:Page){await page.waitForFunction(()=>!!(window as any).__tetol);await page.waitForFunction(()=>document.body.classList.contains('inroom')&&!document.body.classList.contains('moving'));}
+async function ready(page:Page){await page.waitForFunction(()=>!!(window as any).__tetol);await page.waitForFunction(()=>document.body.classList.contains('inroom')&&!document.body.classList.contains('moving')&&!document.body.dataset.q);}
 async function bounds(page:Page,id:string){return page.evaluate(id=>{
  const {cam,THREE}= (window as any).__tetol,s=(document.querySelector('three-d-stage') as any)._scene;s.updateMatrixWorld(true);cam.updateMatrixWorld();
  const art=s.getObjectByName(id+'_artwork'),board=s.getObjectByName(id+'_frame'),d=board.parent.userData.layout;
