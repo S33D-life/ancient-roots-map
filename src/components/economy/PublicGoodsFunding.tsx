@@ -1,6 +1,6 @@
 /**
- * PublicGoodsFunding — Living visualization of external funding flowing into S33D Hearts.
- * Gitcoin rounds, grants, and matching pools displayed as regenerative streams.
+ * PublicGoodsFunding — Public-good funding references, separate from contribution rewards.
+ * Eligibility and recipient control require owner verification.
  */
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -24,16 +24,16 @@ const FUNDING_STREAMS = [
     id: "giveth",
     source: "Giveth",
     round: "S33D on Giveth",
-    status: "active" as const,
+    status: "reference" as const,
     emoji: "💚",
     description: "Visit S33D’s existing public-good donation project; no guaranteed matching or donor rewards.",
     link: "https://giveth.io/project/s33dlife",
   },
   {
-    id: "gitcoin-gg22",
+    id: "gitcoin",
     source: "Gitcoin",
     round: "Check current grant rounds",
-    status: "upcoming" as const,
+    status: "check" as const,
     emoji: "🌱",
     description: "Matching rounds have separate eligibility and application windows; check the organiser.",
     link: "https://explorer.gitcoin.co",
@@ -43,6 +43,8 @@ const FUNDING_STREAMS = [
 const STATUS_STYLES = {
   active: { label: "Active", className: "bg-primary/15 text-primary border-primary/20" },
   upcoming: { label: "Upcoming", className: "bg-accent/40 text-accent-foreground border-accent/30" },
+  reference: { label: "Listed project", className: "bg-muted text-muted-foreground border-border/30" },
+  check: { label: "Check eligibility", className: "bg-muted text-muted-foreground border-border/30" },
   completed: { label: "Completed", className: "bg-muted text-muted-foreground border-border/30" },
 };
 
@@ -78,7 +80,7 @@ const FundingFlowDiagram = () => (
       {[
         { icon: "🌧️", label: "External\nSupport", sub: "Commons rounds" },
         { icon: "🌱", label: "S33D\nCommons", sub: "Value Tree" },
-        { icon: "❤️", label: "Hearts", sub: "Distributed" },
+        { icon: "📚", label: "Shared resources", sub: "Public-good work" },
         { icon: "🌳", label: "Trees &\nStewards", sub: "Living impact" },
       ].map((node, i) => (
         <motion.div
@@ -118,7 +120,7 @@ const PublicGoodsFunding = () => {
             <h3 className="text-base font-serif text-foreground">Commons Nourishment</h3>
           </div>
           <p className="text-[10px] font-serif text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            Support flows into S33D from many sources — like rain nourishing the forest. It enters the commons and is distributed as Hearts.
+            Voluntary gifts support the open Atlas, Council and living library. Donations do not buy Hearts, tokens, access or voting influence.
           </p>
         </div>
 

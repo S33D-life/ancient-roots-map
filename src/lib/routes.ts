@@ -28,6 +28,7 @@ export const ROUTES = {
   COUNCIL: "/council-of-life",
   /** Open Council of Life · Circle 237 (digital Canopy doorway). */
   CIRCLE237: "/council/237",
+  CIRCLE238: "/council/238",
   /** Council Records archive */
   COUNCIL_RECORDS: "/council/records",
   /** Council session detail */

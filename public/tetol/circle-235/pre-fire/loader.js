@@ -1,6 +1,17 @@
 
     
 document.addEventListener('DOMContentLoaded', async function() {
+  // Install before any legacy window-capture handler: the sheet can reflow under a finger.
+  // This state survives the document-element swap below.
+  let swallowSheetClick = false;
+  window.S33D_SHEET_GESTURE_READY = true;
+  window.addEventListener('tetol:sheet-gesture', () => { swallowSheetClick = true; });
+  window.addEventListener('pointerdown', () => { swallowSheetClick = false; }, true);
+  window.addEventListener('keydown', () => { swallowSheetClick = false; }, true);
+  window.addEventListener('click', event => {
+    if (!event.isTrusted || !swallowSheetClick) return;
+    swallowSheetClick = false; event.preventDefault(); event.stopImmediatePropagation();
+  }, true);
   const loading = document.getElementById('__bundler_loading');
   function setStatus(msg) { if (loading) loading.textContent = msg; }
 
@@ -305,6 +316,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       const s = document.createElement('script');
       for (const a of old.attributes) s.setAttribute(a.name, a.value);
       s.textContent = old.textContent;
+      if (s.type === 'module' && /\/runtime\/entry\.js$/.test(s.src)) s.src += '?v=time-tree-20261026';
       // text/babel scripts with a src: read and inline. transformScriptTags
       // does XHR against the src, but blob:null/ from a file:// origin is
       // silently dropped. Inlining makes it a plain inline babel script,

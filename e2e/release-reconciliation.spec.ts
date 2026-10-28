@@ -26,11 +26,11 @@ for (const width of [1280, 390]) {
     test.setTimeout(60_000);
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/council-of-life?from=spatial-council#next-gathering");
-    await expect(page.getByRole("region", { name: "Current Circle" })).toContainText("Circle 237");
+    await expect(page.getByRole("region", { name: "Current Circle" })).toContainText("Circle 238");
     await page.getByRole("link", { name: "Revisit Circle 236 · meet its companions →" }).click();
     await expect(page).toHaveURL(/\/review\/council\/236$/);
     await expect(page.getByRole("heading", { name: "Circle 236" })).toBeVisible();
-    await expect(page.getByText("Canopy · OPEN")).toBeVisible();
+    await expect(page.getByText("Canopy · HISTORICAL · OPEN at the time")).toBeVisible();
     const fire = page.getByRole("region", { name: "Circle 236 Council Fire" });
     await expect(fire.getByText("Tuesday 13 October · 19:30 UK")).toBeVisible();
     await expect(fire.getByRole("link", { name: "Gather at the Fire · Council group →" })).toBeVisible();

@@ -1,0 +1,10 @@
+{
+  "current": 238,
+  "editions": [
+    {"number":234,"state":"HISTORICAL","canopy":"/council-of-life#historical-circle-234"},
+    {"number":235,"state":"HISTORICAL","canopy":"/council-of-life#previous-circle-235"},
+    {"number":236,"state":"HISTORICAL","canopy":"/review/council/236"},
+    {"number":237,"state":"PREVIOUS","canopy":"/council/237"},
+    {"number":238,"state":"CURRENT / OPEN","canopy":"/council/238"}
+  ]
+}

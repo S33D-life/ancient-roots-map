@@ -1,3 +1,4 @@
+import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ function Shell({ children }: { children: ReactNode }) {
 }
 
 export function BirchPreparationPage() {
-  useDocumentTitle("Circle 236 · Open");
+  useDocumentTitle("Circle 236 · Historical · Open at the time");
   const { circleNumber } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate(), location = useLocation();
@@ -53,10 +54,11 @@ export function BirchPreparationPage() {
   }, [location.key, params, appearance.id, appearance.returnContext]);
   if (circleNumber !== "236") return <Shell><h1>Preparation unavailable</h1><Link to={ROUTES.COUNCIL}>Return to Council</Link></Shell>;
   return <Shell>
-    <p className="birch-kicker">Canopy · OPEN</p>
+    <CouncilTimeTree number={236} />
+    <p className="birch-kicker">Canopy · HISTORICAL · OPEN at the time</p>
     <h1>Circle 236</h1>
-    <p className="birch-lead">Meet this week’s companion constellation.</p>
-    <p className="birch-status">The Circle is open. Fires come and go; the Circle remains.</p>
+    <p className="birch-lead">Revisit Circle 236’s companion constellation.</p>
+    <p className="birch-status">Circle 236 was presented as OPEN. This is a historical view; Circle 238 is current.</p>
     <Circle236Fire />
     <section aria-labelledby="preparing-companions"><h2 id="preparing-companions">The companions</h2>
       <p>The companions are confirmed; the Circle is open. Birch’s source-linked study and Ely’s researched Ancient Friend folio are available. Other deeper doorways remain in preparation.</p>

@@ -58,6 +58,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify Council public artifact privacy
+        run: node scripts/check-council-public-bytes.mjs
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -69,9 +72,10 @@ jobs:
   e2e-smoke:
     name: E2E smoke (Playwright)
     needs: validate
-    # Playwright 1.59.1 does not install Chromium on ubuntu26.04; pin a supported runner.
+    # Playwright 1.59.1 supports Ubuntu 24.04; latest selected unsupported 26.04.
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    # Cold browser/OS bootstrap plus the original Tree history acceptance needs this budget.
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -109,5 +113,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: playwright-report
+          path: |
+            test-results
+            output/playwright/circle237-integration
+            playwright-report
           retention-days: 7

@@ -71,3 +71,16 @@ it('continues syncing filters on Atlas and after leaving the auth route', () => 
   expect(window.location.pathname).toBe('/atlas');
   expect(new URLSearchParams(window.location.search).get('species')).toBe('Oak');
 });
+
+
+it.each(['/council-of-life#previous-circle-235', '/council/237?companion=noku#return', '/review/council/236?mode=spatial#birch-companion'])(
+  'preserves the Council edition/return URL %s while retaining map filters', path => {
+    window.history.replaceState({}, '', path);
+    const before = window.location.href;
+    mount();
+    fireEvent.click(screen.getByText('Select oak'));
+    expect(window.location.href).toBe(before);
+    fireEvent.click(screen.getByText('Atlas'));
+    expect(new URLSearchParams(window.location.search).get('species')).toBe('Oak');
+  },
+);
