@@ -47,3 +47,6 @@ public/version.json
 # Isolated Circle 237 private pilot artifacts
 /dist-circle237/
 /test-results-circle237/
+
+# Isolated Council offering fixture review
+/dist-offering-fixture/
