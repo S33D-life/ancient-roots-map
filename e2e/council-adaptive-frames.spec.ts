@@ -43,8 +43,8 @@ test('actual decoder and layout preserve edge-marked portrait, landscape, square
  const c=manifest.companions[0];
  for(const [name,w,h] of [['portrait',640,960],['landscape',960,640],['square',800,800],['extreme-wide',1600,160],['extreme-tall',160,1600]] as const){
   const pattern='**'+c.artwork;await page.route(pattern,r=>r.fulfill({contentType:'image/svg+xml',body:`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#efe6bf"/><rect width="100%" height="8%" fill="red"/><rect y="92%" width="100%" height="8%" fill="blue"/><rect width="8%" height="100%" fill="green"/><rect x="92%" width="8%" height="100%" fill="purple"/><text x="15%" y="50%" font-size="${Math.min(w,h)/8}">${name}</text></svg>`}));
-  await page.setViewportSize({width:390,height:844});await page.goto(route+'#'+c.id);await ready(page);
-  for(const size of [{width:390,height:844},{width:844,height:390},{width:1440,height:900}]){await page.setViewportSize(size);await contained(page,c.id);await page.screenshot({path:`output/playwright/adaptive-frames/${info.project.name}-${name}-${size.width}.png`});}
+  await page.setViewportSize({width:390,height:844});await page.goto(route+'&frame-fixture='+name+'#'+c.id);await ready(page);
+  for(const size of [{width:390,height:844},{width:844,height:390},{width:1440,height:900}]){await page.setViewportSize(size);const decoded=await contained(page,c.id);expect(decoded.image).toEqual([w,h]);await page.screenshot({path:`output/playwright/adaptive-frames/${info.project.name}-${name}-${size.width}.png`});}
   await page.unroute(pattern);
  }
 });
