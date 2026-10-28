@@ -1,0 +1,33 @@
+name: Council offering fixture review
+on:
+  pull_request:
+    paths:
+      - 'src/review/council-offerings/**'
+      - 'src/pages/council/Circle238Page.tsx'
+      - 'review/council-offerings.html'
+      - 'vite.offering-fixture.config.ts'
+      - 'playwright.offering-fixture.config.ts'
+      - 'e2e/offering-fixture/**'
+      - '.github/workflows/council-offering-fixture.yml'
+jobs:
+  disconnected-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test --config playwright.offering-fixture.config.ts
+        env:
+          CI: 'true'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: council-offering-fixture-review
+          path: output/playwright/offering-fixture
+          retention-days: 7
