@@ -1,5 +1,5 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
-import {cleanup,fireEvent,render,screen} from '@testing-library/react';
+import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {readFileSync} from 'node:fs';
 import {MemoryRouter} from 'react-router-dom';
 import Composer from '@/review/council-offerings/Composer';
@@ -7,8 +7,25 @@ import {companions,kinds,selectedCompanion,demoReceipt,sourceOffering} from '@/r
 import Circle238Page from '@/pages/council/Circle238Page';
 beforeEach(()=>{URL.createObjectURL=vi.fn(()=> 'blob:fixture-audio');URL.revokeObjectURL=vi.fn();window.scrollTo=vi.fn();window.matchMedia=vi.fn(()=>({matches:true} as MediaQueryList));});
 afterEach(cleanup);
-function start(kind:string,qa=false){render(<Composer companion={companions[0]} onClose={vi.fn()} qa={qa}/>);fireEvent.click(screen.getByRole('button',{name:kind}));}
+function start(kind:string,qa=false){render(<Composer companion={companions[0]} onClose={vi.fn()} qa={qa}/>);fireEvent.click(screen.getByRole('button',{name:kind==='A seed for a future Circle'?/A seed for a future Circle/:kind}));}
 describe('Council offering fixture isolation and holding',()=>{
+ it.each(['2d','deck'] as const)('focuses the opening question in the %s composer',async host=>{
+  render(<Composer companion={companions[0]} host={host} onClose={vi.fn()}/>);
+  await waitFor(()=>expect(screen.getByRole('heading',{name:'What would you like to offer this companion?'})).toHaveFocus());
+  expect(screen.getByRole('button',{name:'Close offering'})).not.toHaveFocus();
+ });
+ it('names the holding group with its visible question and exposes separate option descriptions',()=>{
+  start('Story');fireEvent.change(screen.getByRole('textbox',{name:'Your words'}),{target:{value:'A fixture story'}});fireEvent.click(screen.getByRole('button',{name:'Continue'}));
+  const question=screen.getByRole('heading',{name:'How should your story be held?'}),group=screen.getByRole('group',{name:'How should your story be held?'});
+  expect(group).toHaveAttribute('aria-labelledby',question.id);
+  expect(screen.getByRole('radio',{name:'Keep it with me'})).toHaveAccessibleDescription(/seen only by you/);
+  expect(screen.getByRole('radio',{name:'Offer it to the Circle for review'})).toHaveAccessibleDescription(/unless they ask you first and you agree/);
+  expect(screen.getByRole('radio',{name:'Keep it with me'})).toBeChecked();
+ });
+ it('includes the visible seed explanation in its accessible name',()=>{
+  render(<Composer companion={companions[0]} onClose={vi.fn()}/>);
+  expect(screen.getByRole('button',{name:'A seed for a future Circle Suggest a companion · a future path to the curators'})).toBeInTheDocument();
+ });
  it.each(kinds)('keeps %s private by default at its dedicated holding stage',async kind=>{
   start(kind);expect(screen.queryByRole('radio')).not.toBeInTheDocument();
   if(kind==='Song')fireEvent.click(screen.getByRole('button',{name:/A canopy hum/}));
@@ -24,6 +41,7 @@ describe('Council offering fixture isolation and holding',()=>{
   expect(screen.queryByLabelText('Demo outcome')).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button',{name:'Place it in the Circle (demo)'}));
   expect(await screen.findByText('Demo receipt · nothing was stored or sent.')).toBeInTheDocument();
+  expect(screen.getByText('Different friends. One living story.')).toBeInTheDocument();
  });
  it('requires a separate review choice and retains QA failures without a receipt',async()=>{
   start('Story',true);fireEvent.change(screen.getByRole('textbox',{name:'Your words'}),{target:{value:'A fixture story'}});

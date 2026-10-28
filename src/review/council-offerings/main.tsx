@@ -8,7 +8,12 @@ import {invitation} from './model';
 import {companions,selectedCompanion,deckUrl,type Companion} from './model';
 import {companionLore} from './lore';
 import './fonts.css';
+import fontFaces from './fonts.css?inline';
 import './preview.css';
+// Alias only the existing EB Garamond faces: do not override original Tree typography.
+const invitationFonts=(fontFaces.match(/@font-face\s*\{[^}]+\}/g)??[])
+ .filter(rule=>/font-family:\s*["']?EB Garamond["']?;/.test(rule))
+ .map(rule=>rule.replace(/font-family:\s*["']?EB Garamond["']?;/,"font-family:'Council Offering EB Garamond';")).join('\n');
 export function Preview(){
  const [query,setQuery]=useSearchParams(),initial=selectedCompanion(query.get('companion'));
  const qa=query.get('qa')==='1';
@@ -25,7 +30,7 @@ export function Preview(){
  }
  function connectDeck(){
   cleanup.current();const doc=frame.current?.contentDocument,win=frame.current?.contentWindow;if(!doc||!win)return;
-  const style=doc.createElement('style');style.textContent=`.fixture-invitation{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,hsl(42 60% 40% / .1),transparent)}.fixture-invitation .q{font:italic 21px/1.3 Georgia,serif;margin:6px 0 12px}.fixture-invitation .hint{font:12px/1.4 system-ui;color:var(--ink3);margin:10px 0 0}.fixture-invitation .new-mark{font:10px system-ui;text-transform:uppercase;color:var(--gold)}.fixture-invitation .act{width:100%;min-height:48px}.fixture-invitation button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}`;doc.head.append(style);
+  const style=doc.createElement('style');style.textContent=invitationFonts+`.fixture-invitation{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,hsl(42 60% 40% / .1),transparent)}.fixture-invitation .q{font:italic 21px/1.3 'Council Offering EB Garamond',Georgia,serif;margin:6px 0 12px}.fixture-invitation .hint{font:12px/1.4 system-ui;color:var(--ink3);margin:10px 0 0}.fixture-invitation .new-mark{font:10px system-ui;text-transform:uppercase;color:var(--gold)}.fixture-invitation .act{width:100%;min-height:48px;text-decoration:none}.fixture-invitation button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}`;doc.head.append(style);
   const decorate=()=>{const node=companions.find(c=>`#${c.id}`===win.location.hash),panel=doc.querySelector('#panel .pbody'),old=doc.querySelector('[data-fixture-invitation]');
    if(!node||!panel||(win as unknown as {TETOL?:{council:{active:number}}}).TETOL?.council.active!==238){old?.remove();return;}if(old&&old.parentElement===panel&&old.getAttribute('data-companion')===node.key)return;old?.remove();
    const block=doc.createElement('section');block.className='fixture-invitation';block.dataset.fixtureInvitation='true';block.dataset.companion=node.key;block.setAttribute('aria-label','Offering invitation');

@@ -58,4 +58,12 @@ The path-scoped Actions workflow runs Chromium/WebKit journeys and uploads compa
 
 ## Public copy / longer-term language
 
-User-facing copy follows Claude’s invitation and receipt guidance, with conditional demo language. “Different friends. One living song.” is a decorative receipt refrain. No long-term governance, withdrawal, storage, Moonroot or curator system is claimed to exist.
+User-facing copy follows Claude’s invitation and receipt guidance, with conditional demo language. “Different friends. One living story.” is a decorative receipt refrain. No long-term governance, withdrawal, storage, Moonroot or curator system is claimed to exist.
+
+## Accessibility refinement and native preparation
+
+A1 focuses the question through Radix onOpenAutoFocus; A2 references that visible question for the holding group and associates each radio’s concise name and explanatory description. A3 retains the full seed explanation. V1 removes only the invitation-button underline. V2 aliases existing embedded EB Garamond faces inside the fixture iframe, scoped to its invitation, without overriding original Tree fonts. C1 uses “One living story.” No original runtime, artwork or manifest changes.
+
+[Ed’s native Safari + VoiceOver checklist and secure-access proposal](./NATIVE-ACCEPTANCE.md). Native status remains UNVERIFIED. The current 127.0.0.1 preview is Mac-only; iPhone access needs a separately approved, authenticated HTTPS route. Nothing has been bound beyond loopback.
+
+Acceptance source: [Claude’s conditional visual review at bcd8f573](https://drive.google.com/file/d/10Byje6xfa-9tbI8nuyDRtZx2UTrNHj4p/view). This refinement addresses A1/A2 and the bounded A3/V1/V2/C1 items; it does not expand the review-only feature or grant native/release approval.

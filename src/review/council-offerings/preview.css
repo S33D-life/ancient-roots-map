@@ -14,3 +14,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .host-2d .circle237{font-family:var(--whisper);color-scheme:light}.host-2d .circle237 section:not(.gallery),.host-2d .circle237 .portrait{background:hsl(38 35% 95%);padding:0}.host-2d .circle237 a,.host-2d .circle237 button{background:transparent}.host-2d .circle237 .eyebrow{color:hsl(30 10% 42%)}.host-2d .circle237 section.fixture-invitation{padding:16px;background:linear-gradient(180deg,hsl(35 65% 35% / .07),transparent)}
 
 .fixture-demo-band{margin:0;padding:10px 16px;font:11px/20px var(--sans);text-align:center}.fixture-shell:not(:has(.fixture-header)) .deck-preview{height:calc(100dvh - 40px);min-height:580px}
+
+.host-2d .circle237 .fixture-invitation button{text-decoration:none}
