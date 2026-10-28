@@ -303,7 +303,7 @@ const SupportPage = () => {
         <div className="space-y-2 flex-1">
           <p className="text-sm font-medium text-foreground">Support through the commons</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Small contributions are amplified by matching through public goods rounds.
+            Voluntary donations to S33D on Giveth support our open Atlas, Council and living library. Matching and donor rewards depend on Giveth eligibility and are not promised.
           </p>
           <div className="flex flex-wrap gap-2">
             <a href="https://explorer.gitcoin.co" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors">
