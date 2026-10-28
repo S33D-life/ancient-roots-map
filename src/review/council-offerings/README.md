@@ -1,12 +1,16 @@
 # Council Offerings V1 — isolated interaction fixture
 
-Review-only, based on main e2f2830f0af383f14d7f0165cd3eb9be4ec9d057. Not a persistent offering system, release approval, Ledger record or deployed feature.
+Draft #130, based on main e2f2830f0af383f14d7f0165cd3eb9be4ec9d057. Review harness only; no live offering system or Council Ledger record.
 
-## Design provenance
+## Core decisions and design provenance
 
-The requested Claude offering interaction artifact was not located in connected Drive/Notion searches. Council PDFs and an older artwork handoff were discoverable, but do not establish the interaction design. A link or written screen/wording/privacy handoff was requested. This draft follows Ed’s explicit six-kind/private-by-default requirements and the existing architecture proposal; **visual fidelity to Claude is unverified**. No Claude media was downloaded, copied or published.
+Claude’s 28 October fidelity review, two comparison sheets, all fourteen individual 390px frames, and full offline prototype were retrieved from the supplied [Drive folder](https://drive.google.com/drive/folders/1_h-XxY9jqtjsaJquirqo1Lah4jr5Ez84). The full prototype was exercised offline with HTTP requests blocked. Reference assets stay outside the production tree. Embedded Cinzel, EB Garamond and Inter font subsets come from that prototype (its SIL Open Font License attribution is retained in fonts.css). Artwork uses existing manifest URLs; no original bytes are changed or duplicated.
 
-## Run locally
+One Composer renders both host themes: Night Grove for the Deck and Living Parchment for 2D. Selection is six 76px-or-larger circular buttons around the companion disc, clockwise Song, Story, Photograph, Voice, Message, Poem. Keyboard/DOM order matches. Below 340px a grid replaces the ring. The separate dashed suggestion path and quiet exit follow the reference.
+
+Normal path: invitation after lore → select → compose → holding → placing → demo receipt. Private is preselected. The separate optional curator-review choice requires asking the contributor before public sharing. All three promises are explicitly labelled future design, not implemented features. Every sheet says “DEMO · nothing is saved”; receipt says “Demo receipt · nothing was stored or sent.” Attribution input is removed. A receipt detail uses “a Wanderer · demo”. Seed privacy is conditional future wording. No Moonroot system is implemented; its optional P3 preview is deferred.
+
+## Active build / run
 
 ```sh
 npm ci
@@ -14,27 +18,27 @@ npx vite build --config vite.offering-fixture.config.ts
 npx vite preview --config vite.offering-fixture.config.ts
 ```
 
-Computer-only entry: http://127.0.0.1:4242/review/council-offerings.html?companion=goji-seed
+- 2D: http://127.0.0.1:4242/review/council-offerings.html?companion=bishop-ely-plane
+- Original Deck: same URL with `&view=deck`.
+- Reviewer controls: append `&qa=1`. Only this mode exposes surface switches, source-offering reference, preview/outcome QA, build receipt and error simulation. QA mode is an explicit review flag, not an authorisation boundary or deployed feature.
 
-Original Tree entry: http://127.0.0.1:4242/review/council-offerings.html?view=deck&companion=hoopoe
+Close/Escape and receipt return discard the in-memory draft, preserve companion identity and focus the originating invitation. “Meet the next companion” follows the existing manifest order and uses the existing Deck navigation API or 2D companion query. Opening a new offering resets privacy to private. Back within a draft retains its explicit choice. Reduced motion skips the timed placing stage.
 
-Choose a companion in 2D, then Leave an offering. In the original Deck, open the existing sheet with its handle, then Leave an offering. Both invoke one composer and return to their originating companion. The iframe is the actual repository Tree, not a replacement renderer or gallery.
+## Isolation and #127/#131 integration
 
-This independent branch deliberately does not incorporate or modify #127. Its main-baseline Deck still uses the older sheet-opening behavior. Reconcile the small optional Circle238Page props with #127 after human release decisions; do not revive main’s old headings or overwrite #127’s lore/navigation when resolving that overlap. The preview heading override affects only this harness. Without an explicit callback, production Circle238Page has no offering button, including with forged query parameters.
+This PR stays main-based and fixture-only. Public/runtime and backend files are unchanged. `Circle238Page` has inert optional render hooks and preview heading only; no callback means no invitation, including forged `qa` query parameters. The fixture supplies a copy of #127’s exact approved lore from d926be725328d092e053dcd85bd4d2fa32fd727c in lore.ts. It uses the approved StarPod naming in its page and offering sheet.
 
-## Safety boundary
+In the Deck the harness adds one invitation after approved lore and before later navigation. On main, which predates #127, it supplies approved lore in the harness only. Where #127/#131 already supplies that lore, it reuses it. It uses the existing grab button once to make the companion’s mid sheet accessible, then leaves the current sheet state and controls intact. Scrolling the existing panel reaches the invitation without pulling to full. No renderer, camera, frame, gesture or historical content edits are included.
 
-- In-memory state only; refresh/close discards the draft.
-- Private by default; proposing Circle sharing is separate and does not automatically publish or broaden a source offering’s permissions.
-- Confirmation: “Demo — not saved to Council Ledger.”
-- Six primary types, future-companion suggestion and one visibly synthetic source-offering reference. No tree IDs are fabricated. Link mode carries only the source ID/context, not copied content.
-- Poem input is reused directly from offering-kit. Other controls reuse existing UI primitives. Photo/voice/music are synthetic fixtures rather than unsafe invocation of existing public upload/search flows. The tone is generated locally; no microphone or camera/library prompt occurs.
-- No Supabase/client import, uploads, auth calls, external search, rewards, attendance, archive, localStorage/IndexedDB submission or background sync in the fixture code.
-- Separate Vite config has no app MCP/PWA/environment plugin; serves original public Tree/Council assets read-only from this checkout, with no-store and self-only network CSP. Original Tree preferences are replaced by per-document memory in this harness; original source files are unchanged. Non-GET/HEAD requests are rejected. This server is loopback-only, not a protected public hosting service.
-- Its build requires the checkout for the original static assets; it is not a self-contained public upload package. No production deployment is authorized.
-- Standard app build does not emit this review HTML/module. No App route is added. Real application history/auth paths are not reimplemented by this harness; use the original Tree Time Tree for spatial history. Existing production history and artwork remain untouched.
+**Reconciliation rule:** #127 owns the final Circle238Page heading, lore, navigation and public copy. Reapply only the optional fixture render hook/preview title from #130 when resolving its page overlap, with the invitation after lore and before Return. Do not restore main’s Fig-wood heading, old review notice or older accuracy copy over #127. #131’s seven files have no direct overlap with this fixture. Keep #131’s geometry/camera/sheet cap unchanged; close/return must retain its existing sheet state. Manifest order, IDs, Circle 238 query and companion hashes remain authoritative.
 
-## Checks
+A separate local integration checkout combines #131 at 86ab252114a438db00dff3815655b74feb23605b (including #127 at d926be72) with only these fixture files and a manual page-hook reconciliation. Its receipts are distinct from #130 CI and do not imply a merged or deployable release. No PR base changes, merges or publications are authorised here.
+
+## Safety and verification
+
+In-memory only. Song/photo/voice are synthetic fixtures: no external search, upload, camera/library, microphone, auth, rewards, submission persistence or database import. Poem input reuses offering-kit. A synthetic source ID is reviewer-only and never copies its private body.
+
+The separate loopback-only Vite server rejects non-GET/HEAD and backend routes, uses self-only network CSP and no-store, and substitutes per-document memory for Tree preferences. Standard application build emits no fixture HTML/route; the separate build needs this checkout’s static Tree/Council assets. It is not a public hosting package.
 
 ```sh
 npm run test -- src/tests/CouncilOfferingFixture.test.tsx
@@ -42,6 +46,16 @@ npm run release-check
 npx playwright test --config playwright.offering-fixture.config.ts
 ```
 
-The `.fixture.ts` browser spec intentionally runs only under its own configuration, not the production smoke server. The separate path-scoped Actions workflow installs Chromium/WebKit and runs the four disconnected journeys; software-renderer CI is not native iPhone proof. Tests block external requests and non-read requests. A later real persistence design needs separate Ledger identity, consent, RLS, private signing, idempotency and withdrawal approval; this draft proves none of those backend properties.
+The path-scoped Actions workflow runs Chromium/WebKit journeys and uploads comparison screenshots. Tests check ring bounds, both hosts, independent holding/private defaults, optional review, receipt, next companion, return focus, narrow/landscape layouts, reviewer-only unknown outcomes, suggestion privacy, no attempted write requests and no page errors. Desktop WebKit does not prove native iPhone Safari/VoiceOver acceptance.
 
-No frame geometry/camera fix is included. Frame diagnosis remains outside this branch and requires a separate GO.
+## Remaining native iPhone acceptance
+
+- Safari at 390px, smaller iPhone and landscape: safe areas, browser toolbar changes, readable sheet and scroll with software keyboard open.
+- VoiceOver: dialog announcement, logical clockwise ring order, radio group labels/state, all controls discoverable, focus trap, Close/Escape/hardware keyboard return focus.
+- Touch: offer without pulling companion sheet full, normal panel scrolling, no gesture interception, same companion/hash/2D query after return; next companion follows manifest order.
+- With #127/#131 combined: opening/closing the offering leaves frame fitting and sheet state intact, original camera gestures and historical Circles still work.
+- Reduced Motion skips placing; normal motion is comfortable; refresh loses draft; no camera/microphone/library prompt and no real submission.
+
+## Public copy / longer-term language
+
+User-facing copy follows Claude’s invitation and receipt guidance, with conditional demo language. “Different friends. One living song.” is a decorative receipt refrain. No long-term governance, withdrawal, storage, Moonroot or curator system is claimed to exist.

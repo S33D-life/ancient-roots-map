@@ -2,7 +2,7 @@ import manifest from '../../../public/council/circle-238/companions.json';
 export const companions = manifest.companions;
 export const edition = manifest.edition;
 export const question = manifest.question;
-export const kinds = ['Song','Story','Photograph','Voice','Message / reflection','Poem'] as const;
+export const kinds = ['Song','Story','Photograph','Voice','Message','Poem'] as const;
 export type Kind = typeof kinds[number] | 'Future companion' | 'Link existing offering';
 export type Audience = 'private' | 'circle-proposal';
 export type Companion = typeof companions[number];
@@ -21,3 +21,5 @@ export function voiceSample() {
 export function demoReceipt(c: Companion, kind: Kind, audience: Audience, text: string, attribution: string) {
  return {circle:238,edition,companionKey:c.key,kind,audience,attribution,...(kind==='Link existing offering'?{sourceOfferingId:sourceOffering.id}:{text}),status:'demo-only' as const};
 }
+
+export const invitation = {question:'What would you like to offer this companion?',hint:'It stays with you unless you choose to share it for review.'};

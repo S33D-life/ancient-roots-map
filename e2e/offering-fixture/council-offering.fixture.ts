@@ -1,24 +1,38 @@
 import {test,expect} from '@playwright/test';
 test.beforeEach(async({context})=>{await context.route('**/*',r=>{const u=new URL(r.request().url());return u.hostname==='127.0.0.1'&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort();});});
-test('2D companion: private draft, explicit Circle proposal, demo confirmation and return',async({page},info)=>{
- await page.setViewportSize({width:390,height:844});const writes:string[]=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});
- await page.goto('/review/council-offerings.html?companion=goji-seed');
- await page.getByRole('button',{name:'Leave an offering · demo'}).click();await expect(page.getByRole('dialog')).toContainText('Goji Berry');
- await page.getByRole('button',{name:'Message / reflection',exact:true}).click();await expect(page.getByLabel('Keep private')).toBeChecked();
- await page.getByRole('textbox',{name:'Your words'}).fill('A fictional reflection beneath the demo canopy.');
- await page.getByLabel('Propose sharing with the Circle').check();await page.getByRole('button',{name:'Preview offering →'}).click();
- await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-phone-preview.png`});
- await page.getByRole('button',{name:'Simulate offering'}).click();await expect(page.getByText('Demo — not saved to Council Ledger.')).toBeVisible();
- await page.getByRole('button',{name:/Return to Goji/}).click();await expect(page.getByRole('dialog')).toHaveCount(0);expect(writes).toEqual([]);
- await page.reload();await expect(page.getByRole('dialog')).toHaveCount(0);await page.getByRole('button',{name:'Leave an offering · demo'}).click();await page.getByRole('button',{name:'Story',exact:true}).click();await expect(page.getByLabel('Keep private')).toBeChecked();
+for(const host of ['2d','deck'])test(`${host}: ring, separate privacy, honest receipt, focus and next companion`,async({page},info)=>{
+ await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
+ const writes:string[]=[],errors:string[]=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(`/review/council-offerings.html?companion=bishop-ely-plane${host==='deck'?'&view=deck':''}`);
+ const frame=page.frameLocator('iframe');const offer=host==='deck'?frame.locator('[data-fixture-offer]'):page.getByRole('button',{name:'Offer something',exact:true});
+ await expect(offer).toBeVisible({timeout:60000});
+ if(host==='deck'){await expect(frame.locator('body')).toHaveAttribute('data-sheet','mid');await offer.scrollIntoViewIfNeeded();await expect(frame.locator('[data-fixture-invitation]')).toHaveCount(1);}
+ await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-${host}-entry.png`});
+ await offer.click();const dialog=page.getByRole('dialog');await expect(dialog).toHaveAttribute('data-host',host);
+ await expect(dialog).toContainText('DEMO · nothing is saved');await expect(dialog.getByRole('button',{name:'Link an existing Ancient Friend offering'})).toHaveCount(0);
+ const tokens=dialog.locator('.offering-token');await expect(tokens).toHaveCount(6);
+ const boxes=await tokens.evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};}));for(const b of boxes){expect(b.w).toBeGreaterThanOrEqual(76);expect(b.h).toBeGreaterThanOrEqual(76);}for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i],b=boxes[j];expect(Math.hypot(a.x+a.w/2-b.x-b.w/2,a.y+a.h/2-b.y-b.h/2)).toBeGreaterThanOrEqual((a.w+b.w)/2);}
+ await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-${host}-ring.png`});
+ await dialog.getByRole('button',{name:'Song',exact:true}).click();await dialog.getByRole('button',{name:/A canopy hum/}).click();await dialog.getByRole('textbox',{name:'Why this song? (optional)'}).fill('A fictional canopy song.');
+ await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-${host}-compose.png`});
+ await expect(dialog.getByRole('radio')).toHaveCount(0);await dialog.getByRole('button',{name:'Continue',exact:true}).click();await expect(dialog.getByLabel('Keep it with me',{exact:true})).toBeChecked();
+ await expect(dialog.getByLabel('Future-design promises')).toBeVisible();await expect(dialog.getByLabel('Demo outcome')).toHaveCount(0);
+ await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-${host}-hold-private.png`});
+ await dialog.getByLabel('Offer it to the Circle for review',{exact:true}).check();await expect(dialog).toContainText('unless they ask you first and you agree');
+ await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-${host}-hold-review.png`});
+ await dialog.getByRole('button',{name:'Place it in the Circle (demo)'}).click();await expect(dialog.getByLabel('Demo receipt')).toBeVisible();await expect(dialog).toContainText('nothing was stored or sent');
+ await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-${host}-receipt.png`});
+ await dialog.getByRole('button',{name:/Return to Bishop/}).click();await expect(dialog).toHaveCount(0);await expect(offer).toBeFocused();
+ await offer.click();await page.getByRole('button',{name:'Message',exact:true}).click();await page.getByRole('textbox',{name:'Your words'}).fill('Fictional message');await page.getByRole('button',{name:'Continue',exact:true}).click();await expect(page.getByLabel('Keep it with me',{exact:true})).toBeChecked();
+ await page.getByRole('button',{name:'Place it in the Circle (demo)'}).click();await page.getByRole('button',{name:'Meet the next companion'}).click();await expect(dialog).toHaveCount(0);
+ if(host==='deck')await expect(frame.locator('#panel h2')).toContainText('Fig');else await expect(page).toHaveURL(/companion=fig/);
+ const nextOffer=host==='deck'?frame.locator('[data-fixture-offer]'):page.getByRole('button',{name:'Offer something',exact:true});await expect(nextOffer).toBeFocused();await nextOffer.click();await expect(dialog).toContainText('Fig');await page.keyboard.press('Escape');await expect(nextOffer).toBeFocused();
+ expect(writes).toEqual([]);expect(errors).toEqual([]);await page.reload();await expect(dialog).toHaveCount(0);
 });
-test('authentic original Deck companion opens the same composer and returns',async({page},info)=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/review/council-offerings.html?view=deck&companion=hoopoe');
- const frame=page.frameLocator('iframe');await expect(frame.locator('#grab')).toBeVisible({timeout:60000});await frame.locator('#grab').click();await expect(frame.locator('[data-fixture-offer]')).toBeVisible();
- await expect(frame.locator('#panel h2')).toContainText('Hoopoe');await frame.locator('[data-fixture-offer]').click();
- await page.getByRole('button',{name:'Poem',exact:true}).click();await page.getByPlaceholder('Let the poem begin…').fill('A fixture feather\nrests in a fictional tree.');
- await page.getByRole('button',{name:'Preview offering →'}).click();await page.getByRole('button',{name:'Simulate offering'}).click();await expect(page.getByText('Demo — not saved to Council Ledger.')).toBeVisible();
- await page.getByRole('button',{name:'Return to Hoopoe'}).click();await expect(frame.locator('#panel h2')).toContainText('Hoopoe');
- await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-original-deck.png`});
- const inside=page.frames()[1];await inside.evaluate(()=>{(window as any).TETOL_NAV.do('goTo','croom');});await expect(frame.locator('[data-fixture-offer]')).toHaveCount(0);
+test('QA only: synthetic source and unknown outcome; responsive narrow/landscape sheet',async({page},info)=>{
+ await page.setViewportSize({width:320,height:740});await page.goto('/review/council-offerings.html?companion=hoopoe&qa=1');await page.getByRole('button',{name:'Offer something',exact:true}).click();
+ const dialog=page.getByRole('dialog');await expect(dialog.locator('.offering-ring')).toHaveCSS('display','grid');
+ await page.getByRole('button',{name:'Link an existing Ancient Friend offering'}).click();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Place it in the Circle (demo)'}).click();await page.getByLabel('Demo outcome').selectOption('unknown');await page.getByRole('button',{name:'Simulate offering'}).click();await expect(page.getByRole('alert')).toContainText('unknown');await expect(page.getByLabel('Demo receipt')).toHaveCount(0);
+ await page.setViewportSize({width:844,height:390});await expect(dialog).toBeVisible();const box=await dialog.boundingBox();expect(box!.y).toBeGreaterThanOrEqual(0);expect(box!.y+box!.height).toBeLessThanOrEqual(391);await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-landscape-qa.png`});
 });
+test('seed path explains future curator-only privacy and never sends',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/review/council-offerings.html?companion=hoopoe');await page.getByRole('button',{name:'Offer something',exact:true}).click();await page.getByRole('button',{name:'A seed for a future Circle'}).click();await expect(page.getByRole('dialog')).toContainText('your suggestion and your name would be seen by the curators only');await page.getByRole('textbox',{name:'Suggested companion'}).fill('A fictional tree');await page.getByRole('textbox',{name:'Why might they join a future Circle?'}).fill('A fictional suggestion');await page.getByRole('button',{name:'Preview the curators’ basket (demo)'}).click();await expect(page.getByLabel('Demo receipt')).toContainText('Nothing was sent.');});
