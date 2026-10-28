@@ -13,7 +13,8 @@ export default function Composer({companion,onClose,onNext,host='2d',qa=false}:{
  const [songQuery,setSongQuery]=useState(''),[song,setSong]=useState(''),[image,setImage]=useState(false),[voice,setVoice]=useState(false),[voiceUrl,setVoiceUrl]=useState('');
  const [outcome,setOutcome]=useState('success'),[error,setError]=useState('');
  const id=useId(),questionId=id+'-question';
- const body=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),first=useRef(true);
+ const body=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),first=useRef(true),openingFocus=useRef<number>();
+ useEffect(()=>()=>{if(openingFocus.current!==undefined)window.cancelAnimationFrame(openingFocus.current);},[]);
  useEffect(()=>{const url=URL.createObjectURL(voiceSample());setVoiceUrl(url);return()=>URL.revokeObjectURL(url);},[]);
  useEffect(()=>{body.current?.scrollTo?.(0,0);if(first.current){first.current=false;return;}heading.current?.focus({preventScroll:true});},[step]);
  useEffect(()=>{if(step!=='placing')return;const timer=window.setTimeout(()=>setStep('receipt'),window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?0:1700);return()=>window.clearTimeout(timer);},[step]);
@@ -23,7 +24,7 @@ export default function Composer({companion,onClose,onNext,host='2d',qa=false}:{
  const choose=(value:Kind)=>{setKind(value);setAudience('private');setError('');setStep('compose');};
  const place=()=>{if(outcome!=='success'){setError(outcome==='unknown'?'Demo result unknown. Nothing has been saved; review before retrying.':'Demo submission unavailable. Nothing has been sent.');return;}setStep('placing');};
  const disc=(className:string)=><img className={className} src={companion.artwork} alt=""/>;
- return <Dialog.Root open onOpenChange={open=>{if(!open)onClose();}}><Dialog.Portal><Dialog.Overlay className="offering-veil"/><Dialog.Content className="offering-sheet" data-host={host} onOpenAutoFocus={e=>{e.preventDefault();heading.current?.focus({preventScroll:true});}} onCloseAutoFocus={e=>e.preventDefault()}>
+ return <Dialog.Root open onOpenChange={open=>{if(!open)onClose();}}><Dialog.Portal><Dialog.Overlay className="offering-veil"/><Dialog.Content className="offering-sheet" data-host={host} onOpenAutoFocus={e=>{e.preventDefault();openingFocus.current=window.requestAnimationFrame(()=>{if(heading.current?.isConnected)heading.current.focus({preventScroll:true});});}} onCloseAutoFocus={e=>e.preventDefault()}>
   <header className="offering-head">{disc('mini')}<div><p>StarPod Circle 238 · {seed?'Suggestion':'Offering'}</p><Dialog.Title>{companion.label}</Dialog.Title><Dialog.Description className="demo-marker">DEMO · nothing is saved</Dialog.Description></div><Dialog.Close className="sheet-close" aria-label="Close offering">×</Dialog.Close></header>
   <div className="offering-body" ref={body} data-step={step}>
   {step!=='receipt'&&<h2 id={questionId} ref={heading} tabIndex={-1} className="oq">{step==='select'?invitation.question:step==='compose'?seed?'Which being, book or place would you like a future Council to meet?':`Offer a ${noun}`:step==='hold'?`How should your ${noun} be held?`:step==='preview'?'Reviewer preview':step==='placing'?'':seed?'This is how a suggestion would reach the curators’ basket.':`This is how your ${noun} would rest with ${companion.label}.`}</h2>}
