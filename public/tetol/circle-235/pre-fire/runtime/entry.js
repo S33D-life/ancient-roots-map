@@ -1,6 +1,7 @@
 // Never render stale weekly labels if the approved static adapter fails.
 if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
+import { frameLayout, frameFit } from './council-frame-layout.js';
 import { installTimeTree } from './council-time-tree.js';
 const D = window.TETOL;
 const circleEdition = new URLSearchParams(location.search).get('circle');
@@ -872,7 +873,32 @@ const BUILD = {
   },
 };
 if (D.ext && D.ext.forms) for (const [k, f] of Object.entries(D.ext.forms)) BUILD[k] = (g, r, id, p) => f({ THREE, V, W, add, std, ctex, hex, mat, taperTube, g, r, id, p }); // 0.9.7 Circle layer hook
+const adaptiveFrames = new Map();
+if (framedCircle === 238) {
+  const style = document.createElement('style');
+  // An expanded companion sheet must still leave a real picture viewport.
+  style.textContent = 'body.phone.council-companion-context[data-sheet=full] #panel{top:max(180px,30dvh,calc(env(safe-area-inset-top) + 160px))!important;bottom:0!important;height:auto!important;max-height:calc(100dvh - max(180px,30dvh,calc(env(safe-area-inset-top) + 160px)))!important}';
+  document.head.append(style);
+}
 BUILD.circleFrame = (g, repr, id) => {
+  if (framedCircle === 238) {
+    const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
+    const wood = new THREE.MeshStandardMaterial({color:0x79543b,roughness:.95});
+    const backing = add(new THREE.Mesh(new THREE.BoxGeometry(), wood), id + '_frame', id, frame);
+    const artwork = add(new THREE.Mesh(new THREE.PlaneGeometry(), new THREE.MeshBasicMaterial({color:repr.artwork?0xffffff:0x314333,side:THREE.DoubleSide})), id + '_artwork', id, frame); artwork.position.z = .045;
+    const cords = [-1,1].map(() => add(new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,1,6),mat.iron),id + '_hanging_cord',id,frame));
+    const layout = (width,height) => {
+      const d = frameLayout(width,height); frame.userData.layout = d;
+      backing.geometry.dispose(); backing.geometry = new THREE.BoxGeometry(d.outerWidth,d.outerHeight,.08);
+      artwork.geometry.dispose(); artwork.geometry = new THREE.PlaneGeometry(d.artWidth,d.artHeight);
+      cords.forEach((cord,i) => { cord.scale.y = d.cordLength; cord.position.set((i?1:-1)*d.cordX,d.outerHeight/2+d.cordLength/2,0); });
+      frame.userData.fitRevision = (frame.userData.fitRevision || 0) + 1;
+    };
+    layout(repr.width,repr.height); adaptiveFrames.set(id,frame);
+    if (repr.artwork) { const texture = new THREE.TextureLoader().load(repr.artwork,t => layout(t.image.width,t.image.height)); texture.colorSpace = THREE.SRGBColorSpace; artwork.material.map = texture; artwork.material.needsUpdate = true; }
+    companionFrames?.buildCompanionPresence({THREE,add,std,BUILD},g,repr,id);
+    return 1.4;
+  }
   const texture = repr.artwork ? new THREE.TextureLoader().load(repr.artwork) : null;
   if (texture) texture.colorSpace = THREE.SRGBColorSpace;
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
@@ -1224,7 +1250,46 @@ function drawThreads(id) {
 
 // Camera flights
 let flight = null, settleCb = null;
-function fitView(id, v) { // narrow portrait screens: step back a little so places are not cropped (the seat view keeps its intimacy)
+const safeProbe = document.createElement('div');
+safeProbe.style.cssText = 'position:fixed;pointer-events:none;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+document.body.append(safeProbe);
+function usableFrameRect() {
+  const safe = getComputedStyle(safeProbe), vv = window.visualViewport;
+  const r = {left:(vv?.offsetLeft || 0)+12+(parseFloat(safe.paddingLeft)||0), top:(vv?.offsetTop || 0)+12+(parseFloat(safe.paddingTop)||0), right:(vv?.offsetLeft || 0)+(vv?.width || innerWidth)-12-(parseFloat(safe.paddingRight)||0), bottom:(vv?.offsetTop || 0)+(vv?.height || innerHeight)-12-(parseFloat(safe.paddingBottom)||0)};
+  // Use actual rendered rectangles, including sheet transitions and orientation.
+  for (const selector of ['#panel','header','.topbar','#top','#council-return']) for (const el of document.querySelectorAll(selector)) {
+    const box = el.getBoundingClientRect(), css = getComputedStyle(el);
+    if (css.visibility === 'hidden' || css.display === 'none' || box.width === 0 || box.height === 0) continue;
+    if (selector === '#panel') { if (mobileSheet()) r.bottom = Math.min(r.bottom,box.top-12); else r.right = Math.min(r.right,box.left-12); }
+    else if (box.top < innerHeight/3) r.top = Math.max(r.top,box.bottom+12);
+  }
+  r.bottom = Math.max(r.top+24,r.bottom); r.right = Math.max(r.left+24,r.right);
+  return r;
+}
+function adaptiveView(id) {
+  const frame = adaptiveFrames.get(id); if (!frame || D.council.active !== 238) return null;
+  frame.updateWorldMatrix(true,false); const d = frame.userData.layout;
+  const center = frame.localToWorld(V(0,d.cordLength/2,0));
+  const normal = V(0,0,1).transformDirection(frame.matrixWorld);
+  const fit = frameFit(d.outerWidth,d.outerHeight+d.cordLength,usableFrameRect(),{width:innerWidth,height:innerHeight},cam.fov);
+  // Off-axis projection keeps the camera above the Deck, rather than moving it
+  // below the floor to place a portrait above a tall sheet. Picking uses this matrix too.
+  const tan = Math.tan(cam.fov*Math.PI/360);
+  cam.setViewOffset(innerWidth,innerHeight,fit.shiftX/(fit.distance*tan*cam.aspect)*innerWidth/2,-fit.shiftY/(fit.distance*tan)*innerHeight/2,innerWidth,innerHeight);
+  return [center,center.clone().addScaledVector(normal,fit.distance)];
+}
+let frameViewportKey = '';
+function refitAdaptiveFrame() {
+  const selected = adaptiveFrames.get(state.current); if (!selected || D.council.active !== 238) { frameViewportKey=''; if (cam.view?.enabled) cam.clearViewOffset(); return; }
+  const r = usableFrameRect(), key = [state.current,innerWidth,innerHeight,cam.aspect,selected.userData.fitRevision,...Object.values(r).map(v=>Math.round(v))].join(':');
+  if (key === frameViewportKey) return; frameViewportKey = key;
+  const v = adaptiveView(state.current);
+  if (flight) { flight.toT.copy(v[0]); flight.toP.copy(v[1]); }
+  else { controls.target.copy(v[0]); cam.position.copy(v[1]); controls.update(); }
+}
+function fitView(id, v) {
+  const adaptive = adaptiveView(id); if (adaptive) return adaptive;
+  if (cam.view?.enabled) cam.clearViewOffset(); // narrow portrait screens: step back a little so places are not cropped (the seat view keeps its intimacy)
   if (!v) return v; const a = cam.aspect; if (a >= 0.72) return v;
   if (X.B && id === 'croom') return (D.ext && D.ext.portraitCroom) || [W(0, 0.85, -1.0), W(0.05, 1.0, 2.9)]; // portrait: the seat in line with the door, so fire, door and name stack
   const k = Math.min(1.55, Math.pow(0.72 / a, 0.75)); return [v[0], v[0].clone().add(v[1].clone().sub(v[0]).multiplyScalar(k))]; }
@@ -1240,6 +1305,7 @@ function flyTo(id, dur = 1800) { lastInput = performance.now();
   flight = { t0: performance.now(), dur: d2 * DIALECT[2], fromT, fromP, toT: v[0], toP: v[1], ctrl: dist > 1.2 ? ctrl : null, settle: DIALECT[3] };
 }
 function frame(now) {
+  refitAdaptiveFrame();
   if (flight) {
     let k = Math.max(0, Math.min(1, (now - flight.t0) / flight.dur)); const kc = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2, kq = 1 - Math.pow(1 - k, 4); k = kc + (kq - kc) * (flight.settle || 0);
     const raw = Math.max(0, Math.min(1, (now - flight.t0) / flight.dur)), g = Math.min(1, raw * 1.18), kg = g < 0.5 ? 4 * g * g * g : 1 - Math.pow(-2 * g + 2, 3) / 2;

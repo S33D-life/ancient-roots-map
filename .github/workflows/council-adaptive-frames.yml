@@ -1,0 +1,34 @@
+name: Council adaptive frame acceptance
+on:
+  pull_request:
+    paths:
+      - 'public/tetol/circle-235/pre-fire/runtime/**'
+      - 'e2e/council-adaptive-frames.spec.ts'
+      - 'playwright.frames.config.ts'
+      - '.github/workflows/council-adaptive-frames.yml'
+permissions:
+  contents: read
+jobs:
+  adaptive-frames:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Serve read-only static Tree on loopback
+        run: python3 -m http.server 4243 --bind 127.0.0.1 --directory public > /tmp/frame-server.log 2>&1 &
+      - run: npx playwright test --config playwright.frames.config.ts
+        env:
+          CI: 'true'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: adaptive-frame-review
+          path: output/playwright/adaptive-frames
+          retention-days: 7
