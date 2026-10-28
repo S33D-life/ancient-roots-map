@@ -1,5 +1,5 @@
 import {createRoot} from 'react-dom/client';
-import {useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {BrowserRouter,useSearchParams} from 'react-router-dom';
 import Circle238Page from '@/pages/council/Circle238Page';
 import Composer from './Composer';
@@ -15,7 +15,7 @@ export function Preview(){
  const [view,setView]=useState<'2d'|'deck'>(query.get('view')==='deck'?'deck':'2d'),[active,setActive]=useState<Companion|null>(null);
  const frame=useRef<HTMLIFrameElement>(null),cleanup=useRef<()=>void>(()=>{}),returnFocus=useRef<HTMLElement|null>(null),pendingNextFocus=useRef(false);
  useEffect(()=>()=>cleanup.current(),[]);
- useLayoutEffect(()=>{if(pendingNextFocus.current&&!active&&view==='2d'){pendingNextFocus.current=false;document.querySelector<HTMLElement>('.fixture-invitation button')?.focus();}},[query,active,view]);
+ useEffect(()=>{if(pendingNextFocus.current&&!active&&view==='2d'){pendingNextFocus.current=false;document.querySelector<HTMLElement>('.fixture-invitation button')?.focus();}},[query,active,view]);
  function open(c:Companion,el?:HTMLElement){returnFocus.current=el??document.activeElement as HTMLElement;setActive(c);}
  function close(){setActive(null);requestAnimationFrame(()=>returnFocus.current?.isConnected&&returnFocus.current.focus());}
  function next(){
