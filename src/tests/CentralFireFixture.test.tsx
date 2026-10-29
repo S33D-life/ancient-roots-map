@@ -7,7 +7,7 @@ beforeEach(()=>{URL.createObjectURL=vi.fn(()=> 'blob:synthetic');URL.revokeObjec
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
 function start(practice='Notice',onReceipt=vi.fn(),onClose=vi.fn()){
  render(<FireComposer host="2d" onClose={onClose} onReceipt={onReceipt}/>);
- fireEvent.click(screen.getByRole('button',{name:practice,exact:true}));
+ fireEvent.click(screen.getByRole('button',{name:practice}));
  return {onReceipt,onClose};
 }
 function words(){fireEvent.change(screen.getByRole('textbox',{name:'What happened?'}),{target:{value:'A fictional moment in a garden.'}});fireEvent.click(screen.getByRole('button',{name:'Continue'}));}
@@ -20,7 +20,7 @@ describe('Central Fire disconnected intentions',()=>{
   fireEvent.click(curator);expect(aloud).not.toBeChecked();fireEvent.click(aloud);expect(aloud).toBeChecked();fireEvent.click(screen.getByRole('radio',{name:'Only me'}));expect(aloud).toBeDisabled();expect(aloud).not.toBeChecked();
   fireEvent.click(screen.getByRole('button',{name:'Place it by the Fire (demo)'}));await screen.findByLabelText('Fire demo receipt');
   expect(onReceipt).toHaveBeenCalledWith(expect.objectContaining({destination:'fire',circle:238,curatorReview:false,readAloud:false,status:'demo-only'}));expect(fetch).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button',{name:'Bring something else to the Fire'}));fireEvent.click(screen.getByRole('button',{name:'Learn',exact:true}));words();expect(screen.getByRole('radio',{name:'Only me'})).toBeChecked();expect(screen.getByRole('checkbox')).not.toBeChecked();
+  fireEvent.click(screen.getByRole('button',{name:'Bring something else to the Fire'}));fireEvent.click(screen.getByRole('button',{name:'Learn'}));words();expect(screen.getByRole('radio',{name:'Only me'})).toBeChecked();expect(screen.getByRole('checkbox')).not.toBeChecked();
  });
  it('focuses the question and lets listening leave without a draft',async()=>{const close=vi.fn(),receipt=vi.fn();render(<FireComposer host="deck" onClose={close} onReceipt={receipt}/>);await waitFor(()=>expect(screen.getByRole('heading',{name:'What happened?'})).toHaveFocus());expect(screen.getByRole('dialog')).toHaveAccessibleName('The Fire');fireEvent.click(screen.getByRole('button',{name:/Or simply sit by the Fire and listen/}));expect(close).toHaveBeenCalledOnce();expect(receipt).not.toHaveBeenCalled();});
  it('marks wild Gather, fungus and preserved Make for safety review without a checkbox',()=>{const d=blankFireDraft();expect(needsSafetyReview({...d,practice:'Gather',origin:'Wild'})).toBe(true);expect(needsSafetyReview({...d,subject:'Hen of the Woods'})).toBe(true);expect(needsSafetyReview({...d,practice:'Make',preserved:true})).toBe(true);expect(needsSafetyReview({...d,practice:'Notice',subject:'Fig'})).toBe(false);start('Gather');fireEvent.click(screen.getByRole('radio',{name:'Wild'}));expect(screen.getByLabelText('Wild food needs care')).toBeInTheDocument();expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();});
