@@ -9,7 +9,7 @@ S33D / Ancient Roots Map — a participatory atlas of the world's remarkable anc
 ## Commands
 
 ```bash
-npm install          # install deps (Node 20, npm is canonical — ignore bun/deno lockfiles)
+npm ci               # install deps exactly from package-lock.json (Node 20, npm is canonical — ignore bun/deno lockfiles)
 npm run dev          # dev server at http://127.0.0.1:8080
 npm run build        # production build (writes public/version.json first)
 npm run typecheck    # tsc --noEmit
@@ -17,10 +17,10 @@ npm run lint         # eslint on src/, scripts/, config files
 npm run test         # vitest (run once, no watch)
 npm run test -- --reporter=verbose   # single test file or verbose output
 npm run e2e          # Playwright smoke (requires a built dist/ — run build first)
-npm run release-check  # full pre-PR gate: typecheck → lint → security → duplicates → assets → test → build
+npm run release-check  # pre-PR gate: council static → council share → typecheck → lint → security → duplicates → assets → test → build
 ```
 
-Individual guards (all run as part of `release-check`):
+Individual guards (CI runs all four; `release-check` runs all except `guard:config-churn`):
 ```bash
 npm run security:check      # blocks committed .env files and leaked key patterns
 npm run guard:config-churn  # detects tools auto-editing .env / vite.config.ts
@@ -28,7 +28,7 @@ npm run check:duplicates    # blocks files ending in " 2", " 3" etc.
 npm run guard:assets        # asset bundle size budget
 ```
 
-**`npm run release-check` must pass before opening a PR.** CI runs identical steps.
+**`npm run release-check` must pass before opening a PR.** CI's `validate` job also runs `guard:config-churn` and `check-council-public-bytes.mjs`, and `e2e-smoke` runs Playwright separately; see `AGENTS.md`.
 
 > The security-check allowlist has historical context in PR #18. Recheck actual source and current CI before using old build claims.
 
