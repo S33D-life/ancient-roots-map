@@ -31,7 +31,7 @@ describe('Central Fire disconnected intentions',()=>{
 
 it('visually distinguishes tending from gathering without changing their accessible names',()=>{
  render(<FireComposer host="2d" onClose={vi.fn()} onReceipt={vi.fn()}/>);
- expect(screen.getByRole('button',{name:'Tend',exact:true}).querySelector('[data-practice-icon="tend"]')).not.toBeNull();
- expect(screen.getByRole('button',{name:'Gather',exact:true}).querySelector('[data-practice-icon="gather"]')).not.toBeNull();
- expect(screen.getByRole('button',{name:'Tend',exact:true})).toHaveAccessibleDescription('grew · cared');expect(screen.getByRole('button',{name:'Gather',exact:true})).toHaveAccessibleDescription('harvested · foraged');
+ expect(screen.getByRole('button',{name:'Tend'}).querySelector('[data-practice-icon="tend"]')).not.toBeNull();
+ expect(screen.getByRole('button',{name:'Gather'}).querySelector('[data-practice-icon="gather"]')).not.toBeNull();
+ expect(screen.getByRole('button',{name:'Tend'})).toHaveAccessibleDescription('grew · cared');expect(screen.getByRole('button',{name:'Gather'})).toHaveAccessibleDescription('harvested · foraged');
 });
