@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { DOCS_ONLY, classifyE2EPaths } from './ci-e2e-scope.mjs';
+
+test('four precisely scoped documentation files may skip Playwright on PRs', () => {
+  assert.equal(classifyE2EPaths([...DOCS_ONLY], 'pull_request').runFull, false);
+});
+test('one shared agent guide edit may skip on a PR', () => {
+  assert.equal(classifyE2EPaths(['AGENTS.md'], 'pull_request').runFull, false);
+});
+test('push to main always runs full browser tests', () => {
+  assert.equal(classifyE2EPaths([...DOCS_ONLY], 'push').runFull, true);
+});
+test('empty or unverified changed-file list fails closed', () => {
+  assert.equal(classifyE2EPaths([], 'pull_request').runFull, true);
+  assert.equal(classifyE2EPaths(undefined, 'pull_request').runFull, true);
+});
+test('Council, TETOL and app changes run the full browser tests', () => {
+  for (const path of ['src/pages/council/Circle238Page.tsx', 'public/tetol/circle-235/pre-fire/runtime/entry.js', 'supabase/functions/_shared/currentCircle.ts']) {
+    assert.equal(classifyE2EPaths(['AGENTS.md', path], 'pull_request').runFull, true, path);
+  }
+});
+test('test scripts, workflow and unknown docs also trigger full suite', () => {
+  for (const path of ['.github/workflows/ci.yml', 'scripts/ci-e2e-scope.mjs', 'README.md', 'docs/releases/RELEASE.md', '.github/pull_request_template.yml']) {
+    assert.equal(classifyE2EPaths([path], 'pull_request').runFull, true, path);
+  }
+});
+test('never skip on a non-pull_request trigger, even with allowlisted files', () => {
+  for (const event of ['workflow_dispatch', 'schedule', undefined]) {
+    assert.equal(classifyE2EPaths(['CURRENT_TASKS.md'], event).runFull, true);
+  }
+});
