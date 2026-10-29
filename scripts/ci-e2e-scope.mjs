@@ -44,9 +44,10 @@ function decideFromGit(env) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const { runFull, why } = decideFromGit(process.env);
   const decision = runFull ? 'true' : 'false';
-  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `run_full=${decision}\n`);
-  if (process.env.GITHUB_STEP_SUMMARY) {
-    appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### E2E coverage decision\n- Full Playwright run: **${decision}**\n- Reason: ${why}\n- The validate/security/Council/privacy/build job is always required.\n`);
+  const { GITHUB_OUTPUT: outputPath, GITHUB_STEP_SUMMARY: summaryPath } = process.env;
+  if (outputPath) appendFileSync(outputPath, `run_full=${decision}\n`);
+  if (summaryPath) {
+    appendFileSync(summaryPath, `### E2E coverage decision\n- Full Playwright run: **${decision}**\n- Reason: ${why}\n- The validate/security/Council/privacy/build job is always required.\n`);
   }
   console.log(`run_full=${decision} · ${why}`);
 }
