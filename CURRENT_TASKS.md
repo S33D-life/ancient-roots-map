@@ -5,6 +5,7 @@
 ## Where to start
 
 - [Live S33D This Week's Compass](https://app.notion.com/p/35215b58480d8173aacfc41fd9da7134): reviewed human priorities, current owner, holds and next-version backlog.
+- [Active PR & Completion Board](https://app.notion.com/p/40815b58480d81c7be69d49a84aa14b1): read your task/PR row at session start; submit a provenance-checked row update and Completion Card at session close.
 - [Current Priorities routing page](https://app.notion.com/p/35215b58480d813fa968d84ccb13a791): short Notion doorway.
 - [Historical Priority Rings](https://app.notion.com/p/3e315b58480d81f3b99efc3403424172): preserved prior decisions, not today's instructions.
 - [GitHub open PRs](https://github.com/S33D-life/ancient-roots-map/pulls) / [issues](https://github.com/S33D-life/ancient-roots-map/issues): implementation and review evidence.
