@@ -28,3 +28,10 @@ describe('Central Fire disconnected intentions',()=>{
  it.each(['open','gathering','afterglow','remembered'])('requires explicit QA for the %s state',state=>{expect(reviewFireState(false,state)).toBe('open');expect(reviewFireState(true,state)).toBe(state);});
  it('has no persistence, upload, capture, backend or lookup imports',()=>{for(const file of ['FireComposer.tsx','FireArea.tsx','model.ts']){const source=readFileSync('src/review/council-offerings/fire/'+file,'utf8');expect(source).not.toMatch(/supabase|\.upload\(|getUserMedia|MediaRecorder|localStorage|sessionStorage|fetch\(|XMLHttpRequest|sendBeacon/);}});
 });
+
+it('visually distinguishes tending from gathering without changing their accessible names',()=>{
+ render(<FireComposer host="2d" onClose={vi.fn()} onReceipt={vi.fn()}/>);
+ expect(screen.getByRole('button',{name:'Tend',exact:true}).querySelector('[data-practice-icon="tend"]')).not.toBeNull();
+ expect(screen.getByRole('button',{name:'Gather',exact:true}).querySelector('[data-practice-icon="gather"]')).not.toBeNull();
+ expect(screen.getByRole('button',{name:'Tend',exact:true})).toHaveAccessibleDescription('grew · cared');expect(screen.getByRole('button',{name:'Gather',exact:true})).toHaveAccessibleDescription('harvested · foraged');
+});

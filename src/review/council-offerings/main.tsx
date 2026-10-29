@@ -1,5 +1,6 @@
+import {createPortal} from 'react-dom';
 import {createRoot} from 'react-dom/client';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {BrowserRouter,useSearchParams,useNavigate} from 'react-router-dom';
 import Circle238Page from '@/pages/council/Circle238Page';
 import Composer from './Composer';
@@ -25,6 +26,11 @@ export function Preview(){
  const [active,setActive]=useState<Companion|null>(()=>query.get('offering')==='companion'?selectedCompanion(query.get('target'))??null:null);
  const fireOpen=query.get('offering')==='fire',recommending=query.get('offering')==='recommendation';
  const [fireReceipts,setFireReceipts]=useState<FireReceipt[]>([]);
+ const [arrivalHost,setArrivalHost]=useState<HTMLElement|null>(null);
+ // Fixture-only slot: preserve the shared page and put choices after its real introduction.
+ useLayoutEffect(()=>{if(view!=='2d'){setArrivalHost(null);return;}const header=document.querySelector('.circle237 > header');if(!header)return;const marker=document.createComment('fixture original heading position');header.before(marker);header.parentElement?.prepend(header);const host=document.createElement('div');host.dataset.fixtureArrival='';header.after(host);setArrivalHost(host);return()=>{host.remove();marker.replaceWith(header);};},[view]);
+ function meetCompanions(){const q=new URLSearchParams(query);q.delete('companion');q.delete('returned');setQuery(q);requestAnimationFrame(()=>{const gallery=document.querySelector<HTMLElement>('.circle237 .gallery');if(gallery){gallery.tabIndex=-1;gallery.focus();gallery.scrollIntoView({block:'start'});}});}
+
  const pushedOverlay=useRef(false),wasOverlay=useRef(false),lastOverlay=useRef(query.get('offering'));
  const source=useRef((()=>{const node=query.get('node');const allowed=['croom','live_fire','seat_you','c233rec',...companions.map(c=>c.id)];return node&&allowed.includes(node)?deckUrl().replace('#croom','#'+node):deckUrl(initial);})());
  function setView(next:'2d'|'deck'){const q=new URLSearchParams(query);q.set('view',next);setQuery(q);}
@@ -74,7 +80,7 @@ export function Preview(){
   const observer=new MutationObserver(decorate);observer.observe(doc,{childList:true,subtree:true});win.addEventListener('hashchange',decorate);decorate();cleanup.current=()=>{observer.disconnect();win.removeEventListener('hashchange',decorate);style.remove();};
  }
  return <div className={`fixture-shell host-${view}`} data-fixture-sha={import.meta.env.VITE_FIXTURE_SHA??'unverified'}>{qa?<header className="fixture-header"><p>PRIVATE INTERACTION REVIEW · V1</p><h1>The Council of Life · yOur Blooming Week</h1><p>DEMO · nothing is saved. No uploads or real submissions.</p><nav aria-label="Preview surface"><button aria-pressed={view==='2d'} onClick={()=>setView('2d')}>2D Council</button><button aria-pressed={view==='deck'} onClick={()=>setView('deck')}>Original 3D Deck</button></nav></header>:<p className="fixture-demo-band">Meet a companion, reflect privately, or propose something for human review. Demo — nothing is stored or sent.</p>}
- {view==='2d'?<><FireArea state={reviewFireState(qa,query.get('fireState'))} qa={qa} receipts={fireReceipts} onOpen={openFire} onRecommend={recommend}/><div onClickCapture={e=>{const link=(e.target as Element).closest('a');if(link?.getAttribute('href')?.startsWith('/tetol/')){e.preventDefault();setView('deck');}}}><Circle238Page previewTitle="The Council of Life · yOur Blooming Week · StarPod Circle 238" renderAfterScene={key=>{const c=selectedCompanion(key)!;const lore=companionLore[key as keyof typeof companionLore];return <><p>{lore.name}</p><p>{lore.text}</p><Invitation companionName={c.label} onOffer={button=>open(c,button)}/></>;}}/></div></>:<iframe ref={frame} title="Original TETOL Council Deck — isolated review" src={source.current} onLoad={connectDeck} sandbox="allow-scripts allow-same-origin" className="deck-preview"/>}
+ {view==='2d'?<>{arrivalHost&&createPortal(<FireArea state={reviewFireState(qa,query.get('fireState'))} qa={qa} receipts={fireReceipts} onOpen={openFire} onRecommend={recommend} onMeet={meetCompanions}/>,arrivalHost)}<div onClickCapture={e=>{const link=(e.target as Element).closest('a');if(link?.getAttribute('href')?.startsWith('/tetol/')){e.preventDefault();setView('deck');}}}><Circle238Page previewTitle="The Council of Life · yOur Blooming Week · StarPod Circle 238" renderAfterScene={key=>{const c=selectedCompanion(key)!;const lore=companionLore[key as keyof typeof companionLore];return <><p>{lore.name}</p><p>{lore.text}</p><Invitation companionName={c.label} onOffer={button=>open(c,button)}/></>;}}/></div></>:<iframe ref={frame} title="Original TETOL Council Deck — isolated review" src={source.current} onLoad={connectDeck} sandbox="allow-scripts allow-same-origin" className="deck-preview"/>}
  {qa&&<footer className="fixture-footer">Fixture build {import.meta.env.VITE_FIXTURE_SHA??'unverified'} · review only. Original artwork and historical editions are unchanged.{qa&&<p>Reviewer QA mode · synthetic outcome controls enabled.</p>}</footer>}
  {fireOpen&&<FireComposer host={view} onClose={dismiss} onReceipt={r=>setFireReceipts(items=>[...items,r].slice(-10))}/> }
  {recommending&&<Composer initialKind="Future companion" host={view} qa={qa} onClose={dismiss}/>}
