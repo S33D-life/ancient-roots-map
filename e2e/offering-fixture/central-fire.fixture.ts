@@ -29,13 +29,16 @@ for(const width of [390,1440])test(`Council and Fire remain distinct, return, Ba
  await expect(page.getByRole('dialog',{name:'The Fire',exact:true})).toBeVisible();await page.getByRole('button',{name:'Notice',exact:true}).click();await expect(page.getByRole('textbox',{name:'What happened?',exact:true})).toHaveValue('');await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);await expect(fire).toBeFocused();
  await expect(page.getByRole('region',{name:'Yours this week — demo'})).toHaveCount(0);expect(writes).toEqual([]);expect(errors).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
-test('original Deck Fire doorway, correct edition label, listen, receipt and exact focus return',async({page},info)=>{
+// Each case exercises one complete journey with continuous original rendering.
+// CI traces showed two journeys exhausted the total budget, not a failed focus assertion.
+for(const action of ['listen','offering'] as const)test(`original Deck Fire ${action}: edition, exact context and focus return`,async({page},info)=>{
  test.setTimeout(180000);const writes:string[]=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/review/council-offerings.html?view=deck&node=live_fire');const frame=page.frameLocator('iframe');const fire=frame.locator('[data-fixture-fire]').first();await expect(fire).toBeAttached({timeout:60000});
  if(await frame.locator('body').getAttribute('data-sheet')==='peek')await frame.locator('#grab').tap();
- await expect(frame.locator('#panel .eyebrow.part')).toContainText('238');await fire.scrollIntoViewIfNeeded();await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-fire-deck-doorway.png`});
- await fire.click();await expect(page.getByRole('dialog',{name:'The Fire',exact:true})).toBeVisible();await page.getByRole('button',{name:/Or simply sit by the Fire and listen/}).click();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(fire).toBeFocused();
- await fire.click();await page.getByRole('button',{name:'Learn',exact:true}).click();await page.getByRole('textbox',{name:'What happened?',exact:true}).fill('A fictional learning moment');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Place it by the Fire (demo)'}).click();await page.getByRole('button',{name:'Return to the Council'}).click();await expect(fire).toBeFocused();await expect(frame.locator('body')).toHaveAttribute('data-sheet',/mid|full/);expect(new URL(page.frames()[1].url()).hash).toBe('#live_fire');
+ await expect(frame.locator('#panel .eyebrow.part')).toContainText('238');await fire.scrollIntoViewIfNeeded();await page.screenshot({path:`output/playwright/offering-fixture/${info.project.name}-fire-deck-${action}-doorway.png`});
+ await fire.click();await expect(page.getByRole('dialog',{name:'The Fire',exact:true})).toBeVisible();
+ if(action==='listen'){await page.getByRole('button',{name:/Or simply sit by the Fire and listen/}).click();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(fire).toBeFocused();}
+ else{await page.getByRole('button',{name:'Learn',exact:true}).click();await page.getByRole('textbox',{name:'What happened?',exact:true}).fill('A fictional learning moment');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:'Place it by the Fire (demo)'}).click();await page.getByRole('button',{name:'Return to the Council'}).click();await expect(fire).toBeFocused();}await expect(frame.locator('body')).toHaveAttribute('data-sheet',/mid|full/);expect(new URL(page.frames()[1].url()).hash).toBe('#live_fire');
  await expect(frame.locator('#open-circle')).not.toBeVisible();expect(writes).toEqual([]);
 });
 test('narrow keyboard flow, safety and synthetic-only optional media',async({page},info)=>{
