@@ -7,6 +7,7 @@
 - Exact head SHA:
 - Changed paths:
 - Related issue / dependency PR (if stacked):
+- Builder's Bench board row / Completion Card:
 
 ## Evidence (record exact HEAD)
 - [ ] Focused tests:
@@ -28,4 +29,4 @@
 - [ ] Ed GO for frontend publish (separate)
 - [ ] Ed GO for Edge Functions / DB / permissions / outbound communications (separate, if applicable)
 
-Agent: <!-- codex | claude | lovable | human | teotag (actual producer) -->
+Agent: <!-- codex | claude | chatgpt | lovable | human | teotag (actual producer) -->
