@@ -23,3 +23,7 @@ export function demoReceipt(c: Companion, kind: Kind, audience: Audience, text: 
 }
 
 export const invitation = {question:'What would you like to offer this companion?',hint:'It stays with you unless you choose to share it for review.'};
+
+// Existing approved kinds, not a new taxonomy or canonical submission model.
+export const recommendationCategories = [...new Set(companions.map(c => c.kind))];
+export const offeringActionLabel = (audience: Audience) => audience === 'private' ? 'Keep this private (demo)' : 'Propose for curator review (demo)';

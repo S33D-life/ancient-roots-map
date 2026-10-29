@@ -16,3 +16,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .fixture-demo-band{margin:0;padding:10px 16px;font:11px/20px var(--sans);text-align:center}.fixture-shell:not(:has(.fixture-header)) .deck-preview{height:calc(100dvh - 40px);min-height:580px}
 
 .host-2d .circle237 .fixture-invitation button{text-decoration:none}
+
+.suggestion-mark{display:grid;place-items:center}.fixture-recommend{margin:12px 0}.fire-area details{margin:12px 0}.fire-area summary{cursor:pointer;min-height:44px;align-content:center}.fixture-demo-band{max-width:960px;margin:auto}

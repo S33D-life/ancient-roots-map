@@ -18,7 +18,7 @@ describe('Central Fire disconnected intentions',()=>{
   const curator=screen.getByRole('radio',{name:'The curators for this Circle'}),aloud=screen.getByRole('checkbox',{name:'Read aloud at the Fire'});
   expect(curator).not.toBeChecked();expect(curator).toHaveAccessibleDescription(/does not permit reading aloud or public Library/);expect(aloud).toBeDisabled();expect(aloud).not.toBeChecked();
   fireEvent.click(curator);expect(aloud).not.toBeChecked();fireEvent.click(aloud);expect(aloud).toBeChecked();fireEvent.click(screen.getByRole('radio',{name:'Only me'}));expect(aloud).toBeDisabled();expect(aloud).not.toBeChecked();
-  fireEvent.click(screen.getByRole('button',{name:'Place it by the Fire (demo)'}));await screen.findByLabelText('Fire demo receipt');
+  fireEvent.click(screen.getByRole('button',{name:/^(Keep this private|Propose for curator review) \(demo\)$/}));await screen.findByLabelText('Fire demo receipt');
   expect(onReceipt).toHaveBeenCalledWith(expect.objectContaining({destination:'fire',circle:238,curatorReview:false,readAloud:false,status:'demo-only'}));expect(fetch).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button',{name:'Bring something else to the Fire'}));fireEvent.click(screen.getByRole('button',{name:'Learn'}));words();expect(screen.getByRole('radio',{name:'Only me'})).toBeChecked();expect(screen.getByRole('checkbox')).not.toBeChecked();
  });

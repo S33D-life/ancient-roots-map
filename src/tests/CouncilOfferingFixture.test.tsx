@@ -7,7 +7,7 @@ import {companions,kinds,selectedCompanion,demoReceipt,sourceOffering} from '@/r
 import Circle238Page from '@/pages/council/Circle238Page';
 beforeEach(()=>{URL.createObjectURL=vi.fn(()=> 'blob:fixture-audio');URL.revokeObjectURL=vi.fn();window.scrollTo=vi.fn();window.matchMedia=vi.fn(()=>({matches:true} as MediaQueryList));});
 afterEach(cleanup);
-function start(kind:string,qa=false){render(<Composer companion={companions[0]} onClose={vi.fn()} qa={qa}/>);fireEvent.click(screen.getByRole('button',{name:kind==='A seed for a future Circle'?/A seed for a future Circle/:kind}));}
+function start(kind:string,qa=false){render(<Composer companion={companions[0]} onClose={vi.fn()} qa={qa}/>);fireEvent.click(screen.getByRole('button',{name:kind==='Recommend a companion for next week'?/Recommend a companion for next week/:kind}));}
 describe('Council offering fixture isolation and holding',()=>{
  it.each(['2d','deck'] as const)('focuses the opening question in the %s composer',async host=>{
   render(<Composer companion={companions[0]} host={host} onClose={vi.fn()}/>);
@@ -18,13 +18,13 @@ describe('Council offering fixture isolation and holding',()=>{
   start('Story');fireEvent.change(screen.getByRole('textbox',{name:'Your words'}),{target:{value:'A fixture story'}});fireEvent.click(screen.getByRole('button',{name:'Continue'}));
   const question=screen.getByRole('heading',{name:'How should your story be held?'}),group=screen.getByRole('group',{name:'How should your story be held?'});
   expect(group).toHaveAttribute('aria-labelledby',question.id);
-  expect(screen.getByRole('radio',{name:'Keep it with me'})).toHaveAccessibleDescription(/seen only by you/);
-  expect(screen.getByRole('radio',{name:'Offer it to the Circle for review'})).toHaveAccessibleDescription(/unless they ask you first and you agree/);
-  expect(screen.getByRole('radio',{name:'Keep it with me'})).toBeChecked();
+  expect(screen.getByRole('radio',{name:'Only me'})).toHaveAccessibleDescription(/only you would see/);
+  expect(screen.getByRole('radio',{name:'The curators for this Circle'})).toHaveAccessibleDescription(/public sharing would need your separate agreement/);
+  expect(screen.getByRole('radio',{name:'Only me'})).toBeChecked();
  });
  it('includes the visible seed explanation in its accessible name',()=>{
   render(<Composer companion={companions[0]} onClose={vi.fn()}/>);
-  expect(screen.getByRole('button',{name:'A seed for a future Circle Suggest a companion · a future path to the curators'})).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Recommend a companion for next week A suggestion for human review · nothing is sent'})).toBeInTheDocument();
  });
  it.each(kinds)('keeps %s private by default at its dedicated holding stage',async kind=>{
   start(kind);expect(screen.queryByRole('radio')).not.toBeInTheDocument();
@@ -34,27 +34,27 @@ describe('Council offering fixture isolation and holding',()=>{
   else if(kind==='Poem')fireEvent.change(screen.getByPlaceholderText('Let the poem begin…'),{target:{value:'A fictional poem'}});
   else fireEvent.change(screen.getByRole('textbox',{name:'Your words'}),{target:{value:'A fictional noticing'}});
   fireEvent.click(screen.getByRole('button',{name:'Continue'}));
-  expect(screen.getByLabelText('Keep it with me')).toBeChecked();
-  expect(screen.getByLabelText('Offer it to the Circle for review')).not.toBeChecked();
+  expect(screen.getByLabelText('Only me')).toBeChecked();
+  expect(screen.getByLabelText('The curators for this Circle')).not.toBeChecked();
   expect(screen.getByLabelText('Future-design promises')).toHaveTextContent('not implemented in this demo');
   expect(screen.getByText(/Not minted/)).toBeInTheDocument();
   expect(screen.queryByLabelText('Demo outcome')).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button',{name:'Place it in the Circle (demo)'}));
+  fireEvent.click(screen.getByRole('button',{name:/^(Keep this private|Propose for curator review) \(demo\)$/}));
   expect(await screen.findByText('Demo receipt · nothing was stored or sent.')).toBeInTheDocument();
   expect(screen.getByText('Different friends. One living story.')).toBeInTheDocument();
  });
  it('requires a separate review choice and retains QA failures without a receipt',async()=>{
   start('Story',true);fireEvent.change(screen.getByRole('textbox',{name:'Your words'}),{target:{value:'A fixture story'}});
-  fireEvent.click(screen.getByRole('button',{name:'Continue'}));fireEvent.click(screen.getByLabelText('Offer it to the Circle for review'));
-  expect(screen.getByText(/unless they ask you first and you agree/)).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button',{name:'Place it in the Circle (demo)'}));
+  fireEvent.click(screen.getByRole('button',{name:'Continue'}));fireEvent.click(screen.getByLabelText('The curators for this Circle'));
+  expect(screen.getByText(/public sharing would need your separate agreement/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:/^(Keep this private|Propose for curator review) \(demo\)$/}));
   fireEvent.change(screen.getByLabelText('Demo outcome'),{target:{value:'unknown'}});fireEvent.click(screen.getByRole('button',{name:'Simulate offering'}));
   expect(screen.getByRole('alert')).toHaveTextContent('unknown');expect(screen.queryByLabelText('Demo receipt')).not.toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('Demo outcome'),{target:{value:'success'}});fireEvent.click(screen.getByRole('button',{name:'Simulate offering'}));
-  expect(await screen.findByText(/A curator would ask before anything is shared/)).toBeInTheDocument();
+  expect(await screen.findByText(/Nothing was submitted or shared/)).toBeInTheDocument();
  });
  it('keeps QA source links out of the normal journey and labels future suggestion privacy',()=>{
-  start('A seed for a future Circle',false);
+  start('Recommend a companion for next week',false);
   expect(screen.getByText(/your suggestion and your name would be seen by the curators only/)).toBeInTheDocument();
  });
  it('does not expose reviewer source linking by default',()=>{render(<Composer companion={companions[0]} onClose={vi.fn()}/>);expect(screen.queryByRole('button',{name:'Link an existing Ancient Friend offering'})).not.toBeInTheDocument();});
@@ -68,4 +68,21 @@ describe('Council offering fixture isolation and holding',()=>{
  });
  it('releases its synthetic object URL on unmount',()=>{const result=render(<Composer companion={companions[0]} onClose={vi.fn()}/>);result.unmount();expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fixture-audio');});
  it('contains no real write, reward, search, storage or recorder integration',()=>{for(const name of ['Composer.tsx','model.ts','main.tsx','Invitation.tsx'])expect(readFileSync('src/review/council-offerings/'+name,'utf8')).not.toMatch(/supabase|issueRewards|earnHearts|claimCouncil|localStorage|indexedDB|getUserMedia|\.upload\(|fetch\(/);});
+});
+
+describe('plain actions and independent recommendations',()=>{
+ it('distinguishes addressed private reflection from a curator proposal',()=>{
+  start('Message');fireEvent.change(screen.getByRole('textbox',{name:'Your words'}),{target:{value:'Fictional reflection'}});fireEvent.click(screen.getByRole('button',{name:'Continue'}));
+  expect(screen.getByRole('button',{name:'Keep this private (demo)'})).toBeInTheDocument();expect(screen.queryByRole('button',{name:'Place it in the Circle (demo)'})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('radio',{name:'The curators for this Circle'}));expect(screen.getByRole('button',{name:'Propose for curator review (demo)'})).toBeInTheDocument();
+ });
+ it('opens a name-only recommendation without another companion and preserves existing categories',async()=>{
+  const before=JSON.stringify(companions),close=vi.fn();render(<Composer initialKind="Future companion" onClose={close}/>);
+  expect(screen.getByRole('dialog')).toHaveAccessibleName('Recommend a companion');expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  const action=screen.getByRole('button',{name:'Preview recommendation (demo)'});expect(action).toBeDisabled();fireEvent.change(screen.getByRole('combobox',{name:'Suggested companion'}),{target:{value:'A fictional elder tree'}});expect(action).not.toBeDisabled();
+  expect(screen.getByRole('textbox',{name:'Why recommend them? (optional)'})).not.toBeRequired();
+  const options=Array.from(screen.getByRole('combobox',{name:'Category (optional)'}).querySelectorAll('option')).map(o=>o.textContent);expect(options).toEqual(['Not sure',...new Set(companions.map(c=>c.kind))]);
+  fireEvent.click(action);expect(await screen.findByLabelText('Demo receipt')).toHaveTextContent('Recommendation preview — nothing was sent.');expect(screen.getByLabelText('Demo receipt')).toHaveTextContent('Not included');expect(screen.queryByText('Addressed to')).not.toBeInTheDocument();expect(screen.queryByRole('button',{name:'Meet the next companion'})).not.toBeInTheDocument();expect(JSON.stringify(companions)).toBe(before);
+  fireEvent.click(screen.getByRole('button',{name:'Return to the Council'}));expect(close).toHaveBeenCalledOnce();
+ });
 });
