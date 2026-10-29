@@ -7,6 +7,7 @@
 import { execFileSync } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 export const DOCS_ONLY = new Set([
   'AGENTS.md',
@@ -40,7 +41,7 @@ function decideFromGit(env) {
   }
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const { runFull, why } = decideFromGit(process.env);
   const decision = runFull ? 'true' : 'false';
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `run_full=${decision}\n`);
