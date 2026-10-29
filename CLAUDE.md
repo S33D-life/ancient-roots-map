@@ -30,13 +30,13 @@ npm run guard:assets        # asset bundle size budget
 
 **`npm run release-check` must pass before opening a PR.** CI runs identical steps.
 
-> `security:check` passes on `main`: the anon-key fallback in `src/config/env.ts` is allowlisted by pragma (PR #18, see CURRENT_TASKS.md, 2026-05-29).
+> The security-check allowlist has historical context in PR #18. Recheck actual source and current CI before using old build claims.
 
-## Branch rules
+## Shared agent rules
 
-- Never commit to `main` directly.
-- One branch per task. Name convention: `teotag/<topic>`, `codex/<topic>`, `ed/<topic>`, `lovable/<topic>`, `agent/<topic>`.
-- PR description must include: files changed, risks, next steps.
+@AGENTS.md
+
+The imported `AGENTS.md` owns branch, lanes, PR, release, privacy and approval conventions. Use this file only for Claude-specific architecture and commands. Do not infer permission to change Claude project settings, auto-memory, hooks or installed MCP servers.
 
 ## Architecture
 
