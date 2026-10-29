@@ -30,3 +30,21 @@ test('never skip on a non-pull_request trigger, even with allowlisted files', ()
     assert.equal(classifyE2EPaths(['CURRENT_TASKS.md'], event).runFull, true);
   }
 });
+
+test('CLI writes a full-run decision in normal relative invocation', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const { mkdtempSync, readFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const dir = mkdtempSync(join(tmpdir(), 's33d-e2e-gate-'));
+  try {
+    const output = join(dir, 'github-output');
+    execFileSync(process.execPath, ['scripts/ci-e2e-scope.mjs'], {
+      cwd: new URL('..', import.meta.url),
+      env: { ...process.env, GITHUB_EVENT_NAME: 'push', GITHUB_OUTPUT: output },
+    });
+    assert.match(readFileSync(output, 'utf8'), /^run_full=true\n$/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
