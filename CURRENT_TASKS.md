@@ -20,11 +20,12 @@
 5. **Release safety**: [issue #103](https://github.com/S33D-life/ancient-roots-map/issues/103) unresolved; investigate Lovable/branch settings before rule changes. No unattended publish.
 6. **Funding in parallel**: existing S33D.Life Giveth owner checks via [#121](https://github.com/S33D-life/ancient-roots-map/issues/121).
 
-## Verified checkout snapshot · 29 October 2026
+## Checkout snapshot · 29 October 2026
 
 - `main` base at check: `e2f2830f0af383f14d7f0165cd3eb9be4ec9d057` (do not treat as perpetual current HEAD).
 - Draft #127 at `d926be72` (CI success); #131 at `9ee4b430` stacked on #127 (CI/adaptive success).
 - Draft #130 at `6214b36e` (fixture CI success); #128 at `f1a89682`; #129 at `7c93d670` (CI success).
+- CI results above were reported by TEOTAG GPT on 29 Oct; re-check the current PR head and actual tested checkout SHA in GitHub.
 - These are **test receipts, not accepted/merged/published features**. Recheck exact head and live served version immediately before any human release decision.
 - Repo Time Tree says Circle 238 current; connected MCP returned Circle 235. Historical/snapshot source is not published-site proof.
 - `AGENTS.md` governs lane and approval rules; ignore the older May "CI broken until #19" text.
