@@ -40,7 +40,7 @@ for(const action of ['listen','offering'] as const)test(`original Deck Fire ${ac
  if(action==='listen'){await page.getByRole('button',{name:/Or simply sit by the Fire and listen/}).click();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(fire).toBeFocused();}
  else{await page.getByRole('button',{name:'Learn',exact:true}).click();await page.getByRole('textbox',{name:'What happened?',exact:true}).fill('A fictional learning moment');await page.getByRole('button',{name:'Continue',exact:true}).click();await page.getByRole('button',{name:/^(Keep this private|Propose for curator review) \(demo\)$/}).click();await page.getByRole('button',{name:'Return to the Council'}).click();await expect(fire).toBeFocused();}await expect(frame.locator('body')).toHaveAttribute('data-sheet',/mid|full/);expect(new URL(page.frames()[1].url()).hash).toBe('#live_fire');
  await expect(frame.locator('#open-circle')).not.toBeVisible();
- if(action==='listen'){const recommendation=frame.locator('[data-fixture-recommend]');await recommendation.click();const d=page.getByRole('dialog');await expect(d).toHaveAccessibleName('Recommend a companion');await d.getByRole('combobox',{name:'Suggested companion'}).fill('A fictional bird');await d.getByRole('button',{name:'Preview recommendation (demo)'}).click();await expect(d.getByLabel('Demo receipt')).toContainText('Nothing was sent.');await d.getByRole('button',{name:'Return to the Council',exact:true}).click();await expect(recommendation).toBeFocused();expect(new URL(page.frames()[1].url()).hash).toBe('#live_fire');}
+
  expect(writes).toEqual([]);
 });
 test('narrow keyboard flow, safety and synthetic-only optional media',async({page},info)=>{
@@ -52,4 +52,10 @@ test('server refuses writes and backend routes; gathering is QA-only',async({pag
  const blocked=await request.post('/rest/v1/council-ledger',{data:{synthetic:true}});expect(blocked.status()).toBe(405);expect((await request.get('/functions/v1/offering-media')).status()).toBe(403);
  await page.goto('/review/council-offerings.html?fireState=gathering');await expect(page.getByRole('region',{name:'The Fire — review only'})).toContainText('Not happening now');
  await page.goto('/review/council-offerings.html?qa=1&fireState=gathering');await expect(page.getByRole('region',{name:'The Fire — review only'})).toContainText('Synthetic QA state: Happening now — not a live announcement');
+});
+
+test('original Deck independent recommendation: name-only and exact focus return',async({page})=>{
+ test.setTimeout(180000);const writes:string[]=[];page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/review/council-offerings.html?view=deck&node=live_fire');const frame=page.frameLocator('iframe');const recommendation=frame.locator('[data-fixture-recommend]');await expect(recommendation).toBeAttached({timeout:60000});if(await frame.locator('body').getAttribute('data-sheet')==='peek')await frame.locator('#grab').tap();
+ await recommendation.click();const d=page.getByRole('dialog');await expect(d).toHaveAccessibleName('Recommend a companion');await d.getByRole('combobox',{name:'Suggested companion'}).fill('A fictional bird');await d.getByRole('button',{name:'Preview recommendation (demo)'}).click();await expect(d.getByLabel('Demo receipt')).toContainText('Nothing was sent.');await d.getByRole('button',{name:'Return to the Council',exact:true}).click();await expect(recommendation).toBeFocused();expect(new URL(page.frames()[1].url()).hash).toBe('#live_fire');expect(writes).toEqual([]);
 });
