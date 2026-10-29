@@ -26,6 +26,17 @@ The local path runs slow under load (see CURRENT_TASKS.md known risks). For rele
 
 ---
 
+## Session entry and completion receipt
+
+1. **On entry:** open the [Current Compass](https://app.notion.com/p/35215b58480d8173aacfc41fd9da7134) and the [Active PR & Completion Board](https://app.notion.com/p/40815b58480d81c7be69d49a84aa14b1) in Builder's Bench. Read the row for **your specific task or PR** before editing. Confirm the row's owner, dependency, permitted paths, gate and last-reviewed date; check actual GitHub head/CI and upstream branches, as the board is a dated human-maintained snapshot.
+2. **During work:** one agent owns each branch; update the PR description with exact base/head, changed files, tests, blockers and separate release dependencies. Label facts precisely: **DESIGNED**, **CODE PRESENT**, **CI PASSED AT SHA**, **DEVICE ACCEPTED**, **MERGE APPROVED**, **MERGED**, **PUBLISHED**, **SERVED VERIFIED**; none implies the next.
+3. **On exit:** report an actionable **Completion Card**: exact full SHA, PR link, test and device receipts, changed paths, blocker/next action, next owner, and what remains unverified. Update the existing Builder's Bench board **only when authorised and connected**; otherwise include a ready-to-paste board-row update in the handoff for a human/TEOTAG steward. Never silently change canonical Notion decisions.
+4. **Before a release decision:** refresh PR head and CI again; the last receipt and board line are historical evidence, not authority. Require Ed's explicit GO for each consequential gate.
+
+This closes the loop between repository work and the existing Notion board without a new status database or unattended synchronisation.
+
+---
+
 ## Branch + PR rules
 
 - **Never commit directly to `main`.**
