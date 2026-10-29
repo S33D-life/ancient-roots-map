@@ -22,14 +22,14 @@ The [29 Oct 2026 compass](https://app.notion.com/p/35215b58480d8173aacfc41fd9da7
 Local repo: `/Users/ed/Documents/S33D CODE/ancient-roots-map`
 Remote: `https://github.com/S33D-life/ancient-roots-map`
 
-The local path runs slow under load (see CURRENT_TASKS.md known risks). For releases or any work that needs clean `npm install` / `npm run build` timing, clone to `/tmp/` or another local volume.
+The FUSE-mounted local path runs slow under load and can occasionally fill the disk. For releases or any work that needs clean `npm ci` / `npm run build` timing, clone to `/tmp/` or another local volume.
 
 ---
 
 ## Session entry and completion receipt
 
 1. **On entry:** open the [Current Compass](https://app.notion.com/p/35215b58480d8173aacfc41fd9da7134) and the [Active PR & Completion Board](https://app.notion.com/p/40815b58480d81c7be69d49a84aa14b1) in Builder's Bench. Read the row for **your specific task or PR** before editing. Confirm the row's owner, dependency, permitted paths, gate and last-reviewed date; check actual GitHub head/CI and upstream branches, as the board is a dated human-maintained snapshot.
-2. **During work:** one agent owns each branch; update the PR description with exact base/head, changed files, tests, blockers and separate release dependencies. Label facts precisely: **DESIGNED**, **CODE PRESENT**, **CI PASSED AT SHA**, **DEVICE ACCEPTED**, **MERGE APPROVED**, **MERGED**, **PUBLISHED**, **SERVED VERIFIED**; none implies the next.
+2. **During work:** one agent owns each branch; update the PR description with exact base/head, changed files, tests, blockers and separate release dependencies. Label facts precisely: **DESIGNED**, **CODE PRESENT**, **TESTED LOCALLY**, **CI PASSED AT SHA**, **DEVICE ACCEPTED**, **MERGE APPROVED**, **MERGED**, **PUBLISHED** (frontend), **DEPLOYED** (Edge Function), **MIGRATION APPLIED** (database), **SERVED VERIFIED**; none implies the next.
 3. **On exit:** report an actionable **Completion Card**: exact full SHA, PR link, test and device receipts, changed paths, blocker/next action, next owner, and what remains unverified. Update the existing Builder's Bench board **only when authorised and connected**; otherwise include a ready-to-paste board-row update in the handoff for a human/TEOTAG steward. Never silently change canonical Notion decisions.
 4. **Before a release decision:** refresh PR head and CI again; the last receipt and board line are historical evidence, not authority. Require Ed's explicit GO for each consequential gate.
 
@@ -45,7 +45,7 @@ This closes the loop between repository work and the existing Notion board witho
 - Keep PRs small (5–12 files ideal). One conceptual change per PR.
 - Open as **draft first**; un-draft only when CI is green or the failures are explicitly accepted as out-of-scope.
 - PR description must include: summary, exact base/head SHA, files changed, risks, tests and exact-head CI, phone/accessibility evidence where relevant, dependency/merge order, rollback and required human gate.
-- Include an accurate `Agent: codex|claude|lovable|human|teotag` trailer on new work commits when the producing agent is known. Commit authorship and agent trailer are provenance hints, not substitutes for human code review.
+- Include an accurate `Agent: codex|claude|chatgpt|lovable|human|teotag` trailer on new work commits when the producing agent is known. Commit authorship and agent trailer are provenance hints, not substitutes for human code review.
 - Use merge commits (default) when landing — keeps the trunk reading honest.
 
 ---
@@ -76,7 +76,7 @@ Concurrent edits to these will produce merge conflicts that are painful to resol
 | `src/integrations/supabase/client.ts` | Auto-generated — never edited by anyone. |
 | `src/integrations/supabase/types.ts` | Auto-generated — regenerated only via Supabase CLI as part of a dedicated chore PR. |
 | `package-lock.json` | Only via a deliberate dep-management PR. Regenerate on a clean (non-FUSE) machine via `npm install`. |
-| `public/version.json` | Auto-written by `generate-version.mjs` at build time. Slated for `.gitignore`; don't commit drift. |
+| `public/version.json` | Auto-written by `generate-version.mjs` at build time; already gitignored. Never force-add it. |
 | `src/App.tsx` route table | One agent at a time. Add new route constants to `src/lib/routes.ts` first, then page in `src/pages/`, then route entry in `App.tsx`. |
 
 ---
@@ -102,10 +102,10 @@ When merging:
 
 The CI workflow has two jobs:
 
-1. **`Lint / Typecheck / Unit / Build`** (`validate`) — runs `npm ci`, security:check, churn guard, dupe guard, asset budget, lint, typecheck, vitest, build. Must pass.
+1. **`Lint / Typecheck / Unit / Build`** (`validate`) — runs `npm ci`, security:check, config-churn guard, duplicate guard, asset budget, lint, typecheck, council:static:check, council:share:check, vitest, build, then `scripts/check-council-public-bytes.mjs`. Must pass.
 2. **`E2E smoke (Playwright)`** (`e2e-smoke`) — runs Chromium against built `dist/` with Circle integration tests. Verify exact-head status in GitHub; software-rendered 3D acceptance is not physical iPhone Safari or VoiceOver.
 
-CI runs against the PR HEAD, not against the simulated merge. If a PR's CI is failing for a reason that's already fixed on main, **update the branch** (`gh pr update-branch <n>`) to merge main in.
+For `pull_request` events, GitHub Actions' default checkout normally tests the synthetic PR merge commit; the run also identifies the PR head. Record **both** and verify the tested checkout SHA before claiming exact-head or merge readiness. If the PR is stale relative to `main`, update the branch through a reviewed action before retesting.
 
 ---
 
@@ -127,13 +127,13 @@ git checkout main
 git pull origin main
 git checkout -b <lane>/<topic>
 
-npm install               # use clean filesystem; FUSE slow + occasionally fills disk
+npm ci                    # lockfile-exact, as CI; use clean filesystem (FUSE is slow)
 npm run dev               # vite at http://127.0.0.1:8080
 npm run typecheck         # tsc --noEmit
 npm run lint              # eslint
 npm run test              # vitest run (no watch)
 npm run build             # writes public/version.json + builds dist/
-npm run release-check     # full gate: typecheck → lint → security → duplicates → assets → test → build
+npm run release-check     # council static → council share → typecheck → lint → security → duplicates → assets → test → build
 ```
 
 For the full release gate, run on a non-FUSE clone:
@@ -141,7 +141,7 @@ For the full release gate, run on a non-FUSE clone:
 ```bash
 git clone https://github.com/S33D-life/ancient-roots-map.git /tmp/s33d-check
 cd /tmp/s33d-check
-npm install
+npm ci
 npm run release-check
 ```
 
