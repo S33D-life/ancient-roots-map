@@ -4,6 +4,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {readFile,stat} from 'node:fs/promises';
 const originalRoot=path.resolve('public');
+const reviewPort=Number(process.env.OFFERING_REVIEW_PORT||4242);
 const csp="default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; form-action 'none'; base-uri 'self'";
 const ephemeral=`(()=>{for(const key of ['localStorage','sessionStorage']){const m=new Map();Object.defineProperty(window,key,{configurable:true,value:{getItem:k=>m.get(k)??null,setItem:(k,v)=>m.set(String(k),String(v)),removeItem:k=>m.delete(k),clear:()=>m.clear(),key:i=>[...m.keys()][i]??null,get length(){return m.size}}});}const f=window.fetch.bind(window);window.fetch=(input,options)=>{const u=new URL(input instanceof Request?input.url:String(input),location.href);if(u.origin!==location.origin||!['GET','HEAD'].includes((options?.method??(input instanceof Request?input.method:'GET')).toUpperCase())||!['/tetol/','/council/'].some(p=>u.pathname.startsWith(p)))return Promise.reject(new Error('Fixture review: network writes and external requests disabled'));return f(input,options);};})();`;
 function reviewOnlyAssets():Plugin {
@@ -19,4 +20,4 @@ function reviewOnlyAssets():Plugin {
  });};
  return {name:'local-offering-review-assets',configureServer:install,configurePreviewServer:install};
 }
-export default defineConfig({define:{'import.meta.env.VITE_FIXTURE_SHA':JSON.stringify(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim())},plugins:[react(),reviewOnlyAssets()],publicDir:false,envPrefix:'OFFERING_FIXTURE_UNUSED_',resolve:{alias:{'@':path.resolve('src')}},server:{host:'127.0.0.1',port:4242,strictPort:true,hmr:false},preview:{host:'127.0.0.1',port:4242,strictPort:true},build:{outDir:'dist-offering-fixture',rollupOptions:{input:'review/council-offerings.html'}}});
+export default defineConfig({define:{'import.meta.env.VITE_FIXTURE_SHA':JSON.stringify(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim())},plugins:[react(),reviewOnlyAssets()],publicDir:false,envPrefix:'OFFERING_FIXTURE_UNUSED_',resolve:{alias:{'@':path.resolve('src')}},server:{host:'127.0.0.1',port:reviewPort,strictPort:true,hmr:false},preview:{host:'127.0.0.1',port:reviewPort,strictPort:true},build:{outDir:'dist-offering-fixture',rollupOptions:{input:'review/council-offerings.html'}}});
