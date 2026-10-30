@@ -198,6 +198,16 @@ export default defineConfig(async ({ mode }) => {
           res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'; frame-ancestors 'self'; frame-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self'; worker-src 'none'");
           res.setHeader('Cache-Control', 'no-store');
           res.setHeader('Referrer-Policy', 'no-referrer');
+          // Vite's later static middleware would overwrite this route-specific CSP.
+          // Serve the built HTML directly so preview matches its production _headers.
+          if (!['GET', 'HEAD'].includes(req.method ?? 'GET')) {
+            res.statusCode = 405;
+            res.end('Static demonstration only');
+          } else {
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.end(req.method === 'HEAD' ? undefined : readFileSync(path.resolve(__dirname, 'dist/council/238/offerings.html')));
+          }
+          return;
         }
         next();
       });

@@ -28,7 +28,7 @@ The full frontend build's existing Lovable MCP plugin regenerates a local backen
 - `npx playwright test` (existing production smoke and historical Tree checks)
 - `git diff --check`; verify no Supabase, lockfile or existing public artwork diff.
 
-The new dedicated CI runs the production build and both browsers. Existing CI and unrelated CI optimisation drafts are untouched. Browser tests block external traffic and non-GET/HEAD requests, assert no writes, and use fictional input. The route-specific synthetic audio test checks actual production-response CSP and playback. Reviewer screenshots/traces are CI artifacts and local `output/playwright/council-demo` files.
+The new dedicated CI runs the production build and both browsers. Existing CI and unrelated CI optimisation drafts are untouched. Browser tests block external traffic and non-GET/HEAD requests, assert no writes, and use fictional input. The private fixture server’s global HTTP rejection assertion is replaced with an assertion that this public document makes no backend requests or mutations, because existing application API routing must remain untouched. The route-specific synthetic audio test checks actual production-response CSP and playback. Reviewer screenshots/traces are CI artifacts and local `output/playwright/council-demo` files.
 
 ## Separate approval gates
 

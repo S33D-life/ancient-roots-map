@@ -48,10 +48,13 @@ test('narrow keyboard flow, safety and synthetic-only optional media',async({pag
  await page.keyboard.press(info.project.name==='webkit'&&process.platform==='darwin'?'Alt+Tab':'Tab');await expect(d.getByRole('button',{name:'Notice',exact:true})).toBeFocused();
  await d.getByRole('button',{name:'Gather',exact:true}).click();await d.getByRole('radio',{name:'Wild',exact:true}).check();await expect(d.getByLabel('Wild food needs care')).toBeVisible();await d.getByRole('textbox',{name:'What happened?',exact:true}).fill('A fictional observation, not food advice.');await d.getByText('Add more (optional)',{exact:true}).click();await d.getByRole('button',{name:'Use synthetic photo example'}).click();await d.getByRole('button',{name:'Use synthetic voice example'}).click();await expect(d.locator('input[type=file]')).toHaveCount(0);await expect(d.getByLabel('Kind of place (optional)')).toBeVisible();await page.setViewportSize({width:844,height:390});const b=await d.boundingBox();expect(b!.y).toBeGreaterThanOrEqual(0);expect(b!.y+b!.height).toBeLessThanOrEqual(391);await page.screenshot({path:`output/playwright/council-demo/${info.project.name}-fire-landscape.png`});
 });
-test('server refuses writes and backend routes; gathering is QA-only',async({page,request})=>{
- const blocked=await request.post('/rest/v1/council-ledger',{data:{synthetic:true}});expect(blocked.status()).toBe(405);expect((await request.get('/functions/v1/offering-media')).status()).toBe(403);
+test('public demo makes no backend requests or writes; gathering is QA-only',async({page})=>{
+ // The production origin also hosts the existing app: do not replace its API routing.
+ // Assert this standalone document never invokes those routes instead of claiming a global server block.
+ const backend:string[]=[],writes:string[]=[];page.on('request',r=>{const path=new URL(r.url()).pathname;if(/\/(rest|auth|functions|api)\//.test(path))backend.push(r.url());if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());});
  await page.goto('/council/238/offerings.html?fireState=gathering');await expect(page.getByRole('region',{name:'The Fire — review only'})).toContainText('Not happening now');
  await page.goto('/council/238/offerings.html?qa=1&fireState=gathering');await expect(page.getByRole('region',{name:'The Fire — review only'})).toContainText('Synthetic QA state: Happening now — not a live announcement');
+ expect(backend).toEqual([]);expect(writes).toEqual([]);
 });
 
 test('original Deck independent recommendation: name-only and exact focus return',async({page})=>{
