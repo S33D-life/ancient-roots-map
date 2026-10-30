@@ -1,0 +1,3 @@
+import {defineConfig,devices} from '@playwright/test';
+const reviewUrl=`http://127.0.0.1:${Number(process.env.COUNCIL_DEMO_PORT||4256)}`;
+export default defineConfig({testDir:'./e2e/council-demo',testMatch:'*.fixture.ts',workers:1,timeout:90000,reporter:'list',outputDir:'output/playwright/council-demo',use:{baseURL:reviewUrl,trace:'retain-on-failure',screenshot:'only-on-failure'},projects:[{name:'chromium',use:{...devices['Desktop Chrome'],hasTouch:true}},{name:'webkit',use:{...devices['Desktop Safari'],hasTouch:true}}],webServer:{command:'npm run preview -- --host 127.0.0.1 --port '+Number(process.env.COUNCIL_DEMO_PORT||4256)+' --strictPort',url:reviewUrl+'/council/238/offerings.html',reuseExistingServer:!process.env.CI}});

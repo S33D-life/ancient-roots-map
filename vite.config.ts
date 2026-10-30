@@ -70,7 +70,7 @@ async function loadPwaPlugin() {
       injectRegister: false,
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
-        navigateFallbackDenylist: [/^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//, /^\/ancient-friends\/bishop-of-elys-plane\.html$/],
+        navigateFallbackDenylist: [/^\/council\/238\/offerings\.html$/, /^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//, /^\/ancient-friends\/bishop-of-elys-plane\.html$/],
         // Never precache version.json — always fetch fresh
         globIgnores: ["**/version.json", "tetol/circle-235/pre-fire/**", "ancient-friends/bishop-of-elys-plane.*"],
         runtimeCaching: [
@@ -190,6 +190,20 @@ export default defineConfig(async ({ mode }) => {
   // /patronsportal/index.html in `vite preview`, regardless of how
   // Vite's stock SPA fallback resolves directory-style URLs. Production
   // hosting uses _redirects rules (public/_redirects).
+  const councilDemoHeaders: Plugin = {
+    name: 'council-demo-preview-headers',
+    configurePreviewServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if ((req.url ?? '').split('?')[0] === '/council/238/offerings.html') {
+          res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'; frame-ancestors 'self'; frame-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self'; worker-src 'none'");
+          res.setHeader('Cache-Control', 'no-store');
+          res.setHeader('Referrer-Policy', 'no-referrer');
+        }
+        next();
+      });
+    },
+  };
+
   const patronsPortalPreviewPlugin: Plugin = {
     name: "patronsportal-preview-static",
     configurePreviewServer(server) {
@@ -229,6 +243,8 @@ export default defineConfig(async ({ mode }) => {
   },
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),
+    // Approved interaction source; release version remains /version.json.
+    "import.meta.env.VITE_FIXTURE_SHA": JSON.stringify("1258497d68034d1f0a0100f98a155360a608e07b"),
   },
   plugins: [
     react(),
@@ -244,6 +260,7 @@ export default defineConfig(async ({ mode }) => {
     mcpPlugin(),
     pwaPlugin,
     patronsPortalPreviewPlugin,
+    councilDemoHeaders,
   ].filter(Boolean),
   resolve: {
     dedupe: ["react", "react-dom", "react/jsx-runtime", "framer-motion"],
@@ -261,6 +278,7 @@ export default defineConfig(async ({ mode }) => {
     target: "es2022",
     cssCodeSplit: true,
     rollupOptions: {
+      input: { app: path.resolve(__dirname, "index.html"), councilOfferings: path.resolve(__dirname, "council/238/offerings.html") },
       output: {
         manualChunks(id: string) {
           // Core React runtime
