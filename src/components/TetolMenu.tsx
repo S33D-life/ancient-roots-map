@@ -45,7 +45,7 @@ const quickLinks = [
   { to: "/cosmic", label: "Cosmic Calendar", icon: CalendarDays },
   { to: "/value-tree", label: "Value Tree", icon: TreePine },
   { to: "/companion", label: "Companion Mode", icon: Smartphone },
-  { to: "/support", label: "Support", icon: Heart },
+  { to: "/support", label: "Nourish", icon: Heart },
   { to: "/vault", label: "Vault", icon: MapPin },
   { to: "/roadmap", label: "Roadmap", icon: Map },
 ];
