@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test';
 const entry='/council/238/offerings.html';
-test.beforeEach(async({context})=>{
- await context.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort());
+test.beforeEach(async({context,baseURL})=>{
+ const origin=new URL(baseURL!).origin;
+ // WebKit routes synthetic blob media too: allow only reads made by this origin.
+ await context.route('**/*',r=>{const u=new URL(r.request().url());return ['http:','blob:'].includes(u.protocol)&&u.origin===origin&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort();});
 });
 test('standalone public entry hands historical and application links back to their own documents',async({page})=>{
  await page.route('**/council/237',r=>r.fulfill({contentType:'text/html',body:'<h1>Historical destination fixture</h1>'}));
