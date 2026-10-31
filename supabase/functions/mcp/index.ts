@@ -220,6 +220,11 @@ var ROUTES = {
   HEARTWOOD_ROOM: (room) => `/library/${room}`,
   /** Council of Life */
   COUNCIL: "/council-of-life",
+  /** Open Council of Life · Circle 237 (digital Canopy doorway). */
+  CIRCLE237: "/council/237",
+  CIRCLE238: "/council/238",
+  /** Public, memory-only Council + Fire demonstration. */
+  COUNCIL_OFFERINGS_DEMO: "/council/238/offerings.html",
   /** Council Records archive */
   COUNCIL_RECORDS: "/council/records",
   /** Council session detail */
