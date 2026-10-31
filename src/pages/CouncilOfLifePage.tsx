@@ -52,6 +52,7 @@ const CouncilOfLifePage = () => {
         <p>{circle238.question}</p><p>Ten companions, with two distinct Goji doors for seed and fruit. Open all week · no scheduled Fire.</p>
         <p>Ten scene-only Fig-wood illustrations are ready to review; publication and illustrated-PDF review continue.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE238}>Enter Circle 238 · meet its companions →</Link>
+        <a className="parchment-action" href={ROUTES.COUNCIL_OFFERINGS_DEMO}>Try Council + Fire · demo — nothing is saved →</a>
         <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=238#croom">Enter Circle 238 in the original 3D TETOL Council Deck →</a>
       </section>
       <section id="previous-circle-237" className="canopy-field-note" aria-label="Previous Circle 237">
