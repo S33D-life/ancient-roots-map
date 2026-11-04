@@ -15,7 +15,7 @@ export const CURRENT_CIRCLE = {
   question: "What is already blooming in us that we haven’t noticed yet?",
   companions: ["Fulham Palace Holm Oak", "Apple Blossom", "Dragon Fruit / Pitaya", "Fly Agaric", "Hen Harrier", "Peter Pan"],
   peopleSeat: "People / those who gather hold the open seventh seat.",
-  companionsLabel: "This week’s companions, chosen by Leo",
+  companionsLabel: "This week’s companions, chosen by the Council",
   safetyLabel: "Fly Agaric",
   safety: "Toxic · Meet with care · Never eat.", approval: "approved", revision: "circle-235-ce9bab5",
   links: {
