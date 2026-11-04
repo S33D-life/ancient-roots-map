@@ -1,0 +1,40 @@
+name: Circle239 living frames acceptance
+on:
+  pull_request:
+    paths:
+      - 'src/pages/council/Circle239Page.tsx'
+      - 'public/council/circle-239/**'
+      - 'public/tetol/circle-235/pre-fire/runtime/entry.js'
+      - 'public/tetol/circle-235/pre-fire/runtime/companion-frames-239.js'
+      - 'e2e/living-frames-239/**'
+      - 'playwright.living-frames.config.ts'
+      - '.github/workflows/circle239-living-frames.yml'
+jobs:
+  acceptance:
+    name: Living frames · ${{ matrix.browser }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/check-council-public-bytes.mjs
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright test --config playwright.living-frames.config.ts --project ${{ matrix.browser }}
+        env:
+          CI: 'true'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: living-frames-${{ matrix.browser }}
+          path: output/playwright
+          retention-days: 7
