@@ -115,8 +115,8 @@ for item in manifest['files']:
 receipt={'circle':239,'receiptId':'typeset-candidates-v2','publicationApproved':False,'sourceManifestSha256':SOURCE_MANIFEST,'pillow':PIL.__version__,'fonts':{name:sha((fonts/name).read_bytes()) for name in fontfiles},'items':items}
 (out/'MANIFEST.json').write_text(json.dumps(receipt,indent=2,ensure_ascii=False)+'\n')
 (out/'SHA256SUMS.txt').write_text(''.join(f"{i['sha256']}  {i['filename']}\n" for i in items))
-thumb=Image.new('RGB',(1536,1200),'#eee3c6')
+thumb=Image.new('RGB',(1536,1368),'#eee3c6')
 for n,i in enumerate(items):
- im=Image.open(out/i['filename']);im.thumbnail((500,333));thumb.paste(im,((n%3)*512,(n//3)*300))
+ im=Image.open(out/i['filename']);im.thumbnail((500,333));thumb.paste(im,((n%3)*512,(n//3)*342))
 thumb.save(out/'CONTACT_SHEET.jpg',quality=92)
 print('Created ten private candidates; pixel-difference masks passed. Human approval remains pending.')
