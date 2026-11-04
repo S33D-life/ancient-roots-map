@@ -1,0 +1,406 @@
+{
+  "circle": 239,
+  "receiptId": "typeset-candidates-v2",
+  "publicationApproved": false,
+  "sourceManifestSha256": "8258283ad988961ce72def7cba3c134bb60d720643bad55498314f926ea380cb",
+  "pillow": "11.3.0",
+  "fonts": {
+    "Georgia.ttf": "4f54eb299fccea7f103edeb0d92437359bfd4441811d53222b82b335369f6218",
+    "Georgia Italic.ttf": "7758840cacb7382db65aa038e9fd1194d077ba9b55fe748f9cfb196d2773ac4e",
+    "Georgia Bold.ttf": "1cfa9abd55be746c798c22ef4eba88fce82257934897404be2dae53ed0a4142a"
+  },
+  "sourceZipSha256": "cd7cf369b06eac270e3bbb65f510b3afb93b91b86d2b6949a23dc40dcb1702ef",
+  "rights": "Owner-provided AI artwork; final owner/rights approval pending. No artwork committed.",
+  "items": [
+    {
+      "number": 1,
+      "sha256": "2ec2fdb75fc06c2dbac0ecc41bfa9c03f1ce679e3765b7e70f9e1f2c3452b4cc",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "01_Defynnog_Yew_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "8517b249174a1895172c7b715e476e86b234ce3db73028c2b62c4be3c27de252",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "01_Defynnog_Yew_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "aba40ad8d517385ef73f17fbf2004126de32753549815e4c0f6e585b615be040",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "e9e3e9936044b7218b78040cbf1413300f90028e918fdcd8a3c7cd42e41d438c",
+      "references": [
+        "https://www.rhs.org.uk/plants/yew",
+        "https://www.ancient-yew.org/yew_trees/defynnog-405/",
+        "https://medlineplus.gov/ency/article/002877.htm"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "defynnog-yew"
+    },
+    {
+      "number": 2,
+      "sha256": "7a38fc45252bdb47e32725ce5dc10e064e08687b14995a66ae695b2d0cdcd67b",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "02_European_Beech_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "0714d554a1aadb1d35e3d2a7e7db192bd94ab37784930339ec4ff0f549828aae",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "02_European_Beech_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "88e2fbafec00a39f3bfbf5bb2b45c0f49bb4cc51a97f2021c9d403eb9bfac41d",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "71c9fc7eca3c0b8fe6aa89b482805a3df3e72babfe1c70adad676e2bf0aefac0",
+      "references": [
+        "https://www.forestryengland.uk/tree-species/beech",
+        "https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/common-beech/"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "european-beech"
+    },
+    {
+      "number": 3,
+      "sha256": "a04d3e7e0f3f90af86c512d6e5476be34112b8fecc6017bb4282e7f3042c7e2d",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "03_Ginger_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "32d82f50134bb95bd45b6e98fb6f269ff89fa6b5b793c78348fb2811c8dee64f",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "03_Ginger_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "3f507cf181a23664ec7629fe7eb1f8c8a3fe8d5316a2ac55df1a4e0d17cd1b3b",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata.",
+        "Retype top-right banner as explicitly editorial, unquoted reflection.",
+        "Restore readable Plant role above the existing Hidden fire panel."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ],
+        [
+          1305,
+          22,
+          1504,
+          157
+        ],
+        [
+          530,
+          91,
+          1025,
+          116
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "6754ba50d2fe7747248d876cfed4c6eac8a70eeba4b2d11136b4b415c2174eab",
+      "references": [
+        "https://www.rhs.org.uk/plants/19233/zingiber-officinale/details",
+        "https://www.nccih.nih.gov/health/ginger"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "ginger"
+    },
+    {
+      "number": 4,
+      "sha256": "e1659e8d63ff6697d701742578bba954bb546e511d38ed53cfc12da9cc440f53",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "04_Sycamore_Helicopter_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "20bb64572641c179bf777509d0405e18f97c860706279e81d327f6cd2bb6930d",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "04_Sycamore_Helicopter_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "e1dc8764a43033352595a80f36e9df9df6d1e5be4af5d235849561447e9521d8",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "830cf243c26a60c3c576bf0b774563f50f1e8b6e9d020c35d8476aca7ac8eab4",
+      "references": [
+        "https://www.ucc.ie/en/tree-explorers/trees/a-z/acerpseudoplatanus/"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "sycamore-helicopter-seed"
+    },
+    {
+      "number": 5,
+      "sha256": "b239964bcf344f1edca10e38ae8eb599dff0225f7ea74f38a72ce65cd62252f1",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "06_Dahlia_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "45e5a9d38145d1ecfd32258b3801023829e8b72b9252b461d26d118d6de26f82",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "05_Ginkgo_Leaf_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "6a53a32c8b37a6a038eb45f21585ddc8ce94de36033a15fbc138d1e5082aa01c",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "b6081345d9834faed5ffa10cd5d999773b47dd84af3634be8c0e4c2caa02e2c4",
+      "references": [
+        "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:262125-1/general-information",
+        "https://www.nccih.nih.gov/health/ginkgo",
+        "https://www.cfs.gov.hk/english/multimedia/multimedia_pub/multimedia_pub_fsf_204_02.html"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "ginkgo-leaf"
+    },
+    {
+      "number": 6,
+      "sha256": "5c032c7ebceda8756128c06b6c99bc3820bcd65a0aab725d50d775ff40c97979",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "05_Ginkgo_Leaf_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "ead4c9b124e466062141ddbfda2cb98de5571faf1fa04d2eecd6e22aac05ff70",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "06_Dahlia_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "0f9c3ea4ec9262085a1ada62c00dca9defa5285d6af4efdfb872434103a77657",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "747401a6cdcecc2020b50cc057ef3cefc11892e2276011bd7316bd5e23b34768",
+      "references": [
+        "https://www.rhs.org.uk/plants/dahlia/growing-guide",
+        "https://www.rhs.org.uk/garden-inspiration/plants-we-love/five-top-dahlias-for-pollinators"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "dahlia"
+    },
+    {
+      "number": 7,
+      "sha256": "eca5f9a3189d66ca7b5ba5ee526775a0f91136fa1c03f492d82883f43fc143f9",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "07_Rosehip_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "eb4fe72c878e6addd46958af63086124537370340e4d234dabc8d277015dcd3f",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "07_Rosehip_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "dc47ef07c9036af4a5155f4ede91639c2d7239a455e7e7bf80855e12c254c9ae",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata.",
+        "Narrow rosehip note to supported irritation claim."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ],
+        [
+          105,
+          705,
+          1404,
+          779
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "80e49a0282ccdc976168d85a03300048d3bce4ccf1157ddec9c29ba52ff82488",
+      "references": [
+        "https://www.botanic.cam.ac.uk/the-garden/plant-list/rosa-canina/",
+        "https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/plants/wild-flowers/dog-rose"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "rosehip"
+    },
+    {
+      "number": 8,
+      "sha256": "a0f718c4411f287cfa3cb0a886f35dd9a2919d10357825794e8160e3c4ab8c4b",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "08_Fly_Agaric_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "b276c7c4c67d0a5562bda8b0de7e06911f87b5f594eec9fc55b5f73acd213877",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "08_Fly_Agaric_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "1c2244c689377936172d7add00839995b9f64f336402f7d87dba218a487bde2a",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "a6c0353987e874703993906f69ccbb90b54841fa6375181d93b545bd1f0b990d",
+      "references": [
+        "https://www.fda.gov/food/post-market-determinations-use-substance-not-gras/letter-industry-use-amanita-muscaria-or-its-constituents-food",
+        "https://virtualmycota.landcareresearch.co.nz/webforms/vM_Species_Details.aspx?pk=312"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "fly-agaric"
+    },
+    {
+      "number": 9,
+      "sha256": "b0ccca140433c52a15807e7349900c26f3aadb8a0d4ad38e4ffcdd8e63c1b843",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "09_Slender_billed_Northern_Nutcracker_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "2d14fad98ec856f9cef4e0a5e26b5572c5f13649d9ff8fadd5e3eae5bd462eda",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "09_Slender_billed_Northern_Nutcracker_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "cea82881aea27eb442f0873332ba3d9c8198134c1d4f152da3903beb338fb246",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata.",
+        "Explicit Bird role; remove stray inherited text from decorative study crop without changing original fronts."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ],
+        [
+          675,
+          228,
+          1100,
+          272
+        ],
+        [
+          89,
+          265,
+          632,
+          585
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "6fd5ff781176dc85ab085150aabf0a56b41c6aa109d0913f12dd47edd879e3b8",
+      "references": [
+        "https://www.vogelwarte.ch/en/projects/dispersal-of-swiss-stone-pine-seeds-by-northern-nutcrackers/"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "slender-billed-northern-nutcracker"
+    },
+    {
+      "number": 10,
+      "sha256": "1b7a933a704974b7ff775dcfb6ce8ff86adaca2aed54a52fbc2444648ba5c80e",
+      "width": 1536,
+      "height": 1024,
+      "source_file": "10_The_Secret_Garden_OWNER_JPEG_20261104.jpeg",
+      "source_sha256": "16f972a13d209157b2ff8b67687179a26af77e5a1e544225d9c682416517b669",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL",
+      "filename": "10_The_Secret_Garden_REVERSE_FINAL_CANDIDATE.png",
+      "proofSha256": "7996388588bf26fe8819c1498ce853727f24c73a4d59acaf5096ef50701d433c",
+      "dimensions_px": [
+        1536,
+        1024
+      ],
+      "changes": [
+        "Replace proof-status footer with illustration/source credit; approval remains pending in metadata.",
+        "Retype top-right banner as explicitly editorial, unquoted reflection."
+      ],
+      "editRegions": [
+        [
+          83,
+          930,
+          1453,
+          955
+        ],
+        [
+          1305,
+          22,
+          1504,
+          157
+        ]
+      ],
+      "unchangedOutsideEditRegions": true,
+      "transcriptSha256": "773269d1723e22d308de02f910053207a2ac370cae2d671a9ab0a16571ebd94d",
+      "references": [
+        "https://www.gutenberg.org/ebooks/113"
+      ],
+      "reviewedAt": "2026-11-04",
+      "humanApproval": false,
+      "key": "the-secret-garden"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import {disconnectedTransport} from '../fixtures/circle237-disconnected-transpor
 const ROOT='/council/circle-239/';
 const privateIntake=process.env.CIRCLE239_PRIVATE_INTAKE;
 const source=privateIntake?JSON.parse(readFileSync(join(privateIntake,'MANIFEST.json'),'utf8')):null;
-const items=fronts.companions.map((c,i)=>({...c,artwork:ROOT+'reverses/'+c.key+'.png',width:held.items[i].sourceWidth,height:held.items[i].sourceHeight,sha256:held.items[i].sourceSha256,status:'LOCAL_PRIVATE_REVIEW',factReviewed:false,rightsApproved:false,readableText:privateIntake?'PRIVATE DRAFT — OCR not fact-cleared.\n'+readFileSync(join(privateIntake,source.items[i].filename.replace(/\.png$/,'.txt')),'utf8'):'Synthetic text fixture for '+c.label+'. Council role: '+c.kind+'. This is not a species record.',explore:null}));
+const items=fronts.companions.map((c,i)=>({...c,artwork:ROOT+'reverses/'+c.key+'.png',width:held.items[i].sourceWidth,height:held.items[i].sourceHeight,sha256:held.items[i].sourceSha256,status:'LOCAL_PRIVATE_REVIEW',factReviewed:false,rightsApproved:false,readableText:privateIntake?'PRIVATE CANDIDATE — human artwork/rights approval pending.\n'+readFileSync(join(privateIntake,source.items[i].filename.replace(/\.png$/,'.txt')),'utf8'):'Synthetic text fixture for '+c.label+'. Council role: '+c.kind+'. This is not a species record.',explore:null}));
 test.beforeEach(async({context})=>{
  await context.addInitScript(disconnectedTransport);
  await context.route('**/*',r=>{const q=r.request();return !['127.0.0.1','localhost'].includes(new URL(q.url()).hostname)||!['GET','HEAD'].includes(q.method())?r.abort():r.continue();});
@@ -59,7 +59,7 @@ test('all ten2D pairs: keyboard, retained focus, full artwork and text at390px',
   await page.getByRole('button',{name:'Meet '+c.label,exact:true}).click();const frame=page.locator('council-living-frame');const flip=frame.getByRole('button',{name:'Reveal reverse of '+c.label,exact:true});await expect(flip).toBeEnabled();await flip.focus();await flip.press('Enter');
   await expect(frame.getByRole('button',{name:'Return to front of '+c.label,exact:true})).toBeFocused();await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','true');
   const image=frame.getByRole('img');await expect(image).toHaveJSProperty('naturalWidth',items[c.order-1].width);await expect(image).toHaveJSProperty('naturalHeight',items[c.order-1].height);
-  await frame.getByText('Read the reverse as text',{exact:true}).click();await expect(frame.locator('pre')).toContainText(privateIntake?'PRIVATE DRAFT':'Synthetic text fixture');
+  await frame.getByText('Read the reverse as text',{exact:true}).click();await expect(frame.locator('pre')).toHaveText(items[c.order-1].readableText);
   await expect(frame.getByRole('link',{name:'Explore deeper',exact:true})).toHaveCount(0);
   if(c.order===9)await page.screenshot({path:`output/playwright/living-frames/${info.project.name}-2d-reverse-390.png`,fullPage:true});
   await frame.getByRole('button').click();await expect(image).toHaveAttribute('src',c.artwork);await page.getByRole('button',{name:'Return to Circle 239',exact:true}).click();
@@ -77,7 +77,7 @@ test('held production catalog cannot reveal or request any reverse even with rev
 test('missing reverse keeps front and truthful status without a fake state change',async({page})=>{
  await review(page);await page.route('**/reverses/ginger.png',r=>r.fulfill({status:503,body:'Unavailable'}));await page.goto('/council/239?review239=1&companion=ginger');const frame=page.locator('council-living-frame');await frame.getByRole('button').click();await expect(frame.getByRole('status')).toContainText('could not be loaded');await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','false');await expect(frame.getByRole('img')).toHaveAttribute('src',fronts.companions[2].artwork);await expect(page).not.toHaveURL(/side=reverse/);
 });
-test('original239 Tree: ten texture pairs, contained4:3, history, quietFire and StaffRoom',async({page},info)=>{
+test('original239 Tree: ten texture pairs, full-image containment, history, quietFire and StaffRoom',async({page},info)=>{
  test.setTimeout(120000);await review(page);await page.setViewportSize({width:390,height:844});await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),250);window.cancelAnimationFrame=id=>clearTimeout(id);});
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=239&review239=1#croom');await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._scene);await boundContinuousDrawing(page);await drawRealFrame(page);await expand(page);
  for(const c of fronts.companions){

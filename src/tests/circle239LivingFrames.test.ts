@@ -47,3 +47,20 @@ describe('appearance identity during direct SPA navigation',()=>{
   const second=document.querySelector('council-living-frame');expect(second).not.toBe(first);expect(second).toHaveAttribute('companion-key','european-beech');expect(second).toHaveAttribute('front','/council/circle-239/portraits/european-beech.jpeg');
  });
 });
+
+describe('corrected private typeset-candidate provenance',()=>{
+ it('pins all ten new 3:2 candidates and transcripts without granting publication',()=>{
+  const receipt=JSON.parse(readFileSync('docs/releases/circle239-living-frames/candidate-receipt.json','utf8'));
+  expect(receipt.publicationApproved).toBe(false);expect(receipt.items).toHaveLength(10);
+  for(const [n,i] of receipt.items.entries()){
+   expect(i.number).toBe(n+1);expect(i.key).toBe(held.items[n].key);
+   expect(i.sha256).toBe(held.items[n].sourceSha256);expect(i.sha256).toMatch(/^[a-f0-9]{64}$/);
+   expect(i.transcriptSha256).toMatch(/^[a-f0-9]{64}$/);expect(i.dimensions_px).toEqual([1536,1024]);
+   expect(i.unchangedOutsideEditRegions).toBe(true);expect(i.humanApproval).toBe(false);
+   expect(held.items[n].factReviewed).toBe(false);expect(held.items[n].rightsApproved).toBe(false);
+  }
+  expect(receipt.items[4].source_file).toMatch(/^06_Dahlia/);
+  expect(receipt.items[5].source_file).toMatch(/^05_Ginkgo/);
+  expect(receipt.items[8].source_sha256).toBe('2d14fad98ec856f9cef4e0a5e26b5572c5f13649d9ff8fadd5e3eae5bd462eda');
+ });
+});

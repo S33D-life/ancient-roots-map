@@ -9,7 +9,8 @@ const root=resolve('dist'), port=Number(process.argv[3]||4270);
 const fronts=JSON.parse(readFileSync(join(root,'council/circle-239/companions.json')));
 const source=JSON.parse(readFileSync(join(intake,'MANIFEST.json')));
 if(source.circle!==239||source.items.length!==10)throw Error('Wrong private intake');
-const receipt=JSON.parse(readFileSync('docs/releases/circle239-living-frames/receipt.json'));
+const candidate=source.receiptId==='typeset-candidates-v2';
+const receipt=JSON.parse(readFileSync(candidate?'docs/releases/circle239-living-frames/candidate-receipt.json':'docs/releases/circle239-living-frames/receipt.json'));
 const assets=new Map();
 const items=fronts.companions.map((c,i)=>{
  const item=source.items[i],expected=receipt.items[i];
@@ -18,7 +19,8 @@ const items=fronts.companions.map((c,i)=>{
  if(item.number!==c.order || createHash('sha256').update(bytes).digest('hex')!==item.sha256)throw Error('Private intake hash/order mismatch: '+c.key);
  const artwork='/council/circle-239/reverses/'+c.key+'.png';assets.set(artwork,bytes);
  const textFile=file.replace(/\.png$/,'.txt');
- return {...c,status:'LOCAL_PRIVATE_REVIEW',artwork,sha256:item.sha256,width:item.dimensions_px[0],height:item.dimensions_px[1],readableText:'PRIVATE DRAFT — uncorrected artwork and OCR; not fact-cleared.\n'+(existsSync(textFile)?readFileSync(textFile,'utf8'):'Transcript pending manual review.'),factReviewed:false,rightsApproved:false,explore:null};
+ if(candidate&&(!existsSync(textFile)||createHash('sha256').update(readFileSync(textFile)).digest('hex')!==expected.transcriptSha256))throw Error('Candidate transcript hash mismatch: '+c.key);
+ return {...c,status:'LOCAL_PRIVATE_REVIEW',artwork,sha256:item.sha256,width:item.dimensions_px[0],height:item.dimensions_px[1],readableText:(candidate?'PRIVATE CANDIDATE — human artwork/rights approval pending.\n':'PRIVATE DRAFT — uncorrected artwork and OCR; not fact-cleared.\n')+(existsSync(textFile)?readFileSync(textFile,'utf8'):'Transcript pending manual review.'),factReviewed:false,rightsApproved:false,explore:null};
 });
 const catalog=JSON.stringify({circle:239,publicationApproved:false,status:'LOCAL_PRIVATE_REVIEW',items});
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpeg':'image/jpeg','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2'};

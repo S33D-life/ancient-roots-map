@@ -1,5 +1,7 @@
 # Circle239 living frames — private review candidate, not release-cleared
 
+**Latest:** [corrected typeset candidates and review](TYPESET-CANDIDATES.md), pinned by candidate-receipt.json. The original intake, dimensions, OCR limitations and risk table below are historical evidence for the FIRST pack, not the current candidate set. All ten current candidates are 3:2; the originals below remain unchanged.
+
 Base: d054f087fecb384e2d539930b4f37068059e62ce (#140, already live). New isolated feature; no changes to #140, historical manifests/art, camera, backend, permissions or DNS. One optional adapter hook in original entry.js; no new renderer. The current 390px camera-edge clipping is preserved/documented, not fixed by this feature.
 
 ## Asset intake and publication gate
