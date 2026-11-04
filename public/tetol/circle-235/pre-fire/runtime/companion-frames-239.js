@@ -20,7 +20,8 @@ export async function installCompanionFrames(D) {
   Object.assign(D.nodes.croom,{name:'The Council Deck · Circle 239',sub:circle.title,question:QUESTION,purpose:QUESTION+' Open all week; no scheduled Fire.',relations:circle.companions.map(c=>({to:c.id,dim:'place',text:c.label}))});
   D.circleFrameCompanions = circle.companions;
   // Edition-specific presentation only: the old hearth must not announce a239 session.
-  if (D.nodes.live_fire) Object.assign(D.nodes.live_fire,{name:'The Fire · Circle 239',sub:'No scheduled Fire',stateShort:'UNSCHEDULED',question:QUESTION,purpose:'No live Fire is scheduled for this Circle.',practical:'Explore the companions in your own time. No attendance or offerings are recorded here.',lives:[],actions:[],where:[],relations:[{to:'croom',dim:'place',text:'Return to Circle 239'}]});
+  if (D.nodes.live_fire) Object.assign(D.nodes.live_fire,{circle:239,parent:'croom',name:'The Fire · Circle 239',sub:'No scheduled Fire',stateShort:'UNSCHEDULED',question:QUESTION,purpose:'No live Fire is scheduled for this Circle.',practical:'Explore the companions in your own time. No attendance or offerings are recorded here.',lives:[],actions:[],where:[],relations:[{to:'croom',dim:'place',text:'Return to Circle 239'}]});
+  if (D.nodes.seat_you) Object.assign(D.nodes.seat_you,{circle:239,parent:'croom',name:'A place to pause',actions:[],relations:[{to:'croom',dim:'place',text:'Return to Circle 239'}]});
   // Reuse the established shared sheet and #grab gesture ownership.
   const style = document.createElement('style');
   style.textContent = 'body.grace-p.g-arriving aside#panel,body[data-q] aside#panel #grab,body[data-q] aside#panel .pbody>*{opacity:1!important;pointer-events:auto!important}#tetol-welcome{display:none!important}body.phone[data-sheet=mid] #council-return,body.phone[data-sheet=full] #council-return{display:none!important}';

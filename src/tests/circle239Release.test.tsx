@@ -12,7 +12,7 @@ import { installTimeTree } from '../../public/tetol/circle-235/pre-fire/runtime/
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); document.head.querySelectorAll('style').forEach(s => s.remove()); });
 const digest = (path:string) => createHash('sha256').update(readFileSync(path)).digest('hex');
-const model = () => ({nodes:{c233:{},c233now:{},yewc233:{},croom:{},live_fire:{name:'Older Fire'}},lineage:[],council:{circles:{233:{number:235}},active:233,current:'c233'}} as any);
+const model = () => ({nodes:{c233:{},c233now:{},yewc233:{},croom:{},live_fire:{name:'Older Fire'},seat_you:{circle:233,room:true}},lineage:[],council:{circles:{233:{number:235}},active:233,current:'c233'}} as any);
 describe('Circle239 front-only release', () => {
   it('pins the selected ten fronts, corrected Ginger and separately confirmed Fly Agaric', () => {
     expect(manifest.companions.map(c=>c.label)).toEqual(['Defynnog Yew','European Beech','Ginger','Sycamore helicopter seed','Ginkgo leaf','Dahlia','Rosehip','Fly Agaric / Amanita muscaria','Slender-billed Northern Nutcracker','The Secret Garden']);
@@ -35,7 +35,8 @@ describe('Circle239 front-only release', () => {
   it('uses the same manifest for the original Tree, question, ten scene frames and unscheduled hearth', async () => {
     vi.stubGlobal('fetch',vi.fn().mockImplementation(async (url:string) => ({ok:true,json:async()=>url.endsWith('time-tree.json')?tree:manifest})));
     (window as any).S33D_COUNCIL={circles:{}};
-    const d=model(); await installCompanionFrames(d); await installTimeTree(d,239);
+    const d=model(); await installCompanionFrames(d); const navigation=await installTimeTree(d,239);
+    expect(navigation.resolveNode('seat_you')).toBe('seat_you');
     expect(d.council.active).toBe(239); expect(d.council.circles[239].status).toBe('open');
     expect(d.nodes.croom.question).toBe(manifest.question); expect(d.nodes.c239.sub).toContain('CURRENT / OPEN');
     expect(d.council.circles[239].companions.map((c:any)=>c.id)).toEqual(manifest.companions.map(c=>c.id));
