@@ -34,7 +34,7 @@ export async function installCompanionFrames(D) {
   window.addEventListener('click',e=>{const panel=e.target instanceof Element&&e.target.closest('#panel.peek');if(panel&&e.target.closest('button,a'))panel.classList.remove('peek');},true);
   document.title = 'TETOL · Circle 238 · OPEN Council of Life';
   const brand=document.getElementById('brandline');
-  if(brand){const label='TETOL · Circle 238 · OPEN · ten companions';brand.textContent=label;new MutationObserver(()=>{if(brand.textContent!==label)brand.textContent=label;}).observe(brand,{childList:true});}
+  if(brand){const label=()=>`TETOL · Circle 238 · ${D.councilPresent.state}`;brand.textContent=label();new MutationObserver(()=>{if(brand.textContent!==label())brand.textContent=label();}).observe(brand,{childList:true});}
   const ret=document.getElementById('council-return');
   if(ret){ret.href='/council-of-life?from=spatial-council#next-gathering';ret.target='_top';ret.textContent='Return to Circle 238';}
   return circle;
@@ -44,7 +44,7 @@ export function companionPanel(D,id,esc) {
   const c=items.find(c=>c.id===id);
   if(!c && id!=='croom' && id!=='c238') return null;
   const link=(id,label)=>'<button type="button" class="act" data-go="'+id+'">'+esc(label)+'</button>';
-  return '<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Explore Council 238"><i></i></button><div class="pbody"><p class="eyebrow">Circle 238 · Open Council</p><h2 class="pname">'+(c?esc(c.label):'Fig-wood Council')+'</h2><p class="psub">'+esc(QUESTION_COPY)+'</p>'
+  return '<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Explore Council 238"><i></i></button><div class="pbody"><p class="eyebrow">Circle 238 · '+esc(D.councilPresent.state)+'</p><h2 class="pname">'+(c?esc(c.label):'Fig-wood Council')+'</h2><p class="psub">'+esc(QUESTION_COPY)+'</p>'
     +(c?(c.artwork?'<img data-circle-artwork="'+c.id+'" src="'+c.artwork+'" alt="'+esc(c.label)+' — illustrated companion" style="width:100%;height:auto;border-radius:8px">':'<p data-artwork-pending>Scene illustration awaiting verification</p>')+'<p>'+esc(c.kind)+' · Artistic interpretation, not field evidence.</p>'+(c.accuracyNote?'<p>'+esc(c.accuracyNote)+'</p>':'')+link('croom','Return to the Council Deck'):items.map(c=>link(c.id,c.label)).join(''))
     +'<a class="act" target="_top" href="/council/238">Visit the 2D Circle 238 →</a><a class="act" target="_top" href="/council-of-life">Return to the Canopy →</a><a class="act" href="https://t.me/s33dlife" target="_blank" rel="noopener noreferrer">Council community · Telegram (not a Fire room)</a></div>';
 }

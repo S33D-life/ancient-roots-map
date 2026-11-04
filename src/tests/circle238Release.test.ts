@@ -25,10 +25,10 @@ describe('Circle 238 source, privacy and archive contract',()=>{
    const source=readFileSync(path,'utf8');expect(source).toMatch(/(?:manifest|circle238)\.question/);expect(source).not.toMatch(/question.*await approval/i);
   }
  });
- it('separates previous presentation from historical OPEN state without rewriting history',()=>{
+ it('keeps historical OPEN state and derives live presentation from the Time Tree',()=>{
   const runtime=readFileSync('public/tetol/circle-235/pre-fire/runtime/companion-frames-237.js','utf8');
   expect(runtime).toContain("status:'open', presentation:'PREVIOUS'");
-  expect(runtime).toContain('TETOL · Circle 237 · PREVIOUS Council of Life');
+  expect(runtime).toContain('D.councilPresent.state');
   expect(runtime).toContain('#previous-circle-237');
   expect(runtime).not.toMatch(/remains open for visits all week|asserted this week/);
  });
