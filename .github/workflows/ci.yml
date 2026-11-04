@@ -79,6 +79,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # PR synthetic merge commit plus its parent; unknown diff => full browser coverage.
+          fetch-depth: 2
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -86,24 +89,43 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Test conservative browser-scope classifier
+        run: node --test scripts/ci-e2e-scope.test.mjs
+
+      - name: Determine required browser coverage
+        id: browser_scope
+        env:
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CI_MERGE_SHA: ${{ github.sha }}
+        run: node scripts/ci-e2e-scope.mjs
+
+      - name: Document docs-only bypass
+        if: steps.browser_scope.outputs.run_full == 'false'
+        run: echo "Exactly allowlisted docs-only PR; full Playwright not executed. Validate/security/static Council/unit/build still ran." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install dependencies
+        if: steps.browser_scope.outputs.run_full == 'true'
         run: npm ci
 
       - name: Download build artifact
+        if: steps.browser_scope.outputs.run_full == 'true'
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - name: Install Playwright (chromium only)
+        if: steps.browser_scope.outputs.run_full == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run smoke tests
+        if: steps.browser_scope.outputs.run_full == 'true'
         run: npx playwright test
         env:
           CI: "true"
 
       - name: Circle 237 disconnected application and mobile journeys
+        if: steps.browser_scope.outputs.run_full == 'true'
         run: npx playwright test --config playwright.circle237-integration.config.ts --project=chromium
         env:
           CI: "true"
