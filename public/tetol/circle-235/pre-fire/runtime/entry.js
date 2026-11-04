@@ -6,6 +6,14 @@ const D = window.TETOL;
 const circleEdition = new URLSearchParams(location.search).get('circle');
 const selectedCircle = circleEdition === null ? 235 : Number(circleEdition);
 const framedCircle = circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : circleEdition === '238' ? 238 : circleEdition === '239' ? 239 : null;
+// Desktop keyboard reading must not disappear when the original stillness timer fires.
+// Keep the frozen classic runtime and phone sheet behaviour unchanged.
+if (selectedCircle === 239) {
+  const readingStyle = document.createElement('style');
+  readingStyle.textContent = '@media (min-width: 601px) { body.grace-p.g-still:not(.g-reading) aside#panel:focus-within { opacity: 1 !important; pointer-events: auto; } }';
+  document.head.appendChild(readingStyle);
+}
+
 let companionFrames;
 let timeTree;
 try {
