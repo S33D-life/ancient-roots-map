@@ -48,6 +48,8 @@ export const ROUTES = {
   VALUE_TREE_EARN: "/value-tree?tab=earn",
   /** Support hub */
   SUPPORT: "/support",
+  /** Informational founding gateway; no collection or checkout. */
+  FOUNDING: "/support/founding",
   /** Guardian Harvest Exchange */
   HARVEST: "/harvest",
   /** Harvest detail */

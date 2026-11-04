@@ -185,6 +185,7 @@ const IndiaAtlasPage = lazyImportWithRetry(() => import("./pages/IndiaAtlasPage"
 const TaiwanAtlasPage = lazyImportWithRetry(() => import("./pages/TaiwanAtlasPage"), "taiwan-atlas");
 const SpainAtlasPage = lazyImportWithRetry(() => import("./pages/SpainAtlasPage"), "spain-atlas");
 const MexicoAtlasPage = lazyImportWithRetry(() => import("./pages/MexicoAtlasPage"), "mexico-atlas");
+const FoundingGatewayPage = lazyImportWithRetry(() => import("./pages/FoundingGatewayPage"), "founding-gateway");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const GardenDetailPage = lazyImportWithRetry(() => import("./pages/GardenDetailPage"), "garden-detail");
@@ -441,6 +442,7 @@ const App = () => {
                 <Route path="/admin/invite-status" element={<InviteStatusPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />
+                <Route path={ROUTES.FOUNDING} element={<FoundingGatewayPage />} />
                 <Route path="/harvest" element={<HarvestPage />} />
                 <Route path="/harvest/:id" element={<HarvestDetailPage />} />
                 <Route path="/how-hearts-work" element={<HowHeartsWorkPage />} />

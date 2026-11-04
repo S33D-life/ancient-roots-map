@@ -438,6 +438,11 @@ const SupportPage = () => {
       <Header />
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20" style={{ paddingTop: 'var(--content-top)' }}>
 
+        <section aria-label="Free entry and founding invitation" className="rounded-xl border border-primary/30 p-4 mb-6 space-y-2">
+          <p className="font-serif">Explore S33D freely, or learn about the proposed founding Life Groves and voluntary public-goods support.</p>
+          <Link className="inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" to={ROUTES.FOUNDING}>Free Wanderer entry and founding invitation →</Link>
+        </section>
+
         {/* ── Page header ── */}
         <motion.section
           initial="hidden"
