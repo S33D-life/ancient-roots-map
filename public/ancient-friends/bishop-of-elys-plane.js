@@ -6,7 +6,7 @@
   const fromSpatial = params.get("from") === "spatial";
   const returnUrl = fromSpatial
     ? "/tetol/circle-235/pre-fire/tetol.html?circle=236#ely-plane-companion"
-    : "/council-of-life?from=spatial-council#next-gathering";
+    : "/review/council/236?mode=2d&returned=1&companion=ely-plane-companion";
   for (const id of ["return-to-circle", "return-bottom"]) {
     const link = document.getElementById(id);
     if (link) link.setAttribute("href", returnUrl);

@@ -1,0 +1,39 @@
+name: Council public demo acceptance
+on:
+  pull_request:
+    paths:
+      - 'council/238/offerings.html'
+      - 'src/review/council-offerings/**'
+      - 'src/pages/council/Circle238Page.tsx'
+      - 'src/pages/CouncilOfLifePage.tsx'
+      - 'src/lib/routes.ts'
+      - 'public/_headers'
+      - 'vite.config.ts'
+      - 'playwright.council-demo.config.ts'
+      - 'e2e/council-demo/**'
+      - '.github/workflows/council-public-demo.yml'
+jobs:
+  production-demo:
+    name: Council demo · Chromium / WebKit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/check-council-public-bytes.mjs
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test --config playwright.council-demo.config.ts
+        env:
+          CI: 'true'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: council-public-demo-acceptance
+          path: output/playwright/council-demo
+          retention-days: 7

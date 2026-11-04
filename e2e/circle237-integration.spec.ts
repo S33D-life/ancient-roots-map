@@ -15,14 +15,14 @@ test.beforeEach(async({context})=>{
  await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4240'?route.continue():route.abort());
 });
 for(const width of [320,390,1440]){
- test(`Previous 237, ten encounters, invitation preview, refresh and history at ${width}`,async({page})=>{
+ test(`Historical 237, ten encounters, invitation preview, refresh and history at ${width}`,async({page})=>{
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 239');
   await expect(page.getByRole('region',{name:'Previous Circle 236'})).toContainText('Circle 236');
   await expect(page.getByRole('heading',{name:'Historical Circle · 235'})).toBeVisible();
   await dismissTrail(page);
   await page.getByRole('link',{name:'Revisit Circle 237 · meet its companions →'}).click();
-  await expect(page).toHaveURL(/\/council\/237$/);await expect(page).toHaveTitle(/237 · Previous/);await expect(page.locator('aside.review')).toContainText('PREVIOUS COUNCIL');
+  await expect(page).toHaveURL(/\/council\/237$/);await expect(page).toHaveTitle(/237 · Historical/);await expect(page.locator('aside.review')).toContainText('HISTORICAL COUNCIL');
   await expect(page.locator('img.companion-scene')).toHaveCount(10);
   await expect(page.getByText('Portrait withheld pending clearance',{exact:true})).toHaveCount(0);
   for(const image of await page.locator('img.companion-scene').all()) { await image.scrollIntoViewIfNeeded(); await expect(image).toHaveJSProperty('naturalWidth', Number(await image.getAttribute('width'))); await expect(image).toHaveJSProperty('naturalHeight', Number(await image.getAttribute('height'))); }
@@ -47,7 +47,7 @@ for(const width of [320,390,1440]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:`output/playwright/circle237-integration/${test.info().project.name}-2d-${width}.png`});
   await page.getByRole('link',{name:'Return to the Council Canopy'}).click();
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 239');
  });
 }
 test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',async({browser})=>{

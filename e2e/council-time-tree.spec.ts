@@ -20,7 +20,7 @@ test.beforeEach(async({context,page})=>{
 });
 async function assertEdition(page:any,n:number){
  await expect(page.locator('#council-time-tree')).toContainText(`Circle ${n}`);
- await expect(page.locator('#panel h2')).toContainText(n===238?'Fig-wood':n===237?'Blooming':`Circle ${n}`);
+ await expect(page.locator('#panel h2')).toContainText(n===239?'Council of Life':n===238?'Fig-wood':n===237?'Blooming':`Circle ${n}`);
  const state=await page.evaluate(()=>{const D=(window as any).TETOL,stage=document.querySelector('three-d-stage') as any,groups:any[]=[],signs:any[]=[];stage._scene.traverse((m:any)=>{if(/^circle_\d+_companions$/.test(m.name)&&m.visible)groups.push(m.name);if(m.name==='current_circle_identity_at_doorway')signs.push(m.material.map.image.__paintedText);});return {active:D.council.circles[D.council.active].number,current:D.nodes[D.council.current].name,question:D.nodes.croom.question,groups,signs};});
  if(n===236)expect(state.question).toBeNull();
  expect(state.active).toBe(n);expect(state.current).toBe(`Circle ${n}`);expect(state.groups).toHaveLength(1);expect(state.signs.flat()).toContain(`CIRCLE ${n}`);
@@ -71,12 +71,12 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
  test.setTimeout(180000);
  for(const width of [320,1440]){
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 238');
-  const entry=page.getByRole('link',{name:'Enter Circle 238 in the original 3D TETOL Council Deck →'});
-  await expect(entry).toHaveAttribute('href',`${root}?circle=238#croom`);await entry.click();
-  await waitForScene(page);await assertEdition(page,238);
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 239');
+  const entry=page.getByRole('link',{name:'Enter Circle 239 in the original 3D TETOL Council Deck →'});
+  await expect(entry).toHaveAttribute('href',`${root}?circle=239#croom`);await entry.click();
+  await waitForScene(page);await assertEdition(page,239);
   await page.goto('/council/238');await page.getByRole('combobox',{name:'Choose a Council Circle'}).selectOption('237');
-  await expect(page).toHaveURL(/\/council\/237$/);await expect(page.locator('.council-time-tree')).toContainText('PREVIOUS');
+  await expect(page).toHaveURL(/\/council\/237$/);await expect(page.locator('.council-time-tree')).toContainText('HISTORICAL');
   await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/\/review\/council\/236$/);
   await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/#previous-circle-235$/);
   await expect(page.locator('.council-time-tree').first().getByRole('combobox')).toHaveValue('235');

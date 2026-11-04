@@ -1,0 +1,147 @@
+{
+  "folder": "https://drive.google.com/drive/folders/1UWTHQvfn63pvPtPDE7Ep2on5fLbcOQPQ",
+  "verifiedFiles": [
+    {
+      "name": "01_Defynnog_Yew_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1Xfn1isSwQ2Q7PzMNLHvymvMu6J9HOt3S",
+      "sha256": "2ec2fdb75fc06c2dbac0ecc41bfa9c03f1ce679e3765b7e70f9e1f2c3452b4cc",
+      "bytes": 1542365,
+      "verified": true
+    },
+    {
+      "name": "01_Defynnog_Yew_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1m7XgnPNAFRtpsp4ffUN5l7sZxhuc7MvR",
+      "sha256": "e9e3e9936044b7218b78040cbf1413300f90028e918fdcd8a3c7cd42e41d438c",
+      "bytes": 729,
+      "verified": true
+    },
+    {
+      "name": "02_European_Beech_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1n8M7uozEPRQkYxLCdrB5IBcgDbixFkkA",
+      "sha256": "7a38fc45252bdb47e32725ce5dc10e064e08687b14995a66ae695b2d0cdcd67b",
+      "bytes": 1513548,
+      "verified": true
+    },
+    {
+      "name": "02_European_Beech_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "10wrsfYdzIDoOsKWtM1oNphRRsZenA9Dm",
+      "sha256": "71c9fc7eca3c0b8fe6aa89b482805a3df3e72babfe1c70adad676e2bf0aefac0",
+      "bytes": 744,
+      "verified": true
+    },
+    {
+      "name": "03_Ginger_REVERSE_FINAL_CANDIDATE.png",
+      "id": "13ueNCXaPzS7dAZe96vN0AR3tkjvyVJuG",
+      "sha256": "a04d3e7e0f3f90af86c512d6e5476be34112b8fecc6017bb4282e7f3042c7e2d",
+      "bytes": 1326447,
+      "verified": true
+    },
+    {
+      "name": "03_Ginger_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1nGZyVm1F5inFMgaot2EpW8VsBEBpseJr",
+      "sha256": "6754ba50d2fe7747248d876cfed4c6eac8a70eeba4b2d11136b4b415c2174eab",
+      "bytes": 833,
+      "verified": true
+    },
+    {
+      "name": "04_Sycamore_Helicopter_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1HFO4TYEw9viVWe_WOkn7ahnDhpwtU1SQ",
+      "sha256": "e1659e8d63ff6697d701742578bba954bb546e511d38ed53cfc12da9cc440f53",
+      "bytes": 1405819,
+      "verified": true
+    },
+    {
+      "name": "04_Sycamore_Helicopter_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1KuwEGh13KRNjt8XSDeF2UNA7QHmR9Mk_",
+      "sha256": "830cf243c26a60c3c576bf0b774563f50f1e8b6e9d020c35d8476aca7ac8eab4",
+      "bytes": 751,
+      "verified": true
+    },
+    {
+      "name": "05_Ginkgo_Leaf_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1qEQ29DyCuNDRiUGwKNCidRj3_VHfC4gk",
+      "sha256": "b239964bcf344f1edca10e38ae8eb599dff0225f7ea74f38a72ce65cd62252f1",
+      "bytes": 1392641,
+      "verified": true
+    },
+    {
+      "name": "05_Ginkgo_Leaf_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1yDJJyrZ8XZI-E1VnGwY6yzSmKwVUHbXP",
+      "sha256": "b6081345d9834faed5ffa10cd5d999773b47dd84af3634be8c0e4c2caa02e2c4",
+      "bytes": 803,
+      "verified": true
+    },
+    {
+      "name": "06_Dahlia_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1iuSZDu0i0p_JP-deGR6UsStAAerg4oSb",
+      "sha256": "5c032c7ebceda8756128c06b6c99bc3820bcd65a0aab725d50d775ff40c97979",
+      "bytes": 1444191,
+      "verified": true
+    },
+    {
+      "name": "06_Dahlia_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "19SFWSDZa7KVttWN6_DMlnKojielPad20",
+      "sha256": "747401a6cdcecc2020b50cc057ef3cefc11892e2276011bd7316bd5e23b34768",
+      "bytes": 818,
+      "verified": true
+    },
+    {
+      "name": "07_Rosehip_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1wpDe5nCVsSpVuGnO4Ojv3xCXgf7pypD6",
+      "sha256": "eca5f9a3189d66ca7b5ba5ee526775a0f91136fa1c03f492d82883f43fc143f9",
+      "bytes": 1460810,
+      "verified": true
+    },
+    {
+      "name": "07_Rosehip_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1qXH0nARpqmyiSiwXbAE4aj_v02kVJ6M6",
+      "sha256": "80e49a0282ccdc976168d85a03300048d3bce4ccf1157ddec9c29ba52ff82488",
+      "bytes": 840,
+      "verified": true
+    },
+    {
+      "name": "08_Fly_Agaric_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1yPf38i7ZnvbNJZX-HbK28jmrbDiPF5bZ",
+      "sha256": "a0f718c4411f287cfa3cb0a886f35dd9a2919d10357825794e8160e3c4ab8c4b",
+      "bytes": 1467238,
+      "verified": true
+    },
+    {
+      "name": "08_Fly_Agaric_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1ggo7WSVG-eP6kWRgpS-TBHddyYdAYED9",
+      "sha256": "a6c0353987e874703993906f69ccbb90b54841fa6375181d93b545bd1f0b990d",
+      "bytes": 827,
+      "verified": true
+    },
+    {
+      "name": "09_Slender_billed_Northern_Nutcracker_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1IJdCvJJjaEFBcHOuLBtU3Wo4yhJt1hNy",
+      "sha256": "b0ccca140433c52a15807e7349900c26f3aadb8a0d4ad38e4ffcdd8e63c1b843",
+      "bytes": 1474551,
+      "verified": true
+    },
+    {
+      "name": "09_Slender_billed_Northern_Nutcracker_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "1o1ZjwzDL2ac-n9cDdECgEny6g9K3cPPR",
+      "sha256": "6fd5ff781176dc85ab085150aabf0a56b41c6aa109d0913f12dd47edd879e3b8",
+      "bytes": 824,
+      "verified": true
+    },
+    {
+      "name": "10_The_Secret_Garden_REVERSE_FINAL_CANDIDATE.png",
+      "id": "1vd6RTV1kvusU2W1X2zElSuocGX8xLaEY",
+      "sha256": "1b7a933a704974b7ff775dcfb6ce8ff86adaca2aed54a52fbc2444648ba5c80e",
+      "bytes": 1415511,
+      "verified": true
+    },
+    {
+      "name": "10_The_Secret_Garden_REVERSE_FINAL_CANDIDATE.txt",
+      "id": "18pHdDxx-4KzDMaGgeF8_HNvh8zZdvEFK",
+      "sha256": "773269d1723e22d308de02f910053207a2ac370cae2d671a9ab0a16571ebd94d",
+      "bytes": 850,
+      "verified": true
+    }
+  ],
+  "sharingChanged": false,
+  "permissionEvidence": "Folder metadata reports user owner/writer only; no anyone/domain permission observed."
+}

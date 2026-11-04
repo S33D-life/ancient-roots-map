@@ -1,0 +1,63 @@
+{
+  "baseline_main": "e2f2830f0af383f14d7f0165cd3eb9be4ec9d057",
+  "approved_experience_sha": "1258497d68034d1f0a0100f98a155360a608e07b",
+  "public_entry": "/council/238/offerings.html",
+  "preserved_public_file_count": 255,
+  "preserved_file_list_sha256": "67a64595fcda0018f911f868bd9ccc27fc69f5bb72defdb5ce97ee9263de7862",
+  "manifest_sha256": "29b53eada0e63c7111af2d4f7a3a7014c165e8d9feab949fde0fa395a487d44c",
+  "scenes": [
+    {
+      "companion": "bishop-ely-plane",
+      "asset": "/council/circle-238/portraits/bishop-ely-plane.jpeg",
+      "sha256": "41d5f7f9d308527d46991a0af9dffce69e4ffa587a55740ef5aa5922a251a276"
+    },
+    {
+      "companion": "fig",
+      "asset": "/council/circle-238/portraits/fig.jpeg",
+      "sha256": "31e88f1fa2831e8fe2357392aa43f3a169a407499ec1f7b6a80b1e9cb7f7dd7d"
+    },
+    {
+      "companion": "peace-lily",
+      "asset": "/council/circle-238/portraits/peace-lily.jpeg",
+      "sha256": "801f06bc15025de2706b1c856bb1f8650e38b45c1149f3e416eb5389cb53aba7"
+    },
+    {
+      "companion": "goji-seed",
+      "asset": "/council/circle-238/portraits/goji-seed.jpeg",
+      "sha256": "e78f5274c58a3c2db1d421c78a4fca57bc4fb2d9ee975d657ed8ad218ad2ec4a"
+    },
+    {
+      "companion": "english-oak-leaf",
+      "asset": "/council/circle-238/portraits/english-oak-leaf.jpeg",
+      "sha256": "9107b3a5b503a53f6076227054217ca9aa49c76ec2b77849287fecb34bd03486"
+    },
+    {
+      "companion": "saffron",
+      "asset": "/council/circle-238/portraits/saffron.jpeg",
+      "sha256": "233d918c41969dafbdf4b674504d797cddfcc510191b41dc2cac4086a09729da"
+    },
+    {
+      "companion": "goji-fruit",
+      "asset": "/council/circle-238/portraits/goji-fruit.jpeg",
+      "sha256": "a15138cc9bd5bf2c716beccf04565d818bb4d3d699e3fe8cbb4aef758a63a9be"
+    },
+    {
+      "companion": "hen-of-the-woods",
+      "asset": "/council/circle-238/portraits/hen-of-the-woods.jpeg",
+      "sha256": "2faa1ff0777f2cd41e02035fe06eb706cbf9fc9eaa852fe45b0f10f98565926d"
+    },
+    {
+      "companion": "the-hobbit",
+      "asset": "/council/circle-238/portraits/the-hobbit.jpeg",
+      "sha256": "5f737a6286e482277e639d05e1e976f49fe5fb9e8c947c53b831ec656a723ce3"
+    },
+    {
+      "companion": "hoopoe",
+      "asset": "/council/circle-238/portraits/hoopoe.jpeg",
+      "sha256": "7ad8038cecbb2dc4f594d3b2a9915be108c2ceb25ec0375c53f3a0f6f4396d14"
+    }
+  ],
+  "public_asset_exception": "_headers: adds only demo route policy; version.json is generated release metadata",
+  "native_acceptance": "Positive Ed review of approved fixture; full Safari/VoiceOver release matrix not completed",
+  "tree_assets": "Current main, unchanged; #127/#131 not integrated"
+}

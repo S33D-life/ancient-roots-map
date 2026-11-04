@@ -21,6 +21,23 @@ describe("Ely public-safe folio — isolated recovery of PR #102", () => {
     expect(elyFolioReturn("spatial")).toBe("/tetol/circle-235/pre-fire/tetol.html?circle=236#ely-plane-companion");
     expect(elyFolioReturn("https://evil.example")).toBe(elyFolioReturn(null));
   });
+  it.each([
+    ["?from=2d", "/review/council/236?mode=2d&returned=1&companion=ely-plane-companion"],
+    ["?from=spatial", "/tetol/circle-235/pre-fire/tetol.html?circle=236#ely-plane-companion"],
+    ["", "/review/council/236?mode=2d&returned=1&companion=ely-plane-companion"],
+    ["?from=https%3A%2F%2Fevil.example", "/review/council/236?mode=2d&returned=1&companion=ely-plane-companion"],
+  ])("restores both static folio return links for %s", (search, expectedReturn) => {
+    const links = new Map([
+      ["return-to-circle", document.createElement("a")],
+      ["return-bottom", document.createElement("a")],
+    ]);
+    const staticDocument = { getElementById: (id: string) => links.get(id) ?? null };
+    const runStaticFolio = new Function("location", "document", readFileSync("public/ancient-friends/bishop-of-elys-plane.js", "utf8"));
+    runStaticFolio({ search }, staticDocument);
+    for (const link of links.values()) {
+      expect(link.getAttribute("href")).toBe(expectedReturn);
+    }
+  });
   it("renders a credited, readable folio without copying livestream media or reading the database", () => {
     render(<MemoryRouter initialEntries={[`${ELY_FOLIO_PATH}?from=spatial`]}><Routes>
       <Route path={ELY_FOLIO_PATH} element={<ElyLivingFolioPage />}/>

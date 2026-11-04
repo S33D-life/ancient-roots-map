@@ -1,0 +1,3 @@
+import {defineConfig,devices} from '@playwright/test';
+const port=Number(process.env.LIVING_FRAMES_PORT||4271);
+export default defineConfig({testDir:'./e2e/living-frames-239',testMatch:'*.fixture.ts',workers:1,timeout:60000,reporter:'list',outputDir:'output/playwright/living-frames-results',use:{baseURL:`http://127.0.0.1:${port}`,trace:'retain-on-failure',screenshot:'only-on-failure'},projects:[{name:'chromium',use:{...devices['Desktop Chrome'],hasTouch:true}},{name:'webkit',use:{...devices['Desktop Safari'],hasTouch:true}}],webServer:{command:`npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,url:`http://127.0.0.1:${port}/council/239`,reuseExistingServer:!process.env.CI}});

@@ -119,6 +119,7 @@ const ElyLivingFolioPage = lazyImportWithRetry(() => import("./pages/review/ElyL
 const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "circle236-preparation");
 const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
+const Circle239Page = lazyImportWithRetry(() => import("./pages/council/Circle239Page"), "circle239");
 const Circle238Page = lazyImportWithRetry(() => import("./pages/council/Circle238Page"), "circle238");
 const Circle237Page = lazyImportWithRetry(() => import("./pages/council/Circle237Page"), "circle237");
 const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/CouncilRecordsPage"), "council-records");
@@ -373,6 +374,7 @@ const App = () => {
                 <Route path={THREAD_PATTERNS.CIRCLE} element={<BirchPreparationPage />} />
                 <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
+                <Route path={ROUTES.CIRCLE239} element={<Circle239Page />} />
                 <Route path={ROUTES.CIRCLE238} element={<Circle238Page />} />
                 <Route path={ROUTES.CIRCLE237} element={<Circle237Page />} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
