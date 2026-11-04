@@ -1,4 +1,9 @@
-import {describe,it,expect} from 'vitest';
+import {describe,it,expect,vi,afterEach} from 'vitest';
+import {createElement} from 'react';
+import {render,fireEvent,screen,cleanup} from '@testing-library/react';
+import {MemoryRouter,useNavigate} from 'react-router-dom';
+import Circle239Page from '../pages/council/Circle239Page';
+afterEach(()=>{cleanup();vi.unstubAllGlobals();});
 import {existsSync,readFileSync} from 'node:fs';
 import {containedSize,localReview,reviewedReverse} from '../../public/council/circle-239/living-frame.js';
 import held from '../../public/council/circle-239/reverse-folios.json';
@@ -29,5 +34,16 @@ describe('Circle239 living-frame approval boundary',()=>{
  it('adds one optional239 adapter hook without modifying the original camera or old adapters',()=>{
    const entry=readFileSync('public/tetol/circle-235/pre-fire/runtime/entry.js','utf8');expect(entry).toContain('companionFrames?.connectLivingFrames?.({THREE,stage})');
    const module=readFileSync('public/council/circle-239/living-frame.js','utf8');expect(module).not.toMatch(/localStorage|indexedDB|supabase|\.upload\(|\.insert\(/);
+ });
+});
+
+describe('appearance identity during direct SPA navigation',()=>{
+ it('creates a fresh frame when the companion changes without going through the gallery',()=>{
+  vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>held}));
+  function Journey(){const navigate=useNavigate();return createElement('div',null,createElement('button',{onClick:()=>navigate('?companion=european-beech')},'Visit Beech'),createElement(Circle239Page));}
+  render(createElement(MemoryRouter,{initialEntries:['/council/239?companion=ginkgo-leaf']},createElement(Journey)));
+  const first=document.querySelector('council-living-frame');expect(first).toHaveAttribute('companion-key','ginkgo-leaf');
+  fireEvent.click(screen.getByRole('button',{name:/^Visit Beech$/}));
+  const second=document.querySelector('council-living-frame');expect(second).not.toBe(first);expect(second).toHaveAttribute('companion-key','european-beech');expect(second).toHaveAttribute('front','/council/circle-239/portraits/european-beech.jpeg');
  });
 });

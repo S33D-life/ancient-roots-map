@@ -37,7 +37,7 @@ export default function Circle239Page() {
     <a href={spatial + (review?'&review239=1':'') + '#croom'}>Enter Circle 239 in the original immersive TETOL →</a>
     {selected ? <section aria-label="Companion encounter">
       <h2 id="companion-heading" tabIndex={-1}>{selected.label}</h2><p>{selected.kind} · {selected.essence}</p>
-      {createElement('council-living-frame', {'companion-key':selected.key,label:selected.label,front:selected.artwork,'front-alt':selected.alt,side:query.get('side')==='reverse'?'reverse':'front'}, <img className="companion-scene" src={selected.artwork} width={selected.width} height={selected.height} alt={selected.alt} style={{width:'100%',height:'auto'}} />)}
+      {createElement('council-living-frame', {key:selected.key,'companion-key':selected.key,label:selected.label,front:selected.artwork,'front-alt':selected.alt,side:query.get('side')==='reverse'?'reverse':'front'}, <img className="companion-scene" src={selected.artwork} width={selected.width} height={selected.height} alt={selected.alt} style={{width:'100%',height:'auto'}} />)}
       <p>{selected.accuracyNote}</p>{selected.safetyNote && <p>{selected.safetyNote}</p>}
       <button onClick={() => navigate({returned:selected.key})}>Return to Circle 239</button>
       <a href={spatial + (review?'&review239=1':'') + '#' + selected.id}>Meet this companion in the original TETOL →</a>
