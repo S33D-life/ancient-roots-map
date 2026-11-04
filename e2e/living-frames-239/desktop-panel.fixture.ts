@@ -31,12 +31,14 @@ test('desktop panel: idle wake, keyboard reading, all ten reverse pairs and retu
  for(const c of companions.companions){
   const choice=panel.getByRole('button',{name:c.label,exact:true});await choice.focus();if(c.order%2)await choice.press('Enter');else await choice.click();
   const frame=page.locator('council-living-frame'),flip=frame.getByRole('button');await expect(flip).toHaveAttribute('aria-pressed','false');
-  await flip.focus();await flip.click();await expect(flip).toHaveAttribute('aria-pressed','true');await expect(flip).toBeFocused();
+  await flip.focus();await flip.press('Enter');await expect(flip).toHaveAttribute('aria-pressed','true');await expect(flip).toBeFocused();
   await page.waitForFunction(id=>(document.querySelector('three-d-stage') as any)._scene.getObjectByName(id+'_artwork')?.material.map?.image?.src?.includes('/reverses/'),c.id);await draw(page);
   const texture=await page.evaluate(id=>{const m=(document.querySelector('three-d-stage') as any)._scene.getObjectByName(id+'_artwork');return {repeat:m.material.map.repeat.toArray(),offset:m.material.map.offset.toArray()};},c.id);expect(texture).toEqual({repeat:[1,1],offset:[0,0]});
   if(c.order===1){await page.screenshot({path:`output/playwright/desktop-panel/${info.project.name}-reverse.png`});await page.reload();await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await boundDrawing(page);await page.keyboard.press('Shift');await expect(flip).toHaveAttribute('aria-pressed','true');}
   await flip.press('Enter');await expect(flip).toHaveAttribute('aria-pressed','false');
   if(c.order===1){await page.goBack();await expect(flip).toHaveAttribute('aria-pressed','true');await page.goForward();await expect(flip).toHaveAttribute('aria-pressed','false');}
+  // Mouse activation is checked separately: macOS WebKit may intentionally blur a clicked button.
+  await flip.click();await expect(flip).toHaveAttribute('aria-pressed','true');await flip.click();await expect(flip).toHaveAttribute('aria-pressed','false');
   await page.getByRole('button',{name:'Return to the Council Deck',exact:true}).click();
  }
  await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/circle=238/);await page.keyboard.press('Shift');await expect(page.locator('#brandline')).toContainText('238 · PREVIOUS');
