@@ -38,6 +38,21 @@ async function review(page){
 }
 async function expand(page){if(await page.locator('body').getAttribute('data-sheet')==='peek')await page.locator('#grab').tap();}
 
+// Software-GPU runners must not continuously redraw the whole historic Tree while
+// checking sheet state. Keep the original renderer and draw each reverse for real.
+async function boundContinuousDrawing(page){
+ await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);
+ await page.evaluate(()=>{const r=(document.querySelector('three-d-stage') as any)._renderer;
+  if(r.__livingFrameDraw)return;const render=r.render.bind(r);r.__livingFrameBudget=0;r.__livingFrameCount=0;
+  r.__livingFrameDraw=()=>{r.__livingFrameBudget=1;};
+  r.render=(...args:any[])=>{if(r.__livingFrameBudget>0){r.__livingFrameBudget--;render(...args);r.__livingFrameCount++;}};
+ });
+}
+async function drawRealFrame(page){
+ const before=await page.evaluate(()=>{const r=(document.querySelector('three-d-stage') as any)._renderer;r.__livingFrameDraw();return r.__livingFrameCount;});
+ await page.waitForFunction(n=>(document.querySelector('three-d-stage') as any)._renderer.__livingFrameCount>n,before);
+}
+
 test('all ten2D pairs: keyboard, retained focus, full artwork and text at390px',async({page},info)=>{
  await review(page);await page.setViewportSize({width:390,height:844});await page.goto('/council/239?review239=1');
  for(const c of fronts.companions){
@@ -64,13 +79,13 @@ test('missing reverse keeps front and truthful status without a fake state chang
 });
 test('original239 Tree: ten texture pairs, contained4:3, history, quietFire and StaffRoom',async({page},info)=>{
  test.setTimeout(120000);await review(page);await page.setViewportSize({width:390,height:844});await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),250);window.cancelAnimationFrame=id=>clearTimeout(id);});
- await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=239&review239=1#croom');await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._scene);await expand(page);
+ await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=239&review239=1#croom');await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._scene);await boundContinuousDrawing(page);await drawRealFrame(page);await expand(page);
  for(const c of fronts.companions){
   await page.locator('#panel').getByRole('button',{name:c.label,exact:true}).click();await expand(page);const frame=page.locator('council-living-frame');await expect(frame.getByRole('button')).toBeEnabled();await frame.getByRole('button').tap();await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','true');
-  await page.waitForFunction(id=>(document.querySelector('three-d-stage') as any)._scene.getObjectByName(id+'_artwork')?.material.map?.image?.src?.includes('/reverses/'),c.id);
+  await page.waitForFunction(id=>(document.querySelector('three-d-stage') as any)._scene.getObjectByName(id+'_artwork')?.material.map?.image?.src?.includes('/reverses/'),c.id);await drawRealFrame(page);
   const shape=await page.evaluate(id=>{const m=(document.querySelector('three-d-stage') as any)._scene.getObjectByName(id+'_artwork');return {w:m.geometry.parameters.width,h:m.geometry.parameters.height,repeat:m.material.map.repeat.toArray(),offset:m.material.map.offset.toArray()};},c.id);
   expect(shape.w/shape.h).toBeCloseTo(items[c.order-1].width/items[c.order-1].height);expect(shape.repeat).toEqual([1,1]);expect(shape.offset).toEqual([0,0]);
-  if(c.order===1){await page.screenshot({path:`output/playwright/living-frames/${info.project.name}-original-tree-reverse-390.png`});await page.reload();await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await expand(page);await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','true');}
+  if(c.order===1){await page.screenshot({path:`output/playwright/living-frames/${info.project.name}-original-tree-reverse-390.png`});await page.reload();await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await boundContinuousDrawing(page);await drawRealFrame(page);await expand(page);await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','true');}
   await frame.getByRole('button').click();await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','false');if(c.order===1){await page.goBack();await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','true');await page.goForward();await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','false');}await page.getByRole('button',{name:'Return to the Council Deck',exact:true}).click();await expand(page);
  }
  await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page.locator('#brandline')).toContainText('238 · PREVIOUS');await expand(page);await expect(page.locator('council-living-frame')).toHaveCount(0);await page.getByRole('link',{name:'Return to current · 239',exact:true}).click();await expect(page.locator('#brandline')).toContainText('239 · CURRENT / OPEN');
