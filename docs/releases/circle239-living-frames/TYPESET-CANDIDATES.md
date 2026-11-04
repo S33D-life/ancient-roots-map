@@ -1,5 +1,7 @@
 # Circle 239 corrected reverse folios — 4 November 2026
 
+**Superseded asset gate:** Ed has approved the exact ten images and confirmed rights/public use. See [current release candidate](RELEASE-CANDIDATE.md) and release-receipt.json. Earlier HOLD statements below remain historical evidence. Source merge and publication still require separate explicit GO.
+
 Candidate set `typeset-candidates-v2`; ten 1536×1024 PNGs. This supersedes the original artwork risk findings in REVIEW.md, but does not grant human approval. Original receipt.json and original supplied bytes remain intact. Final proof collection: restricted Drive folder `1jHYaXROcMFgI1Ih4iDCYEjhvjGDUe1g5`; QA file `1Nwa1qGKTpki-rpckE701xGfwKzdMnqTS`.
 
 ## Corrections and provenance

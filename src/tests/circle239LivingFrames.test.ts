@@ -4,16 +4,31 @@ import {render,fireEvent,screen,cleanup} from '@testing-library/react';
 import {MemoryRouter,useNavigate} from 'react-router-dom';
 import Circle239Page from '../pages/council/Circle239Page';
 afterEach(()=>{cleanup();vi.unstubAllGlobals();});
-import {existsSync,readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {containedSize,localReview,reviewedReverse} from '../../public/council/circle-239/living-frame.js';
-import held from '../../public/council/circle-239/reverse-folios.json';
+import published from '../../public/council/circle-239/reverse-folios.json';
+const held={...published,publicationApproved:false,status:'HOLD_ASSET_REVIEW',items:published.items.map(i=>({...i,status:'HOLD_ASSET_REVIEW',factReviewed:false,rightsApproved:false,artwork:null,readableText:null}))};
 const item={key:'ginger',artwork:'/council/circle-239/reverses/ginger.png',sha256:'a'.repeat(64),width:1536,height:1024,readableText:'Reviewed accessible text',status:'APPROVED',factReviewed:true,rightsApproved:true};
 const approved={circle:239,publicationApproved:true,status:'APPROVED',items:[item]};
 const publicSite={hostname:'www.s33d.life',search:'?review239=1'};
 describe('Circle239 living-frame approval boundary',()=>{
- it('holds all ten original reverse bytes outside public output until independent asset review',()=>{
-   expect(held.publicationApproved).toBe(false);expect(held.items).toHaveLength(10);
-   for(const i of held.items){expect(i.artwork).toBeNull();expect(i.readableText).toBeNull();expect(reviewedReverse(held,i.key,publicSite)).toBeNull();expect(existsSync('public/council/circle-239/reverses/'+i.key+'.png')).toBe(false);}
+ it('admits only the ten owner-approved images and exact accessible transcripts',()=>{
+   const receipt=JSON.parse(readFileSync('docs/releases/circle239-living-frames/release-receipt.json','utf8'));
+   expect(published.publicationApproved).toBe(true);expect(published.items).toHaveLength(10);
+   expect(receipt.ownerVisualEditorialApproval.approved).toBe(true);expect(receipt.rights.approved).toBe(true);
+   expect(receipt.rights.independentLegalReview).toBe(false);expect(receipt.factualReview.independentScientificPeerReview).toBe(false);
+   expect(receipt.sourceMergeApproved).toBe(false);expect(receipt.deploymentApproved).toBe(false);
+   for(const [n,i] of published.items.entries()){
+    const image=readFileSync('public'+i.artwork),text=readFileSync('public'+i.transcript);
+    expect(createHash('sha256').update(image).digest('hex')).toBe(receipt.items[n].sha256);
+    expect(createHash('sha256').update(text).digest('hex')).toBe(receipt.items[n].transcriptSha256);
+    expect(image.readUInt32BE(16)).toBe(1536);expect(image.readUInt32BE(20)).toBe(1024);
+    expect(i.readableText).toBe(text.toString());expect(i.explore).toBeNull();
+    expect(reviewedReverse(published,i.key,publicSite)?.privateReview).toBe(false);
+   }
+   expect(readdirSync('public/council/circle-239/reverses').sort()).toEqual(published.items.flatMap(i=>[i.key+'.png',i.key+'.txt']).sort());
+   expect(readFileSync('vite.config.ts','utf8')).toContain('"council/circle-239/reverses/**"');
  });
  it('requires explicit asset, fact, rights and readable-text approval; never trusts a query flag on public hosts',()=>{
    expect(reviewedReverse(approved,'ginger',publicSite)?.artwork).toBe(item.artwork);
