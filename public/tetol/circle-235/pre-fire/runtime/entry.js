@@ -892,6 +892,7 @@ function buildCircle(num) {
   grp.visible = num === D.council.active;
 }
 Object.keys(D.council.circles).forEach((k) => buildCircle(+k));
+companionFrames?.connectLivingFrames?.({THREE,stage});
 // A carved ring beside the Treehouse door: the way back to the Circle before (and forward again)
 { const t = -0.62, mp = W(Math.sin(t) * 1.07, 1.02, -3.9 + Math.cos(t) * 1.07), mk = new THREE.Group(); mk.name = 'circle_time_ring_marker'; mk.position.copy(mp); S.add(mk); mk.lookAt(W(Math.sin(t) * 3, 1.02, -3.9 + Math.cos(t) * 3));
   const disc = add(new THREE.Mesh(new THREE.CircleGeometry(0.2, 32), mat.rib || mat.limbBark), 'time_ring_disc', 'c232', mk); markerMeshes.push(disc);

@@ -1,4 +1,6 @@
-/** Circle239 fronts in the original TETOL. No reverse folios, new renderer or writes. */
+import {spatialSide,connectLivingScene} from '../../../../council/circle-239/living-frame.js';
+export const connectLivingFrames=connectLivingScene;
+/** Circle239 in the original TETOL; held reverses fail closed. No new renderer or writes. */
 const QUESTION = 'What remains alive when everything appears to be sleeping?';
 const KEYS = ['defynnog-yew','european-beech','ginger','sycamore-helicopter-seed','ginkgo-leaf','dahlia','rosehip','fly-agaric','slender-billed-northern-nutcracker','the-secret-garden'];
 export async function installCompanionFrames(D) {
@@ -35,6 +37,6 @@ export function companionPanel(D,id,esc) {
   if (!c && id !== 'croom' && id !== 'c239') return null;
   const link = (id,label) => '<button type="button" class="act" data-go="'+id+'">'+esc(label)+'</button>';
   return '<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Explore Circle 239"><i></i></button><div class="pbody"><p class="eyebrow">StarPod Circle 239 · '+esc(D.councilPresent.state)+'</p><h2 class="pname">'+(c?esc(c.label):'The Council of Life · yOur Blooming Week')+'</h2><p class="psub">'+esc(QUESTION)+'</p>'
-    +(c?'<p>'+esc(c.kind)+' · '+esc(c.essence)+'</p><img data-circle-artwork="'+c.id+'" src="'+c.artwork+'" alt="'+esc(c.alt)+'" style="width:100%;height:auto;border-radius:8px"><p>'+esc(c.accuracyNote)+'</p>'+(c.safetyNote?'<p>'+esc(c.safetyNote)+'</p>':'')+link('croom','Return to the Council Deck'):items.map(c=>link(c.id,c.label)).join(''))+'<p>Open all week · no scheduled Fire. No offerings or attendance are collected here.</p><a class="act" target="_top" href="/council/239'+(c?'?companion='+c.key:'')+'">Visit the 2D Circle 239 →</a><a class="act" target="_top" href="/council-of-life">Return to the Canopy →</a></div>';
+    +(c?'<p>'+esc(c.kind)+' · '+esc(c.essence)+'</p><council-living-frame context="spatial" companion-key="'+c.key+'" label="'+esc(c.label)+'" front="'+c.artwork+'" front-alt="'+esc(c.alt)+'" side="'+spatialSide(c.key)+'"><img data-circle-artwork="'+c.id+'" src="'+c.artwork+'" alt="'+esc(c.alt)+'" style="width:100%;height:auto;border-radius:8px"></council-living-frame><p>'+esc(c.accuracyNote)+'</p>'+(c.safetyNote?'<p>'+esc(c.safetyNote)+'</p>':'')+link('croom','Return to the Council Deck'):items.map(c=>link(c.id,c.label)).join(''))+'<p>Open all week · no scheduled Fire. No offerings or attendance are collected here.</p><a class="act" target="_top" href="/council/239'+(c?'?companion='+c.key:'')+'">Visit the 2D Circle 239 →</a><a class="act" target="_top" href="/council-of-life">Return to the Canopy →</a></div>';
 }
 export function buildCompanionPresence(){return null;}
