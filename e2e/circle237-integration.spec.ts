@@ -22,7 +22,7 @@ for(const width of [320,390,1440]){
   await expect(page.getByRole('heading',{name:'Historical Circle · 235'})).toBeVisible();
   await dismissTrail(page);
   await page.getByRole('link',{name:'Revisit Circle 237 · meet its companions →'}).click();
-  await expect(page).toHaveURL(/\/council\/237$/);await expect(page).toHaveTitle(/237 · Previous/);await expect(page.locator('aside.review')).toContainText('PREVIOUS COUNCIL');
+  await expect(page).toHaveURL(/\/council\/237$/);await expect(page).toHaveTitle(/237 · Historical/);await expect(page.locator('aside.review')).toContainText('HISTORICAL COUNCIL');
   await expect(page.locator('img.companion-scene')).toHaveCount(10);
   await expect(page.getByText('Portrait withheld pending clearance',{exact:true})).toHaveCount(0);
   for(const image of await page.locator('img.companion-scene').all()) { await image.scrollIntoViewIfNeeded(); await expect(image).toHaveJSProperty('naturalWidth', Number(await image.getAttribute('width'))); await expect(image).toHaveJSProperty('naturalHeight', Number(await image.getAttribute('height'))); }

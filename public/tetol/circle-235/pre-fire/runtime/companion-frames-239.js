@@ -29,6 +29,7 @@ export async function installCompanionFrames(D) {
   return circle;
 }
 export function companionPanel(D,id,esc) {
+  if (id === 'live_fire' || id === 'seat_you') return '<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Explore Circle 239"><i></i></button><div class="pbody"><p class="eyebrow">StarPod Circle 239</p><h2 class="pname">'+(id==='live_fire'?'No scheduled Fire':'A place to pause')+'</h2><p class="psub">'+esc(QUESTION)+'</p><p>This Circle is open for exploration. No live Fire is scheduled, and no offering or attendance is recorded here.</p><button type="button" class="act" data-go="croom">Return to the Council Deck</button><a class="act" target="_top" href="/council/239">Visit the 2D Circle 239 →</a></div>';
   const items = D.circleFrameCompanions || [], c = items.find(c=>c.id===id);
   if (!c && id !== 'croom' && id !== 'c239') return null;
   const link = (id,label) => '<button type="button" class="act" data-go="'+id+'">'+esc(label)+'</button>';

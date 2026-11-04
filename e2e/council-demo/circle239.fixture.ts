@@ -64,6 +64,9 @@ test('239 original Tree: real frames, first touch, all ten encounters, hearth, S
     await page.locator('#panel [data-go="croom"]').evaluate((el:HTMLElement)=>el.click());
   }
   await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','live_fire'));await expect(page.locator('#panel')).toContainText('No scheduled Fire');
+  await expect(page.locator('#panel')).not.toContainText('Circle 235');
+  await expect(page.locator('#panel [data-go="@opencircle"]')).toHaveCount(0);
+  await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','seat_you'));await expect(page.locator('#panel h2')).toHaveText('A place to pause');await expect(page.locator('#panel')).toContainText('no offering or attendance is recorded');
   await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','staff'));await expect(page.locator('#panel')).toContainText('Staff Room');
   await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','croom'));await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council&circle=239#next-gathering');
   await page.locator('#council-time-tree a[rel=prev]').evaluate((el:HTMLElement)=>el.click());

@@ -41,6 +41,11 @@ describe('Circle239 front-only release', () => {
     expect(d.council.circles[239].companions.map((c:any)=>c.id)).toEqual(manifest.companions.map(c=>c.id));
     for(const c of d.council.circles[239].companions) expect(c.repr).toMatchObject({form:'circleFrame',width:1536,height:1024});
     expect(d.nodes.live_fire.actions).toEqual([]); expect(d.nodes.live_fire.stateShort).toBe('UNSCHEDULED');
+    for(const id of ['live_fire','seat_you']) {
+      const panel=companionPanel(d,id,(s:string)=>s);
+      expect(panel).toContain('no offering or attendance is recorded');
+      expect(panel).not.toContain('Circle 235'); expect(panel).not.toContain('@opencircle');
+    }
     expect(companionPanel(d,manifest.companions[0].id,(s:string)=>s)).toContain('/council/239?companion=defynnog-yew');
   });
   it.each(['question','fire','id','artwork'])('fails closed for a mismatched %s without installing another edition', async field => {
