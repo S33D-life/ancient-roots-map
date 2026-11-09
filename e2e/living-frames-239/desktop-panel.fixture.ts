@@ -23,7 +23,9 @@ async function boundDrawing(page){
 async function draw(page){await page.evaluate(()=>(document.querySelector('three-d-stage') as any)._renderer.__panelDraw());await page.waitForFunction(()=>(document.querySelector('three-d-stage') as any)._renderer.__panelBudget===0);}
 
 test('desktop panel: idle wake, keyboard reading, all ten reverse pairs and returns',async({page},info)=>{
- test.setTimeout(120000);await page.setViewportSize({width:1440,height:900});await originalTree(page);
+ // Two real idle intervals and four full Tree boots share this test budget.
+ test.setTimeout(180000);
+ await page.setViewportSize({width:1440,height:900});await originalTree(page);
  const panel=page.locator('#panel'),first=panel.getByRole('button',{name:companions.companions[0].label,exact:true});
  // The old probe intentionally waited for stillness, then clicked a pointer-disabled element.
  await page.waitForFunction(()=>document.body.classList.contains('g-still'),{},{timeout:20000});
