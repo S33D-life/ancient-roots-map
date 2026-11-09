@@ -31,6 +31,10 @@ export interface ResearchMeta {
 
 /* ── Tree entity ── */
 export interface TreeCardData {
+  location_confidence?: string | null;
+  location_basis?: string | null;
+  visiting_access_basis?: string | null;
+  metadata?: unknown;
   id: string;
   name: string;
   species: string;

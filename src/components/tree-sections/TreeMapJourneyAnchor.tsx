@@ -12,9 +12,10 @@ interface Props {
   lat?: number | null;
   lng?: number | null;
   w3w?: string | null;
+  locationLabel?: string | null;
 }
 
-const TreeMapJourneyAnchor = ({ treeId, treeName, lat, lng, w3w }: Props) => {
+const TreeMapJourneyAnchor = ({ treeId, treeName, lat, lng, w3w, locationLabel }: Props) => {
   const { focusMap } = useMapFocus();
 
   if (!lat && !w3w) return null;
@@ -32,6 +33,10 @@ const TreeMapJourneyAnchor = ({ treeId, treeName, lat, lng, w3w }: Props) => {
       className="rounded-xl border border-border/30 overflow-hidden cursor-pointer group transition-colors hover:border-primary/30"
       style={{ background: "linear-gradient(135deg, hsl(var(--card) / 0.5), hsl(var(--secondary) / 0.3))" }}
       onClick={handleJourney}
+      role="button"
+      tabIndex={0}
+      aria-label={[`See ${treeName} in the Arboreal Atlas`, locationLabel].filter(Boolean).join(" — ")}
+      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); handleJourney(); } }}
     >
       <div className="p-5 flex items-center gap-4">
         <div
@@ -42,7 +47,7 @@ const TreeMapJourneyAnchor = ({ treeId, treeName, lat, lng, w3w }: Props) => {
         </div>
         <div className="flex-1">
           <p className="font-serif text-sm text-foreground">See {treeName} in the Arboreal Atlas</p>
-          <p className="text-xs text-muted-foreground/60 font-serif">Ceremonial journey to the tree's location</p>
+          <p className="text-xs text-muted-foreground/60 font-serif">{locationLabel || "Ceremonial journey to the tree's location"}</p>
         </div>
         <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
       </div>
