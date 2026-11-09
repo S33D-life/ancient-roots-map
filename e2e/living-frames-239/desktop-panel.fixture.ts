@@ -4,6 +4,12 @@ import {disconnectedTransport} from '../fixtures/circle237-disconnected-transpor
 const tree='/tetol/circle-235/pre-fire/tetol.html?circle=239#croom';
 async function originalTree(page){
  await page.addInitScript(disconnectedTransport);
+ // Keep the same software-renderer pacing as the other living-frame fixtures,
+ // including after a full navigation to an archived edition.
+ await page.addInitScript(() => {
+  window.requestAnimationFrame = callback => window.setTimeout(() => callback(performance.now()), 250);
+  window.cancelAnimationFrame = id => clearTimeout(id);
+ });
  await page.route('**/*',r=>{const q=r.request();return new URL(q.url()).hostname==='127.0.0.1'&&['GET','HEAD'].includes(q.method())?r.continue():r.abort();});
  await page.goto(tree);
  await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);
@@ -17,7 +23,9 @@ async function boundDrawing(page){
 async function draw(page){await page.evaluate(()=>(document.querySelector('three-d-stage') as any)._renderer.__panelDraw());await page.waitForFunction(()=>(document.querySelector('three-d-stage') as any)._renderer.__panelBudget===0);}
 
 test('desktop panel: idle wake, keyboard reading, all ten reverse pairs and returns',async({page},info)=>{
- test.setTimeout(120000);await page.setViewportSize({width:1440,height:900});await originalTree(page);
+ // Two real idle intervals and four full Tree boots share this test budget.
+ test.setTimeout(180000);
+ await page.setViewportSize({width:1440,height:900});await originalTree(page);
  const panel=page.locator('#panel'),first=panel.getByRole('button',{name:companions.companions[0].label,exact:true});
  // The old probe intentionally waited for stillness, then clicked a pointer-disabled element.
  await page.waitForFunction(()=>document.body.classList.contains('g-still'),{},{timeout:20000});
@@ -41,6 +49,19 @@ test('desktop panel: idle wake, keyboard reading, all ten reverse pairs and retu
   await flip.click();await expect(flip).toHaveAttribute('aria-pressed','true');await flip.click();await expect(flip).toHaveAttribute('aria-pressed','false');
   await page.getByRole('button',{name:'Return to the Council Deck',exact:true}).click();
  }
- await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/circle=238/);await page.keyboard.press('Shift');await expect(page.locator('#brandline')).toContainText('238 · PREVIOUS');
- await page.getByRole('link',{name:'Return to current · 239',exact:true}).click();await expect(page).toHaveURL(/circle=239/);
+ await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();
+ await expect(page).toHaveURL(/\?circle=238#croom$/);
+ // A committed URL can precede the loader replacing the static prototype label.
+ await expect(page.locator('#brandline')).toHaveText('TETOL · Circle 238 · PREVIOUS', {timeout: 20000});
+ // The edition label is installed before the Tree has finished booting.
+ await page.waitForFunction(() => Boolean((window as any).__tetol));
+ await boundDrawing(page);
+ await page.keyboard.press('Shift');
+ await expect(panel).toHaveCSS('pointer-events', 'auto');
+ const returnLink = page.getByRole('link',{name:'Return to current · 239',exact:true});
+ await returnLink.focus();
+ await expect(returnLink).toBeFocused();
+ await returnLink.press('Enter');
+ await expect(page).toHaveURL(/\?circle=239#croom$/);
+ await expect(page.locator('#brandline')).toHaveText('TETOL · Circle 239 · CURRENT / OPEN', {timeout: 20000});
 });
