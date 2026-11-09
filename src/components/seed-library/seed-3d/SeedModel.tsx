@@ -126,6 +126,15 @@ function HempGeometry({ color, accent }: { color: string; accent: string }) {
   );
 }
 
+function TomatoGeometry({ color }: { color: string }) {
+  return (
+    <mesh scale={[0.77, 1, 0.22]}>
+      <sphereGeometry args={[0.44, 32, 24]} />
+      <meshStandardMaterial color={color} roughness={0.95} />
+    </mesh>
+  );
+}
+
 /* ── Main SeedModel ─────────────────────────────────────────── */
 
 interface SeedModelProps {
@@ -154,6 +163,7 @@ export default function SeedModel({
     <group ref={groupRef}>
       {shapeType === "acorn" && <AcornGeometry color={color} accent={colorAccent} />}
       {shapeType === "corn" && <CornGeometry color={color} accent={colorAccent} />}
+      {shapeType === "tomato" && <TomatoGeometry color={color} />}
       {shapeType === "hemp" && <HempGeometry color={color} accent={colorAccent} />}
     </group>
   );

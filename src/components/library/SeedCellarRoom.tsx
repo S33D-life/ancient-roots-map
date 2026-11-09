@@ -3,6 +3,8 @@
  * Now includes tabs for the embedded Airtable view and the new Seed Library directory.
  */
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { SEED_CONFIGS } from "@/components/seed-library/seed-3d/seed-configs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
@@ -12,6 +14,9 @@ import SeedLifeGallery from "@/components/seed-library/SeedLifeGallery";
 import { useHasRole } from "@/hooks/use-role";
 
 const SeedCellarRoom = () => {
+  const [params] = useSearchParams();
+  const requestedSeed = params.get("seed");
+  const initialSeed = SEED_CONFIGS.find(seed => seed.slug === requestedSeed)?.slug;
   const [showEmbed, setShowEmbed] = useState(false);
   const { hasRole: isCurator } = useHasRole("curator");
   const { hasRole: isKeeper } = useHasRole("keeper");
@@ -50,7 +55,10 @@ const SeedCellarRoom = () => {
       )}
 
       {/* Seed Library Directory + Curator Panel */}
-      <Tabs defaultValue="directory" className="w-full">
+      {requestedSeed !== null && !initialSeed && (
+        <p role="status">This seed viewer destination is planned.</p>
+      )}
+      <Tabs key={requestedSeed ?? ""} defaultValue={initialSeed ? "gallery" : "directory"} className="w-full">
         <TabsList className="bg-muted/40 w-full justify-start">
           <TabsTrigger value="directory" className="text-xs">
             🌱 Seed Libraries
@@ -68,7 +76,7 @@ const SeedCellarRoom = () => {
           <SeedLibraryDirectory />
         </TabsContent>
         <TabsContent value="gallery" className="mt-4">
-          <SeedLifeGallery />
+          <SeedLifeGallery initialSeed={initialSeed} />
         </TabsContent>
         {canModerate && (
           <TabsContent value="moderation" className="mt-4">

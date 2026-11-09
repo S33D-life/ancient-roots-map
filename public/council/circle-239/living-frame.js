@@ -1,4 +1,6 @@
 /** One read-only Circle239 frame, shared by React and the original TETOL sheet. */
+import { appendCouncilLibraryLinks } from '../library-links.js';
+
 const ROOT = '/council/circle-239/';
 export const localReview = (where = location) => ['127.0.0.1','localhost','[::1]'].includes(where.hostname) && new URLSearchParams(where.search).get('review239') === '1';
 export function reviewedReverse(catalog, key, where = location) {
@@ -32,7 +34,9 @@ export class LivingFrame239 extends HTMLElement {
     this.status=node('p');this.status.setAttribute('role','status');this.status.setAttribute('aria-live','polite');
     this.transcript=node('details');const summary=node('summary','Read the reverse as text');this.text=node('pre');this.transcript.append(summary,this.text);this.transcript.hidden=true;
     this.deep=node('a','Explore deeper');this.deep.hidden=true;
-    this.shadowRoot.append(style,this.image,controls,this.status,this.transcript,this.deep);
+    const libraryLinks = node('div');
+    this.shadowRoot.append(style,this.image,controls,this.status,this.transcript,this.deep,libraryLinks);
+    appendCouncilLibraryLinks(libraryLinks, 239, this.getAttribute('companion-key'));
     catalogue().then(c=>{this.reverse=reviewedReverse(c,this.getAttribute('companion-key'));if(!this.isConnected)return;
       this.toggle.disabled=!this.reverse;
       this.status.textContent=this.reverse?.privateReview?'Private artwork review — not cleared for publication.':this.reverse?'Front portrait.':'Reverse folio is awaiting editorial approval. The front remains available.';
