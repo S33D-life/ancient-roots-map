@@ -6,7 +6,7 @@ The Council doesn’t begin when the call opens. It begins when we notice the li
 
 **Open Circle**
 
-This week’s companions, chosen by Leo:
+This week’s companions, chosen by the Council:
 - Fulham Palace Holm Oak
 - Apple Blossom
 - Dragon Fruit / Pitaya
