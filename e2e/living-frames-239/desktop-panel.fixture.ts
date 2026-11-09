@@ -53,8 +53,15 @@ test('desktop panel: idle wake, keyboard reading, all ten reverse pairs and retu
  await expect(page).toHaveURL(/\?circle=238#croom$/);
  // A committed URL can precede the loader replacing the static prototype label.
  await expect(page.locator('#brandline')).toHaveText('TETOL · Circle 238 · PREVIOUS', {timeout: 20000});
+ // The edition label is installed before the Tree has finished booting.
+ await page.waitForFunction(() => Boolean((window as any).__tetol));
+ await boundDrawing(page);
  await page.keyboard.press('Shift');
- await page.getByRole('link',{name:'Return to current · 239',exact:true}).click();
+ await expect(panel).toHaveCSS('pointer-events', 'auto');
+ const returnLink = page.getByRole('link',{name:'Return to current · 239',exact:true});
+ await returnLink.focus();
+ await expect(returnLink).toBeFocused();
+ await returnLink.press('Enter');
  await expect(page).toHaveURL(/\?circle=239#croom$/);
  await expect(page.locator('#brandline')).toHaveText('TETOL · Circle 239 · CURRENT / OPEN', {timeout: 20000});
 });
