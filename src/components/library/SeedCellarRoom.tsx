@@ -16,7 +16,8 @@ import { useHasRole } from "@/hooks/use-role";
 const SeedCellarRoom = () => {
   const [params] = useSearchParams();
   const requestedSeed = params.get("seed");
-  const initialSeed = SEED_CONFIGS.find(seed => seed.slug === requestedSeed)?.slug;
+  const seedSlug = requestedSeed === "tomato-seeds" ? "tomato-seed" : requestedSeed;
+  const initialSeed = SEED_CONFIGS.find(seed => seed.slug === seedSlug)?.slug;
   const [showEmbed, setShowEmbed] = useState(false);
   const { hasRole: isCurator } = useHasRole("curator");
   const { hasRole: isKeeper } = useHasRole("keeper");

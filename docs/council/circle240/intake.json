@@ -1,0 +1,122 @@
+[
+  {
+    "key": "rokeby-ginkgo",
+    "label": "The Ginkgo at Rokeby",
+    "role": "Ancient Friend",
+    "expectedFiles": {
+      "front": "01-rokeby-ginkgo-front.png",
+      "reverse": "01-rokeby-ginkgo-reverse.png",
+      "transcript": "01-rokeby-ginkgo-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "hornbeam",
+    "label": "Hornbeam",
+    "role": "Tree Species",
+    "expectedFiles": {
+      "front": "02-hornbeam-front.png",
+      "reverse": "02-hornbeam-reverse.png",
+      "transcript": "02-hornbeam-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "rosemary",
+    "label": "Rosemary",
+    "role": "Plant",
+    "expectedFiles": {
+      "front": "03-rosemary-front.png",
+      "reverse": "03-rosemary-reverse.png",
+      "transcript": "03-rosemary-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "tomato-seeds",
+    "label": "Tomato seeds",
+    "role": "Seed",
+    "expectedFiles": {
+      "front": "04-tomato-seeds-front.png",
+      "reverse": "04-tomato-seeds-reverse.png",
+      "transcript": "04-tomato-seeds-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "field-maple",
+    "label": "Field maple",
+    "role": "Leaf",
+    "expectedFiles": {
+      "front": "05-field-maple-front.png",
+      "reverse": "05-field-maple-reverse.png",
+      "transcript": "05-field-maple-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "calendula",
+    "label": "Calendula",
+    "role": "Flower",
+    "expectedFiles": {
+      "front": "06-calendula-front.png",
+      "reverse": "06-calendula-reverse.png",
+      "transcript": "06-calendula-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "medlar",
+    "label": "Medlar",
+    "role": "Fruit",
+    "expectedFiles": {
+      "front": "07-medlar-front.png",
+      "reverse": "07-medlar-reverse.png",
+      "transcript": "07-medlar-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "horn-of-plenty",
+    "label": "Horn of Plenty",
+    "role": "Fungus",
+    "expectedFiles": {
+      "front": "08-horn-of-plenty-front.png",
+      "reverse": "08-horn-of-plenty-reverse.png",
+      "transcript": "08-horn-of-plenty-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "return-of-the-bird-tribes",
+    "label": "Return of the Bird Tribes — Ken Carey",
+    "role": "Book",
+    "expectedFiles": {
+      "front": "09-return-of-the-bird-tribes-front.png",
+      "reverse": "09-return-of-the-bird-tribes-reverse.png",
+      "transcript": "09-return-of-the-bird-tribes-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  },
+  {
+    "key": "sea-eagle",
+    "label": "Sea Eagle",
+    "role": "Bird",
+    "expectedFiles": {
+      "front": "10-sea-eagle-front.png",
+      "reverse": "10-sea-eagle-reverse.png",
+      "transcript": "10-sea-eagle-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    }
+  }
+]

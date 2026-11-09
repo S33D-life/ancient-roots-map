@@ -2,10 +2,12 @@
 export const TREE_PAGE = '/tetol/circle-235/pre-fire/tetol.html';
 const visitEdition = (number, node = 'croom') => window.top.location.assign(editionUrl(number, node));
 export const editionUrl = (number, node = 'croom') => `${TREE_PAGE}?circle=${number}#${encodeURIComponent(node)}`;
-export async function installTimeTree(D, number) {
+export async function installTimeTree(D, number, privateEdition) {
   const response = await fetch('/council/time-tree.json', {cache:'no-store'});
   if (!response.ok) throw new Error('Council Time Tree unavailable');
-  const tree = await response.json(), edition = tree.editions.find(e => e.number === number);
+  const tree = await response.json();
+  if (privateEdition) tree.editions.push(privateEdition);
+  const edition = tree.editions.find(e => e.number === number);
   if (!edition || !tree.editions.some(e => e.number === tree.current)) throw new Error('Unsupported Council edition');
   // The original engine uses 232/233 as drawing slots, not actual edition numbers.
   // Reuse its existing historical forms; never infer an edition from a slot or folder name.
@@ -49,7 +51,7 @@ export async function installTimeTree(D, number) {
     new MutationObserver(() => { if (brand.textContent !== label) brand.textContent = label; }).observe(brand,{childList:true});
   }
   const ret = document.getElementById('council-return');
-  if (ret) { ret.href = '/council-of-life?from=spatial-council&circle=' + number + '#' + (number === tree.current ? 'next-gathering' : number === 234 ? 'historical-circle-234' : `previous-circle-${number}`); ret.textContent = `Return to Circle ${number}`; ret.target = '_top'; }
+  if (ret) { ret.href = privateEdition?.canopy || '/council-of-life?from=spatial-council&circle=' + number + '#' + (number === tree.current ? 'next-gathering' : number === 234 ? 'historical-circle-234' : `previous-circle-${number}`); ret.textContent = `Return to Circle ${number}`; ret.target = '_top'; }
   const nav = document.createElement('nav'); nav.id = 'council-time-tree'; nav.setAttribute('aria-label','Council Time Tree');
   const link = (n,text,rel='') => n ? `<a href="${editionUrl(n)}" target="_top" ${rel}>${text}</a>` : `<span aria-disabled="true">${text}</span>`;
   const i = tree.editions.indexOf(edition);

@@ -1,0 +1,18 @@
+# Circle 240 · source-only private review
+
+Circle 239 remains current. The published Time Tree and Circle 239 assets are not changed. Circle 240 has a development-only 2D route and an adapter for the original spatial TETOL. Its private catalogue is never a build input. The production bundle has no private 2D page or review endpoint. The static Tree rejects Circle 240 unless the local hostname, explicit review flag and development-only catalogue are all available. The local Time Tree adds only an in-memory private review label and points back to 239 as current.
+
+## Intake
+
+1. Keep the exact Drive masters outside the checkout. Use the approved versions from the private creative handoff, never older review artwork. The filenames in intake.json are local intake names, not Drive master names. Map each file by companion order and side, preserving the original bytes and Drive attribution. In particular, the proposed pack's “ginkgos-of-rokeby” artwork is obsolete for slot 1. The Tomato companion key is tomato-seeds while the Seed Cellar's canonical slug is tomato-seed. Both query spellings are accepted.
+2. In an external private drop, create an intake.json object keyed by each canonical filename. Include sha256, creator, source, rightsEvidence, reviewEvidence, ownerApproved and publicRightsConfirmed. Images also require alt. A UTF-8 transcript requires verifiedAgainstReverseSha256. Record actual evidence after manual review. A private review pack alone does not establish approval. Review the reverse against its full transcript and confirm source, identity, claims and rights for each image.
+3. With Python 3.10+ and Pillow installed, run `python3 scripts/prepare-circle240-review.py /absolute/private/drop` for incremental validation. Add `--output /absolute/private/new-derivatives` when all 30 are approved. The tool produces separate lossless PNGs with original dimensions, verifies exact RGBA equality and records master and derivative hashes. It never edits masters. It preserves embedded ICC profiles. Visually compare the final image colours and reverse type, and review the retained ICC metadata before admitting public bytes. Lossless output size is measured, not guaranteed to meet the asset budget.
+4. Run `CIRCLE240_REVIEW_DIR=/absolute/private/new-derivatives npm run dev -- --host 127.0.0.1 --port 4290`. Review [the local route](http://127.0.0.1:4290/council/240). The server accepts only exact catalogue/image paths and read methods. The receipt and masters are outside the served surface. Keep the server local and use a browser without live account data for review.
+5. Inspect all ten front/reverse pairs in 2D and original TETOL, including full-size artwork, keyboard, reduced motion, touch, return paths, transcript equivalence and actual mobile readability. Verify exact derivative hashes and public metadata. Any required per-file exception to the 512,000-byte guard and precache exclusion belong in the later reviewed activation diff.
+
+## Human approvals pending
+
+- Slot 1 is one individual, The Ginkgo at Rokeby. Confirm the candidate Atlas record refers to that individual and review the public link's audience and implications before adding it. Reference photographs, location details and family context need their own review.
+- Approve the corrected Ginkgo and Field Maple inset, White-tailed Sea Eagle identity, all source/derivative hashes, alt text, transcripts and rights.
+- Confirm the inquiry. The private catalogue has question:null and fire:null.
+- Complete independent asset QA and mobile accessibility. Request source merge and frontend publication separately. This draft contains no creative artwork, photo offerings, coordinates, account IDs or private creative manifests.

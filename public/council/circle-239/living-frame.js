@@ -20,6 +20,8 @@ const catalogue = () => catalogPromise ||= fetch(ROOT+'reverse-folios.json',{cac
 const node = (tag, text) => {const el=document.createElement(tag);if(text)el.textContent=text;return el;};
 export class LivingFrame239 extends HTMLElement {
   static observedAttributes = ['side'];
+  loadReverse(key) { return catalogue().then(c => reviewedReverse(c, key)); }
+  appendLibraryLinks(container, key) { appendCouncilLibraryLinks(container, 239, key); }
   connectedCallback() {
     if(this.shadowRoot)return;
     this.attachShadow({mode:'open'});
@@ -36,8 +38,8 @@ export class LivingFrame239 extends HTMLElement {
     this.deep=node('a','Explore deeper');this.deep.hidden=true;
     const libraryLinks = node('div');
     this.shadowRoot.append(style,this.image,controls,this.status,this.transcript,this.deep,libraryLinks);
-    appendCouncilLibraryLinks(libraryLinks, 239, this.getAttribute('companion-key'));
-    catalogue().then(c=>{this.reverse=reviewedReverse(c,this.getAttribute('companion-key'));if(!this.isConnected)return;
+    this.appendLibraryLinks(libraryLinks, this.getAttribute('companion-key'));
+    this.loadReverse(this.getAttribute('companion-key')).then(reverse=>{this.reverse=reverse;if(!this.isConnected)return;
       this.toggle.disabled=!this.reverse;
       this.status.textContent=this.reverse?.privateReview?'Private artwork review — not cleared for publication.':this.reverse?'Front portrait.':'Reverse folio is awaiting editorial approval. The front remains available.';
       this.text.textContent=this.reverse?.readableText||'';
@@ -53,7 +55,7 @@ export class LivingFrame239 extends HTMLElement {
     const src=side==='reverse'?this.reverse.artwork:this.getAttribute('front');
     this.busy=true;this.toggle.setAttribute('aria-busy','true');this.toggle.setAttribute('aria-disabled','true');
     try {const probe=new Image();probe.src=src;await probe.decode();if(ticket!==this.ticket||!this.isConnected)return;
-      this.side=side;this.setAttribute('side',side);this.image.src=src;this.image.alt=side==='reverse'?this.getAttribute('label')+' — reverse folio; readable text follows.':this.getAttribute('front-alt');
+      this.side=side;this.setAttribute('side',side);this.image.src=src;this.image.alt=side==='reverse'?(this.reverse.alt || this.getAttribute('label')+' — reverse folio; readable text follows.'):this.getAttribute('front-alt');
       this.image.width=side==='reverse'?this.reverse.width:1536;this.image.height=side==='reverse'?this.reverse.height:1024;
       this.full.href=src;this.transcript.hidden=side!=='reverse';this.deep.hidden=side!=='reverse'||!this.deep.hasAttribute('href');
       this.toggle.textContent=side==='reverse'?'Return to front':'Reveal reverse';this.toggle.setAttribute('aria-label',(side==='reverse'?'Return to front of ':'Reveal reverse of ')+this.getAttribute('label'));this.toggle.setAttribute('aria-pressed',String(side==='reverse'));
@@ -67,7 +69,7 @@ export class LivingFrame239 extends HTMLElement {
 if(!customElements.get('council-living-frame'))customElements.define('council-living-frame',LivingFrame239);
 
 export function spatialSide(key) {const q=new URLSearchParams(location.search);return q.get('frame')===key&&q.get('side')==='reverse'?'reverse':'front';}
-export function connectLivingScene({THREE,stage}) {
+export function connectLivingScene({THREE,stage}, {element = 'council-living-frame', reverseRoot = ROOT+'reverses/'} = {}) {
   const original=new Map(), tickets=new Map();
   const show=async ({key,side,reverse}) => {
     const companion=window.TETOL?.circleFrameCompanions?.find(c=>c.key===key);if(!companion)return;
@@ -75,16 +77,16 @@ export function connectLivingScene({THREE,stage}) {
     if(!original.has(key))original.set(key,{geometry:mesh.geometry,map:mesh.material.map});
     const ticket=(tickets.get(key)||0)+1;tickets.set(key,ticket);
     if(side!=='reverse'){const front=original.get(key);if(mesh.geometry!==front.geometry)mesh.geometry.dispose();if(mesh.material.map!==front.map)mesh.material.map?.dispose();mesh.geometry=front.geometry;mesh.material.map=front.map;mesh.material.needsUpdate=true;return;}
-    if(!reverse||reverse.artwork!==ROOT+'reverses/'+key+'.png')return;
+    if(!reverse||reverse.artwork!==reverseRoot+key+'.png')return;
     try {const texture=await new THREE.TextureLoader().loadAsync(reverse.artwork);
       if(tickets.get(key)!==ticket){texture.dispose();return;}
       texture.colorSpace=THREE.SRGBColorSpace;const size=containedSize(reverse.width,reverse.height);
       const front=original.get(key);if(mesh.geometry!==front.geometry)mesh.geometry.dispose();if(mesh.material.map!==front.map)mesh.material.map?.dispose();
       mesh.geometry=new THREE.PlaneGeometry(size.width,size.height);mesh.material.map=texture;mesh.material.needsUpdate=true;
-    } catch {document.querySelectorAll('council-living-frame').forEach(el=>{if(el.getAttribute('companion-key')===key)el.turn('front',true);});}
+    } catch {document.querySelectorAll(element).forEach(el=>{if(el.getAttribute('companion-key')===key)el.turn('front',true);});}
   };
   document.addEventListener('council-frame-display',event=>{if(event.target.getAttribute('context')==='spatial')show(event.detail);});
   document.addEventListener('council-frame-turn',event=>{if(event.target.getAttribute('context')!=='spatial')return;const url=new URL(location.href);url.searchParams.delete('frame');url.searchParams.delete('side');if(event.detail.side==='reverse'){url.searchParams.set('frame',event.detail.key);url.searchParams.set('side','reverse');}history.pushState(null,'',url);});
-  addEventListener('popstate',()=>document.querySelectorAll('council-living-frame[context=spatial]').forEach(el=>el.setAttribute('side',spatialSide(el.getAttribute('companion-key')))));
-  document.querySelectorAll('council-living-frame[context=spatial]').forEach(el=>{if(el.side)show({key:el.getAttribute('companion-key'),side:el.side,reverse:el.reverse});});
+  addEventListener('popstate',()=>document.querySelectorAll(element+'[context=spatial]').forEach(el=>el.setAttribute('side',spatialSide(el.getAttribute('companion-key')))));
+  document.querySelectorAll(element+'[context=spatial]').forEach(el=>{if(el.side)show({key:el.getAttribute('companion-key'),side:el.side,reverse:el.reverse});});
 }
