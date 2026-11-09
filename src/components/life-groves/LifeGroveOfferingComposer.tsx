@@ -4,8 +4,8 @@
  * A focused, mobile-first composer. Choose what you are offering, then see
  * only the controls that offering needs. Everything else stays out of the way.
  *
- * All media capability is reused from the shared offering-kit, which is the
- * same code Ancient Friends uses.
+ * Existing non-voice media comes from the shared offering-kit.
+ * Voice is deliberately disabled in Groves until an audited private-audio path exists.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -21,12 +21,10 @@ import {
   PoemOfferingInput,
   SongOfferingSearch,
   BookOfferingSearch,
-  VoiceOfferingRecorder,
   type PhotoOfferingResult,
   type PoemOfferingData,
   type SelectedSongData,
   type BookOfferingData,
-  type VoiceOfferingData,
 } from "@/components/offering-kit";
 import { OFFERING_TYPES, type OfferingType } from "@/lib/life-groves/types";
 import { assignOfferingPosition } from "@/lib/life-groves/positions";
@@ -48,6 +46,7 @@ interface Props {
 }
 
 const WRITING_TYPES: OfferingType[] = ["story", "letter"];
+const GROVE_VOICE_HOLD = "Voice memories are temporarily unavailable in Life Groves while private audio storage is made safe. No recording will be uploaded.";
 
 function draftKey(groveId: string, type: OfferingType) {
   return `s33d.grove-draft.${groveId}.${type}`;
@@ -69,7 +68,6 @@ export default function LifeGroveOfferingComposer({
   const [photo, setPhoto] = useState<PhotoOfferingResult | null>(null);
   const [song, setSong] = useState<SelectedSongData | null>(null);
   const [book, setBook] = useState<BookOfferingData | null>(null);
-  const [voice, setVoice] = useState<VoiceOfferingData | null>(null);
   const [poem, setPoem] = useState<PoemOfferingData>({ poemTitle: "", poet: "", text: "", sourceUrl: "" });
   const [flowerName, setFlowerName] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("family_only");
@@ -102,7 +100,6 @@ export default function LifeGroveOfferingComposer({
     setPhoto(null);
     setSong(null);
     setBook(null);
-    setVoice(null);
     setPoem({ poemTitle: "", poet: "", text: "", sourceUrl: "" });
     setFlowerName("");
   }, []);
@@ -118,7 +115,8 @@ export default function LifeGroveOfferingComposer({
       case "photo": return !!photo;
       case "song": return !!song;
       case "book": return !!book;
-      case "voice_note": return !!voice;
+      // Fail closed for all Groves, even if someone chooses public visibility.
+      case "voice_note": return false;
       case "poem": return poem.text.trim().length > 0 || poem.poemTitle.trim().length > 0;
       case "recipe": return title.trim().length > 0 || !!photo || words.trim().length > 0;
       case "bloom": return flowerName.trim().length > 0 || !!photo || words.trim().length > 0;
@@ -129,6 +127,12 @@ export default function LifeGroveOfferingComposer({
   })();
 
   const hang = async () => {
+    // Defence in depth: voice cannot be saved via this Grove composer even if
+    // the UI's disabled state is bypassed. Ancient Friend voices are untouched.
+    if (type === "voice_note") {
+      toast(GROVE_VOICE_HOLD);
+      return;
+    }
     if (!type || !ready) return;
     setSaving(true);
     try {
@@ -172,12 +176,6 @@ export default function LifeGroveOfferingComposer({
           finalTitle = book!.title;
           body = [book!.quote, book!.reflection].filter(Boolean).join("\n\n") || body;
           metadata = { author: book!.author, coverUrl: book!.coverUrl, quote: book!.quote };
-          break;
-        case "voice_note":
-          mediaUrl = voice!.audioUrl;
-          mediaType = "audio";
-          body = voice!.message?.trim() || body;
-          metadata = { duration: voice!.duration };
           break;
         case "poem":
           mediaType = "poem";
@@ -383,23 +381,9 @@ export default function LifeGroveOfferingComposer({
                 {type === "poem" && <PoemOfferingInput value={poem} onChange={setPoem} />}
 
                 {type === "voice_note" && (
-                  voice ? (
-                    <div className="space-y-4">
-                      <audio controls src={voice.audioUrl} className="w-full" />
-                      <Button variant="ghost" size="sm" className="font-serif text-xs" onClick={() => setVoice(null)}>
-                        Record again
-                      </Button>
-                      <Textarea
-                        value={words}
-                        onChange={(e) => setWords(e.target.value)}
-                        placeholder="Add a few words…"
-                        rows={3}
-                        className="font-serif text-base resize-none"
-                      />
-                    </div>
-                  ) : (
-                    <VoiceOfferingRecorder onComplete={(d) => setVoice(d)} onCancel={() => setType(null)} />
-                  )
+                  <p role="status" className="rounded-xl border border-border/40 bg-card/40 p-5 font-serif text-sm text-muted-foreground">
+                    {GROVE_VOICE_HOLD}
+                  </p>
                 )}
 
                 {(type === "story" || type === "letter") && (
