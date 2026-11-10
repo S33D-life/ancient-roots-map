@@ -21,7 +21,7 @@ for(const width of [320,390,1440])test(`238 archived after239, historical237, te
 test('original immersive 238 Canopy, mobile sheet, ten encounters, Staff Room and history',async({page})=>{
  test.setTimeout(120000);await page.setViewportSize({width:390,height:844});
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=238#croom');
- await expect(page.locator('#brandline')).toContainText('Circle 238 · PREVIOUS');await expect(page.locator('#panel')).toContainText(manifest.question);
+ await expect(page.locator('#brandline')).toContainText('Circle 238 · HISTORICAL');await expect(page.locator('#panel')).toContainText(manifest.question);
  const d=await page.evaluate(()=>({active:(window as any).TETOL.council.active,staff:(window as any).TETOL.nodes.staff.name,old:!!(window as any).TETOL.council.circles[233]}));expect(d).toEqual({active:238,staff:'Staff Room',old:true});
  if(await page.locator('body').getAttribute('data-sheet')==='peek'){await page.locator('#grab').tap();await expect(page.locator('body')).toHaveAttribute('data-sheet',/mid|full/);}
  for(const [i,c]of manifest.companions.entries()){
@@ -42,5 +42,5 @@ for(const edition of ['238','237','236','history'])test(`Original Tree ${edition
  await page.goto('/tetol/circle-235/pre-fire/tetol.html'+query+'#staff');await expect(page.locator('#panel')).toContainText('Staff Room',{timeout:25000});
  if(edition==='237'){await expect(page.locator('#brandline')).toContainText('237 · HISTORICAL');await expect(page).toHaveTitle(/237 · HISTORICAL/);const historical=await page.evaluate(()=>({historical:(window as any).TETOL.council.circles[237].status,presentation:(window as any).TETOL.councilPresent.state}));expect(historical).toEqual({historical:'open',presentation:'HISTORICAL'});}
  if(edition==='236')await expect(page.locator('#brandline')).toContainText('236');
- if(edition==='238')await expect(page.locator('#brandline')).toContainText('238 · PREVIOUS');
+ if(edition==='238')await expect(page.locator('#brandline')).toContainText('238 · HISTORICAL');
 });
