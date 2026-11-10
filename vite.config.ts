@@ -1,3 +1,4 @@
+import { circle240ReviewServer } from './scripts/circle240-review-server';
 /// <reference types="vitest" />
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
@@ -258,6 +259,7 @@ export default defineConfig(async ({ mode }) => {
   },
   plugins: [
     react(),
+    circle240ReviewServer(process.env.CIRCLE240_REVIEW_DIR),
     {
       name: 'public-council-attribution',
       enforce: 'pre' as const,

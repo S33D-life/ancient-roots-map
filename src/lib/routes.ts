@@ -30,6 +30,7 @@ export const ROUTES = {
   CIRCLE237: "/council/237",
   CIRCLE238: "/council/238",
   CIRCLE239: "/council/239",
+  CIRCLE240: "/council/240",
   /** Public, memory-only Council + Fire demonstration. */
   COUNCIL_OFFERINGS_DEMO: "/council/238/offerings.html",
   /** Council Records archive */

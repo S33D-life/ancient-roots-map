@@ -19,6 +19,9 @@ test("Seed Cellar opens the tomato viewer and rejects unknown seed links", async
   await page.getByRole("button", { name: "Images", exact: true }).click();
   await expect(selector).toHaveCount(0);
 
+  await page.goto("/library/seed-cellar?seed=tomato-seeds");
+  await expect(selector.getByRole("radio", { name: /tomato seed/i })).toHaveAttribute("aria-checked", "true");
+
   await page.goto("/library/seed-cellar?seed=unknown");
   await expect(page.getByText("This seed viewer destination is planned.")).toBeVisible();
   await expect(selector).toHaveCount(0);
