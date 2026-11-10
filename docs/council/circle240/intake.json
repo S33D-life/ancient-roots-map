@@ -43,7 +43,7 @@
   },
   {
     "key": "tomato-seeds",
-    "label": "Tomato seeds",
+    "label": "Tomato Seed",
     "role": "Seed",
     "expectedFiles": {
       "front": "04-tomato-seeds-front.png",
@@ -115,7 +115,7 @@
   },
   {
     "key": "sea-eagle",
-    "label": "White-tailed Eagle",
+    "label": "Sea Eagle",
     "scientificName": "Haliaeetus albicilla",
     "role": "Bird",
     "expectedFiles": {

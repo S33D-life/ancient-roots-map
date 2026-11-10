@@ -7,7 +7,8 @@ export const loadEdition = async () => {
   const response = await fetch(reviewRoot + 'catalogue.json', {cache: 'no-store'});
   if (!response.ok) throw new Error('Circle 240 catalogue unavailable');
   const edition = await response.json();
-  if (edition.number !== 240 || edition.status !== 'PRIVATE_REVIEW' || edition.question !== null ||
+  if (edition.number !== 240 || edition.status !== 'PRIVATE_REVIEW' || (edition.question !== null && (typeof edition.question !== 'string' || !edition.question.trim())) ||
+      edition.publicationApproved !== false ||
       edition.fire !== null || edition.companions.length !== 10) throw new Error('Invalid Circle 240 review catalogue');
   return edition;
 };

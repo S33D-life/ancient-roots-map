@@ -47,6 +47,7 @@ def main():
     parser.add_argument("--output", type=Path, help="New private directory outside the source checkout")
     parser.add_argument("--private-proof", action="store_true",
                         help="Allow unapproved inputs for loopback review only; retain their approval status")
+    parser.add_argument("--inquiry", help="Approved inquiry for the private catalogue")
     args = parser.parse_args()
     drop = args.drop.resolve(strict=True)
     require(not drop.is_relative_to(REPO), "keep masters outside the source checkout")
@@ -106,7 +107,7 @@ def main():
     output = args.output.resolve()
     require(not output.is_relative_to(REPO) and not output.is_relative_to(drop) and not output.exists(),
             "output must be a new directory outside both the checkout and master drop")
-    catalogue = {"number": 240, "status": "PRIVATE_REVIEW", "question": None, "fire": None, "companions": items}
+    catalogue = {"number": 240, "status": "PRIVATE_REVIEW", "question": (args.inquiry or "").strip() or None, "fire": None, "publicationApproved": False, "companions": items}
     with tempfile.TemporaryDirectory(dir=output.parent) as tmp:
         package = Path(tmp) / "package"
         package.mkdir()

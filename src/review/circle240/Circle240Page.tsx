@@ -7,6 +7,7 @@ type Companion = { key: string; label: string; kind: string; id: string; artwork
 
 export default function Circle240Page() {
   const [catalogue, setCatalogue] = useState<Companion[]>([]);
+  const [inquiry, setInquiry] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [query, setQuery] = useSearchParams();
   const selected = catalogue.find(item => item.key === query.get('companion'));
@@ -15,6 +16,7 @@ export default function Circle240Page() {
     loadEdition().then(edition => {
       if (!mounted) return;
       setCatalogue(edition.companions);
+      setInquiry(edition.question);
       if (!document.getElementById('circle240-living-frame')) {
         const script = document.createElement('script');
         script.id = 'circle240-living-frame';
@@ -39,7 +41,8 @@ export default function Circle240Page() {
   useEffect(() => { document.getElementById(selected ? 'circle240-companion' : 'circle240-heading')?.focus(); }, [selected]);
   return <main className="circle237">
     <h1 id="circle240-heading" tabIndex={-1}>Circle 240 · Private review</h1>
-    <p>Inquiry awaiting approval. No scheduled Fire.</p>
+    <p>{inquiry ?? 'Inquiry awaiting approval.'}</p>
+    <p>No scheduled Fire.</p>
     <Link to="/council/239">Return to Circle 239</Link>
     {unavailable && <p role="status">Circle 240 artwork is unavailable in this preview.</p>}
     {!!catalogue.length && <p><a href={spatial + '#' + (selected?.id ?? 'croom')}>Open in the original TETOL →</a></p>}
