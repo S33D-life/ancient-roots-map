@@ -69,7 +69,7 @@ export class LivingFrame239 extends HTMLElement {
 if(!customElements.get('council-living-frame'))customElements.define('council-living-frame',LivingFrame239);
 
 export function spatialSide(key) {const q=new URLSearchParams(location.search);return q.get('frame')===key&&q.get('side')==='reverse'?'reverse':'front';}
-export function connectLivingScene({THREE,stage}, {element = 'council-living-frame', reverseRoot = ROOT+'reverses/'} = {}) {
+export function connectLivingScene({THREE,stage}, {element = 'council-living-frame', reverseRoot = ROOT+'reverses/', extension = 'png'} = {}) {
   const original=new Map(), tickets=new Map();
   const show=async ({key,side,reverse}) => {
     const companion=window.TETOL?.circleFrameCompanions?.find(c=>c.key===key);if(!companion)return;
@@ -77,7 +77,7 @@ export function connectLivingScene({THREE,stage}, {element = 'council-living-fra
     if(!original.has(key))original.set(key,{geometry:mesh.geometry,map:mesh.material.map});
     const ticket=(tickets.get(key)||0)+1;tickets.set(key,ticket);
     if(side!=='reverse'){const front=original.get(key);if(mesh.geometry!==front.geometry)mesh.geometry.dispose();if(mesh.material.map!==front.map)mesh.material.map?.dispose();mesh.geometry=front.geometry;mesh.material.map=front.map;mesh.material.needsUpdate=true;return;}
-    if(!reverse||reverse.artwork!==reverseRoot+key+'.png')return;
+    if(!reverse||reverse.artwork!==reverseRoot+key+'.'+extension)return;
     try {const texture=await new THREE.TextureLoader().loadAsync(reverse.artwork);
       if(tickets.get(key)!==ticket){texture.dispose();return;}
       texture.colorSpace=THREE.SRGBColorSpace;const size=containedSize(reverse.width,reverse.height);

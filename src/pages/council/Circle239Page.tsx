@@ -9,7 +9,7 @@ import '@/review/circle237/pilot.css';
 const spatial = '/tetol/circle-235/pre-fire/tetol.html?circle=239';
 
 export default function Circle239Page() {
-  useDocumentTitle('Council of Life · StarPod Circle 239 · Current / Open');
+  useDocumentTitle('Council of Life · StarPod Circle 239 · Previous');
   const [query, setQuery] = useSearchParams();
   const selected = manifest.companions.find(c => c.key === query.get('companion'));
   const returned = query.get('returned');
@@ -29,8 +29,8 @@ export default function Circle239Page() {
   }, [returned, selected?.key]);
   return <main className="circle237">
     <CouncilTimeTree number={239} />
-    <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.CIRCLE238}>Previous Circle · 238</Link></nav>
-    <header><p className="eyebrow">CURRENT / OPEN · 2–8 November 2026 · Europe/London</p>
+    <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.CIRCLE238}>Earlier Circle · 238</Link></nav>
+    <header><p className="eyebrow">PREVIOUS · 2–8 November 2026 · Europe/London</p>
       <h1 tabIndex={-1}>{manifest.title}</h1><p>{manifest.question}</p>
       <p>Ten companions to notice and learn with. Open all week · no scheduled Fire.</p>
     </header>

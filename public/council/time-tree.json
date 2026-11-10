@@ -1,5 +1,5 @@
 {
-  "current": 239,
+  "current": 240,
   "editions": [
     {
       "number": 234,
@@ -23,13 +23,18 @@
     },
     {
       "number": 238,
-      "state": "PREVIOUS",
+      "state": "HISTORICAL",
       "canopy": "/council/238"
     },
     {
       "number": 239,
-      "state": "CURRENT / OPEN",
+      "state": "PREVIOUS",
       "canopy": "/council/239"
+    },
+    {
+      "number": 240,
+      "state": "CURRENT / OPEN",
+      "canopy": "/council/240"
     }
   ]
 }

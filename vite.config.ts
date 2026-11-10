@@ -73,7 +73,7 @@ async function loadPwaPlugin() {
       workbox: {
         navigateFallbackDenylist: [/^\/council\/238\/offerings\.html$/, /^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//, /^\/ancient-friends\/bishop-of-elys-plane\.html$/],
         // Never precache version.json — always fetch fresh
-        globIgnores: ["council/circle-239/reverses/**", "council/circle-239/portraits/**", "**/version.json", "tetol/circle-235/pre-fire/**", "ancient-friends/bishop-of-elys-plane.*"],
+        globIgnores: ["council/circle-240/portraits/**", "council/circle-240/reverses/**", "council/circle-239/reverses/**", "council/circle-239/portraits/**", "**/version.json", "tetol/circle-235/pre-fire/**", "ancient-friends/bishop-of-elys-plane.*"],
         runtimeCaching: [
           {
             // Always fetch live deployment version metadata

@@ -41,7 +41,7 @@ test('239 original Tree: real frames, first touch, all ten encounters, hearth, S
   await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),250);window.cancelAnimationFrame=id=>clearTimeout(id);});
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`${tree}?circle=239#croom`);
-  await expect(page.locator('#brandline')).toContainText('239 · CURRENT / OPEN');
+  await expect(page.locator('#brandline')).toContainText('239 · PREVIOUS');
   await expect(page.locator('#panel')).toContainText(manifest.question);
   await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);
   const frames=await page.evaluate(ids=>{
@@ -71,17 +71,17 @@ test('239 original Tree: real frames, first touch, all ten encounters, hearth, S
   await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','croom'));await expect(page.locator('#council-return')).toHaveAttribute('href','/council-of-life?from=spatial-council&circle=239#next-gathering');
   await page.locator('#council-time-tree a[rel=prev]').evaluate((el:HTMLElement)=>el.click());
   await expect(page).toHaveURL(/circle=238#croom$/);await expect(page.locator('#brandline')).toContainText('238 · PREVIOUS');
-  await page.locator('#council-time-tree a').filter({hasText:'Return to current · 239'}).evaluate((el:HTMLElement)=>el.click());
-  await expect(page).toHaveURL(/circle=239#croom$/);await expect(page.locator('#brandline')).toContainText('239 · CURRENT / OPEN');
+  await page.locator('#council-time-tree a').filter({hasText:'Return to current · 240'}).evaluate((el:HTMLElement)=>el.click());
+  await expect(page).toHaveURL(/circle=240#croom$/);await expect(page.locator('#brandline')).toContainText('240 · CURRENT / OPEN');
   expect(errors).toEqual([]);
 });
 
 test('239 retains the full234–239 Time Tree and correct current return',async ({page}) => {
   await page.goto('/council/239'); const selector=page.getByRole('combobox',{name:'Choose a Council Circle'});
-  await expect(selector.locator('option')).toHaveText(['234 · HISTORICAL','235 · HISTORICAL','236 · HISTORICAL','237 · HISTORICAL','238 · PREVIOUS','239 · CURRENT / OPEN']);
+  await expect(selector.locator('option')).toHaveText(['234 · HISTORICAL','235 · HISTORICAL','236 · HISTORICAL','237 · HISTORICAL','238 · HISTORICAL','239 · PREVIOUS','240 · CURRENT / OPEN']);
   await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/\/council\/238$/);
-  await page.getByRole('link',{name:'Return to current · 239',exact:true}).click();await expect(page).toHaveURL(/\/council\/239$/);
-  await page.goBack();await expect(page).toHaveURL(/\/council\/238$/);await page.goForward();await expect(page).toHaveURL(/\/council\/239$/);
+  await page.getByRole('link',{name:'Return to current · 240',exact:true}).click();await expect(page).toHaveURL(/\/council\/240$/);
+  await page.goBack();await expect(page).toHaveURL(/\/council\/238$/);await page.goForward();await expect(page).toHaveURL(/\/council\/240$/);
 });
 
 test('239 unavailable manifest fails closed without substituting235',async ({page}) => {

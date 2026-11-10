@@ -119,7 +119,7 @@ const ElyLivingFolioPage = lazyImportWithRetry(() => import("./pages/review/ElyL
 const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "circle236-preparation");
 const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
-const Circle240Page = import.meta.env.DEV ? lazyImportWithRetry(() => import("./review/circle240/Circle240Page"), "circle240") : null;
+const Circle240Page = lazyImportWithRetry(() => import("./review/circle240/Circle240Page"), "circle240");
 const Circle239Page = lazyImportWithRetry(() => import("./pages/council/Circle239Page"), "circle239");
 const Circle238Page = lazyImportWithRetry(() => import("./pages/council/Circle238Page"), "circle238");
 const Circle237Page = lazyImportWithRetry(() => import("./pages/council/Circle237Page"), "circle237");
@@ -241,7 +241,7 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 /** An authored reading folio does not need to replay First Walk. */
 function FolioFirstWalk() {
   const { pathname } = useLocation();
-  return pathname === "/ancient-friends/ely/folio" || (import.meta.env.DEV && pathname === ROUTES.CIRCLE240)
+  return pathname === "/ancient-friends/ely/folio" || pathname === ROUTES.CIRCLE240
     ? null : <FirstWalkTrail />;
 }
 
@@ -378,7 +378,7 @@ const App = () => {
                 <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
                 <Route path={ROUTES.CIRCLE239} element={<Circle239Page />} />
-                {Circle240Page && <Route path={ROUTES.CIRCLE240} element={<Circle240Page />} />}
+                <Route path={ROUTES.CIRCLE240} element={<Circle240Page />} />
                 <Route path={ROUTES.CIRCLE238} element={<Circle238Page />} />
                 <Route path={ROUTES.CIRCLE237} element={<Circle237Page />} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
