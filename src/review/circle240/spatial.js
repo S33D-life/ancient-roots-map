@@ -33,7 +33,8 @@ export function companionPanel(D, id, esc) {
     : id === 'live_fire' || id === 'seat_you' ? button('croom','Return to the Council Deck') : items.map(entry => button(entry.id, entry.label)).join('');
   return `<button type="button" class="grab" id="grab" aria-expanded="false" aria-label="Explore Circle 240"><i></i></button>
     <div class="pbody"><h2 class="pname">${esc(item?.label ?? 'Circle 240')}</h2>
-    <p class="psub">Private review · No scheduled Fire</p>${content}
+    <p class="psub">Private review · No scheduled Fire</p>${item?.scientificName ? `<p><i>${esc(item.scientificName)}</i></p>` : ''}
+    ${item?.proofPending ? '<p>Working proof · approval pending.</p>' : ''}${content}
     <a href="/council/240${item ? '?companion='+encodeURIComponent(item.key) : ''}" class="act">Visit the 2D Circle 240</a></div>`;
 }
 

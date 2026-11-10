@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { loadEdition, spatial } from './edition.js';
 import '@/review/circle237/pilot.css';
 
-type Companion = { key: string; label: string; kind: string; id: string; artwork: string; alt: string };
+type Companion = { key: string; label: string; kind: string; id: string; artwork: string; alt: string; scientificName?: string; proofPending?: boolean };
 
 export default function Circle240Page() {
   const [catalogue, setCatalogue] = useState<Companion[]>([]);
@@ -45,6 +45,8 @@ export default function Circle240Page() {
     {!!catalogue.length && <p><a href={spatial + '#' + (selected?.id ?? 'croom')}>Open in the original TETOL →</a></p>}
     {selected ? <section>
       <h2 id="circle240-companion" tabIndex={-1}>{selected.label}</h2>
+      {selected.scientificName && <p><i>{selected.scientificName}</i></p>}
+      {selected.proofPending && <p>Working proof · approval pending.</p>}
       {createElement('council-preview-frame', {key:selected.key, 'companion-key':selected.key, label:selected.label,
         front:selected.artwork, 'front-alt':selected.alt, side:query.get('side') === 'reverse' ? 'reverse' : 'front'})}
       <p><Link to="/council/240">All Circle 240 companions</Link></p>

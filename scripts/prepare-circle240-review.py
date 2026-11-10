@@ -45,6 +45,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("drop", type=Path)
     parser.add_argument("--output", type=Path, help="New private directory outside the source checkout")
+    parser.add_argument("--private-proof", action="store_true",
+                        help="Allow unapproved inputs for loopback review only; retain their approval status")
     args = parser.parse_args()
     drop = args.drop.resolve(strict=True)
     require(not drop.is_relative_to(REPO), "keep masters outside the source checkout")
@@ -64,11 +66,15 @@ def main():
             require(name in evidence and path.is_file() and not path.is_symlink(), f"{name}: file or review evidence missing")
             record = evidence[name]
             raw = path.read_bytes()
-            require(sha(raw) == record.get("sha256"), f"{name}: master hash mismatch")
+            master_digest = sha(raw)
+            require(master_digest == record.get("sha256"), f"{name}: master hash mismatch")
+            approved_digest = companion.get("approvedMasterSha256", {}).get(kind)
+            require(approved_digest is None or master_digest == approved_digest,
+                    f"{name}: does not match the pinned approved master")
             for field in ("creator", "source", "rightsEvidence", "reviewEvidence"):
                 require(isinstance(record.get(field), str) and record[field].strip(), f"{name}: {field} missing")
-            require(record.get("ownerApproved") is True and record.get("publicRightsConfirmed") is True,
-                    f"{name}: exact master and public rights approval required")
+            cleared = record.get("ownerApproved") is True and record.get("publicRightsConfirmed") is True
+            require(cleared or args.private_proof, f"{name}: exact master and public rights approval required")
             if kind == "transcript":
                 require(raw.decode("utf-8").strip(), f"{name}: blank transcript")
                 require("reverse" in assets and record.get("verifiedAgainstReverseSha256") == evidence[slot["reverse"]]["sha256"],
@@ -80,21 +86,23 @@ def main():
                 target = f"{'portraits' if kind == 'front' else 'reverses'}/{key}.png"
                 output = derivative(raw)
             files[target] = output
-            receipt[target] = {"master": name, "masterSha256": sha(raw), "sha256": sha(output),
-                               "bytes": len(output), "creator": record["creator"], "source": record["source"],
+            receipt[target] = {"master": name, "masterSha256": master_digest, "sha256": sha(output),
+                               "bytes": len(output), "publicApprovalRecorded": cleared, "creator": record["creator"], "source": record["source"],
                                "rightsEvidence": record["rightsEvidence"], "reviewEvidence": record["reviewEvidence"]}
             assets[kind] = (target, record, output)
         if len(assets) == 3:
             front, reverse, transcript = [assets[k] for k in ("front", "reverse", "transcript")]
             items.append({"key": key, "id": f"c240-{key}", "label": companion["label"], "kind": companion["role"],
                           "artwork": ROOT + front[0], "alt": front[1]["alt"], "sha256": sha(front[2]),
+                          "scientificName": companion.get("scientificName"),
+                          "proofPending": any(not receipt[asset[0]]["publicApprovalRecorded"] for asset in assets.values()),
                           "reverse": {"artwork": ROOT + reverse[0], "alt": reverse[1]["alt"], "sha256": sha(reverse[2]),
                                       "transcriptSha256": sha(transcript[2]), "readableText": transcript[2].decode("utf-8"),
                                       "width": 1536, "height": 1024, "privateReview": True}})
     print(f"{len(files)}/30 exact inputs validated. Circle 240 stays inactive.")
     if args.output is None:
         return
-    require(len(items) == 10, "a review package requires all ten approved pairs and transcripts")
+    require(len(items) == 10, "a review package requires all ten validated pairs and transcripts")
     output = args.output.resolve()
     require(not output.is_relative_to(REPO) and not output.is_relative_to(drop) and not output.exists(),
             "output must be a new directory outside both the checkout and master drop")

@@ -9,6 +9,12 @@
       "transcript": "01-rokeby-ginkgo-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "scientificName": "Ginkgo biloba",
+    "approvedMasterSha256": {
+      "front": "8b2fef87184fcbf3697337767f89bcf0a18ba418b4486e40a0751680eec8f3ff",
+      "reverse": "4519205fa615a54416a8bc82c02536058d77432ac38925960de2062fdd82175c",
+      "transcript": "176e2e45ddb7de11c2f8f82f4094aebf074b2d4fcb524484e55d65508e9fb0a9"
     }
   },
   {
@@ -109,7 +115,8 @@
   },
   {
     "key": "sea-eagle",
-    "label": "Sea Eagle",
+    "label": "White-tailed Eagle",
+    "scientificName": "Haliaeetus albicilla",
     "role": "Bird",
     "expectedFiles": {
       "front": "10-sea-eagle-front.png",
