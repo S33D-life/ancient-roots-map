@@ -27,6 +27,10 @@
       "transcript": "02-hornbeam-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "3e60f7679453bd676f67b8413720b249d4c1c5fd35ca6ccfe4c872b0954066ac",
+      "reverse": "5194b37130f200da989f6d0e38ced3a9a7c9725ffa1b44ecd856484aefe91f92"
     }
   },
   {
@@ -39,6 +43,10 @@
       "transcript": "03-rosemary-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "c00edb2cdd54313ca39bbae37213039098c6a8f440ea66aa1517faa59b6f69e4",
+      "reverse": "df253612614e52a968517febb9a1f2eeac0f279d763591577a98562671ea630a"
     }
   },
   {
@@ -51,6 +59,10 @@
       "transcript": "04-tomato-seeds-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "f38c5371b73e87d93fb263ff8eb1a99dac4d47053fc0915b95d521c73933e1a8",
+      "reverse": "c64716afd9f9c71bc0c6a8adf4f10c1b4773b850cecedb6833ad4b0b547edd67"
     }
   },
   {
@@ -63,6 +75,10 @@
       "transcript": "05-field-maple-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "1663c5b6bfe1bf49a4f8d3a26621967daed7a957fe4a2d9326189868aec92d5e",
+      "reverse": "f8ea90e68fb70c1a26e1a56949c0df18d596124cc79c3cc497964575bd9487b4"
     }
   },
   {
@@ -75,6 +91,10 @@
       "transcript": "06-calendula-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "1b2432c5e4a393a7eda6d1d47dcf123321b10a5191a431a9610f5f44e1c1add2",
+      "reverse": "0af54e472f9171ad2012572ec42630489fbd1271a8c68705d61dcf7630142e73"
     }
   },
   {
@@ -87,6 +107,10 @@
       "transcript": "07-medlar-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "77e19720171be954e18a30e416b1be33d1710e9a589e392d9c7eec546197faaf",
+      "reverse": "44295bd04be98b465c380a3800816a8a4c5fd10cee84e37e72fecf8a8030cd8e"
     }
   },
   {
@@ -99,6 +123,10 @@
       "transcript": "08-horn-of-plenty-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "f5426497647594f0845290f490bae49fba36dc9b3f49732e29e6aaa94e0a72a9",
+      "reverse": "6e6eea41e66c13b167186c1ba50aa8774ea7ca2c0ebf17c47aadeedb9b4a0bda"
     }
   },
   {
@@ -111,6 +139,10 @@
       "transcript": "09-return-of-the-bird-tribes-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "1a65c685e5381be3fadef08a718274fd39e93a30f6163a0766048d09b49a4a34",
+      "reverse": "14fec2433f8d18f628f6ecc603f4e709d8146df935642948a82572beae40d555"
     }
   },
   {
@@ -124,6 +156,10 @@
       "transcript": "10-sea-eagle-reverse.txt",
       "width": 1536,
       "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "b90995eafe4737b25ca8669d22b7d4b6232785c58a476823dc7eb37927006181",
+      "reverse": "2f1d6ff02167b7fa91f92df97641716a710311cd9c93ffc1094280c1c43732dd"
     }
   }
 ]
