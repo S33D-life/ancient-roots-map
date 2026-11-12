@@ -52,7 +52,7 @@ export default function FoundingGatewayPage() {
       </section>
       <footer className="border-t border-border pt-6 space-y-3">
         <h2 className="font-serif text-xl">An invitation, not a checkout</h2>
-        <p>We are preparing a seven-day introduction, 5–11 November 2026. This page collects no personal details, expressions of interest or payments. A voluntary interest list can open only after its private, consent-based handling is verified.</p>
+        <p>This page collects no personal details, expressions of interest or payments. A voluntary interest list can open only after its private, consent-based handling is verified.</p>
         <p className="font-serif italic">The living commons remain free. Life Groves are an optional future service.</p>
       </footer>
     </main>
