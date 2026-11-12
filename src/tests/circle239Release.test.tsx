@@ -28,8 +28,8 @@ describe('Circle239 front-only release', () => {
   });
   it('preserves every pinned previous public asset outside explicit edition presentation files', () => {
     for (const [path,sha] of Object.entries(receipt.preservedPublicFiles)) expect(digest(path),path).toBe(sha);
-    expect(tree.current).toBe(239); expect(tree.editions.map(e=>e.number)).toEqual([234,235,236,237,238,239]);
-    expect(tree.editions.find(e=>e.number===238)?.state).toBe('PREVIOUS');
+    expect(tree.current).toBe(240); expect(tree.editions.map(e=>e.number)).toEqual([234,235,236,237,238,239,240]);
+    expect(tree.editions.find(e=>e.number===239)?.state).toBe('PREVIOUS');
     expect(tree.editions.find(e=>e.number===237)?.state).toBe('HISTORICAL');
   });
   it('uses the same manifest for the original Tree, question, ten scene frames and unscheduled hearth', async () => {
@@ -38,7 +38,7 @@ describe('Circle239 front-only release', () => {
     const d=model(); await installCompanionFrames(d); const navigation=await installTimeTree(d,239);
     expect(navigation.resolveNode('seat_you')).toBe('seat_you');
     expect(d.council.active).toBe(239); expect(d.council.circles[239].status).toBe('open');
-    expect(d.nodes.croom.question).toBe(manifest.question); expect(d.nodes.c239.sub).toContain('CURRENT / OPEN');
+    expect(d.nodes.croom.question).toBe(manifest.question); expect(d.nodes.c239.sub).toContain('PREVIOUS');
     expect(d.council.circles[239].companions.map((c:any)=>c.id)).toEqual(manifest.companions.map(c=>c.id));
     for(const c of d.council.circles[239].companions) expect(c.repr).toMatchObject({form:'circleFrame',width:1536,height:1024});
     expect(d.nodes.live_fire.actions).toEqual([]); expect(d.nodes.live_fire.stateShort).toBe('UNSCHEDULED');

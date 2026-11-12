@@ -8,10 +8,10 @@ vi.mock("@/components/council/EmbeddedCouncilDeck", () => ({ default: ({src,onRe
 import CouncilOfLifePage from "@/pages/CouncilOfLifePage";
 describe("selective Canopy promotion", () => {
   beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); window.scrollTo = vi.fn(); });
-  it("puts the open Circle 239 first and preserves both historical Circle 236 and Circle 235", async () => {
+  it("puts the open Circle 240 first and preserves both historical Circle 236 and Circle 235", async () => {
     render(<MemoryRouter><CouncilOfLifePage /></MemoryRouter>);
-    expect(screen.getByRole("link", {name:/Enter Circle 239 · meet its companions/})).toHaveAttribute("href","/council/239");
-    expect(screen.getByRole("region",{name:"Current Circle"})).toContainElement(screen.getByRole("heading", {name:"The Council of Life · yOur Blooming Week · StarPod Circle 239"}));
+    expect(screen.getByRole("link", {name:/Enter Circle 240 · meet its companions/})).toHaveAttribute("href","/council/240");
+    expect(screen.getByRole("region",{name:"Current Circle"})).toContainElement(screen.getByRole("heading", {name:"The Council of Life · yOur Blooming Week · StarPod Circle 240"}));
     expect(screen.getByRole("region",{name:"Previous Circle 236"})).toContainElement(screen.getByRole("heading", {name:"Circle 236"}));
     const doorway=screen.getByRole("button",{name:"Enter the Circle →"});
     fireEvent.click(screen.getByRole("button",{name:"Fly Agaric"}));
@@ -22,7 +22,7 @@ describe("selective Canopy promotion", () => {
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith({ block: "start", behavior: "instant" });
     const scrollMock = vi.mocked(Element.prototype.scrollIntoView);
     expect(scrollMock.mock.contexts.at(-1)).toBe(screen.getByRole("region", { name: "Previous Circle 235" }));
-    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "The Council of Life · yOur Blooming Week · StarPod Circle 239" }));
+    expect(document.getElementById("next-gathering")).toContainElement(screen.getByRole("heading", { name: "The Council of Life · yOur Blooming Week · StarPod Circle 240" }));
     expect(screen.queryByRole("button",{name:"Deck return"})).not.toBeInTheDocument();
     expect(screen.getByRole("link",{name:"Descend to Heartwood Hall →"})).toHaveAttribute("href","/library");
   });

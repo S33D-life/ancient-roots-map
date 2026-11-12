@@ -17,7 +17,7 @@ test.beforeEach(async({context})=>{
 for(const width of [320,390,1440]){
  test(`Historical 237, ten encounters, invitation preview, refresh and history at ${width}`,async({page})=>{
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 239');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 240');
   await expect(page.getByRole('region',{name:'Previous Circle 236'})).toContainText('Circle 236');
   await expect(page.getByRole('heading',{name:'Historical Circle · 235'})).toBeVisible();
   await dismissTrail(page);
@@ -47,7 +47,7 @@ for(const width of [320,390,1440]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:`output/playwright/circle237-integration/${test.info().project.name}-2d-${width}.png`});
   await page.getByRole('link',{name:'Return to the Council Canopy'}).click();
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 239');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 240');
  });
 }
 test('TETOL Canopy reaches spatial237 and all ten frames accept real touch',async({browser})=>{

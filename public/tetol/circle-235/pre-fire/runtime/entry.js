@@ -5,11 +5,11 @@ import { installTimeTree } from './council-time-tree.js';
 const D = window.TETOL;
 const circleEdition = new URLSearchParams(location.search).get('circle');
 const selectedCircle = circleEdition === null ? 235 : Number(circleEdition);
-const privateReview240 = circleEdition === '240' && ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) && new URLSearchParams(location.search).get('review240') === '1';
-const framedCircle = privateReview240 ? 240 : circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : circleEdition === '238' ? 238 : circleEdition === '239' ? 239 : null;
+const circle240 = circleEdition === '240';
+const framedCircle = circle240 ? 240 : circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : circleEdition === '238' ? 238 : circleEdition === '239' ? 239 : null;
 // Desktop keyboard reading must not disappear when the original stillness timer fires.
 // Keep the frozen classic runtime and phone sheet behaviour unchanged.
-if (selectedCircle === 239 || privateReview240) {
+if (selectedCircle === 239 || circle240) {
   const readingStyle = document.createElement('style');
   readingStyle.textContent = '@media (min-width: 601px) { body.grace-p.g-still:not(.g-reading) aside#panel:focus-within { opacity: 1 !important; pointer-events: auto; } }';
   document.head.appendChild(readingStyle);
@@ -19,10 +19,10 @@ let companionFrames;
 let timeTree;
 try {
 if (!window.S33D_SHEET_GESTURE_READY) throw new Error('Council loader and runtime versions do not match');
-if (!privateReview240 && ![234,235,236,237,238,239].includes(selectedCircle)) throw new Error('Unsupported Council edition');
-companionFrames = privateReview240 ? await import('/src/review/circle240/spatial.js') : framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : framedCircle === 239 ? await import('./companion-frames-239.js') : null;
+if (!circle240 && ![234,235,236,237,238,239].includes(selectedCircle)) throw new Error('Unsupported Council edition');
+companionFrames = circle240 ? await import('./companion-frames-240.js') : framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : framedCircle === 239 ? await import('./companion-frames-239.js') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
-timeTree = await installTimeTree(D, selectedCircle, privateReview240 ? {number:240, state:'PRIVATE REVIEW', canopy:'/council/240'} : undefined);
+timeTree = await installTimeTree(D, selectedCircle);
 } catch (error) {
   document.body.replaceChildren();
   const message = document.createElement('p'); message.setAttribute('role','alert');
@@ -879,9 +879,9 @@ BUILD.circleFrame = (g, repr, id) => {
   const texture = repr.artwork ? new THREE.TextureLoader().load(repr.artwork) : null;
   if (texture) texture.colorSpace = THREE.SRGBColorSpace;
   const frame = new THREE.Group(); frame.position.y = 1.4; g.add(frame);
-  add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), ((framedCircle === 238 || framedCircle === 239 || privateReview240) ? new THREE.MeshStandardMaterial({color:0x79543b,roughness:.95}) : mat.limbBark)), id + '_frame', id, frame);
-  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * ((framedCircle === 237 || framedCircle === 238 || framedCircle === 239 || privateReview240) ? (repr.height || 645) / (repr.width || 1024) : 853 / 1280)), new THREE.MeshBasicMaterial({ map: texture, color:texture?0xffffff:0x314333, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
-  if (framedCircle === 237 || framedCircle === 238 || framedCircle === 239 || privateReview240) for (const side of [-.38,.38]) {
+  add(new THREE.Mesh(new THREE.BoxGeometry(1.1, .76, .08), ((framedCircle === 238 || framedCircle === 239 || circle240) ? new THREE.MeshStandardMaterial({color:0x79543b,roughness:.95}) : mat.limbBark)), id + '_frame', id, frame);
+  add(new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.06 * ((framedCircle === 237 || framedCircle === 238 || framedCircle === 239 || circle240) ? (repr.height || 645) / (repr.width || 1024) : 853 / 1280)), new THREE.MeshBasicMaterial({ map: texture, color:texture?0xffffff:0x314333, side: THREE.DoubleSide })), id + '_artwork', id, frame).position.z = .045;
+  if (framedCircle === 237 || framedCircle === 238 || framedCircle === 239 || circle240) for (const side of [-.38,.38]) {
     const hanger = add(new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.65,6), mat.iron), id + '_hanging_cord', id, frame);
     hanger.position.set(side, (1.06 * (repr.height || 645) / (repr.width || 1024) + .1)/2 + .30, 0);
   }
