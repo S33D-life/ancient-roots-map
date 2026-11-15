@@ -22,10 +22,12 @@ import {
   getShareUrl,
 } from "@/utils/shareUtils";
 
+import { treeLocationLabel, type TreeLocationEvidence } from "@/lib/treeLocationEvidence";
+
 interface TreeShareCardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tree: {
+  tree: TreeLocationEvidence & {
     id: string;
     name: string;
     species: string;
@@ -115,7 +117,7 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
 
   const shareOpts: ShareOptions = {
     entity: shareEntity,
-    caption,
+    caption: [caption, treeLocationLabel(tree)].filter(Boolean).join("\n"),
     inviteCode,
   };
 
@@ -199,6 +201,7 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
                   </span>
                 )}
               </div>
+              {treeLocationLabel(tree) && <p className="text-xs leading-relaxed text-primary">{treeLocationLabel(tree)}</p>}
               {tree.mintedByStaff && (
                 <p className="text-[10px] text-primary/70 font-serif">
                   Minted with {tree.mintedByStaff}

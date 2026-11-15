@@ -11,12 +11,15 @@ import {
 interface AccessibilityStripProps {
   tier: EffectiveAccessibilityTier;
   notes?: string | null;
+  /** Explicit managed-grounds presentation only; never changes tier/permissions. */
+  publicRecordOnly?: boolean;
   className?: string;
 }
 
 export default function AccessibilityStrip({
   tier,
   notes,
+  publicRecordOnly = false,
   className,
 }: AccessibilityStripProps) {
   const v = ACCESSIBILITY_VISUALS[tier];
@@ -40,7 +43,7 @@ export default function AccessibilityStrip({
       <span className="flex items-center gap-1.5">
         <span className="text-[10px]">{v.emoji}</span>
         <span>
-          {v.strip}
+          {publicRecordOnly && tier === "public" ? "Public record — check visiting arrangements" : v.strip}
           {inlineNotes}
         </span>
       </span>
