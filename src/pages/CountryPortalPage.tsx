@@ -787,7 +787,7 @@ const CountryPortalPage = () => {
             <TabsList className="bg-card/50 border border-primary/20 mb-4">
               <TabsTrigger value="overview">All Trees</TabsTrigger>
               <TabsTrigger value="immutable" className="gap-1">
-                <Lock className="w-3 h-3" /> Immutable
+                <Lock className="w-3 h-3" /> Legacy Status
               </TabsTrigger>
               <TabsTrigger value="species">Species</TabsTrigger>
               <TabsTrigger value="pilgrimages">Pilgrimages</TabsTrigger>
@@ -831,9 +831,9 @@ const CountryPortalPage = () => {
                   <Card className="border-[hsl(42_80%_50%/0.2)] bg-[hsl(42_30%_12%/0.3)]">
                     <CardContent className="py-12 text-center space-y-3">
                       <Sparkles className="w-8 h-8 text-[hsl(42_80%_55%)] mx-auto opacity-60" />
-                      <p className="text-sm font-serif text-[hsl(42_80%_55%)]">No Immutable Ancient Friends yet</p>
+                      <p className="text-sm font-serif text-[hsl(42_80%_55%)]">No records with stored immutable status</p>
                       <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                        Research trees become Immutable after verification and anchoring. Browse the "All Trees" tab to begin the pipeline.
+                        Existing immutable statuses are retained for review; this interface does not verify anchor proof. Browse "All Trees" for research and curator review.
                       </p>
                     </CardContent>
                   </Card>
