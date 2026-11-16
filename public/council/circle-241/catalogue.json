@@ -1,0 +1,70 @@
+{
+  "number": 241,
+  "status": "FRAMEWORK",
+  "question": "What seeds of understanding are we planting today, and what might they become in generations yet to come?",
+  "fire": null,
+  "front": {
+    "artwork": "./front-placeholder.svg",
+    "width": 1448,
+    "height": 1086
+  },
+  "reverse": {
+    "artwork": "./reverse-placeholder.svg",
+    "width": 1920,
+    "height": 1280,
+    "readableText": "The published folio transcript will appear here once cleared for release."
+  },
+  "companions": [
+    {
+      "label": "Newton’s Apple Tree",
+      "kind": "Ancient Friend",
+      "key": "newtons-apple-tree"
+    },
+    {
+      "label": "Oak",
+      "kind": "Tree",
+      "key": "oak"
+    },
+    {
+      "label": "Mint",
+      "kind": "Plant",
+      "key": "mint"
+    },
+    {
+      "label": "Ginkgo",
+      "kind": "Seed",
+      "key": "ginkgo"
+    },
+    {
+      "label": "Green Tea",
+      "kind": "Leaf",
+      "key": "green-tea"
+    },
+    {
+      "label": "Dandelion",
+      "kind": "Flower",
+      "key": "dandelion"
+    },
+    {
+      "label": "Pera Fiorentina",
+      "kind": "Fruit",
+      "key": "pera-fiorentina"
+    },
+    {
+      "label": "Beefsteak Fungus",
+      "kind": "Fungus",
+      "key": "beefsteak-fungus"
+    },
+    {
+      "label": "The Coming of Arthur",
+      "kind": "Book",
+      "key": "the-coming-of-arthur",
+      "author": "Malcolm Guite"
+    },
+    {
+      "label": "Hume’s Warbler",
+      "kind": "Bird",
+      "key": "humes-warbler"
+    }
+  ]
+}
