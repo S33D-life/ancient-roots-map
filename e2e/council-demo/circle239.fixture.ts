@@ -15,7 +15,7 @@ test.beforeEach(async ({context,page}) => {
 
 for(const width of [320,390,1440]) test(`239 fronts: ten2D encounters, keyboard/Back/refresh and return at ${width}`,async ({page}) => {
   await page.setViewportSize({width,height:844}); await page.goto('/council-of-life');
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 240');
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 241');
   await expect(page.getByRole('region',{name:'Previous Circle 239'})).toContainText(manifest.question);
   await expect(page.getByRole('region',{name:'Previous Circle 238'})).toContainText('HISTORICAL');
   await page.getByRole('link',{name:'Revisit Circle 239 · meet its companions →'}).click();
@@ -42,6 +42,7 @@ test('239 original Tree: real frames, first touch, all ten encounters, hearth, S
   await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),250);window.cancelAnimationFrame=id=>clearTimeout(id);});
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`${tree}?circle=239#croom`);
+  await page.waitForFunction(()=>!!(window as any).__tetol);
   await expect(page.locator('#brandline')).toContainText('239 · HISTORICAL');
   await expect(page.locator('#panel')).toContainText(manifest.question);
   await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);
@@ -73,7 +74,7 @@ test('239 original Tree: real frames, first touch, all ten encounters, hearth, S
   await page.locator('#council-time-tree a[rel=prev]').evaluate((el:HTMLElement)=>el.click());
   await expect(page).toHaveURL(/circle=238#croom$/);await expect(page.locator('#brandline')).toContainText('238 · HISTORICAL');
   await page.locator('#council-time-tree a').filter({hasText:'Return to current · 241'}).evaluate((el:HTMLElement)=>el.click());
-  await expect(page).toHaveURL(/circle=241#croom$/);await expect(page.locator('#brandline')).toContainText('241 · CURRENT / OPEN');
+  await expect(page).toHaveURL(/circle=241#croom$/);await page.waitForFunction(()=>!!(window as any).__tetol);await expect(page.locator('#brandline')).toContainText('241 · CURRENT / OPEN');
   expect(errors).toEqual([]);
 });
 
