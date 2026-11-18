@@ -3,11 +3,11 @@ import { LivingFrame239 } from '../circle-239/living-frame.js';
 async function renderReview() {
   const response = await fetch('./catalogue.json');
   if (!response.ok) throw new Error('Catalogue unavailable');
-  const { question, companions, front, reverse } = await response.json();
+  const { question, companions } = await response.json();
 
   class Circle241PreviewFrame extends LivingFrame239 {
-    async loadReverse() {
-      return { ...reverse, alt: 'Reverse folio placeholder for ' + this.getAttribute('label') };
+    async loadReverse(key) {
+      return companions.find(item => item.key === key)?.reverse;
     }
 
     appendLibraryLinks() {
@@ -27,8 +27,8 @@ async function renderReview() {
     const frame = document.createElement('circle-241-preview-frame');
     frame.setAttribute('label', companion.label);
     frame.setAttribute('companion-key', companion.key);
-    frame.setAttribute('front', front.artwork);
-    frame.setAttribute('front-alt', 'Front portrait placeholder for ' + companion.label);
+    frame.setAttribute('front', companion.artwork);
+    frame.setAttribute('front-alt', companion.alt);
     item.append(heading, detail, frame);
     list.append(item);
   }

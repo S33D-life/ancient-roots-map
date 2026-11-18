@@ -1,0 +1,289 @@
+{
+  "pinnedManifestSha256": "41ce57d6db18bd1c06116965e32326d1b8f6f06c54646cece0de960f3a3a7c5b",
+  "ownerAuthorization": "https://github.com/S33D-life/ancient-roots-map/pull/148#issuecomment-6989497325",
+  "authorizationDate": "2026-11-18",
+  "scope": "Exact derivatives and named destinations",
+  "independentScientificReview": "Not established by owner rights approval",
+  "files": [
+    {
+      "order": 1,
+      "side": "FRONT",
+      "path": "public/council/circle-241/newtons-apple-tree-front.webp",
+      "sha256": "5fbc2a78a27a0c17b71b7208961674e1178de41082394ecf9ef1fdb3b128c0ec",
+      "bytes": 491848,
+      "sourceSha256": "f9477ce3c808547650e02a13bc8257a173286ba4b4b1d5143cd56a59f09737af",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 1,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/newtons-apple-tree.webp",
+      "sha256": "f0c24d3dd600163b69e7c15b5432153ef4df67fcb16a2ab0d4640f2c84f96a3f",
+      "bytes": 455478,
+      "sourceSha256": "e2c2a24d7944295557ab1acc0cd47ffdd4dc8cb8aecd9e3bfff2a3cbcdb53664",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 2,
+      "side": "FRONT",
+      "path": "public/council/circle-241/oak-front.webp",
+      "sha256": "e4670e267357fb9303a46d6ffb800b9fe2191eff10da4c37f5dddc0a0525b2e1",
+      "bytes": 478868,
+      "sourceSha256": "4f6bd25c7708061a8b9f020eed487920d39e708c83edadf4e4e7dc0ba84cd928",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 2,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/oak.webp",
+      "sha256": "e5e4d57b1e34ab28ea9aa29afa2df29255aa364e005c585917501d43534ec5a3",
+      "bytes": 477336,
+      "sourceSha256": "9b026c91d1bd40bb91b5782877e8c163ca06837f58789741ef1837137ec96c1b",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 3,
+      "side": "FRONT",
+      "path": "public/council/circle-241/mint-front.webp",
+      "sha256": "593cbdf1ee43ed623480793739eb69bc981abcaf25ee3de5e0ace45b26e2baba",
+      "bytes": 475588,
+      "sourceSha256": "54fa72b6a754a490e612fe562fcfcc20a363b46fb5d8eff6e38c34e4d84ad6e8",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 3,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/mint.webp",
+      "sha256": "d01ab1ae0d067c58f20f8584b6964eaf45c1f1620285ff44064608e8894ea2b9",
+      "bytes": 477698,
+      "sourceSha256": "f229b01741b9d8129e27e78eb6dcec3f32658e90620e258798da73a899e77f65",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 4,
+      "side": "FRONT",
+      "path": "public/council/circle-241/ginkgo-front.webp",
+      "sha256": "53e6e31afab8accb7072a0e6990da099190d4cc44ad07f07bf1c8a0066cbff6e",
+      "bytes": 495952,
+      "sourceSha256": "8de6fb542911492096c02ebf1e7228d81c927896c37eb7377974665549fb5b5a",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 4,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/ginkgo.webp",
+      "sha256": "2b809b79f833ce20753b35693563d054a9e7dd6768f6ac964a86f82f24ea992e",
+      "bytes": 459248,
+      "sourceSha256": "3568f9d5615b18168e5a85c066d39ce6522ff529a08358e221f48e22bb7126da",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 5,
+      "side": "FRONT",
+      "path": "public/council/circle-241/green-tea-front.webp",
+      "sha256": "2778dbc7c54f5037b4196312aff68d7328ba3240e05c9a3ee752c3dce9d1e4a3",
+      "bytes": 487358,
+      "sourceSha256": "ee639a9d14255948349eb7e0402878fbe963337876077f0fc54d48b8b86eaff7",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 5,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/green-tea.webp",
+      "sha256": "558efe5cc97e0a05d03fe12f99aa2ec7d9294646356eeb21fa55f6130435b0c9",
+      "bytes": 463282,
+      "sourceSha256": "48c1b21444051f0b48e76acc1933cb71c8b969629513be46fcf3c7f97375a358",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 6,
+      "side": "FRONT",
+      "path": "public/council/circle-241/dandelion-front.webp",
+      "sha256": "4624a3d93b6e4b40b3cc7c18a3e762cd6e0f78f922b3c8fd7c785b1332860c95",
+      "bytes": 487762,
+      "sourceSha256": "d789b24c69da2e2116d3a11a71b3171327ef0cbaa738c9d8151bb332b4091bc1",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 6,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/dandelion.webp",
+      "sha256": "04fda3c6fdf3317ed670f5d7ed8b0a4c0aa79b1eca5d1f923a2717e64f2e6b57",
+      "bytes": 475028,
+      "sourceSha256": "2548325ae072d84f629442069d24025dc557ec305fb074c825a689b9a764426a",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 7,
+      "side": "FRONT",
+      "path": "public/council/circle-241/pera-fiorentina-front.webp",
+      "sha256": "235848b78f7d74a61a38a0851e66438ba84de5b1a28edc873b98966003c49929",
+      "bytes": 468744,
+      "sourceSha256": "472a950fca4a90a0d1614e2aaf13e175fca798d892565e6c1caf93f77bf89252",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 7,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/pera-fiorentina.webp",
+      "sha256": "77f322013994b6da06646c72aed2777644dc6907369e2961c2dbdddc11e59d37",
+      "bytes": 451104,
+      "sourceSha256": "0676c66c36d13e207e153d22974389ba5fbf67b1512d6521f2ee683a47159fa7",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 8,
+      "side": "FRONT",
+      "path": "public/council/circle-241/beefsteak-fungus-front.webp",
+      "sha256": "2a21078e73642824579ccca0babfa3a30e3bc68b339a8fcc6cd038b9ef7707ac",
+      "bytes": 510102,
+      "sourceSha256": "eda37db658d4dcf876685ffa7daad56b8fcaa258d752a14270d58822a57f2a59",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 8,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/beefsteak-fungus.webp",
+      "sha256": "2c80fb80a2c1088164960fbeb475311f6cc5bac5ca5652facfba3143b91bd16b",
+      "bytes": 498944,
+      "sourceSha256": "2d3aa797f083b38cdc38c6024dd564afce516c2a19335997bdf74dbe06b45a28",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 9,
+      "side": "FRONT",
+      "path": "public/council/circle-241/the-coming-of-arthur-front.webp",
+      "sha256": "2363ab000bae5e64c48e5afbfa4f99c7c9936e6e1f05dc3955cf676fcbc3847f",
+      "bytes": 490318,
+      "sourceSha256": "a579edc5dc806095e0c5623265ebfb66923d209bc2f3a61ed64f8edaaf41496b",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 9,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/the-coming-of-arthur.webp",
+      "sha256": "ef4f234ce509604d8b15816180e451375fffdaccdd6a85f47c8b523b82b2ea1d",
+      "bytes": 495294,
+      "sourceSha256": "c6a4ce837252f93fa377fed7b60f051a10baa5b6a0b5673784b47d8a2a645015",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 10,
+      "side": "FRONT",
+      "path": "public/council/circle-241/humes-warbler-front.webp",
+      "sha256": "3c12fb835e178719a30bb2744fc90832409224edff53608adcc843f7c2aa8f33",
+      "bytes": 498462,
+      "sourceSha256": "bb1c7c559649c02108ca58df11d618c764a52cc56c86b1804dd4d5c2ae19c2ac",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    },
+    {
+      "order": 10,
+      "side": "REVERSE",
+      "path": "public/council/circle-241/humes-warbler.webp",
+      "sha256": "03391d0f16ef9bba80a621738e0ea81c0b2748aa55e641cf3f89f0fb39a441ad",
+      "bytes": 465936,
+      "sourceSha256": "699ab177c50315a0d4ce82c06de718828df8e1624a74a1ed2eda93e7b05abec2",
+      "attribution": "S33D team",
+      "publicUseRights": "OWNER_AUTHORISED",
+      "destinations": [
+        "S33D-life/ancient-roots-map",
+        "S33D.life"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,15 @@
-# Circle 241 framework review
+# Circle 241 activation review
 
-Open /council/circle-241/index.html on a local preview. The route is separate from the current Council. The viewer reuses the accessible Living Frame component with synthetic artwork at 4:3 and 3:2. The Original TETOL link opens the verified Circle 240 deck, and the Time Tree and Heartwood links use existing destinations.
+Circle 241 uses the approved inquiry and ten ordered companions. Fire is unscheduled. Circle 240 is previous, with historical records and assets retained.
 
-Activation requires provenance and rights clearance, proofreading the accessible transcripts, and verifying the real assets in the spatial frame. The activation change should add Circle 241 to the existing Time Tree and original TETOL edition adapter, making Circle 240 previous while preserving its content and historical routes. Test at 320px, 390px and desktop widths, with keyboard, touch and native VoiceOver. Check historical returns and signed-out Grove boundaries before release.
+The edition uses the existing accessible Living Frame component and original TETOL renderer. The desktop Time Tree remains actionable in the idle state for editions 240 and 241. Original front dimensions and reverse texture coordinates are preserved. The twenty full-size WebP derivatives are excluded from PWA precaching.
 
-This framework has no activation state to restore. If a later activation needs rollback, revert its actual merge on GitHub, verify Circle 240 is current and historical content hashes match, and request approval for a frontend-only update on the existing host.
+## Artwork clearance and acceptance
+
+The owner authorised the exact twenty derivatives for this repository and S33D.life in the PR comment linked by public-assets.json. The receipt records source and derivative hashes and attribution. Owner rights clearance does not constitute independent scientific review or unrestricted relicensing. Native iPhone Safari and VoiceOver acceptance is outstanding.
+
+The local release suite passed all 662 unit tests and build checks. Desktop Chromium and WebKit passed the idle-state Time Tree round trip on the tested candidate. Hosted checks are required at the pushed commit.
+
+## Recovery
+
+Revert the eventual Circle 241 merge, check Circle 240 is current again and all historical content hashes match the baseline, then request separate approval for the frontend restore through the existing publishing workflow. Host-side recovery remains unrehearsed.
