@@ -1,0 +1,6 @@
+body { background: #14251a; color: #fff7e2; font: 1rem/1.5 system-ui; margin: 0; }
+main { max-width: 48rem; margin: auto; padding: 1rem; }
+nav { display: flex; flex-wrap: wrap; gap: .75rem; }
+a { color: inherit; }
+a:focus-visible { outline: 3px solid #f0bf4b; outline-offset: 3px; }
+li { margin-block: 2rem; }

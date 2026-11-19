@@ -14,6 +14,11 @@ jobs:
     name: Living frames · ${{ matrix.browser }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    # Official v1.59.1-noble image: browsers + OS dependencies, matching package-lock.
+    # Pin the registry digest so apt mirror speed cannot consume the test budget.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53
+      options: --ipc=host
     strategy:
       fail-fast: false
       matrix:
@@ -27,7 +32,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: node scripts/check-council-public-bytes.mjs
-      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Verify pinned Playwright version
+        run: node -e "require('node:assert/strict').equal(require('@playwright/test/package.json').version, '1.59.1')"
       - run: npx playwright test --config playwright.living-frames.config.ts --project ${{ matrix.browser }}
         env:
           CI: 'true'

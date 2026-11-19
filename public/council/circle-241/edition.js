@@ -1,0 +1,1 @@
+export const root='/council/circle-241/'; export async function loadEdition(){const r=await fetch(root+'catalogue.json');if(!r.ok)throw new Error('Circle 241 unavailable');return r.json();}

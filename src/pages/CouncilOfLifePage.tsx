@@ -2,6 +2,7 @@ import timeTree from '../../public/council/time-tree.json';
 import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import circle241 from '../../public/council/circle-241/catalogue.json';
 import circle240 from '../../public/council/circle-240/catalogue.json';
 import circle239 from '../../public/council/circle-239/companions.json';
 import circle238 from '../../public/council/circle-238/companions.json';
@@ -49,14 +50,21 @@ const CouncilOfLifePage = () => {
       <CouncilTimeTree number={selectedEdition} />
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
       <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
-        <p className="parchment-kicker">CURRENT / OPEN · 9–15 November 2026</p>
+        <p className="parchment-kicker">CURRENT / OPEN · 16–22 November 2026</p>
+        <h2>Circle 241</h2><p>{circle241.question}</p>
+        <p>No Fire is scheduled.</p>
+        <a className="parchment-action" href="/council/circle-241/index.html">Enter Circle 241 · meet its companions →</a>
+        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=241#croom">Enter Circle 241 in the original 3D TETOL Council Deck →</a>
+      </section>
+      <section id="previous-circle-240" className="canopy-field-note" aria-label="Previous Circle 240">
+        <p className="parchment-kicker">PREVIOUS · 9–15 November 2026</p>
         <h2>{circle240.title}</h2><p>{circle240.question}</p>
-        <p>Ten companions in Hornbeam frames. Open all week · no scheduled Fire.</p>
+        <p>Ten companions in Hornbeam frames. No Fire was scheduled.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE240}>Enter Circle 240 · meet its companions →</Link>
         <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=240#croom">Enter Circle 240 in the original 3D TETOL Council Deck →</a>
       </section>
       <section id="previous-circle-239" className="canopy-field-note" aria-label="Previous Circle 239">
-        <p className="parchment-kicker">PREVIOUS · Circle 239</p><h2>{circle239.title}</h2><p>{circle239.question}</p>
+        <p className="parchment-kicker">HISTORICAL · Circle 239</p><h2>{circle239.title}</h2><p>{circle239.question}</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE239}>Revisit Circle 239 · meet its companions →</Link>
         <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=239#croom">Revisit Circle 239 in the original 3D TETOL Council Deck →</a>
       </section>
