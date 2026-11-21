@@ -53,5 +53,14 @@ await as(removed); assert.equal((await db.query('SELECT * FROM list_my_life_grov
 await as(author); await assert.rejects(()=>db.query('UPDATE life_grove_offerings SET visibility=$1 WHERE id=$2',['public',only])); checks++;
 await as(null,'service_role'); assert.equal((await db.query('SELECT private_grove_media_path($1,$2) AS p',[only,author])).rows[0].p,path); checks++;
 assert.equal((await db.query('SELECT private_grove_media_path($1,$2) AS p',[only,member])).rows[0].p,null); checks++;
+await as(owner); const expiredToken=(await db.query('SELECT manage_grove_invitation($1,true) AS t',[grove])).rows[0].t;
+await db.exec("RESET ROLE; UPDATE life_grove_invite_secrets SET expires_at=now()-interval '1 second'");
+await as(member); await assert.rejects(()=>db.query('SELECT join_life_grove_with_token($1)',[expiredToken])); checks++;
+assert.equal((await db.query('SELECT * FROM list_my_life_groves()')).rows.length,1); checks++;
+await assert.rejects(()=>db.query('SELECT manage_grove_invitation($1,true)',[grove])); checks++;
+await as(owner); await db.query('SELECT set_grove_member_access($1,$2,false)',[grove,author]);
+await as(author); assert.equal((await db.query('SELECT * FROM life_grove_offerings WHERE id=$1',[only])).rows.length,0); checks++;
+assert.equal((await db.query('SELECT * FROM storage.objects')).rows.length,0); checks++;
+await as(owner); await db.query('SELECT set_grove_member_access($1,$2,true)',[grove,author]);
 console.log(`PASS ${checks} actual PostgreSQL audience/invitation/media assertions (fictional records only)`);
 await db.close();

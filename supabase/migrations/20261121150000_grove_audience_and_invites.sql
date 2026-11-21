@@ -23,7 +23,7 @@ UPDATE public.life_groves SET invite_token='retired-' || id::text;
 
 CREATE OR REPLACE FUNCTION public.can_view_life_grove_offering(_offering_id uuid,_user_id uuid)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
- SELECT (_user_id IS NOT DISTINCT FROM auth.uid() OR auth.role()='service_role') AND EXISTS(SELECT 1 FROM public.life_grove_offerings o JOIN public.life_groves g ON g.id=o.life_grove_id
+ SELECT (_user_id IS NOT DISTINCT FROM auth.uid() OR current_setting('role',true)='service_role') AND EXISTS(SELECT 1 FROM public.life_grove_offerings o JOIN public.life_groves g ON g.id=o.life_grove_id
  WHERE o.id=_offering_id AND o.hidden_at IS NULL AND (
    (g.privacy='public' AND o.visibility='public') OR
    (_user_id IS NOT NULL AND public.is_grove_contributor(g.id,_user_id) AND
