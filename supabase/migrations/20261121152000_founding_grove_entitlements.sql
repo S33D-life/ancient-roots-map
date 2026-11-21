@@ -54,11 +54,11 @@ REVOKE ALL ON FUNCTION public.activate_founding_grove(text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.activate_founding_grove(text) TO authenticated;
 -- Export permission is owner-only, but ownership never overrides Only me.
 CREATE FUNCTION public.export_life_grove_memories(p_grove_id uuid)
-RETURNS TABLE(id uuid,offering_type text,title text,body_text text,contributor_name text,visibility text,created_at timestamptz,media_url text)
+RETURNS TABLE(id uuid,offering_type text,title text,body_text text,contributor_name text,visibility text,created_at timestamptz,media_url text,media_type text,media_metadata jsonb)
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
 BEGIN
  IF NOT EXISTS(SELECT 1 FROM public.life_groves g WHERE g.id=p_grove_id AND g.created_by=auth.uid()) THEN RAISE EXCEPTION 'Grove owner required'; END IF;
- RETURN QUERY SELECT o.id,o.offering_type,o.title,o.body_text,o.contributor_name,o.visibility,o.created_at,o.media_url
+ RETURN QUERY SELECT o.id,o.offering_type,o.title,o.body_text,o.contributor_name,o.visibility,o.created_at,o.media_url,o.media_type,o.media_metadata
  FROM public.life_grove_offerings o WHERE o.life_grove_id=p_grove_id AND public.can_view_life_grove_offering(o.id,auth.uid()) ORDER BY o.created_at,o.id;
 END $$;
 REVOKE ALL ON FUNCTION public.export_life_grove_memories(uuid) FROM PUBLIC,anon;
