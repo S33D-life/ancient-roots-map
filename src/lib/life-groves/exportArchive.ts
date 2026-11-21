@@ -19,7 +19,8 @@ export async function buildGroveArchive(memories:ExportMemory[], readPhoto:(id:s
     let photo:string|null=null;
     if(m.media_url){
       const data=await readPhoto(m.id);if(!data.length) throw new Error('Photo unavailable; export was not completed');bytes+=data.length;if(bytes>100*1024*1024) throw new Error('Export exceeds local limit; request a steward-assisted export');
-      photo=`photos/${m.id}.bin`;files.push({name:photo,bytes:data});
+      const extension=data[0]===0x89&&data[1]===0x50&&data[2]===0x4e&&data[3]===0x47 ? "png" : data[0]===0xff&&data[1]===0xd8 ? "jpg" : "bin";
+      photo=`photos/${m.id}.${extension}`;files.push({name:photo,bytes:data});
     }
     const {media_url:_,...record}=m;safe.push({...record,photo});
   }
