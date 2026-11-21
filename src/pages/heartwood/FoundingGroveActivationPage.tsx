@@ -12,8 +12,9 @@ export default function FoundingGroveActivationPage() {
     setBusy(true); setMessage('');
     try {
       const {data,error}=await (supabase as any).rpc('activate_founding_grove',{p_token:token});
-      if(error || !data) throw error || new Error('No entitlement returned');
-      setResult(data);
+      const row=Array.isArray(data) ? (data.length===1 ? data[0] : null) : data;
+      if(error || !row || typeof row.life_grove_id!=='string' || !Number.isFinite(Date.parse(row.activated_at)) || !Number.isFinite(Date.parse(row.ends_at))) throw error || new Error('No confirmed entitlement returned');
+      setResult(row);
     } catch { setMessage('Activation is unavailable. Check the invited account and opening date, or ask the steward. No activation is assumed.'); }
     finally { setBusy(false); }
   }

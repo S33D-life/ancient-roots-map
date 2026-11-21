@@ -83,3 +83,13 @@ memory and one exact 68-byte PNG (hash above), without a remote media reference.
 This proves the download interaction/format locally, not live Storage permissions.
 Final source release-check: 92 files / 685 tests PASS, typecheck/lint/security/
 static/share/duplicate/asset guards and production build PASS.
+
+Current media handoff uses checked no-store bytes and browser-local image URLs,
+not transferable storage grants. The actual reader, image decoding and archive
+button pass in both Chromium and WebKit with only the transport mocked. The
+browser fixture now has a real loopback origin (about:blank is opaque in WebKit).
+A malformed CRC in the old synthetic 1-pixel PNG was corrected without changing
+its decoded pixels; final 68-byte fixture SHA-256 is
+5e3d382db4dd83d59aa5742793ad6b7903409e865c83bcbc54835049f043bc15.
+No real artwork or family file was modified. The activation page also normalises
+single-row composite RPC responses and refuses malformed acknowledgements.
