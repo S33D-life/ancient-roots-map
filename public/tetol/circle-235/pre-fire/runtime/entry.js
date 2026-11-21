@@ -1,10 +1,20 @@
 // Never render stale weekly labels if the approved static adapter fails.
 if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle projection unavailable for this Council package");
 
+import { selectedEdition as resolveSelectedEdition } from '/council/published-selector.js';
 import { installTimeTree } from './council-time-tree.js';
 const D = window.TETOL;
-const circleEdition = new URLSearchParams(location.search).get('circle');
-const selectedCircle = circleEdition === null ? 235 : Number(circleEdition);
+let selectedCircle;
+try {
+  const response=await fetch('/council/time-tree.json',{cache:'no-store'});
+  if(!response.ok) throw new Error('Published selector unavailable');
+  selectedCircle=resolveSelectedEdition(new URLSearchParams(location.search).get('circle'),await response.json());
+} catch(error) {
+  document.body.replaceChildren();
+  const alert=document.createElement('p');alert.setAttribute('role','alert');alert.textContent='Current Council unavailable. Return to the Council Canopy to choose a historical Circle.';
+  const link=document.createElement('a');link.href='/council-of-life';link.textContent='Council Canopy';document.body.append(alert,link);throw error;
+}
+const circleEdition=String(selectedCircle);
 const circle240 = circleEdition === '240';
 const circle241 = circleEdition === '241';
 const framedCircle = circle241 ? 241 : circle240 ? 240 : circleEdition === '236' ? 236 : circleEdition === '237' ? 237 : circleEdition === '238' ? 238 : circleEdition === '239' ? 239 : null;
