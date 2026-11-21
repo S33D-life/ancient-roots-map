@@ -168,26 +168,6 @@ import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.26.3";
 import { z as z4 } from "npm:zod@^3.25.76";
 
 // supabase/functions/_shared/currentCircle.ts
-var CURRENT_CIRCLE = {
-  number: 235,
-  title: "Circle 235 \xB7 yOur Blooming Week",
-  weekState: "Open Circle",
-  openLine: "The Circle is open now. Times will be shared in the group as each fire is lit.",
-  question: "What is already blooming in us that we haven\u2019t noticed yet?",
-  companions: ["Fulham Palace Holm Oak", "Apple Blossom", "Dragon Fruit / Pitaya", "Fly Agaric", "Hen Harrier", "Peter Pan"],
-  peopleSeat: "People / those who gather hold the open seventh seat.",
-  companionsLabel: "This week\u2019s companions, chosen by Leo",
-  safetyLabel: "Fly Agaric",
-  safety: "Toxic \xB7 Meet with care \xB7 Never eat.",
-  approval: "approved",
-  revision: "circle-235-ce9bab5",
-  links: {
-    council: { url: "https://www.s33d.life/council-of-life", approved: true },
-    tetol: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html", approved: true },
-    group: { url: "https://t.me/s33dlife", approved: true },
-    councilDeck: { url: "https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html#croom", approved: true }
-  }
-};
 function approvedCircleUrl(link) {
   if (!link?.approved) return void 0;
   try {
@@ -198,6 +178,45 @@ function approvedCircleUrl(link) {
   } catch {
     return void 0;
   }
+}
+
+// src/lib/mcp/tools/publishedCircle.ts
+var PUBLISHED_ORIGIN = "https://www.s33d.life";
+var TIME_TREE = "/council/time-tree.json";
+async function loadPublishedCircle(fetcher = (u) => fetch(u, { headers: { accept: "application/json" } })) {
+  const treeRes = await fetcher(`${PUBLISHED_ORIGIN}${TIME_TREE}?t=${Date.now()}`);
+  if (!treeRes.ok) return void 0;
+  const tree = await treeRes.json();
+  const n = tree?.current;
+  if (!Number.isInteger(n)) return void 0;
+  const edition = tree.editions?.find((e) => e.number === n);
+  if (!edition || !/CURRENT/i.test(edition.state)) return void 0;
+  const catRes = await fetcher(`${PUBLISHED_ORIGIN}/council/circle-${n}/catalogue.json?t=${Date.now()}`);
+  if (!catRes.ok) return void 0;
+  const cat = await catRes.json();
+  if (cat?.number !== n) return void 0;
+  const companions = (cat.companions ?? []).map((c) => c.label).filter(Boolean);
+  const canopy = edition.canopy.startsWith("/") ? `${PUBLISHED_ORIGIN}${edition.canopy}` : edition.canopy;
+  return {
+    number: n,
+    title: `Circle ${n}`,
+    weekState: edition.state,
+    openLine: cat.fire ? "A Fire is scheduled; times are shared in the group." : "No Fire is scheduled.",
+    question: cat.question ?? "",
+    companions,
+    peopleSeat: "People / those who gather hold an open seat.",
+    safety: "",
+    companionsLabel: "This week\u2019s companions",
+    safetyLabel: "",
+    approval: "approved",
+    revision: `published-time-tree-circle-${n}`,
+    links: {
+      council: { url: `${PUBLISHED_ORIGIN}/council-of-life`, approved: true },
+      councilDeck: { url: canopy, approved: true },
+      tetol: { url: `${PUBLISHED_ORIGIN}/tetol/circle-235/pre-fire/tetol.html?circle=${n}#croom`, approved: true },
+      group: { url: "https://t.me/s33dlife", approved: true }
+    }
+  };
 }
 
 // src/lib/routes.ts
@@ -549,13 +568,13 @@ function projectGrowth(growth) {
   };
 }
 function createLivingDreamTools(sources = {
-  circle: () => CURRENT_CIRCLE,
+  circle: () => loadPublishedCircle(),
   growths: () => CROWN_GROWTHS
 }) {
-  const read = (ctx, load) => {
+  const read = async (ctx, load) => {
     if (!ctx.isAuthenticated()) return failure("Not authenticated");
     try {
-      const payload = load();
+      const payload = await load();
       return payload ? result(payload) : failure("No approved public item found.");
     } catch {
       return failure("Public projection unavailable.");
@@ -568,10 +587,10 @@ function createLivingDreamTools(sources = {
       description: "Read the approved public Current Circle, including its revision and safety wording. Read access grants no publication or TEOTAG authority.",
       inputSchema: {},
       annotations,
-      handler: (_input, ctx) => read(ctx, () => {
-        const source = sources.circle();
+      handler: (_input, ctx) => read(ctx, async () => {
+        const source = await sources.circle();
         const circle = source && projectCircle(source);
-        return circle ? { circle, provenance: provenance("supabase/functions/_shared/currentCircle.ts") } : void 0;
+        return circle ? { circle, provenance: { source: `${PUBLISHED_ORIGIN}/council/time-tree.json`, freshness: "Live read of the published Council of Life Time Tree and current Circle catalogue.", authority } } : void 0;
       })
     }),
     defineTool5({

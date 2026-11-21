@@ -18,6 +18,8 @@ const ctx = new ToolContext({ type: "oauth", principal: {
   claims: { sub: "test-user" }, issuer: "https://test.invalid", resource: "https://s33d.life/mcp",
   acceptedAudiences: ["authenticated"], scopes: [], sub: "test-user",
 }, bearer: { token: "test-only-verified-context" } });
+const PUBLISHED_TREE = JSON.parse(readFileSync("public/council/time-tree.json", "utf8"));
+const PUBLISHED_CATALOGUE = JSON.parse(readFileSync("public/council/circle-241/catalogue.json", "utf8"));
 const [circleTool, listTool, detailTool] = createLivingDreamTools();
 afterEach(() => vi.restoreAllMocks());
 
@@ -98,7 +100,12 @@ describe("Living Dream read-only MCP", () => {
     const issuer = "https://test.invalid/auth";
     const { publicKey, privateKey } = generateKeyPairSync("ec", { namedCurve: "prime256v1" });
     const key = { ...publicKey.export({ format: "jwk" }), kid: "test-key", alg: "ES256", use: "sig" };
-    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(async () => Response.json({ keys: [key] }));
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const u = String(url);
+      if (u.includes("/council/time-tree.json")) return Response.json(PUBLISHED_TREE);
+      if (u.includes("/council/circle-241/catalogue.json")) return Response.json(PUBLISHED_CATALOGUE);
+      return Response.json({ keys: [key] });
+    });
     const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
     const unsigned = `${encode({ alg: "ES256", kid: "test-key", typ: "JWT" })}.${encode({ iss: issuer, aud: "authenticated", sub: "test-user", client_id: "test-client", exp: Math.floor(Date.now() / 1000) + 300 })}`;
     const token = `${unsigned}.${sign("sha256", Buffer.from(unsigned), { key: privateKey, dsaEncoding: "ieee-p1363" }).toString("base64url")}`;
@@ -138,7 +145,7 @@ describe("Living Dream read-only MCP", () => {
       }));
       expect(response.status).toBe(401);
     }
-    expect(fetch.mock.calls.every(([url]) => String(url) === "https://test.invalid/jwks")).toBe(true);
+    expect(fetch.mock.calls.every(([url]) => String(url) === "https://test.invalid/jwks" || String(url).startsWith("https://www.s33d.life/council/"))).toBe(true);
   });
   it("requires verified auth for every new tool before accessing any source", async () => {
     const circle = vi.fn(() => CURRENT_CIRCLE);
@@ -150,10 +157,21 @@ describe("Living Dream read-only MCP", () => {
     expect((await c.handler({ growth_id: CROWN_GROWTHS[0].id }, anonymous)).isError).toBe(true);
     expect(circle).not.toHaveBeenCalled(); expect(growths).not.toHaveBeenCalled();
   });
-  it("preserves every approved Circle 235 field", async () => {
+  it("follows the published Council Time Tree current Circle, as the website does", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) =>
+      Response.json(String(url).includes("time-tree") ? PUBLISHED_TREE : PUBLISHED_CATALOGUE));
     const response = await circleTool.handler({}, ctx);
-    expect(response.structuredContent?.circle).toEqual(CURRENT_CIRCLE);
-    expect(response.structuredContent?.provenance).toMatchObject({ source: "supabase/functions/_shared/currentCircle.ts" });
+    const circle = response.structuredContent?.circle as Record<string, any>;
+    expect(circle.number).toBe(241);
+    expect(circle.title).toBe("Circle 241");
+    expect(circle.weekState).toBe("CURRENT / OPEN");
+    expect(circle.links.tetol.url).toBe("https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html?circle=241#croom");
+    expect(response.structuredContent?.provenance).toMatchObject({ source: "https://www.s33d.life/council/time-tree.json" });
+  });
+  it("fails closed when the published selector and catalogue disagree", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) =>
+      Response.json(String(url).includes("time-tree") ? PUBLISHED_TREE : { ...PUBLISHED_CATALOGUE, number: 240 }));
+    expect((await circleTool.handler({}, ctx)).isError).toBe(true);
   });
   it("fails closed for missing and draft Circles", async () => {
     for (const circle of [undefined, { ...CURRENT_CIRCLE, approval: "draft" as const }]) {
@@ -213,11 +231,11 @@ describe("Living Dream read-only MCP", () => {
     expect(schema.parse({ growth_id: "  one-circle-many-surfaces  " }).growth_id).toBe("one-circle-many-surfaces");
     for (const input of [{}, { growth_id: " " }, { growth_id: "x".repeat(129) }, { growth_id: 1 }]) expect(schema.safeParse(input).success).toBe(false);
   });
-  it("has no database, network or mutation dependency and leaves sources unchanged", async () => {
+  it("reads only the published website (no database or mutation) and leaves sources unchanged", async () => {
     const before = JSON.stringify([CURRENT_CIRCLE, CROWN_GROWTHS]);
     const fetch = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network prohibited"));
     await circleTool.handler({}, ctx); await listTool.handler({}, ctx); await detailTool.handler({ growth_id: CROWN_GROWTHS[0].id }, ctx);
-    expect(fetch).not.toHaveBeenCalled(); expect(JSON.stringify([CURRENT_CIRCLE, CROWN_GROWTHS])).toBe(before);
+    expect(fetch.mock.calls.every(([url]) => String(url).startsWith("https://www.s33d.life/council/"))).toBe(true); expect(JSON.stringify([CURRENT_CIRCLE, CROWN_GROWTHS])).toBe(before);
     const source = readFileSync("src/lib/mcp/tools/living-dream.ts", "utf8");
     expect(source).not.toMatch(/supabaseForUser|createClient|fetch\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(|\.rpc\(/);
   });
