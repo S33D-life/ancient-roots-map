@@ -13,7 +13,6 @@ import { getLifeGrove, listOfferings } from "@/repositories/life-groves";
 import EtherealOfferingTree from "@/components/life-groves/EtherealOfferingTree";
 import FullscreenTreeView from "@/components/life-groves/FullscreenTreeView";
 import HeartwoodLibraryTabs from "@/components/life-groves/HeartwoodLibraryTabs";
-import InviteLinkPanel from "@/components/life-groves/InviteLinkPanel";
 import RootedTreeSection from "@/components/life-groves/RootedTreeSection";
 import AncestralRootsSection from "@/components/life-groves/AncestralRootsSection";
 import LifeGroveOfferingComposer from "@/components/life-groves/LifeGroveOfferingComposer";
@@ -30,14 +29,14 @@ export default function LifeGrovePage() {
   const { isContributor } = useGroveAuthority(id);
 
   const { data: grove, isLoading, isError } = useQuery({
-    queryKey: ["life-grove", id],
+    queryKey: ["life-grove", id, userId],
     queryFn: () => (id ? getLifeGrove(id) : null),
     enabled: !!id,
     retry: 1,
   });
 
   const { data: offerings = [], isLoading: loadingOfferings } = useQuery({
-    queryKey: ["life-grove-offerings", id],
+    queryKey: ["life-grove-offerings", id, userId],
     queryFn: () => (id ? listOfferings(id) : []),
     enabled: !!id && !!grove,
     refetchOnMount: true,
@@ -85,7 +84,6 @@ export default function LifeGrovePage() {
 
   const archetypeLabel = TREE_ARCHETYPES.find((a) => a.value === grove.tree_archetype_species)?.label ?? "Tree";
   const groveLabel = GROVE_TYPES.find((g) => g.value === grove.grove_type)?.label ?? grove.grove_type;
-  const isOwner = userId && userId === grove.created_by;
 
   return (
     <div className="min-h-screen botanical-heartwood">
@@ -198,19 +196,7 @@ export default function LifeGrovePage() {
         {/* Tending */}
         <GroveStewardshipSection grove={grove} />
 
-        {/* Invite — contributor access only, never stewardship */}
-        {isOwner && (
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-            <InviteLinkPanel inviteToken={grove.invite_token} />
-            <div className="rounded-xl border border-border/40 bg-card/40 p-4 flex flex-col justify-center">
-              <p className="font-serif text-sm text-foreground mb-2">Share the invitation</p>
-              <p className="text-xs font-serif text-muted-foreground/80">
-                Anyone with this link may hang offerings in the tree. It does not make them a steward —
-                stewardship is always granted deliberately.
-              </p>
-            </div>
-          </section>
-        )}
+
       </main>
 
       <FullscreenTreeView

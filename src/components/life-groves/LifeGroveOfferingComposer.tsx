@@ -30,7 +30,7 @@ import { OFFERING_TYPES, type OfferingType } from "@/lib/life-groves/types";
 import { assignOfferingPosition } from "@/lib/life-groves/positions";
 import { createOffering, listOfferings } from "@/repositories/life-groves";
 
-type Visibility = "family_only" | "public";
+type Visibility = "private" | "family_only" | "public";
 
 interface Props {
   open: boolean;
@@ -48,9 +48,7 @@ interface Props {
 const WRITING_TYPES: OfferingType[] = ["story", "letter"];
 const GROVE_VOICE_HOLD = "Voice memories are temporarily unavailable in Life Groves while private audio storage is made safe. No recording will be uploaded.";
 
-function draftKey(groveId: string, type: OfferingType) {
-  return `s33d.grove-draft.${groveId}.${type}`;
-}
+
 
 export default function LifeGroveOfferingComposer({
   open,
@@ -70,7 +68,7 @@ export default function LifeGroveOfferingComposer({
   const [book, setBook] = useState<BookOfferingData | null>(null);
   const [poem, setPoem] = useState<PoemOfferingData>({ poemTitle: "", poet: "", text: "", sourceUrl: "" });
   const [flowerName, setFlowerName] = useState("");
-  const [visibility, setVisibility] = useState<Visibility>("family_only");
+  const [visibility, setVisibility] = useState<Visibility>("private");
   const [saving, setSaving] = useState(false);
 
   const meta = useMemo(() => OFFERING_TYPES.find((t) => t.value === type), [type]);
@@ -78,20 +76,8 @@ export default function LifeGroveOfferingComposer({
 
   // Preselect the grove's own privacy; never widen family material silently.
   useEffect(() => {
-    setVisibility(grovePrivacy === "public" ? "public" : "family_only");
+    setVisibility("private");
   }, [grovePrivacy, open]);
-
-  // Restore a written draft so a dismissed keyboard never loses a memory.
-  useEffect(() => {
-    if (!type || !WRITING_TYPES.includes(type)) return;
-    const saved = sessionStorage.getItem(draftKey(groveId, type));
-    if (saved) setWords((w) => w || saved);
-  }, [type, groveId]);
-
-  useEffect(() => {
-    if (!type || !WRITING_TYPES.includes(type)) return;
-    if (words) sessionStorage.setItem(draftKey(groveId, type), words);
-  }, [words, type, groveId]);
 
   const reset = useCallback(() => {
     setType(null);
@@ -219,7 +205,6 @@ export default function LifeGroveOfferingComposer({
         ...(metadata ? { media_metadata: metadata } : {}),
       } as never);
 
-      if (type && WRITING_TYPES.includes(type)) sessionStorage.removeItem(draftKey(groveId, type));
       toast("Your offering is hanging in the branches.");
       onHung?.();
       close();
@@ -311,7 +296,7 @@ export default function LifeGroveOfferingComposer({
                 {type === "photo" && (
                   <>
                     <PhotoOfferingPicker
-                          visibility={visibility} pathPrefix={groveId} value={photo} onChange={setPhoto} />
+                          visibility="family_only" pathPrefix={groveId} value={photo} onChange={setPhoto} />
                     {photo && (
                       <>
                         <Textarea
@@ -403,7 +388,7 @@ export default function LifeGroveOfferingComposer({
                       className="font-serif text-base"
                     />
                     <PhotoOfferingPicker
-                          visibility={visibility}
+                          visibility="family_only"
                       pathPrefix={groveId}
                       value={photo}
                       onChange={setPhoto}
@@ -429,7 +414,7 @@ export default function LifeGroveOfferingComposer({
                       className="font-serif text-base leading-relaxed resize-none"
                     />
                     <PhotoOfferingPicker
-                          visibility={visibility}
+                          visibility="family_only"
                       pathPrefix={groveId}
                       value={photo}
                       onChange={setPhoto}
@@ -455,7 +440,7 @@ export default function LifeGroveOfferingComposer({
                       className="font-serif text-base resize-none"
                     />
                     <PhotoOfferingPicker
-                          visibility={visibility}
+                          visibility="family_only"
                       pathPrefix={groveId}
                       value={photo}
                       onChange={setPhoto}
@@ -468,7 +453,7 @@ export default function LifeGroveOfferingComposer({
                 <div className="pt-2">
                   <p className="font-serif text-xs text-muted-foreground/60 mb-2">Who may see this?</p>
                   <div className="flex gap-1 p-1 rounded-xl bg-card/40 border border-border/30">
-                    {(["family_only", "public"] as Visibility[]).map((v) => (
+                    {((grovePrivacy === "public" ? ["private", "family_only", "public"] : ["private", "family_only"]) as Visibility[]).map((v) => (
                       <button
                         key={v}
                         type="button"
@@ -478,14 +463,14 @@ export default function LifeGroveOfferingComposer({
                           visibility === v ? "bg-primary/10 text-foreground" : "text-muted-foreground/70",
                         )}
                       >
-                        {v === "family_only" ? "Family only" : "Anyone who wanders past"}
+                        {v === "private" ? "Only me" : v === "family_only" ? "Grove members" : "Public"}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <p className="font-serif text-[11px] italic text-muted-foreground/50 text-center pt-1">
-                  Hanging this places it in {forWhom}'s Heartwood Library, where the family can find it.
+                  {visibility === "private" ? "Only you can read this memory. Stewards cannot read it." : visibility === "family_only" ? "Current Grove members and stewards can read this memory." : "Anyone can read this memory in this public Grove."}
                 </p>
 
                 <Button

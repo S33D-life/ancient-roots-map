@@ -187,7 +187,7 @@ export interface LifeGroveOffering {
   media_type?: string | null;
   /** Song, book and poem details resolved at the time of offering. */
   media_metadata?: Record<string, unknown> | null;
-  visibility: "family_only" | "public";
+  visibility: "private" | "family_only" | "public";
   memory_position_data: unknown | null;
   created_at: string;
   updated_at?: string;

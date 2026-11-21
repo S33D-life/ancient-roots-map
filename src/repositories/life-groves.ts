@@ -4,12 +4,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { LifeGrove, LifeGroveOffering } from "@/lib/life-groves/types";
 
+const OFFERING_COLUMNS="id,life_grove_id,contributor_user_id,contributor_name,offering_type,title,body_text,media_url,visibility,memory_position_data,created_at,media_metadata,media_type,updated_at,hidden_at";
+
 export async function listMyLifeGroves(userId: string): Promise<LifeGrove[]> {
-  const { data, error } = await supabase
-    .from("life_groves")
-    .select("*")
-    .eq("created_by", userId)
-    .order("created_at", { ascending: false });
+  if (!userId) return [];
+  const { data, error } = await (supabase as any).rpc("list_my_life_groves");
   if (error) throw error;
   return (data ?? []) as unknown as LifeGrove[];
 }
@@ -46,7 +45,7 @@ export async function createLifeGrove(
 export async function listOfferings(life_grove_id: string): Promise<LifeGroveOffering[]> {
   const { data, error } = await supabase
     .from("life_grove_offerings")
-    .select("*")
+    .select(OFFERING_COLUMNS)
     .eq("life_grove_id", life_grove_id)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -59,7 +58,7 @@ export async function createOffering(
   const { data, error } = await supabase
     .from("life_grove_offerings")
     .insert(input as never)
-    .select("*")
+    .select(OFFERING_COLUMNS)
     .single();
   if (error) throw error;
   return data as unknown as LifeGroveOffering;
