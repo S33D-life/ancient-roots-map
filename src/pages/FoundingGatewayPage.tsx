@@ -33,13 +33,13 @@ export default function FoundingGatewayPage() {
       </section>
       <section aria-label="Two distinct ways to support S33D" className="grid gap-6 md:grid-cols-2">
         <article aria-labelledby="founding-groves" className="rounded-2xl border border-border bg-card p-5 sm:p-7 space-y-4">
-          <p className="text-sm text-muted-foreground">Proposed product · Crowdfunder UK</p>
+          <p className="text-sm text-muted-foreground">Founding Grove - account required</p>
           <h2 id="founding-groves" className="font-serif text-2xl">The First 1,000 Life Groves</h2>
-          <p>A proposed founding collection of 1,000 places for families and friends to gather chosen memories around an Ethereal Tree.</p>
-          <p><strong>Proposed rewards:</strong> £33 for a defined first year, or £111 total for a defined ten-year Grove. These are proposals, not prices currently available to buy.</p>
-          <p>Christmas gifting is being explored. Availability, recipient consent and delivery are not yet confirmed.</p>
-          <p className="font-serif font-semibold">Crowdfunder — preparing launch</p>
-          <p className="text-sm text-muted-foreground">No campaign URL or checkout is available here. This is not yet a fulfilled paid service. Storage, privacy, export, recovery, delivery and cancellation terms must be confirmed before sales.</p>
+          <p>A private place for families and friends to gather chosen memories around an Ethereal Tree.</p>
+          <p><strong>£33 Founding Grove:</strong> one year of S33D access including a private Life Grove with Founding Grove status. An S33D account is required. Your year begins when you activate your Grove.</p>
+          <p>First invitations are planned from 21 December 2026. Manually issued invitations will support new and existing accounts.</p>
+          <p>No checkout is enabled here. Renewal price, access after the first year, and duration of Founding status after year one remain open decisions.</p>
+          <p>Private-media, account and recovery acceptance are required before inviting families.</p>
         </article>
         <article aria-labelledby="giveth-commons" className="rounded-2xl border border-border bg-card p-5 sm:p-7 space-y-4">
           <p className="text-sm text-muted-foreground">Voluntary public-goods support · Giveth</p>
@@ -52,7 +52,7 @@ export default function FoundingGatewayPage() {
       </section>
       <footer className="border-t border-border pt-6 space-y-3">
         <h2 className="font-serif text-xl">An invitation, not a checkout</h2>
-        <p>We are preparing a seven-day introduction, 5–11 November 2026. This page collects no personal details, expressions of interest or payments. A voluntary interest list can open only after its private, consent-based handling is verified.</p>
+        <p>This page collects no personal details, expressions of interest or payments. The Ancient Friends map remains free.</p>
         <p className="font-serif italic">The living commons remain free. Life Groves are an optional future service.</p>
       </footer>
     </main>

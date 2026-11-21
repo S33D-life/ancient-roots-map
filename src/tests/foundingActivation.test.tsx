@@ -1,0 +1,12 @@
+import {afterEach,it,expect,vi} from 'vitest';
+import {render,screen,fireEvent,waitFor,cleanup} from '@testing-library/react';
+import {MemoryRouter,Routes,Route} from 'react-router-dom';
+import Page from '@/pages/heartwood/FoundingGroveActivationPage';
+const state=vi.hoisted(()=>({userId:null as string|null,rpc:vi.fn()}));
+vi.mock('@/hooks/use-current-user',()=>({useCurrentUser:()=>({userId:state.userId})}));
+vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:state.rpc}}));
+afterEach(()=>{cleanup();state.userId=null;vi.clearAllMocks();});
+function visit(){render(<MemoryRouter initialEntries={['/founding-grove/activate/fictional-token?invite=fictional-signup-code']}><Routes><Route path="/founding-grove/activate/:token" element={<Page/>}/></Routes></MemoryRouter>);}
+it('carries a manually paired existing account invitation and activation destination through sign-in',()=>{visit();const href=screen.getByRole('link',{name:'Sign in or create an account'}).getAttribute('href')!;const url=new URL(href,'https://fixture.invalid');expect(url.searchParams.get('invite')).toBe('fictional-signup-code');expect(url.searchParams.get('returnTo')).toBe('/founding-grove/activate/fictional-token');expect(state.rpc).not.toHaveBeenCalled();});
+it('uses the existing account and only announces activation after server acknowledgement',async()=>{state.userId='fictional-user';state.rpc.mockResolvedValue({data:{life_grove_id:'fictional-grove',activated_at:'2026-12-21',ends_at:'2027-12-21'},error:null});visit();fireEvent.click(screen.getByRole('button',{name:'Activate my year and private Grove'}));await waitFor(()=>expect(screen.getByRole('link',{name:'Open your private Grove'})).toHaveAttribute('href','/heartwood/life-groves/fictional-grove'));expect(state.rpc).toHaveBeenCalledWith('activate_founding_grove',{p_token:'fictional-token'});});
+it('does not announce success on a denied activation',async()=>{state.userId='fictional-user';state.rpc.mockResolvedValue({data:null,error:{message:'denied'}});visit();fireEvent.click(screen.getByRole('button',{name:'Activate my year and private Grove'}));await waitFor(()=>expect(screen.getByRole('status')).toHaveTextContent('No activation is assumed'));expect(screen.queryByRole('heading',{name:'Your Grove is ready'})).toBeNull();});
