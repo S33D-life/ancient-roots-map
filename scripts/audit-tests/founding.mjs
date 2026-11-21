@@ -23,6 +23,11 @@ await db.query('INSERT INTO life_grove_offerings(id,life_grove_id,contributor_us
 const exported=(await db.query('SELECT * FROM export_life_grove_memories($1)',[g])).rows;
 assert.equal(exported.length,1);assert.equal(exported[0].body_text,'Our fictional first memory');
 writeFileSync('/tmp/s33d-fictional-memories.json',JSON.stringify(exported));
+const {transformSync}=await import('esbuild');
+const source=transformSync(readFileSync('src/lib/life-groves/exportArchive.ts','utf8'),{loader:'ts',format:'esm'}).code;
+const {buildGroveArchive}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const photo=Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a3ioAAAAASUVORK5CYII=','base64'));
+writeFileSync('/tmp/s33d-fictional-backer-export.tar',await buildGroveArchive(exported,async memoryId=>{assert.equal(memoryId,m);return photo;}));
 await as(wrong);await assert.rejects(()=>db.query('SELECT * FROM export_life_grove_memories($1)',[g]));
 await db.exec('RESET ROLE; UPDATE founding_grove_invitations SET revoked_at=now(),expires_at=now()-interval \'1 day\';');
 await as(backer);assert.equal((await db.query('SELECT * FROM activate_founding_grove($1)',[token])).rows[0].id,first.id);

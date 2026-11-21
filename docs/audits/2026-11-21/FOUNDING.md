@@ -54,3 +54,10 @@ Local release-check passed: 90 files / 677 unit tests before the final Grove cac
 patch was inherited. Final integrated results are recorded below after revalidation.
 PGlite is a single PostgreSQL engine: repeat claims are tested, true independent
 connection races and actual Storage/Auth HTTP still require isolated staging.
+
+Email-confirmation continuity: the existing AuthPage now keeps a strictly validated
+Founding activation return path and the paired account invitation in confirmation
+and resend destinations. Ordinary signup still uses /welcome. No alternate Auth
+backend or client-side identity authority is added. Both new/existing account
+routing and denied acknowledgements have mocked regression tests; real email
+confirmation, recovery and cross-device login remain isolated-staging acceptance.

@@ -1,0 +1,5 @@
+import {it,expect} from 'vitest';
+import {foundingActivationPath,foundingEmailReturn} from '@/lib/life-groves/foundingAuthReturn';
+it('retains exact activation and existing account invitation across email confirmation',()=>{const path='/founding-grove/activate/'+'a'.repeat(64);const url=new URL(foundingEmailReturn('https://fixture.invalid',path,'fictional-account-invite'));expect(url.pathname).toBe('/auth');expect(url.searchParams.get('returnTo')).toBe(path);expect(url.searchParams.get('invite')).toBe('fictional-account-invite');});
+it.each(['https://foreign.invalid/path','//foreign.invalid/path','/auth?code=private','/founding-grove/activate/'+ 'a'.repeat(64)+'?access_token=bad'])('does not accept an external or credential-bearing destination',value=>{expect(foundingActivationPath(value)).toBeNull();expect(foundingEmailReturn('https://fixture.invalid',value,null)).toBe('https://fixture.invalid/welcome');});
+it('leaves the ordinary account confirmation destination unchanged',()=>expect(foundingEmailReturn('https://fixture.invalid','/atlas',null)).toBe('https://fixture.invalid/welcome'));
