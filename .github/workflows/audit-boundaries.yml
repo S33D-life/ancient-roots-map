@@ -1,0 +1,30 @@
+name: Audit database boundaries
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit-tests/**'
+      - 'supabase/migrations/**'
+      - 'supabase/functions/offering-media/**'
+      - 'supabase/functions/api-gateway/**'
+      - '.github/workflows/audit-boundaries.yml'
+permissions:
+  contents: read
+jobs:
+  fictional-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install isolated pinned PostgreSQL test engine
+        run: npm install --prefix "$RUNNER_TEMP/s33d-postgres-tests" --ignore-scripts --no-audit --no-fund @electric-sql/pglite@0.3.14
+      - name: Run fictional role and transaction tests without a hosted database
+        shell: bash
+        run: |
+          set -euo pipefail
+          export S33D_PGLITE="$RUNNER_TEMP/s33d-postgres-tests/node_modules/@electric-sql/pglite/dist/index.js"
+          for test in scripts/audit-tests/*.mjs; do
+            node "$test"
+          done
