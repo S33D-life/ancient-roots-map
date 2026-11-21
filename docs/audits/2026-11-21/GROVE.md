@@ -45,3 +45,16 @@ Executed results: 25 PostgreSQL role/RLS/media/invitation assertions PASS; full
 release-check PASS (88 files / 671 unit tests, lint/typecheck/security/build and
 all repository guards). Voice remains blocked through every offered visibility;
 non-voice composing remains available with an explicit private default.
+
+Additional boundary found during implementation: the PWA's broad REST and storage
+caches could retain private Grove responses across sign-out. Targeted NetworkOnly
+rules and a scoped activation cleanup remove only Grove API/private-photo entries;
+public trees/map caches remain. Authentication changes clear Grove React Query
+caches, and detail query keys include the viewer. The old unexpired-token copying
+panel is replaced by steward-issued expiring invitations. Restrictive RLS policies
+also block historical permissive-policy bypass; the database fixture intentionally
+adds old broad policies and still denies unauthorised text/photo reads.
+
+Final local results: 31 PostgreSQL assertions PASS; 673 unit tests / 89 files and
+full release-check PASS. Existing unknown audience values are explicitly tested
+as author-only. No physical device or production integration acceptance claimed.

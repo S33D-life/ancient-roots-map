@@ -8,6 +8,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import LifeGroveOfferingComposer from "@/components/life-groves/LifeGroveOfferingComposer";
 
 const spies = vi.hoisted(() => ({
+  photoPicker: vi.fn(),
   recorderMounted: vi.fn(),
   storageFrom: vi.fn(),
   dbFrom: vi.fn(),
@@ -29,7 +30,7 @@ vi.mock("@/components/ui/button", () => ({
 }));
 
 vi.mock("@/components/offering-kit", () => ({
-  PhotoOfferingPicker: () => null,
+  PhotoOfferingPicker: (props: unknown) => { spies.photoPicker(props); return null; },
   PoemOfferingInput: () => null,
   SongOfferingSearch: () => null,
   BookOfferingSearch: () => null,
@@ -106,6 +107,15 @@ describe("Life Grove voice fail-closed upload gate", () => {
       expect(spies.listOfferings).not.toHaveBeenCalled();
     },
   );
+
+  it("keeps all Grove photo uploads private across visibility switches", () => {
+    openComposer("public");
+    fireEvent.click(screen.getByRole("button", {name:/Photo$/}));
+    for (const name of ["Public", "Only me", "Grove members", "Public"]) {
+      fireEvent.click(screen.getByRole("button", {name}));
+      expect(spies.photoPicker).toHaveBeenLastCalledWith(expect.objectContaining({visibility:"family_only",pathPrefix:"fictional-grove"}));
+    }
+  });
 
   it("leaves ordinary non-voice memory composing available", () => {
     openComposer("private_family");

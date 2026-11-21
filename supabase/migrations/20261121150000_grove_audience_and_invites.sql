@@ -154,4 +154,13 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
  FROM public.life_grove_offerings o JOIN public.profiles pr ON pr.id=o.contributor_user_id
  WHERE o.life_grove_id=p_grove_id AND public.can_view_life_grove_offering(o.id,auth.uid());
 $$;
+-- RESTRICTIVE boundaries prevent an older permissive policy from bypassing
+-- these rules on installations with additional historical policies.
+CREATE POLICY "Required memory audience" ON public.life_grove_offerings AS RESTRICTIVE FOR SELECT
+USING(public.can_view_life_grove_offering(id,auth.uid()));
+CREATE POLICY "Required private Grove object audience" ON storage.objects AS RESTRICTIVE FOR SELECT TO authenticated
+USING(bucket_id<>'offerings-private' OR EXISTS(SELECT 1 FROM public.life_grove_offerings o WHERE
+ o.media_url LIKE '%/offerings-private/' || storage.objects.name AND public.can_view_life_grove_offering(o.id,auth.uid())
+ AND split_part(storage.objects.name,'/',1)=o.contributor_user_id::text AND split_part(storage.objects.name,'/',2)=o.life_grove_id::text
+ AND COALESCE(to_jsonb(objects)->>'owner_id',to_jsonb(objects)->>'owner')=o.contributor_user_id::text));
 COMMIT;

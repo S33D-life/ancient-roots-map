@@ -71,10 +71,20 @@ async function loadPwaPlugin() {
       injectRegister: false,
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
+        importScripts: ["/grove-cache-boundary.js"],
         navigateFallbackDenylist: [/^\/council\/238\/offerings\.html$/, /^\/~oauth/, /^\/patronsportal/, /^\/tetol\/circle-235\/pre-fire\//, /^\/ancient-friends\/bishop-of-elys-plane\.html$/],
         // Never precache version.json — always fetch fresh
         globIgnores: ["council/circle-241/*.webp","council/circle-240/portraits/**", "council/circle-240/reverses/**", "council/circle-239/reverses/**", "council/circle-239/portraits/**", "**/version.json", "tetol/circle-235/pre-fire/**", "ancient-friends/bishop-of-elys-plane.*"],
         runtimeCaching: [
+          {
+            // Private Grove data and invitation/entitlement RPCs never survive offline.
+            urlPattern: /\/rest\/v1\/(?:life_groves(?:[/?]|$)|life_grove_[^/?]*|founding_grove_[^/?]*|rpc\/[^/?]*grove[^/?]*)/i,
+            handler: "NetworkOnly",
+          },
+          {
+            urlPattern: /\/storage\/v1\/object\/(?:public|sign|authenticated)\/offerings-private\//i,
+            handler: "NetworkOnly",
+          },
           {
             // Always fetch live deployment version metadata
             urlPattern: /\/version\.json$/i,

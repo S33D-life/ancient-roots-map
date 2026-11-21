@@ -17,6 +17,7 @@ GRANT SELECT ON storage.objects TO authenticated;
 const migrations = readdirSync('supabase/migrations');
 for (const prefix of ['20260511181830','20260915082615']) await db.exec(readFileSync('supabase/migrations/'+migrations.find(f=>f.startsWith(prefix)),'utf8'));
 await db.exec(readFileSync('supabase/migrations/20261121150000_grove_audience_and_invites.sql','utf8'));
+await db.exec(`CREATE POLICY "Fictional old broad memory read" ON life_grove_offerings FOR SELECT TO authenticated USING(true); CREATE POLICY "Fictional old broad photo read" ON storage.objects FOR SELECT TO authenticated USING(true);`);
 await db.exec('GRANT SELECT,INSERT,UPDATE,DELETE ON public.life_groves,public.life_grove_offerings TO authenticated; GRANT SELECT ON public.life_groves,public.life_grove_offerings TO anon;');
 const id = n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const [owner,author,member,steward,removed,grove,only,family,unknown]=[1,2,3,4,5,10,20,21,22].map(id);
@@ -29,11 +30,14 @@ INSERT INTO life_grove_offerings(id,life_grove_id,contributor_user_id,contributo
 ('${family}','${grove}','${author}','Fictional author','Family text','family_only',NULL);
 INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private','${path}','${author}');
 `);
+await db.exec(`ALTER TABLE life_grove_offerings DISABLE TRIGGER grove_memory_guard;
+INSERT INTO life_grove_offerings(id,life_grove_id,contributor_user_id,contributor_name,body_text,visibility) VALUES('${unknown}','${grove}','${author}','Fictional author','Legacy unknown audience','ambiguous_legacy');
+ALTER TABLE life_grove_offerings ENABLE TRIGGER grove_memory_guard;`);
 let checks=0;
 async function as(user,role='authenticated') { await db.exec(`RESET ROLE; SELECT set_config('request.jwt.claim.sub','${user||''}',false),set_config('request.jwt.claim.role','${role}',false); SET ROLE ${role}`); }
 for(const [user,expectedOnly,expectedFamily] of [[author,true,true],[member,false,true],[steward,false,true],[owner,false,true],[removed,false,false],[null,false,false]]) {
  await as(user,user?'authenticated':'anon');
- for(const [memory,want] of [[only,expectedOnly],[family,expectedFamily]]) {
+ for(const [memory,want] of [[only,expectedOnly],[family,expectedFamily],[unknown,expectedOnly]]) {
   const {rows}=await db.query(`SELECT id FROM life_grove_offerings WHERE id=$1`,[memory]); assert.equal(rows.length,want?1:0); checks++;
  }
  if(user){ const {rows}=await db.query('SELECT name FROM storage.objects'); assert.equal(rows.length,expectedOnly?1:0); checks++; }
