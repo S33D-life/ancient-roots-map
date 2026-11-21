@@ -32,3 +32,10 @@ Live read-only recheck: main remains 3f342de; public version remains a8cc42b;
 public Time Tree selects 241 and live catalogue has ten companions and Fire null;
 S33D MCP get_current_circle still returns 235. Thus local PASS, deployment PENDING.
 No public, backend or historical record changes executed.
+
+Additional final acceptance: Chromium and WebKit both PASS the historical Circle
+237 Canopy-to-spatial study and all ten simulated-touch frame encounters (2 tests,
+13.8s). The only old browser assertion changed pins the explicit historical 235
+link now that an omitted edition means published current. Both engines also PASS
+the default 242 synthetic-adapter fixture. No physical iPhone/VoiceOver pass is
+claimed. All actual 234–241 catalogue/image/transcript bytes remain unchanged.
