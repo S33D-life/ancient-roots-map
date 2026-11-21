@@ -31,9 +31,9 @@ export default function LifeGroveInvitePage() {
   const [joined, setJoined] = useState(false);
 
   const { data: grove, isLoading, isError } = useQuery({
-    queryKey: ["life-grove-by-token", inviteToken],
+    queryKey: ["life-grove-by-token", inviteToken, userId, joined],
     queryFn: () => (inviteToken ? getLifeGroveByToken(inviteToken) : null),
-    enabled: !!inviteToken,
+    enabled: !!inviteToken && !!userId && joined,
     retry: 1,
   });
 
@@ -49,6 +49,9 @@ export default function LifeGroveInvitePage() {
         toast(err instanceof Error ? err.message : "This invitation could not bloom.");
       });
   }, [inviteToken, userId, joined, queryClient]);
+
+  if (!userId) return <main className="max-w-md mx-auto px-4 py-24"><h1>Private Grove invitation</h1><p>Sign in to check this invitation. No family details are shown before access is confirmed.</p><Link to={`/auth?returnTo=${encodeURIComponent(`/life-grove-invite/${inviteToken ?? ""}`)}`}>Sign in or create an account</Link></main>;
+  if (!joined) return <main className="p-8"><h1>Checking invitation</h1><p>If access is unavailable, ask a steward for a new invitation.</p></main>;
 
   const archetype = (grove?.tree_archetype_species ?? "oak") as TreeArchetype;
 

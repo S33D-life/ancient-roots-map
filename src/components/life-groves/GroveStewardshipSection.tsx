@@ -27,6 +27,7 @@ import {
   revokeGroveSteward,
 } from "@/repositories/life-grove-stewardship";
 import { useGroveAuthority } from "@/hooks/use-grove-authority";
+import GroveInvitationControls from "./GroveInvitationControls";
 import TendGroveSheet from "./TendGroveSheet";
 import ProposeEditDialog from "./ProposeEditDialog";
 
@@ -117,6 +118,7 @@ export default function GroveStewardshipSection({ grove }: Props) {
 
   return (
     <section className="mb-10">
+      {isSteward && <GroveInvitationControls groveId={grove.id} />}
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="font-serif text-xl text-foreground">Tending</h2>
         {isSteward ? (

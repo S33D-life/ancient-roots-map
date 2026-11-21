@@ -5,11 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { LifeGrove, LifeGroveOffering } from "@/lib/life-groves/types";
 
 export async function listMyLifeGroves(userId: string): Promise<LifeGrove[]> {
-  const { data, error } = await supabase
-    .from("life_groves")
-    .select("*")
-    .eq("created_by", userId)
-    .order("created_at", { ascending: false });
+  if (!userId) return [];
+  const { data, error } = await (supabase as any).rpc("list_my_life_groves");
   if (error) throw error;
   return (data ?? []) as unknown as LifeGrove[];
 }

@@ -5,7 +5,7 @@
  *
  * Used by Life Grove offerings; safe for Ancient Friends reuse later.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, ImagePlus, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,8 @@ async function compress(file: File): Promise<{ blob: Blob; width: number; height
 }
 
 export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label, visibility }: Props) {
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  useEffect(() => () => { if (localPreview) URL.revokeObjectURL(localPreview); }, [localPreview]);
   const previewUrl = useOfferingMediaUrl(value?.url ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +79,7 @@ export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label
         const url = await uploadOfferingMedia(path, blob, visibility, {
           contentType: "image/jpeg",
         });
+        setLocalPreview(URL.createObjectURL(blob));
         onChange({ url, width, height, bytes: blob.size });
       } catch (err) {
         setError(err instanceof Error ? err.message : "The photograph could not be added.");
@@ -95,7 +98,7 @@ export default function PhotoOfferingPicker({ pathPrefix, value, onChange, label
           animate={{ opacity: 1, scale: 1 }}
           className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/30"
         >
-          <img src={previewUrl ?? value.url} alt="Your offering" className="w-full max-h-[52vh] object-contain" />
+          <img src={localPreview ?? previewUrl ?? undefined} alt="Your offering" className="w-full max-h-[52vh] object-contain" />
           <button
             type="button"
             onClick={() => onChange(null)}

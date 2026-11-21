@@ -93,7 +93,7 @@ describe("Life Grove voice fail-closed upload gate", () => {
       expect(spies.recorderMounted).not.toHaveBeenCalled();
 
       // Choosing 'public' must not re-enable a Grove recording.
-      for (const name of ["Anyone who wanders past", "Family only", "Anyone who wanders past"]) {
+      for (const name of privacy === "public" ? ["Public", "Grove members", "Only me", "Public"] : ["Grove members", "Only me"]) {
         fireEvent.click(screen.getByRole("button", { name }));
         expect(screen.getByRole("button", { name: "Hang voice memory" })).toBeDisabled();
       }
@@ -138,7 +138,7 @@ describe("Life Grove voice fail-closed upload gate", () => {
     };
     const view = render(<LifeGroveOfferingComposer {...props} />);
     fireEvent.click(screen.getByRole("button", { name: /Voice note$/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Anyone who wanders past" }));
+    fireEvent.click(screen.getByRole("button", { name: "Grove members" }));
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     fireEvent.click(screen.getByRole("button", { name: /Story$/ }));
     fireEvent.change(screen.getByPlaceholderText("Tell a memory…"), { target: { value: "Fictional memory" } });
@@ -160,7 +160,7 @@ describe("Life Grove voice fail-closed upload gate", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Hang memory" }));
     await waitFor(() => expect(spies.createOffering).toHaveBeenCalledWith(expect.objectContaining({
-      life_grove_id: "fictional-grove", offering_type: "story", visibility: "family_only",
+      life_grove_id: "fictional-grove", offering_type: "story", visibility: "private",
       body_text: "A fictional story, not personal data.", media_url: null,
     })));
     expect(spies.recorderMounted).not.toHaveBeenCalled();
