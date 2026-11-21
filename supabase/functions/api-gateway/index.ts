@@ -1,4 +1,4 @@
-import { validPublicAgentKey } from "./agentAuthority.ts";
+import { validPublicAgentKey, agentKeyAllowsMethod } from "./agentAuthority.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { identifyTreeSpecies } from "./services/speciesVision.ts";
@@ -629,6 +629,7 @@ serve(async (req) => {
 
   try {
     const auth = await authenticate(req);
+    if(auth.isAgent && !agentKeyAllowsMethod(req.method)) return err("FORBIDDEN", "This key permits public reads only", 403);
     const match = matchRoute(req.method, path);
     if (!match) return err("NOT_FOUND", `No route: ${req.method} ${path}`, 404);
 

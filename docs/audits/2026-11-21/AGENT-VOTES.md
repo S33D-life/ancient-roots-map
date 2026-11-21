@@ -38,3 +38,8 @@ socket only, verifies concurrent first votes serialize the daily budget and
 simultaneous retractions refund once. Hosted tests use the same fixture driver
 against a pinned PostgreSQL loopback-only service; no production database URL or
 credentials are accepted. Supabase JWT/Edge deployment remains a separate gate.
+
+Public-read key scope is also enforced by HTTP method at the gateway boundary;
+Agent Garden mutation routes cannot bypass it just because they lack a separate
+scope hook. Session-authenticated owners retain their existing review/contribution
+journey. Five focused method-gate tests were added (final local total 676 tests).
