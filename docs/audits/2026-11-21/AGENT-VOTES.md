@@ -32,3 +32,9 @@ Executed local validation: 12 PostgreSQL authorization/vote assertions PASS; ful
 release-check PASS (88 test files / 671 tests, typecheck/lint/security/guards/build).
 The former source-only test expecting admin:* bypass was replaced with the new
 ownership invariant, alongside executable positive/negative authority unit tests.
+
+Independent-session validation added: disposable local PostgreSQL 17.12, Unix
+socket only, verifies concurrent first votes serialize the daily budget and
+simultaneous retractions refund once. Hosted tests use the same fixture driver
+against a pinned PostgreSQL loopback-only service; no production database URL or
+credentials are accepted. Supabase JWT/Edge deployment remains a separate gate.
