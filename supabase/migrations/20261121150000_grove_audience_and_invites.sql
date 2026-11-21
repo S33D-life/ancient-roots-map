@@ -1,11 +1,22 @@
 -- Review-only migration. No production execution authorised.
 BEGIN;
+CREATE OR REPLACE FUNCTION public.is_grove_object_path(object_name text) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+ SELECT EXISTS(SELECT 1 FROM public.life_groves g WHERE g.id::text=lower(split_part(object_name,'/',2)));
+$$;
+CREATE OR REPLACE FUNCTION public.grove_upload_allowed(object_name text,viewer uuid) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+ SELECT viewer IS NOT NULL AND split_part(object_name,'/',1)=viewer::text AND
+ CASE WHEN public.is_grove_object_path(object_name) THEN public.is_grove_contributor(lower(split_part(object_name,'/',2))::uuid,viewer) ELSE true END;
+$$;
+REVOKE ALL ON FUNCTION public.is_grove_object_path(text),public.grove_upload_allowed(text,uuid) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.is_grove_object_path(text),public.grove_upload_allowed(text,uuid) TO authenticated,service_role;
+
 INSERT INTO storage.buckets(id,name,public) VALUES('offerings-private','offerings-private',false)
 ON CONFLICT(id) DO UPDATE SET public=false;
 DROP POLICY IF EXISTS "Owners can upload private offering media" ON storage.objects;
 CREATE POLICY "Owners can upload private offering media" ON storage.objects FOR INSERT TO authenticated
-WITH CHECK(bucket_id='offerings-private' AND split_part(name,'/',1)=auth.uid()::text
- AND public.is_grove_contributor(NULLIF(split_part(name,'/',2),'')::uuid,auth.uid()));
+WITH CHECK(bucket_id='offerings-private' AND public.grove_upload_allowed(name,auth.uid()));
 
 -- Keep capability tokens out of publicly selectable Grove rows. Existing links
 -- are preserved privately but fail closed until a steward rotates with expiry.
@@ -141,14 +152,14 @@ GRANT EXECUTE ON FUNCTION public.private_grove_media_path(uuid,uuid) TO service_
 DROP POLICY IF EXISTS "Signed-in members can read private offering media" ON storage.objects;
 DROP POLICY IF EXISTS "Owners can read their private offering media" ON storage.objects;
 CREATE POLICY "Grove object audience" ON storage.objects FOR SELECT TO authenticated
-USING(bucket_id='offerings-private' AND EXISTS(
+USING(bucket_id='offerings-private' AND ((NOT public.is_grove_object_path(name) AND split_part(name,'/',1)=auth.uid()::text) OR EXISTS(
  SELECT 1 FROM public.life_grove_offerings o WHERE
  split_part(storage.objects.name,'/',1)=o.contributor_user_id::text
  AND split_part(storage.objects.name,'/',2)=o.life_grove_id::text
  AND COALESCE(to_jsonb(objects)->>'owner_id',to_jsonb(objects)->>'owner')=o.contributor_user_id::text
  AND o.media_url LIKE '%/offerings-private/' || storage.objects.name
  AND public.can_view_life_grove_offering(o.id,auth.uid())
-));
+)));
 CREATE OR REPLACE FUNCTION public.get_life_grove_offering_identities(p_grove_id uuid)
 RETURNS TABLE(user_id uuid,display_name text,avatar_url text)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
@@ -161,7 +172,7 @@ $$;
 CREATE POLICY "Required memory audience" ON public.life_grove_offerings AS RESTRICTIVE FOR SELECT
 USING(public.can_view_life_grove_offering(id,auth.uid()));
 CREATE POLICY "Required private Grove object audience" ON storage.objects AS RESTRICTIVE FOR SELECT TO authenticated
-USING(bucket_id<>'offerings-private' OR EXISTS(SELECT 1 FROM public.life_grove_offerings o WHERE
+USING(bucket_id<>'offerings-private' OR (NOT public.is_grove_object_path(name) AND split_part(name,'/',1)=auth.uid()::text) OR EXISTS(SELECT 1 FROM public.life_grove_offerings o WHERE
  o.media_url LIKE '%/offerings-private/' || storage.objects.name AND public.can_view_life_grove_offering(o.id,auth.uid())
  AND split_part(storage.objects.name,'/',1)=o.contributor_user_id::text AND split_part(storage.objects.name,'/',2)=o.life_grove_id::text
  AND COALESCE(to_jsonb(objects)->>'owner_id',to_jsonb(objects)->>'owner')=o.contributor_user_id::text));
@@ -185,4 +196,14 @@ BEGIN
  FROM public.life_grove_offerings o JOIN public.profiles pr ON pr.id=o.contributor_user_id LEFT JOIN auth.users u ON u.id=pr.id
  WHERE o.life_grove_id=p_grove_id AND public.can_view_life_grove_offering(o.id,auth.uid());
 END $$;
+-- Server-side upload boundary also protects older frontends and rollback builds.
+CREATE POLICY "No Grove uploads to public offerings" ON storage.objects AS RESTRICTIVE FOR INSERT TO authenticated
+WITH CHECK((bucket_id<>'offerings' OR NOT public.is_grove_object_path(name)) AND
+ (bucket_id<>'offerings-private' OR public.grove_upload_allowed(name,auth.uid())));
+CREATE POLICY "No Grove moves to public offerings" ON storage.objects AS RESTRICTIVE FOR UPDATE TO authenticated
+USING(bucket_id<>'offerings-private' OR public.grove_upload_allowed(name,auth.uid()))
+WITH CHECK((bucket_id<>'offerings' OR NOT public.is_grove_object_path(name)) AND
+ (bucket_id<>'offerings-private' OR public.grove_upload_allowed(name,auth.uid())));
+CREATE POLICY "Removed members cannot change Grove media" ON storage.objects AS RESTRICTIVE FOR DELETE TO authenticated
+USING(bucket_id<>'offerings-private' OR public.grove_upload_allowed(name,auth.uid()));
 COMMIT;

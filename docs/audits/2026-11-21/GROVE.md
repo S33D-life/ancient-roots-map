@@ -80,3 +80,12 @@ Public Grove photos also stay in private storage and are signed for anonymous
 viewers only when the exact memory AND Grove are explicitly public; private and
 ambiguous records still deny them. Existing synthetic contract examples now match
 this rule, while actual SQL—not those examples—provides the security evidence.
+
+Final storage rollback boundary: restrictive INSERT/UPDATE policies reject Grove
+objects in the public offerings bucket even for an older frontend; otherwise a
+record-insert denial would occur too late to prevent a public upload. Removed
+members cannot upload or modify Grove objects. Non-Grove Ancient Friends paths
+retain their existing public upload / private-owner preview behaviour. The final
+matrix has 51 assertions, including these positive and negative upload cases;
+independent revoke/redeem races also PASS on PostgreSQL 17.12. Edge module bundle
+and the last frontend release-check pass (675 tests) are recorded locally.

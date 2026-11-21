@@ -12,7 +12,7 @@ CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT curren
 CREATE FUNCTION public.update_updated_at_column() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN NEW.updated_at=now(); RETURN NEW; END $$;
 CREATE TABLE storage.buckets(id text PRIMARY KEY,name text,public boolean); CREATE TABLE storage.objects(id uuid DEFAULT gen_random_uuid(),bucket_id text,name text,owner_id text); ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 GRANT USAGE ON SCHEMA public,auth,storage TO anon,authenticated,service_role;
-GRANT SELECT ON storage.objects TO authenticated;
+GRANT SELECT,INSERT ON storage.objects TO authenticated;
 `);
 const migrations = readdirSync('supabase/migrations');
 for (const prefix of ['20260511181830','20260915082615']) await db.exec(readFileSync('supabase/migrations/'+migrations.find(f=>f.startsWith(prefix)),'utf8'));
@@ -89,5 +89,13 @@ INSERT INTO life_grove_offerings(id,life_grove_id,contributor_user_id,contributo
 INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private','${author}/${id(30)}/public.jpg','${author}');`);
 await as(null,'service_role'); assert.equal((await db.query('SELECT private_grove_media_path($1,NULL) AS p',[id(31)])).rows[0].p,`${author}/${id(30)}/public.jpg`); checks++;
 assert.equal((await db.query('SELECT private_grove_media_path($1,NULL) AS p',[only])).rows[0].p,null); checks++;
+await db.exec("RESET ROLE; CREATE POLICY fictional_legacy_upload ON storage.objects FOR INSERT TO authenticated WITH CHECK(split_part(name,'/',1)=auth.uid()::text)");
+await as(author);await assert.rejects(()=>db.query("INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings',$1,$2)",[`${author}/${grove}/rollback.jpg`,author])); checks++;
+await db.query("INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private',$1,$2)",[`${author}/${grove}/new.jpg`,author]); checks++;
+await db.query("INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings',$1,$2)",[`${author}/${id(900)}/ancient-friend.jpg`,author]); checks++;
+await db.query("INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private',$1,$2)",[`${author}/${id(900)}/private-ancient-friend.jpg`,author]); checks++;
+assert.equal((await db.query("SELECT name FROM storage.objects WHERE name=$1",[`${author}/${id(900)}/private-ancient-friend.jpg`])).rows.length,1); checks++;
+await as(owner);await db.query('SELECT set_grove_member_access($1,$2,false)',[grove,removed]);
+await as(removed);await assert.rejects(()=>db.query("INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private',$1,$2)",[`${removed}/${grove}/removed.jpg`,removed])); checks++;
 console.log(`PASS ${checks} actual PostgreSQL audience/invitation/media assertions (fictional records only)`);
 await db.close();
