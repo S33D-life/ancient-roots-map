@@ -93,3 +93,10 @@ its decoded pixels; final 68-byte fixture SHA-256 is
 5e3d382db4dd83d59aa5742793ad6b7903409e865c83bcbc54835049f043bc15.
 No real artwork or family file was modified. The activation page also normalises
 single-row composite RPC responses and refuses malformed acknowledgements.
+
+Hosted 4295066 CI exposed three stale gateway-copy assertions, all expecting the
+retired “Crowdfunder — preparing launch” label. The other 52 smoke tests passed.
+The test now asserts the account-required offer, planned 21 December invitations
+and activation-based year, retaining every no-write/payment/free-entry, responsive,
+keyboard and history assertion. Targeted Chromium + WebKit at 320/390/1440: 6/6
+PASS. This correction changes no product source or workflow settings.
