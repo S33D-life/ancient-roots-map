@@ -81,5 +81,7 @@ if(db.connectSession){
   console.log('PASS PostgreSQL two-session revoke-before-redeem and redeem-before-revoke races');
  }finally{await a.close();await b.close();await inspector.close();}
 }
+await as(author); await db.query("INSERT INTO life_grove_offerings(life_grove_id,contributor_user_id,contributor_name,offering_type,media_type,media_url) VALUES($1,$2,'Fictional author','song','song','https://music.apple.com/fixture-track')",[grove,author]); checks++;
+await assert.rejects(()=>db.query("INSERT INTO life_grove_offerings(life_grove_id,contributor_user_id,contributor_name,offering_type,media_type,media_url) VALUES($1,$2,'Fictional author','song','song','https://fixture.invalid/storage/v1/object/public/offerings/family.jpg')",[grove,author])); checks++;
 console.log(`PASS ${checks} actual PostgreSQL audience/invitation/media assertions (fictional records only)`);
 await db.close();

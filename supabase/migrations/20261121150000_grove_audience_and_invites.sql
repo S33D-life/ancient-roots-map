@@ -49,6 +49,8 @@ CREATE POLICY "Active authors edit their memories" ON public.life_grove_offering
 USING(contributor_user_id=auth.uid() AND public.is_grove_contributor(life_grove_id,auth.uid()))
 WITH CHECK(contributor_user_id=auth.uid() AND public.is_grove_contributor(life_grove_id,auth.uid()));
 
+ALTER TABLE public.life_grove_offerings ALTER COLUMN visibility SET DEFAULT 'private';
+
 -- A stored private object belongs to exactly one memory. Existing invalid media
 -- references remain unmodified, but cannot be signed. No retrospective publicity.
 CREATE OR REPLACE FUNCTION public.grove_memory_guard() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
@@ -59,7 +61,7 @@ BEGIN
  IF NEW.visibility NOT IN ('private','family_only','public') THEN RAISE EXCEPTION 'Choose an explicit memory audience'; END IF;
  IF NEW.visibility='public' AND NOT EXISTS(SELECT 1 FROM public.life_groves WHERE id=NEW.life_grove_id AND privacy='public') THEN RAISE EXCEPTION 'This Grove is private'; END IF;
  -- No new public-media references, including a later visibility switch.
- IF NEW.media_url IS NOT NULL AND (TG_OP='INSERT' OR NEW.media_url IS DISTINCT FROM OLD.media_url OR NEW.visibility IS DISTINCT FROM OLD.visibility) AND
+ IF NEW.media_url IS NOT NULL AND NOT (NEW.offering_type='song' AND NEW.media_type='song' AND NEW.media_url ~ '^https://' AND NEW.media_url !~ '/storage/v1/object/') AND (TG_OP='INSERT' OR NEW.media_url IS DISTINCT FROM OLD.media_url OR NEW.visibility IS DISTINCT FROM OLD.visibility) AND
     position('/offerings-private/' || NEW.contributor_user_id::text || '/' || NEW.life_grove_id::text || '/' IN NEW.media_url)=0 THEN
   RAISE EXCEPTION 'Grove media must use its private, author-owned object';
  END IF;
