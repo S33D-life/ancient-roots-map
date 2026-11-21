@@ -10,8 +10,7 @@ const BASE = "https://example.supabase.co/storage/v1/object/public";
 // ── Mirror of storage.objects SELECT policy on offerings-private ──
 function storageSelectAllowed(callerId: string | null, objectPath: string): boolean {
   if (!callerId) return false;
-  const offering=world.offerings.find(o=>o.mediaUrl?.endsWith("/offerings-private/"+objectPath));
-  return !!offering && canViewOffering(world,offering.id,callerId);
+  return !world.groves[objectPath.split("/")[1]] && objectPath.split("/")[0]===callerId;
 }
 
 // ── Mirror of public.can_view_life_grove_offering() ───────────────
@@ -91,15 +90,15 @@ describe("Private offering media — who may obtain a link", () => {
 
   it("lets the owner read their own upload", () => {
     expect(requestMedia(world, { callerId: OWNER, offeringId: PRIVATE_ID }).status).toBe(200);
-    expect(storageSelectAllowed(OWNER, PRIVATE_PATH)).toBe(true);
+    expect(storageSelectAllowed(OWNER, PRIVATE_PATH)).toBe(false);
   });
 
   it("lets an authorised family/tribe viewer through the checked path", () => {
     const res = requestMedia(world, { callerId: FAMILY, offeringId: PRIVATE_ID });
     expect(res.status).toBe(200);
     expect(res.signedPath).toBe(PRIVATE_PATH);
-    // Direct storage also requires the exact authorised memory.
-    expect(storageSelectAllowed(FAMILY, PRIVATE_PATH)).toBe(true);
+    // Grove reads must go through checked byte delivery; no client signing.
+    expect(storageSelectAllowed(FAMILY, PRIVATE_PATH)).toBe(false);
   });
 
   it("refuses a family/tribe viewer who is not a member of that circle", () => {

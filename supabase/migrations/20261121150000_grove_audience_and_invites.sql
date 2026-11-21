@@ -152,14 +152,7 @@ GRANT EXECUTE ON FUNCTION public.private_grove_media_path(uuid,uuid) TO service_
 DROP POLICY IF EXISTS "Signed-in members can read private offering media" ON storage.objects;
 DROP POLICY IF EXISTS "Owners can read their private offering media" ON storage.objects;
 CREATE POLICY "Grove object audience" ON storage.objects FOR SELECT TO authenticated
-USING(bucket_id='offerings-private' AND ((NOT public.is_grove_object_path(name) AND split_part(name,'/',1)=auth.uid()::text) OR EXISTS(
- SELECT 1 FROM public.life_grove_offerings o WHERE
- split_part(storage.objects.name,'/',1)=o.contributor_user_id::text
- AND split_part(storage.objects.name,'/',2)=o.life_grove_id::text
- AND COALESCE(to_jsonb(objects)->>'owner_id',to_jsonb(objects)->>'owner')=o.contributor_user_id::text
- AND o.media_url LIKE '%/offerings-private/' || storage.objects.name
- AND public.can_view_life_grove_offering(o.id,auth.uid())
-)));
+USING(bucket_id='offerings-private' AND NOT public.is_grove_object_path(name) AND split_part(name,'/',1)=auth.uid()::text);
 CREATE OR REPLACE FUNCTION public.get_life_grove_offering_identities(p_grove_id uuid)
 RETURNS TABLE(user_id uuid,display_name text,avatar_url text)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
@@ -172,10 +165,7 @@ $$;
 CREATE POLICY "Required memory audience" ON public.life_grove_offerings AS RESTRICTIVE FOR SELECT
 USING(public.can_view_life_grove_offering(id,auth.uid()));
 CREATE POLICY "Required private Grove object audience" ON storage.objects AS RESTRICTIVE FOR SELECT TO authenticated
-USING(bucket_id<>'offerings-private' OR (NOT public.is_grove_object_path(name) AND split_part(name,'/',1)=auth.uid()::text) OR EXISTS(SELECT 1 FROM public.life_grove_offerings o WHERE
- o.media_url LIKE '%/offerings-private/' || storage.objects.name AND public.can_view_life_grove_offering(o.id,auth.uid())
- AND split_part(storage.objects.name,'/',1)=o.contributor_user_id::text AND split_part(storage.objects.name,'/',2)=o.life_grove_id::text
- AND COALESCE(to_jsonb(objects)->>'owner_id',to_jsonb(objects)->>'owner')=o.contributor_user_id::text));
+USING(bucket_id<>'offerings-private' OR (NOT public.is_grove_object_path(name) AND split_part(name,'/',1)=auth.uid()::text));
 CREATE OR REPLACE FUNCTION public.guard_grove_identity() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
 BEGIN
  IF NEW.created_by IS DISTINCT FROM OLD.created_by THEN RAISE EXCEPTION 'Grove ownership cannot be reassigned through a content edit'; END IF;

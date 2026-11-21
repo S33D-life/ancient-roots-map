@@ -89,3 +89,15 @@ retain their existing public upload / private-owner preview behaviour. The final
 matrix has 51 assertions, including these positive and negative upload cases;
 independent revoke/redeem races also PASS on PostgreSQL 17.12. Edge module bundle
 and the last frontend release-check pass (675 tests) are recorded locally.
+
+Revocation hardening supersedes the earlier 60-second URL approach above: clients
+cannot SELECT/sign ANY Grove object directly, including the uploader. Each new
+Grove read uses offering-media to authenticate, check the exact memory and object,
+and proxy no-store bytes. The frontend uses a browser-local Blob URL and revokes
+it on cleanup. No newly minted remote capability can outlive membership. Existing
+downloaded bytes and previously minted old URLs cannot be recalled; legacy host
+containment remains a separately approved operation. Non-Grove Ancient Friends
+owner reads are retained. Latest SQL matrix: 52 assertions PASS; actual revoked
+member races PASS. Updated frontend release-check: 678 tests PASS. Both the Edge
+service and frontend must be coordinated; old JSON-only clients fail closed during
+that upgrade rather than restoring signed-URL fallback.

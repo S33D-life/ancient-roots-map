@@ -5,8 +5,8 @@
  *   1. identifies the caller from their JWT (anonymous reads require an explicitly public memory in a public Grove),
  *   2. loads the offering record with service-role privileges,
  *   3. checks the record's own visibility rules via can_view_life_grove_offering,
- *   4. derives the storage object path from the stored record (never from the
- *      caller), and only then issues a short-lived signed URL.
+ *   4. derives the storage object from the record and returns checked bytes;
+ *      it never mints a transferable remote storage URL.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.0";
 
@@ -19,7 +19,6 @@ const corsHeaders = {
 import { privateObjectPath } from "./objectPath.ts";
 
 const PRIVATE_BUCKET = "offerings-private";
-const EXPIRES_IN = 60;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -73,12 +72,14 @@ Deno.serve(async (req) => {
     const { data: checkedPath, error: objectError } = await admin.rpc("private_grove_media_path", { p_offering_id: offeringId, p_user_id: userId });
     if (objectError || checkedPath !== path) return json({ error: "media unavailable" }, 403);
 
-    const { data: signed, error: signError } = await admin.storage
-      .from(PRIVATE_BUCKET)
-      .createSignedUrl(path, EXPIRES_IN);
-    if (signError || !signed?.signedUrl) return json({ error: "could not sign media" }, 500);
-
-    return json({ url: signed.signedUrl, expires_in: EXPIRES_IN });
+    const { data: file, error: readError } = await admin.storage.from(PRIVATE_BUCKET).download(path);
+    if (readError || !file) return json({ error: "media unavailable" }, 404);
+    // Proxy checked bytes, never mint a transferable remote URL that survives
+    // membership revocation. Existing downloaded bytes cannot be recalled.
+    return new Response(file, { headers: { ...corsHeaders,
+      "Content-Type": "application/octet-stream", "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "sandbox",
+    } });
   } catch {
     return json({ error: "unexpected error" }, 500);
   }

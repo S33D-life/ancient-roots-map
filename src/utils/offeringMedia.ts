@@ -1,16 +1,16 @@
 /**
  * offeringMedia — where offering photographs live, and how they are read back.
  *
- * Public offerings keep using the public `offerings` bucket (tree pages, social
+ * Public Ancient Friends offerings keep using the public `offerings` bucket (tree pages, social
  * previews and NFTree metadata all depend on stable public URLs).
  *
  * Offerings that are not public (private / family / tribe) upload instead to the
  * private `offerings-private` bucket. Those files are never fetchable anonymously,
  * and being signed in is not enough either: viewers ask the `offering-media`
  * function for a media link *by offering id*, and the server checks that
- * offering's own visibility rules before signing. Only the uploader keeps direct
- * access to their own objects (used for the composer preview before an offering
- * row exists).
+ * offering's own visibility rules before signing. Grove reads use checked bytes, not transferable remote signed URLs.
+ * Direct owner signing remains only for non-Grove private uploads; Grove draft
+ * photos preview from an in-memory browser Blob.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,14 +53,13 @@ export async function uploadOfferingMedia(
   return data.publicUrl;
 }
 
-/** Ask the server for a checked, short-lived link to an offering's private media. */
+/** Read checked bytes and return a browser-local object URL; no remote capability. */
 export async function signedOfferingMediaUrl(offeringId: string): Promise<string | null> {
   const { data, error } = await supabase.functions.invoke("offering-media", {
     body: { offering_id: offeringId },
   });
   if (error) return null;
-  const url = (data as { url?: string } | null)?.url;
-  return typeof url === "string" ? url : null;
+  return data instanceof Blob ? URL.createObjectURL(data) : null;
 }
 
 /**
@@ -92,6 +91,7 @@ export function useOfferingMediaUrl(
 
   useEffect(() => {
     let cancelled = false;
+    let temporary: string | null = null;
     if (!url) {
       setResolved(null);
       return;
@@ -103,10 +103,12 @@ export function useOfferingMediaUrl(
     setResolved(null);
     (async () => {
       const signed = await resolveOfferingMediaUrl(url, offeringId);
-      if (!cancelled) setResolved(signed);
+      if (cancelled) { if (signed?.startsWith("blob:")) URL.revokeObjectURL(signed); return; }
+      temporary=signed;setResolved(signed);
     })();
     return () => {
       cancelled = true;
+      if (temporary?.startsWith("blob:")) URL.revokeObjectURL(temporary);
     };
   }, [url, offeringId]);
 

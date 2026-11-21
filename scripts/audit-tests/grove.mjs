@@ -40,7 +40,7 @@ for(const [user,expectedOnly,expectedFamily] of [[author,true,true],[member,fals
  for(const [memory,want] of [[only,expectedOnly],[family,expectedFamily],[unknown,expectedOnly]]) {
   const {rows}=await db.query(`SELECT id FROM life_grove_offerings WHERE id=$1`,[memory]); assert.equal(rows.length,want?1:0); checks++;
  }
- if(user){ const {rows}=await db.query('SELECT name FROM storage.objects'); assert.equal(rows.length,(expectedOnly?1:0)+(expectedFamily?1:0)); checks++; }
+ if(user){ const {rows}=await db.query('SELECT name FROM storage.objects'); assert.equal(rows.length,0); checks++; }
 }
 await as(null,'anon'); await assert.rejects(()=>db.query('SELECT name FROM storage.objects')); checks++; await assert.rejects(()=>db.query('SELECT * FROM get_life_grove_by_invite_token($1)',['bad'])); checks++;
 await as(owner); let t=(await db.query('SELECT manage_grove_invitation($1,true) AS t',[grove])).rows[0].t;
@@ -53,6 +53,7 @@ await as(removed); assert.equal((await db.query('SELECT * FROM list_my_life_grov
 await as(author); await assert.rejects(()=>db.query('UPDATE life_grove_offerings SET visibility=$1 WHERE id=$2',['public',only])); checks++;
 await as(null,'service_role'); assert.equal((await db.query('SELECT private_grove_media_path($1,$2) AS p',[only,author])).rows[0].p,path); checks++;
 assert.equal((await db.query('SELECT private_grove_media_path($1,$2) AS p',[only,member])).rows[0].p,null); checks++;
+assert.equal((await db.query('SELECT private_grove_media_path($1,$2) AS p',[family,member])).rows[0].p,familyPath); checks++;
 await as(owner); const expiredToken=(await db.query('SELECT manage_grove_invitation($1,true) AS t',[grove])).rows[0].t;
 await db.exec("RESET ROLE; UPDATE life_grove_invite_secrets SET expires_at=now()-interval '1 second'");
 await as(member); await assert.rejects(()=>db.query('SELECT join_life_grove_with_token($1)',[expiredToken])); checks++;
