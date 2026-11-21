@@ -176,7 +176,7 @@ var CURRENT_CIRCLE = {
   question: "What is already blooming in us that we haven\u2019t noticed yet?",
   companions: ["Fulham Palace Holm Oak", "Apple Blossom", "Dragon Fruit / Pitaya", "Fly Agaric", "Hen Harrier", "Peter Pan"],
   peopleSeat: "People / those who gather hold the open seventh seat.",
-  companionsLabel: "This week\u2019s companions, chosen by Leo",
+  companionsLabel: "This week\u2019s companions, chosen by the Council",
   safetyLabel: "Fly Agaric",
   safety: "Toxic \xB7 Meet with care \xB7 Never eat.",
   approval: "approved",
