@@ -61,3 +61,16 @@ and resend destinations. Ordinary signup still uses /welcome. No alternate Auth
 backend or client-side identity authority is added. Both new/existing account
 routing and denied acknowledgements have mocked regression tests; real email
 confirmation, recovery and cross-device login remain isolated-staging acceptance.
+
+Final independent-session evidence: PostgreSQL 17.12 Unix-socket fixture PASS.
+Two actual sessions race on the same previously unredeemed invitation; the second
+is observed waiting on the invitation lock. Both receive the same entitlement,
+Grove and end date, and only one entitlement exists. The same run verifies both
+Grove revoke/redeem orderings. This closes the local concurrency limitation above;
+real Supabase Auth/Storage HTTP acceptance is still outstanding.
+
+The SQL-exported memories (not a separately handwritten payload) were passed to
+the production archive builder. The resulting fictional backer tar was inspected:
+memories.json plus photos/00000000-0000-4000-8000-000000000200.png. Body text and PNG
+signature/68 original bytes match; no remote media URL is included. No public file,
+actual backer invitation, payment, account or family memory was created.

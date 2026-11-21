@@ -757,7 +757,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: addr,
-        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),searchParams.get("invite")) },
+        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),inviteCode.trim() || searchParams.get("invite")) },
       });
       if (error) throw error;
       writePendingEmail(addr);
@@ -875,7 +875,7 @@ const AuthPage = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),searchParams.get("invite")) },
+        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),inviteCode.trim() || searchParams.get("invite")) },
       });
       if (error) {
         if (error.message.includes("User already registered")) {
@@ -939,7 +939,7 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),searchParams.get("invite")) },
+        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),inviteCode.trim() || searchParams.get("invite")) },
       });
       if (error) throw error;
       setView("magic-sent");
