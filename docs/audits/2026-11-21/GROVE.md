@@ -101,3 +101,8 @@ owner reads are retained. Latest SQL matrix: 52 assertions PASS; actual revoked
 member races PASS. Updated frontend release-check: 678 tests PASS. Both the Edge
 service and frontend must be coordinated; old JSON-only clients fail closed during
 that upgrade rather than restoring signed-URL fallback.
+
+Final client byte-delivery regression: raster MIME is derived from byte signatures
+before creating the browser-local URL (no SVG/HTML MIME is trusted). A real PNG
+through the actual reader decodes in Chromium and WebKit in the isolated browser
+walkthrough; native iPhone/VoiceOver remain untested. Current unit total: 679.

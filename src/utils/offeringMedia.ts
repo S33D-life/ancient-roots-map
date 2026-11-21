@@ -59,7 +59,20 @@ export async function signedOfferingMediaUrl(offeringId: string): Promise<string
     body: { offering_id: offeringId },
   });
   if (error) return null;
-  return data instanceof Blob ? URL.createObjectURL(data) : null;
+  if (!(data instanceof Blob)) return null;
+  // The SDK decodes octet-stream as Blob. Safari needs an image MIME on the
+  // local URL; determine it from bytes, never from caller-controlled metadata.
+  const bytes=new Uint8Array(await data.slice(0,16).arrayBuffer());
+  const ascii=(start:number,end:number)=>String.fromCharCode(...bytes.slice(start,end));
+  let type="application/octet-stream";
+  if([137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n)) type="image/png";
+  else if(bytes[0]===255&&bytes[1]===216&&bytes[2]===255) type="image/jpeg";
+  else if(ascii(0,4)==="GIF8") type="image/gif";
+  else if(ascii(0,4)==="RIFF"&&ascii(8,12)==="WEBP") type="image/webp";
+  else if(ascii(0,4)==="RIFF"&&ascii(8,12)==="WAVE") type="audio/wav";
+  else if(ascii(0,4)==="OggS") type="audio/ogg";
+  else if(ascii(0,3)==="ID3"||(bytes[0]===255&&(bytes[1]&224)===224)) type="audio/mpeg";
+  return URL.createObjectURL(new Blob([data],{type}));
 }
 
 /**
