@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
-for (const width of [1280, 390]) test(`static Council Deck arrival and return at ${width}px`, async ({ page }) => {
+import {readFileSync} from "node:fs";
+const timeTree=JSON.parse(readFileSync("public/council/time-tree.json","utf8")) as {current:number;editions:{number:number;canopy:string}[]};
+for (const width of [1280, 390]) test(`historical Circle 235 arrival and return at ${width}px`, async ({ page }) => {
   // This checks the static data/UI seam; full GPU rendering is a separate local smoke check.
   test.setTimeout(60_000);
   // Reproduce a fragment being cleared during destination startup.
@@ -20,7 +22,7 @@ for (const width of [1280, 390]) test(`static Council Deck arrival and return at
       await route.fulfill({ response, body: source.slice(0, boundary) });
     });
   }
-  await page.goto("/tetol/circle-235/pre-fire/tetol.html?welcome=0#croom");
+  await page.goto("/tetol/circle-235/pre-fire/tetol.html?circle=235&welcome=0#croom");
   const back = page.locator("#council-return");
   await expect(back).toHaveAttribute("href", "/council-of-life?from=spatial-council&circle=235#previous-circle-235");
   await expect(page.locator("#panel")).toContainText("What is already blooming in us");
@@ -31,4 +33,13 @@ for (const width of [1280, 390]) test(`static Council Deck arrival and return at
   await back.click();
   await expect(page).toHaveURL(/council-of-life\?from=spatial-council/);
   await expect(page.locator("#previous-circle-235")).toBeInViewport();
+});
+
+test('default original TETOL entrance follows the published Circle',async({page})=>{
+ await page.route('**/*',r=>['127.0.0.1','localhost'].includes(new URL(r.request().url()).hostname)?r.continue():r.abort());
+ await page.goto('/tetol/circle-235/pre-fire/tetol.html?welcome=0#croom');
+ await expect(page.locator('#brandline')).toContainText(`Circle ${timeTree.current}`);
+ await expect(page.locator('#council-time-tree select')).toHaveValue(String(timeTree.current));
+ const current=timeTree.editions.find(e=>e.number===timeTree.current)!;
+ await expect(page.locator('#council-return')).toHaveAttribute('href',current.canopy);
 });

@@ -1,3 +1,4 @@
+import { publishedEdition } from "../../../../public/council/published-selector.js";
 import type { CurrentCircle } from "../../../../supabase/functions/_shared/currentCircle";
 
 /** The same published files the Council of Life page reads: the Time Tree selector and the current Circle catalogue. */
@@ -14,10 +15,9 @@ export async function loadPublishedCircle(fetcher: Fetcher = (u) => fetch(u, { h
   const treeRes = await fetcher(`${PUBLISHED_ORIGIN}${TIME_TREE}?t=${Date.now()}`);
   if (!treeRes.ok) return undefined;
   const tree = await treeRes.json() as TimeTree;
-  const n = tree?.current;
-  if (!Number.isInteger(n)) return undefined;
-  const edition = tree.editions?.find(e => e.number === n);
-  if (!edition || !/CURRENT/i.test(edition.state)) return undefined;
+  let edition;
+  try { edition=publishedEdition(tree); } catch { return undefined; }
+  const n=edition.number;
   const catRes = await fetcher(`${PUBLISHED_ORIGIN}/council/circle-${n}/catalogue.json?t=${Date.now()}`);
   if (!catRes.ok) return undefined;
   const cat = await catRes.json() as Catalogue;
