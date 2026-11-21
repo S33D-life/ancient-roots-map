@@ -17,10 +17,10 @@ describe("Agent Garden identity binding", () => {
     }
   });
 
-  it("rejects anonymous and mismatched identities while retaining privileged review", () => {
+  it("rejects anonymous and mismatched identities without trusting self-issued privileges", () => {
     expect(service).toContain("(!auth.userId && !auth.agentId)");
-    expect(service).toContain("auth.agentId === agentId || check.agent.owner_user_id === auth.userId");
-    expect(service).toContain('auth.scopes.includes("admin:*")');
+    expect(service).toContain("ownsAgentForRequest(auth,check.agent,agentId)");
+    expect(service).not.toContain('auth.scopes.includes("admin:*")');
     expect(service).toContain('error: "Not authorized for this agent"');
   });
 
