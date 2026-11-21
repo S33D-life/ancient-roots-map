@@ -1,3 +1,4 @@
+import { validPublicAgentKey, agentKeyAllowsMethod } from "./agentAuthority.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { identifyTreeSpecies } from "./services/speciesVision.ts";
@@ -87,11 +88,14 @@ async function authenticate(req: Request): Promise<AuthResult> {
       .single();
     if (token) {
       if (token.expires_at && new Date(token.expires_at).getTime() <= Date.now()) return noAuth;
+      const { data: profile } = await admin.from("agent_profiles").select("owner_user_id").eq("id", token.agent_id).maybeSingle();
+      if (!profile || !validPublicAgentKey(token,profile.owner_user_id)) return noAuth;
+      // Applies to existing keys too, before any migration/reissuance.
       return {
         userId: token.user_id,
         agentId: token.agent_id,
         roles: ["agent"],
-        scopes: token.scopes ?? ["read:public"],
+        scopes: ["read:public"],
         isAgent: true,
       };
     }
@@ -625,6 +629,7 @@ serve(async (req) => {
 
   try {
     const auth = await authenticate(req);
+    if(auth.isAgent && !agentKeyAllowsMethod(req.method)) return err("FORBIDDEN", "This key permits public reads only", 403);
     const match = matchRoute(req.method, path);
     if (!match) return err("NOT_FOUND", `No route: ${req.method} ${path}`, 404);
 

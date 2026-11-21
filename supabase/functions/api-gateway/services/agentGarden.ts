@@ -1,3 +1,4 @@
+import { ownsAgentForRequest } from "../agentAuthority.ts";
 /**
  * Agent Garden — Backend service handlers for the Tree Data Commons agent contribution protocol.
  *
@@ -67,9 +68,8 @@ async function verifyAgentAccess(auth: AuthResult, agentId: string): Promise<{ o
   if (!agentId || (!auth.userId && !auth.agentId)) return { ok: false, error: "Authentication required" };
   const check = await verifyAgent(agentId);
   if (!check.ok) return check;
-  const ownsAgent = auth.agentId === agentId || check.agent.owner_user_id === auth.userId;
-  const isPrivileged = auth.scopes.includes("admin:*");
-  if (!ownsAgent && !isPrivileged) return { ok: false, error: "Not authorized for this agent" };
+  const ownsAgent = ownsAgentForRequest(auth,check.agent,agentId);
+  if (!ownsAgent) return { ok: false, error: "Not authorized for this agent" };
   return check;
 }
 
