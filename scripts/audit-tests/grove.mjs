@@ -3,9 +3,9 @@
 // S33D_PGLITE=/tmp/s33d-db-harness/node_modules/@electric-sql/pglite/dist/index.js node scripts/audit-tests/grove.mjs
 import { readFileSync, readdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
-const { PGlite } = await import(process.env.S33D_PGLITE || '@electric-sql/pglite');
-const db = new PGlite();
-await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS;
+import {fixtureDatabase,assertBlocked,sessionAs} from '../lib/auditDatabase.mjs';
+const db = await fixtureDatabase();
+await db.exec(`DO $fixture$ BEGIN CREATE ROLE anon; EXCEPTION WHEN duplicate_object THEN NULL; END $fixture$; DO $fixture$ BEGIN CREATE ROLE authenticated; EXCEPTION WHEN duplicate_object THEN NULL; END $fixture$; DO $fixture$ BEGIN CREATE ROLE service_role BYPASSRLS; EXCEPTION WHEN duplicate_object THEN NULL; END $fixture$;
 CREATE SCHEMA auth; CREATE SCHEMA storage; CREATE TABLE auth.users(id uuid,email text); CREATE TABLE public.profiles(id uuid,full_name text,avatar_url text);
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
 CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT current_setting('request.jwt.claim.role',true) $$;
@@ -65,5 +65,21 @@ await as(owner); await db.query('SELECT set_grove_member_access($1,$2,true)',[gr
 await as(member); await assert.rejects(()=>db.query('SELECT contributor_email FROM life_grove_offerings')); checks++;
 await as(steward); await assert.rejects(()=>db.query('UPDATE life_groves SET created_by=$1 WHERE id=$2',[steward,grove])); checks++;
 await assert.rejects(()=>db.query("UPDATE life_groves SET privacy='public' WHERE id=$1",[grove])); checks++;
+if(db.connectSession){
+ await as(owner);const raceToken=(await db.query('SELECT manage_grove_invitation($1,true) AS t',[grove])).rows[0].t;
+ const a=await sessionAs(db,owner),b=await sessionAs(db,member),inspector=await db.connectSession();const pid=(await b.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;const apid=(await a.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
+ try{
+  await a.exec('BEGIN');await a.query('SELECT set_grove_member_access($1,$2,false)',[grove,member]);
+  const redeem=b.query('SELECT join_life_grove_with_token($1)',[raceToken]).then(()=>({ok:true}),()=>({ok:false}));
+  await assertBlocked(inspector,pid);await a.exec('COMMIT');assert.equal((await redeem).ok,false);
+  await a.query('SELECT set_grove_member_access($1,$2,true)',[grove,member]);
+  await b.exec('BEGIN');await b.query('SELECT join_life_grove_with_token($1)',[raceToken]);
+  const revoke=a.query('SELECT set_grove_member_access($1,$2,false)',[grove,member]);
+  await assertBlocked(inspector,apid);
+  await b.exec('COMMIT');await revoke;
+  assert.equal((await b.query('SELECT id FROM life_groves WHERE id=$1',[grove])).rows.length,0);
+  console.log('PASS PostgreSQL two-session revoke-before-redeem and redeem-before-revoke races');
+ }finally{await a.close();await b.close();await inspector.close();}
+}
 console.log(`PASS ${checks} actual PostgreSQL audience/invitation/media assertions (fictional records only)`);
 await db.close();

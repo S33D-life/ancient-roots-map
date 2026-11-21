@@ -66,3 +66,10 @@ The final database matrix includes expiry, revoked authors, old broad policies,
 email denial and delegated-steward ownership/visibility escalation (39 assertions).
 A separate read-only-permission CI job runs the pinned PostgreSQL fixture engine;
 no hosted database credentials or changed existing workflow triggers are used.
+
+Concurrency gap closed locally: PostgreSQL 17.12 was installed only under /tmp and
+started with listen_addresses empty, a mode-0700 Unix socket, and fictional data.
+Independent authenticated sessions were observed waiting on actual row locks.
+Both revoke-before-redeem and redeem-before-revoke finish with the member revoked.
+The new CI job uses pinned PostgreSQL 17.6 in a disposable loopback-only service
+and no secrets. This does not substitute for real Supabase Storage/Auth staging.

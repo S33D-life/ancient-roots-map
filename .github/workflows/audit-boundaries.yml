@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'scripts/audit-tests/**'
+      - 'scripts/lib/auditDatabase.mjs'
       - 'supabase/migrations/**'
       - 'supabase/functions/offering-media/**'
       - 'supabase/functions/api-gateway/**'
@@ -13,18 +14,32 @@ jobs:
   fictional-postgres:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: fixture_admin
+          POSTGRES_DB: postgres
+          # Disposable synthetic database, bound to runner loopback only.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:55441:5432'
+        options: >-
+          --health-cmd "pg_isready -U fixture_admin -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install isolated pinned PostgreSQL test engine
-        run: npm install --prefix "$RUNNER_TEMP/s33d-postgres-tests" --ignore-scripts --no-audit --no-fund @electric-sql/pglite@0.3.14
-      - name: Run fictional role and transaction tests without a hosted database
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Run fictional authorization and independent-session race tests
         shell: bash
+        env:
+          S33D_CI_POSTGRES: '1'
         run: |
           set -euo pipefail
-          export S33D_PGLITE="$RUNNER_TEMP/s33d-postgres-tests/node_modules/@electric-sql/pglite/dist/index.js"
           for test in scripts/audit-tests/*.mjs; do
             node "$test"
           done
