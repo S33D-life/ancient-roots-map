@@ -163,4 +163,24 @@ USING(bucket_id<>'offerings-private' OR EXISTS(SELECT 1 FROM public.life_grove_o
  o.media_url LIKE '%/offerings-private/' || storage.objects.name AND public.can_view_life_grove_offering(o.id,auth.uid())
  AND split_part(storage.objects.name,'/',1)=o.contributor_user_id::text AND split_part(storage.objects.name,'/',2)=o.life_grove_id::text
  AND COALESCE(to_jsonb(objects)->>'owner_id',to_jsonb(objects)->>'owner')=o.contributor_user_id::text));
+CREATE OR REPLACE FUNCTION public.guard_grove_identity() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
+BEGIN
+ IF NEW.created_by IS DISTINCT FROM OLD.created_by THEN RAISE EXCEPTION 'Grove ownership cannot be reassigned through a content edit'; END IF;
+ IF NEW.privacy IS DISTINCT FROM OLD.privacy AND auth.uid() IS DISTINCT FROM OLD.created_by AND current_setting('role',true)<>'service_role' THEN RAISE EXCEPTION 'Only the owner may change Grove visibility'; END IF;
+ RETURN NEW;
+END $$;
+CREATE TRIGGER guard_grove_identity BEFORE UPDATE ON public.life_groves FOR EACH ROW EXECUTE FUNCTION public.guard_grove_identity();
+-- A memory reader is not automatically entitled to the author's email.
+REVOKE SELECT ON public.life_grove_offerings FROM anon,authenticated;
+GRANT SELECT(id,life_grove_id,contributor_user_id,contributor_name,offering_type,title,body_text,media_url,visibility,memory_position_data,created_at,media_metadata,media_type,updated_at,hidden_at,hidden_by) ON public.life_grove_offerings TO anon,authenticated;
+CREATE OR REPLACE FUNCTION public.get_life_grove_contributors(p_grove_id uuid)
+RETURNS TABLE(user_id uuid,display_name text,avatar_url text,email text)
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+ IF NOT public.can_view_life_grove(p_grove_id,auth.uid()) THEN RAISE EXCEPTION 'Not authorised'; END IF;
+ RETURN QUERY SELECT DISTINCT pr.id,COALESCE(NULLIF(pr.full_name,''),'A Wanderer'),pr.avatar_url,
+ CASE WHEN public.is_grove_steward(p_grove_id,auth.uid()) THEN u.email::text ELSE NULL END
+ FROM public.life_grove_offerings o JOIN public.profiles pr ON pr.id=o.contributor_user_id LEFT JOIN auth.users u ON u.id=pr.id
+ WHERE o.life_grove_id=p_grove_id AND public.can_view_life_grove_offering(o.id,auth.uid());
+END $$;
 COMMIT;

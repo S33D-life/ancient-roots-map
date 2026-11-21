@@ -58,3 +58,11 @@ adds old broad policies and still denies unauthorised text/photo reads.
 Final local results: 31 PostgreSQL assertions PASS; 673 unit tests / 89 files and
 full release-check PASS. Existing unknown audience values are explicitly tested
 as author-only. No physical device or production integration acceptance claimed.
+
+Final security review additionally prevents content-edit ownership transfer and
+requires the primary owner for Grove visibility changes. Contributor emails are
+column-restricted; author-identity/contact RPCs respect exact memory audiences.
+The final database matrix includes expiry, revoked authors, old broad policies,
+email denial and delegated-steward ownership/visibility escalation (39 assertions).
+A separate read-only-permission CI job runs the pinned PostgreSQL fixture engine;
+no hosted database credentials or changed existing workflow triggers are used.
