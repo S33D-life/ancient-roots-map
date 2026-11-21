@@ -28,7 +28,10 @@ export default function LifeGroveInvitePage() {
   const { user, userId } = useCurrentUser();
   const queryClient = useQueryClient();
   const [composerOpen, setComposerOpen] = useState(false);
-  const [joined, setJoined] = useState(false);
+  const contextKey=`${userId ?? ""}:${inviteToken ?? ""}`;
+  const [joinedFor,setJoinedFor]=useState<string|null>(null);
+  const [failedFor,setFailedFor]=useState<string|null>(null);
+  const joined=!!userId && joinedFor===contextKey;
 
   const { data: grove, isLoading, isError } = useQuery({
     queryKey: ["life-grove-by-token", inviteToken, userId, joined],
@@ -40,18 +43,24 @@ export default function LifeGroveInvitePage() {
   // Redeem the invitation once, for a signed-in Wanderer only.
   useEffect(() => {
     if (!inviteToken || !userId || joined) return;
+    let active=true;
     joinGroveWithToken(inviteToken)
       .then(() => {
-        setJoined(true);
+        if(!active) return;
+        setJoinedFor(contextKey);
+        queryClient.invalidateQueries({queryKey:["life-groves"]});
         queryClient.invalidateQueries({ queryKey: ["grove-authority"] });
       })
       .catch((err) => {
+        if(!active) return;
+        setFailedFor(contextKey);
         toast(err instanceof Error ? err.message : "This invitation could not bloom.");
       });
-  }, [inviteToken, userId, joined, queryClient]);
+    return ()=>{active=false;};
+  }, [inviteToken, userId, joined, queryClient, contextKey]);
 
   if (!userId) return <main className="max-w-md mx-auto px-4 py-24"><h1>Private Grove invitation</h1><p>Sign in to check this invitation. No family details are shown before access is confirmed.</p><Link to={`/auth?returnTo=${encodeURIComponent(`/life-grove-invite/${inviteToken ?? ""}`)}`}>Sign in or create an account</Link></main>;
-  if (!joined) return <main className="p-8"><h1>Checking invitation</h1><p>If access is unavailable, ask a steward for a new invitation.</p></main>;
+  if (!joined) return <main className="p-8"><h1>{failedFor===contextKey ? "Invitation unavailable" : "Checking invitation"}</h1><p>If access is unavailable, ask a steward for a new invitation.</p><Link to="/heartwood/life-groves">Return to my Groves</Link></main>;
 
   const archetype = (grove?.tree_archetype_species ?? "oak") as TreeArchetype;
 

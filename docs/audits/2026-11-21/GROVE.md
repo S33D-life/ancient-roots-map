@@ -106,3 +106,11 @@ Final client byte-delivery regression: raster MIME is derived from byte signatur
 before creating the browser-local URL (no SVG/HTML MIME is trusted). A real PNG
 through the actual reader decodes in Chromium and WebKit in the isolated browser
 walkthrough; native iPhone/VoiceOver remain untested. Current unit total: 679.
+
+Final invitation UI acceptance adds four tests: no signed-out detail lookup;
+family details only after successful redemption; an honest expired-link state with
+Return to my Groves; and no reuse of another account's joined state. The final
+frontend release-check passes 683 tests. The actual PostgreSQL matrix remains 52
+assertions plus both independent-session revocation orderings. Before rollout,
+review legacy public media, old signed capabilities and existing browser drafts;
+new written drafts stay in memory, and no existing canonical memory is deleted.
