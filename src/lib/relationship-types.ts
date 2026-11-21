@@ -43,7 +43,7 @@ export const TIER_CONFIG: Record<
   witness: {
     label: "Witness",
     emoji: "👁️",
-    description: "Confirmed presence alongside another warden",
+    description: "You have been here with another warden",
     color: "text-blue-400",
   },
   steward: {
@@ -103,9 +103,9 @@ export function computeRelationship(stats: {
     const avgProg = Math.round((visitProg + stewProg + monthProg) / 3);
 
     const reqs: string[] = [];
-    if (totalVisits < 10) reqs.push(`${10 - totalVisits} more visits`);
-    if (stewardshipActions < 3) reqs.push(`${3 - stewardshipActions} more stewardship actions`);
-    if (monthsActive < 3) reqs.push(`${3 - monthsActive} more months of presence`);
+    if (totalVisits < 10) reqs.push("Return to this tree");
+    if (stewardshipActions < 3) reqs.push("Tend to this tree's record");
+    if (monthsActive < 3) reqs.push("Keep coming back through the seasons");
 
     return { tier: "steward", tierIndex: 2, stats, nextProgress: avgProg, nextRequirements: reqs };
   }
@@ -117,14 +117,14 @@ export function computeRelationship(stats: {
     const avgProg = Math.round((visitProg + contribProg) / 2);
 
     const reqs: string[] = [];
-    if (totalVisits < 3) reqs.push(`${3 - totalVisits} more visits`);
-    if ((offeringCount + stewardshipActions) < 1) reqs.push("Make an offering or contribution");
+    if (totalVisits < 3) reqs.push("Return to this tree");
+    if ((offeringCount + stewardshipActions) < 1) reqs.push("Leave something here");
 
     return { tier: "witness", tierIndex: 1, stats, nextProgress: avgProg, nextRequirements: reqs };
   }
 
   // Explorer: any visit
-  const reqs: string[] = ["Co-witness scan with another warden"];
+  const reqs: string[] = ["Witness this tree alongside another warden"];
   const prog = coWitnessCount > 0 ? 100 : 0;
 
   return { tier: "explorer", tierIndex: 0, stats, nextProgress: prog, nextRequirements: reqs };
