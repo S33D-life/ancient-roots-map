@@ -84,5 +84,10 @@ if(db.connectSession){
 await as(author); await db.query("INSERT INTO life_grove_offerings(life_grove_id,contributor_user_id,contributor_name,offering_type,media_type,media_url) VALUES($1,$2,'Fictional author','song','song','https://music.apple.com/fixture-track')",[grove,author]); checks++;
 await assert.rejects(()=>db.query("INSERT INTO life_grove_offerings(life_grove_id,contributor_user_id,contributor_name,offering_type,media_type,media_url) VALUES($1,$2,'Fictional author','song','song','https://fixture.invalid/storage/v1/object/public/offerings/family.jpg')",[grove,author])); checks++;
 await assert.rejects(()=>db.query("INSERT INTO life_grove_offerings(life_grove_id,contributor_user_id,contributor_name,offering_type,media_url) VALUES($1,$2,'Fictional author','song','https://fixture.invalid/storage/v1/object/public/offerings/family.jpg')",[grove,author])); checks++;
+await db.exec(`RESET ROLE; INSERT INTO life_groves(id,created_by,grove_title,privacy) VALUES('${id(30)}','${author}','Fictional public Grove','public');
+INSERT INTO life_grove_offerings(id,life_grove_id,contributor_user_id,contributor_name,offering_type,media_type,media_url,visibility) VALUES('${id(31)}','${id(30)}','${author}','Fictional author','photo','image','https://fixture.invalid/storage/v1/object/public/offerings-private/${author}/${id(30)}/public.jpg','public');
+INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private','${author}/${id(30)}/public.jpg','${author}');`);
+await as(null,'service_role'); assert.equal((await db.query('SELECT private_grove_media_path($1,NULL) AS p',[id(31)])).rows[0].p,`${author}/${id(30)}/public.jpg`); checks++;
+assert.equal((await db.query('SELECT private_grove_media_path($1,NULL) AS p',[only])).rows[0].p,null); checks++;
 console.log(`PASS ${checks} actual PostgreSQL audience/invitation/media assertions (fictional records only)`);
 await db.close();

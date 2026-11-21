@@ -2,7 +2,7 @@
  * offering-media — authoritative access path for private offering media.
  *
  * The browser asks for media by offering id. This function:
- *   1. identifies the caller from their JWT (anonymous callers are refused),
+ *   1. identifies the caller from their JWT (anonymous reads require an explicitly public memory in a public Grove),
  *   2. loads the offering record with service-role privileges,
  *   3. checks the record's own visibility rules via can_view_life_grove_offering,
  *   4. derives the storage object path from the stored record (never from the
@@ -33,7 +33,6 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.startsWith("Bearer ")) return json({ error: "unauthenticated" }, 401);
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -43,8 +42,9 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: userData } = await asCaller.auth.getUser();
-    const userId = userData?.user?.id;
-    if (!userId) return json({ error: "unauthenticated" }, 401);
+    const userId = userData?.user?.id ?? null;
+    // No identity is inferred from the request body. Anonymous callers can pass
+    // only the database's explicit public-memory/public-Grove branch.
 
     const body = await req.json().catch(() => ({}));
     const offeringId = typeof body?.offering_id === "string" ? body.offering_id : null;

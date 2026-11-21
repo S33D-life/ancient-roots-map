@@ -1,13 +1,8 @@
-/**
- * Private offering media — audience boundary contract.
- *
- * Mirrors the enforcement that now lives server-side:
- *  - storage.objects SELECT on `offerings-private` is owner-only,
- *  - every other viewer must go through the `offering-media` function, which
- *    checks public.can_view_life_grove_offering() and derives the object path
- *    from the stored record rather than the caller.
+/** Synthetic contract examples only. Real RLS/object/role authority is exercised
+ * in scripts/audit-tests/grove.mjs against PostgreSQL, not established by mirrors.
  */
 import { describe, it, expect } from "vitest";
+import { privateObjectPath } from "../../supabase/functions/offering-media/objectPath";
 import { isPrivateOfferingMedia, bucketForVisibility } from "@/utils/offeringMedia";
 
 const BASE = "https://example.supabase.co/storage/v1/object/public";
@@ -15,7 +10,8 @@ const BASE = "https://example.supabase.co/storage/v1/object/public";
 // ── Mirror of storage.objects SELECT policy on offerings-private ──
 function storageSelectAllowed(callerId: string | null, objectPath: string): boolean {
   if (!callerId) return false;
-  return objectPath.split("/")[0] === callerId;
+  const offering=world.offerings.find(o=>o.mediaUrl?.endsWith("/offerings-private/"+objectPath));
+  return !!offering && canViewOffering(world,offering.id,callerId);
 }
 
 // ── Mirror of public.can_view_life_grove_offering() ───────────────
@@ -37,9 +33,8 @@ interface World {
 function canViewOffering(world: World, offeringId: string, userId: string | null): boolean {
   const o = world.offerings.find((x) => x.id === offeringId);
   if (!o || o.hidden) return false;
-  if (userId && o.contributorId === userId) return true;
-  if (userId && (world.members[o.groveId] ?? []).includes(userId)) return true;
-  return world.groves[o.groveId]?.privacy === "public" && o.visibility === "public";
+  if (world.groves[o.groveId]?.privacy === "public" && o.visibility === "public") return true;
+  return !!userId && (world.members[o.groveId] ?? []).includes(userId) && (o.visibility === "family_only" || o.contributorId === userId);
 }
 
 /** Mirror of the offering-media function's request handling. */
@@ -47,15 +42,12 @@ function requestMedia(
   world: World,
   args: { callerId: string | null; offeringId?: string; objectPath?: string },
 ): { status: number; signedPath?: string } {
-  if (!args.callerId) return { status: 401 };
   if (!args.offeringId || !/^[0-9a-f-]{36}$/i.test(args.offeringId)) return { status: 400 };
   if (!canViewOffering(world, args.offeringId, args.callerId)) return { status: 403 };
   // Path comes from the record, never from the caller.
   const o = world.offerings.find((x) => x.id === args.offeringId)!;
-  const marker = "/offerings-private/";
-  const idx = o.mediaUrl?.indexOf(marker) ?? -1;
-  if (!o.mediaUrl || idx === -1) return { status: 404 };
-  return { status: 200, signedPath: o.mediaUrl.slice(idx + marker.length) };
+  const path=privateObjectPath(o.mediaUrl,o.contributorId,o.groveId);
+  return path ? {status:200,signedPath:path} : {status:404};
 }
 
 const OWNER = "11111111-1111-1111-1111-111111111111";
@@ -88,7 +80,7 @@ const world: World = {
 
 describe("Private offering media — who may obtain a link", () => {
   it("refuses an anonymous viewer", () => {
-    expect(requestMedia(world, { callerId: null, offeringId: PRIVATE_ID }).status).toBe(401);
+    expect(requestMedia(world, { callerId: null, offeringId: PRIVATE_ID }).status).toBe(403);
     expect(storageSelectAllowed(null, PRIVATE_PATH)).toBe(false);
   });
 
@@ -106,8 +98,8 @@ describe("Private offering media — who may obtain a link", () => {
     const res = requestMedia(world, { callerId: FAMILY, offeringId: PRIVATE_ID });
     expect(res.status).toBe(200);
     expect(res.signedPath).toBe(PRIVATE_PATH);
-    // …but not directly against storage.
-    expect(storageSelectAllowed(FAMILY, PRIVATE_PATH)).toBe(false);
+    // Direct storage also requires the exact authorised memory.
+    expect(storageSelectAllowed(FAMILY, PRIVATE_PATH)).toBe(true);
   });
 
   it("refuses a family/tribe viewer who is not a member of that circle", () => {
@@ -153,4 +145,9 @@ describe("Public offering media is unchanged", () => {
     expect(isPrivateOfferingMedia(pub.mediaUrl)).toBe(false);
     expect(canViewOffering(world, PUBLIC_ID, null)).toBe(true);
   });
+});
+
+describe("Exact audiences",()=>{
+ it("does not let a family member read Only me",()=>{const privateWorld:World={...world,offerings:world.offerings.map(o=>o.id===PRIVATE_ID?{...o,visibility:"private"}:o)};expect(requestMedia(privateWorld,{callerId:FAMILY,offeringId:PRIVATE_ID}).status).toBe(403);expect(requestMedia(privateWorld,{callerId:OWNER,offeringId:PRIVATE_ID}).status).toBe(200);});
+ it("permits anonymous signing only for the explicitly public memory",()=>{const publicWorld:World={...world,offerings:world.offerings.map(o=>o.id===PUBLIC_ID?{...o,mediaUrl:`${BASE}/offerings-private/${OWNER}/grove-2/pub.jpg`}:o)};expect(requestMedia(publicWorld,{callerId:null,offeringId:PUBLIC_ID}).status).toBe(200);expect(requestMedia(publicWorld,{callerId:null,offeringId:PRIVATE_ID}).status).toBe(403);});
 });

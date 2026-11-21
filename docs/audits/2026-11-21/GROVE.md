@@ -73,3 +73,10 @@ Independent authenticated sessions were observed waiting on actual row locks.
 Both revoke-before-redeem and redeem-before-revoke finish with the member revoked.
 The new CI job uses pinned PostgreSQL 17.6 in a disposable loopback-only service
 and no secrets. This does not substitute for real Supabase Storage/Auth staging.
+
+Latest compatibility check: 675 unit tests PASS and 45 actual PostgreSQL assertions
+PASS. Public catalogue songs remain references (never public-uploaded family files).
+Public Grove photos also stay in private storage and are signed for anonymous
+viewers only when the exact memory AND Grove are explicitly public; private and
+ambiguous records still deny them. Existing synthetic contract examples now match
+this rule, while actual SQL—not those examples—provides the security evidence.
