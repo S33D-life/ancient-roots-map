@@ -39,3 +39,10 @@ Additional final acceptance: Chromium and WebKit both PASS the historical Circle
 link now that an omitted edition means published current. Both engines also PASS
 the default 242 synthetic-adapter fixture. No physical iPhone/VoiceOver pass is
 claimed. All actual 234–241 catalogue/image/transcript bytes remain unchanged.
+
+Hosted CI 44916857480 found two stale static-seam tests that omitted circle=235
+while asserting historical 235. Product behaviour was correct. Those tests now
+pin their historical edition and retain all assertions; a separate full-runtime
+default test checks published current. Targeted Chromium: 3/3 PASS at 1280/390px
+and the default original entrance (13.3s). No triggers, budgets or assertions were
+removed. Fresh hosted CI is required on the resulting head.
