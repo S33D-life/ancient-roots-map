@@ -21,14 +21,14 @@ await db.exec('GRANT SELECT,INSERT,UPDATE,DELETE ON public.life_groves,public.li
 await db.exec(readFileSync('supabase/migrations/20261121150000_grove_audience_and_invites.sql','utf8'));
 const id = n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const [owner,author,member,steward,removed,grove,only,family,unknown]=[1,2,3,4,5,10,20,21,22].map(id);
-const path=`${author}/${grove}/photo.jpg`; const media=`https://fixture.invalid/storage/v1/object/public/offerings-private/${path}`;
+const familyPath=`${author}/${grove}/family.jpg`; const path=`${author}/${grove}/photo.jpg`; const media=`https://fixture.invalid/storage/v1/object/public/offerings-private/${path}`;
 await db.exec(`INSERT INTO life_groves(id,created_by,grove_title) VALUES('${grove}','${owner}','Fictional Grove');
 INSERT INTO life_grove_members(life_grove_id,user_id,revoked_at) VALUES('${grove}','${author}',NULL),('${grove}','${member}',NULL),('${grove}','${removed}',now());
 INSERT INTO life_grove_stewards(life_grove_id,user_id) VALUES('${grove}','${steward}');
 INSERT INTO life_grove_offerings(id,life_grove_id,contributor_user_id,contributor_name,body_text,visibility,media_url) VALUES
 ('${only}','${grove}','${author}','Fictional author','Only me text','private','${media}'),
-('${family}','${grove}','${author}','Fictional author','Family text','family_only',NULL);
-INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private','${path}','${author}');
+('${family}','${grove}','${author}','Fictional author','Family text','family_only','https://fixture.invalid/storage/v1/object/public/offerings-private/${familyPath}');
+INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private','${path}','${author}'),('offerings-private','${familyPath}','${author}');
 `);
 await db.exec(`ALTER TABLE life_grove_offerings DISABLE TRIGGER grove_memory_guard;
 INSERT INTO life_grove_offerings(id,life_grove_id,contributor_user_id,contributor_name,body_text,visibility) VALUES('${unknown}','${grove}','${author}','Fictional author','Legacy unknown audience','ambiguous_legacy');
@@ -40,9 +40,9 @@ for(const [user,expectedOnly,expectedFamily] of [[author,true,true],[member,fals
  for(const [memory,want] of [[only,expectedOnly],[family,expectedFamily],[unknown,expectedOnly]]) {
   const {rows}=await db.query(`SELECT id FROM life_grove_offerings WHERE id=$1`,[memory]); assert.equal(rows.length,want?1:0); checks++;
  }
- if(user){ const {rows}=await db.query('SELECT name FROM storage.objects'); assert.equal(rows.length,expectedOnly?1:0); checks++; }
+ if(user){ const {rows}=await db.query('SELECT name FROM storage.objects'); assert.equal(rows.length,(expectedOnly?1:0)+(expectedFamily?1:0)); checks++; }
 }
-await as(null,'anon'); await assert.rejects(()=>db.query('SELECT * FROM get_life_grove_by_invite_token($1)',['bad'])); checks++;
+await as(null,'anon'); await assert.rejects(()=>db.query('SELECT name FROM storage.objects')); checks++; await assert.rejects(()=>db.query('SELECT * FROM get_life_grove_by_invite_token($1)',['bad'])); checks++;
 await as(owner); let t=(await db.query('SELECT manage_grove_invitation($1,true) AS t',[grove])).rows[0].t;
 await as(removed); await assert.rejects(()=>db.query('SELECT join_life_grove_with_token($1)',[t])); checks++;
 await as(member); assert.equal((await db.query('SELECT join_life_grove_with_token($1) AS g',[t])).rows[0].g,grove); checks++;

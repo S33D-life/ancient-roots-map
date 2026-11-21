@@ -59,7 +59,7 @@ BEGIN
  IF NEW.visibility NOT IN ('private','family_only','public') THEN RAISE EXCEPTION 'Choose an explicit memory audience'; END IF;
  IF NEW.visibility='public' AND NOT EXISTS(SELECT 1 FROM public.life_groves WHERE id=NEW.life_grove_id AND privacy='public') THEN RAISE EXCEPTION 'This Grove is private'; END IF;
  -- No new public-media references, including a later visibility switch.
- IF NEW.media_url IS NOT NULL AND (TG_OP='INSERT' OR NEW.media_url IS DISTINCT FROM OLD.media_url) AND
+ IF NEW.media_url IS NOT NULL AND (TG_OP='INSERT' OR NEW.media_url IS DISTINCT FROM OLD.media_url OR NEW.visibility IS DISTINCT FROM OLD.visibility) AND
     position('/offerings-private/' || NEW.contributor_user_id::text || '/' || NEW.life_grove_id::text || '/' IN NEW.media_url)=0 THEN
   RAISE EXCEPTION 'Grove media must use its private, author-owned object';
  END IF;
