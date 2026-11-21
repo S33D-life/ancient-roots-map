@@ -1,3 +1,4 @@
+import { foundingActivationPath, foundingEmailReturn } from "@/lib/life-groves/foundingAuthReturn";
 import { checkRecoveryReadiness, finishRecovery, recordAuthEvidence, safeAuthError } from "@/lib/auth/sessionEvidence";
 import { returnContext } from "@/lib/auth/returnContext";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -148,6 +149,8 @@ const AuthPage = () => {
   const { toast } = useToast();
 
   const resolvePostAuthPath = useCallback(() => {
+    const founding=foundingActivationPath(searchParams.get("returnTo"));
+    if(founding) return founding;
     // Check bot handoff first — it may carry a destination
     const handoff = getStoredHandoff();
     if (handoff?.intent || handoff?.returnTo) {
@@ -754,7 +757,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: addr,
-        options: { emailRedirectTo: `${window.location.origin}/welcome` },
+        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),inviteCode.trim() || searchParams.get("invite")) },
       });
       if (error) throw error;
       writePendingEmail(addr);
@@ -872,7 +875,7 @@ const AuthPage = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/welcome` },
+        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),inviteCode.trim() || searchParams.get("invite")) },
       });
       if (error) {
         if (error.message.includes("User already registered")) {
@@ -936,7 +939,7 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/welcome` },
+        options: { emailRedirectTo: foundingEmailReturn(window.location.origin,searchParams.get("returnTo"),inviteCode.trim() || searchParams.get("invite")) },
       });
       if (error) throw error;
       setView("magic-sent");
