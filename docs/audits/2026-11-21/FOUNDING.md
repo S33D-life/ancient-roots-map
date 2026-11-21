@@ -74,3 +74,12 @@ the production archive builder. The resulting fictional backer tar was inspected
 memories.json plus photos/00000000-0000-4000-8000-000000000200.png. Body text and PNG
 signature/68 original bytes match; no remote media URL is included. No public file,
 actual backer invitation, payment, account or family memory was created.
+
+Actual browser-download acceptance: scripts/audit-export-browser.mjs compiles the
+production GroveArchiveDownload and archive builder with fictional transport only,
+using the SQL-exported payload. Chromium AND WebKit emitted real download events;
+both saved tar files were opened with Python tarfile. Each contains the permitted
+memory and one exact 68-byte PNG (hash above), without a remote media reference.
+This proves the download interaction/format locally, not live Storage permissions.
+Final source release-check: 92 files / 685 tests PASS, typecheck/lint/security/
+static/share/duplicate/asset guards and production build PASS.
