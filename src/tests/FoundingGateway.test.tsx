@@ -16,10 +16,10 @@ describe('informational S33D founding gateway',()=>{
   expect(screen.getByRole('link',{name:'Join or sign in for free'})).toHaveAttribute('href',ROUTES.AUTH);
   expect(screen.getByText(/Some group Whisper channels use earned Hearts/)).toBeInTheDocument();
  });
- it('keeps proposed rewards and Christmas gifting distinct from fulfilled services and donations',()=>{
-  visit();expect(screen.getByText(/£33 for a defined first year/)).toHaveTextContent('£111 total');
-  expect(screen.getByText(/Christmas gifting is being explored/)).toBeInTheDocument();
-  expect(screen.getByText(/No campaign URL or checkout is available here/)).toBeInTheDocument();
+ it('states the approved first-year offer without inventing renewal or donation benefits',()=>{
+  visit();expect(screen.getByText(/one year of S33D access including a private Life Grove/)).toBeInTheDocument();
+  expect(screen.getByText(/First invitations are planned from 21 December 2026/)).toBeInTheDocument();
+  expect(screen.getByText(/No checkout is enabled here/)).toHaveTextContent(/remain open decisions/);
   expect(screen.getByRole('link',{name:'View the existing S33D Giveth project'})).toHaveAttribute('href','https://giveth.io/project/s33dlife');
   expect(screen.getByText(/Donations do not purchase a Grove/)).toBeInTheDocument();
  });

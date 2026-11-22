@@ -7,7 +7,9 @@ for(const width of [320,390,1440])test(`founding gateway remains free-entry and 
  const main=page.getByRole('main');await expect(main.getByRole('heading',{name:'Welcome to S33D',exact:true})).toBeVisible();
  await expect(main.getByRole('link',{name:'Join or sign in for free'})).toHaveAttribute('href','/auth');
  await expect(main.getByRole('link',{name:'Visit the weekly Council'})).toHaveAttribute('href','/council-of-life');
- await expect(main.getByText('Crowdfunder — preparing launch',{exact:true})).toBeVisible();
+ await expect(main.getByText('Founding Grove - account required',{exact:true})).toBeVisible();
+ await expect(main.getByText('First invitations are planned from 21 December 2026. Manually issued invitations will support new and existing accounts.',{exact:true})).toBeVisible();
+ await expect(main.getByText(/Your year begins when you activate your Grove/)).toBeVisible();
  await expect(main.getByRole('link',{name:'View the existing S33D Giveth project'})).toHaveAttribute('href','https://giveth.io/project/s33dlife');
  await expect(main.locator('form,input,textarea,button')).toHaveCount(0);
  expect(await main.locator('a').evaluateAll(links=>links.every(a=>!a.href.includes('crowdfunder.')&&!a.href.includes('stripe.')))).toBe(true);

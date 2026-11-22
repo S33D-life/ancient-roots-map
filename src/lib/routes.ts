@@ -51,6 +51,7 @@ export const ROUTES = {
   SUPPORT: "/support",
   /** Informational founding gateway; no collection or checkout. */
   FOUNDING: "/support/founding",
+  FOUNDING_ACTIVATE: "/founding-grove/activate/:token",
   /** Guardian Harvest Exchange */
   HARVEST: "/harvest",
   /** Harvest detail */

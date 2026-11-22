@@ -99,4 +99,5 @@ assert.equal((await db.query("SELECT name FROM storage.objects WHERE name=$1",[`
 await as(owner);await db.query('SELECT set_grove_member_access($1,$2,false)',[grove,removed]);
 await as(removed);await assert.rejects(()=>db.query("INSERT INTO storage.objects(bucket_id,name,owner_id) VALUES('offerings-private',$1,$2)",[`${removed}/${grove}/removed.jpg`,removed])); checks++;
 console.log(`PASS ${checks} actual PostgreSQL audience/invitation/media assertions (fictional records only)`);
-await db.close();
+if (!process.env.S33D_KEEP_TEST_DB) await db.close();
+export {db,id,as};
