@@ -71,10 +71,10 @@ test('2D entry and selector agree with the original Tree at phone and desktop wi
  test.setTimeout(180000);
  for(const width of [320,1440]){
   await page.setViewportSize({width,height:900});await page.goto('/council-of-life');
-  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 241');
-  const entry=page.getByRole('link',{name:'Enter Circle 241 in the original 3D TETOL Council Deck →'});
-  await expect(entry).toHaveAttribute('href',`${root}?circle=241#croom`);await entry.click();
-  await waitForScene(page);await assertEdition(page,241);
+  await expect(page.getByRole('region',{name:'Current Circle'})).toContainText('Circle 242');
+  const entry=page.getByRole('link',{name:'Enter Circle 242 in the original 3D TETOL Council Deck →'});
+  await expect(entry).toHaveAttribute('href',`${root}?circle=242#croom`);await entry.click();
+  await waitForScene(page);await assertEdition(page,242);
   await page.goto('/council/238');await page.getByRole('combobox',{name:'Choose a Council Circle'}).selectOption('237');
   await expect(page).toHaveURL(/\/council\/237$/);await expect(page.locator('.council-time-tree')).toContainText('HISTORICAL');
   await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page).toHaveURL(/\/review\/council\/236$/);
