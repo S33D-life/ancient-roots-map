@@ -24,7 +24,7 @@ const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
   const location = useLocation();
   const returnEdition = Number(new URLSearchParams(location.search).get('circle'));
-  const selectedEdition = timeTree.editions.some(e => e.number === returnEdition) ? returnEdition : Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237|238|239|240)/)?.[1] || timeTree.current);
+  const selectedEdition = timeTree.editions.some(e => e.number === returnEdition) ? returnEdition : Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237|238|239|240|241)/)?.[1] || timeTree.current);
   const [deckNode, setDeckNode] = useState<string | null>(null);
   const doorway = useRef<HTMLButtonElement>(null);
   const closeDeck = useRef<HTMLButtonElement>(null);
@@ -51,8 +51,9 @@ const CouncilOfLifePage = () => {
       <CouncilTimeTree number={selectedEdition} />
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
       <PublishedCouncilCard tree={timeTree} catalogues={publishedCatalogues} />
+      <section id="previous-circle-241" className="canopy-field-note" aria-label="Previous Circle 241"><p className="parchment-kicker">PREVIOUS · 16–22 November 2026</p><h2>Circle 241</h2><p>Its original companions, inquiry and folios remain unchanged.</p><a className="parchment-action" href="/council/circle-241/index.html">Revisit Circle 241</a><a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=241#croom">Revisit Circle 241 in original TETOL</a></section>
       <section id="previous-circle-240" className="canopy-field-note" aria-label="Previous Circle 240">
-        <p className="parchment-kicker">PREVIOUS · 9–15 November 2026</p>
+        <p className="parchment-kicker">HISTORICAL · 9–15 November 2026</p>
         <h2>{circle240.title}</h2><p>{circle240.question}</p>
         <p>Ten companions in Hornbeam frames. No Fire was scheduled.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE240}>Enter Circle 240 · meet its companions →</Link>

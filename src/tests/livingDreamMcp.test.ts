@@ -19,7 +19,7 @@ const ctx = new ToolContext({ type: "oauth", principal: {
   acceptedAudiences: ["authenticated"], scopes: [], sub: "test-user",
 }, bearer: { token: "test-only-verified-context" } });
 const PUBLISHED_TREE = JSON.parse(readFileSync("public/council/time-tree.json", "utf8"));
-const PUBLISHED_CATALOGUE = JSON.parse(readFileSync("public/council/circle-241/catalogue.json", "utf8"));
+const PUBLISHED_CATALOGUE = JSON.parse(readFileSync("public/council/circle-242/catalogue.json", "utf8"));
 const [circleTool, listTool, detailTool] = createLivingDreamTools();
 afterEach(() => vi.restoreAllMocks());
 
@@ -103,7 +103,7 @@ describe("Living Dream read-only MCP", () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
       const u = String(url);
       if (u.includes("/council/time-tree.json")) return Response.json(PUBLISHED_TREE);
-      if (u.includes("/council/circle-241/catalogue.json")) return Response.json(PUBLISHED_CATALOGUE);
+      if (u.includes("/council/circle-242/catalogue.json")) return Response.json(PUBLISHED_CATALOGUE);
       return Response.json({ keys: [key] });
     });
     const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -162,10 +162,10 @@ describe("Living Dream read-only MCP", () => {
       Response.json(String(url).includes("time-tree") ? PUBLISHED_TREE : PUBLISHED_CATALOGUE));
     const response = await circleTool.handler({}, ctx);
     const circle = response.structuredContent?.circle as Record<string, any>;
-    expect(circle.number).toBe(241);
-    expect(circle.title).toBe("Circle 241");
+    expect(circle.number).toBe(242);
+    expect(circle.title).toBe("Circle 242");
     expect(circle.weekState).toBe("CURRENT / OPEN");
-    expect(circle.links.tetol.url).toBe("https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html?circle=241#croom");
+    expect(circle.links.tetol.url).toBe("https://www.s33d.life/tetol/circle-235/pre-fire/tetol.html?circle=242#croom");
     expect(response.structuredContent?.provenance).toMatchObject({ source: "https://www.s33d.life/council/time-tree.json" });
   });
   it("fails closed when the published selector and catalogue disagree", async () => {

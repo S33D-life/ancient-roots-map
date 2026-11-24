@@ -1,4 +1,5 @@
 import { LivingFrame239 } from '../circle-239/living-frame.js';
+import { appendLearningNotes } from './learning-notes.js';
 
 async function renderReview() {
   const response = await fetch('./catalogue.json');
@@ -10,14 +11,12 @@ async function renderReview() {
       return companions.find(item => item.key === key)?.reverse;
     }
 
-    appendLibraryLinks() {
-      // Link verified destinations when the edition is activated.
-    }
+    appendLibraryLinks(container, key) { appendLearningNotes(container, companions.find(item => item.key === key)); }
   }
 
   customElements.define('circle-242-preview-frame', Circle242PreviewFrame);
   document.querySelector('#question').textContent = question || 'Weekly inquiry awaiting curatorial approval.';
-  document.querySelector('#notice').textContent = 'Private preparation — not published. Individual folio prompts are companion invitations, not separate weekly inquiries.';
+  document.querySelector('#notice').textContent = 'The Keepers of Winter’s Threshold. Individual folio prompts are companion invitations, not separate weekly inquiries.';
   const list = document.querySelector('#companions');
   for (const companion of companions) {
     const item = document.createElement('li');

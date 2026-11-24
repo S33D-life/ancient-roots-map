@@ -5,13 +5,13 @@
     "start": "2026-11-23",
     "end": "2026-11-29"
   },
-  "status": "PRIVATE_REVIEW",
-  "question": null,
+  "status": "CURRENT / OPEN",
+  "question": "What does the living world keep alive through the darker days?",
   "proposedQuestion": "What does the living world keep alive through the darker days?",
   "proposedThread": "The Keepers of Winter’s Threshold",
   "fire": null,
-  "publicationApproved": false,
-  "assetsReady": false,
+  "publicationApproved": true,
+  "assetsReady": true,
   "companions": [
     {
       "order": 1,
@@ -21,9 +21,27 @@
       "kind": "Ancient Friend",
       "scientificName": "Platanus × acerifolia",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "Where in your life are you being asked to stand broad, open and sheltering?",
+      "sources": [],
+      "artwork": "/council/circle-242/ely-london-plane-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "c31f3400c5c2495f47864c466b16811f0c52f0bedd1a4d9374c18f14f22392a5",
+      "alt": "Great London Plane of Ely — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/ely-london-plane.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "2ba3cab1da552f0ea692f4ee8b8d00894a80198cf535a0b09763cb564b0630fa",
+        "alt": "Great London Plane of Ely — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nGreat London Plane of Ely\nPlatanus × acerifolia\nThe broad-canopied witness of open sky and stone.\n\nNATURAL HISTORY\nLondon plane is a vigorous hybrid tree, long valued in towns, parks and avenues. Its patchwork bark peels in plates to reveal pale green, cream and olive beneath, while broad maple-like leaves and hanging seed-balls mark the seasons. It can grow immense, casting a spacious canopy that feels both civic and sheltering.\n\nECOLOGY & CONNECTIONS\nA mature plane offers shade, roosting places and refuge for urban wildlife. Rough bark, old cavities and branch architecture create niches for insects, lichens and birds, while fallen leaves feed the living soil below. In open landscapes it becomes a gathering tree — a living roof for meeting, rest, play and quiet thought.\n\nTRADITIONS & LORE\nPlane trees have long been planted where people gather: beside roads, in commons, near schools and along public walks. They are trees of welcome, endurance and civic memory — companions to conversation and crossing. The Great London Plane of Ely stands in that tradition, joining rooted strength with an open, generous presence.\n\nA REFLECTION\nWide-limbed and weather-bright, the Plane\nholds a room beneath the sky.\nIts bark remembers change without losing form,\nand its shade invites the world to draw near.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhere in your life are you being asked\nto stand broad, open and sheltering?\n\nIMAGE CAPTIONS\nMottled bark (detail)\nPlane leaf and seed-balls\n",
+        "transcriptSha256": "b429eb99b7c4759bfab3c3c21585b5a785704044de03b02e4027594a213d730f",
+        "privateReview": false
+      },
+      "learningNote": "An imagined illustration of Ely’s Great London Plane, which stands in a walled garden. London plane is also named Platanus × hispanica; Platanus × acerifolia is a synonym. Its planting date and age are estimates, not a verified birthday.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nGreat London Plane of Ely\nPlatanus × acerifolia\nThe broad-canopied witness of open sky and stone.\n\nNATURAL HISTORY\nLondon plane is a vigorous hybrid tree, long valued in towns, parks and avenues. Its patchwork bark peels in plates to reveal pale green, cream and olive beneath, while broad maple-like leaves and hanging seed-balls mark the seasons. It can grow immense, casting a spacious canopy that feels both civic and sheltering.\n\nECOLOGY & CONNECTIONS\nA mature plane offers shade, roosting places and refuge for urban wildlife. Rough bark, old cavities and branch architecture create niches for insects, lichens and birds, while fallen leaves feed the living soil below. In open landscapes it becomes a gathering tree — a living roof for meeting, rest, play and quiet thought.\n\nTRADITIONS & LORE\nPlane trees have long been planted where people gather: beside roads, in commons, near schools and along public walks. They are trees of welcome, endurance and civic memory — companions to conversation and crossing. The Great London Plane of Ely stands in that tradition, joining rooted strength with an open, generous presence.\n\nA REFLECTION\nWide-limbed and weather-bright, the Plane\nholds a room beneath the sky.\nIts bark remembers change without losing form,\nand its shade invites the world to draw near.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhere in your life are you being asked\nto stand broad, open and sheltering?\n\nIMAGE CAPTIONS\nMottled bark (detail)\nPlane leaf and seed-balls\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 2,
@@ -33,9 +51,27 @@
       "kind": "Tree Species",
       "scientificName": "Ilex aquifolium",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What does the living world keep alive through the darker days?",
+      "sources": [],
+      "artwork": "/council/circle-242/holly-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "4d0b28ab91bcf5335ff14db486877496e5a4be1da465ace2b7948fc14036f5bf",
+      "alt": "Holly — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/holly.webp",
+        "width": 1536,
+        "height": 1024,
+        "sha256": "1d6512359679b1c5746635133196988d2caaa2aa1947448bc9493bba190b32ae",
+        "alt": "Holly — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nHolly\nIlex aquifolium\nThe evergreen that holds the winter.\n\nNATURAL HISTORY\nHolly is a native tree of Britain, found in woodlands, hedgerows and ancient landscapes. It can live for hundreds of years, reaching 10–20 metres, often as a tree or a dense, sheltering shrub. Its glossy, spiny leaves and bright red berries make it one of the most recognisable trees in our winter world.\n\nECOLOGY & CONNECTIONS\nHolly is a vital winter resource. Its berries feed birds such as blackbird, thrush, robin and waxwing when other food is scarce. Its dense, evergreen cover offers shelter and nesting places, and its spring flowers provide nectar and pollen for bees and other pollinators. Holly helps to keep woodland edges rich and resilient.\n\nTRADITIONS & LORE\nIn Celtic tradition, Holly was a tree of protection, renewal and life through winter. It was hung in homes to bring good fortune and keep away harm, and often paired with Ivy as a symbol of balance — light and dark, rest and return. Its ever-living leaves remind us that life continues, even when the land seems to sleep.\n\nA REFLECTION\nAmong bare branches, Holly stands green,\na quiet flame in the winter’s breath.\nIt shelters, feeds and keeps the promise\nthat life endures, and will return.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat does the living world keep alive\nthrough the darker days?\n\nIMAGE CAPTIONS\nHolly flowers (Spring)\nHolly berries (Winter)\n",
+        "transcriptSha256": "dac614ebb11f621f231f6446b674cec31f80332394e61383e4351837cecd456a",
+        "privateReview": false
+      },
+      "learningNote": "Evergreen holly shelters wildlife. Its berries feed birds but are harmful if eaten by people. Real holly flowers typically have four petals. Heights and bird visitors vary; the foliage and flower details here are stylised. The reference to ‘Celtic tradition’ is unverified folklore.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nHolly\nIlex aquifolium\nThe evergreen that holds the winter.\n\nNATURAL HISTORY\nHolly is a native tree of Britain, found in woodlands, hedgerows and ancient landscapes. It can live for hundreds of years, reaching 10–20 metres, often as a tree or a dense, sheltering shrub. Its glossy, spiny leaves and bright red berries make it one of the most recognisable trees in our winter world.\n\nECOLOGY & CONNECTIONS\nHolly is a vital winter resource. Its berries feed birds such as blackbird, thrush, robin and waxwing when other food is scarce. Its dense, evergreen cover offers shelter and nesting places, and its spring flowers provide nectar and pollen for bees and other pollinators. Holly helps to keep woodland edges rich and resilient.\n\nTRADITIONS & LORE\nIn Celtic tradition, Holly was a tree of protection, renewal and life through winter. It was hung in homes to bring good fortune and keep away harm, and often paired with Ivy as a symbol of balance — light and dark, rest and return. Its ever-living leaves remind us that life continues, even when the land seems to sleep.\n\nA REFLECTION\nAmong bare branches, Holly stands green,\na quiet flame in the winter’s breath.\nIt shelters, feeds and keeps the promise\nthat life endures, and will return.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat does the living world keep alive\nthrough the darker days?\n\nIMAGE CAPTIONS\nHolly flowers (Spring)\nHolly berries (Winter)\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 3,
@@ -45,9 +81,27 @@
       "kind": "Plant",
       "scientificName": "Achillea millefolium",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What in you is ready to mend, gather and rejoin the whole?",
+      "sources": [],
+      "artwork": "/council/circle-242/yarrow-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "5fc8c678d792e3785500499da00919ae964117b2aa7db26a2273afe768d90dfd",
+      "alt": "Yarrow — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/yarrow.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "debbf913794e80d8be12d242afe6ee395d3a665151a2c17b3bad948cc6a160f3",
+        "alt": "Yarrow — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nYarrow\nAchillea millefolium\nThe field herb that gathers healing light.\n\nNATURAL HISTORY\nYarrow is a hardy perennial of meadows, paths and open ground. Its finely divided, feather-like leaves and flat-topped clusters of tiny white flowers make it one of the most recognisable wild herbs of summer. It spreads by root and seed, returning year after year with a quiet, enduring presence.\n\nECOLOGY & CONNECTIONS\nYarrow is a generous plant for pollinators, drawing bees, hoverflies, beetles and butterflies to its many small florets. It thrives in lean soils and sunny places, helping weave resilient meadow communities. Its long flowering season makes it a faithful bridge between abundance and decline.\n\nTRADITIONS & LORE\nLinked in legend to Achilles, Yarrow has long been associated with mending and protection. It has been used in herbal traditions for wounds, boundaries and blessing, and has also appeared in folklore as a plant of divination and steadfast love. It carries an old memory of healing close at hand.\n\nA REFLECTION\nFeather-leaved and many-flowered,\nYarrow keeps the memory of repair.\nIt gathers small lives around it, and\nteaches that healing is often humble,\npatient and near.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat in you is ready to mend,\ngather and rejoin the whole?\n\nIMAGE CAPTIONS\nYarrow flowers\nFeathery leaf detail\n",
+        "transcriptSha256": "268fe22bd4db1984d19926fe4e5ef17abed1729a7cf8aafbad4bbf16d618e5d5",
+        "privateReview": false
+      },
+      "learningNote": "Yarrow is a meadow perennial with finely divided leaves and many tiny flowers. The healing language here describes poetry and traditional associations, not a medical recommendation.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nYarrow\nAchillea millefolium\nThe field herb that gathers healing light.\n\nNATURAL HISTORY\nYarrow is a hardy perennial of meadows, paths and open ground. Its finely divided, feather-like leaves and flat-topped clusters of tiny white flowers make it one of the most recognisable wild herbs of summer. It spreads by root and seed, returning year after year with a quiet, enduring presence.\n\nECOLOGY & CONNECTIONS\nYarrow is a generous plant for pollinators, drawing bees, hoverflies, beetles and butterflies to its many small florets. It thrives in lean soils and sunny places, helping weave resilient meadow communities. Its long flowering season makes it a faithful bridge between abundance and decline.\n\nTRADITIONS & LORE\nLinked in legend to Achilles, Yarrow has long been associated with mending and protection. It has been used in herbal traditions for wounds, boundaries and blessing, and has also appeared in folklore as a plant of divination and steadfast love. It carries an old memory of healing close at hand.\n\nA REFLECTION\nFeather-leaved and many-flowered,\nYarrow keeps the memory of repair.\nIt gathers small lives around it, and\nteaches that healing is often humble,\npatient and near.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat in you is ready to mend,\ngather and rejoin the whole?\n\nIMAGE CAPTIONS\nYarrow flowers\nFeathery leaf detail\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 4,
@@ -57,9 +111,27 @@
       "kind": "Seed",
       "scientificName": "Lodoicea maldivica",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "How do you care for what is rare, slow and irreplaceable?",
+      "sources": [],
+      "artwork": "/council/circle-242/coco-de-mer-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "89529ef66faad6381cb8b361a25d10efdf578525c6cec253dbd139371160a2b7",
+      "alt": "Coco de Mer — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/coco-de-mer.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "406ea6bc7fa1da728ac4fe558014d1e70846a58d097c220280bcb3adf63d84a5",
+        "alt": "Coco de Mer — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nCoco de Mer\nLodoicea maldivica\nThe giant seed that carries an island mystery.\n\nNATURAL HISTORY\nCoco de mer is an extraordinary palm found naturally only in the Seychelles. Its immense double-lobed seed is the largest in the plant kingdom, and the tree itself grows slowly, taking many years to flower and fruit. Separate male and female trees shape one of the most remarkable life cycles in the botanical world.\n\nECOLOGY & CONNECTIONS\nThis great palm belongs to ancient island forests, where moisture, shade and time all matter. Its broad leaves help shape the forest floor, and its rare seeds speak of a habitat that cannot be hurried. Coco de mer reminds us that some forms of life depend on patience, protection and ecological wholeness.\n\nTRADITIONS & LORE\nBefore its true home was known, coco de mer seeds were found floating at sea and were once believed to come from trees growing beneath the ocean. The seed became a marvel of trade, story and imagination, and today iit stands as an emblem of rarity and wonder — a treasure best honoured through care rather than possession.\n\nA REFLECTION\nImmense and tidal-shaped, Coco de Mer\nasks for a slower measure of value.\nIt teaches that what is rare and ancient\nis not ours to seize, but ours to protect.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nHow do you care for what is rare,\nslow and irreplaceable?\n\nIMAGE CAPTIONS\nGiant seed detail\nPalm frond\n",
+        "transcriptSha256": "0d596d5f825d1b37a9b0e4246cc80072ddafec1785a6451f4a35fb8138c91613",
+        "privateReview": false
+      },
+      "learningNote": "The living palm has large fan-shaped leaves; the painting stylises its fronds. Its double-lobed seed is distinct from the surrounding fruit. Viable seeds are too dense to float like coconuts; stories of drifting material are not a dispersal guide.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nCoco de Mer\nLodoicea maldivica\nThe giant seed that carries an island mystery.\n\nNATURAL HISTORY\nCoco de mer is an extraordinary palm found naturally only in the Seychelles. Its immense double-lobed seed is the largest in the plant kingdom, and the tree itself grows slowly, taking many years to flower and fruit. Separate male and female trees shape one of the most remarkable life cycles in the botanical world.\n\nECOLOGY & CONNECTIONS\nThis great palm belongs to ancient island forests, where moisture, shade and time all matter. Its broad leaves help shape the forest floor, and its rare seeds speak of a habitat that cannot be hurried. Coco de mer reminds us that some forms of life depend on patience, protection and ecological wholeness.\n\nTRADITIONS & LORE\nBefore its true home was known, coco de mer seeds were found floating at sea and were once believed to come from trees growing beneath the ocean. The seed became a marvel of trade, story and imagination, and today it stands as an emblem of rarity and wonder — a treasure best honoured through care rather than possession.\n\nA REFLECTION\nImmense and tidal-shaped, Coco de Mer\nasks for a slower measure of value.\nIt teaches that what is rare and ancient\nis not ours to seize, but ours to protect.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nHow do you care for what is rare,\nslow and irreplaceable?\n\nIMAGE CAPTIONS\nGiant seed detail\nPalm frond\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 5,
@@ -69,9 +141,27 @@
       "kind": "Leaf",
       "scientificName": "Acer campestre",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What quiet edge in your life is asking to be noticed and valued?",
+      "sources": [],
+      "artwork": "/council/circle-242/field-maple-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "945649a04c34f6f69f7a9e8d4208f540d1498bd5b362d556604e8959442669b3",
+      "alt": "Field Maple — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/field-maple.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "326eeaea2d25d6462600af651bf6241bfe43a7485587d360e1c5707fbc40c8f9",
+        "alt": "Field Maple — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nField Maple\nAcer campestre\nThe hedgerow leaf that turns the margins gold.\n\nNATURAL HISTORY\nField Maple is Britain’s native maple, most often found in hedgerows, woodland edges and old field boundaries. It is a modest tree, yet full of grace, with small five-lobed leaves, neat branching and paired winged seeds. In autumn it turns cleat yellow and amber, lighting quiet margins with colour.\n\nECOLOGY & CONNECTIONS\nField Maple supports many insects and offers shelter for birds within thick hedges and mixed countryside edges. Its flowers feed pollinators in spring, and its leaves and seeds become part of the wider web of seasonal exchange. It is a tree of connected places — lanes, fields, gardens and village greens.\n\nTRADITIONS & LORE\nThough less celebrated than oak or ash, Field Maple has long belonged to the lived texture of rural life. It is a tree of boundaries, craft and everyday beauty, often woven into hedge-lines and farmed landscapes. Its gift is not grandeur but companionship — a native presence that belongs by staying near.\n\nA REFLECTION\nSmall in stature and bright in turning,\nField Maple keeps the beauty of the edge.\nIt teaches that quiet places, faithfully held,\ncan glow with their own importance.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat quiet edge in your life is asking\nto be noticed and valued?\n\nIMAGE CAPTIONS\nField Maple flowers (Spring)\nAutumn leaf\nWinged seeds (Samaras)\n",
+        "transcriptSha256": "fb4fe45bfe86f1745390f9cf503f6ec9ca39dda900ebfa203839912ca000311a",
+        "privateReview": false
+      },
+      "learningNote": "Field maple, Acer campestre, has five blunt, rounded lobes and rounded teeth. The leaf and insets have been corrected while retaining the Holly frame. The printed “cleat yellow” should read “clear yellow”.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nField Maple\nAcer campestre\nThe hedgerow leaf that turns the margins gold.\n\nNATURAL HISTORY\nField Maple is Britain’s native maple, most often found in hedgerows, woodland edges and old field boundaries. It is a modest tree, yet full of grace, with small five-lobed leaves, neat branching and paired winged seeds. In autumn it turns clear yellow and amber, lighting quiet margins with colour.\n\nECOLOGY & CONNECTIONS\nField Maple supports many insects and offers shelter for birds within thick hedges and mixed countryside edges. Its flowers feed pollinators in spring, and its leaves and seeds become part of the wider web of seasonal exchange. It is a tree of connected places — lanes, fields, gardens and village greens.\n\nTRADITIONS & LORE\nThough less celebrated than oak or ash, Field Maple has long belonged to the lived texture of rural life. It is a tree of boundaries, craft and everyday beauty, often woven into hedge-lines and farmed landscapes. Its gift is not grandeur but companionship — a native presence that belongs by staying near.\n\nA REFLECTION\nSmall in stature and bright in turning,\nField Maple keeps the beauty of the edge.\nIt teaches that quiet places, faithfully held,\ncan glow with their own importance.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat quiet edge in your life is asking\nto be noticed and valued?\n\nIMAGE CAPTIONS\nField Maple flowers (Spring)\nAutumn leaf\nWinged seeds (Samaras)\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 6,
@@ -81,9 +171,27 @@
       "kind": "Flower",
       "scientificName": "Hedera helix",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "Where is life still flowering in you — late, faithful and full of offering?",
+      "sources": [],
+      "artwork": "/council/circle-242/ivy-blossom-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "a53901fa434a914a553bdee0bd295dfc00f2ceb7687438cb9904fda867c867d7",
+      "alt": "Ivy Blossom — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/ivy-blossom.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "e945aae2188ccc47a1726b52dccc6d9c4b3d9ba5c99a59114eedf933df09aff6",
+        "alt": "Ivy Blossom — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nIvy Blossom\nHedera helix\nThe late flower that keeps the season open.\n\nNATURAL HISTORY\nIvy is an evergreen climber and woodland companion, but its flowering phase is one of the quiet wonders of autumn. When many plants are fading, Ivy lifts pale green-yellow flower clusters into the late light. Its glossy leaves, wandering stems and seasonal transformation make it both familiar and full of surprise.\n\nECOLOGY & CONNECTIONS\nIvy blossom is one of the most valuable late nectar sources for bees, hoverflies and wasps, and its berries later feed birds through winter. Dense ivy cover also offers nesting shelter and refuge. It stands at the turning of the year, feeding life when other doors are closing.\n\nTRADITIONS & LORE\nIn folklore, Ivy has long symbolised endurance, fidelity and the power of life to persist through dark seasons. It is often paired with Holly as a balancing companion — evergreen with evergreen, shelter with shelter. Ivy teaches the strength of climbing, clinging and quietly remaining.\n\nA REFLECTION\nLate-flowering and ever-climbing,\nIvy keeps the season open. It reminds us\nthat life does not end where summer fades;\nit gathers itself and offers again.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhere is life still flowering in you —\nlate, faithful and full of offering?\n\nIMAGE CAPTIONS\nIvy flowers\nGlossy leaf detail\n",
+        "transcriptSha256": "11c71bd6edeb426ce6ccdd508f5dd821aa48b4ee5c0dca835b1237993d28c73a",
+        "privateReview": false
+      },
+      "learningNote": "Ivy has two leaf forms: juvenile shoots usually bear lobed leaves; mature flowering shoots bear unlobed leaves. This painting combines the stages.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nIvy Blossom\nHedera helix\nThe late flower that keeps the season open.\n\nNATURAL HISTORY\nIvy is an evergreen climber and woodland companion, but its flowering phase is one of the quiet wonders of autumn. When many plants are fading, Ivy lifts pale green-yellow flower clusters into the late light. Its glossy leaves, wandering stems and seasonal transformation make it both familiar and full of surprise.\n\nECOLOGY & CONNECTIONS\nIvy blossom is one of the most valuable late nectar sources for bees, hoverflies and wasps, and its berries later feed birds through winter. Dense ivy cover also offers nesting shelter and refuge. It stands at the turning of the year, feeding life when other doors are closing.\n\nTRADITIONS & LORE\nIn folklore, Ivy has long symbolised endurance, fidelity and the power of life to persist through dark seasons. It is often paired with Holly as a balancing companion — evergreen with evergreen, shelter with shelter. Ivy teaches the strength of climbing, clinging and quietly remaining.\n\nA REFLECTION\nLate-flowering and ever-climbing,\nIvy keeps the season open. It reminds us\nthat life does not end where summer fades;\nit gathers itself and offers again.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhere is life still flowering in you —\nlate, faithful and full of offering?\n\nIMAGE CAPTIONS\nIvy flowers\nGlossy leaf detail\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 7,
@@ -93,9 +201,27 @@
       "kind": "Fruit",
       "scientificName": "Vaccinium spp.",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What sweetness is ripening quietly in your life?",
+      "sources": [],
+      "artwork": "/council/circle-242/blueberries-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "ac8351e0f989ac13d8a2ba1b2cc6efd813796966d568987b39cba6bf3e5cf4a0",
+      "alt": "Blueberries — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/blueberries.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "8e3219f79cc9695011dd7524aa7cecd5547a277da7e6ae466ecb34f50203127e",
+        "alt": "Blueberries — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nBlueberries\nVaccinium spp.\nThe blue fruit that gathers summer into sweetness.\n\nNATURAL HISTORY\nBlueberries belong to the Vaccinium family, a group of shrubs known for their bell-shaped flowers and dusky blue fruits. They thrive best in acidic soils and bright, open places, whether in woodland clearings, moorland kinlands or cultivated gardens. Their fruit carries both freshness and depth, ripening slowly into summer sweetness.\n\nECOLOGY & CONNECTIONS\nBlueberries feed bees when in flower and later nourish birds, mammals and people with their abundant berries. Their shrubs offer cover close to the ground, and their fruiting ties together pollinators, foragers and seed-dispersers. They are a reminder that sweetness is part of ecology, not apart from it.\n\nTRADITIONS & LORE\nBlue fruits have long belonged to summer gathering, preserving and sharing. Whether eaten fresh, baked, dried or made into jam, blueberries carry a sense of abundance held in small form. They belong to the basket, the path and the berry-stained hand — gifts of season, memory and delight.\n\nA REFLECTION\nRound and blue with gathered light,\nBlueberries ripen by degrees.\nThey teach that sweetness often arrives\nquietly, one small fruit at a time.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat sweetness is ripening quietly\nin your life?\n\nIMAGE CAPTIONS\nBerry cluster\nLeaf detail\n",
+        "transcriptSha256": "110a5d63e2c090d2fedf9f5a088981a088ad6f369dd25311a9e54ba0a6530f5f",
+        "privateReview": false
+      },
+      "learningNote": "Blueberries belong to the genus Vaccinium, in the family Ericaceae. This companion represents blueberries at genus level, not an identified cultivar or species. The printed ‘Vaccinium family’ is incorrect; ‘moorland kinlands’ is a wording error.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nBlueberries\nVaccinium spp.\nThe blue fruit that gathers summer into sweetness.\n\nNATURAL HISTORY\nBlueberries belong to the genus Vaccinium, in the heath family (Ericaceae), a group of shrubs known for their bell-shaped flowers and dusky blue fruits. They thrive best in acidic soils and bright, open places, whether in woodland clearings, heathlands or cultivated gardens. Their fruit carries both freshness and depth, ripening slowly into summer sweetness.\n\nECOLOGY & CONNECTIONS\nBlueberries feed bees when in flower and later nourish birds, mammals and people with their abundant berries. Their shrubs offer cover close to the ground, and their fruiting ties together pollinators, foragers and seed-dispersers. They are a reminder that sweetness is part of ecology, not apart from it.\n\nTRADITIONS & LORE\nBlue fruits have long belonged to summer gathering, preserving and sharing. Whether eaten fresh, baked, dried or made into jam, blueberries carry a sense of abundance held in small form. They belong to the basket, the path and the berry-stained hand — gifts of season, memory and delight.\n\nA REFLECTION\nRound and blue with gathered light,\nBlueberries ripen by degrees.\nThey teach that sweetness often arrives\nquietly, one small fruit at a time.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat sweetness is ripening quietly\nin your life?\n\nIMAGE CAPTIONS\nBerry cluster\nLeaf detail\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 8,
@@ -105,9 +231,27 @@
       "kind": "Fungus",
       "scientificName": "Trametes versicolor",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What in your life is ready to become soil for new growth?",
+      "sources": [],
+      "artwork": "/council/circle-242/turkey-tail-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "234ef1149fc6656cfbe1d952c11e862ddfdd28b407486468842c7f9b44110a47",
+      "alt": "Turkey Tail — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/turkey-tail.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "edc786c19fd598399706ac0fdeda83b18480641d44820e2b19a37c0088ebb118",
+        "alt": "Turkey Tail — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nTurkey Tail\nTrametes versicolor\nThe layered fan that returns wood to earth.\n\nNATURAL HISTORY\nTurkey Tail is a thin, shelf-like bracket fungus found on fallen branches, stumps and decaying logs. Its many bands of brown, grey, cream and rust give it the look of layered feathers, which is how it earned its name. It is common, beautiful and easy to overlook until one kneels close to the wood.\n\nECOLOGY & CONNECTIONS\nAs a white-rot fungus, Turkey Tail helps break down wood and return its matter to the living system. It turns fallen timber into habitat, food and soil, opening space for insects, mosses, microbes and future growth. It is one of the quiet recyclers that keeps woodland cycles moving.\n\nTRADITIONS & LORE\nTurkey Tail has become one of the most widely recognised medicinal fungi in modern herbal and mycological conversation, while its patterned bands have long inspired simple wonder. It teaches that beauty often appears in the work of decay, and that endings can be richly inhabited.\n\nA REFLECTION\nLayer upon layer, Turkey Tail opens on\nfallen wood like a patient fan. It reminds\nus that what is breaking down may also\nbe feeding what comes next.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat in your life is ready to\nbecome soil for new growth?\n\nIMAGE CAPTIONS\nBracket layers\nPore underside detail\n",
+        "transcriptSha256": "7a9e888eedc2c8ce6eefa5c82c40cf211189bec4d7ffaed8140406aa89418f9b",
+        "privateReview": false
+      },
+      "learningNote": "Turkey Tail recycles dead wood and has fine pores underneath. The enlarged underside detail is stylised. ‘Medicinal’ here refers to traditional associations and research, not a treatment or an identification/edibility claim.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nTurkey Tail\nTrametes versicolor\nThe layered fan that returns wood to earth.\n\nNATURAL HISTORY\nTurkey Tail is a thin, shelf-like bracket fungus found on fallen branches, stumps and decaying logs. Its many bands of brown, grey, cream and rust give it the look of layered feathers, which is how it earned its name. It is common, beautiful and easy to overlook until one kneels close to the wood.\n\nECOLOGY & CONNECTIONS\nAs a white-rot fungus, Turkey Tail helps break down wood and return its matter to the living system. It turns fallen timber into habitat, food and soil, opening space for insects, mosses, microbes and future growth. It is one of the quiet recyclers that keeps woodland cycles moving.\n\nTRADITIONS & LORE\nTurkey Tail is studied for its biology and has traditional associations; its patterned bands inspire wonder. This is an ecology-led reading, not a treatment claim. It teaches that beauty often appears in the work of decay, and that endings can be richly inhabited.\n\nA REFLECTION\nLayer upon layer, Turkey Tail opens on\nfallen wood like a patient fan. It reminds\nus that what is breaking down may also\nbe feeding what comes next.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat in your life is ready to\nbecome soil for new growth?\n\nIMAGE CAPTIONS\nBracket layers\nPore underside detail\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 9,
@@ -117,9 +261,27 @@
       "kind": "Book",
       "scientificName": null,
       "author": "Ken Carey",
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What part of you is being called to remember a larger belonging?",
+      "sources": [],
+      "artwork": "/council/circle-242/return-of-the-bird-tribes-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "e597cc47077e759a8511772a4ecb50d70bd619d642ce48bd596b36d83aef2ac9",
+      "alt": "Return of the Bird Tribes — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/return-of-the-bird-tribes.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "fab1d372cb0e65e4e361935a29f9906e138003cf7439671ca4ada9df4f643e12",
+        "alt": "Return of the Bird Tribes — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nReturn of the Bird Tribes\nKen Carey\nA visionary book of remembrance and kinship.\n\nABOUT THE BOOK\nReturn of the Bird Tribes is a visionary work by Ken Carey that speaks in a lyrical, prophetic voice about humanity, consciousness and the living Earth. It invites the reader to step beyond ordinary habit and remember a more sacred relationship with the world. The book feels less like an argument and more like a summons.\n\nTHEMES & GIFTS\nAwakening, imagination, service and reverence run through the book like bright threads. Birds appear as messengers of perspective, migration and soul-memory, carrying the sense that another way of being human is still possible. It is a text that asks not only to be read, but listened to.\n\nCOUNCIL & CONNECTIONS\nFor the Council of Life, this book offers companionship in the work of remembering kinship with creation. It speaks to those who feel that culture can turn again toward humility, wonder and participation in a larger living order. Its gift is to re-open the conversation between spirit, Earth and responsibility.\n\nA REFLECTION\nSome books do not simply inform; they call.\nReturn of the Bird Tribes opens a skyward path,\nasking what it would mean to remember\nour place in the great living chorus.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat part of you is being called\nto remember a larger belonging?\n\nIMAGE CAPTIONS\nFeather detail\nOpen sky\nIllustrated book: Return of the Bird Tribes\n",
+        "transcriptSha256": "8580221370e6968d49045c36b7cb2657ce7d9d56786cc055743b7118c67abf80",
+        "privateReview": false
+      },
+      "learningNote": "An imagined binding for Ken Carey’s Return of the Bird Tribes. Its spiritual narrative is the author’s literary perspective, not a historical account or representative Indigenous teaching.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nReturn of the Bird Tribes\nKen Carey\nA visionary book of remembrance and kinship.\n\nABOUT THE BOOK\nReturn of the Bird Tribes is a visionary work by Ken Carey that speaks in a lyrical, prophetic voice about humanity, consciousness and the living Earth. It invites the reader to step beyond ordinary habit and remember a more sacred relationship with the world. The book feels less like an argument and more like a summons.\n\nTHEMES & GIFTS\nAwakening, imagination, service and reverence run through the book like bright threads. Birds appear as messengers of perspective, migration and soul-memory, carrying the sense that another way of being human is still possible. It is a text that asks not only to be read, but listened to.\n\nCOUNCIL & CONNECTIONS\nFor the Council of Life, this book offers companionship in the work of remembering kinship with creation. It speaks to those who feel that culture can turn again toward humility, wonder and participation in a larger living order. Its gift is to re-open the conversation between spirit, Earth and responsibility.\n\nA REFLECTION\nSome books do not simply inform; they call.\nReturn of the Bird Tribes opens a skyward path,\nasking what it would mean to remember\nour place in the great living chorus.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat part of you is being called\nto remember a larger belonging?\n\nIMAGE CAPTIONS\nFeather detail\nOpen sky\nIllustrated book: Return of the Bird Tribes\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     },
     {
       "order": 10,
@@ -129,9 +291,28 @@
       "kind": "Bird",
       "scientificName": "Tyto alba",
       "author": null,
-      "artwork": null,
-      "reverse": null,
-      "rightsStatus": "PENDING"
+      "reflectionInvitation": "What helps you listen more deeply and move with grace through the dark?",
+      "sources": [],
+      "artwork": "/council/circle-242/barn-owl-front.webp",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "de7b8d124d772f85f0cbf2d4a05e7758a98126e97e94365b6852c73204e04895",
+      "alt": "Barn Owl — front companion illustration in a Holly-decorated live-edge frame",
+      "reverse": {
+        "artwork": "/council/circle-242/barn-owl.webp",
+        "width": 1448,
+        "height": 1086,
+        "sha256": "2b82a12ad44f8d03e334770a6d01eb2afb3c2b93a0002c4f5880b94b540fbb55",
+        "alt": "Barn Owl — reverse learning folio; full transcript follows",
+        "readableText": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nBarn Owl\nTyto alba\nThe pale-winged hunter of dusk and meadow.\n\nNATURAL HISTORY\nBarn Owl is one of Britain’s most recognisable birds of prey, known for its pale plumage, heart-shaped face and almost silent flight. It hunts mainly at dusk and after dark, quartering meadows and rough grass for voles and other small mammals. It nests in barns, towers, tree cavities and other quiet sheltered places.\n\nECOLOGY & CONNECTIONS\nBarn Owls depend on rich grassland habitats, hedgerows and field margins that hold abundant prey. Their pellets tell the story of local small-mammal life, making them messengers of place as well as hunters within it. Where Barn Owls thrive, a whole web of rough meadow life is often still intact.\n\nTRADITIONS & LORE\nIn folklore, Barn Owls have often been seen as ghost-birds, night-watchers or omens, their pale forms drifting through the dark. Yet they also carry another meaning: stillness, precision and listening. They belong to the threshold between fear and wonder, reminding us that the night is full of presence.\n\nA REFLECTION\nSoft-winged and lantern-faced, the Barn Owl\nmoves through dusk with still attention.\nIt teaches that there is a way of knowing\nthat comes not by noise, but by listening.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat helps you listen more deeply\nand move with grace through the dark?\n\nIMAGE CAPTIONS\nFacial disc detail\nWinter meadow\n",
+        "transcriptSha256": "7feb7b21ad5df4d9fc68e3df34d7aaea5370b3af295862afb9250ab863ce8916",
+        "privateReview": false
+      },
+      "learningNote": "Barn Owl, Tyto alba, hunts small mammals over suitable grassland. This is an illustration, not a recorded sighting or a nesting-location record.",
+      "invitationNote": "An invitation from this companion — the image labels this “Council Question”. The weekly Council inquiry is separate.",
+      "correctedReading": "The Council of Life\nCIRCLE 242 · 23–29 NOVEMBER 2026\n\nBarn Owl\nTyto alba\nThe pale-winged hunter of dusk and meadow.\n\nNATURAL HISTORY\nBarn Owl is one of Britain’s most recognisable birds of prey, known for its pale plumage, heart-shaped face and almost silent flight. It hunts mainly at dusk and after dark, quartering meadows and rough grass for voles and other small mammals. It nests in barns, towers, tree cavities and other quiet sheltered places.\n\nECOLOGY & CONNECTIONS\nBarn Owls depend on rich grassland habitats, hedgerows and field margins that hold abundant prey. Their pellets tell the story of local small-mammal life, making them messengers of place as well as hunters within it. Where Barn Owls thrive, a whole web of rough meadow life is often still intact.\n\nTRADITIONS & LORE\nIn folklore, Barn Owls have often been seen as ghost-birds, night-watchers or omens, their pale forms drifting through the dark. Yet they also carry another meaning: stillness, precision and listening. They belong to the threshold between fear and wonder, reminding us that the night is full of presence.\n\nA REFLECTION\nSoft-winged and lantern-faced, the Barn Owl\nmoves through dusk with still attention.\nIt teaches that there is a way of knowing\nthat comes not by noise, but by listening.\n\nTHE COUNCIL QUESTION [printed heading; this is a companion invitation, not a separate weekly inquiry]\nWhat helps you listen more deeply\nand move with grace through the dark?\n\nIMAGE CAPTIONS\nFacial disc detail\nWinter meadow\n",
+      "rightsStatus": "OWNER_PUBLIC_USE_APPROVED"
     }
-  ]
+  ],
+  "thread": "The Keepers of Winter’s Threshold."
 }
