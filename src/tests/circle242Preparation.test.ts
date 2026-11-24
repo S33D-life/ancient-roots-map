@@ -44,6 +44,7 @@ describe('Circle 242 Holly release',()=>{
  it('uses the original Tree without data writes or reward activation',()=>{
   const source=readFileSync('public/tetol/circle-235/pre-fire/runtime/companion-frames-242.js','utf8');
   expect(source).toContain("from '/council/circle-239/living-frame.js'");expect(source).toContain('D.council.active = 242');
+  expect(source).toContain('body[data-q] aside#panel #grab');expect(source).toContain('pointer-events:auto!important');
   expect(source).toContain('No scheduled Fire');expect(source).not.toMatch(/supabase|\.insert\(|\.update\(|issueReward/);
  });
 });

@@ -9,6 +9,11 @@ export function connectLivingFrames(scene) {
 export async function installCompanionFrames(D) {
   const circle = await loadEdition();
   const companions = circle.companions;
+  // Reuse the earlier Council guard: the opening quiet question must not disable
+  // the real panel buttons or #grab. Scope this to the loaded 242 edition only.
+  const style = document.createElement('style');
+  style.textContent = 'body.grace-p.g-arriving aside#panel,body[data-q] aside#panel #grab,body[data-q] aside#panel .pbody>*{opacity:1!important;pointer-events:auto!important}';
+  document.head.append(style);
   D.nodes.c242 = {...D.nodes.c233, name:'Circle 242', circle:242, parent:'croom', question:circle.question, actions:[], relations:[], lives:[]};
   D.council.circles[242] = {node:'c242', number:242, status:'open', companions:companions.map((item, index) => {
     D.nodes[item.id] = {...D.nodes.yewc233, name:item.label, sub:item.kind, circle:242, parent:'croom',
