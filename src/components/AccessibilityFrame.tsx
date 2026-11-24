@@ -13,6 +13,7 @@ import {
 
 interface AccessibilityFrameProps {
   tier: EffectiveAccessibilityTier;
+  publicRecordOnly?: boolean;
   /** "card" = ~2-3px (preview cards). "hero" = ~3-4px (detail page). */
   size?: "card" | "hero";
   /** Match the wrapped element's corner radius. */
@@ -23,6 +24,7 @@ interface AccessibilityFrameProps {
 
 export default function AccessibilityFrame({
   tier,
+  publicRecordOnly = false,
   size = "card",
   rounded = "rounded-xl",
   className,
@@ -41,7 +43,7 @@ export default function AccessibilityFrame({
           ? `0 0 0 ${borderWidth}px ${v.border}, 0 0 14px ${v.glow}, inset 0 0 12px ${v.glow}`
           : `0 0 0 ${borderWidth}px ${v.border}, 0 0 8px ${v.glow}`,
       }}
-      aria-label={`Accessibility: ${v.label}`}
+      aria-label={`Accessibility: ${publicRecordOnly && tier === "public" ? "Public record" : v.label}`}
       data-accessibility-tier={tier}
     >
       {children}

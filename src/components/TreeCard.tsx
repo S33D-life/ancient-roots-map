@@ -1,3 +1,4 @@
+import { treeLocationLabel, isManagedPublicRecord } from "@/lib/treeLocationEvidence";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -179,7 +180,7 @@ const TreeCard = ({
   if (variant === "compact") {
     return (
       <>
-      <AccessibilityFrame tier={accessTier} size="card" rounded="rounded-lg">
+      <AccessibilityFrame publicRecordOnly={isManagedPublicRecord(tree, accessTier)} tier={accessTier} size="card" rounded="rounded-lg">
       <Card
         className="border-transparent hover:border-primary/30 transition-all duration-300 cursor-pointer group bg-card"
         onClick={handleClick}
@@ -268,7 +269,7 @@ const TreeCard = ({
   /* ── Gallery variant (full card) ── */
   return (
     <>
-    <AccessibilityFrame tier={accessTier} size="card" rounded="rounded-xl">
+    <AccessibilityFrame publicRecordOnly={isManagedPublicRecord(tree, accessTier)} tier={accessTier} size="card" rounded="rounded-xl">
     <Card className="border-transparent hover:border-primary/25 transition-all duration-400 relative group bg-card overflow-hidden">
       {/* Hero image */}
       {heroPhotoUrl && (
@@ -385,6 +386,8 @@ const TreeCard = ({
                 Known since {knownSince}
               </p>
             )}
+
+            {treeLocationLabel(tree) && <p className="text-xs leading-relaxed text-primary">{treeLocationLabel(tree)}</p>}
 
             {/* Line 2: Grounding — w3w only (hive + age moved to identity cluster) */}
             {tree.what3words && (
