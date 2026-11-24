@@ -29,6 +29,10 @@ for(const width of [320,390,1440])test(`242: ten full pairs and visible readings
 });
 test('242 original Tree: opening-pause clicks, ten folios, Time Tree and Staff Room',async({page})=>{
  test.setTimeout(90_000);await page.setViewportSize({width:1440,height:1000});
+ // Match the established original-Tree acceptance cadence: real drawing at 4fps
+ // avoids saturating CI's software GPU while keeping every interaction assertion.
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),250);window.cancelAnimationFrame=id=>clearTimeout(id);});
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=242#croom');await page.waitForFunction(()=>!!(window as any).__tetol);
  // Keep the actual quiet-pause state active to catch pointer interception, not bypass it.
  await page.evaluate(()=>document.body.dataset.q='question');
