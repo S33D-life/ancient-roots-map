@@ -50,7 +50,11 @@ test('242 original Tree: opening-pause clicks, ten folios, Time Tree and Staff R
  // avoids saturating CI's software GPU while keeping every interaction assertion.
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.addInitScript(()=>{window.requestAnimationFrame=cb=>window.setTimeout(()=>cb(performance.now()),250);window.cancelAnimationFrame=id=>clearTimeout(id);});
- await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=242#croom');await page.waitForFunction(()=>!!(window as any).__tetol);await boundDrawing(page);
+ // Verify a fresh Staff Room deep link first, without a fifth full Tree boot at teardown.
+ await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=242#staff');
+ await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await boundDrawing(page);
+ await page.waitForFunction(()=>!!(window as any).__tetol);await expect(page.getByRole('heading',{name:'Staff Room',exact:true})).toBeAttached();await drawRealFrame(page);
+ await page.evaluate(()=>(window as any).TETOL_NAV.do('goTo','croom'));
  // Keep the actual quiet-pause state active to catch pointer interception, not bypass it.
  await page.evaluate(()=>document.body.dataset.q='question');
  for(const c of circle.companions){
@@ -61,8 +65,8 @@ test('242 original Tree: opening-pause clicks, ten folios, Time Tree and Staff R
   await expect(f.getByText('Learning note — '+c.learningNote,{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Return to the Council Deck',exact:true}).click();
  }
- await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page.locator('#brandline')).toContainText('241 · PREVIOUS');await page.waitForFunction(()=>!!(window as any).__tetol);await boundDrawing(page);await drawRealFrame(page);
- await page.getByRole('link',{name:'Next Circle →',exact:true}).click();await expect(page.locator('#brandline')).toContainText('242 · CURRENT / OPEN');await page.waitForFunction(()=>!!(window as any).__tetol);await boundDrawing(page);await drawRealFrame(page);
+ await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page.locator('#brandline')).toContainText('241 · PREVIOUS');await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await boundDrawing(page);await page.waitForFunction(()=>!!(window as any).__tetol);await drawRealFrame(page);
+ await page.getByRole('link',{name:'Next Circle →',exact:true}).click();await expect(page.locator('#brandline')).toContainText('242 · CURRENT / OPEN');await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await boundDrawing(page);await page.waitForFunction(()=>!!(window as any).__tetol);await drawRealFrame(page);
  await page.goBack();await expect(page.locator('#brandline')).toContainText('241 · PREVIOUS');
- await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=242#staff');await expect(page.getByRole('heading',{name:'Staff Room',exact:true})).toBeAttached();
+ await page.waitForFunction(()=>!!(document.querySelector('three-d-stage') as any)?._renderer);await boundDrawing(page);await page.waitForFunction(()=>!!(window as any).__tetol);await drawRealFrame(page);
 });
