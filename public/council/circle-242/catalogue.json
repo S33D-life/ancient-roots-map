@@ -1,0 +1,137 @@
+{
+  "number": 242,
+  "title": "The Council of Life · Circle 242 · Holly Edition",
+  "week": {
+    "start": "2026-11-23",
+    "end": "2026-11-29"
+  },
+  "status": "PRIVATE_REVIEW",
+  "question": null,
+  "proposedQuestion": "What does the living world keep alive through the darker days?",
+  "proposedThread": "The Keepers of Winter’s Threshold",
+  "fire": null,
+  "publicationApproved": false,
+  "assetsReady": false,
+  "companions": [
+    {
+      "order": 1,
+      "key": "ely-london-plane",
+      "id": "c242-ely-london-plane",
+      "label": "Great London Plane of Ely",
+      "kind": "Ancient Friend",
+      "scientificName": "Platanus × acerifolia",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 2,
+      "key": "holly",
+      "id": "c242-holly",
+      "label": "Holly",
+      "kind": "Tree Species",
+      "scientificName": "Ilex aquifolium",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 3,
+      "key": "yarrow",
+      "id": "c242-yarrow",
+      "label": "Yarrow",
+      "kind": "Plant",
+      "scientificName": "Achillea millefolium",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 4,
+      "key": "coco-de-mer",
+      "id": "c242-coco-de-mer",
+      "label": "Coco de Mer",
+      "kind": "Seed",
+      "scientificName": "Lodoicea maldivica",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 5,
+      "key": "field-maple",
+      "id": "c242-field-maple",
+      "label": "Field Maple",
+      "kind": "Leaf",
+      "scientificName": "Acer campestre",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 6,
+      "key": "ivy-blossom",
+      "id": "c242-ivy-blossom",
+      "label": "Ivy Blossom",
+      "kind": "Flower",
+      "scientificName": "Hedera helix",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 7,
+      "key": "blueberries",
+      "id": "c242-blueberries",
+      "label": "Blueberries",
+      "kind": "Fruit",
+      "scientificName": "Vaccinium spp.",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 8,
+      "key": "turkey-tail",
+      "id": "c242-turkey-tail",
+      "label": "Turkey Tail",
+      "kind": "Fungus",
+      "scientificName": "Trametes versicolor",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 9,
+      "key": "return-of-the-bird-tribes",
+      "id": "c242-return-of-the-bird-tribes",
+      "label": "Return of the Bird Tribes",
+      "kind": "Book",
+      "scientificName": null,
+      "author": "Ken Carey",
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    },
+    {
+      "order": 10,
+      "key": "barn-owl",
+      "id": "c242-barn-owl",
+      "label": "Barn Owl",
+      "kind": "Bird",
+      "scientificName": "Tyto alba",
+      "author": null,
+      "artwork": null,
+      "reverse": null,
+      "rightsStatus": "PENDING"
+    }
+  ]
+}
