@@ -180,6 +180,16 @@ function approvedCircleUrl(link) {
   }
 }
 
+// public/council/published-selector.js
+function publishedEdition(tree) {
+  const n = tree?.current;
+  const current = tree?.editions?.filter((e) => /^CURRENT(?:\s*\/\s*OPEN)?$/.test(e.state));
+  if (!Number.isInteger(n) || n < 1 || current?.length !== 1 || current[0].number !== n) throw new Error("Published Council selector unavailable");
+  const edition = current[0];
+  if (typeof edition.canopy !== "string" || !edition.canopy.startsWith("/") || edition.canopy.startsWith("//")) throw new Error("Invalid Council destination");
+  return edition;
+}
+
 // src/lib/mcp/tools/publishedCircle.ts
 var PUBLISHED_ORIGIN = "https://www.s33d.life";
 var TIME_TREE = "/council/time-tree.json";
@@ -187,10 +197,13 @@ async function loadPublishedCircle(fetcher = (u) => fetch(u, { headers: { accept
   const treeRes = await fetcher(`${PUBLISHED_ORIGIN}${TIME_TREE}?t=${Date.now()}`);
   if (!treeRes.ok) return void 0;
   const tree = await treeRes.json();
-  const n = tree?.current;
-  if (!Number.isInteger(n)) return void 0;
-  const edition = tree.editions?.find((e) => e.number === n);
-  if (!edition || !/CURRENT/i.test(edition.state)) return void 0;
+  let edition;
+  try {
+    edition = publishedEdition(tree);
+  } catch {
+    return void 0;
+  }
+  const n = edition.number;
   const catRes = await fetcher(`${PUBLISHED_ORIGIN}/council/circle-${n}/catalogue.json?t=${Date.now()}`);
   if (!catRes.ok) return void 0;
   const cat = await catRes.json();
