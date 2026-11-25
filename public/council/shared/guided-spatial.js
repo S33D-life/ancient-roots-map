@@ -2,6 +2,12 @@ import { destination,selection,surfaceLink,navigationControls,installNavigationS
 export function installSpatialNavigation(D, circle, go, setSheet, canopy) {
   const returnLink=()=>{const url=surfaceLink(location.href,circle,D.circleFrameCompanions,true,canopy);return url.pathname+url.search+url.hash;};
   const items=validateCompanions(circle,D.circleFrameCompanions);installNavigationStyle();let action;
+  // Keep the existing cross-surface link in the reusable Time Tree's normal flow.
+  // That nav survives panel rebuilds; the link must never float over a folio.
+  const surfaceReturn=document.getElementById('council-return');
+  const style=document.createElement('style');style.textContent=`
+    #panel #council-time-tree #council-return{position:static!important;display:inline-flex!important;max-width:100%;box-sizing:border-box;margin-top:6px;min-height:44px}
+  `;document.head.append(style);
   function choose(item,key){action=key;history.pushState(null,'',destination(location.href,circle,item,'front',true));go(item?.id||'croom',{push:false});}
   function decorate(id){
     const panel=document.querySelector('#panel .pbody'),item=items.find(c=>c.id===id);
@@ -9,9 +15,10 @@ export function installSpatialNavigation(D, circle, go, setSheet, canopy) {
     // Scene selections use the original go()/camera. Align only companion URL state.
     const selected=selection(new URL(location.href),items,true);
     history.replaceState(null,'',destination(location.href,circle,item,selected.side,true));
+    const timeTree=panel.querySelector('#council-time-tree');if(timeTree&&surfaceReturn)timeTree.append(surfaceReturn);
     const heading=panel.querySelector('h2');heading.id='pname';heading.tabIndex=-1;heading.dataset.canopyHeading='';
     const nav=navigationControls(circle,items,item,choose);heading.after(nav);
-    const link=panel.querySelector('a[href*="/council/circle-"]');if(link){link.textContent='Continue in 2D Council';link.href=returnLink();}
+    const link=panel.querySelector('a[href*="/council/circle-"]:not(#council-return)');if(link){link.textContent='Continue in 2D Council';link.href=returnLink();}
     const exit=document.getElementById('council-return');if(exit){exit.href=returnLink();exit.textContent='2D Council';}
     const grab=document.querySelector('#grab');grab?.setAttribute('aria-label',item?`Companion ${items.indexOf(item)+1} of ${items.length} · resize panel`:'Meet the companions · resize panel');
   }
@@ -23,6 +30,6 @@ export function installSpatialNavigation(D, circle, go, setSheet, canopy) {
     if(focus)focusNavigation(document.querySelector('#panel'),action||'history',document.querySelector('#pname'));
     action=undefined;
   }
-  document.addEventListener('council-frame-turn',()=>queueMicrotask(()=>{const link=document.querySelector('#panel .pbody a[href*="/council/"]');if(link)link.href=returnLink();const exit=document.getElementById('council-return');if(exit)exit.href=returnLink();}));
+  document.addEventListener('council-frame-turn',()=>queueMicrotask(()=>{const link=document.querySelector('#panel .pbody a[href*="/council/"]:not(#council-return)');if(link)link.href=returnLink();const exit=document.getElementById('council-return');if(exit)exit.href=returnLink();}));
   return {decorate,afterNavigation};
 }

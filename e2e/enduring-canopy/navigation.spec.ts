@@ -41,6 +41,9 @@ for(const edition of [current,previous]){
   for(const [i,c] of edition.companions.entries()){
    await expect(panel.getByRole('status').first()).toContainText(`Companion ${i+1} of 10`);
    const frame=panel.locator('canopy-folio-frame');await expect(frame).toHaveAttribute('companion-key',c.key);
+   const surfaceReturn=panel.locator('#council-time-tree #council-return');
+   await expect(surfaceReturn).toHaveCSS('position','static');
+   expect(await surfaceReturn.evaluate(link=>link.getBoundingClientRect().bottom<=document.querySelector('canopy-folio-frame').getBoundingClientRect().top)).toBe(true);
    await frame.getByRole('button').click();await expect(frame.getByRole('button')).toHaveAttribute('aria-pressed','true');
    await page.waitForFunction(({id,artwork})=>(document.querySelector('three-d-stage') as any)._scene.getObjectByName(id+'_artwork')?.material.map?.image?.src?.endsWith(artwork),{id:c.id,artwork:c.reverse.artwork});
    await page.evaluate(()=>(document.querySelector('three-d-stage') as any)._renderer.__draw=true);await page.waitForFunction(()=>(document.querySelector('three-d-stage') as any)._renderer.__draw===false);
@@ -75,6 +78,8 @@ test('390px original Tree retains grab gestures, companion touch and side contin
  await page.evaluate(()=>{const r=(document.querySelector('three-d-stage') as any)._renderer,draw=r.render.bind(r);r.render=(...args:any[])=>{if(r.__draw){r.__draw=false;draw(...args);}};r.__draw=true;});
  await page.keyboard.press('Shift');const panel=page.locator('#panel'),grab=page.locator('#grab');
  await grab.tap();await expect(grab).toHaveAttribute('aria-expanded','true');
+ const surfaceReturn=panel.locator('#council-time-tree #council-return');
+ await expect(surfaceReturn).toHaveCSS('position','static');await expect(surfaceReturn).toHaveCSS('display','inline-flex');
  await panel.getByRole('button',{name:'Meet the companions →',exact:true}).tap();
  await expect(panel.getByRole('status').first()).toContainText('Companion 1 of 10');
  await panel.getByRole('button',{name:'Next companion →',exact:true}).tap();await expect(panel.getByRole('status').first()).toContainText('Companion 2 of 10');
