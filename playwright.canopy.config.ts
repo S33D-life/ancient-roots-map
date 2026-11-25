@@ -1,0 +1,3 @@
+import {defineConfig,devices} from '@playwright/test';
+const port=4372;
+export default defineConfig({testDir:'./e2e/enduring-canopy',workers:1,timeout:90000,reporter:'list',outputDir:'output/playwright/enduring-canopy',use:{baseURL:`http://127.0.0.1:${port}`,hasTouch:true,trace:'retain-on-failure',screenshot:'only-on-failure'},projects:[{name:'chromium',use:{...devices['Desktop Chrome'],hasTouch:true}},{name:'webkit',use:{...devices['Desktop Safari'],hasTouch:true}}],webServer:{command:`npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,url:`http://127.0.0.1:${port}/council/canopy.html?circle=242`,reuseExistingServer:!process.env.CI}});

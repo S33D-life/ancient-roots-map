@@ -13,7 +13,8 @@ for(const width of [320,390,1440])test(`242: ten full pairs and visible readings
  await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/council/circle-242/index.html');await expect(page.locator('#question')).toHaveText(circle.question);
  for(const [i,c] of circle.companions.entries()){
-  const f=page.locator('circle-242-preview-frame').nth(i),im=f.locator('img');
+  await page.getByLabel('Choose companion',{exact:true}).selectOption(c.key);
+  const f=page.locator('li:visible canopy-folio-frame'),im=f.locator('img');
   await im.evaluate((image:HTMLImageElement)=>image.decode());
   const bounds=await im.boundingBox();expect(bounds!.width/bounds!.height).toBeCloseTo(c.width/c.height,2);
   await f.getByRole('button',{name:'Reveal reverse of '+c.label}).focus();await page.keyboard.press('Space');
@@ -49,12 +50,12 @@ test('242 original Tree: opening-pause clicks, ten folios, Time Tree and Staff R
  // Keep the actual quiet-pause state active to catch pointer interception, not bypass it.
  await page.evaluate(()=>document.body.dataset.q='question');
  for(const c of circle.companions){
-  await page.locator(`#panel button[data-go="${c.id}"]`).click();const f=page.locator('council-242-frame');
+  await page.locator(`#panel button[data-go="${c.id}"]`).click();const f=page.locator('canopy-folio-frame');
   await verifyAndDrawTexture(page,c.id,c.artwork);
   await f.getByRole('button',{name:'Reveal reverse of '+c.label}).click();await expect(f.locator('button[aria-pressed=true]')).toBeVisible();
   await verifyAndDrawTexture(page,c.id,c.reverse.artwork);
   await expect(f.getByText('Learning note — '+c.learningNote,{exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Return to the Council Deck',exact:true}).click();
+  await page.getByRole('button',{name:'Return to gathering',exact:true}).click();
  }
  await page.getByRole('link',{name:'← Previous Circle',exact:true}).click();await expect(page.locator('#brandline')).toContainText('241 · PREVIOUS');await drawRealFrame(page);
  await page.getByRole('link',{name:'Next Circle →',exact:true}).click();await expect(page.locator('#brandline')).toContainText('242 · CURRENT / OPEN');await drawRealFrame(page);
