@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import {readFileSync} from "node:fs";
+import {installBoundedTreeRendering, drawTreeFrame} from './fixtures/bounded-tree-rendering';
 const timeTree=JSON.parse(readFileSync("public/council/time-tree.json","utf8")) as {current:number;editions:{number:number;canopy:string}[]};
 for (const width of [1280, 390]) test(`historical Circle 235 arrival and return at ${width}px`, async ({ page }) => {
   // This checks the static data/UI seam; full GPU rendering is a separate local smoke check.
@@ -36,10 +37,12 @@ for (const width of [1280, 390]) test(`historical Circle 235 arrival and return 
 });
 
 test('default original TETOL entrance follows the published Circle',async({page})=>{
+ await installBoundedTreeRendering(page);
  await page.route('**/*',r=>['127.0.0.1','localhost'].includes(new URL(r.request().url()).hostname)?r.continue():r.abort());
  await page.goto('/tetol/circle-235/pre-fire/tetol.html?welcome=0#croom');
  await expect(page.locator('#brandline')).toContainText(`Circle ${timeTree.current}`);
  await expect(page.locator('#council-time-tree select')).toHaveValue(String(timeTree.current));
  const current=timeTree.editions.find(e=>e.number===timeTree.current)!;
  await expect(page.locator('#council-return')).toHaveAttribute('href',current.canopy);
+ await drawTreeFrame(page);
 });
