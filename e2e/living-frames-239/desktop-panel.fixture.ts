@@ -58,10 +58,10 @@ test('desktop panel: idle wake, keyboard reading, all ten reverse pairs and retu
  await boundDrawing(page);
  await page.keyboard.press('Shift');
  await expect(panel).toHaveCSS('pointer-events', 'auto');
- const returnLink = page.getByRole('link',{name:'Return to current · 241',exact:true});
+ const returnLink = page.getByRole('link',{name:'Return to current · 242',exact:true});
  await returnLink.focus();
  await expect(returnLink).toBeFocused();
  await returnLink.press('Enter');
- await expect(page).toHaveURL(/\?circle=241#croom$/);
- await expect(page.locator('#brandline')).toHaveText('TETOL · Circle 241 · CURRENT / OPEN', {timeout: 20000});
+ await expect(page).toHaveURL(/\?circle=242#croom$/);
+ await expect(page.locator('#brandline')).toHaveText('TETOL · Circle 242 · CURRENT / OPEN', {timeout: 20000});
 });

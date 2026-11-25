@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { disconnectedTransport } from './fixtures/circle237-disconnected-transport';
+import {installBoundedTreeRendering, drawTreeFrame} from './fixtures/bounded-tree-rendering';
 
 test('the activation build preserves Circle 240 with its unscheduled Fire and archive', async ({ page, context, request }) => {
+  await installBoundedTreeRendering(page);
   await context.addInitScript(disconnectedTransport);
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' &&
     route.request().method() === 'GET' ? route.continue() : route.abort());
@@ -11,10 +13,11 @@ test('the activation build preserves Circle 240 with its unscheduled Fire and ar
   await expect(page.getByText('No live Fire is scheduled.', { exact: false })).toBeVisible();
 
   const tree = await (await request.get('/council/time-tree.json')).json();
-  expect(tree.current).toBe(241);
-  expect(tree.editions.map((edition: { number: number }) => edition.number)).toEqual([234, 235, 236, 237, 238, 239, 240, 241]);
+  expect(tree.current).toBe(242);
+  expect(tree.editions.map((edition: { number: number }) => edition.number)).toEqual([234, 235, 236, 237, 238, 239, 240, 241, 242]);
 
   await page.goto('/tetol/circle-235/pre-fire/tetol.html?circle=240#croom');
-  await expect(page.locator('#brandline')).toContainText('240 · PREVIOUS');
+  await expect(page.locator('#brandline')).toContainText('240 · HISTORICAL');
   await expect(page.locator('three-d-stage')).toHaveCount(1);
+  await drawTreeFrame(page);
 });

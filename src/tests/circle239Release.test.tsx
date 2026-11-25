@@ -28,7 +28,7 @@ describe('Circle239 front-only release', () => {
   });
   it('preserves every pinned previous public asset outside explicit edition presentation files', () => {
     for (const [path,sha] of Object.entries(receipt.preservedPublicFiles)) expect(digest(path),path).toBe(sha);
-    expect(tree.current).toBe(241); expect(tree.editions.map(e=>e.number)).toEqual([234,235,236,237,238,239,240,241]);
+    expect(tree.current).toBe(242); expect(tree.editions.map(e=>e.number)).toEqual([234,235,236,237,238,239,240,241,242]);
     expect(tree.editions.find(e=>e.number===239)?.state).toBe('HISTORICAL');
     expect(tree.editions.find(e=>e.number===237)?.state).toBe('HISTORICAL');
   });

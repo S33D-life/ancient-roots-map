@@ -1,0 +1,56 @@
+{
+  "circle": 242,
+  "inquiry": "What does the living world keep alive through the darker days?",
+  "thread": "The Keepers of Winter’s Threshold.",
+  "fire": null,
+  "ownerApproval": "Owner approved thread, inquiry, accompanying notes and public use in conversation on 24 November 2026; corrected Field Maple pair supplied for integration.",
+  "limitations": [
+    "Native iPhone Safari and VoiceOver NOT COMPLETED",
+    "Existing mobile camera/panel occlusion not redesigned",
+    "Owner rights confirmation is distinct from independent scientific review"
+  ],
+  "artworkManifestSha256": "a3ee20ab57ec42ad4d71cdcea0c807976a2e5e87b776366fabfb9f480046abd8",
+  "transcripts": [
+    {
+      "file": "transcripts/ely-london-plane.txt",
+      "sha256": "b429eb99b7c4759bfab3c3c21585b5a785704044de03b02e4027594a213d730f"
+    },
+    {
+      "file": "transcripts/holly.txt",
+      "sha256": "dac614ebb11f621f231f6446b674cec31f80332394e61383e4351837cecd456a"
+    },
+    {
+      "file": "transcripts/yarrow.txt",
+      "sha256": "268fe22bd4db1984d19926fe4e5ef17abed1729a7cf8aafbad4bbf16d618e5d5"
+    },
+    {
+      "file": "transcripts/coco-de-mer.txt",
+      "sha256": "0d596d5f825d1b37a9b0e4246cc80072ddafec1785a6451f4a35fb8138c91613"
+    },
+    {
+      "file": "transcripts/field-maple.txt",
+      "sha256": "fb4fe45bfe86f1745390f9cf503f6ec9ca39dda900ebfa203839912ca000311a"
+    },
+    {
+      "file": "transcripts/ivy-blossom.txt",
+      "sha256": "11c71bd6edeb426ce6ccdd508f5dd821aa48b4ee5c0dca835b1237993d28c73a"
+    },
+    {
+      "file": "transcripts/blueberries.txt",
+      "sha256": "110a5d63e2c090d2fedf9f5a088981a088ad6f369dd25311a9e54ba0a6530f5f"
+    },
+    {
+      "file": "transcripts/turkey-tail.txt",
+      "sha256": "7a9e888eedc2c8ce6eefa5c82c40cf211189bec4d7ffaed8140406aa89418f9b"
+    },
+    {
+      "file": "transcripts/return-of-the-bird-tribes.txt",
+      "sha256": "8580221370e6968d49045c36b7cb2657ce7d9d56786cc055743b7118c67abf80"
+    },
+    {
+      "file": "transcripts/barn-owl.txt",
+      "sha256": "7feb7b21ad5df4d9fc68e3df34d7aaea5370b3af295862afb9250ab863ce8916"
+    }
+  ],
+  "correction": "Field Maple leaf and inset corrected; printed cleat retained literally, clear in labelled corrected reading. Other nine art bytes unchanged."
+}
