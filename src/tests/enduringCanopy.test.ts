@@ -33,12 +33,24 @@ describe('enduring canopy identity and history contract',()=>{
 describe('published folio contract',()=>{
  it('rejects an unlisted private edition before fetching its catalogue',async()=>{
   const {vi}=await import('vitest');const {loadFolioEdition}=await import('../../public/council/shared/folio-edition.js');
-  const fetch=vi.spyOn(globalThis,'fetch').mockResolvedValue({ok:true,json:async()=>({editions:[{number:242}]})} as Response);
+  const fetch=vi.spyOn(globalThis,'fetch').mockResolvedValue({ok:true,json:async()=>({editions:[{number:242,canopy:'/council/circle-242/index.html'}]})} as Response);
   try{await expect(loadFolioEdition(243)).rejects.toThrow('Unpublished');expect(fetch).toHaveBeenCalledTimes(1);}finally{fetch.mockRestore();}
  });
  it('rejects an explicit publication hold even on a listed edition',async()=>{
   const {vi}=await import('vitest');const {loadFolioEdition}=await import('../../public/council/shared/folio-edition.js');
-  const fetch=vi.spyOn(globalThis,'fetch').mockResolvedValueOnce({ok:true,json:async()=>({editions:[{number:242}]})} as Response).mockResolvedValueOnce({ok:true,json:async()=>({...circle,publicationApproved:false})} as Response);
+  const fetch=vi.spyOn(globalThis,'fetch').mockResolvedValueOnce({ok:true,json:async()=>({editions:[{number:242,canopy:'/council/circle-242/index.html'}]})} as Response).mockResolvedValueOnce({ok:true,json:async()=>({...circle,publicationApproved:false})} as Response);
   try{await expect(loadFolioEdition(242)).rejects.toThrow('not approved');}finally{fetch.mockRestore();}
+ });
+});
+
+
+describe('canonical edition return compatibility',()=>{
+ it('keeps the published gathering route and carries a companion reverse on that same route',()=>{
+  const canonical='/council/circle-242/index.html';
+  const gathering=surfaceLink('https://example.test/tetol/page.html?circle=242#croom',242,circle.companions,true,canonical);
+  expect(gathering.pathname+gathering.search+gathering.hash).toBe(canonical);
+  const current=destination('https://example.test/tetol/page.html?circle=242',242,circle.companions[4],'reverse',true);
+  const back=surfaceLink(current.href,242,circle.companions,true,canonical);
+  expect(back.pathname).toBe(canonical);expect(selection(back,circle.companions)).toEqual({item:circle.companions[4],side:'reverse'});
  });
 });

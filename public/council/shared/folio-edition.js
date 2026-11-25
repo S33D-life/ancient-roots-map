@@ -5,13 +5,15 @@ export async function loadFolioEdition(number) {
   const treeResponse=await fetch('/council/time-tree.json',{cache:'no-store'});
   if(!treeResponse.ok)throw Error('Published Council index unavailable');
   const tree=await treeResponse.json();
-  if(!Number.isSafeInteger(number)||number<241||!tree.editions?.some(e=>e.number===number))throw Error('Unpublished Council');
+  const published=tree.editions?.find(e=>e.number===number);
+  if(!Number.isSafeInteger(number)||number<241||!published)throw Error('Unpublished Council');
+  if(typeof published.canopy!=='string' || !published.canopy.startsWith('/council/') || published.canopy.includes('..') || published.canopy.includes('\\') || published.canopy.includes('#'))throw Error('Invalid Council return route');
   const response=await fetch(`/council/circle-${number}/catalogue.json`,{cache:'no-store'});
   if(!response.ok)throw Error('Council catalogue unavailable');
   const data=await response.json();
   // 241 is the historical pre-approval-field contract. New editions must explicitly opt in.
   if(typeof data.question!=='string' || !data.question.trim() || data.fire!==null || data.number!==number || (data.publicationApproved!==true && !(number===241 && data.publicationApproved===undefined)))throw Error('Council not approved');
-  validateCompanions(number,data.companions);return data;
+  validateCompanions(number,data.companions);return {...data,canopy:published.canopy};
 }
 const editions=new Map();
 export function registerFolioFrame(edition) {

@@ -23,9 +23,9 @@ export function destination(where, circle, item, side = 'front', spatial = false
   else url.hash='';
   return url;
 }
-export function surfaceLink(where, circle, companions, fromSpatial) {
+export function surfaceLink(where, circle, companions, fromSpatial, canopy) {
   const current=selection(new URL(where),companions,fromSpatial);
-  const path=fromSpatial?`/council/canopy.html?circle=${circle}`:`/tetol/circle-235/pre-fire/tetol.html?circle=${circle}`;
+  const path=fromSpatial?(canopy||`/council/canopy.html?circle=${circle}`):`/tetol/circle-235/pre-fire/tetol.html?circle=${circle}`;
   return destination(new URL(path,where),circle,current.item,current.side,!fromSpatial);
 }
 const el=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};

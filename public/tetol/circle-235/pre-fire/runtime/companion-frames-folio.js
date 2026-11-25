@@ -43,5 +43,5 @@ function companionPanel(D, id, esc) {
 
 function buildCompanionPresence() { return null; }
 
-return {installCompanionFrames,companionPanel,connectLivingFrames,buildCompanionPresence};
+return {installCompanionFrames,companionPanel,connectLivingFrames,buildCompanionPresence,canopy:edition.canopy};
 }
