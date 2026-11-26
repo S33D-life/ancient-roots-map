@@ -332,11 +332,11 @@ function SeedLifeSubmitDialog({ open, onOpenChange }: { open: boolean; onOpenCha
 
 const SeedModelViewer = lazy(() => import("./seed-3d/SeedModelViewer"));
 
-export default function SeedLifeGallery() {
+export default function SeedLifeGallery({ initialSeed }: { initialSeed?: string }) {
   const [filters, setFilters] = useState<SeedLifeFilters>({});
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
-  const [show3D, setShow3D] = useState(false);
+  const [show3D, setShow3D] = useState(Boolean(initialSeed));
 
   const { data: seeds = [], isLoading } = useSeedLifeEntries(filters);
   const { data: filterOptions } = useSeedLifeFilterOptions();
@@ -398,7 +398,7 @@ export default function SeedLifeGallery() {
               </div>
             }
           >
-            <SeedModelViewer onFallbackToImages={() => setShow3D(false)} />
+            <SeedModelViewer initialSlug={initialSeed} onFallbackToImages={() => setShow3D(false)} />
           </Suspense>
         </div>
       )}

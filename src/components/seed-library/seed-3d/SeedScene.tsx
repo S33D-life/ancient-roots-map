@@ -16,8 +16,10 @@ function SceneContents({ seed }: { seed: Seed3DConfig }) {
       <directionalLight position={[3, 5, 4]} intensity={0.7} color="#fdf4e3" />
       <directionalLight position={[-2, 3, -3]} intensity={0.25} color="#c8d4e8" />
 
-      {/* Environment for subtle reflections */}
-      <Environment preset="forest" environmentIntensity={0.3} />
+      {/* The tomato deep link uses local lights and works without the HDR download. */}
+      {seed.fallbackShapeType !== "tomato" && (
+        <Environment preset="forest" environmentIntensity={0.3} />
+      )}
 
       {/* The seed */}
       <SeedModel

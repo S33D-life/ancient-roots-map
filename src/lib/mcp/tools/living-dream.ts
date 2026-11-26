@@ -1,6 +1,7 @@
 import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { CURRENT_CIRCLE, approvedCircleUrl, type CurrentCircle } from "../../../../supabase/functions/_shared/currentCircle";
+import { approvedCircleUrl, type CurrentCircle } from "../../../../supabase/functions/_shared/currentCircle";
+import { loadPublishedCircle, PUBLISHED_ORIGIN } from "./publishedCircle";
 import { CROWN_GROWTHS, type CrownGrowth } from "../../../data/crown/growths";
 
 const annotations = { readOnlyHint: true, idempotentHint: true, openWorldHint: false };
@@ -54,13 +55,13 @@ export function projectGrowth(growth: CrownGrowth) {
 
 /** Dependency injection is for tests, not an alternate store or a runtime write path. */
 export function createLivingDreamTools(sources = {
-  circle: (): CurrentCircle | undefined => CURRENT_CIRCLE,
+  circle: (): CurrentCircle | undefined | Promise<CurrentCircle | undefined> => loadPublishedCircle(),
   growths: (): readonly CrownGrowth[] => CROWN_GROWTHS,
 }) {
-  const read = (ctx: ToolContext, load: () => Record<string, unknown> | undefined) => {
+  const read = async (ctx: ToolContext, load: () => Record<string, unknown> | undefined | Promise<Record<string, unknown> | undefined>) => {
     if (!ctx.isAuthenticated()) return failure("Not authenticated");
     try {
-      const payload = load();
+      const payload = await load();
       return payload ? result(payload) : failure("No approved public item found.");
     } catch {
       return failure("Public projection unavailable.");
@@ -71,10 +72,10 @@ export function createLivingDreamTools(sources = {
       name: "get_current_circle", title: "Get approved Current Circle",
       description: "Read the approved public Current Circle, including its revision and safety wording. Read access grants no publication or TEOTAG authority.",
       inputSchema: {}, annotations,
-      handler: (_input, ctx) => read(ctx, () => {
-        const source = sources.circle();
+      handler: (_input, ctx) => read(ctx, async () => {
+        const source = await sources.circle();
         const circle = source && projectCircle(source);
-        return circle ? { circle, provenance: provenance("supabase/functions/_shared/currentCircle.ts") } : undefined;
+        return circle ? { circle, provenance: { source: `${PUBLISHED_ORIGIN}/council/time-tree.json`, freshness: "Live read of the published Council of Life Time Tree and current Circle catalogue.", authority } } : undefined;
       }),
     }),
     defineTool({

@@ -1,0 +1,20 @@
+import {afterEach,it,expect} from 'vitest';
+import {render,screen,cleanup} from '@testing-library/react';
+import PublishedCouncilCard from '@/components/council/PublishedCouncilCard';
+import {publishedEdition,selectedEdition} from '../../public/council/published-selector.js';
+import {loadPublishedCircle} from '@/lib/mcp/tools/publishedCircle';
+import timeTree from '../../public/council/time-tree.json';
+import circle241 from '../../public/council/circle-241/catalogue.json';
+import circle242 from '../../public/council/circle-242/catalogue.json';
+afterEach(cleanup);
+it('publishes Circle 242 while preserving Circle 241 and its approved week',()=>{expect(publishedEdition(timeTree).number).toBe(242);expect(circle242.fire).toBeNull();expect(circle242.companions).toHaveLength(10);expect(circle241.fire).toBeNull();expect(circle241.companions).toHaveLength(10);expect(circle241.companions[0].reverse.readableText).toContain('16–22 NOVEMBER 2026');});
+it.each([241,242])('Council page, default TETOL resolver and connector follow published fixture %s',async number=>{
+ const tree={current:number,editions:[{number:240,state:'HISTORICAL',canopy:'/council/240'},{number,state:'CURRENT / OPEN',canopy:`/council/circle-${number}/index.html`}]};
+ const cat={...circle241,number,question:'Synthetic inquiry - not a real next Council'};
+ render(<PublishedCouncilCard tree={tree} catalogues={{fixture:cat}}/>);
+ expect(screen.getByRole('heading',{name:`Circle ${number}`})).toBeTruthy();
+ expect(selectedEdition(null,tree)).toBe(number);expect(selectedEdition('240',tree)).toBe(240);
+ const result=await loadPublishedCircle(async url=>({ok:true,json:async()=>url.includes('time-tree')?tree:cat}));
+ expect(result?.number).toBe(number);expect(result?.links.tetol.url).toContain(`circle=${number}#croom`);
+});
+it('fails closed instead of substituting a stale Circle',()=>{expect(()=>publishedEdition({current:243,editions:timeTree.editions})).toThrow();expect(()=>selectedEdition('999',timeTree)).toThrow();});

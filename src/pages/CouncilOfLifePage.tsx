@@ -2,6 +2,10 @@ import timeTree from '../../public/council/time-tree.json';
 import CouncilTimeTree from '@/components/council/CouncilTimeTree';
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import PublishedCouncilCard from '@/components/council/PublishedCouncilCard';
+const publishedCatalogues=import.meta.glob('../../public/council/circle-*/catalogue.json',{eager:true,import:'default'}) as Record<string,{number:number;question?:string;fire:unknown}>;
+import circle240 from '../../public/council/circle-240/catalogue.json';
+import circle239 from '../../public/council/circle-239/companions.json';
 import circle238 from '../../public/council/circle-238/companions.json';
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { ROUTES } from "@/lib/routes";
@@ -20,7 +24,7 @@ const CouncilOfLifePage = () => {
   useDocumentTitle("Council of Life");
   const location = useLocation();
   const returnEdition = Number(new URLSearchParams(location.search).get('circle'));
-  const selectedEdition = timeTree.editions.some(e => e.number === returnEdition) ? returnEdition : Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237)/)?.[1] || timeTree.current);
+  const selectedEdition = timeTree.editions.some(e => e.number === returnEdition) ? returnEdition : Number(location.hash.match(/(?:previous-circle-|historical-circle-)(234|235|236|237|238|239|240|241)/)?.[1] || timeTree.current);
   const [deckNode, setDeckNode] = useState<string | null>(null);
   const doorway = useRef<HTMLButtonElement>(null);
   const closeDeck = useRef<HTMLButtonElement>(null);
@@ -46,22 +50,35 @@ const CouncilOfLifePage = () => {
     <main className="parchment-main">
       <CouncilTimeTree number={selectedEdition} />
       <div className="canopy-orientation"><span className="parchment-kicker">Canopy · Council of Life</span><h1 className="sr-only">Council of Life</h1><p>New Moon → New Moon · weekly Circles.</p></div>
-      <section id="next-gathering" className="canopy-field-note" aria-label="Current Circle">
-        <p className="parchment-kicker">CURRENT / OPEN · Monday 26 October 2026</p>
-        <h2>Circle 238 · Fig-wood Council</h2>
-        <p>{circle238.question}</p><p>Ten companions, with two distinct Goji doors for seed and fruit. Open all week · no scheduled Fire.</p>
-        <p>Ten scene-only Fig-wood illustrations are ready to review; publication and illustrated-PDF review continue.</p>
-        <Link className="parchment-action" to={ROUTES.CIRCLE238}>Enter Circle 238 · meet its companions →</Link>
-        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=238#croom">Enter Circle 238 in the original 3D TETOL Council Deck →</a>
+      <PublishedCouncilCard tree={timeTree} catalogues={publishedCatalogues} />
+      <section id="previous-circle-241" className="canopy-field-note" aria-label="Previous Circle 241"><p className="parchment-kicker">PREVIOUS · 16–22 November 2026</p><h2>Circle 241</h2><p>Its original companions, inquiry and folios remain unchanged.</p><a className="parchment-action" href="/council/circle-241/index.html">Revisit Circle 241</a><a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=241#croom">Revisit Circle 241 in original TETOL</a></section>
+      <section id="previous-circle-240" className="canopy-field-note" aria-label="Previous Circle 240">
+        <p className="parchment-kicker">HISTORICAL · 9–15 November 2026</p>
+        <h2>{circle240.title}</h2><p>{circle240.question}</p>
+        <p>Ten companions in Hornbeam frames. No Fire was scheduled.</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE240}>Enter Circle 240 · meet its companions →</Link>
+        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=240#croom">Enter Circle 240 in the original 3D TETOL Council Deck →</a>
+      </section>
+      <section id="previous-circle-239" className="canopy-field-note" aria-label="Previous Circle 239">
+        <p className="parchment-kicker">HISTORICAL · Circle 239</p><h2>{circle239.title}</h2><p>{circle239.question}</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE239}>Revisit Circle 239 · meet its companions →</Link>
+        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=239#croom">Revisit Circle 239 in the original 3D TETOL Council Deck →</a>
+      </section>
+      <section id="previous-circle-238" className="canopy-field-note" aria-label="Previous Circle 238">
+        <p className="parchment-kicker">HISTORICAL · Circle 238</p><h2>Circle 238 · Fig-wood Council</h2>
+        <p>{circle238.question}</p><p>Its ten companions and original scenes remain available.</p>
+        <Link className="parchment-action" to={ROUTES.CIRCLE238}>Revisit Circle 238 · meet its companions →</Link>
+        <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=238#croom">Revisit Circle 238 in the original 3D TETOL Council Deck →</a>
+        <a className="parchment-action" href={ROUTES.COUNCIL_OFFERINGS_DEMO}>Try Council 238 + Fire · demo — nothing is saved →</a>
       </section>
       <section id="previous-circle-237" className="canopy-field-note" aria-label="Previous Circle 237">
-        <p className="parchment-kicker">PREVIOUS · Circle 237</p>
+        <p className="parchment-kicker">HISTORICAL · Circle 237</p>
         <h2 id="circle237-arrival">Circle 237</h2>
         <p>What is life teaching us through the beings we encounter?</p>
-        <p>The previous Circle’s ten companions and illustrated scenes remain available. No attended Fire or Harvest is asserted.</p>
+        <p>This historical Circle’s ten companions and illustrated scenes remain available. No attended Fire or Harvest is asserted.</p>
         <Link className="parchment-action" to={ROUTES.CIRCLE237}>Revisit Circle 237 · meet its companions →</Link>
         <a className="parchment-action" href="/tetol/circle-235/pre-fire/tetol.html?circle=237#croom">Revisit Circle 237 in the original 3D TETOL Council Deck →</a>
-        <a className="parchment-action" href={`${TETOL_PAGE}#croom`}>Remember the historical Circle 235 TETOL →</a>
+        <a className="parchment-action" href={`${TETOL_PAGE}?circle=235#croom`}>Remember the historical Circle 235 TETOL →</a>
       </section>
       <section id="previous-circle-236" className="canopy-field-note" aria-label="Previous Circle 236">
         <p className="parchment-kicker">Historical Circle · 236</p>

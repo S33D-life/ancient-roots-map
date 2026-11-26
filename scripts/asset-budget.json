@@ -1,9 +1,29 @@
 {
-  "comment": "Three explicit exceptions preserve the locally tested Circle 235 standalone 3D package and existing production-pinned Three.js bytes. The 500 KB limit remains for all other files. TETOL is excluded from PWA precaching. See docs/council/Circle-235-release.md for measured sizes and rationale.",
+  "comment": "Three explicit exceptions preserve the locally tested Circle 235 standalone 3D package and existing production-pinned Three.js bytes. The 500 KB limit remains for all other files. TETOL is excluded from PWA precaching. See docs/council/Circle-235-release.md for measured sizes and rationale. Circle239 exceptions retain exact owner-selected 1536x1024 front bytes; these portraits are excluded from PWA precaching. Circle239 reverse exceptions preserve the ten exact owner-approved PNG hashes; reverses are excluded from PWA precaching.",
   "maxBytes": 512000,
   "allowList": [
     "public/tetol/circle-235/pre-fire/tetol.html",
     "public/tetol/circle-235/pre-fire/vendor/three/build/three.core.js",
-    "public/tetol/circle-235/pre-fire/vendor/three/build/three.module.js"
+    "public/tetol/circle-235/pre-fire/vendor/three/build/three.module.js",
+    "public/council/circle-239/portraits/defynnog-yew.jpeg",
+    "public/council/circle-239/portraits/european-beech.jpeg",
+    "public/council/circle-239/portraits/ginger.png",
+    "public/council/circle-239/portraits/sycamore-helicopter-seed.jpeg",
+    "public/council/circle-239/portraits/ginkgo-leaf.jpeg",
+    "public/council/circle-239/portraits/dahlia.jpeg",
+    "public/council/circle-239/portraits/rosehip.jpeg",
+    "public/council/circle-239/portraits/fly-agaric.jpeg",
+    "public/council/circle-239/portraits/slender-billed-northern-nutcracker.jpeg",
+    "public/council/circle-239/portraits/the-secret-garden.jpeg",
+    "public/council/circle-239/reverses/defynnog-yew.png",
+    "public/council/circle-239/reverses/european-beech.png",
+    "public/council/circle-239/reverses/ginger.png",
+    "public/council/circle-239/reverses/sycamore-helicopter-seed.png",
+    "public/council/circle-239/reverses/ginkgo-leaf.png",
+    "public/council/circle-239/reverses/dahlia.png",
+    "public/council/circle-239/reverses/rosehip.png",
+    "public/council/circle-239/reverses/fly-agaric.png",
+    "public/council/circle-239/reverses/slender-billed-northern-nutcracker.png",
+    "public/council/circle-239/reverses/the-secret-garden.png"
   ]
 }

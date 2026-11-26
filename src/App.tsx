@@ -119,6 +119,8 @@ const ElyLivingFolioPage = lazyImportWithRetry(() => import("./pages/review/ElyL
 const BirchPreparationPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchPreparationPage })), "circle236-preparation");
 const BirchReadingPage = lazyImportWithRetry(() => import("./pages/library/BirchThreadPage").then(m => ({ default: m.BirchReadingPage })), "birch-reading");
 const CouncilOfLifePage = lazyImportWithRetry(() => import("./pages/CouncilOfLifePage"), "council");
+const Circle240Page = lazyImportWithRetry(() => import("./review/circle240/Circle240Page"), "circle240");
+const Circle239Page = lazyImportWithRetry(() => import("./pages/council/Circle239Page"), "circle239");
 const Circle238Page = lazyImportWithRetry(() => import("./pages/council/Circle238Page"), "circle238");
 const Circle237Page = lazyImportWithRetry(() => import("./pages/council/Circle237Page"), "circle237");
 const CouncilRecordsPage = lazyImportWithRetry(() => import("./pages/council/CouncilRecordsPage"), "council-records");
@@ -184,6 +186,7 @@ const IndiaAtlasPage = lazyImportWithRetry(() => import("./pages/IndiaAtlasPage"
 const TaiwanAtlasPage = lazyImportWithRetry(() => import("./pages/TaiwanAtlasPage"), "taiwan-atlas");
 const SpainAtlasPage = lazyImportWithRetry(() => import("./pages/SpainAtlasPage"), "spain-atlas");
 const MexicoAtlasPage = lazyImportWithRetry(() => import("./pages/MexicoAtlasPage"), "mexico-atlas");
+const FoundingGatewayPage = lazyImportWithRetry(() => import("./pages/FoundingGatewayPage"), "founding-gateway");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const GardenDetailPage = lazyImportWithRetry(() => import("./pages/GardenDetailPage"), "garden-detail");
@@ -238,7 +241,8 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 /** An authored reading folio does not need to replay First Walk. */
 function FolioFirstWalk() {
   const { pathname } = useLocation();
-  return pathname === "/ancient-friends/ely/folio" ? null : <FirstWalkTrail />;
+  return pathname === "/ancient-friends/ely/folio" || pathname === ROUTES.CIRCLE240
+    ? null : <FirstWalkTrail />;
 }
 
 const App = () => {
@@ -373,6 +377,8 @@ const App = () => {
                 <Route path={THREAD_PATTERNS.CIRCLE} element={<BirchPreparationPage />} />
                 <Route path={THREAD_PATTERNS.IDENTITY} element={<BirchReadingPage />} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
+                <Route path={ROUTES.CIRCLE239} element={<Circle239Page />} />
+                <Route path={ROUTES.CIRCLE240} element={<Circle240Page />} />
                 <Route path={ROUTES.CIRCLE238} element={<Circle238Page />} />
                 <Route path={ROUTES.CIRCLE237} element={<Circle237Page />} />
                 <Route path="/council/records" element={realm(<CouncilRecordsPage />, "canopy")} />
@@ -439,6 +445,7 @@ const App = () => {
                 <Route path="/admin/invite-status" element={<InviteStatusPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />
+                <Route path={ROUTES.FOUNDING} element={<FoundingGatewayPage />} />
                 <Route path="/harvest" element={<HarvestPage />} />
                 <Route path="/harvest/:id" element={<HarvestDetailPage />} />
                 <Route path="/how-hearts-work" element={<HowHeartsWorkPage />} />

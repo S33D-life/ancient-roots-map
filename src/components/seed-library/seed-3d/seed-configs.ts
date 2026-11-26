@@ -1,6 +1,6 @@
-/** Seed definition objects for the 3D viewer — first 3 seeds */
+/** Seed definition objects for the 3D viewer */
 
-export type FallbackShape = "acorn" | "corn" | "hemp";
+export type FallbackShape = "acorn" | "corn" | "hemp" | "tomato";
 
 export interface Seed3DConfig {
   slug: string;
@@ -77,5 +77,21 @@ export const SEED_CONFIGS: Seed3DConfig[] = [
     tone: "small, potent, foundational",
     color: "#5A6B3C",
     colorAccent: "#3D4A2A",
+  },
+  {
+    slug: "tomato-seed",
+    commonName: "Tomato Seed",
+    latinName: "Solanum lycopersicum",
+    speciesGroup: "Tomato",
+    originLabel: "Cultivated tomato",
+    description: "An illustrative, enlarged model of a flattened tomato seed.",
+    useCategory: "food",
+    germinationNotes: "For seed saving, collect seeds from healthy, fully ripe fruit.",
+    storageNotes: "Dry seeds thoroughly, then store them labelled in a cool, dry place.",
+    modelPath: null,
+    fallbackShapeType: "tomato",
+    tone: "garden seed",
+    color: "#C5A875",
+    colorAccent: "#A78451",
   },
 ];

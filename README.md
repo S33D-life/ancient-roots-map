@@ -4,6 +4,12 @@ A living atlas of the world's most remarkable trees, built as a participatory st
 
 S33D maps **Ancient Friends** — venerable trees verified by human encounters — and weaves them into a shared economy of care powered by **Hearts**, **Staff NFTs**, and community governance.
 
+## Support S33D's public-good work
+
+The existing S33D.Life project on Giveth is [S33D.Life — support the living library](https://giveth.io/project/s33dlife). This public fundraising page supports the freely accessible Ancient Friends Atlas, Council of Life, Heartwood learning resources, documentation and the people tending these commons. The project also has a public support doorway on [S33D.life](https://s33d.life/support).
+
+**Public-good donations are not purchases.** Donations through Giveth do not provide Staffs, NFTrees, Hearts, tokens, premium access, goods or voting influence. Commercial artefacts and memberships belong to separate pathways. Verification, donor rewards and any matching-fund eligibility must be checked on the live Giveth project; S33D does not promise them.
+
 ## Key areas
 
 | Area | Route | Purpose |

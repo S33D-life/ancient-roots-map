@@ -29,6 +29,10 @@ export const ROUTES = {
   /** Open Council of Life · Circle 237 (digital Canopy doorway). */
   CIRCLE237: "/council/237",
   CIRCLE238: "/council/238",
+  CIRCLE239: "/council/239",
+  CIRCLE240: "/council/240",
+  /** Public, memory-only Council + Fire demonstration. */
+  COUNCIL_OFFERINGS_DEMO: "/council/238/offerings.html",
   /** Council Records archive */
   COUNCIL_RECORDS: "/council/records",
   /** Council session detail */
@@ -45,6 +49,8 @@ export const ROUTES = {
   VALUE_TREE_EARN: "/value-tree?tab=earn",
   /** Support hub */
   SUPPORT: "/support",
+  /** Informational founding gateway; no collection or checkout. */
+  FOUNDING: "/support/founding",
   /** Guardian Harvest Exchange */
   HARVEST: "/harvest",
   /** Harvest detail */

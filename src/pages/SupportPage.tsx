@@ -303,7 +303,7 @@ const SupportPage = () => {
         <div className="space-y-2 flex-1">
           <p className="text-sm font-medium text-foreground">Support through the commons</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Small contributions are amplified by matching through public goods rounds.
+            Voluntary donations to S33D on Giveth support our open Atlas, Council and living library. Matching and donor rewards depend on Giveth eligibility and are not promised.
           </p>
           <div className="flex flex-wrap gap-2">
             <a href="https://explorer.gitcoin.co" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors">
@@ -437,6 +437,11 @@ const SupportPage = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20" style={{ paddingTop: 'var(--content-top)' }}>
+
+        <section aria-label="Free entry and founding invitation" className="rounded-xl border border-primary/30 p-4 mb-6 space-y-2">
+          <p className="font-serif">Explore S33D freely, or learn about the proposed founding Life Groves and voluntary public-goods support.</p>
+          <Link className="inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" to={ROUTES.FOUNDING}>Free Wanderer entry and founding invitation →</Link>
+        </section>
 
         {/* ── Page header ── */}
         <motion.section

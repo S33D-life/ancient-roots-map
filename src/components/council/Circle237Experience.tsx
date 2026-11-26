@@ -32,11 +32,11 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
   function link(href: string, text: string) { return <a href={href} onClick={e=>{e.preventDefault();go(href);}}>{text}</a>; }
   return <main className="circle237">
     <CouncilTimeTree number={237} />
-    <aside className="review">CIRCLE 237 · PREVIOUS COUNCIL · Explore freely · Offerings are not collected on this page yet</aside>
+    <aside className="review">CIRCLE 237 · HISTORICAL COUNCIL · Explore freely · Offerings are not collected on this page yet</aside>
     {basePath !== PILOT_PATH && <nav aria-label="Council navigation"><Link to={ROUTES.COUNCIL}>Return to the Council Canopy</Link><Link to={ROUTES.HOME}>TETOL</Link></nav>}
     <header><p className="eyebrow">Council of Life · 237 / yOur Blooming Week</p>
       <h1 tabIndex={-1}>{state.view==='invitation'?invitation.title:state.view==='council' ? 'Companions, connected' : `${item?.name} · ${state.view==='record'?'Living Library':state.view==='harvest'?'Future Heartwood':state.view==='twin'?'Spatial twin reference':'Council appearance'}`}</h1>
-      <p>{state.view==='council'?'Ten companions and ten illustrated scenes. Noku returns; new threads gather around her. Previous Circle · no attended Fire or Harvest is asserted.':'A weekly doorway into a continuing living thread.'}</p>
+      <p>{state.view==='council'?'Ten companions and ten illustrated scenes. Noku returns; new threads gather around her. Historical Circle · no attended Fire or Harvest is asserted.':'A weekly doorway into a continuing living thread.'}</p>
     </header>
     {offline&&<p role="status">Offline · this already-loaded local study remains readable. Remote records are not fetched or verified.</p>}
     {state.view==='council' ? <>
@@ -54,10 +54,10 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <small>Hawthorn frame family · scene-only illustration; original text panels withheld</small>
       </article>)}</section>
     </> : state.view==='invitation'?<section aria-label="Invitation editorial review">
-      <p className="eyebrow">Previous Circle · historical invitation preview</p>
+      <p className="eyebrow">Historical Circle · historical invitation preview</p>
       <p>{invitation.copy}</p>
       <h2>Our Council question</h2><p>{invitation.approvedQuestion}</p><p>The historical invitation is retained for review; no PDF publication or Telegram send is asserted.</p>
-      <h2>Come as you are</h2><p>Circle 237 was open without a scheduled Fire. It is now Previous and remains available to explore; whether any informal gathering occurred is unverified.</p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>Telegram is our Council community, not a direct live Fire-room link.</p>
+      <h2>Come as you are</h2><p>Circle 237 was open without a scheduled Fire. It is now historical and remains available to explore; whether any informal gathering occurred is unverified.</p><p><a href={invitation.communityLink} rel="noopener noreferrer">Council community · Telegram</a></p><p>Telegram is our Council community, not a direct live Fire-room link.</p>
       <p>This week's gathering does not need a meeting time. You are welcome to listen, discover and return.</p>
       <details><summary>Publication checklist</summary><ul>{publicationBlockers().map(reason=><li key={reason}>{reason}</li>)}</ul></details>
       {link(href(state.mode),'Return to Circle 237')}
@@ -67,7 +67,7 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
         <p className="eyebrow">{item.category} · Circle appearance, not a new identity</p>
         <h2>{item.name}</h2><p>{item.plaque}</p><p>These approved scene illustrations are artistic interpretations, not photographic or field evidence. The Sunflower scene is illustrative rather than a botanically exact Teddy Bear cultivar.</p>
         <p>{introductions[key]}</p>
-        <p>Companion doorway first prepared <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Circle 237 is Previous and remains available for exploration; no completed encounter or physical visit is asserted.</p>
+        <p>Companion doorway first prepared <time dateTime={PILOT_REVIEW_DATE}>16 October 2026</time>. Circle 237 is historical and remains available for exploration; no completed encounter or physical visit is asserted.</p>
         <p>{key==='noku'?'Noku is the Cape Town individual remembered in Circle 234 and selected to return in 237. She is distinct from the Camp Unicorn fig.':key==='fly-agaric'?'This is a provisional Council 237 appearance of the existing Fly Agaric Library subject, not a recorded mushroom sighting.':'This previous Council appearance remains available to explore. Its enduring record binding is not yet verified; no new canonical identity is created.'}</p>
         {isPilotKey(key)?link(href(state.mode,'record',key),'Open enduring Library identity'):<p className="muted">Living Library connection awaiting record reconciliation.</p>}
       </section>}
@@ -93,6 +93,6 @@ export default function Circle237Experience({ basePath = PILOT_PATH }: { basePat
       {state.view==='harvest'&&<section><h2>Remember what is ready</h2><p>Future reviewed Heartwood pathway · not yet connected. Nothing is saved or published.</p><p>A harvest will reference approved knowledge and permissioned contributions without copying private memories or changing their visibility.</p>{link(href(state.mode,'record',key),'Return to enduring identity')}</section>}
       <p className="muted">Council appearance: {isPilotKey(key)?appearance(key,state.mode).id:item.appearanceId} · mode: {state.mode}</p>
     </> : null}
-    <footer>Circle 237 · Previous · a preserved weekly doorway · past Councils and Library records remain preserved.</footer>
+    <footer>Circle 237 · Historical · a preserved weekly doorway · past Councils and Library records remain preserved.</footer>
   </main>;
 }

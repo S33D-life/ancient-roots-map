@@ -1,0 +1,3 @@
+import {defineConfig,devices} from '@playwright/test';
+const port=4278;
+export default defineConfig({testDir:'./e2e',testMatch:'founding-gateway.spec.ts',workers:1,timeout:30000,reporter:'list',outputDir:'output/founding-gateway-results',use:{baseURL:`http://127.0.0.1:${port}`,trace:'retain-on-failure',screenshot:'only-on-failure'},projects:[{name:'chromium',use:{...devices['Desktop Chrome']}},{name:'webkit',use:{...devices['Desktop Safari']}}],webServer:{command:`npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,url:`http://127.0.0.1:${port}/support/founding`,reuseExistingServer:!process.env.CI}});

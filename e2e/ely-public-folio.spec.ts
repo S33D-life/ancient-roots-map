@@ -15,6 +15,8 @@ for (const width of [390,1440]) test(`Ely Circle 236 folio and return — ${widt
   await page.reload();
   await expect(page.getByRole("heading",{name:"Bishop of Ely’s Plane"})).toBeVisible();
   await page.getByRole("link",{name:"← Return to Circle 236"}).first().click();
-  await expect(page).toHaveURL(/\/council-of-life/);
+  await expect(page).toHaveURL(/\/review\/council\/236\?mode=2d&returned=1&companion=ely-plane-companion$/);
   await expect(page.getByRole("heading",{name:"Circle 236"})).toBeVisible();
+  await expect(page.locator("#ely-plane-companion")).toBeFocused();
+  await expect(page.locator("#ely-plane-companion")).toBeInViewport();
 });

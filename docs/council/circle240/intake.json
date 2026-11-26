@@ -1,0 +1,165 @@
+[
+  {
+    "key": "rokeby-ginkgo",
+    "label": "The Ginkgo at Rokeby",
+    "role": "Ancient Friend",
+    "expectedFiles": {
+      "front": "01-rokeby-ginkgo-front.png",
+      "reverse": "01-rokeby-ginkgo-reverse.png",
+      "transcript": "01-rokeby-ginkgo-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "scientificName": "Ginkgo biloba",
+    "approvedMasterSha256": {
+      "front": "8b2fef87184fcbf3697337767f89bcf0a18ba418b4486e40a0751680eec8f3ff",
+      "reverse": "4519205fa615a54416a8bc82c02536058d77432ac38925960de2062fdd82175c",
+      "transcript": "176e2e45ddb7de11c2f8f82f4094aebf074b2d4fcb524484e55d65508e9fb0a9"
+    }
+  },
+  {
+    "key": "hornbeam",
+    "label": "Hornbeam",
+    "role": "Tree Species",
+    "expectedFiles": {
+      "front": "02-hornbeam-front.png",
+      "reverse": "02-hornbeam-reverse.png",
+      "transcript": "02-hornbeam-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "3e60f7679453bd676f67b8413720b249d4c1c5fd35ca6ccfe4c872b0954066ac",
+      "reverse": "5194b37130f200da989f6d0e38ced3a9a7c9725ffa1b44ecd856484aefe91f92"
+    }
+  },
+  {
+    "key": "rosemary",
+    "label": "Rosemary",
+    "role": "Plant",
+    "expectedFiles": {
+      "front": "03-rosemary-front.png",
+      "reverse": "03-rosemary-reverse.png",
+      "transcript": "03-rosemary-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "c00edb2cdd54313ca39bbae37213039098c6a8f440ea66aa1517faa59b6f69e4",
+      "reverse": "df253612614e52a968517febb9a1f2eeac0f279d763591577a98562671ea630a"
+    }
+  },
+  {
+    "key": "tomato-seeds",
+    "label": "Tomato Seed",
+    "role": "Seed",
+    "expectedFiles": {
+      "front": "04-tomato-seeds-front.png",
+      "reverse": "04-tomato-seeds-reverse.png",
+      "transcript": "04-tomato-seeds-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "f38c5371b73e87d93fb263ff8eb1a99dac4d47053fc0915b95d521c73933e1a8",
+      "reverse": "c64716afd9f9c71bc0c6a8adf4f10c1b4773b850cecedb6833ad4b0b547edd67"
+    }
+  },
+  {
+    "key": "field-maple",
+    "label": "Field maple",
+    "role": "Leaf",
+    "expectedFiles": {
+      "front": "05-field-maple-front.png",
+      "reverse": "05-field-maple-reverse.png",
+      "transcript": "05-field-maple-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "1663c5b6bfe1bf49a4f8d3a26621967daed7a957fe4a2d9326189868aec92d5e",
+      "reverse": "f8ea90e68fb70c1a26e1a56949c0df18d596124cc79c3cc497964575bd9487b4"
+    }
+  },
+  {
+    "key": "calendula",
+    "label": "Calendula",
+    "role": "Flower",
+    "expectedFiles": {
+      "front": "06-calendula-front.png",
+      "reverse": "06-calendula-reverse.png",
+      "transcript": "06-calendula-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "1b2432c5e4a393a7eda6d1d47dcf123321b10a5191a431a9610f5f44e1c1add2",
+      "reverse": "0af54e472f9171ad2012572ec42630489fbd1271a8c68705d61dcf7630142e73"
+    }
+  },
+  {
+    "key": "medlar",
+    "label": "Medlar",
+    "role": "Fruit",
+    "expectedFiles": {
+      "front": "07-medlar-front.png",
+      "reverse": "07-medlar-reverse.png",
+      "transcript": "07-medlar-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "77e19720171be954e18a30e416b1be33d1710e9a589e392d9c7eec546197faaf",
+      "reverse": "44295bd04be98b465c380a3800816a8a4c5fd10cee84e37e72fecf8a8030cd8e"
+    }
+  },
+  {
+    "key": "horn-of-plenty",
+    "label": "Horn of Plenty",
+    "role": "Fungus",
+    "expectedFiles": {
+      "front": "08-horn-of-plenty-front.png",
+      "reverse": "08-horn-of-plenty-reverse.png",
+      "transcript": "08-horn-of-plenty-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "f5426497647594f0845290f490bae49fba36dc9b3f49732e29e6aaa94e0a72a9",
+      "reverse": "6e6eea41e66c13b167186c1ba50aa8774ea7ca2c0ebf17c47aadeedb9b4a0bda"
+    }
+  },
+  {
+    "key": "return-of-the-bird-tribes",
+    "label": "Return of the Bird Tribes — Ken Carey",
+    "role": "Book",
+    "expectedFiles": {
+      "front": "09-return-of-the-bird-tribes-front.png",
+      "reverse": "09-return-of-the-bird-tribes-reverse.png",
+      "transcript": "09-return-of-the-bird-tribes-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "1a65c685e5381be3fadef08a718274fd39e93a30f6163a0766048d09b49a4a34",
+      "reverse": "14fec2433f8d18f628f6ecc603f4e709d8146df935642948a82572beae40d555"
+    }
+  },
+  {
+    "key": "sea-eagle",
+    "label": "Sea Eagle",
+    "scientificName": "Haliaeetus albicilla",
+    "role": "Bird",
+    "expectedFiles": {
+      "front": "10-sea-eagle-front.png",
+      "reverse": "10-sea-eagle-reverse.png",
+      "transcript": "10-sea-eagle-reverse.txt",
+      "width": 1536,
+      "height": 1024
+    },
+    "approvedMasterSha256": {
+      "front": "b90995eafe4737b25ca8669d22b7d4b6232785c58a476823dc7eb37927006181",
+      "reverse": "2f1d6ff02167b7fa91f92df97641716a710311cd9c93ffc1094280c1c43732dd"
+    }
+  }
+]
