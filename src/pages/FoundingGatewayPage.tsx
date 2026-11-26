@@ -13,7 +13,7 @@ export default function FoundingGatewayPage() {
     <Header />
     <main className="mx-auto w-full max-w-5xl px-4 pb-24 space-y-8" style={{ paddingTop: 'var(--content-top)' }}>
       <header className="pt-8 space-y-4">
-        <p className="text-sm font-serif tracking-wide text-muted-foreground">A founding invitation · being prepared</p>
+        <p className="text-sm font-serif tracking-wide text-muted-foreground">A founding invitation</p>
         <h1 className="font-serif text-3xl sm:text-5xl leading-tight">Welcome to S33D</h1>
         <p className="font-serif text-lg max-w-3xl">Discover ancient trees, share what life teaches you, and help grow a living library for everyone.</p>
       </header>
@@ -33,13 +33,15 @@ export default function FoundingGatewayPage() {
       </section>
       <section aria-label="Two distinct ways to support S33D" className="grid gap-6 md:grid-cols-2">
         <article aria-labelledby="founding-groves" className="rounded-2xl border border-border bg-card p-5 sm:p-7 space-y-4">
-          <p className="text-sm text-muted-foreground">Proposed product · Crowdfunder UK</p>
+          <p className="text-sm text-muted-foreground">Founding Grove - account required</p>
           <h2 id="founding-groves" className="font-serif text-2xl">The First 1,000 Life Groves</h2>
-          <p>A proposed founding collection of 1,000 places for families and friends to gather chosen memories around an Ethereal Tree.</p>
-          <p><strong>Proposed rewards:</strong> £33 for a defined first year, or £111 total for a defined ten-year Grove. These are proposals, not prices currently available to buy.</p>
-          <p>Christmas gifting is being explored. Availability, recipient consent and delivery are not yet confirmed.</p>
-          <p className="font-serif font-semibold">Crowdfunder — preparing launch</p>
-          <p className="text-sm text-muted-foreground">No campaign URL or checkout is available here. This is not yet a fulfilled paid service. Storage, privacy, export, recovery, delivery and cancellation terms must be confirmed before sales.</p>
+          <p>A private place for families and friends to gather chosen memories around an Ethereal Tree.</p>
+          <p><strong>£33 Founding Grove:</strong> one year of S33D access including a private Life Grove with Founding Grove status. An S33D account is required. Your year begins when you activate your Grove.</p>
+          <p>First invitations are planned from 21 December 2026. Manually issued invitations will support new and existing accounts.</p>
+          <a className={linkStyle} href="https://www.crowdfunder.co.uk/p/s33d" target="_blank" rel="noopener noreferrer">View the S33D Crowdfunder</a>
+          <p>Papaya Seed is the campaign recipient. No checkout is enabled on this page.</p>
+          <p>Renewal is optional. Founding Grove Keepers will be offered the lowest available renewal price for the equivalent plan. Renewal details, memory access after non-renewal, and the duration of Founding status after year one must be confirmed before activation.</p>
+          <p>Life Grove activation is being prepared. Private-media, account and recovery checks must pass before invitations are issued.</p>
         </article>
         <article aria-labelledby="giveth-commons" className="rounded-2xl border border-border bg-card p-5 sm:p-7 space-y-4">
           <p className="text-sm text-muted-foreground">Voluntary public-goods support · Giveth</p>
@@ -52,8 +54,8 @@ export default function FoundingGatewayPage() {
       </section>
       <footer className="border-t border-border pt-6 space-y-3">
         <h2 className="font-serif text-xl">An invitation, not a checkout</h2>
-        <p>We are preparing a seven-day introduction, 5–11 November 2026. This page collects no personal details, expressions of interest or payments. A voluntary interest list can open only after its private, consent-based handling is verified.</p>
-        <p className="font-serif italic">The living commons remain free. Life Groves are an optional future service.</p>
+        <p>This page collects no personal details, expressions of interest or payments. The Ancient Friends map remains free.</p>
+        <p className="font-serif italic">The living commons remain free. Founding Life Groves are being prepared for backer activation.</p>
       </footer>
     </main>
     <Footer />
