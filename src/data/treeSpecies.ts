@@ -179,7 +179,8 @@ const TREE_SPECIES: TreeSpecies[] = [
   { common: "Juniper", scientific: "Juniperus communis", family: "Cupressaceae" },
   { common: "Ivy", scientific: "Hedera helix", family: "Araliaceae" },
   { common: "Medlar", scientific: "Mespilus germanica", family: "Rosaceae" },
-  { common: "Mulberry", scientific: "Morus nigra", family: "Moraceae", aliases: ["Black Mulberry"] },
+  { common: "Black Mulberry", scientific: "Morus nigra", family: "Moraceae" },
+  { common: "White Mulberry", scientific: "Morus alba", family: "Moraceae" },
   { common: "Fig", scientific: "Ficus carica", family: "Moraceae", aliases: ["Common Fig"] },
   { common: "Guelder Rose", scientific: "Viburnum opulus", family: "Adoxaceae" },
   { common: "Wayfaring Tree", scientific: "Viburnum lantana", family: "Adoxaceae" },
@@ -313,7 +314,14 @@ for (const sp of TREE_SPECIES) {
 }
 
 export function getFamilyForSpecies(speciesName: string): string | undefined {
+  // Broad learning context, not a determination of an individual tree's species.
+  if (isBroadMulberryName(speciesName)) return "Moraceae";
   return familyMap.get(speciesName.toLowerCase());
+}
+
+/** Unqualified labels must never resolve to one of the several Morus species. */
+export function isBroadMulberryName(input: string): boolean {
+  return ["mulberry", "mulberries", "morus"].includes(input.toLowerCase().trim());
 }
 
 /** Get all unique families from the database, sorted alphabetically. */
@@ -329,6 +337,7 @@ export function getAllFamilies(): string[] {
  */
 export function matchSpecies(input: string): TreeSpecies | undefined {
   if (!input) return undefined;
+  if (isBroadMulberryName(input)) return undefined;
   const q = input.toLowerCase().trim();
 
   // Exact match on common name or alias
@@ -337,9 +346,14 @@ export function matchSpecies(input: string): TreeSpecies | undefined {
     if (sp.aliases?.some(a => a.toLowerCase() === q)) return sp;
   }
   // Exact match on scientific name
+  // These two documented binomials may include Linnaeus's author abbreviation.
+  const scientificQuery = q.replace(/^(morus (?:alba|nigra)) l\.?$/, "$1");
   for (const sp of TREE_SPECIES) {
-    if (sp.scientific.toLowerCase() === q) return sp;
+    if (sp.scientific.toLowerCase() === scientificQuery) return sp;
   }
+  // A qualified/unknown mulberry, hybrid or cultivar is not a substring match.
+  // Exact documented names above still work; uncertain wording stays verbatim.
+  if (/\bmulberr(?:y|ies)\b|\bmorus\b/.test(q)) return undefined;
   // Partial: input is a substring of common name or vice versa
   for (const sp of TREE_SPECIES) {
     const c = sp.common.toLowerCase();

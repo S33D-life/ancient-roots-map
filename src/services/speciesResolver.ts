@@ -9,7 +9,7 @@
  * Returns a SpeciesResolution containing canonical data + hive info.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { enrichSpecies } from "@/data/treeSpecies";
+import { enrichSpecies, isBroadMulberryName } from "@/data/treeSpecies";
 import { getHiveForSpecies, getHiveInfo, type HiveInfo } from "@/utils/hiveUtils";
 
 export type MatchConfidence = "exact" | "fuzzy" | "unresolved";
@@ -103,6 +103,11 @@ export async function resolveSpecies(
   speciesString: string,
   speciesKey?: string | null
 ): Promise<SpeciesResolution> {
+  // A common-name DB row is not evidence that an unqualified tree is M. nigra.
+  // An explicitly recorded canonical key still takes the normal authoritative path.
+  if (!speciesKey && isBroadMulberryName(speciesString)) {
+    return resolveSpeciesSync(speciesString);
+  }
   const cacheKey = speciesKey || speciesString.toLowerCase().trim();
   const cached = cache.get(cacheKey);
   if (cached && cached.source === "db") return cached;
