@@ -8,6 +8,9 @@ for(const edition of [current,previous]){
   await page.addInitScript(disconnectedTransport);
   await page.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'&&['GET','HEAD'].includes(r.request().method())?r.continue():r.abort());
   await page.goto(`/council/canopy.html?circle=${edition.number}`);
+  await expect(page.locator('h1')).toHaveText(edition.title||`The Council of Life · Circle ${edition.number}`);
+  await expect(page).toHaveTitle(`Circle ${edition.number} · Council of Life`);
+  await expect(page.locator('#fire')).toHaveText('Open all week. No Fire is scheduled.');
   await page.getByRole('button',{name:'Meet the companions →',exact:true}).click();
   const nav=page.getByRole('navigation',{name:'Meet the companions',exact:true});
   for(const [index,c] of edition.companions.entries()){
