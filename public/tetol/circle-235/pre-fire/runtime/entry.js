@@ -3,6 +3,8 @@ if (!window.S33D_STATIC_CURRENT_CIRCLE_READY) throw new Error("Current Circle pr
 
 import { selectedEdition as resolveSelectedEdition } from '/council/published-selector.js';
 import { installTimeTree } from './council-time-tree.js';
+import { createFolioAdapter } from './companion-frames-folio.js';
+import { installSpatialNavigation } from '/council/shared/guided-spatial.js';
 const D = window.TETOL;
 let selectedCircle;
 try {
@@ -35,10 +37,10 @@ let timeTree;
 try {
 if (!window.S33D_SHEET_GESTURE_READY) throw new Error('Council loader and runtime versions do not match');
 if (!circle240 && !folioCircle && ![234,235,236,237,238,239].includes(selectedCircle)) throw new Error('Unsupported Council edition');
-companionFrames = folioCircle ? await import(`./companion-frames-${selectedCircle}.js`) : circle240 ? await import('./companion-frames-240.js') : framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : framedCircle === 239 ? await import('./companion-frames-239.js') : null;
+companionFrames = folioCircle ? await createFolioAdapter(selectedCircle) : circle240 ? await import('./companion-frames-240.js') : framedCircle === 236 ? await import('./companion-frames.js') : framedCircle === 237 ? await import('./companion-frames-237.js') : framedCircle === 238 ? await import('./companion-frames-238.js') : framedCircle === 239 ? await import('./companion-frames-239.js') : null;
 if (companionFrames) await companionFrames.installCompanionFrames(D);
 timeTree = await installTimeTree(D, selectedCircle);
-if (folioCircle) document.getElementById('council-return')?.setAttribute('href', `/council/circle-${selectedCircle}/index.html`);
+if (folioCircle) document.getElementById('council-return')?.setAttribute('href', companionFrames.canopy);
 } catch (error) {
   document.body.replaceChildren();
   const message = document.createElement('p'); message.setAttribute('role','alert');
@@ -50,6 +52,7 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const state = { thread: null, current: 'overview', history: [], mode: '3d', motion: !matchMedia('(prefers-reduced-motion: reduce)').matches };
 const X = window.TETOL_X || {}; let quietEnd = null;
+const guided = folioCircle ? installSpatialNavigation(D, selectedCircle, go, setSheet, companionFrames.canopy) : null;
 const mobileSheet = () => X.D && document.body.classList.contains('phone');
 
 /* ---------- Shared UI (works without 3D) ---------- */
@@ -139,7 +142,7 @@ function renderTime(num, compact) {
 function renderPanel() {
   const id = state.current, n = D.nodes[id];
   const framedPanel = timeTree.historicalPanel(id, esc) || companionFrames?.companionPanel(D, id, esc);
-  if (framedPanel) { $('#panel').innerHTML = framedPanel; timeTree.decoratePanel(); $('#panel').scrollTop = 0; return; }
+  if (framedPanel) { $('#panel').innerHTML = framedPanel; timeTree.decoratePanel(); guided?.decorate(id); $('#panel').scrollTop = 0; return; }
   const crumbs = pathOf(id).map((p, i, a) => i === a.length - 1
     ? `<span aria-current="location">${esc(shortName(p))}</span>`
     : `<button type="button" data-go="${p}">${esc(shortName(p))}</button><span aria-hidden="true">›</span>`).join('');
@@ -235,6 +238,7 @@ function go(id, { push = true, focus = true } = {}) {
   state.current = id;
   renderPanel(); renderList(); renderLineage(); scene3d?.select(id, prev);
   if (focus && !mobileSheet()) $('#pname')?.focus({ preventScroll: true });
+  guided?.afterNavigation(id, prev, focus);
 }
 function back() { if (state.history.length) go(state.history.pop(), { push: false }); }
 
