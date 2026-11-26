@@ -9,6 +9,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { speciesCatalogueQueries } from "@/lib/species/speciesSearch";
 
 export type SpeciesRow = Database["public"]["Tables"]["species_index"]["Row"];
 export type SpeciesName = Database["public"]["Tables"]["tree_species_names"]["Row"];
@@ -127,18 +128,34 @@ export function useSpeciesTrees(speciesKey: string | null | undefined, limit = 2
 }
 
 /** Multilingual species search via the SECURITY DEFINER RPC. */
-export function useSpeciesSearch(query: string, enabled = true) {
+export function useSpeciesSearch(query: string, enabled = true, fieldSearch = false) {
   return useQuery<SpeciesSearchHit[]>({
-    queryKey: ["species-search", query],
+    queryKey: ["species-search", query, fieldSearch],
     enabled: enabled && query.trim().length >= 2,
     staleTime: 60_000,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("search_species_multilingual", {
-        query: query.trim(),
-        max_results: 20,
-      });
-      if (error) throw error;
-      return (data as SpeciesSearchHit[]) || [];
+    ...(fieldSearch ? { retry: false, refetchOnWindowFocus: false, networkMode: "always" as const } : {}),
+    queryFn: async ({ signal }) => {
+      const controller = new AbortController();
+      const abort = () => controller.abort();
+      signal.addEventListener("abort", abort, { once: true });
+      if (signal.aborted) abort();
+      // A slow connection must not leave field search spinning indefinitely.
+      const timeout = fieldSearch ? setTimeout(abort, 3500) : undefined;
+      try {
+        const queries = fieldSearch ? speciesCatalogueQueries(query) : [query.trim()];
+        const results = await Promise.all(queries.map(async term => {
+          const { data, error } = await supabase.rpc("search_species_multilingual", {
+            query: term, max_results: 20,
+          }).abortSignal(controller.signal);
+          if (error) throw error;
+          return (data as SpeciesSearchHit[]) || [];
+        }));
+        return results.flat();
+      } finally {
+        controller.abort();
+        clearTimeout(timeout);
+        signal.removeEventListener("abort", abort);
+      }
     },
   });
 }

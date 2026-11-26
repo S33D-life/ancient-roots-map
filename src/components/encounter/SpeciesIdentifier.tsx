@@ -6,7 +6,7 @@
  *
  * Supports uncertainty — never blocks submission.
  */
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import {
   Search, Camera, ImagePlus, HelpCircle, Leaf, ChevronRight,
   Check, Loader2, ArrowLeft, Sparkles,
 } from "lucide-react";
-import { searchSpecies } from "@/data/treeSpecies";
+import FieldSpeciesSearch from "./FieldSpeciesSearch";
 import { getAllHives, getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import {
   identifyTreeSpeciesFromPhoto,
@@ -24,12 +24,15 @@ import {
 
 /* ─── Types ─── */
 
-export type IdentificationMethod = "known" | "ai" | "hive" | null;
+export type IdentificationMethod = "known" | "ai" | "hive" | "broad" | null;
 export type SpeciesCertainty = "exact" | "ai_confirmed" | "ai_suggested" | "hive_guess" | "uncertain";
 
 export interface SpeciesResult {
   species: string;
   certainty: SpeciesCertainty;
+  canonicalSpeciesKey?: string | null;
+  scientificName?: string | null;
+  identificationRank?: "species" | "genus" | "family" | "unresolved";
   hiveFamily?: string;
   hiveName?: string;
   aiPrediction?: SpeciesVisionPrediction | null;
@@ -60,13 +63,12 @@ export default function SpeciesIdentifier({
 }: SpeciesIdentifierProps) {
   const [method, setMethod] = useState<IdentificationMethod>(species ? "known" : null);
   const [localSpecies, setLocalSpecies] = useState(species);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [broadRank, setBroadRank] = useState<"genus" | "family">("genus");
+  const [broadName, setBroadName] = useState("");
   const [selectedHive, setSelectedHive] = useState<HiveInfo | null>(null);
   const [hiveSpeciesChoice, setHiveSpeciesChoice] = useState<string>("");
   const [confirmedAiPrediction, setConfirmedAiPrediction] = useState<SpeciesVisionPrediction | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const suggestions = useMemo(() => searchSpecies(localSpecies), [localSpecies]);
   const allHives = useMemo(() => {
     const hives = getAllHives();
     // Sort by representative species count (most popular first), then name
@@ -94,12 +96,6 @@ export default function SpeciesIdentifier({
       aiResult: externalAiResult,
     });
   }, [onSpeciesChange, externalAiResult]);
-
-  const handleSelectSpecies = (name: string) => {
-    setLocalSpecies(name);
-    setShowSuggestions(false);
-    emitSpecies(name, "exact");
-  };
 
   const handleConfirmAi = (prediction: SpeciesVisionPrediction) => {
     setConfirmedAiPrediction(prediction);
@@ -162,7 +158,6 @@ export default function SpeciesIdentifier({
             accentHsl="42, 70%, 50%"
             onClick={() => {
               setMethod("known");
-              setTimeout(() => inputRef.current?.focus(), 100);
             }}
           />
 
@@ -191,6 +186,9 @@ export default function SpeciesIdentifier({
           />
         </div>
 
+        <button type="button" className="w-full min-h-11 text-sm font-serif text-muted-foreground hover:text-foreground"
+          onClick={() => setMethod("broad")}>I know only the family or genus</button>
+
         {/* Quick uncertain option */}
         <button
           type="button"
@@ -214,54 +212,38 @@ export default function SpeciesIdentifier({
       >
         <PathHeader title="Search by species" onBack={goBack} />
 
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            value={localSpecies}
-            onChange={(e) => {
-              setLocalSpecies(e.target.value.slice(0, 200));
-              setShowSuggestions(true);
-              // If user types manually, emit as exact
-              if (e.target.value.trim()) {
-                emitSpecies(e.target.value.trim(), "exact");
-              }
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            placeholder="Oak, Yew, Birch, Pine…"
-            maxLength={200}
-            className="font-serif h-9 text-sm"
-            autoComplete="off"
-          />
-          {showSuggestions && suggestions.length > 0 && (
-            <div
-              className="absolute left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto rounded-lg border shadow-lg"
-              style={{
-                background: "hsl(30, 15%, 12%)",
-                borderColor: "hsla(42, 40%, 30%, 0.5)",
-              }}
-            >
-              {suggestions.map((sp) => (
-                <button
-                  key={sp.scientific}
-                  type="button"
-                  className="w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-white/5 flex flex-col"
-                  onClick={() => handleSelectSpecies(sp.common)}
-                >
-                  <span className="font-serif" style={{ color: "hsl(42, 75%, 60%)" }}>{sp.common}</span>
-                  <span className="text-[10px] italic" style={{ color: "hsla(42, 40%, 55%, 0.7)" }}>
-                    {sp.scientific} · {sp.family}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <p className="text-[10px] font-serif text-muted-foreground/40 text-center">
-          You can always refine this later
-        </p>
+        <FieldSpeciesSearch value={localSpecies}
+          onChange={value => { setLocalSpecies(value); emitSpecies(value, "uncertain"); }}
+          onSelect={choice => {
+            setLocalSpecies(choice.label);
+            onSpeciesChange({ species: choice.label, certainty: choice.identificationRank === "species" ? "exact" : "uncertain",
+              canonicalSpeciesKey: choice.speciesKey, scientificName: choice.scientificName,
+              identificationRank: choice.identificationRank });
+          }} />
       </motion.div>
     );
+  }
+
+  if (method === "broad") {
+    return <div className="space-y-3">
+      <PathHeader title="Family or genus only" onBack={goBack} />
+      <label className="text-xs font-serif" htmlFor="identification-rank">What do you know?</label>
+      <select id="identification-rank" className="w-full min-h-11 rounded-md border bg-background px-3 text-base"
+        value={broadRank} onChange={event => setBroadRank(event.target.value as "genus" | "family")}>
+        <option value="genus">Genus</option><option value="family">Botanical family</option>
+      </select>
+      <label className="text-xs font-serif" htmlFor="broad-identification-name">{broadRank === "genus" ? "Genus name" : "Family name"}</label>
+      <Input id="broad-identification-name" value={broadName} maxLength={200} className="text-base h-11"
+        placeholder={broadRank === "genus" ? "For example, Quercus" : "For example, Fagaceae"}
+        onChange={event => setBroadName(event.target.value)} />
+      <p className="text-xs text-muted-foreground">Recorded as a broad identification, not an exact species. You can refine it later.</p>
+      <Button type="button" variant="outline" disabled={!broadName.trim()} onClick={() => {
+        const label = `${broadName.trim()} (${broadRank}; species unconfirmed)`;
+        setLocalSpecies(label);
+        onSpeciesChange({ species: label, certainty: "uncertain", identificationRank: broadRank,
+          canonicalSpeciesKey: null, scientificName: null });
+      }}>Use this broad identification</Button>
+    </div>;
   }
 
   /* ─── Render: Path 2 — AI identify ─── */
@@ -618,6 +600,7 @@ function PathHeader({ title, onBack }: { title: string; onBack: () => void }) {
     <div className="flex items-center gap-2">
       <button
         type="button"
+        aria-label="Back to identification choices"
         className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors shrink-0"
         onClick={onBack}
       >

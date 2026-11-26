@@ -20,6 +20,8 @@ const TREE_SPECIES: TreeSpecies[] = [
   { common: "Turkey Oak", scientific: "Quercus cerris", family: "Fagaceae" },
   { common: "Red Oak", scientific: "Quercus rubra", family: "Fagaceae", aliases: ["Northern Red Oak"] },
   { common: "Cork Oak", scientific: "Quercus suber", family: "Fagaceae" },
+  // Small field fallback; sources and scope recorded in docs/species-discoverability-stage1.md.
+  { common: "Chestnut-leaved Oak", scientific: "Quercus castaneifolia", family: "Fagaceae" },
   { common: "White Oak", scientific: "Quercus alba", family: "Fagaceae" },
   { common: "Live Oak", scientific: "Quercus virginiana", family: "Fagaceae" },
   { common: "Kermes Oak", scientific: "Quercus coccifera", family: "Fagaceae" },
@@ -159,7 +161,7 @@ const TREE_SPECIES: TreeSpecies[] = [
 
   // ── Hornbeam ──
   { common: "Common Hornbeam", scientific: "Carpinus betulus", family: "Betulaceae" },
-  { common: "Hop Hornbeam", scientific: "Ostrya carpinifolia", family: "Betulaceae" },
+  { common: "Hop Hornbeam", scientific: "Ostrya carpinifolia", family: "Betulaceae", aliases: ["European Hop-Hornbeam"] },
 
   // ── Plane ──
   { common: "London Plane", scientific: "Platanus × acerifolia", family: "Platanaceae" },
@@ -226,6 +228,8 @@ const TREE_SPECIES: TreeSpecies[] = [
   { common: "Kapok", scientific: "Ceiba pentandra", family: "Malvaceae", aliases: ["Ceiba"] },
   { common: "Moringa", scientific: "Moringa oleifera", family: "Moringaceae", aliases: ["Drumstick Tree"] },
   { common: "Argan", scientific: "Argania spinosa", family: "Sapotaceae" },
+  { common: "Wollemi Pine", scientific: "Wollemia nobilis", family: "Araucariaceae" },
+  { common: "Sausage Tree", scientific: "Kigelia africana", family: "Bignoniaceae" },
   { common: "Frankincense", scientific: "Boswellia sacra", family: "Burseraceae" },
   { common: "Myrrh", scientific: "Commiphora myrrha", family: "Burseraceae" },
 

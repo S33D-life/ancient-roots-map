@@ -15,7 +15,7 @@ import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sp
 import { motion, AnimatePresence } from "framer-motion";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 // maplibre-gl is dynamically imported in adjustMode useEffect
-import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
+import { fieldIdentificationPayload } from "@/lib/species/fieldIdentification";
 import OfferingCelebration from "@/components/OfferingCelebration";
 import NearbyTreesSheet from "@/components/NearbyTreesSheet";
 import CanopyCheckinModal from "@/components/CanopyCheckinModal";
@@ -91,8 +91,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [step, setStep] = useState<RitualStep>("encounter");
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
-  const [showSpeciesSuggestions, setShowSpeciesSuggestions] = useState(false);
-  const speciesSuggestions = useMemo(() => searchSpecies(species), [species]);
+  const [speciesSelection, setSpeciesSelection] = useState<SpeciesResult | null>(null);
   const [description, setDescription] = useState("");
   const [age, setAge] = useState<TreeAgeValue>(EMPTY_AGE);
   const [orchard, setOrchard] = useState<OrchardValue>(EMPTY_ORCHARD);
@@ -152,6 +151,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setStep("encounter");
       setName("");
       setSpecies("");
+      setSpeciesSelection(null);
       setDescription("");
       setAge(EMPTY_AGE);
       setOrchard(EMPTY_ORCHARD);
@@ -547,7 +547,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     setSelectedSpeciesPrediction(prediction);
     setSpecies(prediction.commonName || prediction.scientificName);
     setSpeciesDecision("confirmed");
-    setShowSpeciesSuggestions(false);
+    setSpeciesSelection(null);
   }, []);
 
   // Check for nearby duplicates before creating
@@ -609,6 +609,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const handleSubmit = async () => {
     // Species is no longer strictly required — uncertainty is allowed
     const speciesValue = species.trim() || "Unknown species";
+    const identification = fieldIdentificationPayload(speciesValue, speciesSelection);
 
     const aiPredictions = speciesVisionResult?.predictions ?? [];
 
@@ -650,6 +651,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         const pendingTree: Record<string, unknown> = {
           name: name.trim() || speciesValue,
           species: speciesValue,
+          ...identification,
           description: description.trim() || null,
           what3words: what3words.trim() || '',
           latitude: lat,
@@ -701,6 +703,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       const { data, error } = await supabase.from('trees').insert({
         name: name.trim() || speciesValue,
         species: speciesValue,
+        ...identification,
         description: description.trim() || null,
         what3words: what3words.trim() || '',
         latitude: lat,
@@ -806,6 +809,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) setAdjustMode(false); onOpenChange(v); }}>
       <DialogContent
+        onEscapeKeyDown={event => {
+          // Escape dismisses the open species choices before the encounter dialog.
+          const target = event.target as HTMLElement;
+          if (target.getAttribute("role") === "combobox" && target.getAttribute("aria-expanded") === "true") {
+            event.preventDefault();
+          }
+        }}
         className="bg-card border-border/40 max-w-md p-0 overflow-hidden flex flex-col"
         style={{
           maxHeight: 'min(92dvh, 720px)',
@@ -1045,11 +1055,15 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     species={species}
                     onSpeciesChange={(result: SpeciesResult) => {
                       setSpecies(result.species);
+                      setSpeciesSelection(result);
                       setSpeciesCertainty(result.certainty);
                       setSpeciesHiveFamily(result.hiveFamily);
                       if (result.aiPrediction) {
                         setSelectedSpeciesPrediction(result.aiPrediction);
                         setSpeciesDecision("confirmed");
+                      } else {
+                        setSelectedSpeciesPrediction(null);
+                        setSpeciesDecision("overridden");
                       }
                       if (result.certainty === "exact" || result.certainty === "ai_confirmed") {
                         setSpeciesDecision("confirmed");
