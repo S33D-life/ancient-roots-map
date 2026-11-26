@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import manifest from '../../public/council/circle-239/companions.json';
 import receipt from '../../docs/releases/circle239-20261104/receipt.json';
 import tree from '../../public/council/time-tree.json';
+import privacyCorrection from '../../docs/council/public-attribution-correction.json';
 import Circle239Page from '@/pages/council/Circle239Page';
 import { installCompanionFrames, companionPanel } from '../../public/tetol/circle-235/pre-fire/runtime/companion-frames-239.js';
 import { installTimeTree } from '../../public/tetol/circle-235/pre-fire/runtime/council-time-tree.js';
@@ -27,7 +28,11 @@ describe('Circle239 front-only release', () => {
     expect(manifest.fire).toBeNull(); expect(manifest.pdf).toBeNull(); expect(manifest.publicationApproved).toBe(false);
   });
   it('preserves every pinned previous public asset outside explicit edition presentation files', () => {
-    for (const [path,sha] of Object.entries(receipt.preservedPublicFiles)) expect(digest(path),path).toBe(sha);
+    for (const [path,sha] of Object.entries(receipt.preservedPublicFiles)) {
+      const correction = privacyCorrection.files.find(file => file.path === path);
+      if (correction) expect(correction.beforeSha256, path).toBe(sha);
+      expect(digest(path),path).toBe(correction?.afterSha256 ?? sha);
+    }
     expect(tree.current).toBe(242); expect(tree.editions.map(e=>e.number)).toEqual([234,235,236,237,238,239,240,241,242]);
     expect(tree.editions.find(e=>e.number===239)?.state).toBe('HISTORICAL');
     expect(tree.editions.find(e=>e.number===237)?.state).toBe('HISTORICAL');

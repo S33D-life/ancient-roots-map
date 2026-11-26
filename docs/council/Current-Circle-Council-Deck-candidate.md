@@ -14,7 +14,7 @@ Source direction: [Canopy](https://app.notion.com/p/35215b58480d81b59779f5002c5a
 
 One scroll-icon text link, **Open the Council Deck**, sits beneath the existing Current Circle card in the 2D Council page. It opens the existing Deck separately, preserving the original Council tab and its state. No new dashboard card, manifest, database, deck implementation or companion entity model.
 
-“This week’s companions, chosen by Leo” and the “Fly Agaric” safety label move from `NextCouncilCard` to approved Current Circle data. They describe this weekly appearance, not permanent companion identity. Circle number/title/state already came from Current Circle and stay there. The generic 3D exploration label derives its number from data. Historical invitation/calendar surfaces remain distinct. The numbered compatibility adapter remains for a later naming-only migration.
+“This week’s companions, chosen by the Council” and the “Fly Agaric” safety label move from `NextCouncilCard` to approved Current Circle data. They describe this weekly appearance, not permanent companion identity. Circle number/title/state already came from Current Circle and stay there. The generic 3D exploration label derives its number from data. Historical invitation/calendar surfaces remain distinct. The numbered compatibility adapter remains for a later naming-only migration.
 
 Telegram renderers/handlers and their outputs are unchanged; they do not emit the Deck link in this slice. Existing publication gates remain intact. There is no new ceremonial copy.
 

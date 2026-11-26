@@ -15,7 +15,7 @@ Latest Current Priorities and the explicit user brief govern public scheduling. 
 
 ## Public changes
 
-Council card becomes Current Circle / Open Circle, with the approved question, six companions chosen by Leo, People/open seventh seat, Fly Agaric safety and hosted 3D entrance. Reflection agrees with the Circle question. No scheduled Fire is advertised or inferred to have occurred. Telegram copy is alongside this file; no Telegram message has been sent or edited.
+Council card becomes Current Circle / Open Circle, with the approved question, six companions chosen by the Council, People/open seventh seat, Fly Agaric safety and hosted 3D entrance. Reflection agrees with the Circle question. No scheduled Fire is advertised or inferred to have occurred. Telegram copy is alongside this file; no Telegram message has been sent or edited.
 
 The static URL remains /tetol/circle-235/pre-fire/tetol.html for compatibility. The embedded current-Circle projection removes the dated Fire and displays “The Circle is open now. Times will be shared in the group as each fire is lit.” Frozen source manifests and earlier Circles remain preserved. Six-companion learning and Fly Agaric/Birch paths remain available. SAVE remains disabled.
 

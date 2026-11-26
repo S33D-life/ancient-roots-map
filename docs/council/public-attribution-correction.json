@@ -1,0 +1,16 @@
+{
+  "base": "d2a08bb4f679a8fef5292f6fb8b47b3bf053dfea",
+  "reason": "Remove unintended private attribution and encounter details; no artwork or canonical edition changes. Original release receipts retained.",
+  "files": [
+    {
+      "path": "public/tetol/circle-235/pre-fire/runtime/classic-2.js",
+      "beforeSha256": "bcd8c2511741c79976b2abacace08594eaf87aa7d632c86a2229332e20c0ee87",
+      "afterSha256": "5251607c47ad8e0201a4523756a50ef6b45b8d04acfc0fcebda34bf360a3c35c"
+    },
+    {
+      "path": "public/tetol/circle-235/pre-fire/runtime/classic-3.js",
+      "beforeSha256": "6dee0f935bf5cdafdb5afa823d72169f4f749d70ec4e950546dddadd49140779",
+      "afterSha256": "145b04ff6d38defde05a0ee05415a1b8c3f1fede999d2d0e51c0547ce1b6bba4"
+    }
+  ]
+}
