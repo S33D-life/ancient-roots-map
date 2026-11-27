@@ -40,7 +40,7 @@ export default function FoundingGatewayPage() {
           <p>First invitations are planned from 21 December 2026. Manually issued invitations will support new and existing accounts.</p>
           <a className={linkStyle} href="https://www.crowdfunder.co.uk/p/s33d" target="_blank" rel="noopener noreferrer">View the S33D Crowdfunder</a>
           <p>Papaya Seed is the campaign recipient. No checkout is enabled on this page.</p>
-          <p>Renewal is optional. Founding Grove Keepers will be offered the lowest available renewal price for the equivalent plan. Renewal details, memory access after non-renewal, and the duration of Founding status after year one must be confirmed before activation.</p>
+          <p>Renewal is optional. We intend to offer founders our lowest available renewal price for the equivalent service. Renewal details, memory access after non-renewal, and the duration of Founding status after year one must be confirmed before activation.</p>
           <p>Life Grove activation is being prepared. Private-media, account and recovery checks must pass before invitations are issued.</p>
         </article>
         <article aria-labelledby="giveth-commons" className="rounded-2xl border border-border bg-card p-5 sm:p-7 space-y-4">
