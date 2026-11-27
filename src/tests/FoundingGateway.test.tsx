@@ -20,7 +20,7 @@ describe('informational S33D founding gateway',()=>{
   visit();expect(screen.getByText(/one year of S33D access including a private Life Grove/)).toHaveTextContent('Your year begins when you activate your Grove');
   expect(screen.getByText(/First invitations are planned from 21 December 2026/)).toBeInTheDocument();
   expect(screen.getByText(/Papaya Seed is the campaign recipient/)).toBeInTheDocument();
-  expect(screen.getByText(/Renewal is optional/)).toHaveTextContent('lowest available renewal price for the equivalent plan');
+  expect(screen.getByText(/Renewal is optional/)).toHaveTextContent('We intend to offer founders our lowest available renewal price for the equivalent service.');
   expect(screen.getByText(/Life Grove activation is being prepared/)).toBeInTheDocument();
   expect(screen.getByRole('link',{name:'View the S33D Crowdfunder'})).toHaveAttribute('href','https://www.crowdfunder.co.uk/p/s33d');
   expect(screen.getByRole('link',{name:'View the existing S33D Giveth project'})).toHaveAttribute('href','https://giveth.io/project/s33dlife');
