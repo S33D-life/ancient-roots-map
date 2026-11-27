@@ -16,18 +16,22 @@ describe('informational S33D founding gateway',()=>{
   expect(screen.getByRole('link',{name:'Join or sign in for free'})).toHaveAttribute('href',ROUTES.AUTH);
   expect(screen.getByText(/Some group Whisper channels use earned Hearts/)).toBeInTheDocument();
  });
- it('keeps proposed rewards and Christmas gifting distinct from fulfilled services and donations',()=>{
-  visit();expect(screen.getByText(/£33 for a defined first year/)).toHaveTextContent('£111 total');
-  expect(screen.getByText(/Christmas gifting is being explored/)).toBeInTheDocument();
-  expect(screen.getByText(/No campaign URL or checkout is available here/)).toBeInTheDocument();
+ it('states the founding year, activation start and confirmed campaign without claiming live fulfilment',()=>{
+  visit();expect(screen.getByText(/one year of S33D access including a private Life Grove/)).toHaveTextContent('Your year begins when you activate your Grove');
+  expect(screen.getByText(/First invitations are planned from 21 December 2026/)).toBeInTheDocument();
+  expect(screen.getByText(/Papaya Seed is the campaign recipient/)).toBeInTheDocument();
+  expect(screen.getByText(/Renewal is optional/)).toHaveTextContent('lowest available renewal price for the equivalent plan');
+  expect(screen.getByText(/Life Grove activation is being prepared/)).toBeInTheDocument();
+  expect(screen.getByRole('link',{name:'View the S33D Crowdfunder'})).toHaveAttribute('href','https://www.crowdfunder.co.uk/p/s33d');
   expect(screen.getByRole('link',{name:'View the existing S33D Giveth project'})).toHaveAttribute('href','https://giveth.io/project/s33dlife');
   expect(screen.getByText(/Donations do not purchase a Grove/)).toBeInTheDocument();
  });
- it('has no collection, checkout, invented Crowdfunder destination or application-side writes',()=>{
+ it('has no collection, checkout, unapproved campaign destination or application-side writes',()=>{
   const {container}=visit();expect(container.querySelectorAll('form,input,textarea,button')).toHaveLength(0);
-  expect([...container.querySelectorAll('a')].filter(a=>a.href.includes('crowdfunder.'))).toHaveLength(0);
+  expect([...container.querySelectorAll('a')].filter(a=>a.href.includes('crowdfunder.')).map(a=>a.href)).toEqual(['https://www.crowdfunder.co.uk/p/s33d']);
   const source=readFileSync('src/pages/FoundingGatewayPage.tsx','utf8');
   expect(source).not.toMatch(/supabase|fetch\(|localStorage|sessionStorage|createSupportCheckout|stripe|\.insert\(|\.upload\(/);
   expect(screen.getByText(/This page collects no personal details/)).toBeInTheDocument();
+  expect(container.textContent).not.toMatch(/5[–-]11 November|£111|Christmas gifting|preparing launch|Proposed rewards/);
  });
 });
